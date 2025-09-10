@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deutsche Verben Konjugation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #f5576c);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .verb-selector, .mode-selector, .voice-selector {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .selector-label {
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        select, .filter-btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        select:hover, .filter-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .conjugation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .tense-section {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .tense-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+
+        .tense-title {
+            color: white;
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .person-conjugations {
+            display: grid;
+            gap: 12px;
+        }
+
+        .person-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.25);
+            padding: 12px 16px;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            border-left: 4px solid #f5576c;
+            transition: all 0.3s ease;
+        }
+
+        .person-item:hover {
+            background: rgba(255, 255, 255, 0.35);
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .person {
+            font-weight: bold;
+        }
+
+        .conjugation {
+            font-style: italic;
+            color: #fff;
+        }
+
+        .info-box {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            color: white;
+            text-align: center;
+        }
+
+        .verb-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .verb-detail {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .detail-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .imperative {
+            border-left-color: #f093fb;
+        }
+
+        .subjunctive {
+            border-left-color: #764ba2;
+        }
+
+        .passive {
+            border-left-color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .conjugation-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🇩🇪 Deutsche Verben Konjugation</h1>
+        
+        <div class="controls">
+            <div class="verb-selector">
+                <label class="selector-label">Verb auswählen:</label>
+                <select id="verbSelect">
+                    <option value="machen">machen (schwach)</option>
+                    <option value="kommen">kommen (stark)</option>
+                    <option value="gehen">gehen (stark)</option>
+                    <option value="sehen">sehen (stark)</option>
+                    <option value="sprechen">sprechen (stark)</option>
+                    <option value="nehmen">nehmen (stark)</option>
+                    <option value="geben">geben (stark)</option>
+                    <option value="fahren">fahren (stark)</option>
+                    <option value="laufen">laufen (stark)</option>
+                    <option value="schreiben">schreiben (stark)</option>
+                    <option value="lesen">lesen (stark)</option>
+                    <option value="essen">essen (stark)</option>
+                    <option value="trinken">trinken (stark)</option>
+                    <option value="finden">finden (stark)</option>
+                    <option value="beginnen">beginnen (stark)</option>
+                    <option value="helfen">helfen (stark)</option>
+                    <option value="denken">denken (gemischt)</option>
+                    <option value="bringen">bringen (gemischt)</option>
+                    <option value="wissen">wissen (gemischt)</option>
+                    <option value="arbeiten">arbeiten (schwach)</option>
+                    <option value="lernen">lernen (schwach)</option>
+                    <option value="kaufen">kaufen (schwach)</option>
+                    <option value="lieben">lieben (schwach)</option>
+                    <option value="wohnen">wohnen (schwach)</option>
+                    <option value="spielen">spielen (schwach)</option>
+                </select>
+            </div>
+            
+            <div class="mode-selector">
+                <label class="selector-label">Modus:</label>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-mode="indikativ">Indikativ</button>
+                    <button class="filter-btn" data-mode="konjunktiv">Konjunktiv</button>
+                    <button class="filter-btn" data-mode="imperativ">Imperativ</button>
+                </div>
+            </div>
+            
+            <div class="voice-selector">
+                <label class="selector-label">Genus Verbi:</label>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-voice="aktiv">Aktiv</button>
+                    <button class="filter-btn" data-voice="passiv">Passiv</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <div class="verb-info">
+                <div class="verb-detail">
+                    <div class="detail-label">Infinitiv</div>
+                    <div class="detail-value" id="infinitive">machen</div>
+                </div>
+                <div class="verb-detail">
+                    <div class="detail-label">Partizip I</div>
+                    <div class="detail-value" id="partizip1">machend</div>
+                </div>
+                <div class="verb-detail">
+                    <div class="detail-label">Partizip II</div>
+                    <div class="detail-value" id="partizip2">gemacht</div>
+                </div>
+                <div class="verb-detail">
+                    <div class="detail-label">Verbtyp</div>
+                    <div class="detail-value" id="verbtype">schwach</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="conjugation-grid" id="conjugationGrid">
+            <!-- Konjugationen werden hier dynamisch eingefügt -->
+        </div>
+    </div>
+
+    <script>
+        const verbs = {
+            machen: {
+                type: 'schwach',
+                partizip2: 'gemacht',
+                stem: 'mach',
+                present: ['mache', 'machst', 'macht', 'machen', 'macht', 'machen'],
+                preterite: ['machte', 'machtest', 'machte', 'machten', 'machtet', 'machten'],
+                subjunctive1: ['mache', 'machest', 'mache', 'machen', 'machet', 'machen'],
+                subjunctive2: ['machte', 'machtest', 'machte', 'machten', 'machtet', 'machten']
+            },
+            kommen: {
+                type: 'stark',
+                partizip2: 'gekommen',
+                stem: 'komm',
+                present: ['komme', 'kommst', 'kommt', 'kommen', 'kommt', 'kommen'],
+                preterite: ['kam', 'kamst', 'kam', 'kamen', 'kamt', 'kamen'],
+                subjunctive1: ['komme', 'kommest', 'komme', 'kommen', 'kommet', 'kommen'],
+                subjunctive2: ['käme', 'kämest', 'käme', 'kämen', 'kämet', 'kämen']
+            },
+            gehen: {
+                type: 'stark',
+                partizip2: 'gegangen',
+                stem: 'geh',
+                present: ['gehe', 'gehst', 'geht', 'gehen', 'geht', 'gehen'],
+                preterite: ['ging', 'gingst', 'ging', 'gingen', 'gingt', 'gingen'],
+                subjunctive1: ['gehe', 'gehest', 'gehe', 'gehen', 'gehet', 'gehen'],
+                subjunctive2: ['ginge', 'gingest', 'ginge', 'gingen', 'ginget', 'gingen']
+            },
+            sehen: {
+                type: 'stark',
+                partizip2: 'gesehen',
+                stem: 'seh',
+                present: ['sehe', 'siehst', 'sieht', 'sehen', 'seht', 'sehen'],
+                preterite: ['sah', 'sahst', 'sah', 'sahen', 'saht', 'sahen'],
+                subjunctive1: ['sehe', 'sehest', 'sehe', 'sehen', 'sehet', 'sehen'],
+                subjunctive2: ['sähe', 'sähest', 'sähe', 'sähen', 'sähet', 'sähen']
+            },
+            sprechen: {
+                type: 'stark',
+                partizip2: 'gesprochen',
+                stem: 'sprech',
+                present: ['spreche', 'sprichst', 'spricht', 'sprechen', 'sprecht', 'sprechen'],
+                preterite: ['sprach', 'sprachst', 'sprach', 'sprachen', 'spracht', 'sprachen'],
+                subjunctive1: ['spreche', 'sprechest', 'spreche', 'sprechen', 'sprechet', 'sprechen'],
+                subjunctive2: ['spräche', 'sprächest', 'spräche', 'sprächen', 'sprächet', 'sprächen']
+            },
+            nehmen: {
+                type: 'stark',
+                partizip2: 'genommen',
+                stem: 'nehm',
+                present: ['nehme', 'nimmst', 'nimmt', 'nehmen', 'nehmt', 'nehmen'],
+                preterite: ['nahm', 'nahmst', 'nahm', 'nahmen', 'nahmt', 'nahmen'],
+                subjunctive1: ['nehme', 'nehmest', 'nehme', 'nehmen', 'nehmet', 'nehmen'],
+                subjunctive2: ['nähme', 'nähmest', 'nähme', 'nähmen', 'nähmet', 'nähmen']
+            },
+            geben: {
+                type: 'stark',
+                partizip2: 'gegeben',
+                stem: 'geb',
+                present: ['gebe', 'gibst', 'gibt', 'geben', 'gebt', 'geben'],
+                preterite: ['gab', 'gabst', 'gab', 'gaben', 'gabt', 'gaben'],
+                subjunctive1: ['gebe', 'gebest', 'gebe', 'geben', 'gebet', 'geben'],
+                subjunctive2: ['gäbe', 'gäbest', 'gäbe', 'gäben', 'gäbet', 'gäben']
+            },
+            fahren: {
+                type: 'stark',
+                partizip2: 'gefahren',
+                stem: 'fahr',
+                present: ['fahre', 'fährst', 'fährt', 'fahren', 'fahrt', 'fahren'],
+                preterite: ['fuhr', 'fuhrst', 'fuhr', 'fuhren', 'fuhrt', 'fuhren'],
+                subjunctive1: ['fahre', 'fahrest', 'fahre', 'fahren', 'fahret', 'fahren'],
+                subjunctive2: ['führe', 'führest', 'führe', 'führen', 'führet', 'führen']
+            },
+            laufen: {
+                type: 'stark',
+                partizip2: 'gelaufen',
+                stem: 'lauf',
+                present: ['laufe', 'läufst', 'läuft', 'laufen', 'lauft', 'laufen'],
+                preterite: ['lief', 'liefst', 'lief', 'liefen', 'lieft', 'liefen'],
+                subjunctive1: ['laufe', 'laufest', 'laufe', 'laufen', 'laufet', 'laufen'],
+                subjunctive2: ['liefe', 'liefest', 'liefe', 'liefen', 'liefet', 'liefen']
+            },
+            schreiben: {
+                type: 'stark',
+                partizip2: 'geschrieben',
+                stem: 'schreib',
+                present: ['schreibe', 'schreibst', 'schreibt', 'schreiben', 'schreibt', 'schreiben'],
+                preterite: ['schrieb', 'schriebst', 'schrieb', 'schrieben', 'schriebt', 'schrieben'],
+                subjunctive1: ['schreibe', 'schreibest', 'schreibe', 'schreiben', 'schreibet', 'schreiben'],
+                subjunctive2: ['schriebe', 'schriebest', 'schriebe', 'schrieben', 'schriebet', 'schrieben']
+            },
+            lesen: {
+                type: 'stark',
+                partizip2: 'gelesen',
+                stem: 'les',
+                present: ['lese', 'liest', 'liest', 'lesen', 'lest', 'lesen'],
+                preterite: ['las', 'lasest', 'las', 'lasen', 'last', 'lasen'],
+                subjunctive1: ['lese', 'lesest', 'lese', 'lesen', 'leset', 'lesen'],
+                subjunctive2: ['läse', 'läsest', 'läse', 'läsen', 'läset', 'läsen']
+            },
+            essen: {
+                type: 'stark',
+                partizip2: 'gegessen',
+                stem: 'ess',
+                present: ['esse', 'isst', 'isst', 'essen', 'esst', 'essen'],
+                preterite: ['aß', 'aßest', 'aß', 'aßen', 'aßt', 'aßen'],
+                subjunctive1: ['esse', 'essest', 'esse', 'essen', 'esset', 'essen'],
+                subjunctive2: ['äße', 'äßest', 'äße', 'äßen', 'äßet', 'äßen']
+            },
+            trinken: {
+                type: 'stark',
+                partizip2: 'getrunken',
+                stem: 'trink',
+                present: ['trinke', 'trinkst', 'trinkt', 'trinken', 'trinkt', 'trinken'],
+                preterite: ['trank', 'trankst', 'trank', 'tranken', 'trankt', 'tranken'],
+                subjunctive1: ['trinke', 'trinkest', 'trinke', 'trinken', 'trinket', 'trinken'],
+                subjunctive2: ['tränke', 'tränkest', 'tränke', 'tränken', 'tränket', 'tränken']
+            },
+            finden: {
+                type: 'stark',
+                partizip2: 'gefunden',
+                stem: 'find',
+                present: ['finde', 'findest', 'findet', 'finden', 'findet', 'finden'],
+                preterite: ['fand', 'fandest', 'fand', 'fanden', 'fandet', 'fanden'],
+                subjunctive1: ['finde', 'findest', 'finde', 'finden', 'findet', 'finden'],
+                subjunctive2: ['fände', 'fändest', 'fände', 'fänden', 'fändet', 'fänden']
+            },
+            beginnen: {
+                type: 'stark',
+                partizip2: 'begonnen',
+                stem: 'beginn',
+                present: ['beginne', 'beginnst', 'beginnt', 'beginnen', 'beginnt', 'beginnen'],
+                preterite: ['begann', 'begannst', 'begann', 'begannen', 'begannt', 'begannen'],
+                subjunctive1: ['beginne', 'beginnest', 'beginne', 'beginnen', 'beginnet', 'beginnen'],
+                subjunctive2: ['begänne', 'begännest', 'begänne', 'begännen', 'begännet', 'begännen']
+            },
+            helfen: {
+                type: 'stark',
+                partizip2: 'geholfen',
+                stem: 'helf',
+                present: ['helfe', 'hilfst', 'hilft', 'helfen', 'helft', 'helfen'],
+                preterite: ['half', 'halfst', 'half', 'halfen', 'halft', 'halfen'],
+                subjunctive1: ['helfe', 'helfest', 'helfe', 'helfen', 'helfet', 'helfen'],
+                subjunctive2: ['hülfe', 'hülfest', 'hülfe', 'hülfen', 'hülfet', 'hülfen']
+            },
+            denken: {
+                type: 'gemischt',
+                partizip2: 'gedacht',
+                stem: 'denk',
+                present: ['denke', 'denkst', 'denkt', 'denken', 'denkt', 'denken'],
+                preterite: ['dachte', 'dachtest', 'dachte', 'dachten', 'dachtet', 'dachten'],
+                subjunctive1: ['denke', 'denkest', 'denke', 'denken', 'denket', 'denken'],
+                subjunctive2: ['dächte', 'dächtest', 'dächte', 'dächten', 'dächtet', 'dächten']
+            },
+            bringen: {
+                type: 'gemischt',
+                partizip2: 'gebracht',
+                stem: 'bring',
+                present: ['bringe', 'bringst', 'bringt', 'bringen', 'bringt', 'bringen'],
+                preterite: ['brachte', 'brachtest', 'brachte', 'brachten', 'brachtet', 'brachten'],
+                subjunctive1: ['bringe', 'bringest', 'bringe', 'bringen', 'bringet', 'bringen'],
+                subjunctive2: ['brächte', 'brächtest', 'brächte', 'brächten', 'brächtet', 'brächten']
+            },
+            wissen: {
+                type: 'gemischt',
+                partizip2: 'gewusst',
+                stem: 'wiss',
+                present: ['weiß', 'weißt', 'weiß', 'wissen', 'wisst', 'wissen'],
+                preterite: ['wusste', 'wusstest', 'wusste', 'wussten', 'wusstet', 'wussten'],
+                subjunctive1: ['wisse', 'wissest', 'wisse', 'wissen', 'wisset', 'wissen'],
+                subjunctive2: ['wüsste', 'wüsstest', 'wüsste', 'wüssten', 'wüsstet', 'wüssten']
+            },
+            arbeiten: {
+                type: 'schwach',
+                partizip2: 'gearbeitet',
+                stem: 'arbeit',
+                present: ['arbeite', 'arbeitest', 'arbeitet', 'arbeiten', 'arbeitet', 'arbeiten'],
+                preterite: ['arbeitete', 'arbeitetest', 'arbeitete', 'arbeiteten', 'arbeitetet', 'arbeiteten'],
+                subjunctive1: ['arbeite', 'arbeitest', 'arbeite', 'arbeiten', 'arbeitet', 'arbeiten'],
+                subjunctive2: ['arbeitete', 'arbeitetest', 'arbeitete', 'arbeiteten', 'arbeitetet', 'arbeiteten']
+            },
+            lernen: {
+                type: 'schwach',
+                partizip2: 'gelernt',
+                stem: 'lern',
+                present: ['lerne', 'lernst', 'lernt', 'lernen', 'lernt', 'lernen'],
+                preterite: ['lernte', 'lerntest', 'lernte', 'lernten', 'lerntet', 'lernten'],
+                subjunctive1: ['lerne', 'lernest', 'lerne', 'lernen', 'lernet', 'lernen'],
+                subjunctive2: ['lernte', 'lerntest', 'lernte', 'lernten', 'lerntet', 'lernten']
+            },
+            kaufen: {
+                type: 'schwach',
+                partizip2: 'gekauft',
+                stem: 'kauf',
+                present: ['kaufe', 'kaufst', 'kauft', 'kaufen', 'kauft', 'kaufen'],
+                preterite: ['kaufte', 'kauftest', 'kaufte', 'kauften', 'kauftet', 'kauften'],
+                subjunctive1: ['kaufe', 'kaufest', 'kaufe', 'kaufen', 'kaufet', 'kaufen'],
+                subjunctive2: ['kaufte', 'kauftest', 'kaufte', 'kauften', 'kauftet', 'kauften']
+            },
+            lieben: {
+                type: 'schwach',
+                partizip2: 'geliebt',
+                stem: 'lieb',
+                present: ['liebe', 'liebst', 'liebt', 'lieben', 'liebt', 'lieben'],
+                preterite: ['liebte', 'liebtest', 'liebte', 'liebten', 'liebtet', 'liebten'],
+                subjunctive1: ['liebe', 'liebest', 'liebe', 'lieben', 'liebet', 'lieben'],
+                subjunctive2: ['liebte', 'liebtest', 'liebte', 'liebten', 'liebtet', 'liebten']
+            },
+            wohnen: {
+                type: 'schwach',
+                partizip2: 'gewohnt',
+                stem: 'wohn',
+                present: ['wohne', 'wohnst', 'wohnt', 'wohnen', 'wohnt', 'wohnen'],
+                preterite: ['wohnte', 'wohntest', 'wohnte', 'wohnten', 'wohntet', 'wohnten'],
+                subjunctive1: ['wohne', 'wohnest', 'wohne', 'wohnen', 'wohnet', 'wohnen'],
+                subjunctive2: ['wohnte', 'wohntest', 'wohnte', 'wohnten', 'wohntet', 'wohnten']
+            },
+            spielen: {
+                type: 'schwach',
+                partizip2: 'gespielt',
+                stem: 'spiel',
+                present: ['spiele', 'spielst', 'spielt', 'spielen', 'spielt', 'spielen'],
+                preterite: ['spielte', 'spieltest', 'spielte', 'spielten', 'spieltet', 'spielten'],
+                subjunctive1: ['spiele', 'spielest', 'spiele', 'spielen', 'spielet', 'spielen'],
+                subjunctive2: ['spielte', 'spieltest', 'spielte', 'spielten', 'spieltet', 'spielten']
+            }
+        };
+
+        const persons = ['ich', 'du', 'er/sie/es', 'wir', 'ihr', 'sie/Sie'];
+        
+        let currentVerb = 'machen';
+        let currentMode = 'indikativ';
+        let currentVoice = 'aktiv';
+
+        // Event Listeners
+        document.getElementById('verbSelect').addEventListener('change', function(e) {
+            currentVerb = e.target.value;
+            updateConjugation();
+        });
+
+        document.querySelectorAll('[data-mode]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('[data-mode]').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentMode = this.dataset.mode;
+                updateConjugation();
+            });
+        });
+
+        document.querySelectorAll('[data-voice]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('[data-voice]').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentVoice = this.dataset.voice;
+                updateConjugation();
+            });
+        });
+
+        function getAuxiliary(verb, tense, person) {
+            // Hilfsverb für zusammengesetzte Zeiten bestimmen
+            const seinVerbs = ['kommen', 'gehen', 'fahren', 'laufen'];
+            if (seinVerbs.includes(verb)) {
+                const seinForms = {
+                    present: ['bin', 'bist', 'ist', 'sind', 'seid', 'sind'],
+                    preterite: ['war', 'warst', 'war', 'waren', 'wart', 'waren'],
+                    subjunctive1: ['sei', 'seiest', 'sei', 'seien', 'seiet', 'seien'],
+                    subjunctive2: ['wäre', 'wärest', 'wäre', 'wären', 'wäret', 'wären']
+                };
+                return seinForms[tense][person];
+            } else {
+                const habenForms = {
+                    present: ['habe', 'hast', 'hat', 'haben', 'habt', 'haben'],
+                    preterite: ['hatte', 'hattest', 'hatte', 'hatten', 'hattet', 'hatten'],
+                    subjunctive1: ['habe', 'habest', 'habe', 'haben', 'habet', 'haben'],
+                    subjunctive2: ['hätte', 'hättest', 'hätte', 'hätten', 'hättet', 'hätten']
+                };
+                return habenForms[tense][person];
+            }
+        }
+
+        function getWerden(tense, person) {
+            const werdenForms = {
+                present: ['werde', 'wirst', 'wird', 'werden', 'werdet', 'werden'],
+                preterite: ['wurde', 'wurdest', 'wurde', 'wurden', 'wurdet', 'wurden'],
+                subjunctive1: ['werde', 'werdest', 'werde', 'werden', 'werdet', 'werden'],
+                subjunctive2: ['würde', 'würdest', 'würde', 'würden', 'würdet', 'würden']
+            };
+            return werdenForms[tense][person];
+        }
+
+        function createConjugation(verb, tense, mode, voice, person) {
+            const verbData = verbs[verb];
+            
+            if (mode === 'imperativ') {
+                if (voice === 'passiv') return '—';
+                if (person === 1) return '—'; // ich
+                if (person === 2) return verbData.present[1].replace(/st$/, '') + '!'; // du
+                if (person === 3) return '—'; // er/sie/es
+                if (person === 4) return verbData.present[0] + 'n wir!'; // wir
+                if (person === 5) return verbData.present[4] + '!'; // ihr
+                if (person === 6) return verbData.present[5] + ' Sie!'; // Sie
+            }
+
+            let result = '';
+            
+            if (voice === 'aktiv') {
+                switch (tense) {
+                    case 'präsens':
+                        if (mode === 'indikativ') {
+                            result = verbData.present[person];
+                        } else if (mode === 'konjunktiv') {
+                            result = verbData.subjunctive1[person];
+                        }
+                        break;
+                    case 'präteritum':
+                        if (mode === 'indikativ') {
+                            result = verbData.preterite[person];
+                        } else if (mode === 'konjunktiv') {
+                            result = verbData.subjunctive2[person];
+                        }
+                        break;
+                    case 'perfekt':
+                        if (mode === 'indikativ') {
+                            result = getAuxiliary(verb, 'present', person) + ' ' + verbData.partizip2;
+                        } else if (mode === 'konjunktiv') {
+                            result = getAuxiliary(verb, 'subjunctive1', person) + ' ' + verbData.partizip2;
+                        }
+                        break;
+                    case 'plusquamperfekt':
+                        if (mode === 'indikativ') {
+                            result = getAuxiliary(verb, 'preterite', person) + ' ' + verbData.partizip2;
+                        } else if (mode === 'konjunktiv') {
+                            result = getAuxiliary(verb, 'subjunctive2', person) + ' ' + verbData.partizip2;
+                        }
+                        break;
+                    case 'futur1':
+                        if (mode === 'indikativ') {
+                            result = getWerden('present', person) + ' ' + verb;
+                        } else if (mode === 'konjunktiv') {
+                            result = getWerden('subjunctive1', person) + ' ' + verb;
+                        }
+                        break;
+                    case 'futur2':
+                        if (mode === 'indikativ') {
+                            result = getWerden('present', person) + ' ' + verbData.partizip2 + ' ' + getAuxiliaryInfinitive(verb);
+                        } else if (mode === 'konjunktiv') {
+                            result = getWerden('subjunctive1', person) + ' ' + verbData.partizip2 + ' ' + getAuxiliaryInfinitive(verb);
+                        }
+                        break;
+                }
+            } else { // passiv
+                switch (tense) {
+                    case 'präsens':
+                        if (mode === 'indikativ') {
+                            result = getWerden('present', person) + ' ' + verbData.partizip2;
+                        } else if (mode === 'konjunktiv') {
+                            result = getWerden('subjunctive1', person) + ' ' + verbData.partizip2;
+                        }
+                        break;
+                    case 'präteritum':
+                        if (mode === 'indikativ') {
+                            result = getWerden('preterite', person) + ' ' + verbData.partizip2;
+                        } else if (mode === 'konjunktiv') {
+                            result = getWerden('subjunctive2', person) + ' ' + verbData.partizip2;
+                        }
+                        break;
+                    case 'perfekt':
+                        if (mode === 'indikativ') {
+                            result = getAuxiliary(verb, 'present', person) + ' ' + verbData.partizip2 + ' worden';
+                        } else if (mode === 'konjunktiv') {
+                            result = getAuxiliary(verb, 'subjunctive1', person) + ' ' + verbData.partizip2 + ' worden';
+                        }
+                        break;
+                    case 'plusquamperfekt':
+                        if (mode === 'indikativ') {
+                            result = getAuxiliary(verb, 'preterite', person) + ' ' + verbData.partizip2 + ' worden';
+                        } else if (mode === 'konjunktiv') {
+                            result = getAuxiliary(verb, 'subjunctive2', person) + ' ' + verbData.partizip2 + ' worden';
+                        }
+                        break;
+                    case 'futur1':
+                        if (mode === 'indikativ') {
+                            result = getWerden('present', person) + ' ' + verbData.partizip2 + ' werden';
+                        } else if (mode === 'konjunktiv') {
+                            result = getWerden('subjunctive1', person) + ' ' + verbData.partizip2 + ' werden';
+                        }
+                        break;
+                    case 'futur2':
+                        if (mode === 'indikativ') {
+                            result = getWerden('present', person) + ' ' + verbData.partizip2 + ' worden sein';
+                        } else if (mode === 'konjunktiv') {
+                            result = getWerden('subjunctive1', person) + ' ' + verbData.partizip2 + ' worden sein';
+                        }
+                        break;
+                }
+            }
+            
+            return result;
+        }
+
+        function getAuxiliaryInfinitive(verb) {
+            const seinVerbs = ['kommen', 'gehen', 'fahren', 'laufen'];
+            return seinVerbs.includes(verb) ? 'sein' : 'haben';
+        }
+
+        function updateVerbInfo() {
+            const verbData = verbs[currentVerb];
+            document.getElementById('infinitive').textContent = currentVerb;
+            document.getElementById('partizip1').textContent = currentVerb.replace(/en$/, 'end');
+            document.getElementById('partizip2').textContent = verbData.partizip2;
+            document.getElementById('verbtype').textContent = verbData.type;
+        }
+
+        function updateConjugation() {
+            updateVerbInfo();
+            
+            const grid = document.getElementById('conjugationGrid');
+            grid.innerHTML = '';
+
+            let tenses = [];
+            
+            if (currentMode === 'imperativ') {
+                tenses = ['imperativ'];
+            } else {
+                tenses = ['präsens', 'präteritum', 'perfekt', 'plusquamperfekt', 'futur1', 'futur2'];
+            }
+
+            tenses.forEach(tense => {
+                const section = document.createElement('div');
+                section.className = 'tense-section';
+                
+                if (currentMode === 'konjunktiv') {
+                    section.classList.add('subjunctive');
+                }
+                if (currentVoice === 'passiv') {
+                    section.classList.add('passive');
+                }
+                if (currentMode === 'imperativ') {
+                    section.classList.add('imperative');
+                }
+
+                const title = document.createElement('div');
+                title.className = 'tense-title';
+                
+                let titleText = '';
+                switch (tense) {
+                    case 'präsens': titleText = 'Präsens'; break;
+                    case 'präteritum': titleText = 'Präteritum'; break;
+                    case 'perfekt': titleText = 'Perfekt'; break;
+                    case 'plusquamperfekt': titleText = 'Plusquamperfekt'; break;
+                    case 'futur1': titleText = 'Futur I'; break;
+                    case 'futur2': titleText = 'Futur II'; break;
+                    case 'imperativ': titleText = 'Imperativ'; break;
+                }
+                
+                if (currentMode === 'konjunktiv' && tense !== 'imperativ') {
+                    if (tense === 'präsens' || tense === 'perfekt' || tense === 'futur1' || tense === 'futur2') {
+                        titleText += ' (Konjunktiv I)';
+                    } else {
+                        titleText += ' (Konjunktiv II)';
+                    }
+                }
+                
+                if (currentVoice === 'passiv' && tense !== 'imperativ') {
+                    titleText += ' - Passiv';
+                }
+                
+                title.textContent = titleText;
+                section.appendChild(title);
+
+                const conjugations = document.createElement('div');
+                conjugations.className = 'person-conjugations';
+
+                for (let i = 0; i < 6; i++) {
+                    const item = document.createElement('div');
+                    item.className = 'person-item';
+
+                    const personSpan = document.createElement('span');
+                    personSpan.className = 'person';
+                    personSpan.textContent = persons[i];
+
+                    const conjugationSpan = document.createElement('span');
+                    conjugationSpan.className = 'conjugation';
+                    conjugationSpan.textContent = createConjugation(currentVerb, tense, currentMode, currentVoice, i);
+
+                    item.appendChild(personSpan);
+                    item.appendChild(conjugationSpan);
+                    conjugations.appendChild(item);
+                }
+
+                section.appendChild(conjugations);
+                grid.appendChild(section);
+            });
+        }
+
+        // Initialisierung
+        updateConjugation();
+    </script>
+</body>
+</html>
