@@ -352,6 +352,12 @@
             transform: translateY(-2px);
         }
 
+        .comment-form button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .comments-list {
             max-height: 400px;
             overflow-y: auto;
@@ -393,10 +399,19 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 0.8em;
+            margin-left: 10px;
         }
 
         .delete-btn:hover {
             background: #c82333;
+        }
+
+        .admin-password {
+            margin-left: 10px;
+            padding: 3px 8px;
+            font-size: 0.8em;
+            border: 1px solid #ccc;
+            border-radius: 3px;
         }
 
         .footer {
@@ -443,6 +458,13 @@
         .video-testimonials-link:hover {
             background: rgba(255, 0, 0, 0.2);
             transform: translateY(-1px);
+        }
+
+        .loading {
+            text-align: center;
+            color: #8B4513;
+            font-style: italic;
+            padding: 20px;
         }
 
         @media (max-width: 768px) {
@@ -567,7 +589,7 @@
             
             <div id="intro-ar" class="intro-content">
                 <div class="intro-text">
-                    مرحباً! اسمي إيمي لانغ وأنا مدربة لغة ألمانية معتمدة مع أكثر من 20 عاماً من الخبرة التعليمية الناجحة ودرجة جامعية. أدرِّس بشغف جميع المستويات من A1 إلى C2 عبر الإنترنت. عند الطلب، يسعدني تقديم مراجع من طلابي بالإضافة إلى عرض فردي. كثير من طلابي يبقون معي غالباً لسنوات، حيث أن دروسي منظمة ومتنوعة وقبل كل شيء موجهة نحو النتائج. أتطلع لمرافقتك في رحلة تعلم الألمانية!
+                    مرحباً! اسمي إيمي لانغ وأنا مدربة لغة ألمانية معتمدة مع أكثر من 20 عاماً من الخبرة التعليمية الناجحة ودرجة جامعية. أدرّس بشغف جميع المستويات من A1 إلى C2 عبر الإنترنت. عند الطلب، يسعدني تقديم مراجع من طلابي بالإضافة إلى عرض فردي. كثير من طلابي يبقون معي غالباً لسنوات، حيث أن دروسي منظمة ومتنوعة وقبل كل شيء موجهة نحو النتائج. أتطلع لمرافقتك في رحلة تعلم الألمانية!
                     
                     <div class="whatsapp-container">
                         <a href="https://wa.me/36301818503?text=مرحباً Amy! أنا مهتم بدروس اللغة الألمانية وأود معرفة المزيد عن دوراتك." class="whatsapp-link">
@@ -721,14 +743,11 @@
                         <span class="star" onclick="setRating(5)">⭐</span>
                     </span>
                 </div>
-                <button onclick="addComment()">Feedback hinzufügen</button>
+                <button onclick="addComment()" id="submitBtn">Feedback hinzufügen</button>
             </div>
             
             <div class="comments-list" id="commentsList">
-                <div class="empty-comments" id="emptyComments">
-                    ⭐ Noch keine Erfolgsgeschichten geteilt...<br>
-                    <strong>Seien Sie der Erste und teilen Sie Ihre Lernerfahrung!</strong> ⭐
-                </div>
+                <div class="loading" id="loadingComments">Kommentare werden geladen...</div>
             </div>
         </section>
 
@@ -744,7 +763,7 @@
                 E-Mail: amylan@ik.me<br>
                 Telefon: +43 (0)30 181 8503<br><br>
                 Unternehmensgegenstand: Sprachtraining und Deutschunterricht<br>
-                Gewerberechtliche Geschäftsführerin: Amy Lang<br>
+                Gewerberechtliche Geschäftsleiterin: Amy Lang<br>
                 Aufsichtsbehörde: Magistrat Graz<br>
                 Mitglied der Wirtschaftskammer Steiermark<br>
                 UID-Nummer: AT U798 77 625<br>
@@ -753,11 +772,33 @@
         </footer>
     </div>
 
-    <script>
-        let currentRating = 5; // Default rating
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, orderBy, query, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-        // Language switching function - FIXED
-        function showLanguage(lang) {
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB4oL9R7oY5_2EBwuIXKwoq6m2AKCPgN_M",
+            authDomain: "amylang-deutsch.firebaseapp.com",
+            projectId: "amylang-deutsch",
+            storageBucket: "amylang-deutsch.firebasestorage.app",
+            messagingSenderId: "258064169576",
+            appId: "1:258064169576:web:84ecede1695a25c756d9dd",
+            measurementId: "G-16C3KL1HGG"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // Global variables
+        let currentRating = 5;
+        const ADMIN_PASSWORD = "amy2025admin"; // Change this to a secure password
+
+        // Language switching function
+        window.showLanguage = function(lang) {
             // Hide all intro contents
             const intros = document.querySelectorAll('.intro-content');
             intros.forEach(intro => {
@@ -779,7 +820,7 @@
         }
 
         // Star rating system
-        function setRating(rating) {
+        window.setRating = function(rating) {
             currentRating = rating;
             const stars = document.querySelectorAll('.star');
             stars.forEach((star, index) => {
@@ -796,58 +837,90 @@
         // Initialize star rating
         setRating(5);
 
-        // Comments system
-        let comments = [];
-        let commentId = 0;
-
-        function addComment() {
+        // Add comment function
+        window.addComment = async function() {
             const name = document.getElementById('commentName').value.trim();
             const text = document.getElementById('commentText').value.trim();
+            const submitBtn = document.getElementById('submitBtn');
             
             if (!name || !text) {
                 alert('Bitte füllen Sie alle Felder aus.');
                 return;
             }
             
-            const comment = {
-                id: ++commentId,
-                name: name,
-                text: text,
-                rating: currentRating,
-                date: new Date().toLocaleDateString('de-DE', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                })
-            };
+            // Disable submit button during submission
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Wird hinzugefügt...';
             
-            comments.push(comment);
-            displayComments();
-            
-            // Clear form
-            document.getElementById('commentName').value = '';
-            document.getElementById('commentText').value = '';
-            setRating(5); // Reset to 5 stars
-        }
-
-        function deleteComment(id) {
-            if (confirm('Möchten Sie diesen Kommentar wirklich löschen?')) {
-                comments = comments.filter(comment => comment.id !== id);
-                displayComments();
+            try {
+                const comment = {
+                    name: name,
+                    text: text,
+                    rating: currentRating,
+                    timestamp: serverTimestamp(),
+                    date: new Date().toLocaleDateString('de-DE', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    })
+                };
+                
+                await addDoc(collection(db, 'comments'), comment);
+                
+                // Clear form
+                document.getElementById('commentName').value = '';
+                document.getElementById('commentText').value = '';
+                setRating(5); // Reset to 5 stars
+                
+                alert('Vielen Dank für Ihr Feedback!');
+                
+            } catch (error) {
+                console.error('Error adding comment: ', error);
+                alert('Fehler beim Hinzufügen des Kommentars. Bitte versuchen Sie es erneut.');
+            } finally {
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Feedback hinzufügen';
             }
         }
 
-        function displayComments() {
-            const commentsList = document.getElementById('commentsList');
-            const emptyComments = document.getElementById('emptyComments');
-            
-            if (comments.length === 0) {
-                emptyComments.style.display = 'block';
-                commentsList.innerHTML = '<div class="empty-comments" id="emptyComments">⭐ Noch keine Erfolgsgeschichten geteilt...<br><strong>Seien Sie der Erste und teilen Sie Ihre Lernerfahrung!</strong> ⭐</div>';
+        // Delete comment function (admin only)
+        window.deleteComment = async function(commentId) {
+            const password = prompt('Admin-Passwort eingeben:');
+            if (password !== ADMIN_PASSWORD) {
+                alert('Falsches Passwort!');
                 return;
             }
             
-            emptyComments.style.display = 'none';
+            if (confirm('Möchten Sie diesen Kommentar wirklich löschen?')) {
+                try {
+                    await deleteDoc(doc(db, 'comments', commentId));
+                    alert('Kommentar wurde gelöscht.');
+                } catch (error) {
+                    console.error('Error deleting comment: ', error);
+                    alert('Fehler beim Löschen des Kommentars.');
+                }
+            }
+        }
+
+        // Display comments function
+        function displayComments(comments) {
+            const commentsList = document.getElementById('commentsList');
+            const loadingComments = document.getElementById('loadingComments');
+            
+            if (loadingComments) {
+                loadingComments.style.display = 'none';
+            }
+            
+            if (comments.length === 0) {
+                commentsList.innerHTML = `
+                    <div class="empty-comments">
+                        ⭐ Noch keine Erfolgsgeschichten geteilt...<br>
+                        <strong>Seien Sie der Erste und teilen Sie Ihre Lernerfahrung!</strong> ⭐
+                    </div>
+                `;
+                return;
+            }
             
             const commentsHTML = comments.map(comment => {
                 const starsHTML = '⭐'.repeat(comment.rating);
@@ -858,7 +931,7 @@
                             <div>
                                 <span class="stars">${starsHTML}</span>
                                 <span class="comment-date">${comment.date}</span>
-                                <button class="delete-btn" onclick="deleteComment(${comment.id})">Löschen</button>
+                                <button class="delete-btn" onclick="deleteComment('${comment.id}')">Löschen</button>
                             </div>
                         </div>
                         <p>${comment.text}</p>
@@ -869,8 +942,26 @@
             commentsList.innerHTML = commentsHTML;
         }
 
-        // Initialize comments display
-        displayComments();
+        // Listen for real-time updates
+        const q = query(collection(db, 'comments'), orderBy('timestamp', 'desc'));
+        onSnapshot(q, (snapshot) => {
+            const comments = [];
+            snapshot.forEach((doc) => {
+                comments.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            });
+            displayComments(comments);
+        }, (error) => {
+            console.error('Error listening to comments: ', error);
+            document.getElementById('commentsList').innerHTML = `
+                <div class="empty-comments">
+                    Fehler beim Laden der Kommentare. Bitte laden Sie die Seite neu.
+                </div>
+            `;
+        });
+
     </script>
 </body>
 </html>
