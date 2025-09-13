@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wortartenanalysierer - Detaillierte Grammatikanalyse</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #B8860B, #DAA520);
+            color: #1e3a5f;
+            font-family: 'Georgia', serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #C71585;
+            padding-bottom: 15px;
+        }
+        
+        .input-section {
+            background: rgba(255, 215, 0, 0.2);
+            border-left: 5px solid #C71585;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .input-label {
+            color: #C71585;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        #sentence-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            border: 2px solid #C71585;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #1e3a5f;
+            font-family: 'Georgia', serif;
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        #analyze-btn {
+            background: linear-gradient(45deg, #C71585, #FFD700);
+            color: #1e3a5f;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 15px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        #analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .results-section {
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            margin: 20px 0;
+        }
+        
+        .results-table th {
+            background: #C71585;
+            color: #FFD700;
+            padding: 15px;
+            font-weight: bold;
+            text-align: left;
+            font-size: 1.1em;
+        }
+        
+        .results-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(30, 58, 95, 0.1);
+            vertical-align: top;
+        }
+        
+        .results-table tr:nth-child(even) {
+            background: rgba(255, 215, 0, 0.1);
+        }
+        
+        .word-cell {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #1e3a5f;
+            min-width: 120px;
+        }
+        
+        .wortart-cell {
+            font-weight: bold;
+            font-size: 1.1em;
+            min-width: 150px;
+        }
+        
+        .details-cell {
+            font-size: 0.95em;
+            color: #1e3a5f;
+            max-width: 200px;
+        }
+        
+        .explanation-cell {
+            font-size: 0.9em;
+            color: #444;
+            font-style: italic;
+            max-width: 300px;
+        }
+        
+        /* Farbkodierung für Wortarten */
+        .substantiv { background: rgba(255, 99, 132, 0.3); color: #8B0000; }
+        .verb { background: rgba(54, 162, 235, 0.3); color: #00008B; }
+        .adjektiv { background: rgba(255, 205, 86, 0.3); color: #8B8B00; }
+        .adverb { background: rgba(75, 192, 192, 0.3); color: #006B6B; }
+        .pronomen { background: rgba(153, 102, 255, 0.3); color: #4B0082; }
+        .artikel { background: rgba(255, 159, 64, 0.3); color: #CC4400; }
+        .praeposition { background: rgba(201, 203, 207, 0.3); color: #333; }
+        .konjunktion { background: rgba(255, 99, 255, 0.3); color: #8B008B; }
+        .numerale { background: rgba(0, 255, 127, 0.3); color: #006400; }
+        .interjektion { background: rgba(255, 20, 147, 0.3); color: #8B1538; }
+        
+        .statistics {
+            background: rgba(255, 215, 0, 0.2);
+            border-left: 5px solid #C71585;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #C71585;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #C71585;
+        }
+        
+        .stat-label {
+            color: #1e3a5f;
+            font-weight: bold;
+        }
+        
+        .legend {
+            background: rgba(255, 215, 0, 0.2);
+            border-left: 5px solid #C71585;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .legend-title {
+            color: #C71585;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .color-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+        }
+        
+        .info-panel {
+            background: rgba(255, 215, 0, 0.2);
+            border-left: 5px solid #C71585;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .expandable-explanation {
+            cursor: pointer;
+            color: #C71585;
+            font-weight: bold;
+        }
+        
+        .expandable-content {
+            display: none;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #C71585;
+        }
+        
+        .example-sentence {
+            background: rgba(199, 21, 133, 0.1);
+            border: 2px solid #FFD700;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-style: italic;
+        }
+        
+        .grammatik-info {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid #C71585;
+            padding: 8px;
+            margin: 3px 0;
+            border-radius: 5px;
+        }
+        
+        .besonderheit {
+            background: rgba(255, 215, 0, 0.4);
+            border: 2px solid #C71585;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Wortartenanalysierer</h1>
+        
+        <div class="info-panel">
+            <h3 style="color: #C71585; margin-top: 0;">📚 Anleitung:</h3>
+            <p>Geben Sie einen beliebigen deutschen Satz ein und erhalten Sie eine detaillierte Analyse aller Wortarten mit grammatischen Details, Definitionen und Beispielen. Die App erkennt alle Hauptwortarten und deren Unterkategorien.</p>
+        </div>
+        
+        <div class="input-section">
+            <label for="sentence-input" class="input-label">📝 Satz eingeben:</label>
+            <textarea id="sentence-input" placeholder="Beispiel: Der schnelle braune Fuchs springt elegant über den faulen Hund, weil er sehr müde ist."></textarea>
+            <button id="analyze-btn" onclick="analyzeSentence()">🔬 Satz analysieren</button>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-title">🎨 Farbkodierung der Wortarten:</div>
+            <div class="legend-grid">
+                <div class="legend-item substantiv">
+                    <div class="color-box substantiv"></div>
+                    Substantive (Nomen)
+                </div>
+                <div class="legend-item verb">
+                    <div class="color-box verb"></div>
+                    Verben
+                </div>
+                <div class="legend-item adjektiv">
+                    <div class="color-box adjektiv"></div>
+                    Adjektive
+                </div>
+                <div class="legend-item adverb">
+                    <div class="color-box adverb"></div>
+                    Adverbien
+                </div>
+                <div class="legend-item pronomen">
+                    <div class="color-box pronomen"></div>
+                    Pronomen
+                </div>
+                <div class="legend-item artikel">
+                    <div class="color-box artikel"></div>
+                    Artikel
+                </div>
+                <div class="legend-item praeposition">
+                    <div class="color-box praeposition"></div>
+                    Präpositionen
+                </div>
+                <div class="legend-item konjunktion">
+                    <div class="color-box konjunktion"></div>
+                    Konjunktionen
+                </div>
+                <div class="legend-item numerale">
+                    <div class="color-box numerale"></div>
+                    Numerale
+                </div>
+                <div class="legend-item interjektion">
+                    <div class="color-box interjektion"></div>
+                    Interjektionen
+                </div>
+            </div>
+        </div>
+        
+        <div id="results" class="results-section">
+            <h2 style="color: #C71585; margin-bottom: 20px;">📊 Analyseergebnisse:</h2>
+            
+            <div id="statistics" class="statistics">
+                <h3 style="color: #C71585; margin-top: 0;">📈 Statistik:</h3>
+                <div id="stat-content" class="stat-grid"></div>
+            </div>
+            
+            <table id="results-table" class="results-table">
+                <thead>
+                    <tr>
+                        <th>Wort</th>
+                        <th>Wortart</th>
+                        <th>Unterkategorie</th>
+                        <th>Grammatische Details</th>
+                        <th>Definition & Erklärung</th>
+                    </tr>
+                </thead>
+                <tbody id="results-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Kompakte Wortarten-Datenbank (wichtigste Wörter)
+        const wortartenDB = {
+            // Artikel
+            'der': ['Artikel', 'artikel', 'Bestimmter Artikel', 'Maskulinum Nominativ/Genitiv/Dativ', 'Bestimmter Artikel für männliche Substantive', 'der Mann, der Hund'],
+            'die': ['Artikel', 'artikel', 'Bestimmter Artikel', 'Femininum/Plural', 'Bestimmter Artikel für weibliche Substantive oder Plural', 'die Frau, die Kinder'],
+            'das': ['Artikel', 'artikel', 'Bestimmter Artikel', 'Neutrum', 'Bestimmter Artikel für sächliche Substantive', 'das Haus, das Kind'],
+            'ein': ['Artikel', 'artikel', 'Unbestimmter Artikel', 'Maskulinum/Neutrum', 'Unbestimmter Artikel für männliche/sächliche Substantive', 'ein Mann, ein Haus'],
+            'eine': ['Artikel', 'artikel', 'Unbestimmter Artikel', 'Femininum', 'Unbestimmter Artikel für weibliche Substantive', 'eine Frau, eine Katze'],
+
+            // Personalpronomen
+            'ich': ['Pronomen', 'pronomen', 'Personalpronomen', '1. Person Singular Nominativ', 'Verweis auf den Sprecher selbst', 'ich bin da', {kasus: 'Nominativ', person: '1. Person', numerus: 'Singular'}],
+            'mir': ['Pronomen', 'pronomen', 'Personalpronomen', '1. Person Singular Dativ', 'Sprecher als indirektes Objekt', 'gib mir das', {kasus: 'Dativ', person: '1. Person', numerus: 'Singular'}],
+            'mich': ['Pronomen', 'pronomen', 'Personalpronomen', '1. Person Singular Akkusativ', 'Sprecher als direktes Objekt', 'sieh mich an', {kasus: 'Akkusativ', person: '1. Person', numerus: 'Singular'}],
+            'du': ['Pronomen', 'pronomen', 'Personalpronomen', '2. Person Singular Nominativ', 'Verweis auf Gesprächspartner', 'du bist nett', {kasus: 'Nominativ', person: '2. Person', numerus: 'Singular'}],
+            'dir': ['Pronomen', 'pronomen', 'Personalpronomen', '2. Person Singular Dativ', 'Gesprächspartner als indirektes Objekt', 'ich helfe dir', {kasus: 'Dativ', person: '2. Person', numerus: 'Singular'}],
+            'dich': ['Pronomen', 'pronomen', 'Personalpronomen', '2. Person Singular Akkusativ', 'Gesprächspartner als direktes Objekt', 'ich sehe dich', {kasus: 'Akkusativ', person: '2. Person', numerus: 'Singular'}],
+            'er': ['Pronomen', 'pronomen', 'Personalpronomen', '3. Person Singular maskulin Nominativ', 'Verweis auf männliche Person', 'er ist groß', {kasus: 'Nominativ', person: '3. Person', numerus: 'Singular', genus: 'maskulin'}],
+            'ihm': ['Pronomen', 'pronomen', 'Personalpronomen', '3. Person Singular maskulin Dativ', 'Männliche Person als indirektes Objekt', 'gib ihm das', {kasus: 'Dativ', person: '3. Person', numerus: 'Singular', genus: 'maskulin'}],
+            'ihn': ['Pronomen', 'pronomen', 'Personalpronomen', '3. Person Singular maskulin Akkusativ', 'Männliche Person als direktes Objekt', 'ich sehe ihn', {kasus: 'Akkusativ', person: '3. Person', numerus: 'Singular', genus: 'maskulin'}],
+            'sie': ['Pronomen', 'pronomen', 'Personalpronomen', '3. Person Singular feminin/Plural', 'Verweis auf weibliche Person oder Plural', 'sie ist schön, sie kommen', {kasus: 'Nominativ/Akkusativ', person: '3. Person', numerus: 'Singular/Plural', genus: 'feminin'}],
+            'ihr': ['Pronomen', 'pronomen', 'Personalpronomen', '3. Person Singular feminin Dativ / 2. Person Plural', 'Dativ feminin oder 2. Person Plural', 'gib ihr das, ihr seid toll', {kasus: 'Dativ/Nominativ', person: '2./3. Person', numerus: 'Singular/Plural'}],
+            'es': ['Pronomen', 'pronomen', 'Personalpronomen', '3. Person Singular neutrum', 'Verweis auf sächliches Substantiv', 'es ist kalt', {kasus: 'Nominativ/Akkusativ', person: '3. Person', numerus: 'Singular', genus: 'neutrum'}],
+            'wir': ['Pronomen', 'pronomen', 'Personalpronomen', '1. Person Plural Nominativ', 'Verweis auf Sprecher und andere', 'wir gehen heim', {kasus: 'Nominativ', person: '1. Person', numerus: 'Plural'}],
+            'uns': ['Pronomen', 'pronomen', 'Personalpronomen', '1. Person Plural Dativ/Akkusativ', 'Sprechergruppe als Objekt', 'gib uns das', {kasus: 'Dativ/Akkusativ', person: '1. Person', numerus: 'Plural'}],
+            'euch': ['Pronomen', 'pronomen', 'Personalpronomen', '2. Person Plural Dativ/Akkusativ', 'Angesprochene als Objekt', 'ich gebe euch das', {kasus: 'Dativ/Akkusativ', person: '2. Person', numerus: 'Plural'}],
+
+            // Possessivpronomen
+            'mein': ['Pronomen', 'pronomen', 'Possessivpronomen', '1. Person Singular maskulin/neutrum', 'Zeigt Besitz des Sprechers an', 'mein Haus', {person: '1. Person', numerus: 'Singular', genus: 'maskulin/neutrum'}],
+            'meine': ['Pronomen', 'pronomen', 'Possessivpronomen', '1. Person Singular feminin/Plural', 'Zeigt Besitz des Sprechers an', 'meine Katze', {person: '1. Person', numerus: 'Singular/Plural', genus: 'feminin'}],
+            'dein': ['Pronomen', 'pronomen', 'Possessivpronomen', '2. Person Singular maskulin/neutrum', 'Zeigt Besitz des Angesprochenen an', 'dein Auto', {person: '2. Person', numerus: 'Singular', genus: 'maskulin/neutrum'}],
+            'deine': ['Pronomen', 'pronomen', 'Possessivpronomen', '2. Person Singular feminin/Plural', 'Zeigt Besitz des Angesprochenen an', 'deine Mutter', {person: '2. Person', numerus: 'Singular/Plural', genus: 'feminin'}],
+            'sein': ['Pronomen', 'pronomen', 'Possessivpronomen', '3. Person Singular maskulin/neutrum', 'Zeigt Besitz einer männlichen Person an', 'sein Hund', {person: '3. Person', numerus: 'Singular', genus: 'maskulin/neutrum'}],
+            'seine': ['Pronomen', 'pronomen', 'Possessivpronomen', '3. Person Singular feminin/Plural', 'Zeigt Besitz einer männlichen Person an', 'seine Frau', {person: '3. Person', numerus: 'Singular/Plural', genus: 'feminin'}],
+
+            // Hilfsverben
+            'ist': ['Verb', 'verb', 'Hilfsverb', '3. Person Singular Präsens von "sein"', 'Zustandsverb, drückt Existenz aus', 'er ist müde'],
+            'bin': ['Verb', 'verb', 'Hilfsverb', '1. Person Singular Präsens von "sein"', 'Zustandsverb erste Person', 'ich bin da'],
+            'sind': ['Verb', 'verb', 'Hilfsverb', '1./3. Person Plural Präsens von "sein"', 'Zustandsverb Plural', 'wir sind da'],
+            'war': ['Verb', 'verb', 'Hilfsverb', '1./3. Person Singular Präteritum von "sein"', 'Zustandsverb Vergangenheit', 'ich war da'],
+            'waren': ['Verb', 'verb', 'Hilfsverb', '1./3. Person Plural Präteritum von "sein"', 'Zustandsverb Vergangenheit Plural', 'wir waren da'],
+            'hat': ['Verb', 'verb', 'Hilfsverb', '3. Person Singular Präsens von "haben"', 'Besitzverb dritte Person', 'er hat Zeit'],
+            'haben': ['Verb', 'verb', 'Hilfsverb', 'Infinitiv', 'Besitzverb und Hilfsverb für Perfekt', 'Zeit haben'],
+            'hatte': ['Verb', 'verb', 'Hilfsverb', '1./3. Person Singular Präteritum von "haben"', 'Besitzverb Vergangenheit', 'ich hatte Zeit'],
+            'wird': ['Verb', 'verb', 'Hilfsverb', '3. Person Singular Präsens von "werden"', 'Hilfsverb für Futur und Passiv', 'er wird kommen'],
+            'wurde': ['Verb', 'verb', 'Hilfsverb', '1./3. Person Singular Präteritum von "werden"', 'Hilfsverb Vergangenheit, oft für Passiv', 'es wurde gemacht'],
+
+            // Modalverben
+            'kann': ['Verb', 'verb', 'Modalverb', '1./3. Person Singular Präsens von "können"', 'Drückt Fähigkeit oder Möglichkeit aus', 'ich kann schwimmen'],
+            'will': ['Verb', 'verb', 'Modalverb', '1./3. Person Singular Präsens von "wollen"', 'Drückt Wunsch oder Absicht aus', 'ich will nach Hause'],
+            'muss': ['Verb', 'verb', 'Modalverb', '1./3. Person Singular Präsens von "müssen"', 'Drückt Notwendigkeit aus', 'ich muss gehen'],
+            'soll': ['Verb', 'verb', 'Modalverb', '1./3. Person Singular Präsens von "sollen"', 'Drückt Auftrag oder Verpflichtung aus', 'ich soll das machen'],
+
+            // Häufige Substantive
+            'mann': ['Substantiv', 'substantiv', 'Person', 'Maskulinum, zählbar', 'Erwachsene männliche Person', 'der Mann arbeitet'],
+            'frau': ['Substantiv', 'substantiv', 'Person', 'Femininum, zählbar', 'Erwachsene weibliche Person', 'die Frau lacht'],
+            'kind': ['Substantiv', 'substantiv', 'Person', 'Neutrum, zählbar', 'Junger Mensch', 'das Kind spielt'],
+            'haus': ['Substantiv', 'substantiv', 'Gegenstand', 'Neutrum, zählbar', 'Bauwerk zum Wohnen', 'das Haus ist groß'],
+            'auto': ['Substantiv', 'substantiv', 'Gegenstand', 'Neutrum, zählbar', 'Kraftfahrzeug', 'das Auto fährt'],
+
+            // Adjektive
+            'schnell': ['Adjektiv', 'adjektiv', 'Eigenschafswort', 'Grundform, steigerbar', 'Mit hoher Geschwindigkeit', 'ein schnelles Auto'],
+            'große': ['Adjektiv', 'adjektiv', 'Eigenschafswort', 'Dekliniert, steigerbar', 'Von beträchtlicher Ausdehnung', 'die große Stadt'],
+            'schön': ['Adjektiv', 'adjektiv', 'Eigenschafswort', 'Grundform, steigerbar', 'Ästhetisch ansprechend', 'ein schönes Bild'],
+
+            // Adverbien
+            'sehr': ['Adverb', 'adverb', 'Gradpartikel', 'Modaladverb, unveränderlich', 'Verstärkt Adjektive und Adverbien', 'sehr schnell'],
+            'hier': ['Adverb', 'adverb', 'Lokaladverb', 'Ortsangabe, unveränderlich', 'An diesem Ort', 'hier bin ich'],
+            'heute': ['Adverb', 'adverb', 'Temporaladverb', 'Zeitangabe, unveränderlich', 'An diesem Tag', 'heute ist schönes Wetter'],
+
+            // Präpositionen
+            'in': ['Präposition', 'praeposition', 'Wechselpräposition', 'Dativ/Akkusativ', 'Bezeichnet Ort oder Richtung', 'in der Stadt'],
+            'auf': ['Präposition', 'praeposition', 'Wechselpräposition', 'Dativ/Akkusativ', 'Bezeichnet Lage auf einer Fläche', 'auf dem Tisch'],
+            'mit': ['Präposition', 'praeposition', 'Präposition mit Dativ', 'immer Dativ', 'Bezeichnet Begleitung oder Mittel', 'mit dem Auto'],
+
+            // Konjunktionen
+            'und': ['Konjunktion', 'konjunktion', 'Nebenordnende Konjunktion', 'kopulativ', 'Verbindet gleichrangig', 'Peter und Maria'],
+            'aber': ['Konjunktion', 'konjunktion', 'Nebenordnende Konjunktion', 'adversativ', 'Drückt Gegensatz aus', 'klein aber fein'],
+            'weil': ['Konjunktion', 'konjunktion', 'Unterordnende Konjunktion', 'kausal', 'Leitet Grund-Nebensatz ein', 'weil es regnet'],
+            'dass': ['Konjunktion', 'konjunktion', 'Unterordnende Konjunktion', 'Objektsatz', 'Leitet Inhaltssatz ein', 'ich glaube, dass er kommt']
+        };
+
+        function analyzeSentence() {
+            const input = document.getElementById('sentence-input').value.trim();
+            
+            if (!input) {
+                alert('Bitte geben Sie einen Satz ein!');
+                return;
+            }
+            
+            // Text in Wörter aufteilen
+            const words = input.toLowerCase()
+                .replace(/[.!?,:;]/g, '')
+                .split(/\s+/)
+                .filter(word => word.length > 0);
+            
+            // Ergebnisse analysieren
+            const results = words.map(word => analyzeWord(word, input));
+            
+            // Statistiken berechnen
+            const statistics = calculateStatistics(results);
+            
+            // Ergebnisse anzeigen
+            displayResults(results, statistics);
+            
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function analyzeWord(word, originalSentence) {
+            const originalWord = findOriginalWord(word, originalSentence);
+            const analysis = wortartenDB[word];
+            
+            if (analysis) {
+                // Strukturierte Datenbank-Daten extrahieren
+                const [wortart, typ, kategorie, details, definition, beispiele, grammatik] = analysis;
+                
+                return {
+                    wort: word,
+                    originalWord: originalWord,
+                    wortart: wortart,
+                    typ: typ,
+                    kategorie: kategorie,
+                    details: details,
+                    definition: definition,
+                    beispiele: beispiele,
+                    grammatik: grammatik || null
+                };
+            } else {
+                // Erweiterte Analyse für unbekannte Wörter
+                return performAdvancedAnalysis(word, originalWord);
+            }
+        }
+
+        function performAdvancedAnalysis(word, originalWord) {
+            // Substantiv-Erkennung durch Großschreibung
+            if (originalWord && originalWord.charAt(0) === originalWord.charAt(0).toUpperCase() && originalWord.charAt(0).match(/[A-ZÜÄÖ]/)) {
+                return {
+                    wort: word,
+                    originalWord: originalWord,
+                    wortart: 'Substantiv (erkannt)',
+                    typ: 'substantiv',
+                    kategorie: 'Substantiv',
+                    details: 'Großschreibung deutet auf Substantiv hin',
+                    definition: 'Wahrscheinlich ein Substantiv aufgrund der Großschreibung',
+                    beispiele: 'Weitere Analyse erforderlich',
+                    grammatik: null
+                };
+            }
+            
+            // Verb-Erkennung durch Endungen
+            if (word.endsWith('en')) {
+                return {
+                    wort: word,
+                    originalWord: originalWord,
+                    wortart: 'Verb (erkannt)',
+                    typ: 'verb',
+                    kategorie: 'Infinitiv',
+                    details: 'Infinitivendung -en',
+                    definition: 'Grundform eines Verbs',
+                    beispiele: 'laufen, gehen, sein',
+                    grammatik: null
+                };
+            }
+            
+            if (word.endsWith('t') && word.length > 2) {
+                return {
+                    wort: word,
+                    originalWord: originalWord,
+                    wortart: 'Verb (erkannt)',
+                    typ: 'verb',
+                    kategorie: 'Konjugierte Form',
+                    details: '3. Person Singular oder 2. Person Plural',
+                    definition: 'Gebeugte Verbform',
+                    beispiele: 'er läuft, ihr lauft',
+                    grammatik: null
+                };
+            }
+            
+            // Adjektiv-Erkennung
+            if (word.endsWith('lich') || word.endsWith('ig') || word.endsWith('isch')) {
+                return {
+                    wort: word,
+                    originalWord: originalWord,
+                    wortart: 'Adjektiv (erkannt)',
+                    typ: 'adjektiv',
+                    kategorie: 'Abgeleitetes Adjektiv',
+                    details: 'Typische Adjektiv-Endung',
+                    definition: 'Eigenschaftswort mit charakteristischer Endung',
+                    beispiele: 'freundlich, ruhig, praktisch',
+                    grammatik: null
+                };
+            }
+            
+            // Fallback für unbekannte Wörter
+            return {
+                wort: word,
+                originalWord: originalWord,
+                wortart: 'Unbekannt',
+                typ: 'unbekannt',
+                kategorie: 'Unbekannt',
+                details: 'Wort nicht in Datenbank',
+                definition: 'Manuelle Analyse erforderlich',
+                beispiele: 'Bitte erweitern Sie die Datenbank',
+                grammatik: null
+            };
+        }
+
+        function findOriginalWord(word, sentence) {
+            const words = sentence.split(/\s+/);
+            const found = words.find(w => w.toLowerCase().replace(/[.!?,:;]/g, '') === word);
+            return found ? found.replace(/[.!?,:;]/g, '') : word;
+        }
+
+        function calculateStatistics(results) {
+            const stats = {};
+            const total = results.length;
+            
+            results.forEach(result => {
+                const wortart = result.wortart.split(' ')[0];
+                stats[wortart] = (stats[wortart] || 0) + 1;
+            });
+            
+            return {
+                total,
+                breakdown: stats,
+                mostCommon: Object.entries(stats).sort(([,a], [,b]) => b - a)[0]
+            };
+        }
+
+        function displayResults(results, statistics) {
+            displayStatistics(statistics);
+            
+            const tbody = document.getElementById('results-body');
+            tbody.innerHTML = '';
+            
+            results.forEach((result, index) => {
+                const row = createResultRow(result, index);
+                tbody.appendChild(row);
+            });
+        }
+
+        function displayStatistics(statistics) {
+            const statContent = document.getElementById('stat-content');
+            statContent.innerHTML = '';
+            
+            // Gesamt-Wörter
+            const totalCard = createStatCard('Gesamt Wörter', statistics.total, '#C71585');
+            statContent.appendChild(totalCard);
+            
+            // Häufigste Wortart
+            if (statistics.mostCommon) {
+                const commonCard = createStatCard('Häufigste Wortart', `${statistics.mostCommon[0]} (${statistics.mostCommon[1]}x)`, '#FFD700');
+                statContent.appendChild(commonCard);
+            }
+            
+            // Einzelne Wortarten
+            Object.entries(statistics.breakdown).forEach(([wortart, count]) => {
+                const percentage = ((count / statistics.total) * 100).toFixed(1);
+                const card = createStatCard(wortart, `${count} (${percentage}%)`, getWortartColor(wortart));
+                statContent.appendChild(card);
+            });
+        }
+
+        function createStatCard(label, value, color) {
+            const card = document.createElement('div');
+            card.className = 'stat-card';
+            card.style.borderColor = color;
+            
+            card.innerHTML = `
+                <div class="stat-number" style="color: ${color}">${value}</div>
+                <div class="stat-label">${label}</div>
+            `;
+            
+            return card;
+        }
+
+        function createResultRow(result, index) {
+            const row = document.createElement('tr');
+            row.className = result.typ;
+            
+            // Wort
+            const wordCell = document.createElement('td');
+            wordCell.className = 'word-cell';
+            wordCell.textContent = result.originalWord;
+            
+            // Wortart
+            const wortartCell = document.createElement('td');
+            wortartCell.className = `wortart-cell ${result.typ}`;
+            wortartCell.textContent = result.wortart;
+            
+            // Unterkategorie
+            const kategorieCell = document.createElement('td');
+            kategorieCell.className = 'details-cell';
+            kategorieCell.innerHTML = `
+                <strong>${result.kategorie}</strong><br>
+                <small>${result.details}</small>
+            `;
+            
+            // Grammatische Details
+            const grammatikCell = document.createElement('td');
+            grammatikCell.className = 'details-cell';
+            let grammatikHTML = '';
+            
+            // Pronomen-spezifische grammatische Details anzeigen
+            if (result.grammatik) {
+                if (result.grammatik.kasus) {
+                    grammatikHTML += `<div class="grammatik-info"><strong>Kasus:</strong> ${result.grammatik.kasus}</div>`;
+                }
+                if (result.grammatik.person) {
+                    grammatikHTML += `<div class="grammatik-info"><strong>Person:</strong> ${result.grammatik.person}</div>`;
+                }
+                if (result.grammatik.numerus) {
+                    grammatikHTML += `<div class="grammatik-info"><strong>Numerus:</strong> ${result.grammatik.numerus}</div>`;
+                }
+                if (result.grammatik.genus) {
+                    grammatikHTML += `<div class="grammatik-info"><strong>Genus:</strong> ${result.grammatik.genus}</div>`;
+                }
+                if (result.grammatik.funktion) {
+                    grammatikHTML += `<div class="grammatik-info"><strong>Funktion:</strong> ${result.grammatik.funktion}</div>`;
+                }
+            }
+            
+            // Besondere Hinweise für Pronomen
+            if (result.typ === 'pronomen') {
+                if (result.kategorie.includes('Höflichkeitsform')) {
+                    grammatikHTML += `<div class="besonderheit">⚠️ Immer großgeschrieben!</div>`;
+                }
+                if (result.kategorie.includes('Reflexivpronomen')) {
+                    grammatikHTML += `<div class="besonderheit">🔄 Bezieht sich auf Subjekt zurück</div>`;
+                }
+                if (result.kategorie.includes('Possessivpronomen')) {
+                    grammatikHTML += `<div class="besonderheit">📝 Wird wie Adjektiv dekliniert</div>`;
+                }
+            }
+            
+            grammatikCell.innerHTML = grammatikHTML || '<em style="color: #999;">Keine grammatischen Details</em>';
+            
+            // Definition & Erklärung
+            const definitionCell = document.createElement('td');
+            definitionCell.className = 'explanation-cell';
+            definitionCell.innerHTML = `
+                <div class="expandable-explanation" onclick="toggleExplanation(${index})">
+                    📖 Definition anzeigen
+                </div>
+                <div id="explanation-${index}" class="expandable-content">
+                    <strong>Definition:</strong><br>
+                    ${result.definition}<br><br>
+                    <strong>Beispiele:</strong><br>
+                    <div class="example-sentence">${result.beispiele}</div>
+                </div>
+            `;
+            
+            row.appendChild(wordCell);
+            row.appendChild(wortartCell);
+            row.appendChild(kategorieCell);
+            row.appendChild(grammatikCell);
+            row.appendChild(definitionCell);
+            
+            return row;
+        }
+
+        function toggleExplanation(index) {
+            const content = document.getElementById(`explanation-${index}`);
+            const button = content.previousElementSibling;
+            
+            if (content.style.display === 'none' || content.style.display === '') {
+                content.style.display = 'block';
+                button.textContent = '📖 Definition ausblenden';
+            } else {
+                content.style.display = 'none';
+                button.textContent = '📖 Definition anzeigen';
+            }
+        }
+
+        function getWortartColor(wortart) {
+            const colors = {
+                'Substantiv': '#FF6384',
+                'Verb': '#36A2EB', 
+                'Adjektiv': '#FFCD56',
+                'Adverb': '#4BC0C0',
+                'Pronomen': '#9966FF',
+                'Artikel': '#FF9F40',
+                'Präposition': '#C9CBCF',
+                'Konjunktion': '#FF63FF',
+                'Numerale': '#00FF7F',
+                'Interjektion': '#FF1493'
+            };
+            return colors[wortart] || '#666';
+        }
+
+        // Event Listener für Enter-Taste
+        document.getElementById('sentence-input').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                analyzeSentence();
+            }
+        });
+
+        // Beispielsatz beim Laden einfügen
+        window.onload = function() {
+            document.getElementById('sentence-input').value = "Ich gebe dir mein Buch, weil du es lesen willst.";
+        };
+    </script>
+</body>
+</html>
