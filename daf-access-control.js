@@ -159,6 +159,26 @@ function showRegistrationDialog() {
                 </button>
             </form>
 
+            <div style="text-align: center; margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee;">
+                <p style="font-size: 0.95em; color: #666; margin-bottom: 12px;">
+                    Bereits registriert? Anderes Gerät?
+                </p>
+                <button onclick="showRenewAccessDialog()" style="
+                    padding: 10px 20px;
+                    background: transparent;
+                    color: #667eea;
+                    border: 2px solid #667eea;
+                    border-radius: 8px;
+                    font-size: 0.95em;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                " onmouseover="this.style.background='#667eea'; this.style.color='white';" 
+                   onmouseout="this.style.background='transparent'; this.style.color='#667eea';">
+                    🔑 Zugang erneuern
+                </button>
+            </div>
+
             <p style="margin-top: 20px; font-size: 0.9em; text-align: center; color: #666; line-height: 1.6;">
                 Du erhältst eine Email mit einem Bestätigungslink.<br>
                 Nach der Bestätigung hast du dauerhaften Zugang.
@@ -169,7 +189,7 @@ function showRegistrationDialog() {
     document.body.appendChild(overlay);
     document.body.style.overflow = 'hidden';
 
-    // VERBESSERUNG 4: Zeichenzähler für Mitteilungen
+    // Zeichenzähler für Mitteilungen
     const textarea = document.querySelector('textarea[name="mitteilungen"]');
     const counter = document.getElementById('char-counter');
     if (textarea && counter) {
@@ -188,24 +208,208 @@ function showRegistrationDialog() {
     document.getElementById('daf-registration-form').addEventListener('submit', handleRegistration);
 }
 
+// NEU: Zugang erneuern Dialog
+function showRenewAccessDialog() {
+    // Schließe den Registrierungsdialog falls offen
+    const existingOverlay = document.getElementById('daf-access-overlay');
+    if (existingOverlay) {
+        existingOverlay.remove();
+    }
+
+    const overlay = document.createElement('div');
+    overlay.id = 'daf-renew-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 999999;
+        padding: 20px;
+    `;
+
+    overlay.innerHTML = `
+        <div style="
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+        ">
+            <button onclick="closeRenewDialog()" style="
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                background: none;
+                border: none;
+                font-size: 1.8em;
+                cursor: pointer;
+                color: #999;
+                padding: 5px 10px;
+                line-height: 1;
+            ">×</button>
+            
+            <h2 style="color: #667eea; text-align: center; margin-bottom: 15px; font-size: 1.6em;">
+                🔑 Zugang erneuern
+            </h2>
+            
+            <p style="text-align: center; color: #666; margin-bottom: 25px; line-height: 1.6;">
+                Gib deine registrierte Email-Adresse ein. Du erhältst einen neuen Bestätigungslink für dieses Gerät.
+            </p>
+
+            <form id="daf-renew-form">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">
+                        Email-Adresse:
+                    </label>
+                    <input type="email" name="email" required placeholder="deine@email.com" 
+                        style="width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; box-sizing: border-box;">
+                </div>
+
+                <button type="submit" style="
+                    width: 100%;
+                    padding: 15px;
+                    background: linear-gradient(135deg, #667eea, #764ba2);
+                    color: white;
+                    border: none;
+                    border-radius: 10px;
+                    font-size: 1.1em;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: transform 0.2s;
+                ">
+                    Bestätigungslink senden
+                </button>
+            </form>
+
+            <p style="margin-top: 20px; font-size: 0.85em; text-align: center; color: #999; line-height: 1.5;">
+                Noch nicht registriert? <a href="#" onclick="closeRenewDialog(); showRegistrationDialog(); return false;" style="color: #667eea; text-decoration: none; font-weight: bold;">Zur Registrierung</a>
+            </p>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+
+    // Form Handler
+    document.getElementById('daf-renew-form').addEventListener('submit', handleRenewAccess);
+
+    // Schließen mit Klick außerhalb
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) {
+            closeRenewDialog();
+        }
+    });
+}
+
+// NEU: Schließt den Zugang-erneuern Dialog
+function closeRenewDialog() {
+    const overlay = document.getElementById('daf-renew-overlay');
+    if (overlay) {
+        overlay.remove();
+        document.body.style.overflow = '';
+    }
+}
+
+// NEU: Verarbeitet Zugang erneuern
+async function handleRenewAccess(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const email = formData.get('email');
+    
+    const button = e.target.querySelector('button');
+    const originalText = button.innerHTML;
+    button.innerHTML = '⏳ Wird gesendet...';
+    button.disabled = true;
+    button.style.opacity = '0.7';
+
+    try {
+        // Bestätigungslink generieren
+        const confirmationToken = btoa(email + Date.now());
+        const confirmationLink = window.location.origin + window.location.pathname + 
+                                '?confirm=' + confirmationToken + '&email=' + encodeURIComponent(email);
+
+        // Email an den Nutzer senden (ohne Benachrichtigung an dich)
+        await emailjs.send(
+            EMAILJS_SERVICE_ID,
+            EMAILJS_TEMPLATE_USER,
+            {
+                name: 'DAF-Teilnehmer',
+                to_email: email,
+                confirmation_link: confirmationLink
+            }
+        );
+
+        // Erfolg anzeigen
+        button.innerHTML = '✅ Email versendet!';
+        button.style.background = '#4caf50';
+        button.style.opacity = '1';
+        
+        setTimeout(() => {
+            const overlay = document.getElementById('daf-renew-overlay');
+            overlay.innerHTML = `
+                <div style="background: white; padding: 40px; border-radius: 20px; max-width: 500px; width: 90%; text-align: center;">
+                    <div style="font-size: 4em; margin-bottom: 20px;">✅</div>
+                    <h2 style="color: #4caf50; margin-bottom: 15px;">Email versendet!</h2>
+                    <p style="font-size: 1.05em; color: #666; line-height: 1.6; margin-bottom: 25px;">
+                        Prüfe dein Email-Postfach (auch Spam-Ordner).<br><br>
+                        Klicke auf den Bestätigungslink um deinen Zugang auf diesem Gerät zu aktivieren.
+                    </p>
+                    <button onclick="closeRenewDialog()" style="
+                        padding: 12px 25px;
+                        background: #667eea;
+                        color: white;
+                        border: none;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-weight: bold;
+                        font-size: 1em;
+                    ">
+                        Schließen
+                    </button>
+                </div>
+            `;
+        }, 1500);
+
+    } catch (error) {
+        console.error('Fehler beim Versenden:', error);
+        
+        button.innerHTML = '❌ Fehler - Bitte erneut versuchen';
+        button.style.background = '#f44336';
+        button.style.opacity = '1';
+        button.disabled = false;
+        
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+        }, 3000);
+    }
+}
+
 // Registrierung verarbeiten
 async function handleRegistration(e) {
     e.preventDefault();
     
     const formData = new FormData(e.target);
     
-    // VERBESSERUNG 4: Validierung und Bereinigung der Mitteilungen
+    // Validierung und Bereinigung der Mitteilungen
     let mitteilungen = formData.get('mitteilungen') || '';
-    mitteilungen = mitteilungen.trim(); // Leerzeichen entfernen
+    mitteilungen = mitteilungen.trim();
     
-    // Prüfe auf übermäßig viele Links (einfacher Spam-Schutz)
+    // Link-Spam-Schutz
     const linkCount = (mitteilungen.match(/https?:\/\//g) || []).length;
     if (linkCount > 3) {
         alert('Zu viele Links in der Mitteilung. Bitte maximal 3 Links verwenden.');
         return;
     }
     
-    // Wenn leer, setze auf "Keine Angabe"
     if (!mitteilungen) {
         mitteilungen = 'Keine Angabe';
     }
@@ -220,15 +424,13 @@ async function handleRegistration(e) {
         registration_date: new Date().toLocaleString('de-DE')
     };
 
-    // Button deaktivieren
-    const button = e.target.querySelector('button');
+    const button = e.target.querySelector('button[type="submit"]');
     const originalText = button.innerHTML;
     button.innerHTML = '⏳ Wird gesendet...';
     button.disabled = true;
     button.style.opacity = '0.7';
 
     try {
-        // Bestätigungslink generieren
         const confirmationToken = btoa(data.email + Date.now());
         const confirmationLink = window.location.origin + window.location.pathname + 
                                 '?confirm=' + confirmationToken + '&email=' + encodeURIComponent(data.email);
@@ -248,18 +450,17 @@ async function handleRegistration(e) {
             }
         );
 
-        // VERBESSERUNG 3: Email an NUTZER mit korrekter to_email Variable
+        // Email an NUTZER (Bestätigung)
         await emailjs.send(
             EMAILJS_SERVICE_ID,
             EMAILJS_TEMPLATE_USER,
             {
                 name: data.name,
-                to_email: data.email,  // Wichtig: Wird an diese Email gesendet
+                to_email: data.email,
                 confirmation_link: confirmationLink
             }
         );
 
-        // Erfolg anzeigen
         button.innerHTML = '✅ Email versendet!';
         button.style.background = '#4caf50';
         button.style.opacity = '1';
@@ -293,23 +494,21 @@ async function handleRegistration(e) {
     }
 }
 
-// VERBESSERUNG 5: Bestätigung über URL Parameter - URL sofort bereinigen
+// Bestätigung über URL Parameter - URL sofort bereinigen
 function checkConfirmation() {
     const urlParams = new URLSearchParams(window.location.search);
     const confirmToken = urlParams.get('confirm');
     const email = urlParams.get('email');
     
     if (confirmToken && email) {
-        // Zugang gewähren
         localStorage.setItem('daf_access_granted', 'true');
         localStorage.setItem('daf_user_email', email);
         localStorage.setItem('daf_access_date', new Date().toISOString());
         
-        // URL SOFORT bereinigen (nicht erst nach 3 Sekunden)
+        // URL sofort bereinigen
         const cleanUrl = window.location.origin + window.location.pathname;
         window.history.replaceState({}, document.title, cleanUrl);
         
-        // Erfolgs-Overlay anzeigen
         const overlay = document.createElement('div');
         overlay.style.cssText = `
             position: fixed;
@@ -354,15 +553,19 @@ function checkConfirmation() {
 
 // Hauptfunktion beim Laden der Seite
 window.addEventListener('DOMContentLoaded', function() {
-    // Prüfe zuerst auf Bestätigungslink
     checkConfirmation();
     
-    // Wenn kein Zugang, zeige Registrierung
     if (!checkAccess()) {
-        // Warte kurz, damit die Seite sichtbar ist
         setTimeout(() => {
             showRegistrationDialog();
         }, 500);
+    }
+});
+
+// ESC-Taste zum Schließen
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeRenewDialog();
     }
 });
 
@@ -371,6 +574,7 @@ window.DAFAccessControl = {
     hasAccess: checkAccess,
     getUserEmail: () => localStorage.getItem('daf_user_email'),
     getAccessDate: () => localStorage.getItem('daf_access_date'),
+    showRenewDialog: showRenewAccessDialog,
     logout: () => {
         if (confirm('Möchtest du dich wirklich abmelden?')) {
             localStorage.removeItem('daf_access_granted');
