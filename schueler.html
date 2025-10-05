@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meine Hausübungen - Amy Lang Deutsch</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: linear-gradient(135deg, #FFB6C1 0%, #FFA07A 50%, #FFD1DC 100%);
+            min-height: 100vh;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            color: #8B4513;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #8B4513;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            color: #8B4513;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .hw-card {
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #FF69B4;
+            transition: all 0.3s ease;
+        }
+
+        .hw-card.completed {
+            border-left-color: #90EE90;
+            opacity: 0.7;
+        }
+
+        .hw-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 105, 180, 0.3);
+        }
+
+        .hw-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .hw-title {
+            color: #8B4513;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .hw-status {
+            font-size: 1.5em;
+        }
+
+        .hw-description {
+            color: #8B4513;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .hw-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .hw-response {
+            margin-top: 20px;
+        }
+
+        .hw-response textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(139, 69, 19, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            font-family: inherit;
+            font-size: 1em;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .hw-response input[type="file"] {
+            margin: 10px 0;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-size: 1em;
+        }
+
+        .btn-primary {
+            background: #FF69B4;
+            color: white;
+            border: 2px solid rgba(255, 105, 180, 0.5);
+        }
+
+        .btn-primary:hover {
+            background: #FF1493;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 20, 147, 0.3);
+        }
+
+        .btn-success {
+            background: #90EE90;
+            color: #2d5016;
+            border: 2px solid rgba(144, 238, 144, 0.5);
+        }
+
+        .btn-success:hover {
+            background: #7CCD7C;
+            transform: translateY(-2px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8B4513;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .response-display {
+            background: rgba(144, 238, 144, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border-left: 3px solid #90EE90;
+        }
+
+        .response-display strong {
+            color: #2d5016;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            header h1 {
+                font-size: 1.5em;
+            }
+
+            .hw-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 id="welcomeText">Meine Hausübungen</h1>
+            <p>Hier findest du alle deine aktuellen und erledigten Aufgaben</p>
+        </header>
+
+        <div class="section">
+            <h2>📝 Offene Hausübungen</h2>
+            <div id="pendingHw">
+                <div class="empty-state">
+                    <h3>Lade Hausübungen...</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>✅ Erledigte Hausübungen</h2>
+            <div id="completedHw">
+                <div class="empty-state">
+                    <p>Noch keine erledigten Hausübungen</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, query, where, onSnapshot, updateDoc, doc, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBU3231QacwG-xey5KMyM9roQ3ZkpQ6bCE",
+            authDomain: "amy-lang---huepp.firebaseapp.com",
+            projectId: "amy-lang---huepp",
+            storageBucket: "amy-lang---huepp.firebasestorage.app",
+            messagingSenderId: "54316876573",
+            appId: "1:54316876573:web:3e3788a6db18cdab5ed7f4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Get student ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const studentLink = 'huepp.html?s=' + urlParams.get('s');
+
+        let studentId = null;
+        let studentName = '';
+
+        // Find student by link
+        const studentsQuery = query(collection(db, 'students'), where('link', '==', studentLink));
+        const studentsSnapshot = await getDocs(studentsQuery);
+        
+        if (!studentsSnapshot.empty) {
+            const studentDoc = studentsSnapshot.docs[0];
+            studentId = studentDoc.id;
+            studentName = studentDoc.data().name;
+            document.getElementById('welcomeText').textContent = `Hallo ${studentName}!`;
+        } else {
+            document.getElementById('welcomeText').textContent = 'Schüler nicht gefunden';
+        }
+
+        // Listen to homework
+        if (studentId) {
+            const hwQuery = query(collection(db, 'homework'), where('studentId', '==', studentId));
+            onSnapshot(hwQuery, (snapshot) => {
+                const homework = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderHomework(homework);
+            });
+        }
+
+        function renderHomework(homework) {
+            const pending = homework.filter(hw => !hw.completed);
+            const completed = homework.filter(hw => hw.completed);
+
+            // Render pending
+            const pendingEl = document.getElementById('pendingHw');
+            if (pending.length === 0) {
+                pendingEl.innerHTML = '<div class="empty-state"><h3>🎉 Keine offenen Hausübungen!</h3><p>Du bist auf dem neuesten Stand!</p></div>';
+            } else {
+                pendingEl.innerHTML = pending.map(hw => createHwCard(hw, false)).join('');
+            }
+
+            // Render completed
+            const completedEl = document.getElementById('completedHw');
+            if (completed.length === 0) {
+                completedEl.innerHTML = '<div class="empty-state"><p>Noch keine erledigten Hausübungen</p></div>';
+            } else {
+                completedEl.innerHTML = completed.map(hw => createHwCard(hw, true)).join('');
+            }
+        }
+
+        function createHwCard(hw, isCompleted) {
+            const typeText = hw.type === 'text' ? 'Text-Antwort' : hw.type === 'checkbox' ? 'Abhaken' : 'Foto-Upload';
+            
+            return `
+                <div class="hw-card ${isCompleted ? 'completed' : ''}">
+                    <div class="hw-header">
+                        <div class="hw-title">${hw.title}</div>
+                        <div class="hw-status">${isCompleted ? '✅' : '⭕'}</div>
+                    </div>
+                    ${hw.description ? `<div class="hw-description">${hw.description}</div>` : ''}
+                    <div class="hw-meta">
+                        <span>📅 Bis: ${new Date(hw.dueDate).toLocaleDateString('de-DE')}</span>
+                        <span>📝 ${typeText}</span>
+                    </div>
+                    ${isCompleted ? 
+                        (hw.response ? `<div class="response-display"><strong>Deine Antwort:</strong> ${hw.response}</div>` : '') :
+                        createResponseSection(hw)
+                    }
+                </div>
+            `;
+        }
+
+        function createResponseSection(hw) {
+            if (hw.type === 'text') {
+                return `
+                    <div class="hw-response">
+                        <textarea id="response-${hw.id}" placeholder="Schreibe deine Antwort hier..."></textarea>
+                        <button class="btn btn-primary" style="margin-top: 10px;" onclick="window.submitResponse('${hw.id}', 'text')">Absenden</button>
+                    </div>
+                `;
+            } else if (hw.type === 'checkbox') {
+                return `
+                    <div class="hw-response">
+                        <button class="btn btn-success" onclick="window.submitResponse('${hw.id}', 'checkbox')">Als erledigt markieren</button>
+                    </div>
+                `;
+            } else if (hw.type === 'photo') {
+                return `
+                    <div class="hw-response">
+                        <input type="file" id="photo-${hw.id}" accept="image/*">
+                        <button class="btn btn-primary" style="margin-top: 10px;" onclick="window.submitResponse('${hw.id}', 'photo')">Foto hochladen</button>
+                    </div>
+                `;
+            }
+        }
+
+        window.submitResponse = async function(hwId, type) {
+            let response = '';
+            
+            if (type === 'text') {
+                response = document.getElementById(`response-${hwId}`).value.trim();
+                if (!response) {
+                    alert('Bitte schreibe eine Antwort.');
+                    return;
+                }
+            } else if (type === 'checkbox') {
+                response = 'Erledigt ✓';
+            } else if (type === 'photo') {
+                const fileInput = document.getElementById(`photo-${hwId}`);
+                if (!fileInput.files[0]) {
+                    alert('Bitte wähle ein Foto aus.');
+                    return;
+                }
+                response = `Foto hochgeladen: ${fileInput.files[0].name}`;
+            }
+
+            try {
+                await updateDoc(doc(db, 'homework', hwId), {
+                    completed: true,
+                    response: response,
+                    completedAt: new Date().toISOString()
+                });
+            } catch (error) {
+                alert('Fehler beim Absenden: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
