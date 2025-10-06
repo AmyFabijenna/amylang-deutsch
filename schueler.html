@@ -20,8 +20,8 @@
         }
 
         .container {
-            max-width: 500px;
-            margin: 50px auto;
+            max-width: 600px;
+            margin: 30px auto;
         }
 
         .login-box {
@@ -30,6 +30,7 @@
             border-radius: 20px;
             padding: 40px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
 
         .login-box h1 {
@@ -78,6 +79,28 @@
             transform: translateY(-2px);
         }
 
+        .btn-secondary {
+            background: #8B4513;
+        }
+
+        .btn-secondary:hover {
+            background: #A0522D;
+        }
+
+        .btn-warning {
+            background: #FFA500;
+        }
+
+        .btn-warning:hover {
+            background: #FF8C00;
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .error {
             background: rgba(255, 0, 0, 0.2);
             color: #8B4513;
@@ -85,6 +108,46 @@
             border-radius: 10px;
             margin-bottom: 20px;
             display: none;
+        }
+
+        .student-view {
+            display: none;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #FF69B4;
+        }
+
+        .info-title {
+            color: #8B4513;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .next-lesson {
+            background: rgba(255, 105, 180, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .lesson-time {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #8B4513;
+            margin-bottom: 5px;
+        }
+
+        .reschedule-info {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 10px;
+            font-style: italic;
         }
 
         .hw-view {
@@ -131,6 +194,85 @@
             border-radius: 20px;
             text-decoration: none;
             margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(139, 69, 19, 1);
+            transform: translateY(-2px);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal h3 {
+            color: #8B4513;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+        }
+
+        .time-slot {
+            background: rgba(139, 69, 19, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(139, 69, 19, 0.2);
+        }
+
+        .time-slot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .day-badge {
+            background: #FF69B4;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .success-message {
+            background: rgba(144, 238, 144, 0.3);
+            color: #8B4513;
+            padding: 12px;
+            border-radius: 10px;
+            margin: 10px 0;
+            display: none;
         }
     </style>
 </head>
@@ -155,12 +297,42 @@
             </div>
         </div>
 
-        <!-- Homework View -->
-        <div id="hwView" class="hw-view">
+        <!-- Student Dashboard -->
+        <div id="studentView" class="student-view">
             <a href="index.html" class="back-btn">← Zurück zur Hauptseite</a>
             <div class="login-box">
-                <h1 id="welcomeText">Meine Hausübungen</h1>
-                <button class="btn" onclick="logout()" style="margin-bottom: 20px;">Ausloggen</button>
+                <h1 id="welcomeText">Mein Schülerbereich</h1>
+                <button class="btn btn-secondary" onclick="logout()" style="margin-bottom: 20px;">Ausloggen</button>
+                
+                <!-- Meine Termine -->
+                <div class="info-card">
+                    <div class="info-title">📅 Meine Termine</div>
+                    <div id="myLessons">Lade Termine...</div>
+                    <button class="btn btn-warning" onclick="openRescheduleModal()" id="rescheduleBtn" style="margin-top: 10px;">
+                        Stunde verschieben
+                    </button>
+                    <div class="reschedule-info" id="rescheduleInfo"></div>
+                </div>
+
+                <!-- Hausaufgaben -->
+                <div class="info-card">
+                    <div class="info-title">📝 Meine Hausaufgaben</div>
+                    <div id="myHomework">Lade Hausaufgaben...</div>
+                    <button class="btn" onclick="switchToHomeworkView()" style="margin-top: 10px;">
+                        Alle Hausaufgaben anzeigen
+                    </button>
+                </div>
+
+                <!-- Erfolgsmeldung -->
+                <div id="successMessage" class="success-message"></div>
+            </div>
+        </div>
+
+        <!-- Homework Detail View -->
+        <div id="hwView" class="hw-view">
+            <a href="#" class="back-btn" onclick="switchToDashboard()">← Zurück zum Dashboard</a>
+            <div class="login-box">
+                <h1 id="hwWelcomeText">Meine Hausübungen</h1>
                 
                 <h2 style="color: #8B4513; margin: 20px 0;">📝 Offene Hausübungen</h2>
                 <div id="pendingHw">
@@ -175,25 +347,48 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getFirestore, collection, query, where, getDocs, onSnapshot, updateDoc, doc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+    <!-- Reschedule Modal -->
+    <div class="modal" id="rescheduleModal">
+        <div class="modal-content">
+            <h3>🔄 Stunde verschieben</h3>
+            <div class="form-group">
+                <label>Welche Stunde möchtest du verschieben?</label>
+                <select id="lessonToReschedule" class="form-control">
+                    <option value="">Lade Termine...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Neues Datum *</label>
+                <input type="date" id="newDate" required>
+            </div>
+            <div class="form-group">
+                <label>Neue Uhrzeit *</label>
+                <input type="time" id="newTime" required>
+            </div>
+            <div class="form-group">
+                <label>Grund für die Verschiebung</label>
+                <textarea id="rescheduleReason" rows="3" placeholder="Warum möchtest du die Stunde verschieben? (optional)"></textarea>
+            </div>
+            <div class="btn-group">
+                <button class="btn" onclick="submitRescheduleRequest()">Anfrage senden</button>
+                <button class="btn btn-secondary" onclick="closeModal('rescheduleModal')">Abbrechen</button>
+            </div>
+        </div>
+    </div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBU3231QacwG-xey5KMyM9roQ3ZkpQ6bCE",
-            authDomain: "amy-lang---huepp.firebaseapp.com",
-            projectId: "amy-lang---huepp",
-            storageBucket: "amy-lang---huepp.firebasestorage.app",
-            messagingSenderId: "54316876573",
-            appId: "1:54316876573:web:3e3788a6db18cdab5ed7f4"
-        };
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Supabase Initialisierung - GLEICHE WIE IN huepp.html
+        const supabaseUrl = 'IHR_SUPABASE_URL_HIER';
+        const supabaseKey = 'IHR_SUPABASE_ANON_KEY_HIER';
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        let currentStudent = null;
+        let studentLessons = [];
 
-        let currentStudentId = null;
-        let currentStudentName = '';
+        const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 
+        // Login Funktion
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -201,57 +396,275 @@
             const password = document.getElementById('loginPassword').value.trim();
             
             try {
-                const q = query(collection(db, 'students'), 
-                    where('email', '==', email), 
-                    where('password', '==', password));
+                const { data, error } = await supabase
+                    .from('students')
+                    .select('*')
+                    .eq('email', email)
+                    .eq('password', password)
+                    .single();
                 
-                const snapshot = await getDocs(q);
-                
-                if (snapshot.empty) {
-                    document.getElementById('errorMsg').textContent = 'Email oder Passwort falsch!';
-                    document.getElementById('errorMsg').style.display = 'block';
+                if (error || !data) {
+                    showError('Email oder Passwort falsch!');
                     return;
                 }
                 
-                const studentDoc = snapshot.docs[0];
-                currentStudentId = studentDoc.id;
-                currentStudentName = studentDoc.data().name;
-                
+                currentStudent = data;
                 document.getElementById('loginView').style.display = 'none';
-                document.getElementById('hwView').style.display = 'block';
-                document.getElementById('welcomeText').textContent = `Hallo ${currentStudentName}!`;
+                document.getElementById('studentView').style.display = 'block';
+                document.getElementById('welcomeText').textContent = `Hallo ${currentStudent.name}!`;
                 
-                loadHomework();
+                await loadStudentData();
                 
             } catch (error) {
-                document.getElementById('errorMsg').textContent = 'Fehler: ' + error.message;
-                document.getElementById('errorMsg').style.display = 'block';
+                showError('Fehler beim Login: ' + error.message);
             }
         });
 
-        function loadHomework() {
-            const hwQuery = query(collection(db, 'homework'), where('studentId', '==', currentStudentId));
-            
-            onSnapshot(hwQuery, (snapshot) => {
-                const homework = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderHomework(homework);
-            });
+        async function loadStudentData() {
+            await loadMyLessons();
+            await loadMyHomeworkOverview();
+            updateRescheduleButton();
         }
 
-        function renderHomework(homework) {
+        async function loadMyLessons() {
+            if (!currentStudent?.standard_times) {
+                document.getElementById('myLessons').innerHTML = '<p>Keine festen Termine vereinbart</p>';
+                studentLessons = [];
+                return;
+            }
+            
+            // Berechne nächste Termine für jede Zeit-Slot
+            const upcomingLessons = [];
+            const today = new Date();
+            
+            currentStudent.standard_times.forEach(timeSlot => {
+                const stdDay = timeSlot.day;
+                const [hours, minutes] = timeSlot.time.split(':');
+                
+                // Finde nächsten Termin für diesen Slot
+                let nextDate = new Date();
+                nextDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                
+                // Gehe zu nächstem Wochentag
+                while (nextDate.getDay() !== stdDay || nextDate < today) {
+                    nextDate.setDate(nextDate.getDate() + 1);
+                }
+                
+                upcomingLessons.push({
+                    date: nextDate,
+                    time: timeSlot.time,
+                    duration: timeSlot.duration,
+                    day: timeSlot.day,
+                    dayName: dayNames[timeSlot.day]
+                });
+            });
+            
+            // Sortiere nach Datum
+            upcomingLessons.sort((a, b) => a.date - b.date);
+            studentLessons = upcomingLessons;
+            
+            let html = '';
+            
+            if (upcomingLessons.length > 0) {
+                const nextLesson = upcomingLessons[0];
+                html = `
+                    <div class="next-lesson">
+                        <div class="lesson-time">⏰ Nächste Stunde: ${nextLesson.date.toLocaleDateString('de-DE')} um ${nextLesson.time} Uhr</div>
+                        <div>📅 ${nextLesson.dayName} | ⏱️ ${nextLesson.duration} Minuten</div>
+                    </div>
+                `;
+                
+                html += `<p><strong>Alle wöchentlichen Termine:</strong></p>`;
+                currentStudent.standard_times.forEach(time => {
+                    html += `<p>• ${dayNames[time.day]} ${time.time} Uhr (${time.duration} Min)</p>`;
+                });
+            } else {
+                html = '<p>Keine anstehenden Termine</p>';
+            }
+            
+            document.getElementById('myLessons').innerHTML = html;
+        }
+
+        async function loadMyHomeworkOverview() {
+            const { data, error } = await supabase
+                .from('homework')
+                .select('*')
+                .eq('student_id', currentStudent.id)
+                .order('due_date', { ascending: true });
+            
+            if (error || !data || data.length === 0) {
+                document.getElementById('myHomework').innerHTML = '<p>🎉 Aktuell keine Hausaufgaben!</p>';
+                return;
+            }
+            
+            const pending = data.filter(hw => !hw.completed);
+            const completed = data.filter(hw => hw.completed);
+            
+            let html = '';
+            
+            if (pending.length > 0) {
+                html += `<p><strong>${pending.length} offene Hausaufgabe(n):</strong></p>`;
+                pending.slice(0, 3).forEach(hw => {
+                    const dueDate = new Date(hw.due_date);
+                    const today = new Date();
+                    const isOverdue = dueDate < today;
+                    
+                    html += `<div style="margin: 5px 0; padding: 8px; background: ${isOverdue ? 'rgba(255,0,0,0.1)' : 'rgba(255,165,0,0.1)'}; border-radius: 8px;">
+                        <strong>${hw.title}</strong><br>
+                        📅 Bis: ${dueDate.toLocaleDateString('de-DE')} ${isOverdue ? '⚠️ Überfällig!' : ''}
+                    </div>`;
+                });
+                
+                if (pending.length > 3) {
+                    html += `<p style="color: #666; font-size: 0.9em;">... und ${pending.length - 3} weitere</p>`;
+                }
+            }
+            
+            if (completed.length > 0) {
+                html += `<p style="margin-top: 15px;"><strong>${completed.length} erledigt</strong> ✅</p>`;
+            }
+            
+            document.getElementById('myHomework').innerHTML = html;
+        }
+
+        // Update Reschedule Button basierend auf 24h Regel
+        function updateRescheduleButton() {
+            const btn = document.getElementById('rescheduleBtn');
+            const info = document.getElementById('rescheduleInfo');
+            
+            if (studentLessons.length === 0) {
+                btn.disabled = true;
+                btn.textContent = 'Keine Termine verfügbar';
+                info.innerHTML = '';
+                return;
+            }
+            
+            const nextLesson = studentLessons[0];
+            const now = new Date();
+            const lessonTime = new Date(nextLesson.date);
+            const timeDiff = lessonTime - now;
+            const hoursDiff = timeDiff / (1000 * 60 * 60);
+            
+            if (hoursDiff <= 24) {
+                btn.disabled = true;
+                btn.textContent = 'Verschiebung nicht möglich';
+                info.innerHTML = `❌ Verschiebung nur möglich, wenn mehr als 24 Stunden vor Stunde (noch ${Math.round(hoursDiff)}h)`;
+            } else {
+                btn.disabled = false;
+                btn.textContent = 'Stunde verschieben';
+                info.innerHTML = `✅ Verschiebung möglich (noch ${Math.round(hoursDiff)}h vor Stunde)`;
+            }
+        }
+
+        // Reschedule Modal
+        window.openRescheduleModal = async function() {
+            const select = document.getElementById('lessonToReschedule');
+            select.innerHTML = '<option value="">Lade Termine...</option>';
+            
+            // Fülle Dropdown mit kommenden Terminen
+            studentLessons.forEach((lesson, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${lesson.date.toLocaleDateString('de-DE')} ${lesson.time} Uhr (${lesson.dayName})`;
+                select.appendChild(option);
+            });
+            
+            // Setze min Datum auf heute
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('newDate').min = today;
+            
+            document.getElementById('rescheduleModal').style.display = 'flex';
+        };
+
+        window.closeModal = function(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        };
+
+        window.submitRescheduleRequest = async function() {
+            const lessonIndex = document.getElementById('lessonToReschedule').value;
+            const newDate = document.getElementById('newDate').value;
+            const newTime = document.getElementById('newTime').value;
+            const reason = document.getElementById('rescheduleReason').value.trim();
+            
+            if (!lessonIndex || !newDate || !newTime) {
+                alert('Bitte wähle einen Termin aus und gib neues Datum/Uhrzeit an!');
+                return;
+            }
+            
+            const selectedLesson = studentLessons[lessonIndex];
+            
+            try {
+                const { error } = await supabase
+                    .from('reschedule_requests')
+                    .insert({
+                        student_id: currentStudent.id,
+                        student_name: currentStudent.name,
+                        original_date: selectedLesson.date.toISOString(),
+                        original_time: selectedLesson.time,
+                        requested_date: newDate,
+                        requested_time: newTime,
+                        reason: reason || 'Kein Grund angegeben',
+                        status: 'pending'
+                    });
+                
+                if (error) throw error;
+                
+                showSuccess('Verschiebungsanfrage wurde erfolgreich gesendet! Amy wird sich bald bei dir melden.');
+                closeModal('rescheduleModal');
+                
+                // Formular zurücksetzen
+                document.getElementById('newDate').value = '';
+                document.getElementById('newTime').value = '';
+                document.getElementById('rescheduleReason').value = '';
+                
+            } catch (error) {
+                alert('Fehler beim Senden der Anfrage: ' + error.message);
+            }
+        };
+
+        // Homework View
+        window.switchToHomeworkView = function() {
+            document.getElementById('studentView').style.display = 'none';
+            document.getElementById('hwView').style.display = 'block';
+            document.getElementById('hwWelcomeText').textContent = `Hausaufgaben von ${currentStudent.name}`;
+            loadDetailedHomework();
+        };
+
+        window.switchToDashboard = function() {
+            document.getElementById('hwView').style.display = 'none';
+            document.getElementById('studentView').style.display = 'block';
+            loadStudentData();
+        };
+
+        async function loadDetailedHomework() {
+            const { data, error } = await supabase
+                .from('homework')
+                .select('*')
+                .eq('student_id', currentStudent.id)
+                .order('due_date', { ascending: true });
+            
+            if (error) {
+                document.getElementById('pendingHw').innerHTML = '<p>Fehler beim Laden der Hausaufgaben</p>';
+                document.getElementById('completedHw').innerHTML = '';
+                return;
+            }
+            
+            const homework = data || [];
             const pending = homework.filter(hw => !hw.completed);
             const completed = homework.filter(hw => hw.completed);
-
+            
+            // Rendere offene Hausaufgaben
             const pendingEl = document.getElementById('pendingHw');
             if (pending.length === 0) {
-                pendingEl.innerHTML = '<p style="text-align: center; color: #8B4513;">🎉 Keine offenen Hausübungen!</p>';
+                pendingEl.innerHTML = '<p style="text-align: center; color: #8B4513;">🎉 Keine offenen Hausaufgaben!</p>';
             } else {
                 pendingEl.innerHTML = pending.map(hw => createHwCard(hw, false)).join('');
             }
-
+            
+            // Rendere erledigte Hausaufgaben
             const completedEl = document.getElementById('completedHw');
             if (completed.length === 0) {
-                completedEl.innerHTML = '<p style="text-align: center; color: #8B4513;">Noch keine erledigten Hausübungen</p>';
+                completedEl.innerHTML = '<p style="text-align: center; color: #8B4513;">Noch keine erledigten Hausaufgaben</p>';
             } else {
                 completedEl.innerHTML = completed.map(hw => createHwCard(hw, true)).join('');
             }
@@ -259,16 +672,20 @@
 
         function createHwCard(hw, isCompleted) {
             const typeText = hw.type === 'text' ? 'Text-Antwort' : hw.type === 'checkbox' ? 'Abhaken' : 'Foto-Upload';
+            const dueDate = new Date(hw.due_date);
+            const today = new Date();
+            const isOverdue = !isCompleted && dueDate < today;
             
             return `
                 <div class="hw-card ${isCompleted ? 'completed' : ''}">
-                    <div style="display: flex; justify-content: space-between;">
-                        <div class="hw-title">${hw.title}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div class="hw-title">${hw.title} ${isOverdue ? '⚠️' : ''}</div>
                         <div style="font-size: 1.5em;">${isCompleted ? '✅' : '⭕'}</div>
                     </div>
                     ${hw.description ? `<p style="color: #8B4513; margin: 10px 0;">${hw.description}</p>` : ''}
                     <div style="font-size: 0.9em; color: #666; margin: 10px 0;">
-                        📅 Bis: ${new Date(hw.dueDate).toLocaleDateString('de-DE')} | 📝 ${typeText}
+                        📅 Bis: ${dueDate.toLocaleDateString('de-DE')} | 📝 ${typeText}
+                        ${isOverdue ? '<br><span style="color: red;">⚠️ Überfällig!</span>' : ''}
                     </div>
                     ${isCompleted ? 
                         (hw.response ? `<div style="background: rgba(144,238,144,0.3); padding: 12px; border-radius: 8px; margin-top: 10px;"><strong>Deine Antwort:</strong> ${hw.response}</div>` : '') :
@@ -281,20 +698,29 @@
         function createResponseSection(hw) {
             if (hw.type === 'text') {
                 return `
-                    <textarea id="response-${hw.id}" placeholder="Schreibe deine Antwort..."></textarea>
-                    <button class="btn" style="margin-top: 10px;" onclick="window.submitResponse('${hw.id}', 'text')">Absenden</button>
+                    <textarea id="response-${hw.id}" placeholder="Schreibe deine Antwort hier..."></textarea>
+                    <button class="btn" style="margin-top: 10px;" onclick="submitHomeworkResponse('${hw.id}', 'text')">
+                        Antwort absenden
+                    </button>
                 `;
             } else if (hw.type === 'checkbox') {
-                return `<button class="btn" style="margin-top: 10px;" onclick="window.submitResponse('${hw.id}', 'checkbox')">Als erledigt markieren</button>`;
+                return `
+                    <button class="btn" style="margin-top: 10px;" onclick="submitHomeworkResponse('${hw.id}', 'checkbox')">
+                        Als erledigt markieren
+                    </button>
+                `;
             } else if (hw.type === 'photo') {
                 return `
                     <input type="file" id="photo-${hw.id}" accept="image/*" style="margin-top: 10px;">
-                    <button class="btn" style="margin-top: 10px;" onclick="window.submitResponse('${hw.id}', 'photo')">Foto hochladen</button>
+                    <button class="btn" style="margin-top: 10px;" onclick="submitHomeworkResponse('${hw.id}', 'photo')">
+                        Foto hochladen
+                    </button>
                 `;
             }
+            return '';
         }
 
-        window.submitResponse = async function(hwId, type) {
+        window.submitHomeworkResponse = async function(hwId, type) {
             let response = '';
             
             if (type === 'text') {
@@ -312,27 +738,66 @@
                     return;
                 }
                 response = `Foto hochgeladen: ${fileInput.files[0].name}`;
+                // Hier könnte man das Foto tatsächlich hochladen
             }
 
             try {
-                await updateDoc(doc(db, 'homework', hwId), {
-                    completed: true,
-                    response: response,
-                    completedAt: new Date().toISOString()
-                });
+                const { error } = await supabase
+                    .from('homework')
+                    .update({
+                        completed: true,
+                        response: response,
+                        completed_at: new Date().toISOString()
+                    })
+                    .eq('id', hwId);
+                
+                if (error) throw error;
+                
+                showSuccess('Hausaufgabe wurde als erledigt markiert!');
+                await loadDetailedHomework();
+                await loadMyHomeworkOverview();
+                
             } catch (error) {
                 alert('Fehler beim Absenden: ' + error.message);
             }
+        };
+
+        // Hilfsfunktionen
+        function showError(message) {
+            const errorEl = document.getElementById('errorMsg');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+        }
+
+        function showSuccess(message) {
+            const successEl = document.getElementById('successMessage');
+            successEl.textContent = message;
+            successEl.style.display = 'block';
+            setTimeout(() => {
+                successEl.style.display = 'none';
+            }, 5000);
         }
 
         window.logout = function() {
-            currentStudentId = null;
-            currentStudentName = '';
+            currentStudent = null;
+            studentLessons = [];
             document.getElementById('loginView').style.display = 'block';
+            document.getElementById('studentView').style.display = 'none';
             document.getElementById('hwView').style.display = 'none';
             document.getElementById('loginEmail').value = '';
             document.getElementById('loginPassword').value = '';
-        }
+            document.getElementById('errorMsg').style.display = 'none';
+        };
+
+        // Automatische Updates alle 2 Minuten
+        setInterval(() => {
+            if (currentStudent) {
+                updateRescheduleButton();
+            }
+        }, 120000);
+
+        // Initial Reschedule Button Check
+        setTimeout(updateRescheduleButton, 1000);
     </script>
 </body>
 </html>
