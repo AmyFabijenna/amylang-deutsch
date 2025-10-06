@@ -8,6 +8,21 @@ const supabaseUrl = 'https://hfdjnttxavlghjfnjkms.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmZGpudHR4YXZsZ2hqZm5qa21zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk2OTQwNTIsImV4cCI6MjA3NTI3MDA1Mn0.LBLAkKzkquHvAmvFix4jIrudCVMGGjs5kfvK4l0RfIM';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+
+// AUTH CHECK
+// ===================================
+
+async function checkAuth() {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+        window.location.href = 'login.html';
+        return false;
+    }
+    
+    return true;
+}
+
 // Globale Variablen
 let students = [];
 let rescheduleRequests = [];
@@ -451,16 +466,12 @@ window.saveNewStudent = async function() {
         return;
     }
     
-    const words = ['katze', 'mango', 'ananas', 'koala', 'giraffe', 'kiwi', 'banane', 'tiger', 'panda', 'apfel'];
-    const password = words[Math.floor(Math.random() * words.length)];
-    
     try {
         const { error } = await supabase
             .from('students')
             .insert([{
                 name: name,
                 email: email,
-                password: password,
                 phone: phone,
                 mother_language: motherLanguage,
                 goals: goals,
@@ -474,7 +485,7 @@ window.saveNewStudent = async function() {
         
         if (error) throw error;
         
-        alert('Schüler erfolgreich erstellt! Passwort: ' + password);
+        alert('Schüler erfolgreich erstellt!');
         closeModal();
         await loadData();
         
@@ -715,6 +726,11 @@ window.closeModal = function() {
     currentEditHomework = null;
 };
 
+window.logout = async function() {
+    await supabase.auth.signOut();
+    window.location.href = 'login.html';
+};
+
 window.switchTab = function(tabName) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
@@ -772,8 +788,15 @@ function renderAll() {
 // INITIALISIERUNG
 // ===================================
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('DOM loaded, initializing...');
+    
+    if (!await checkAuth()) {
+        return;
+    }
+    
     loadData();
     setInterval(checkUpcomingLessons, 60000);
     checkUpcomingLessons();
+    console.log('openAddHomeworkModal defined:', typeof window.openAddHomeworkModal);
 });

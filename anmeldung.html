@@ -766,28 +766,59 @@
                 created_at: new Date().toISOString()
             };
 
-            try {
-                const { data, error } = await supabase
-                    .from('students')
-                    .insert([studentData]);
-                
-                if (error) throw error;
-
-                document.getElementById('levelText').textContent = studentData.level;
-                document.getElementById('learningTypeText').textContent = studentData.learning_type;
-                document.getElementById('studentLink').innerHTML = `
-                    <strong>Email:</strong> ${email}<br>
-                    <strong>Passwort:</strong> ${password}<br><br>
-                    <strong>Login-Link:</strong> ${window.location.origin}/schueler.html
-                `;
-
-                document.getElementById('step4').classList.remove('active');
-                document.getElementById('success').classList.add('active');
-                document.getElementById('circle4').classList.remove('active');
-                document.getElementById('text4').classList.remove('active');
-            } catch (error) {
-                alert('Fehler beim Speichern: ' + error.message);
+            
+try {
+    // 1. Auth-Account erstellen
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+            data: {
+                name: studentData.name,
+                role: 'student'
             }
+        }
+    });
+    
+    if (authError) throw authError;
+    
+    // 2. In students Tabelle eintragen
+    const { error: dbError } = await supabase
+        .from('students')
+        .insert([{
+            id: authData.user.id,
+            name: studentData.name,
+            email: email,
+            phone: studentData.phone,
+            mother_language: studentData.mother_language,
+            goals: studentData.goals,
+            level: studentData.level,
+            learning_type: studentData.learning_type,
+            standard_times: [],
+            start_date: new Date().toISOString().split('T')[0],
+            total_lessons: 0,
+            created_at: new Date().toISOString()
+        }]);
+    
+    if (dbError) throw dbError;
+
+    document.getElementById('levelText').textContent = studentData.level;
+    document.getElementById('learningTypeText').textContent = studentData.learning_type;
+    document.getElementById('studentLink').innerHTML = `
+        <strong>Email:</strong> ${email}<br>
+        <strong>Passwort:</strong> ${password}<br><br>
+        <strong>Login-Link:</strong> ${window.location.origin}/schueler.html
+    `;
+
+    document.getElementById('step4').classList.remove('active');
+    document.getElementById('success').classList.add('active');
+    document.getElementById('circle4').classList.remove('active');
+    document.getElementById('text4').classList.remove('active');
+} catch (error) {
+    alert('Fehler beim Speichern: ' + error.message);
+}
+
+            
         }
 
         function generatePassword() {
