@@ -4,8 +4,8 @@
 
 // Supabase Initialisierung
 const { createClient } = window.supabase;
-const supabaseUrl = 'https://smmspsnquuqischuhjyn.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtbXNwc25xdXVxaXNjaHVoanluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3NTQ1ODUsImV4cCI6MjA3NTMzMDU4NX0.xffqRWQYlg_25wkXMe0gU6QqkLBoFNqhjjmepPEF-xc';
+const supabaseUrl = 'https://hfdjnttxavlghjfnjkms.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmZGpudHR4YXZsZ2hqZm5qa21zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk2OTQwNTIsImV4cCI6MjA3NTI3MDA1Mn0.LBLAkKzkquHvAmvFix4jIrudCVMGGjs5kfvK4l0RfIM';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Globale Variablen
