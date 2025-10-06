@@ -440,6 +440,26 @@
                     <label>Telefon</label>
                     <input type="text" id="addStudentPhone" placeholder="+491234567890">
                 </div>
+                <div class="form-group">
+                    <label>Muttersprache</label>
+                    <input type="text" id="addStudentMotherLanguage">
+                </div>
+                <div class="form-group">
+                    <label>Ziele/Lernziele</label>
+                    <textarea id="addStudentGoals" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Vorkenntnisse</label>
+                    <select id="addStudentLevel">
+                        <option value="">Bitte wählen</option>
+                        <option value="A1">A1 - Anfänger</option>
+                        <option value="A2">A2 - Grundlagen</option>
+                        <option value="B1">B1 - Mittelstufe</option>
+                        <option value="B2">B2 - Fortgeschritten</option>
+                        <option value="C1">C1 - Sehr fortgeschritten</option>
+                        <option value="C2">C2 - Fast muttersprachlich</option>
+                    </select>
+                </div>
                 <div class="btn-group">
                     <button class="btn btn-approve" onclick="saveNewStudent()">💾 Schüler erstellen</button>
                     <button class="btn" style="background: #999; color: white;" onclick="closeModal()">Abbrechen</button>
@@ -453,9 +473,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Supabase Initialisierung - HIER IHRE DATEN EINTRAGEN
-        const supabaseUrl = 'IHR_SUPABASE_URL_HIER';
-        const supabaseKey = 'IHR_SUPABASE_ANON_KEY_HIER';
+        // Supabase Initialisierung
+        const supabaseUrl = 'https://smmspsnquuqischuhjyn.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtbXNwc25xdXVxaXNjaHVoanluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3NTQ1ODUsImV4cCI6MjA3NTMzMDU4NX0.xffqRWQYlg_25wkXMe0gU6QqkLBoFNqhjjmepPEF-xc';
         const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
         let students = [];
@@ -861,7 +881,7 @@
             }
         };
 
-        // Add New Student
+        // Add New Student - NEUE FUNKTION
         window.openAddStudentModal = function() {
             document.getElementById('addStudentModal').classList.add('active');
         };
@@ -870,6 +890,9 @@
             const name = document.getElementById('addStudentName').value.trim();
             const email = document.getElementById('addStudentEmail').value.trim();
             const phone = document.getElementById('addStudentPhone').value.trim();
+            const motherLanguage = document.getElementById('addStudentMotherLanguage').value.trim();
+            const goals = document.getElementById('addStudentGoals').value.trim();
+            const level = document.getElementById('addStudentLevel').value;
             
             if (!name || !email) {
                 alert('Bitte Name und Email ausfüllen!');
@@ -888,7 +911,12 @@
                         email: email,
                         password: password,
                         phone: phone,
+                        mother_language: motherLanguage,
+                        goals: goals,
+                        level: level,
+                        learning_type: '',
                         standard_times: [],
+                        start_date: new Date().toISOString().split('T')[0],
                         total_lessons: 0,
                         created_at: new Date().toISOString()
                     }]);
@@ -903,6 +931,9 @@
                 document.getElementById('addStudentName').value = '';
                 document.getElementById('addStudentEmail').value = '';
                 document.getElementById('addStudentPhone').value = '';
+                document.getElementById('addStudentMotherLanguage').value = '';
+                document.getElementById('addStudentGoals').value = '';
+                document.getElementById('addStudentLevel').value = '';
                 
             } catch (error) {
                 alert('Fehler: ' + error.message);
@@ -915,6 +946,14 @@
                 modal.classList.remove('active');
             });
             currentEditStudent = null;
+            
+            // Formular zurücksetzen
+            document.getElementById('addStudentName').value = '';
+            document.getElementById('addStudentEmail').value = '';
+            document.getElementById('addStudentPhone').value = '';
+            document.getElementById('addStudentMotherLanguage').value = '';
+            document.getElementById('addStudentGoals').value = '';
+            document.getElementById('addStudentLevel').value = '';
         };
 
         // Tab Switching
