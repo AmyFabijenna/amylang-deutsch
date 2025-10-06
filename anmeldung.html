@@ -618,9 +618,23 @@
                 <label class="option"><input type="radio" name="lt3" value="kinesthetic"> Mache ich Sport oder bastle etwas</label>
             </div>
 
+            <div class="question">
+                <p>4. Bei Erklärungen verstehe ich am besten...</p>
+                <label class="option"><input type="radio" name="lt4" value="visual"> Wenn ich Diagramme und Grafiken sehe</label>
+                <label class="option"><input type="radio" name="lt4" value="auditory"> Wenn mir jemand es erklärt</label>
+                <label class="option"><input type="radio" name="lt4" value="kinesthetic"> Wenn ich es selbst durchführen kann</label>
+            </div>
+
+            <div class="question">
+                <p>5. Ich merke mir Informationen am besten, wenn ich...</p>
+                <label class="option"><input type="radio" name="lt5" value="visual"> Sie aufschreibe oder in Mindmaps festhalte</label>
+                <label class="option"><input type="radio" name="lt5" value="auditory"> Darüber spreche oder sie mir vorlese</label>
+                <label class="option"><input type="radio" name="lt5" value="kinesthetic"> Sie in die Praxis umsetze</label>
+            </div>
+
             <div class="btn-container">
                 <button class="btn btn-secondary" onclick="nextStep(3)">← Zurück</button>
-                <button class="btn btn-primary" onclick="window.submitForm()">Anmeldung abschließen ✓</button>
+                <button class="btn btn-primary" onclick="submitForm()">Anmeldung abschließen ✓</button>
             </div>
         </div>
 
@@ -716,14 +730,28 @@
             const lt1 = document.querySelector('input[name="lt1"]:checked')?.value || '';
             const lt2 = document.querySelector('input[name="lt2"]:checked')?.value || '';
             const lt3 = document.querySelector('input[name="lt3"]:checked')?.value || '';
+            const lt4 = document.querySelector('input[name="lt4"]:checked')?.value || '';
+            const lt5 = document.querySelector('input[name="lt5"]:checked')?.value || '';
             
             const counts = {visual: 0, auditory: 0, kinesthetic: 0};
-            [lt1, lt2, lt3].forEach(v => { if (v) counts[v]++; });
+            [lt1, lt2, lt3, lt4, lt5].forEach(v => { if (v) counts[v]++; });
             
-            const max = Math.max(counts.visual, counts.auditory, counts.kinesthetic);
-            if (counts.visual === max) return 'Visuell';
-            if (counts.auditory === max) return 'Auditiv';
-            return 'Kinästhetisch';
+            // Sortiere nach Häufigkeit
+            const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+            
+            // Namen mapping
+            const typeNames = {
+                visual: 'Visuell',
+                auditory: 'Auditiv',
+                kinesthetic: 'Kinästhetisch'
+            };
+            
+            // Wenn zwei Typen gleich stark sind
+            if (sorted[0][1] === sorted[1][1] && sorted[0][1] > 0) {
+                return `${typeNames[sorted[0][0]]}-${typeNames[sorted[1][0]]}`;
+            }
+            
+            return typeNames[sorted[0][0]] || 'Gemischt';
         }
 
         window.submitForm = async function() {
@@ -767,6 +795,24 @@
             const words = ['katze', 'mango', 'ananas', 'koala', 'giraffe', 'kiwi', 'banane', 'tiger', 'panda', 'apfel', 'birne', 'elefant', 'zebra', 'orange', 'papaya', 'loewe', 'delfin', 'erdbeere', 'pinguin', 'affe'];
             return words[Math.floor(Math.random() * words.length)];
         }
+
+        // Randomize test answers
+        function shuffleAnswers() {
+            const questions = document.querySelectorAll('#step3 .question');
+            questions.forEach(question => {
+                const options = Array.from(question.querySelectorAll('.option'));
+                const container = question;
+                
+                // Fisher-Yates shuffle
+                for (let i = options.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    container.insertBefore(options[j], options[i]);
+                }
+            });
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', shuffleAnswers);
     </script>
 </body>
 </html>
