@@ -202,7 +202,6 @@
             transform: translateY(-2px);
         }
 
-        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -278,7 +277,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Login View -->
         <div id="loginView">
             <div class="login-box">
                 <h1>🎓 Schüler Login</h1>
@@ -297,14 +295,12 @@
             </div>
         </div>
 
-        <!-- Student Dashboard -->
         <div id="studentView" class="student-view">
             <a href="index.html" class="back-btn">← Zurück zur Hauptseite</a>
             <div class="login-box">
                 <h1 id="welcomeText">Mein Schülerbereich</h1>
                 <button class="btn btn-secondary" onclick="logout()" style="margin-bottom: 20px;">Ausloggen</button>
                 
-                <!-- Meine Termine -->
                 <div class="info-card">
                     <div class="info-title">📅 Meine Termine</div>
                     <div id="myLessons">Lade Termine...</div>
@@ -314,7 +310,6 @@
                     <div class="reschedule-info" id="rescheduleInfo"></div>
                 </div>
 
-                <!-- Hausaufgaben -->
                 <div class="info-card">
                     <div class="info-title">📝 Meine Hausaufgaben</div>
                     <div id="myHomework">Lade Hausaufgaben...</div>
@@ -323,12 +318,10 @@
                     </button>
                 </div>
 
-                <!-- Erfolgsmeldung -->
                 <div id="successMessage" class="success-message"></div>
             </div>
         </div>
 
-        <!-- Homework Detail View -->
         <div id="hwView" class="hw-view">
             <a href="#" class="back-btn" onclick="switchToDashboard()">← Zurück zum Dashboard</a>
             <div class="login-box">
@@ -347,7 +340,6 @@
         </div>
     </div>
 
-    <!-- Reschedule Modal -->
     <div class="modal" id="rescheduleModal">
         <div class="modal-content">
             <h3>🔄 Stunde verschieben</h3>
@@ -378,17 +370,16 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Supabase Initialisierung - GLEICHE WIE IN huepp.html
-        const supabaseUrl = 'IHR_SUPABASE_URL_HIER';
-        const supabaseKey = 'IHR_SUPABASE_ANON_KEY_HIER';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        const { createClient } = window.supabase;
+        const supabaseUrl = 'https://smmspsnquuqischuhjyn.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtbXNwc25xdXVxaXNjaHVoanluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3NTQ1ODUsImV4cCI6MjA3NTMzMDU4NX0.xffqRWQYlg_25wkXMe0gU6QqkLBoFNqhjjmepPEF-xc';
+        const supabase = createClient(supabaseUrl, supabaseKey);
 
         let currentStudent = null;
         let studentLessons = [];
 
         const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 
-        // Login Funktion
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -433,7 +424,6 @@
                 return;
             }
             
-            // Berechne nächste Termine für jede Zeit-Slot
             const upcomingLessons = [];
             const today = new Date();
             
@@ -441,11 +431,9 @@
                 const stdDay = timeSlot.day;
                 const [hours, minutes] = timeSlot.time.split(':');
                 
-                // Finde nächsten Termin für diesen Slot
                 let nextDate = new Date();
                 nextDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
                 
-                // Gehe zu nächstem Wochentag
                 while (nextDate.getDay() !== stdDay || nextDate < today) {
                     nextDate.setDate(nextDate.getDate() + 1);
                 }
@@ -459,7 +447,6 @@
                 });
             });
             
-            // Sortiere nach Datum
             upcomingLessons.sort((a, b) => a.date - b.date);
             studentLessons = upcomingLessons;
             
@@ -527,7 +514,6 @@
             document.getElementById('myHomework').innerHTML = html;
         }
 
-        // Update Reschedule Button basierend auf 24h Regel
         function updateRescheduleButton() {
             const btn = document.getElementById('rescheduleBtn');
             const info = document.getElementById('rescheduleInfo');
@@ -556,12 +542,10 @@
             }
         }
 
-        // Reschedule Modal
         window.openRescheduleModal = async function() {
             const select = document.getElementById('lessonToReschedule');
             select.innerHTML = '<option value="">Lade Termine...</option>';
             
-            // Fülle Dropdown mit kommenden Terminen
             studentLessons.forEach((lesson, index) => {
                 const option = document.createElement('option');
                 option.value = index;
@@ -569,7 +553,6 @@
                 select.appendChild(option);
             });
             
-            // Setze min Datum auf heute
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('newDate').min = today;
             
@@ -612,7 +595,6 @@
                 showSuccess('Verschiebungsanfrage wurde erfolgreich gesendet! Amy wird sich bald bei dir melden.');
                 closeModal('rescheduleModal');
                 
-                // Formular zurücksetzen
                 document.getElementById('newDate').value = '';
                 document.getElementById('newTime').value = '';
                 document.getElementById('rescheduleReason').value = '';
@@ -622,7 +604,6 @@
             }
         };
 
-        // Homework View
         window.switchToHomeworkView = function() {
             document.getElementById('studentView').style.display = 'none';
             document.getElementById('hwView').style.display = 'block';
@@ -633,117 +614,113 @@
         window.switchToDashboard = function() {
             document.getElementById('hwView').style.display = 'none';
             document.getElementById('studentView').style.display = 'block';
-            loadStudentData();
+            loadStudent Data();
         };
 
         async function loadDetailedHomework() {
-            const { data, error } = await supabase
-                .from('homework')
-                .select('*')
-                .eq('student_id', currentStudent.id)
-                .order('due_date', { ascending: true });
-            
-            if (error) {
-                document.getElementById('pendingHw').innerHTML = '<p>Fehler beim Laden der Hausaufgaben</p>';
-                document.getElementById('completedHw').innerHTML = '';
-                return;
-            }
-            
-            const homework = data || [];
-            const pending = homework.filter(hw => !hw.completed);
-            const completed = homework.filter(hw => hw.completed);
-            
-            // Rendere offene Hausaufgaben
-            const pendingEl = document.getElementById('pendingHw');
-            if (pending.length === 0) {
-                pendingEl.innerHTML = '<p style="text-align: center; color: #8B4513;">🎉 Keine offenen Hausaufgaben!</p>';
-            } else {
-                pendingEl.innerHTML = pending.map(hw => createHwCard(hw, false)).join('');
-            }
-            
-            // Rendere erledigte Hausaufgaben
-            const completedEl = document.getElementById('completedHw');
-            if (completed.length === 0) {
-                completedEl.innerHTML = '<p style="text-align: center; color: #8B4513;">Noch keine erledigten Hausaufgaben</p>';
-            } else {
-                completedEl.innerHTML = completed.map(hw => createHwCard(hw, true)).join('');
-            }
+        const { data, error } = await supabase
+            .from('homework')
+            .select('*')
+            .eq('student_id', currentStudent.id)
+            .order('due_date', { ascending: true });
+        
+        if (error) {
+            document.getElementById('pendingHw').innerHTML = '<p>Fehler beim Laden der Hausaufgaben</p>';
+            document.getElementById('completedHw').innerHTML = '';
+            return;
         }
+        
+        const homework = data || [];
+        const pending = homework.filter(hw => !hw.completed);
+        const completed = homework.filter(hw => hw.completed);
+        
+        const pendingEl = document.getElementById('pendingHw');
+        if (pending.length === 0) {
+            pendingEl.innerHTML = '<p style="text-align: center; color: #8B4513;">🎉 Keine offenen Hausaufgaben!</p>';
+        } else {
+            pendingEl.innerHTML = pending.map(hw => createHwCard(hw, false)).join('');
+        }
+        
+        const completedEl = document.getElementById('completedHw');
+        if (completed.length === 0) {
+            completedEl.innerHTML = '<p style="text-align: center; color: #8B4513;">Noch keine erledigten Hausaufgaben</p>';
+        } else {
+            completedEl.innerHTML = completed.map(hw => createHwCard(hw, true)).join('');
+        }
+    }
 
-        function createHwCard(hw, isCompleted) {
-            const typeText = hw.type === 'text' ? 'Text-Antwort' : hw.type === 'checkbox' ? 'Abhaken' : 'Foto-Upload';
-            const dueDate = new Date(hw.due_date);
-            const today = new Date();
-            const isOverdue = !isCompleted && dueDate < today;
-            
-            return `
-                <div class="hw-card ${isCompleted ? 'completed' : ''}">
-                    <div style="display: flex; justify-content: space-between; align-items: start;">
-                        <div class="hw-title">${hw.title} ${isOverdue ? '⚠️' : ''}</div>
-                        <div style="font-size: 1.5em;">${isCompleted ? '✅' : '⭕'}</div>
-                    </div>
-                    ${hw.description ? `<p style="color: #8B4513; margin: 10px 0;">${hw.description}</p>` : ''}
-                    <div style="font-size: 0.9em; color: #666; margin: 10px 0;">
-                        📅 Bis: ${dueDate.toLocaleDateString('de-DE')} | 📝 ${typeText}
-                        ${isOverdue ? '<br><span style="color: red;">⚠️ Überfällig!</span>' : ''}
-                    </div>
-                    ${isCompleted ? 
-                        (hw.response ? `<div style="background: rgba(144,238,144,0.3); padding: 12px; border-radius: 8px; margin-top: 10px;"><strong>Deine Antwort:</strong> ${hw.response}</div>` : '') :
-                        createResponseSection(hw)
-                    }
+    function createHwCard(hw, isCompleted) {
+        const typeText = hw.type === 'text' ? 'Text-Antwort' : hw.type === 'checkbox' ? 'Abhaken' : 'Foto-Upload';
+        const dueDate = new Date(hw.due_date);
+        const today = new Date();
+        const isOverdue = !isCompleted && dueDate < today;
+        
+        return `
+            <div class="hw-card ${isCompleted ? 'completed' : ''}">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div class="hw-title">${hw.title} ${isOverdue ? '⚠️' : ''}</div>
+                    <div style="font-size: 1.5em;">${isCompleted ? '✅' : '⭕'}</div>
                 </div>
+                ${hw.description ? `<p style="color: #8B4513; margin: 10px 0;">${hw.description}</p>` : ''}
+                <div style="font-size: 0.9em; color: #666; margin: 10px 0;">
+                    📅 Bis: ${dueDate.toLocaleDateString('de-DE')} | 📝 ${typeText}
+                    ${isOverdue ? '<br><span style="color: red;">⚠️ Überfällig!</span>' : ''}
+                </div>
+                ${isCompleted ? 
+                    (hw.response ? `<div style="background: rgba(144,238,144,0.3); padding: 12px; border-radius: 8px; margin-top: 10px;"><strong>Deine Antwort:</strong> ${hw.response}</div>` : '') :
+                    createResponseSection(hw)
+                }
+            </div>
+        `;
+    }
+
+    function createResponseSection(hw) {
+        if (hw.type === 'text') {
+            return `
+                <textarea id="response-${hw.id}" placeholder="Schreibe deine Antwort hier..."></textarea>
+                <button class="btn" style="margin-top: 10px;" onclick="submitHomeworkResponse('${hw.id}', 'text')">
+                    Antwort absenden
+                </button>
+            `;
+        } else if (hw.type === 'checkbox') {
+            return `
+                <button class="btn" style="margin-top: 10px;" onclick="submitHomeworkResponse('${hw.id}', 'checkbox')">
+                    Als erledigt markieren
+                </button>
+            `;
+        } else if (hw.type === 'photo') {
+            return `
+                <input type="file" id="photo-${hw.id}" accept="image/*" style="margin-top: 10px;">
+                <button class="btn" style="margin-top: 10px;" onclick="submitHomeworkResponse('${hw.id}', 'photo')">
+                    Foto hochladen
+                </button>
             `;
         }
+        return '';
+    }
 
-        function createResponseSection(hw) {
-            if (hw.type === 'text') {
-                return `
-                    <textarea id="response-${hw.id}" placeholder="Schreibe deine Antwort hier..."></textarea>
-                    <button class="btn" style="margin-top: 10px;" onclick="submitHomeworkResponse('${hw.id}', 'text')">
-                        Antwort absenden
-                    </button>
-                `;
-            } else if (hw.type === 'checkbox') {
-                return `
-                    <button class="btn" style="margin-top: 10px;" onclick="submitHomeworkResponse('${hw.id}', 'checkbox')">
-                        Als erledigt markieren
-                    </button>
-                `;
-            } else if (hw.type === 'photo') {
-                return `
-                    <input type="file" id="photo-${hw.id}" accept="image/*" style="margin-top: 10px;">
-                    <button class="btn" style="margin-top: 10px;" onclick="submitHomeworkResponse('${hw.id}', 'photo')">
-                        Foto hochladen
-                    </button>
-                `;
+    window.submitHomeworkResponse = async function(hwId, type) {
+        let response = '';
+        
+        if (type === 'text') {
+            response = document.getElementById(`response-${hwId}`).value.trim();
+            if (!response) {
+                alert('Bitte schreibe eine Antwort.');
+                return;
             }
-            return '';
+        } else if (type === 'checkbox') {
+            response = 'Erledigt ✓';
+        } else if (type === 'photo') {
+            const fileInput = document.getElementById(`photo-${hwId}`);
+            if (!fileInput.files[0]) {
+                alert('Bitte wähle ein Foto aus.');
+                return;
+            }
+            response = `Foto hochgeladen: ${fileInput.files[0].name}`;
         }
 
-        window.submitHomeworkResponse = async function(hwId, type) {
-            let response = '';
-            
-            if (type === 'text') {
-                response = document.getElementById(`response-${hwId}`).value.trim();
-                if (!response) {
-                    alert('Bitte schreibe eine Antwort.');
-                    return;
-                }
-            } else if (type === 'checkbox') {
-                response = 'Erledigt ✓';
-            } else if (type === 'photo') {
-                const fileInput = document.getElementById(`photo-${hwId}`);
-                if (!fileInput.files[0]) {
-                    alert('Bitte wähle ein Foto aus.');
-                    return;
-                }
-                response = `Foto hochgeladen: ${fileInput.files[0].name}`;
-                // Hier könnte man das Foto tatsächlich hochladen
-            }
-
-            try {
-                const { error } = await supabase
-                    .from('homework')
+        try {
+            const { error } = await supabase .from('homework')
                     .update({
                         completed: true,
                         response: response,
@@ -762,7 +739,6 @@
             }
         };
 
-        // Hilfsfunktionen
         function showError(message) {
             const errorEl = document.getElementById('errorMsg');
             errorEl.textContent = message;
@@ -789,15 +765,15 @@
             document.getElementById('errorMsg').style.display = 'none';
         };
 
-        // Automatische Updates alle 2 Minuten
         setInterval(() => {
             if (currentStudent) {
                 updateRescheduleButton();
             }
         }, 120000);
 
-        // Initial Reschedule Button Check
         setTimeout(updateRescheduleButton, 1000);
     </script>
 </body>
 </html>
+
+

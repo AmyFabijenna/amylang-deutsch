@@ -661,21 +661,13 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBU3231QacwG-xey5KMyM9roQ3ZkpQ6bCE",
-            authDomain: "amy-lang---huepp.firebaseapp.com",
-            projectId: "amy-lang---huepp",
-            storageBucket: "amy-lang---huepp.firebasestorage.app",
-            messagingSenderId: "54316876573",
-            appId: "1:54316876573:web:3e3788a6db18cdab5ed7f4"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Supabase Initialisierung
+        const { createClient } = window.supabase;
+        const supabaseUrl = 'https://smmspsnquuqischuhjyn.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtbXNwc25xdXVxaXNjaHVoanluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3NTQ1ODUsImV4cCI6MjA3NTMzMDU4NX0.xffqRWQYlg_25wkXMe0gU6QqkLBoFNqhjjmepPEF-xc';
+        const supabase = createClient(supabaseUrl, supabaseKey);
 
         let currentStep = 1;
         let testScore = 0;
@@ -735,10 +727,8 @@
             
             const counts = {visual: 0, auditory: 0, kinesthetic: 0};
             [lt1, lt2, lt3, lt4, lt5].forEach(v => { if (v) counts[v]++; });
-            
+
             // Sortiere nach Häufigkeit
-
-
             const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
             
             // Namen mapping
@@ -759,32 +749,36 @@
         window.submitForm = async function() {
             const email = document.getElementById('email').value;
             const password = generatePassword();
-            const studentId = 's' + Date.now().toString().slice(-8);
-            const studentLink = `schueler.html?s=${studentId}`;
             
             const studentData = {
                 name: document.getElementById('name').value,
                 email: email,
                 password: password,
                 phone: document.getElementById('phone').value,
-                motherLanguage: document.getElementById('motherLanguage').value,
+                mother_language: document.getElementById('motherLanguage').value,
                 goals: document.getElementById('goals').value,
-                priorKnowledge: document.getElementById('priorKnowledge').value,
+                prior_knowledge: document.getElementById('priorKnowledge').value,
                 level: getLevel(testScore),
-                learningType: getLearningType(),
-                link: studentLink,
-                createdAt: new Date().toISOString()
+                learning_type: getLearningType(),
+                standard_times: [],
+                start_date: new Date().toISOString().split('T')[0],
+                total_lessons: 0,
+                created_at: new Date().toISOString()
             };
 
             try {
-                await addDoc(collection(db, 'students'), studentData);
+                const { data, error } = await supabase
+                    .from('students')
+                    .insert([studentData]);
+                
+                if (error) throw error;
 
                 document.getElementById('levelText').textContent = studentData.level;
-                document.getElementById('learningTypeText').textContent = studentData.learningType;
+                document.getElementById('learningTypeText').textContent = studentData.learning_type;
                 document.getElementById('studentLink').innerHTML = `
                     <strong>Email:</strong> ${email}<br>
                     <strong>Passwort:</strong> ${password}<br><br>
-                    <strong>Login-Link:</strong> ${window.location.origin}/${studentLink}
+                    <strong>Login-Link:</strong> ${window.location.origin}/schueler.html
                 `;
 
                 document.getElementById('step4').classList.remove('active');
@@ -821,5 +815,3 @@
     </script>
 </body>
 </html>
-
-
