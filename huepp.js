@@ -580,7 +580,6 @@ window.saveNewHomework = async function() {
                 deadline: deadline,
                 submission_type: submissionType,
                 custom_submission_text: submissionType === 'custom' ? customText : null,
-                type: submissionType, // Für Kompatibilität mit schueler.html
                 completed: false,
                 is_read: false,
                 last_updated: new Date().toISOString(),
