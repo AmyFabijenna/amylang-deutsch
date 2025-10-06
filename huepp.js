@@ -1,5 +1,5 @@
 // ===================================
-// HÜPP.JS - Ausgelagertes JavaScript
+// HÜPP.JS - Vollständig überarbeitet
 // ===================================
 
 // Supabase Initialisierung
@@ -13,11 +13,15 @@ let students = [];
 let rescheduleRequests = [];
 let homework = [];
 let currentEditStudent = null;
+let currentEditHomework = null;
 let whatsappLink = '';
 
 const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 
-// Lade Daten aus Supabase
+// ===================================
+// DATEN LADEN
+// ===================================
+
 async function loadData() {
     await loadStudents();
     await loadRescheduleRequests();
@@ -56,7 +60,7 @@ async function loadHomework() {
     const { data, error } = await supabase
         .from('homework')
         .select('*')
-        .order('due_date', { ascending: true });
+        .order('deadline', { ascending: true });
     
     if (error) {
         console.error('Fehler beim Laden der Hausaufgaben:', error);
@@ -65,7 +69,10 @@ async function loadHomework() {
     homework = data || [];
 }
 
-// Berechne nächsten Termin (unterstützt mehrere wöchentliche Termine)
+// ===================================
+// KALENDER-FUNKTIONEN
+// ===================================
+
 function getNextLesson(student) {
     if (!student.standard_times || student.standard_times.length === 0) return null;
     
@@ -95,7 +102,25 @@ function getNextLesson(student) {
     return allUpcomingLessons[0];
 }
 
-// Render Next Student Widget
+// Berechne verstrichene Einheiten seit Startdatum
+function calculateCompletedLessons(student) {
+    if (!student.start_date || !student.standard_times || student.standard_times.length === 0) {
+        return 0;
+    }
+    
+    const startDate = new Date(student.start_date);
+    const today = new Date();
+    
+    // Nur volle Wochen zählen
+    const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+    const weeksPassed = Math.floor((today - startDate) / msPerWeek);
+    
+    // Anzahl Termine pro Woche
+    const lessonsPerWeek = student.standard_times.length;
+    
+    return weeksPassed * lessonsPerWeek;
+}
+
 function renderNextStudent() {
     const studentsWithLessons = students
         .filter(s => s.standard_times && s.standard_times.length > 0)
@@ -112,12 +137,15 @@ function renderNextStudent() {
     }
     
     const nextLesson = nextStudent.nextLesson;
+    const completedLessons = calculateCompletedLessons(nextStudent);
+    
     widget.innerHTML = `
         <div class="student-info">${nextStudent.name}</div>
         <div class="lesson-details">
             <div>📅 ${nextLesson.date.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit' })}</div>
             <div>🕐 ${nextLesson.time} Uhr</div>
             <div>⏱️ ${nextLesson.duration} Min</div>
+            <div>📚 ${completedLessons} Einheiten</div>
         </div>
         <div class="whatsapp-sender">
             <input type="text" id="whatsappLinkInput" placeholder="Link hier einfügen (z.B. kMeet-Link)..." value="${whatsappLink}">
@@ -128,7 +156,6 @@ function renderNextStudent() {
     `;
 }
 
-// WhatsApp Link senden
 window.sendWhatsAppLink = function(phone, name) {
     const link = document.getElementById('whatsappLinkInput').value.trim();
     if (!link) {
@@ -149,7 +176,6 @@ window.sendWhatsAppLink = function(phone, name) {
     document.getElementById('whatsappLinkInput').value = '';
 };
 
-// Render Today's Lessons
 function renderTodayLessons() {
     const today = new Date();
     const todayDay = today.getDay();
@@ -186,25 +212,31 @@ function renderTodayLessons() {
         return;
     }
     
-    container.innerHTML = todayLessons.map(lesson => `
-        <div class="student-card">
-            <div class="student-card-header">
-                <div>
-                    <div class="student-name">${lesson.student.name}</div>
-                    <div class="student-details">
-                        🕐 ${lesson.time} Uhr | ⏱️ ${lesson.duration} Min
+    container.innerHTML = todayLessons.map(lesson => {
+        const completedLessons = calculateCompletedLessons(lesson.student);
+        return `
+            <div class="student-card">
+                <div style="display: flex; justify-content: space-between;">
+                    <div>
+                        <div class="student-name">${lesson.student.name}</div>
+                        <div class="student-details">
+                            🕐 ${lesson.time} Uhr | ⏱️ ${lesson.duration} Min
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="color: #666; font-size: 0.9em;">Seit: ${lesson.student.start_date || 'k.A.'}</div>
+                        <div style="color: #8B4513; font-weight: bold;">📚 ${completedLessons} Einheiten</div>
                     </div>
                 </div>
-                <div style="text-align: right;">
-                    <div style="color: #666; font-size: 0.9em;">Seit: ${lesson.student.start_date || 'k.A.'}</div>
-                    <div style="color: #8B4513; font-weight: bold;">📚 ${lesson.student.total_lessons || 0} Stunden</div>
-                </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
-// Render Requests
+// ===================================
+// ANFRAGEN
+// ===================================
+
 function renderRequests() {
     const pending = rescheduleRequests.filter(r => r.status === 'pending');
     const container = document.getElementById('requestsList');
@@ -218,7 +250,7 @@ function renderRequests() {
     }
     
     container.innerHTML = pending.map(r => `
-        <div class="student-card request-card">
+        <div class="student-card" style="border-left-color: #FFA500;">
             <div class="student-name">
                 ${r.student_name}
                 <span class="badge badge-pending">Ausstehend</span>
@@ -227,15 +259,12 @@ function renderRequests() {
                 <div><strong>Von:</strong> ${new Date(r.original_date).toLocaleDateString('de-DE')} ${r.original_time} Uhr</div>
                 <div><strong>Nach:</strong> ${r.requested_date} ${r.requested_time} Uhr</div>
                 <div><strong>Grund:</strong> ${r.reason || 'Kein Grund angegeben'}</div>
-                <div style="font-size: 0.9em; color: #666; margin-top: 5px;">
-                    Angefragt am: ${new Date(r.request_date).toLocaleString('de-DE')}
-                </div>
             </div>
-            <div class="btn-group" style="margin-top: 15px;">
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
                 <button class="btn btn-approve" onclick="handleRequest('${r.id}', true)">
                     ✓ Genehmigen
                 </button>
-                <button class="btn btn-reject" onclick="handleRequest('${r.id}', false)">
+                <button class="btn" style="background: #f44336; color: white;" onclick="handleRequest('${r.id}', false)">
                     ✗ Ablehnen
                 </button>
             </div>
@@ -243,7 +272,6 @@ function renderRequests() {
     `).join('');
 }
 
-// Handle Reschedule Request
 window.handleRequest = async function(requestId, approve) {
     try {
         const { error } = await supabase
@@ -264,17 +292,21 @@ window.handleRequest = async function(requestId, approve) {
     }
 };
 
-// Render Students List
+// ===================================
+// SCHÜLER-VERWALTUNG
+// ===================================
+
 function renderStudentsList() {
     const container = document.getElementById('studentsList');
     
     container.innerHTML = students.map(s => {
         const nextLesson = getNextLesson(s);
         const allTimes = s.standard_times || [];
+        const completedLessons = calculateCompletedLessons(s);
         
         return `
             <div class="student-card">
-                <div class="student-card-header">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
                     <div style="flex: 1;">
                         <div class="student-name">${s.name}</div>
                         <div class="student-details">
@@ -290,7 +322,7 @@ function renderStudentsList() {
                                 </div>
                             ` : '<div>⚠️ Noch keine Termine festgelegt</div>'}
                             <div style="margin-top: 5px;">📞 ${s.phone || 'Keine Telefonnummer'}</div>
-                            <div style="margin-top: 5px;">📚 Beginn: ${s.start_date || 'k.A.'} | Gesamt: ${s.total_lessons || 0} Stunden</div>
+                            <div style="margin-top: 5px;">📚 Beginn: ${s.start_date || 'k.A.'} | Einheiten: ${completedLessons}</div>
                         </div>
                     </div>
                     <button class="btn btn-edit" onclick="openEditModal('${s.id}')">
@@ -302,7 +334,6 @@ function renderStudentsList() {
     }).join('');
 }
 
-// Open Edit Modal
 window.openEditModal = function(studentId) {
     const student = students.find(s => s.id == studentId);
     if (!student) return;
@@ -327,7 +358,6 @@ window.openEditModal = function(studentId) {
     document.getElementById('editStudentModal').classList.add('active');
 };
 
-// Add Time Slot to Modal
 function addTimeSlotToModal(timeSlot = null) {
     const container = document.getElementById('timeSlotsContainer');
     const timeSlotDiv = document.createElement('div');
@@ -353,7 +383,7 @@ function addTimeSlotToModal(timeSlot = null) {
             <label>Dauer (Minuten)</label>
             <input type="number" class="time-duration" value="${timeSlot?.duration || 60}" min="15" step="15">
         </div>
-        ${container.children.length > 0 ? `<button type="button" class="remove-time" onclick="this.parentElement.remove()">❌ Entfernen</button>` : ''}
+        ${container.children.length > 0 ? `<button type="button" class="remove-time" onclick="this.parentElement.remove()">✖ Entfernen</button>` : ''}
     `;
     
     if (timeSlot) {
@@ -367,7 +397,6 @@ window.addTimeSlot = function() {
     addTimeSlotToModal();
 };
 
-// Save Student Edit
 window.saveStudentEdit = async function() {
     if (!currentEditStudent) return;
     
@@ -405,7 +434,6 @@ window.saveStudentEdit = async function() {
     }
 };
 
-// Add New Student
 window.openAddStudentModal = function() {
     document.getElementById('addStudentModal').classList.add('active');
 };
@@ -462,24 +490,10 @@ window.saveNewStudent = async function() {
     }
 };
 
-// Close Modal
-window.closeModal = function() {
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.classList.remove('active');
-    });
-    currentEditStudent = null;
-};
+// ===================================
+// HAUSAUFGABEN-VERWALTUNG (NEU!)
+// ===================================
 
-// Tab Switching
-window.switchTab = function(tabName) {
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
-    
-    event.target.classList.add('active');
-    document.getElementById(tabName + '-section').classList.add('active');
-};
-
-// Render Homework Management
 function renderHomeworkManagement() {
     const container = document.getElementById('hwStudentsGrid');
     
@@ -491,21 +505,229 @@ function renderHomeworkManagement() {
     container.innerHTML = students.map(student => {
         const studentHomework = homework.filter(hw => hw.student_id === student.id);
         const pending = studentHomework.filter(hw => !hw.completed);
-        const completed = studentHomework.filter(hw => hw.completed);
+        const hasUnread = studentHomework.some(hw => !hw.is_read);
         
         return `
-            <div class="student-card">
+            <div class="hw-student-card">
+                ${hasUnread ? '<div class="hw-status-indicator unread" title="Ungelesene Hausaufgaben"></div>' : '<div class="hw-status-indicator read"></div>'}
                 <div class="student-name">${student.name}</div>
                 <div class="student-details">
-                    <div>📝 ${pending.length} offene Hausaufgaben</div>
-                    <div>✅ ${completed.length} erledigt</div>
+                    📝 ${pending.length} offene | ✅ ${studentHomework.length - pending.length} erledigt
+                </div>
+                
+                <div class="hw-list">
+                    ${studentHomework.length === 0 ? 
+                        '<p style="color: #666; font-style: italic;">Keine Hausaufgaben</p>' :
+                        studentHomework.slice(0, 3).map(hw => `
+                            <div class="hw-item" onclick="openEditHomeworkModal('${hw.id}')">
+                                <div>
+                                    <div class="hw-item-title">${hw.title}</div>
+                                    <div class="hw-item-meta">
+                                        📅 ${new Date(hw.deadline).toLocaleDateString('de-DE')} 
+                                        ${hw.completed ? '| ✅ Erledigt' : ''}
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="read-badge ${hw.is_read ? 'read' : ''}">
+                                        ${hw.is_read ? '👁️ Gelesen' : '🔴 Ungelesen'}
+                                    </span>
+                                </div>
+                            </div>
+                        `).join('')
+                    }
+                    ${studentHomework.length > 3 ? `<p style="color: #666; font-size: 0.9em; margin-top: 10px;">... und ${studentHomework.length - 3} weitere</p>` : ''}
                 </div>
             </div>
         `;
     }).join('');
 }
 
-// 30-Min Erinnerung
+window.openAddHomeworkModal = function() {
+    // Schüler-Dropdown füllen
+    const select = document.getElementById('hwStudentSelect');
+    select.innerHTML = '<option value="">Bitte wählen</option>' + 
+        students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+    
+    document.getElementById('addHomeworkModal').classList.add('active');
+};
+
+window.toggleCustomSubmission = function() {
+    const type = document.getElementById('hwSubmissionType').value;
+    const customGroup = document.getElementById('customSubmissionGroup');
+    customGroup.style.display = type === 'custom' ? 'block' : 'none';
+};
+
+window.saveNewHomework = async function() {
+    const studentId = document.getElementById('hwStudentSelect').value;
+    const title = document.getElementById('hwTitle').value.trim();
+    const description = document.getElementById('hwDescription').value.trim();
+    const deadline = document.getElementById('hwDeadline').value;
+    const submissionType = document.getElementById('hwSubmissionType').value;
+    const customText = document.getElementById('hwCustomSubmission').value.trim();
+    
+    if (!studentId || !title || !deadline) {
+        alert('Bitte alle Pflichtfelder ausfüllen!');
+        return;
+    }
+    
+    try {
+        const { error } = await supabase
+            .from('homework')
+            .insert([{
+                student_id: studentId,
+                title: title,
+                description: description,
+                deadline: deadline,
+                submission_type: submissionType,
+                custom_submission_text: submissionType === 'custom' ? customText : null,
+                type: submissionType, // Für Kompatibilität mit schueler.html
+                completed: false,
+                is_read: false,
+                last_updated: new Date().toISOString(),
+                created_at: new Date().toISOString()
+            }]);
+        
+        if (error) throw error;
+        
+        alert('Hausaufgabe erfolgreich erstellt!');
+        closeModal();
+        await loadHomework();
+        renderHomeworkManagement();
+        
+        // Formular leeren
+        document.getElementById('hwStudentSelect').value = '';
+        document.getElementById('hwTitle').value = '';
+        document.getElementById('hwDescription').value = '';
+        document.getElementById('hwDeadline').value = '';
+        document.getElementById('hwSubmissionType').value = 'text';
+        document.getElementById('hwCustomSubmission').value = '';
+        document.getElementById('customSubmissionGroup').style.display = 'none';
+        
+    } catch (error) {
+        alert('Fehler: ' + error.message);
+    }
+};
+
+window.openEditHomeworkModal = async function(homeworkId) {
+    const hw = homework.find(h => h.id === homeworkId);
+    if (!hw) return;
+    
+    currentEditHomework = homeworkId;
+    
+    // Felder füllen
+    document.getElementById('editHwTitle').value = hw.title;
+    document.getElementById('editHwDescription').value = hw.description || '';
+    document.getElementById('editHwDeadline').value = hw.deadline.slice(0, 16); // Format für datetime-local
+    document.getElementById('editHwSubmissionType').value = hw.submission_type;
+    document.getElementById('editHwCustomSubmission').value = hw.custom_submission_text || '';
+    
+    toggleEditCustomSubmission();
+    
+    // Als gelesen markieren (automatisch beim Öffnen durch Trainer)
+    if (!hw.is_read) {
+        await supabase
+            .from('homework')
+            .update({ is_read: true })
+            .eq('id', homeworkId);
+    }
+    
+    document.getElementById('editHomeworkModal').classList.add('active');
+};
+
+window.toggleEditCustomSubmission = function() {
+    const type = document.getElementById('editHwSubmissionType').value;
+    const customGroup = document.getElementById('editCustomSubmissionGroup');
+    customGroup.style.display = type === 'custom' ? 'block' : 'none';
+};
+
+window.saveEditedHomework = async function() {
+    if (!currentEditHomework) return;
+    
+    const title = document.getElementById('editHwTitle').value.trim();
+    const description = document.getElementById('editHwDescription').value.trim();
+    const deadline = document.getElementById('editHwDeadline').value;
+    const submissionType = document.getElementById('editHwSubmissionType').value;
+    const customText = document.getElementById('editHwCustomSubmission').value.trim();
+    
+    if (!title || !deadline) {
+        alert('Bitte alle Pflichtfelder ausfüllen!');
+        return;
+    }
+    
+    try {
+        const { error } = await supabase
+            .from('homework')
+            .update({
+                title: title,
+                description: description,
+                deadline: deadline,
+                submission_type: submissionType,
+                custom_submission_text: submissionType === 'custom' ? customText : null,
+                type: submissionType,
+                is_read: false, // Zurücksetzen bei Änderung
+                last_updated: new Date().toISOString()
+            })
+            .eq('id', currentEditHomework);
+        
+        if (error) throw error;
+        
+        alert('Hausaufgabe aktualisiert! Status wurde auf "ungelesen" zurückgesetzt.');
+        closeModal();
+        await loadHomework();
+        renderHomeworkManagement();
+        
+    } catch (error) {
+        alert('Fehler: ' + error.message);
+    }
+};
+
+window.deleteHomework = async function() {
+    if (!currentEditHomework) return;
+    
+    if (!confirm('Hausaufgabe wirklich löschen?')) return;
+    
+    try {
+        const { error } = await supabase
+            .from('homework')
+            .delete()
+            .eq('id', currentEditHomework);
+        
+        if (error) throw error;
+        
+        alert('Hausaufgabe gelöscht!');
+        closeModal();
+        await loadHomework();
+        renderHomeworkManagement();
+        
+    } catch (error) {
+        alert('Fehler: ' + error.message);
+    }
+};
+
+// ===================================
+// MODALS & TABS
+// ===================================
+
+window.closeModal = function() {
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.classList.remove('active');
+    });
+    currentEditStudent = null;
+    currentEditHomework = null;
+};
+
+window.switchTab = function(tabName) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+    
+    event.target.classList.add('active');
+    document.getElementById(tabName + '-section').classList.add('active');
+};
+
+// ===================================
+// 30-MIN ERINNERUNG
+// ===================================
+
 function checkUpcomingLessons() {
     const now = new Date();
     const in30Min = new Date(now.getTime() + 30 * 60000);
@@ -534,7 +756,10 @@ function showNotification(student) {
     }, 10000);
 }
 
-// Render All
+// ===================================
+// RENDER ALL
+// ===================================
+
 function renderAll() {
     renderNextStudent();
     renderTodayLessons();
@@ -543,7 +768,11 @@ function renderAll() {
     renderHomeworkManagement();
 }
 
-// Initialisierung
+// ===================================
+
+// INITIALISIERUNG
+// ===================================
+
 document.addEventListener('DOMContentLoaded', function() {
     loadData();
     setInterval(checkUpcomingLessons, 60000);

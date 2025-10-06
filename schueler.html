@@ -160,11 +160,28 @@
             padding: 20px;
             margin-bottom: 20px;
             border-left: 4px solid #FF69B4;
+            position: relative;
         }
 
         .hw-card.completed {
             border-left-color: #90EE90;
             opacity: 0.7;
+        }
+
+        /* Gelesen-Status Indikator */
+        .hw-card::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #f44336;
+        }
+
+        .hw-card.read::before {
+            background: #90EE90;
         }
 
         .hw-title {
@@ -241,30 +258,6 @@
             flex: 1;
         }
 
-        .time-slot {
-            background: rgba(139, 69, 19, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            border: 1px solid rgba(139, 69, 19, 0.2);
-        }
-
-        .time-slot-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .day-badge {
-            background: #FF69B4;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.9em;
-            font-weight: bold;
-        }
-
         .success-message {
             background: rgba(144, 238, 144, 0.3);
             color: #8B4513;
@@ -272,6 +265,40 @@
             border-radius: 10px;
             margin: 10px 0;
             display: none;
+        }
+
+        /* Filter Toggle */
+        .filter-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid #FF69B4;
+            background: rgba(255, 255, 255, 0.5);
+            color: #8B4513;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: #FF69B4;
+            color: white;
+        }
+
+        .submission-type-badge {
+            display: inline-block;
+            background: rgba(139, 69, 19, 0.1);
+            color: #8B4513;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            margin-top: 8px;
         }
     </style>
 </head>
@@ -323,19 +350,17 @@
         </div>
 
         <div id="hwView" class="hw-view">
-            <a href="#" class="back-btn" onclick="switchToDashboard()">← Zurück zum Dashboard</a>
+            <a href="#" class="back-btn" onclick="switchToDashboard(); return false;">← Zurück zum Dashboard</a>
             <div class="login-box">
                 <h1 id="hwWelcomeText">Meine Hausübungen</h1>
                 
-                <h2 style="color: #8B4513; margin: 20px 0;">📝 Offene Hausübungen</h2>
-                <div id="pendingHw">
-                    <p style="text-align: center; color: #8B4513;">Lade...</p>
+                <div class="filter-toggle">
+                    <button class="filter-btn active" onclick="filterHomework('all')">Alle</button>
+                    <button class="filter-btn" onclick="filterHomework('pending')">Offen</button>
+                    <button class="filter-btn" onclick="filterHomework('completed')">Erledigt</button>
                 </div>
-
-                <h2 style="color: #8B4513; margin: 20px 0;">✅ Erledigt</h2>
-                <div id="completedHw">
-                    <p style="text-align: center; color: #8B4513;">Keine erledigten Hausübungen</p>
-                </div>
+                
+                <div id="homeworkContainer"></div>
             </div>
         </div>
     </div>
@@ -345,17 +370,17 @@
             <h3>🔄 Stunde verschieben</h3>
             <div class="form-group">
                 <label>Welche Stunde möchtest du verschieben?</label>
-                <select id="lessonToReschedule" class="form-control">
+                <select id="lessonToReschedule" style="width: 100%; padding: 10px; border-radius: 10px;">
                     <option value="">Lade Termine...</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>Neues Datum *</label>
-                <input type="date" id="newDate" required>
+                <input type="date" id="newDate" required style="width: 100%; padding: 10px; border-radius: 10px;">
             </div>
             <div class="form-group">
                 <label>Neue Uhrzeit *</label>
-                <input type="time" id="newTime" required>
+                <input type="time" id="newTime" required style="width: 100%; padding: 10px; border-radius: 10px;">
             </div>
             <div class="form-group">
                 <label>Grund für die Verschiebung</label>
@@ -371,12 +396,14 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const { createClient } = window.supabase;
-        const supabaseUrl = 'https://smmspsnquuqischuhjyn.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtbXNwc25xdXVxaXNjaHVoanluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3NTQ1ODUsImV4cCI6MjA3NTMzMDU4NX0.xffqRWQYlg_25wkXMe0gU6QqkLBoFNqhjjmepPEF-xc';
+        const supabaseUrl = 'https://hfdjnttxavlghjfnjkms.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmZGpudHR4YXZsZ2hqZm5qa21zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk2OTQwNTIsImV4cCI6MjA3NTI3MDA1Mn0.LBLAkKzkquHvAmvFix4jIrudCVMGGjs5kfvK4l0RfIM';
         const supabase = createClient(supabaseUrl, supabaseKey);
 
         let currentStudent = null;
         let studentLessons = [];
+        let currentHomework = [];
+        let currentFilter = 'all';
 
         const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 
@@ -477,28 +504,35 @@
                 .from('homework')
                 .select('*')
                 .eq('student_id', currentStudent.id)
-                .order('due_date', { ascending: true });
+                .order('deadline', { ascending: true });
             
             if (error || !data || data.length === 0) {
                 document.getElementById('myHomework').innerHTML = '<p>🎉 Aktuell keine Hausaufgaben!</p>';
+                currentHomework = [];
                 return;
             }
             
+            currentHomework = data;
             const pending = data.filter(hw => !hw.completed);
             const completed = data.filter(hw => hw.completed);
+            const unread = data.filter(hw => !hw.is_read);
             
             let html = '';
+            
+            if (unread.length > 0) {
+                html += `<p style="color: #f44336; font-weight: bold;">🔴 ${unread.length} neue/geänderte Hausaufgabe(n)</p>`;
+            }
             
             if (pending.length > 0) {
                 html += `<p><strong>${pending.length} offene Hausaufgabe(n):</strong></p>`;
                 pending.slice(0, 3).forEach(hw => {
-                    const dueDate = new Date(hw.due_date);
+                    const deadline = new Date(hw.deadline);
                     const today = new Date();
-                    const isOverdue = dueDate < today;
+                    const isOverdue = deadline < today;
                     
                     html += `<div style="margin: 5px 0; padding: 8px; background: ${isOverdue ? 'rgba(255,0,0,0.1)' : 'rgba(255,165,0,0.1)'}; border-radius: 8px;">
-                        <strong>${hw.title}</strong><br>
-                        📅 Bis: ${dueDate.toLocaleDateString('de-DE')} ${isOverdue ? '⚠️ Überfällig!' : ''}
+                        <strong>${hw.title}</strong> ${!hw.is_read ? '🔴' : ''}<br>
+                        📅 Bis: ${deadline.toLocaleDateString('de-DE')} ${isOverdue ? '⚠️ Überfällig!' : ''}
                     </div>`;
                 });
                 
@@ -534,7 +568,7 @@
             if (hoursDiff <= 24) {
                 btn.disabled = true;
                 btn.textContent = 'Verschiebung nicht möglich';
-                info.innerHTML = `❌ Verschiebung nur möglich, wenn mehr als 24 Stunden vor Stunde (noch ${Math.round(hoursDiff)}h)`;
+                info.innerHTML = `✖ Verschiebung nur möglich, wenn mehr als 24 Stunden vor Stunde (noch ${Math.round(hoursDiff)}h)`;
             } else {
                 btn.disabled = false;
                 btn.textContent = 'Stunde verschieben';
@@ -608,119 +642,159 @@
             document.getElementById('studentView').style.display = 'none';
             document.getElementById('hwView').style.display = 'block';
             document.getElementById('hwWelcomeText').textContent = `Hausaufgaben von ${currentStudent.name}`;
-            loadDetailedHomework();
+            renderDetailedHomework();
         };
 
         window.switchToDashboard = function() {
             document.getElementById('hwView').style.display = 'none';
             document.getElementById('studentView').style.display = 'block';
-            loadStudent Data();
+            loadStudentData();
         };
 
-        async function loadDetailedHomework() {
-        const { data, error } = await supabase
-            .from('homework')
-            .select('*')
-            .eq('student_id', currentStudent.id)
-            .order('due_date', { ascending: true });
-        
-        if (error) {
-            document.getElementById('pendingHw').innerHTML = '<p>Fehler beim Laden der Hausaufgaben</p>';
-            document.getElementById('completedHw').innerHTML = '';
-            return;
-        }
-        
-        const homework = data || [];
-        const pending = homework.filter(hw => !hw.completed);
-        const completed = homework.filter(hw => hw.completed);
-        
-        const pendingEl = document.getElementById('pendingHw');
-        if (pending.length === 0) {
-            pendingEl.innerHTML = '<p style="text-align: center; color: #8B4513;">🎉 Keine offenen Hausaufgaben!</p>';
-        } else {
-            pendingEl.innerHTML = pending.map(hw => createHwCard(hw, false)).join('');
-        }
-        
-        const completedEl = document.getElementById('completedHw');
-        if (completed.length === 0) {
-            completedEl.innerHTML = '<p style="text-align: center; color: #8B4513;">Noch keine erledigten Hausaufgaben</p>';
-        } else {
-            completedEl.innerHTML = completed.map(hw => createHwCard(hw, true)).join('');
-        }
-    }
+        window.filterHomework = function(filter) {
+            currentFilter = filter;
+            
+            // Update button states
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            renderDetailedHomework();
+        };
 
-    function createHwCard(hw, isCompleted) {
-        const typeText = hw.type === 'text' ? 'Text-Antwort' : hw.type === 'checkbox' ? 'Abhaken' : 'Foto-Upload';
-        const dueDate = new Date(hw.due_date);
-        const today = new Date();
-        const isOverdue = !isCompleted && dueDate < today;
-        
-        return `
-            <div class="hw-card ${isCompleted ? 'completed' : ''}">
-                <div style="display: flex; justify-content: space-between; align-items: start;">
-                    <div class="hw-title">${hw.title} ${isOverdue ? '⚠️' : ''}</div>
-                    <div style="font-size: 1.5em;">${isCompleted ? '✅' : '⭕'}</div>
+        async function renderDetailedHomework() {
+            let filteredHomework = currentHomework;
+            
+            if (currentFilter === 'pending') {
+                filteredHomework = currentHomework.filter(hw => !hw.completed);
+            } else if (currentFilter === 'completed') {
+                filteredHomework = currentHomework.filter(hw => hw.completed);
+            }
+            
+            const container = document.getElementById('homeworkContainer');
+            
+            if (filteredHomework.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #8B4513; padding: 40px;">Keine Hausaufgaben in dieser Kategorie</p>';
+                return;
+            }
+            
+            container.innerHTML = filteredHomework.map(hw => createHwCard(hw)).join('');
+        }
+
+        function createHwCard(hw) {
+            const deadline = new Date(hw.deadline);
+            const today = new Date();
+            const isOverdue = !hw.completed && deadline < today;
+            const isCompleted = hw.completed;
+            
+            // Submission Type anzeigen
+            const submissionTypeText = {
+                'text': '📝 Text-Antwort',
+                'photo': '📸 Foto hochladen',
+                'whatsapp': '💬 Per WhatsApp',
+                'custom': `✏️ ${hw.custom_submission_text || 'Benutzerdefiniert'}`
+            };
+            
+            return `
+                <div class="hw-card ${isCompleted ? 'completed' : ''} ${hw.is_read ? 'read' : ''}" onclick="markAsRead('${hw.id}')">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div class="hw-title">${hw.title} ${isOverdue ? '⚠️' : ''}</div>
+                        <div style="font-size: 1.5em;">${isCompleted ? '✅' : '⭕'}</div>
+                    </div>
+                    ${hw.description ? `<p style="color: #8B4513; margin: 10px 0;">${hw.description}</p>` : ''}
+                    <div style="font-size: 0.9em; color: #666; margin: 10px 0;">
+                        📅 Bis: ${deadline.toLocaleDateString('de-DE')} ${deadline.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                        ${isOverdue ? '<br><span style="color: red;">⚠️ Überfällig!</span>' : ''}
+                    </div>
+                    <div class="submission-type-badge">
+                        ${submissionTypeText[hw.submission_type] || submissionTypeText[hw.type] || '📝 Text-Antwort'}
+                    </div>
+                    ${isCompleted ? 
+                        (hw.response ? `<div style="background: rgba(144,238,144,0.3); padding: 12px; border-radius: 8px; margin-top: 10px;"><strong>Deine Antwort:</strong> ${hw.response}</div>` : '') :
+                        createResponseSection(hw)
+                    }
                 </div>
-                ${hw.description ? `<p style="color: #8B4513; margin: 10px 0;">${hw.description}</p>` : ''}
-                <div style="font-size: 0.9em; color: #666; margin: 10px 0;">
-                    📅 Bis: ${dueDate.toLocaleDateString('de-DE')} | 📝 ${typeText}
-                    ${isOverdue ? '<br><span style="color: red;">⚠️ Überfällig!</span>' : ''}
-                </div>
-                ${isCompleted ? 
-                    (hw.response ? `<div style="background: rgba(144,238,144,0.3); padding: 12px; border-radius: 8px; margin-top: 10px;"><strong>Deine Antwort:</strong> ${hw.response}</div>` : '') :
-                    createResponseSection(hw)
+            `;
+        }
+
+        function createResponseSection(hw) {
+            const submissionType = hw.submission_type || hw.type;
+            
+            if (submissionType === 'text') {
+                return `
+                    <textarea id="response-${hw.id}" placeholder="Schreibe deine Antwort hier..."></textarea>
+                    <button class="btn" style="margin-top: 10px;" onclick="submitHomeworkResponse('${hw.id}', 'text'); event.stopPropagation();">
+                        Antwort absenden
+                    </button>
+                `;
+            } else if (submissionType === 'photo') {
+                return `
+                    <p style="margin-top: 10px; color: #8B4513;">Bitte mache ein Foto deiner Hausaufgabe und markiere sie als erledigt.</p>
+                    <button class="btn" style="margin-top: 10px;" onclick="submitHomeworkResponse('${hw.id}', 'photo'); event.stopPropagation();">
+                        Foto gemacht - als erledigt markieren
+                    </button>
+                `;
+            } else if (submissionType === 'whatsapp') {
+                return `
+                    <p style="margin-top: 10px; color: #8B4513;">Bitte sende deine Antwort per WhatsApp an Amy und markiere die Aufgabe als erledigt.</p>
+                    <button class="btn" style="margin-top: 10px;" onclick="submitHomeworkResponse('${hw.id}', 'whatsapp'); event.stopPropagation();">
+                        Per WhatsApp gesendet - als erledigt markieren
+                    </button>
+                `;
+            } else if (submissionType === 'custom') {
+                return `
+                    <p style="margin-top: 10px; color: #8B4513;"><strong>Anweisung:</strong> ${hw.custom_submission_text || 'Siehe Beschreibung'}</p>
+                    <button class="btn" style="margin-top: 10px;" onclick="submitHomeworkResponse('${hw.id}', 'custom'); event.stopPropagation();">
+                        Als erledigt markieren
+                    </button>
+                `;
+            }
+            return '';
+        }
+
+        window.markAsRead = async function(hwId) {
+            const hw = currentHomework.find(h => h.id === hwId);if (!hw || hw.is_read) return;
+            
+            // Als gelesen markieren
+            try {
+                await supabase
+                    .from('homework')
+                    .update({ is_read: true })
+                    .eq('id', hwId);
+                
+                // Lokales Array aktualisieren
+                const hwIndex = currentHomework.findIndex(h => h.id === hwId);
+                if (hwIndex !== -1) {
+                    currentHomework[hwIndex].is_read = true;
                 }
-            </div>
-        `;
-    }
-
-    function createResponseSection(hw) {
-        if (hw.type === 'text') {
-            return `
-                <textarea id="response-${hw.id}" placeholder="Schreibe deine Antwort hier..."></textarea>
-                <button class="btn" style="margin-top: 10px;" onclick="submitHomeworkResponse('${hw.id}', 'text')">
-                    Antwort absenden
-                </button>
-            `;
-        } else if (hw.type === 'checkbox') {
-            return `
-                <button class="btn" style="margin-top: 10px;" onclick="submitHomeworkResponse('${hw.id}', 'checkbox')">
-                    Als erledigt markieren
-                </button>
-            `;
-        } else if (hw.type === 'photo') {
-            return `
-                <input type="file" id="photo-${hw.id}" accept="image/*" style="margin-top: 10px;">
-                <button class="btn" style="margin-top: 10px;" onclick="submitHomeworkResponse('${hw.id}', 'photo')">
-                    Foto hochladen
-                </button>
-            `;
-        }
-        return '';
-    }
-
-    window.submitHomeworkResponse = async function(hwId, type) {
-        let response = '';
-        
-        if (type === 'text') {
-            response = document.getElementById(`response-${hwId}`).value.trim();
-            if (!response) {
-                alert('Bitte schreibe eine Antwort.');
-                return;
+                
+                // UI aktualisieren
+                renderDetailedHomework();
+                loadMyHomeworkOverview();
+            } catch (error) {
+                console.error('Fehler beim Markieren als gelesen:', error);
             }
-        } else if (type === 'checkbox') {
-            response = 'Erledigt ✓';
-        } else if (type === 'photo') {
-            const fileInput = document.getElementById(`photo-${hwId}`);
-            if (!fileInput.files[0]) {
-                alert('Bitte wähle ein Foto aus.');
-                return;
-            }
-            response = `Foto hochgeladen: ${fileInput.files[0].name}`;
-        }
+        };
 
-        try {
-            const { error } = await supabase .from('homework')
+        window.submitHomeworkResponse = async function(hwId, type) {
+            let response = '';
+            
+            if (type === 'text') {
+                response = document.getElementById(`response-${hwId}`).value.trim();
+                if (!response) {
+                    alert('Bitte schreibe eine Antwort.');
+                    return;
+                }
+            } else if (type === 'photo') {
+                response = 'Foto gemacht ✓';
+            } else if (type === 'whatsapp') {
+                response = 'Per WhatsApp gesendet ✓';
+            } else if (type === 'custom') {
+                response = 'Erledigt ✓';
+            }
+
+            try {
+                const { error } = await supabase
+                    .from('homework')
                     .update({
                         completed: true,
                         response: response,
@@ -731,8 +805,16 @@
                 if (error) throw error;
                 
                 showSuccess('Hausaufgabe wurde als erledigt markiert!');
-                await loadDetailedHomework();
-                await loadMyHomeworkOverview();
+                
+                // Lokales Array aktualisieren
+                const hwIndex = currentHomework.findIndex(h => h.id === hwId);
+                if (hwIndex !== -1) {
+                    currentHomework[hwIndex].completed = true;
+                    currentHomework[hwIndex].response = response;
+                }
+                
+                renderDetailedHomework();
+                loadMyHomeworkOverview();
                 
             } catch (error) {
                 alert('Fehler beim Absenden: ' + error.message);
@@ -757,6 +839,7 @@
         window.logout = function() {
             currentStudent = null;
             studentLessons = [];
+            currentHomework = [];
             document.getElementById('loginView').style.display = 'block';
             document.getElementById('studentView').style.display = 'none';
             document.getElementById('hwView').style.display = 'none';
@@ -775,5 +858,3 @@
     </script>
 </body>
 </html>
-
-
