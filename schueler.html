@@ -168,7 +168,6 @@
             opacity: 0.7;
         }
 
-        /* Gelesen-Status Indikator */
         .hw-card::before {
             content: '';
             position: absolute;
@@ -267,7 +266,6 @@
             display: none;
         }
 
-        /* Filter Toggle */
         .filter-toggle {
             display: flex;
             gap: 10px;
@@ -300,6 +298,13 @@
             font-size: 0.85em;
             margin-top: 8px;
         }
+
+        .phone-hint {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -310,8 +315,9 @@
                 <div id="errorMsg" class="error"></div>
                 <form id="loginForm">
                     <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" id="loginEmail" required>
+                        <label>WhatsApp-Telefonnummer</label>
+                        <input type="tel" id="loginPhone" placeholder="+49 123 456789" required>
+                        <div class="phone-hint">📱 Dieselbe Nummer wie bei der Anmeldung</div>
                     </div>
                     <div class="form-group">
                         <label>Passwort</label>
@@ -410,19 +416,20 @@
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const email = document.getElementById('loginEmail').value.trim();
+            const phone = document.getElementById('loginPhone').value.trim();
             const password = document.getElementById('loginPassword').value.trim();
             
             try {
+                // Login mit Telefonnummer statt Email
                 const { data, error } = await supabase
                     .from('students')
                     .select('*')
-                    .eq('email', email)
+                    .eq('phone', phone)
                     .eq('password', password)
                     .single();
                 
                 if (error || !data) {
-                    showError('Email oder Passwort falsch!');
+                    showError('Telefonnummer oder Passwort falsch!');
                     return;
                 }
                 
@@ -654,7 +661,6 @@
         window.filterHomework = function(filter) {
             currentFilter = filter;
             
-            // Update button states
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
             
@@ -669,7 +675,7 @@
             } else if (currentFilter === 'completed') {
                 filteredHomework = currentHomework.filter(hw => hw.completed);
             }
-            
+
             const container = document.getElementById('homeworkContainer');
             
             if (filteredHomework.length === 0) {
@@ -686,7 +692,6 @@
             const isOverdue = !hw.completed && deadline < today;
             const isCompleted = hw.completed;
             
-            // Submission Type anzeigen
             const submissionTypeText = {
                 'text': '📝 Text-Antwort',
                 'photo': '📸 Foto hochladen',
@@ -752,22 +757,20 @@
         }
 
         window.markAsRead = async function(hwId) {
-            const hw = currentHomework.find(h => h.id === hwId);if (!hw || hw.is_read) return;
+            const hw = currentHomework.find(h => h.id === hwId);
+            if (!hw || hw.is_read) return;
             
-            // Als gelesen markieren
             try {
                 await supabase
                     .from('homework')
                     .update({ is_read: true })
                     .eq('id', hwId);
                 
-                // Lokales Array aktualisieren
                 const hwIndex = currentHomework.findIndex(h => h.id === hwId);
                 if (hwIndex !== -1) {
                     currentHomework[hwIndex].is_read = true;
                 }
                 
-                // UI aktualisieren
                 renderDetailedHomework();
                 loadMyHomeworkOverview();
             } catch (error) {
@@ -785,11 +788,11 @@
                     return;
                 }
             } else if (type === 'photo') {
-                response = 'Foto gemacht ✓';
+                response = 'Foto gemacht ✔';
             } else if (type === 'whatsapp') {
-                response = 'Per WhatsApp gesendet ✓';
+                response = 'Per WhatsApp gesendet ✔';
             } else if (type === 'custom') {
-                response = 'Erledigt ✓';
+                response = 'Erledigt ✔';
             }
 
             try {
@@ -806,7 +809,6 @@
                 
                 showSuccess('Hausaufgabe wurde als erledigt markiert!');
                 
-                // Lokales Array aktualisieren
                 const hwIndex = currentHomework.findIndex(h => h.id === hwId);
                 if (hwIndex !== -1) {
                     currentHomework[hwIndex].completed = true;
@@ -843,7 +845,7 @@
             document.getElementById('loginView').style.display = 'block';
             document.getElementById('studentView').style.display = 'none';
             document.getElementById('hwView').style.display = 'none';
-            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPhone').value = '';
             document.getElementById('loginPassword').value = '';
             document.getElementById('errorMsg').style.display = 'none';
         };
