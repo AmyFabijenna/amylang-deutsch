@@ -750,7 +750,10 @@ window.toggleEditCustomSubmission = function() {
 };
 
 window.saveEditedHomework = async function() {
-    if (!currentEditHomework) return;
+    if (!currentEditHomework) {
+        alert('Keine Hausaufgabe ausgewählt!');
+        return;
+    }
     
     const title = document.getElementById('editHwTitle').value.trim();
     const description = document.getElementById('editHwDescription').value.trim();
@@ -778,9 +781,14 @@ window.saveEditedHomework = async function() {
         
         if (error) throw error;
         
-        alert('✅ Hausaufgabe aktualisiert! Status wurde auf "ungelesen" zurückgesetzt.');
-        await loadData();
+        // Modal schließen
         closeModal();
+        
+        // Daten neu laden und rendern
+        await loadHomework();
+        renderHomeworkManagement();
+        
+        alert('✅ Hausaufgabe aktualisiert!');
         
     } catch (error) {
         alert('Fehler: ' + error.message);
