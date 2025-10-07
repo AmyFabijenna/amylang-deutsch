@@ -780,8 +780,7 @@ window.saveEditedHomework = async function() {
         
         alert('✅ Hausaufgabe aktualisiert! Status wurde auf "ungelesen" zurückgesetzt.');
         closeModal();
-        await loadHomework();
-        renderHomeworkManagement();
+        await loadData(); // Lädt ALLE Daten neu
         
     } catch (error) {
         alert('Fehler: ' + error.message);
