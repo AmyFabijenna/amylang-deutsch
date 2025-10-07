@@ -755,7 +755,7 @@ window.toggleEditCustomSubmission = function() {
 };
 
 window.saveEditedHomework = async function() {
-    console.log('💾 Speichere Hausaufgabe...', currentEditHomework);
+    console.log('💾 START: Speichere Hausaufgabe...', currentEditHomework);
     
     if (!currentEditHomework) {
         alert('Keine Hausaufgabe ausgewählt!');
@@ -768,61 +768,84 @@ window.saveEditedHomework = async function() {
     const submissionType = document.getElementById('editHwSubmissionType').value;
     const customText = document.getElementById('editHwCustomSubmission').value.trim();
     
+    console.log('📝 Neue Daten:', { title, description, deadline, submissionType, customText });
+    
     if (!title || !deadline) {
         alert('Bitte alle Pflichtfelder ausfüllen!');
         return;
     }
     
     try {
-        console.log('📤 Sende Update an Datenbank für ID:', currentEditHomework);
+        console.log('📤 Sende Update an Supabase für ID:', currentEditHomework);
         
-        // 1. ZUERST Datenbank-Update
+        // SUPABASE UPDATE mit ALLEN Feldern
+        const updateData = {
+            title: title,
+            description: description,
+            deadline: deadline,
+            submission_type: submissionType,
+            custom_submission_text: submissionType === 'custom' ? customText : null,
+            is_read: false,
+            last_updated: new Date().toISOString()
+        };
+        
+        console.log('📦 Update-Daten:', updateData);
+        
         const { data, error } = await supabase
             .from('homework')
-            .update({
-                title: title,
-                description: description,
-                deadline: deadline,
-                submission_type: submissionType,
-                custom_submission_text: submissionType === 'custom' ? customText : null,
-                is_read: false,
-                last_updated: new Date().toISOString()
-            })
+            .update(updateData)
             .eq('id', currentEditHomework)
-            .select(); // WICHTIG: select() hinzufügen um die aktualisierten Daten zurückzubekommen
+            .select();
         
         if (error) {
-            console.error('❌ Datenbank-Fehler:', error);
-            throw error;
+            console.error('❌ SUPABASE FEHLER:', error);
+            alert('Datenbank-Fehler: ' + error.message);
+            return;
         }
         
-        console.log('✅ Datenbank-Update erfolgreich:', data);
+        console.log('✅ SUPABASE ERFOLG:', data);
         
-        if (data && data.length > 0) {
-            // 2. DIREKTES UPDATE der homework-Variable mit den Daten aus der Datenbank
-            const homeworkIndex = homework.findIndex(h => h.id === currentEditHomework);
-            if (homeworkIndex !== -1) {
-                homework[homeworkIndex] = data[0];
-                console.log('✅ Homework-Variable aktualisiert mit DB-Daten:', homework[homeworkIndex]);
-            }
+        if (!data || data.length === 0) {
+            console.error('❌ Keine Daten zurückbekommen von Supabase');
+            alert('Fehler: Hausaufgabe wurde nicht in der Datenbank gefunden');
+            return;
         }
         
-        // 3. Modal schließen
+        // Lokale Variable aktualisieren
+        const homeworkIndex = homework.findIndex(h => h.id === currentEditHomework);
+        if (homeworkIndex !== -1) {
+            homework[homeworkIndex] = data[0];
+            console.log('✅ Lokale Variable aktualisiert');
+        }
+        
         closeModal();
         
-        // 4. KOMPLETT NEU LADEN aller Daten
-        console.log('🔄 Lade ALLE Daten neu...');
-        await loadData(); // Lädt students, requests UND homework neu
+        // VERZÖGERUNG für Datenbank-Sync
+        console.log('⏳ Warte auf Datenbank-Sync...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // 5. Neu rendern
-        console.log('🔄 Rendere alles neu...');
-        renderAll();
+        // NOCHMALS explizit aus der Datenbank laden
+        console.log('🔄 Lade Daten explizit neu von Supabase...');
+        const { data: freshData, error: loadError } = await supabase
+            .from('homework')
+            .select('*')
+            .eq('id', currentEditHomework)
+            .single();
+            
+        if (!loadError && freshData) {
+            console.log('✅ Frisch geladene Daten:', freshData);
+        }
         
+        // Komplett neu laden und rendern
+        await loadHomework();
+        renderHomeworkManagement();
+        
+        console.log('🎉 HAUSAUFGABE ERFOLGREICH GESPEICHERT');
         alert('✅ Hausaufgabe aktualisiert!');
         
     } catch (error) {
-        console.error('❌ Fehler beim Speichern:', error);
-        alert('Fehler: ' + error.message);
+        console.error('❌ UNBEKANNTER FEHLER:', error);
+        alert('Unbekannter Fehler: ' + error.message);
     }
 };
 
