@@ -713,10 +713,16 @@ const deadline = `${deadlineDate}T${deadlineTime}:00`;
 };
 
 window.openEditHomeworkModal = async function(homeworkId) {
-    const hw = homework.find(h => h.id == homeworkId); // == statt ===
-    if (!hw) return;
+    // Sicherstellen dass homeworkId eine Zahl ist
+    const hwId = parseInt(homeworkId);
+    const hw = homework.find(h => h.id === hwId);
+    if (!hw) {
+        console.error('Hausaufgabe nicht gefunden:', homeworkId, homework);
+        return;
+    }
     
-    currentEditHomework = homeworkId;
+    currentEditHomework = hwId;
+    console.log('Bearbeite Hausaufgabe:', hwId, hw);
     
     document.getElementById('editHwTitle').value = hw.title;
     document.getElementById('editHwDescription').value = hw.description || '';
