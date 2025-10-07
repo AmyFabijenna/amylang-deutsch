@@ -781,12 +781,12 @@ window.saveEditedHomework = async function() {
         
         if (error) throw error;
         
-        // Modal schließen
+        // ZUERST Modal schließen
         closeModal();
         
-        // Daten neu laden und rendern
-        await loadHomework();
-        renderHomeworkManagement();
+        // DANACH Daten neu laden und rendern
+        await loadHomework(); // Hausaufgaben neu laden
+        renderHomeworkManagement(); // Anzeige aktualisieren
         
         alert('✅ Hausaufgabe aktualisiert!');
         
