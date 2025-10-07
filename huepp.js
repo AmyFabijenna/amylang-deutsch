@@ -749,6 +749,7 @@ window.toggleEditCustomSubmission = function() {
     customGroup.style.display = type === 'custom' ? 'block' : 'none';
 };
 
+
 window.saveEditedHomework = async function() {
     if (!currentEditHomework) {
         alert('Keine Hausaufgabe ausgewählt!');
@@ -781,12 +782,23 @@ window.saveEditedHomework = async function() {
         
         if (error) throw error;
         
-        // ZUERST Modal schließen
-        closeModal();
+        // DIREKTES UPDATE der homework-Variable
+        const homeworkIndex = homework.findIndex(h => h.id === currentEditHomework);
+        if (homeworkIndex !== -1) {
+            homework[homeworkIndex] = {
+                ...homework[homeworkIndex],
+                title: title,
+                description: description,
+                deadline: deadline,
+                submission_type: submissionType,
+                custom_submission_text: submissionType === 'custom' ? customText : null,
+                is_read: false,
+                last_updated: new Date().toISOString()
+            };
+        }
         
-        // DANACH Daten neu laden und rendern
-        await loadHomework(); // Hausaufgaben neu laden
-        renderHomeworkManagement(); // Anzeige aktualisieren
+        closeModal();
+        renderHomeworkManagement(); // Direkt mit aktualisierter Variable rendern
         
         alert('✅ Hausaufgabe aktualisiert!');
         
@@ -794,6 +806,7 @@ window.saveEditedHomework = async function() {
         alert('Fehler: ' + error.message);
     }
 };
+
 
 window.deleteHomework = async function() {
     if (!currentEditHomework) return;
