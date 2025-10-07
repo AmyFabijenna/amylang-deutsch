@@ -486,25 +486,46 @@ window.deleteStudent = async function() {
     }
     
     try {
-        // Erst Hausaufgaben löschen
-        await supabase.from('homework').delete().eq('student_id', currentEditStudent);
+        // 1. Erst Hausaufgaben löschen
+        const { error: hwError } = await supabase
+            .from('homework')
+            .delete()
+            .eq('student_id', currentEditStudent);
         
-        // Dann Verschiebungsanfragen löschen
-        await supabase.from('reschedule_requests').delete().eq('student_id', currentEditStudent);
+        if (hwError) {
+            console.error('Fehler beim Löschen der Hausaufgaben:', hwError);
+            throw new Error('Hausaufgaben konnten nicht gelöscht werden: ' + hwError.message);
+        }
         
-        // Dann Schüler löschen
-        const { error } = await supabase
+        // 2. Dann Verschiebungsanfragen löschen
+        const { error: reqError } = await supabase
+            .from('reschedule_requests')
+            .delete()
+            .eq('student_id', currentEditStudent);
+        
+        if (reqError) {
+            console.error('Fehler beim Löschen der Anfragen:', reqError);
+            throw new Error('Verschiebungsanfragen konnten nicht gelöscht werden: ' + reqError.message);
+        }
+        
+        // 3. Schließlich Schüler löschen
+        const { error: studentError } = await supabase
             .from('students')
             .delete()
             .eq('id', currentEditStudent);
         
-        if (error) throw error;
+        if (studentError) {
+            console.error('Fehler beim Löschen des Schülers:', studentError);
+            throw new Error('Schüler konnte nicht gelöscht werden: ' + studentError.message);
+        }
         
-        alert('🗑️ Schüler wurde gelöscht!');
+        alert('🗑️ Schüler wurde erfolgreich gelöscht!');
         closeModal();
         await loadData();
+        
     } catch (error) {
-        alert('Fehler beim Löschen: ' + error.message);
+        console.error('Fehler beim Löschen:', error);
+        alert('❌ Fehler beim Löschen: ' + error.message + '\n\nBitte prüfe die Datenbankberechtigungen in Supabase.');
     }
 };
 
