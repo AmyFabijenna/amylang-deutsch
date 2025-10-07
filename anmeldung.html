@@ -663,10 +663,10 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Supabase Initialisierung
+        // Supabase Initialisierung - KORRIGIERT auf Hüpp-Datenbank
         const { createClient } = window.supabase;
-        const supabaseUrl = 'https://smmspsnquuqischuhjyn.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtbXNwc25xdXVxaXNjaHVoanluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3NTQ1ODUsImV4cCI6MjA3NTMzMDU4NX0.xffqRWQYlg_25wkXMe0gU6QqkLBoFNqhjjmepPEF-xc';
+        const supabaseUrl = 'https://hfdjnttxavlghjfnjkms.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmZGpudHR4YXZsZ2hqZm5qa21zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk2OTQwNTIsImV4cCI6MjA3NTI3MDA1Mn0.LBLAkKzkquHvAmvFix4jIrudCVMGGjs5kfvK4l0RfIM';
         const supabase = createClient(supabaseUrl, supabaseKey);
 
         let currentStep = 1;
@@ -725,8 +725,7 @@
             const lt4 = document.querySelector('input[name="lt4"]:checked')?.value || '';
             const lt5 = document.querySelector('input[name="lt5"]:checked')?.value || '';
             
-            const counts = {visual: 0, auditory: 0, kinesthetic: 0};
-            [lt1, lt2, lt3, lt4, lt5].forEach(v => { if (v) counts[v]++; });
+            const counts = {visual: 0, auditory: 0, kinesthetic: 0};[lt1, lt2, lt3, lt4, lt5].forEach(v => { if (v) counts[v]++; });
 
             // Sortiere nach Häufigkeit
             const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
@@ -766,59 +765,44 @@
                 created_at: new Date().toISOString()
             };
 
-            
-try {
-    // 1. Auth-Account erstellen
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: email,
-        password: password,
-        options: {
-            data: {
-                name: studentData.name,
-                role: 'student'
+            try {
+                // VEREINFACHT: Nur in students Tabelle eintragen (ohne Auth)
+                const { data, error } = await supabase
+                    .from('students')
+                    .insert([{
+                        name: studentData.name,
+                        email: email,
+                        password: password,
+                        phone: studentData.phone,
+                        mother_language: studentData.mother_language,
+                        goals: studentData.goals,
+                        level: studentData.level,
+                        learning_type: studentData.learning_type,
+                        standard_times: [],
+                        start_date: new Date().toISOString().split('T')[0],
+                        total_lessons: 0,
+                        created_at: new Date().toISOString()
+                    }])
+                    .select();
+                
+                if (error) throw error;
+
+                document.getElementById('levelText').textContent = studentData.level;
+                document.getElementById('learningTypeText').textContent = studentData.learning_type;
+                document.getElementById('studentLink').innerHTML = `
+                    <strong>Email:</strong> ${email}<br>
+                    <strong>Passwort:</strong> ${password}<br><br>
+                    <strong>Login-Link:</strong> ${window.location.origin}/schueler.html
+                `;
+
+                document.getElementById('step4').classList.remove('active');
+                document.getElementById('success').classList.add('active');
+                document.getElementById('circle4').classList.remove('active');
+                document.getElementById('text4').classList.remove('active');
+            } catch (error) {
+                alert('Fehler beim Speichern: ' + error.message);
+                console.error('Detaillierter Fehler:', error);
             }
-        }
-    });
-    
-    if (authError) throw authError;
-    
-    // 2. In students Tabelle eintragen
-    const { error: dbError } = await supabase
-        .from('students')
-        .insert([{
-            id: authData.user.id,
-            name: studentData.name,
-            email: email,
-            phone: studentData.phone,
-            mother_language: studentData.mother_language,
-            goals: studentData.goals,
-            level: studentData.level,
-            learning_type: studentData.learning_type,
-            standard_times: [],
-            start_date: new Date().toISOString().split('T')[0],
-            total_lessons: 0,
-            created_at: new Date().toISOString()
-        }]);
-    
-    if (dbError) throw dbError;
-
-    document.getElementById('levelText').textContent = studentData.level;
-    document.getElementById('learningTypeText').textContent = studentData.learning_type;
-    document.getElementById('studentLink').innerHTML = `
-        <strong>Email:</strong> ${email}<br>
-        <strong>Passwort:</strong> ${password}<br><br>
-        <strong>Login-Link:</strong> ${window.location.origin}/schueler.html
-    `;
-
-    document.getElementById('step4').classList.remove('active');
-    document.getElementById('success').classList.add('active');
-    document.getElementById('circle4').classList.remove('active');
-    document.getElementById('text4').classList.remove('active');
-} catch (error) {
-    alert('Fehler beim Speichern: ' + error.message);
-}
-
-            
         }
 
         function generatePassword() {
