@@ -551,28 +551,29 @@ window.saveNewStudent = async function() {
     }
     
     try {
+
         const { error } = await supabase
-            .from('students')
-            .insert([{
-                name: name,
-                phone: phone,
-                email: email || null,
-                password: password,
-                mother_language: document.getElementById('addStudentMotherLanguage').value.trim(),
-                goals: document.getElementById('addStudentGoals').value.trim(),
-                level: document.getElementById('addStudentLevel').value,
-                learning_type: '',
-                standard_times: [],
-                start_date: new Date().toISOString().split('T')[0],
-                total_lessons: 0,
-                created_at: new Date().toISOString()
-            }]);
+    .from('homework')
+    .insert([{
+        student_id: studentId,
+        title: title,
+        description: description,
+        deadline: deadline,
+        type: submissionType,
+        submission_type: submissionType,
+        custom_submission_text: submissionType === 'custom' ? customText : null,
+        completed: false,
+        is_read: false,
+        last_updated: new Date().toISOString(),
+        created_at: new Date().toISOString()
+    }]);
+
         
         if (error) throw error;
         
-        alert('✅ Schüler erfolgreich erstellt!');
+        alert('✅ Hausaufgabe erfolgreich erstellt!');
         closeModal();
-        await loadData();
+        await loadData(); // Lädt alle Daten neu inkl. homework
         
         // Formular leeren
         document.getElementById('addStudentName').value = '';
