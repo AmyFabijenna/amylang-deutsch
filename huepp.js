@@ -676,13 +676,14 @@ const deadline = `${deadlineDate}T${deadlineTime}:00`;
     
     try {
         const { error } = await supabase
-            .from('homework')
-            .insert([{
-                student_id: studentId,
-                title: title,
-                description: description,
-                deadline: deadline,
-                submission_type: submissionType,
+    .from('homework')
+    .insert([{
+        student_id: studentId,
+        title: title,
+        description: description,
+        deadline: deadline,
+        type: submissionType,
+        submission_type: submissionType,
                 custom_submission_text: submissionType === 'custom' ? customText : null,
                 completed: false,
                 is_read: false,
