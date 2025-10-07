@@ -794,7 +794,7 @@ window.saveEditedHomework = async function() {
         
         console.log('✅ Datenbank-Update erfolgreich');
         
-        // DIREKTES UPDATE der homework-Variable
+        // DIREKTES UPDATE der homework-Variable für sofortige Anzeige
         const homeworkIndex = homework.findIndex(h => h.id === currentEditHomework);
         if (homeworkIndex !== -1) {
             homework[homeworkIndex] = {
@@ -814,9 +814,13 @@ window.saveEditedHomework = async function() {
         
         closeModal();
         
-        // EXPLIZIT neu rendern
+        // EXPLIZIT neu rendern für sofortige Anzeige
         console.log('🔄 Rendere Hausaufgaben neu...');
         renderHomeworkManagement();
+        
+        // ABER AUCH: Datenbank neu laden um sicherzustellen dass alles synchron ist
+        console.log('🔄 Lade Datenbank-Daten neu für zukünftige Verwendung...');
+        await loadHomework();
         
         alert('✅ Hausaufgabe aktualisiert!');
         
