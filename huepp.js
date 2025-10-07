@@ -663,9 +663,9 @@ window.saveNewHomework = async function() {
     const studentId = document.getElementById('hwStudentSelect').value;
     const title = document.getElementById('hwTitle').value.trim();
     const description = document.getElementById('hwDescription').value.trim();
-    const deadlineDate = document.getElementById('editHwDeadline').value;
-const deadlineTime = document.getElementById('editHwDeadlineTime').value || '23:59';
-const deadline = `${deadlineDate}T${deadlineTime}:00`;
+    const deadlineDate = document.getElementById('hwDeadline').value;
+    const deadlineTime = document.getElementById('hwDeadlineTime').value || '23:59';
+    const deadline = `${deadlineDate}T${deadlineTime}:00`;
     const submissionType = document.getElementById('hwSubmissionType').value;
     const customText = document.getElementById('hwCustomSubmission').value.trim();
     
