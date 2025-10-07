@@ -622,7 +622,7 @@ function renderHomeworkManagement() {
                     ${studentHomework.length === 0 ? 
                         '<p style="color: #666; font-style: italic;">Keine Hausaufgaben</p>' :
                         studentHomework.slice(0, 3).map(hw => `
-                            <div class="hw-item" onclick="openEditHomeworkModal('${hw.id}')">
+                            <div class="hw-item" onclick="event.stopPropagation(); openEditHomeworkModal('${hw.id}');">
                                 <div>
                                     <div class="hw-item-title">${hw.title}</div>
                                     <div class="hw-item-meta">
