@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HÜpp - Hausaufgaben & Kalender Manager</title>
+    <title>Hüpp - Hausaufgaben & Kalender Manager</title>
     
     <style>
         * {
@@ -207,6 +207,11 @@
             color: white;
         }
 
+        .btn-delete {
+            background: #f44336;
+            color: white;
+        }
+
         .btn:hover {
             transform: translateY(-2px);
         }
@@ -232,7 +237,7 @@
             background: rgba(255,255,255,0.95);
             border-radius: 20px;
             padding: 30px;
-            max-width: 600px;
+            max-width: 700px;
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
@@ -263,19 +268,21 @@
             border-radius: 10px;
             margin-bottom: 10px;
             border: 1px solid rgba(139,69,19,0.2);
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            gap: 10px;
+            align-items: end;
         }
 
         .remove-time {
             background: #f44336;
             color: white;
             border: none;
-            padding: 5px 10px;
+            padding: 10px 15px;
             border-radius: 5px;
             cursor: pointer;
-            margin-top: 5px;
         }
 
-        /* Hausaufgaben-Cards mit Status-Indikatoren */
         .hw-student-card {
             background: rgba(255,255,255,0.4);
             padding: 20px;
@@ -315,6 +322,12 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .hw-item:hover {
+            background: rgba(255,255,255,0.7);
         }
 
         .hw-item-title {
@@ -341,14 +354,26 @@
             background: #90EE90;
             color: #2e7d32;
         }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <nav>
-        <a href="index.html" class="back-btn">← Zurück zur Hauptseite</a>
-        <h1>HÜpp! - Kalender & Hausaufgaben</h1>
-        <button class="back-btn" onclick="logout()" style="background: #f44336;">Abmelden</button>
+            <a href="index.html" class="back-btn">← Zurück zur Hauptseite</a>
+            <h1>Hüpp! - Kalender & Hausaufgaben</h1>
+            <button class="back-btn" onclick="logout()" style="background: #f44336;">Abmelden</button>
         </nav>
 
         <div class="notification" id="notification">
@@ -401,10 +426,58 @@
 
         <!-- Modal: Schüler bearbeiten -->
         <div class="modal" id="editStudentModal">
-            <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-content">
                 <h3 style="color: #8B4513; margin-bottom: 20px;">Schüler bearbeiten</h3>
                 
-                <div style="margin-bottom: 20px;">
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" id="editName" required>
+                </div>
+
+                <div class="form-group">
+                    <label>WhatsApp-Telefonnummer *</label>
+                    <input type="tel" id="editPhone" placeholder="+49 123 456789" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Email (optional)</label>
+                    <input type="email" id="editEmail">
+                </div>
+
+                <div class="form-group">
+                    <label>Muttersprache</label>
+                    <input type="text" id="editMotherLanguage">
+                </div>
+
+                <div class="form-group">
+                    <label>Lernziele</label>
+                    <textarea id="editGoals" rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Niveau</label>
+                    <select id="editLevel">
+                        <option value="A0">A0</option>
+                        <option value="A1">A1</option>
+                        <option value="A2">A2</option>
+                        <option value="B1">B1</option>
+                        <option value="B2">B2</option>
+                        <option value="C1">C1</option>
+                        <option value="C2">C2</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Lerntyp</label>
+                    <input type="text" id="editLearningType" placeholder="z.B. Visuell, Auditiv...">
+                </div>
+
+                <div class="form-group">
+                    <label>Passwort</label>
+                    <input type="text" id="editPassword" placeholder="Login-Passwort">
+                </div>
+
+                <div style="margin: 20px 0;">
                     <h4 style="color: #8B4513; margin-bottom: 10px;">Wöchentliche Termine</h4>
                     <div id="timeSlotsContainer"></div>
                     <button class="btn btn-edit" onclick="addTimeSlot()" style="width: 100%; margin-top: 10px;">
@@ -416,16 +489,10 @@
                     <label>Beginndatum</label>
                     <input type="date" id="editStartDate">
                 </div>
-                <div class="form-group">
-                    <label>Anzahl Stunden (gesamt)</label>
-                    <input type="number" id="editTotalLessons" min="0">
-                </div>
-                <div class="form-group">
-                    <label>Telefon</label>
-                    <input type="text" id="editPhone" placeholder="+491234567890">
-                </div>
-                <div style="display: flex; gap: 10px;">
+
+                <div class="action-buttons">
                     <button class="btn btn-approve" onclick="saveStudentEdit()">💾 Speichern</button>
+                    <button class="btn btn-delete" onclick="deleteStudent()">🗑️ Schüler löschen</button>
                     <button class="btn" style="background: #999; color: white;" onclick="closeModal()">Abbrechen</button>
                 </div>
             </div>
@@ -440,32 +507,40 @@
                     <input type="text" id="addStudentName" required>
                 </div>
                 <div class="form-group">
-                    <label>Email *</label>
-                    <input type="email" id="addStudentEmail" required>
+                    <label>WhatsApp-Telefonnummer *</label>
+                    <input type="tel" id="addStudentPhone" placeholder="+49 123 456789" required>
                 </div>
                 <div class="form-group">
-                    <label>Telefon</label>
-                    <input type="text" id="addStudentPhone" placeholder="+491234567890">
+                    <label>Email (optional)</label>
+                    <input type="email" id="addStudentEmail">
                 </div>
                 <div class="form-group">
                     <label>Muttersprache</label>
                     <input type="text" id="addStudentMotherLanguage">
                 </div>
                 <div class="form-group">
-                    <label>Ziele/Lernziele</label>
+                    <label>Lernziele</label>
                     <textarea id="addStudentGoals" rows="3"></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Vorkenntnisse</label>
+                    <label>Niveau</label>
                     <select id="addStudentLevel">
                         <option value="">Bitte wählen</option>
-                        <option value="A1">A1 - Anfänger</option>
-                        <option value="A2">A2 - Grundlagen</option>
-                        <option value="B1">B1 - Mittelstufe</option>
-                        <option value="B2">B2 - Fortgeschritten</option>
-                        <option value="C1">C1 - Sehr fortgeschritten</option>
-                        <option value="C2">C2 - Fast muttersprachlich</option>
+                        <option value="A0">A0</option>
+                        <option value="A1">A1</option>
+                        <option value="A2">A2</option>
+                        <option value="B1">B1</option>
+                        <option value="B2">B2</option>
+                        <option value="C1">C1</option>
+                        <option value="C2">C2</option>
                     </select>
+                </div>
+                <div class="form-group">
+                    <label>Passwort</label>
+                    <input type="text" id="addStudentPassword" placeholder="Wird automatisch generiert" readonly>
+                    <button class="btn btn-edit" onclick="generateNewPassword()" style="margin-top: 5px; width: 100%;">
+                        🔄 Neues Passwort generieren
+                    </button>
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <button class="btn btn-approve" onclick="saveNewStudent()">💾 Schüler erstellen</button>
@@ -560,7 +635,7 @@
 
                 <div style="display: flex; gap: 10px;">
                     <button class="btn btn-approve" onclick="saveEditedHomework()">💾 Speichern</button>
-                    <button class="btn" style="background: #f44336; color: white;" onclick="deleteHomework()">🗑️ Löschen</button>
+                    <button class="btn btn-delete" onclick="deleteHomework()">🗑️ Löschen</button>
                     <button class="btn" style="background: #999; color: white;" onclick="closeModal()">Abbrechen</button>
                 </div>
             </div>

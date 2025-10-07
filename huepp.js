@@ -117,8 +117,8 @@ function getNextLesson(student) {
     return allUpcomingLessons[0];
 }
 
-// Berechne verstrichene Einheiten seit Startdatum
-function calculateCompletedLessons(student) {
+// Berechne STUNDEN (60 Min) seit Startdatum
+function calculateTotalHours(student) {
     if (!student.start_date || !student.standard_times || student.standard_times.length === 0) {
         return 0;
     }
@@ -130,10 +130,19 @@ function calculateCompletedLessons(student) {
     const msPerWeek = 7 * 24 * 60 * 60 * 1000;
     const weeksPassed = Math.floor((today - startDate) / msPerWeek);
     
-    // Anzahl Termine pro Woche
-    const lessonsPerWeek = student.standard_times.length;
+    // Gesamtminuten pro Woche berechnen
+    let totalMinutesPerWeek = 0;
+    student.standard_times.forEach(slot => {
+        totalMinutesPerWeek += slot.duration;
+    });
     
-    return weeksPassed * lessonsPerWeek;
+    // Gesamtminuten seit Start
+    const totalMinutes = weeksPassed * totalMinutesPerWeek;
+    
+    // In 60-Minuten-Stunden umrechnen
+    const totalHours = totalMinutes / 60;
+    
+    return Math.round(totalHours * 10) / 10; // Auf 1 Dezimalstelle runden
 }
 
 function renderNextStudent() {
@@ -152,7 +161,7 @@ function renderNextStudent() {
     }
     
     const nextLesson = nextStudent.nextLesson;
-    const completedLessons = calculateCompletedLessons(nextStudent);
+    const totalHours = calculateTotalHours(nextStudent);
     
     widget.innerHTML = `
         <div class="student-info">${nextStudent.name}</div>
@@ -160,7 +169,7 @@ function renderNextStudent() {
             <div>📅 ${nextLesson.date.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit' })}</div>
             <div>🕐 ${nextLesson.time} Uhr</div>
             <div>⏱️ ${nextLesson.duration} Min</div>
-            <div>📚 ${completedLessons} Einheiten</div>
+            <div>🕐 ${totalHours}h Unterricht</div>
         </div>
         <div class="whatsapp-sender">
             <input type="text" id="whatsappLinkInput" placeholder="Link hier einfügen (z.B. kMeet-Link)..." value="${whatsappLink}">
@@ -228,7 +237,7 @@ function renderTodayLessons() {
     }
     
     container.innerHTML = todayLessons.map(lesson => {
-        const completedLessons = calculateCompletedLessons(lesson.student);
+        const totalHours = calculateTotalHours(lesson.student);
         return `
             <div class="student-card">
                 <div style="display: flex; justify-content: space-between;">
@@ -240,7 +249,7 @@ function renderTodayLessons() {
                     </div>
                     <div style="text-align: right;">
                         <div style="color: #666; font-size: 0.9em;">Seit: ${lesson.student.start_date || 'k.A.'}</div>
-                        <div style="color: #8B4513; font-weight: bold;">📚 ${completedLessons} Einheiten</div>
+                        <div style="color: #8B4513; font-weight: bold;">🕐 ${totalHours}h Unterricht</div>
                     </div>
                 </div>
             </div>
@@ -317,7 +326,7 @@ function renderStudentsList() {
     container.innerHTML = students.map(s => {
         const nextLesson = getNextLesson(s);
         const allTimes = s.standard_times || [];
-        const completedLessons = calculateCompletedLessons(s);
+        const totalHours = calculateTotalHours(s);
         
         return `
             <div class="student-card">
@@ -325,8 +334,11 @@ function renderStudentsList() {
                     <div style="flex: 1;">
                         <div class="student-name">${s.name}</div>
                         <div class="student-details">
+                            <div style="margin-bottom: 8px;">📱 ${s.phone || 'Keine Telefonnummer'}</div>
+                            <div style="margin-bottom: 8px;">📧 ${s.email || 'Keine Email'}</div>
+                            <div style="margin-bottom: 8px;">🌍 ${s.mother_language || 'k.A.'} | 📊 ${s.level || 'k.A.'}</div>
                             ${allTimes.length > 0 ? `
-                                <div style="margin-bottom: 10px;"><strong>📅 Wöchentliche Termine:</strong></div>
+                                <div style="margin-top: 15px; margin-bottom: 10px;"><strong>📅 Wöchentliche Termine:</strong></div>
                                 ${allTimes.map(t => `
                                     <div style="margin-left: 15px;">
                                         • ${dayNames[t.day]} ${t.time} Uhr (${t.duration} Min)
@@ -335,9 +347,8 @@ function renderStudentsList() {
                                 <div style="margin-top: 10px;">
                                     🎯 Nächste Stunde: ${nextLesson ? nextLesson.date.toLocaleDateString('de-DE') + ' ' + nextLesson.time + ' Uhr' : 'k.A.'}
                                 </div>
-                            ` : '<div>⚠️ Noch keine Termine festgelegt</div>'}
-                            <div style="margin-top: 5px;">📞 ${s.phone || 'Keine Telefonnummer'}</div>
-                            <div style="margin-top: 5px;">📚 Beginn: ${s.start_date || 'k.A.'} | Einheiten: ${completedLessons}</div>
+                            ` : '<div style="margin-top: 10px;">⚠️ Noch keine Termine festgelegt</div>'}
+                            <div style="margin-top: 10px;">🗓️ Beginn: ${s.start_date || 'k.A.'} | 🕐 <strong>${totalHours}h Unterricht</strong></div>
                         </div>
                     </div>
                     <button class="btn btn-edit" onclick="openEditModal('${s.id}')">
@@ -355,6 +366,18 @@ window.openEditModal = function(studentId) {
     
     currentEditStudent = studentId;
     
+    // Alle Felder füllen
+    document.getElementById('editName').value = student.name || '';
+    document.getElementById('editPhone').value = student.phone || '';
+    document.getElementById('editEmail').value = student.email || '';
+    document.getElementById('editMotherLanguage').value = student.mother_language || '';
+    document.getElementById('editGoals').value = student.goals || '';
+    document.getElementById('editLevel').value = student.level || '';
+    document.getElementById('editLearningType').value = student.learning_type || '';
+    document.getElementById('editPassword').value = student.password || '';
+    document.getElementById('editStartDate').value = student.start_date || '';
+    
+    // Termine laden
     const timeSlotsContainer = document.getElementById('timeSlotsContainer');
     timeSlotsContainer.innerHTML = '';
     
@@ -366,10 +389,6 @@ window.openEditModal = function(studentId) {
         addTimeSlotToModal();
     }
     
-    document.getElementById('editStartDate').value = student.start_date || '';
-    document.getElementById('editTotalLessons').value = student.total_lessons || 0;
-    document.getElementById('editPhone').value = student.phone || '';
-    
     document.getElementById('editStudentModal').classList.add('active');
 };
 
@@ -378,7 +397,7 @@ function addTimeSlotToModal(timeSlot = null) {
     const timeSlotDiv = document.createElement('div');
     timeSlotDiv.className = 'time-slot';
     timeSlotDiv.innerHTML = `
-        <div class="form-group">
+        <div class="form-group" style="margin: 0;">
             <label>Wochentag</label>
             <select class="time-day">
                 <option value="1">Montag</option>
@@ -390,15 +409,18 @@ function addTimeSlotToModal(timeSlot = null) {
                 <option value="0">Sonntag</option>
             </select>
         </div>
-        <div class="form-group">
+        <div class="form-group" style="margin: 0;">
             <label>Uhrzeit</label>
             <input type="time" class="time-time" value="${timeSlot?.time || '14:00'}">
         </div>
-        <div class="form-group">
-            <label>Dauer (Minuten)</label>
+        <div class="form-group" style="margin: 0;">
+            <label>Dauer (Min)</label>
             <input type="number" class="time-duration" value="${timeSlot?.duration || 60}" min="15" step="15">
         </div>
-        ${container.children.length > 0 ? `<button type="button" class="remove-time" onclick="this.parentElement.remove()">✖ Entfernen</button>` : ''}
+        <div>
+            <label style="opacity: 0;">X</label>
+            <button type="button" class="remove-time" onclick="this.parentElement.parentElement.remove()">✖</button>
+        </div>
     `;
     
     if (timeSlot) {
@@ -427,10 +449,16 @@ window.saveStudentEdit = async function() {
     });
     
     const updates = {
+        name: document.getElementById('editName').value.trim(),
+        phone: document.getElementById('editPhone').value.trim(),
+        email: document.getElementById('editEmail').value.trim() || null,
+        mother_language: document.getElementById('editMotherLanguage').value.trim(),
+        goals: document.getElementById('editGoals').value.trim(),
+        level: document.getElementById('editLevel').value,
+        learning_type: document.getElementById('editLearningType').value.trim(),
+        password: document.getElementById('editPassword').value.trim(),
         standard_times: timeSlots,
-        start_date: document.getElementById('editStartDate').value,
-        total_lessons: parseInt(document.getElementById('editTotalLessons').value) || 0,
-        phone: document.getElementById('editPhone').value
+        start_date: document.getElementById('editStartDate').value
     };
     
     try {
@@ -441,7 +469,7 @@ window.saveStudentEdit = async function() {
         
         if (error) throw error;
         
-        alert('Erfolgreich gespeichert!');
+        alert('✅ Erfolgreich gespeichert!');
         closeModal();
         await loadData();
     } catch (error) {
@@ -449,20 +477,55 @@ window.saveStudentEdit = async function() {
     }
 };
 
+window.deleteStudent = async function() {
+    if (!currentEditStudent) return;
+    
+    const student = students.find(s => s.id == currentEditStudent);
+    if (!confirm(`Wirklich Schüler "${student.name}" löschen? Dies kann nicht rückgängig gemacht werden!`)) {
+        return;
+    }
+    
+    try {
+        // Erst Hausaufgaben löschen
+        await supabase.from('homework').delete().eq('student_id', currentEditStudent);
+        
+        // Dann Verschiebungsanfragen löschen
+        await supabase.from('reschedule_requests').delete().eq('student_id', currentEditStudent);
+        
+        // Dann Schüler löschen
+        const { error } = await supabase
+            .from('students')
+            .delete()
+            .eq('id', currentEditStudent);
+        
+        if (error) throw error;
+        
+        alert('🗑️ Schüler wurde gelöscht!');
+        closeModal();
+        await loadData();
+    } catch (error) {
+        alert('Fehler beim Löschen: ' + error.message);
+    }
+};
+
 window.openAddStudentModal = function() {
+    // Passwort automatisch generieren
+    document.getElementById('addStudentPassword').value = generatePassword();
     document.getElementById('addStudentModal').classList.add('active');
+};
+
+window.generateNewPassword = function() {
+    document.getElementById('addStudentPassword').value = generatePassword();
 };
 
 window.saveNewStudent = async function() {
     const name = document.getElementById('addStudentName').value.trim();
-    const email = document.getElementById('addStudentEmail').value.trim();
     const phone = document.getElementById('addStudentPhone').value.trim();
-    const motherLanguage = document.getElementById('addStudentMotherLanguage').value.trim();
-    const goals = document.getElementById('addStudentGoals').value.trim();
-    const level = document.getElementById('addStudentLevel').value;
+    const email = document.getElementById('addStudentEmail').value.trim();
+    const password = document.getElementById('addStudentPassword').value.trim();
     
-    if (!name || !email) {
-        alert('Bitte Name und Email ausfüllen!');
+    if (!name || !phone || !password) {
+        alert('Bitte Name, Telefonnummer und Passwort ausfüllen!');
         return;
     }
     
@@ -471,11 +534,12 @@ window.saveNewStudent = async function() {
             .from('students')
             .insert([{
                 name: name,
-                email: email,
                 phone: phone,
-                mother_language: motherLanguage,
-                goals: goals,
-                level: level,
+                email: email || null,
+                password: password,
+                mother_language: document.getElementById('addStudentMotherLanguage').value.trim(),
+                goals: document.getElementById('addStudentGoals').value.trim(),
+                level: document.getElementById('addStudentLevel').value,
                 learning_type: '',
                 standard_times: [],
                 start_date: new Date().toISOString().split('T')[0],
@@ -485,13 +549,14 @@ window.saveNewStudent = async function() {
         
         if (error) throw error;
         
-        alert('Schüler erfolgreich erstellt!');
+        alert('✅ Schüler erfolgreich erstellt!');
         closeModal();
         await loadData();
         
+        // Formular leeren
         document.getElementById('addStudentName').value = '';
-        document.getElementById('addStudentEmail').value = '';
         document.getElementById('addStudentPhone').value = '';
+        document.getElementById('addStudentEmail').value = '';
         document.getElementById('addStudentMotherLanguage').value = '';
         document.getElementById('addStudentGoals').value = '';
         document.getElementById('addStudentLevel').value = '';
@@ -501,8 +566,13 @@ window.saveNewStudent = async function() {
     }
 };
 
+function generatePassword() {
+    const words = ['katze', 'mango', 'ananas', 'koala', 'giraffe', 'kiwi', 'banane', 'tiger', 'panda', 'apfel', 'birne', 'elefant', 'zebra', 'orange', 'papaya', 'loewe', 'delfin', 'erdbeere', 'pinguin', 'affe'];
+    return words[Math.floor(Math.random() * words.length)];
+}
+
 // ===================================
-// HAUSAUFGABEN-VERWALTUNG (NEU!)
+// HAUSAUFGABEN-VERWALTUNG
 // ===================================
 
 function renderHomeworkManagement() {
@@ -554,7 +624,6 @@ function renderHomeworkManagement() {
 }
 
 window.openAddHomeworkModal = function() {
-    // Schüler-Dropdown füllen
     const select = document.getElementById('hwStudentSelect');
     select.innerHTML = '<option value="">Bitte wählen</option>' + 
         students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
@@ -599,7 +668,7 @@ window.saveNewHomework = async function() {
         
         if (error) throw error;
         
-        alert('Hausaufgabe erfolgreich erstellt!');
+        alert('✅ Hausaufgabe erfolgreich erstellt!');
         closeModal();
         await loadHomework();
         renderHomeworkManagement();
@@ -624,16 +693,15 @@ window.openEditHomeworkModal = async function(homeworkId) {
     
     currentEditHomework = homeworkId;
     
-    // Felder füllen
     document.getElementById('editHwTitle').value = hw.title;
     document.getElementById('editHwDescription').value = hw.description || '';
-    document.getElementById('editHwDeadline').value = hw.deadline.slice(0, 16); // Format für datetime-local
+    document.getElementById('editHwDeadline').value = hw.deadline.slice(0, 16);
     document.getElementById('editHwSubmissionType').value = hw.submission_type;
     document.getElementById('editHwCustomSubmission').value = hw.custom_submission_text || '';
     
     toggleEditCustomSubmission();
     
-    // Als gelesen markieren (automatisch beim Öffnen durch Trainer)
+    // Als gelesen markieren
     if (!hw.is_read) {
         await supabase
             .from('homework')
@@ -665,23 +733,21 @@ window.saveEditedHomework = async function() {
     }
     
     try {
-        const { error } = await supabase
-            .from('homework')
+        const { error } = await supabase.from('homework')
             .update({
                 title: title,
                 description: description,
                 deadline: deadline,
                 submission_type: submissionType,
                 custom_submission_text: submissionType === 'custom' ? customText : null,
-                type: submissionType,
-                is_read: false, // Zurücksetzen bei Änderung
+                is_read: false,
                 last_updated: new Date().toISOString()
             })
             .eq('id', currentEditHomework);
         
         if (error) throw error;
         
-        alert('Hausaufgabe aktualisiert! Status wurde auf "ungelesen" zurückgesetzt.');
+        alert('✅ Hausaufgabe aktualisiert! Status wurde auf "ungelesen" zurückgesetzt.');
         closeModal();
         await loadHomework();
         renderHomeworkManagement();
@@ -704,7 +770,7 @@ window.deleteHomework = async function() {
         
         if (error) throw error;
         
-        alert('Hausaufgabe gelöscht!');
+        alert('🗑️ Hausaufgabe gelöscht!');
         closeModal();
         await loadHomework();
         renderHomeworkManagement();
@@ -784,7 +850,6 @@ function renderAll() {
 }
 
 // ===================================
-
 // INITIALISIERUNG
 // ===================================
 
@@ -798,5 +863,4 @@ document.addEventListener('DOMContentLoaded', async function() {
     loadData();
     setInterval(checkUpcomingLessons, 60000);
     checkUpcomingLessons();
-    console.log('openAddHomeworkModal defined:', typeof window.openAddHomeworkModal);
 });
