@@ -450,7 +450,7 @@ window.saveStudentEdit = async function() {
     
     const updates = {
         name: document.getElementById('editName').value.trim(),
-        phone: document.getElementById('editPhone').value.trim(),
+        phone: document.getElementById('editPhone').value.trim().replace(/\s+/g, ''),
         email: document.getElementById('editEmail').value.trim() || null,
         mother_language: document.getElementById('editMotherLanguage').value.trim(),
         goals: document.getElementById('editGoals').value.trim(),
