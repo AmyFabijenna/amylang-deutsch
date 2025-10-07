@@ -754,6 +754,10 @@ window.toggleEditCustomSubmission = function() {
     customGroup.style.display = type === 'custom' ? 'block' : 'none';
 };
 
+
+
+
+
 window.saveEditedHomework = async function() {
     console.log('💾 START: Speichere Hausaufgabe...', currentEditHomework);
     
@@ -762,9 +766,18 @@ window.saveEditedHomework = async function() {
         return;
     }
     
-    // ID als Zahl sicherstellen
     const homeworkId = parseInt(currentEditHomework);
     console.log('🔢 Homework ID als Zahl:', homeworkId);
+    
+    // ZUERST: Prüfen ob die Hausaufgabe in unserer lokalen Variable existiert
+    const localHomework = homework.find(h => h.id === homeworkId);
+    if (!localHomework) {
+        console.error('❌ Hausaufgabe nicht in lokaler Variable gefunden:', homeworkId);
+        alert('Fehler: Hausaufgabe wurde lokal nicht gefunden. Bitte Seite neu laden.');
+        return;
+    }
+    
+    console.log('✅ Hausaufgabe lokal gefunden:', localHomework);
     
     const title = document.getElementById('editHwTitle').value.trim();
     const description = document.getElementById('editHwDescription').value.trim();
@@ -772,33 +785,14 @@ window.saveEditedHomework = async function() {
     const submissionType = document.getElementById('editHwSubmissionType').value;
     const customText = document.getElementById('editHwCustomSubmission').value.trim();
     
-    console.log('📝 Neue Daten:', { title, description, deadline, submissionType, customText });
-    
     if (!title || !deadline) {
         alert('Bitte alle Pflichtfelder ausfüllen!');
         return;
     }
     
     try {
-        console.log('📤 Sende Update an Supabase für ID:', homeworkId);
+        console.log('📤 Versuche UPDATE für ID:', homeworkId);
         
-        // ZUERST: Prüfen ob die Hausaufgabe existiert
-        console.log('🔍 Prüfe ob Hausaufgabe existiert...');
-        const { data: existingData, error: checkError } = await supabase
-            .from('homework')
-            .select('id')
-            .eq('id', homeworkId)
-            .single();
-            
-        if (checkError || !existingData) {
-            console.error('❌ Hausaufgabe nicht gefunden:', checkError);
-            alert('Fehler: Hausaufgabe wurde nicht in der Datenbank gefunden (ID: ' + homeworkId + ')');
-            return;
-        }
-        
-        console.log('✅ Hausaufgabe existiert:', existingData);
-        
-        // JETZT: Update durchführen
         const updateData = {
             title: title,
             description: description,
@@ -811,6 +805,7 @@ window.saveEditedHomework = async function() {
         
         console.log('📦 Update-Daten:', updateData);
         
+        // UPDATE versuchen
         const { data, error } = await supabase
             .from('homework')
             .update(updateData)
@@ -818,42 +813,85 @@ window.saveEditedHomework = async function() {
             .select();
         
         if (error) {
-            console.error('❌ SUPABASE UPDATE FEHLER:', error);
-            alert('Datenbank-Fehler: ' + error.message);
+            console.error('❌ SUPABASE FEHLER:', error);
+            
+            // Wenn UPDATE fehlschlägt, versuche INSERT
+            console.log('🔄 Versuche INSERT statt UPDATE...');
+            await tryInsertInstead(homeworkId, updateData, localHomework);
             return;
         }
-        
-        console.log('✅ SUPABASE UPDATE ERFOLG:', data);
         
         if (!data || data.length === 0) {
-            console.error('❌ Keine Daten zurückbekommen - Update hat keine Zeile betroffen');
-            alert('Fehler: Update hat keine Zeile in der Datenbank verändert');
+            console.log('🔄 UPDATE hat keine Zeile betroffen, versuche INSERT...');
+            await tryInsertInstead(homeworkId, updateData, localHomework);
             return;
         }
+        
+        console.log('✅ UPDATE ERFOLGREICH:', data);
         
         // Lokale Variable aktualisieren
         const homeworkIndex = homework.findIndex(h => h.id === homeworkId);
         if (homeworkIndex !== -1) {
             homework[homeworkIndex] = data[0];
-            console.log('✅ Lokale Variable aktualisiert');
-        } else {
-            console.warn('⚠️ Hausaufgabe nicht in lokaler Variable gefunden');
         }
         
         closeModal();
-        
-        // Komplett neu laden und rendern
         await loadHomework();
         renderHomeworkManagement();
         
-        console.log('🎉 HAUSAUFGABE ERFOLGREICH GESPEICHERT');
         alert('✅ Hausaufgabe aktualisiert!');
         
     } catch (error) {
-        console.error('❌ UNBEKANNTER FEHLER:', error);
-        alert('Unbekannter Fehler: ' + error.message);
+        console.error('❌ FEHLER:', error);
+        alert('Fehler: ' + error.message);
     }
 };
+
+// Neue Funktion für INSERT falls UPDATE nicht funktioniert
+async function tryInsertInstead(homeworkId, updateData, localHomework) {
+    try {
+        const insertData = {
+            ...updateData,
+            id: homeworkId, // Explizite ID setzen
+            student_id: localHomework.student_id,
+            completed: localHomework.completed || false,
+            created_at: localHomework.created_at || new Date().toISOString()
+        };
+        
+        console.log('📤 INSERT mit Daten:', insertData);
+        
+        const { data, error } = await supabase
+            .from('homework')
+            .insert([insertData])
+            .select();
+            
+        if (error) {
+            console.error('❌ INSERT FEHLER:', error);
+            alert('Fehler beim Erstellen der Hausaufgabe: ' + error.message);
+            return;
+        }
+        
+        console.log('✅ INSERT ERFOLGREICH:', data);
+        
+        // Lokale Variable aktualisieren
+        const homeworkIndex = homework.findIndex(h => h.id === homeworkId);
+        if (homeworkIndex !== -1) {
+            homework[homeworkIndex] = data[0];
+        } else {
+            homework.push(data[0]);
+        }
+        
+        closeModal();
+        await loadHomework();
+        renderHomeworkManagement();
+        
+        alert('✅ Hausaufgabe erstellt!');
+        
+    } catch (error) {
+        console.error('❌ INSERT FEHLER:', error);
+        alert('Fehler: ' + error.message);
+    }
+}
 
 
 window.deleteHomework = async function() {
