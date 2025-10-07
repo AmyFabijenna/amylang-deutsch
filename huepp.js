@@ -774,8 +774,11 @@ window.saveEditedHomework = async function() {
     }
     
     try {
-        console.log('📤 Sende Update an Datenbank...');
-        const { error } = await supabase.from('homework')
+        console.log('📤 Sende Update an Datenbank für ID:', currentEditHomework);
+        
+        // 1. ZUERST Datenbank-Update
+        const { data, error } = await supabase
+            .from('homework')
             .update({
                 title: title,
                 description: description,
@@ -785,42 +788,35 @@ window.saveEditedHomework = async function() {
                 is_read: false,
                 last_updated: new Date().toISOString()
             })
-            .eq('id', currentEditHomework);
+            .eq('id', currentEditHomework)
+            .select(); // WICHTIG: select() hinzufügen um die aktualisierten Daten zurückzubekommen
         
         if (error) {
             console.error('❌ Datenbank-Fehler:', error);
             throw error;
         }
         
-        console.log('✅ Datenbank-Update erfolgreich');
+        console.log('✅ Datenbank-Update erfolgreich:', data);
         
-        // DIREKTES UPDATE der homework-Variable für sofortige Anzeige
-        const homeworkIndex = homework.findIndex(h => h.id === currentEditHomework);
-        if (homeworkIndex !== -1) {
-            homework[homeworkIndex] = {
-                ...homework[homeworkIndex],
-                title: title,
-                description: description,
-                deadline: deadline,
-                submission_type: submissionType,
-                custom_submission_text: submissionType === 'custom' ? customText : null,
-                is_read: false,
-                last_updated: new Date().toISOString()
-            };
-            console.log('✅ Homework-Variable aktualisiert:', homework[homeworkIndex]);
-        } else {
-            console.warn('⚠️ Homework-Eintrag nicht in Variable gefunden');
+        if (data && data.length > 0) {
+            // 2. DIREKTES UPDATE der homework-Variable mit den Daten aus der Datenbank
+            const homeworkIndex = homework.findIndex(h => h.id === currentEditHomework);
+            if (homeworkIndex !== -1) {
+                homework[homeworkIndex] = data[0];
+                console.log('✅ Homework-Variable aktualisiert mit DB-Daten:', homework[homeworkIndex]);
+            }
         }
         
+        // 3. Modal schließen
         closeModal();
         
-        // EXPLIZIT neu rendern für sofortige Anzeige
-        console.log('🔄 Rendere Hausaufgaben neu...');
-        renderHomeworkManagement();
+        // 4. KOMPLETT NEU LADEN aller Daten
+        console.log('🔄 Lade ALLE Daten neu...');
+        await loadData(); // Lädt students, requests UND homework neu
         
-        // ABER AUCH: Datenbank neu laden um sicherzustellen dass alles synchron ist
-        console.log('🔄 Lade Datenbank-Daten neu für zukünftige Verwendung...');
-        await loadHomework();
+        // 5. Neu rendern
+        console.log('🔄 Rendere alles neu...');
+        renderAll();
         
         alert('✅ Hausaufgabe aktualisiert!');
         
@@ -829,6 +825,7 @@ window.saveEditedHomework = async function() {
         alert('Fehler: ' + error.message);
     }
 };
+
 
 window.deleteHomework = async function() {
     if (!currentEditHomework) return;
