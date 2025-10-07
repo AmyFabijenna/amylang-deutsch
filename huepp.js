@@ -72,6 +72,7 @@ async function loadRescheduleRequests() {
 }
 
 async function loadHomework() {
+    console.log('🔄 Lade Hausaufgaben...');
     const { data, error } = await supabase
         .from('homework')
         .select('*')
@@ -82,6 +83,7 @@ async function loadHomework() {
         return;
     }
     homework = data || [];
+    console.log('✅ Hausaufgaben geladen:', homework.length, 'Einträge');
 }
 
 // ===================================
@@ -597,6 +599,7 @@ function generatePassword() {
 // ===================================
 
 function renderHomeworkManagement() {
+    console.log('🔄 Rendere Hausaufgaben-Management...', homework.length, 'Einträge');
     const container = document.getElementById('hwStudentsGrid');
     
     if (students.length === 0) {
@@ -643,6 +646,8 @@ function renderHomeworkManagement() {
             </div>
         `;
     }).join('');
+    
+    console.log('✅ Hausaufgaben-Management gerendert');
 }
 
 window.openAddHomeworkModal = function() {
@@ -749,8 +754,9 @@ window.toggleEditCustomSubmission = function() {
     customGroup.style.display = type === 'custom' ? 'block' : 'none';
 };
 
-
 window.saveEditedHomework = async function() {
+    console.log('💾 Speichere Hausaufgabe...', currentEditHomework);
+    
     if (!currentEditHomework) {
         alert('Keine Hausaufgabe ausgewählt!');
         return;
@@ -768,6 +774,7 @@ window.saveEditedHomework = async function() {
     }
     
     try {
+        console.log('📤 Sende Update an Datenbank...');
         const { error } = await supabase.from('homework')
             .update({
                 title: title,
@@ -780,7 +787,12 @@ window.saveEditedHomework = async function() {
             })
             .eq('id', currentEditHomework);
         
-        if (error) throw error;
+        if (error) {
+            console.error('❌ Datenbank-Fehler:', error);
+            throw error;
+        }
+        
+        console.log('✅ Datenbank-Update erfolgreich');
         
         // DIREKTES UPDATE der homework-Variable
         const homeworkIndex = homework.findIndex(h => h.id === currentEditHomework);
@@ -795,18 +807,24 @@ window.saveEditedHomework = async function() {
                 is_read: false,
                 last_updated: new Date().toISOString()
             };
+            console.log('✅ Homework-Variable aktualisiert:', homework[homeworkIndex]);
+        } else {
+            console.warn('⚠️ Homework-Eintrag nicht in Variable gefunden');
         }
         
         closeModal();
-        renderHomeworkManagement(); // Direkt mit aktualisierter Variable rendern
+        
+        // EXPLIZIT neu rendern
+        console.log('🔄 Rendere Hausaufgaben neu...');
+        renderHomeworkManagement();
         
         alert('✅ Hausaufgabe aktualisiert!');
         
     } catch (error) {
+        console.error('❌ Fehler beim Speichern:', error);
         alert('Fehler: ' + error.message);
     }
 };
-
 
 window.deleteHomework = async function() {
     if (!currentEditHomework) return;
