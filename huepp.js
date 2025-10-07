@@ -754,9 +754,7 @@ window.saveEditedHomework = async function() {
     
     const title = document.getElementById('editHwTitle').value.trim();
     const description = document.getElementById('editHwDescription').value.trim();
-    const deadlineDate = document.getElementById('hwDeadline').value;
-const deadlineTime = document.getElementById('hwDeadlineTime').value || '17:00';
-const deadline = `${deadlineDate}T${deadlineTime}:00`;
+    const deadline = document.getElementById('editHwDeadline').value;
     const submissionType = document.getElementById('editHwSubmissionType').value;
     const customText = document.getElementById('editHwCustomSubmission').value.trim();
     
