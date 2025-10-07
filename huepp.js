@@ -622,20 +622,21 @@ function renderHomeworkManagement() {
                     ${studentHomework.length === 0 ? 
                         '<p style="color: #666; font-style: italic;">Keine Hausaufgaben</p>' :
                         studentHomework.slice(0, 3).map(hw => `
-                            <div class="hw-item" onclick="event.stopPropagation(); openEditHomeworkModal(${hw.id});">
-                                <div>
-                                    <div class="hw-item-title">${hw.title}</div>
-                                    <div class="hw-item-meta">
-                                        📅 ${new Date(hw.deadline).toLocaleDateString('de-DE')} 
-                                        ${hw.completed ? '| ✅ Erledigt' : ''}
-                                    </div>
-                                </div>
-                                <div>
-                                    <span class="read-badge ${hw.is_read ? 'read' : ''}">
-                                        ${hw.is_read ? '👁️ Gelesen' : '🔴 Ungelesen'}
-                                    </span>
-                                </div>
-                            </div>
+                    <div class="hw-item" onclick="event.stopPropagation(); openEditHomeworkModal(${hw.id});">
+                        <div>
+                            <div class="hw-item-title">${hw.title}</div>
+                            ${hw.description ? `<div style="font-size: 0.9em; color: #666; margin-top: 5px;">${hw.description}</div>` : ''}
+                            <div class="hw-item-meta">
+                            📅 ${new Date(hw.deadline).toLocaleDateString('de-DE')} 
+                            ${hw.completed ? '| ✅ Erledigt' : ''}
+                        </div>
+                    </div>
+                <div>
+        <span class="read-badge ${hw.is_read ? 'read' : ''}">
+            ${hw.is_read ? '👁️ Gelesen' : '🔴 Ungelesen'}
+        </span>
+    </div>
+</div>
                         `).join('')
                     }
                     ${studentHomework.length > 3 ? `<p style="color: #666; font-size: 0.9em; margin-top: 10px;">... und ${studentHomework.length - 3} weitere</p>` : ''}
@@ -663,7 +664,9 @@ window.saveNewHomework = async function() {
     const studentId = document.getElementById('hwStudentSelect').value;
     const title = document.getElementById('hwTitle').value.trim();
     const description = document.getElementById('hwDescription').value.trim();
-    const deadline = document.getElementById('hwDeadline').value;
+    const deadlineDate = document.getElementById('hwDeadline').value;
+const deadlineTime = document.getElementById('hwDeadlineTime').value || '23:59';
+const deadline = `${deadlineDate}T${deadlineTime}:00`;
     const submissionType = document.getElementById('hwSubmissionType').value;
     const customText = document.getElementById('hwCustomSubmission').value.trim();
     
@@ -745,7 +748,9 @@ window.saveEditedHomework = async function() {
     
     const title = document.getElementById('editHwTitle').value.trim();
     const description = document.getElementById('editHwDescription').value.trim();
-    const deadline = document.getElementById('editHwDeadline').value;
+    const deadlineDate = document.getElementById('hwDeadline').value;
+const deadlineTime = document.getElementById('hwDeadlineTime').value || '17:00';
+const deadline = `${deadlineDate}T${deadlineTime}:00`;
     const submissionType = document.getElementById('editHwSubmissionType').value;
     const customText = document.getElementById('editHwCustomSubmission').value.trim();
     
