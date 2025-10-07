@@ -710,7 +710,7 @@ window.saveNewHomework = async function() {
 };
 
 window.openEditHomeworkModal = async function(homeworkId) {
-    const hw = homework.find(h => h.id === homeworkId);
+    const hw = homework.find(h => h.id == homeworkId); // == statt ===
     if (!hw) return;
     
     currentEditHomework = homeworkId;
