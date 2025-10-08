@@ -358,6 +358,10 @@
             </div>
         </div>
 
+
+        <!-- Zahlungsbenachrichtigung einfügen -->
+<div id="paymentNotification" style="display: none;"></div>
+
         <div id="studentView" class="student-view">
             <a href="index.html" class="back-btn">← Zurück zur Hauptseite</a>
             <div class="login-box">
@@ -887,6 +891,112 @@
         }, 120000);
 
         setTimeout(updateRescheduleButton, 1000);
+
+
+        // ===================================
+// ZAHLUNGSBENACHRICHTIGUNG FÜR SCHÜLER
+// Füge diese Funktionen zur schueler.html hinzu
+// ===================================
+
+async function checkPaymentStatus() {
+    if (!currentStudent) return;
+    
+    const now = new Date();
+    const day = now.getDate();
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const nextMonth = getNextMonthStr();
+    
+    // Ab 28. des Monats = Benachrichtigung für nächsten Monat
+    const trackingMonth = day >= 28 ? nextMonth : currentMonth;
+    
+    // Payment-Status vom Server holen
+    const { data: payment } = await supabase
+        .from('payments')
+        .select('*')
+        .eq('student_id', currentStudent.id)
+        .eq('month', trackingMonth)
+        .single();
+    
+    const isPaid = payment?.paid || false;
+    const notificationContainer = document.getElementById('paymentNotification');
+    
+    if (isPaid) {
+        // Bezahlt = keine Benachrichtigung
+        notificationContainer.style.display = 'none';
+        return;
+    }
+    
+    // NICHT bezahlt = Benachrichtigung anzeigen
+    let notificationHtml = '';
+    let bgColor = '';
+    let message = '';
+    
+    if (day >= 28 && day <= 5) {
+        // Vor Fälligkeit (28. bis 5.)
+        bgColor = 'linear-gradient(135deg, #FFA500, #FF8C00)';
+        message = `💰 Bitte überweise das Lehrhonorar bis zum 5. ${getMonthName(trackingMonth)}`;
+    } else if (day >= 6 && day < 10) {
+        // Leicht überfällig (6.-9.)
+        const daysOverdue = day - 5;
+        bgColor = 'linear-gradient(135deg, #FF6B35, #F7931E)';
+        message = `⚠️ Das Lehrhonorar ist seit dem 5. ${getMonthName(trackingMonth)} überfällig (${daysOverdue} Tag${daysOverdue > 1 ? 'e' : ''})`;
+    } else if (day >= 10) {
+        // Stark überfällig (ab 10.)
+        const daysOverdue = day - 5;
+        bgColor = 'linear-gradient(135deg, #DC143C, #8B0000)';
+        message = `🚨 DRINGEND: Das Lehrhonorar ist seit dem 5. ${getMonthName(trackingMonth)} überfällig (${daysOverdue} Tage)`;
+    }
+    
+    if (message) {
+        notificationHtml = `
+            <div style="
+                background: ${bgColor};
+                color: white;
+                padding: 20px;
+                border-radius: 15px;
+                margin-bottom: 20px;
+                font-weight: bold;
+                font-size: 1.1em;
+                text-align: center;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            ">
+                ${message}
+            </div>
+        `;
+        notificationContainer.innerHTML = notificationHtml;
+        notificationContainer.style.display = 'block';
+    } else {
+        notificationContainer.style.display = 'none';
+    }
+}
+
+function getNextMonthStr() {
+    const now = new Date();
+    const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    return `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function getMonthName(monthStr) {
+    const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 
+                       'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+    const month = parseInt(monthStr.split('-')[1]) - 1;
+    return monthNames[month];
+}
+
+// Beim Login aufrufen:
+async function loadStudentData() {
+    await loadMyLessons();
+    await loadMyHomeworkOverview();
+    await checkPaymentStatus(); // ← NEU hinzufügen
+    updateRescheduleButton();
+}
+
+// Regelmäßig prüfen (alle 5 Minuten)
+setInterval(() => {
+    if (currentStudent) {
+        checkPaymentStatus();
+    }
+}, 300000);
     </script>
 </body>
 </html>

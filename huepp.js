@@ -322,6 +322,11 @@ window.handleRequest = async function(requestId, approve) {
 // SCHÜLER-VERWALTUNG
 // ===================================
 
+// ===================================
+// AKTUALISIERTE renderStudentsList() für huepp.js
+// Ersetze die bestehende Funktion durch diese Version
+// ===================================
+
 function renderStudentsList() {
     const container = document.getElementById('studentsList');
     
@@ -353,9 +358,14 @@ function renderStudentsList() {
                             <div style="margin-top: 10px;">🗓️ Beginn: ${s.start_date || 'k.A.'} | 🕐 <strong>${totalHours}h Unterricht</strong></div>
                         </div>
                     </div>
-                    <button class="btn btn-edit" onclick="openEditModal('${s.id}')">
-                        ✏️ Bearbeiten
-                    </button>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-edit" onclick="openEditModal('${s.id}')">
+                            ✏️ Bearbeiten
+                        </button>
+                        <button class="btn btn-edit" onclick="showPaymentHistory(${s.id})" style="background: #4CAF50;">
+                            💰 Zahlungen
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
@@ -1001,3 +1011,199 @@ document.addEventListener('DOMContentLoaded', async function() {
     setInterval(checkUpcomingLessons, 60000);
     checkUpcomingLessons();
 });
+
+
+// ===================================
+// ZAHLUNGS-TRACKING FUNKTIONEN
+// Füge diese zu deiner bestehenden huepp.js hinzu
+// ===================================
+
+let payments = [];
+
+// Zum bestehenden loadData() hinzufügen
+async function loadPayments() {
+    const { data, error } = await supabase
+        .from('payments')
+        .select('*')
+        .order('month', { ascending: false });
+    
+    if (error) {
+        console.error('Fehler beim Laden der Zahlungen:', error);
+        return;
+    }
+    payments = data || [];
+}
+
+// Aktuellen Monat im Format "2025-10" bekommen
+function getCurrentMonth() {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
+
+// Nächsten Monat berechnen
+function getNextMonth() {
+    const now = new Date();
+    const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    return `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}`;
+}
+
+// Payment-Eintrag für Schüler und Monat erstellen/laden
+async function ensurePaymentEntry(studentId, month) {
+    const existing = payments.find(p => p.student_id === studentId && p.month === month);
+    
+    if (existing) return existing;
+    
+    const { data, error } = await supabase
+        .from('payments')
+        .insert([{
+            student_id: studentId,
+            month: month,
+            paid: false
+        }])
+        .select()
+        .single();
+    
+    if (error) {
+        console.error('Fehler beim Erstellen des Payment-Eintrags:', error);
+        return null;
+    }
+    
+    payments.push(data);
+    return data;
+}
+
+// Payment als bezahlt markieren
+window.markAsPaid = async function(studentId, month) {
+    await ensurePaymentEntry(studentId, month);
+    
+    const { error } = await supabase
+        .from('payments')
+        .update({
+            paid: true,
+            paid_date: new Date().toISOString()
+        })
+        .eq('student_id', studentId)
+        .eq('month', month);
+    
+    if (error) {
+        alert('Fehler beim Markieren: ' + error.message);
+        return;
+    }
+    
+    await loadPayments();
+    renderPaymentOverview();
+    alert('✅ Als bezahlt markiert!');
+};
+
+// Payment als unbezahlt markieren
+window.markAsUnpaid = async function(studentId, month) {
+    const { error } = await supabase
+        .from('payments')
+        .update({
+            paid: false,
+            paid_date: null
+        })
+        .eq('student_id', studentId)
+        .eq('month', month);
+    
+    if (error) {
+        alert('Fehler: ' + error.message);
+        return;
+    }
+    
+    await loadPayments();
+    renderPaymentOverview();
+};
+
+// Zahlungsübersicht rendern
+function renderPaymentOverview() {
+    const currentMonth = getCurrentMonth();
+    const nextMonth = getNextMonth();
+    const now = new Date();
+    const day = now.getDate();
+    
+    // Welchen Monat tracken wir? Ab 28. des Monats = nächster Monat
+    const trackingMonth = day >= 28 ? nextMonth : currentMonth;
+    
+    const container = document.getElementById('paymentOverview');
+    if (!container) return;
+    
+    const overviewHtml = students.map(student => {
+        const payment = payments.find(p => p.student_id === student.id && p.month === trackingMonth);
+        const isPaid = payment?.paid || false;
+        
+        return `
+            <div class="payment-card ${isPaid ? 'paid' : 'unpaid'}">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div class="student-name">${student.name}</div>
+                        <div style="color: #666; font-size: 0.9em;">
+                            ${trackingMonth} ${isPaid ? `✅ Bezahlt am ${new Date(payment.paid_date).toLocaleDateString('de-DE')}` : '⏳ Ausstehend'}
+                        </div>
+                    </div>
+                    <div>
+                        ${isPaid ? 
+                            `<button class="btn" style="background: #f44336; color: white;" onclick="markAsUnpaid(${student.id}, '${trackingMonth}')">
+                                ❌ Als unbezahlt markieren
+                            </button>` :
+                            `<button class="btn btn-approve" onclick="markAsPaid(${student.id}, '${trackingMonth}')">
+                                ✅ Als bezahlt markieren
+                            </button>`
+                        }
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    container.innerHTML = `
+        <h3 style="color: #8B4513; margin-bottom: 15px;">
+            💰 Zahlungsübersicht ${trackingMonth}
+        </h3>
+        ${overviewHtml}
+    `;
+}
+
+// Zahlungshistorie anzeigen
+window.showPaymentHistory = function(studentId) {
+    const student = students.find(s => s.id === studentId);
+    if (!student) return;
+    
+    const studentPayments = payments
+        .filter(p => p.student_id === studentId)
+        .sort((a, b) => b.month.localeCompare(a.month));
+    
+    const historyHtml = studentPayments.length === 0 ? 
+        '<p>Keine Zahlungshistorie vorhanden</p>' :
+        studentPayments.map(p => `
+            <div style="background: rgba(255,255,255,0.3); padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+                <strong>${p.month}</strong>: 
+                ${p.paid ? 
+                    `✅ Bezahlt am ${new Date(p.paid_date).toLocaleDateString('de-DE')}` : 
+                    '❌ Nicht bezahlt'
+                }
+            </div>
+        `).join('');
+    
+    document.getElementById('paymentHistoryContent').innerHTML = historyHtml;
+    document.getElementById('paymentHistoryModal').classList.add('active');
+};
+
+// Zur loadData() Funktion hinzufügen:
+async function loadData() {
+    await loadStudents();
+    await loadRescheduleRequests();
+    await loadHomework();
+    await loadPayments(); // ← NEU
+    renderAll();
+}
+
+// Zur renderAll() Funktion hinzufügen:
+function renderAll() {
+    renderNextStudent();
+    renderTodayLessons();
+    renderRequests();
+    renderStudentsList();
+    renderHomeworkManagement();
+    renderPaymentOverview(); // ← NEU
+}
