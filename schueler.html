@@ -339,6 +339,10 @@
 </head>
 <body>
     <div class="container">
+
+        <!-- Zahlungsbenachrichtigung einfügen -->
+<div id="paymentNotification" style="display: none;"></div>
+        
         <div id="loginView">
             <div class="login-box">
                 <h1>🎓 Schüler Login</h1>
@@ -359,8 +363,7 @@
         </div>
 
 
-        <!-- Zahlungsbenachrichtigung einfügen -->
-<div id="paymentNotification" style="display: none;"></div>
+
 
         <div id="studentView" class="student-view">
             <a href="index.html" class="back-btn">← Zurück zur Hauptseite</a>
@@ -893,9 +896,9 @@
         setTimeout(updateRescheduleButton, 1000);
 
 
-        // ===================================
+// ===================================
 // ZAHLUNGSBENACHRICHTIGUNG FÜR SCHÜLER
-// Füge diese Funktionen zur schueler.html hinzu
+// Füge diesen Code in schueler.html im <script>-Bereich ein
 // ===================================
 
 async function checkPaymentStatus() {
@@ -903,11 +906,16 @@ async function checkPaymentStatus() {
     
     const now = new Date();
     const day = now.getDate();
-    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    const nextMonth = getNextMonthStr();
+    const month = now.getMonth() + 1;
+    const year = now.getFullYear();
+    const currentMonth = `${year}-${String(month).padStart(2, '0')}`;
     
-    // Ab 28. des Monats = Benachrichtigung für nächsten Monat
-    const trackingMonth = day >= 28 ? nextMonth : currentMonth;
+    // Ab 28. des Monats zeigen wir die Benachrichtigung für den NÄCHSTEN Monat
+    let trackingMonth = currentMonth;
+    if (day >= 28) {
+        const nextMonthDate = new Date(year, month, 1); // Nächster Monat
+        trackingMonth = `${nextMonthDate.getFullYear()}-${String(nextMonthDate.getMonth() + 1).padStart(2, '0')}`;
+    }
     
     // Payment-Status vom Server holen
     const { data: payment } = await supabase
@@ -915,7 +923,7 @@ async function checkPaymentStatus() {
         .select('*')
         .eq('student_id', currentStudent.id)
         .eq('month', trackingMonth)
-        .single();
+        .maybeSingle();
     
     const isPaid = payment?.paid || false;
     const notificationContainer = document.getElementById('paymentNotification');
@@ -927,28 +935,36 @@ async function checkPaymentStatus() {
     }
     
     // NICHT bezahlt = Benachrichtigung anzeigen
-    let notificationHtml = '';
-    let bgColor = '';
     let message = '';
+    let bgColor = '';
     
-    if (day >= 28 && day <= 5) {
-        // Vor Fälligkeit (28. bis 5.)
+    const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 
+                       'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+    const trackingMonthNum = parseInt(trackingMonth.split('-')[1]);
+    const monthName = monthNames[trackingMonthNum - 1];
+    
+    if (day >= 28 && day <= 31) {
+        // Vor Fälligkeit (28.-31. des Vormonats)
         bgColor = 'linear-gradient(135deg, #FFA500, #FF8C00)';
-        message = `💰 Bitte überweise das Lehrhonorar bis zum 5. ${getMonthName(trackingMonth)}`;
+        message = `💰 Bitte überweise das Lehrhonorar bis zum 5. ${monthName}`;
+    } else if (day >= 1 && day <= 5) {
+        // Noch innerhalb der Frist (1.-5.)
+        bgColor = 'linear-gradient(135deg, #FFA500, #FF8C00)';
+        message = `💰 Bitte überweise das Lehrhonorar bis zum 5. ${monthName}`;
     } else if (day >= 6 && day < 10) {
         // Leicht überfällig (6.-9.)
         const daysOverdue = day - 5;
         bgColor = 'linear-gradient(135deg, #FF6B35, #F7931E)';
-        message = `⚠️ Das Lehrhonorar ist seit dem 5. ${getMonthName(trackingMonth)} überfällig (${daysOverdue} Tag${daysOverdue > 1 ? 'e' : ''})`;
+        message = `⚠️ Das Lehrhonorar ist seit dem 5. ${monthName} überfällig (${daysOverdue} Tag${daysOverdue > 1 ? 'e' : ''})`;
     } else if (day >= 10) {
         // Stark überfällig (ab 10.)
         const daysOverdue = day - 5;
         bgColor = 'linear-gradient(135deg, #DC143C, #8B0000)';
-        message = `🚨 DRINGEND: Das Lehrhonorar ist seit dem 5. ${getMonthName(trackingMonth)} überfällig (${daysOverdue} Tage)`;
+        message = `🚨 DRINGEND: Das Lehrhonorar ist seit dem 5. ${monthName} überfällig (${daysOverdue} Tage)`;
     }
     
     if (message) {
-        notificationHtml = `
+        notificationContainer.innerHTML = `
             <div style="
                 background: ${bgColor};
                 color: white;
@@ -963,27 +979,13 @@ async function checkPaymentStatus() {
                 ${message}
             </div>
         `;
-        notificationContainer.innerHTML = notificationHtml;
         notificationContainer.style.display = 'block';
     } else {
         notificationContainer.style.display = 'none';
     }
 }
 
-function getNextMonthStr() {
-    const now = new Date();
-    const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-    return `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}`;
-}
-
-function getMonthName(monthStr) {
-    const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 
-                       'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
-    const month = parseInt(monthStr.split('-')[1]) - 1;
-    return monthNames[month];
-}
-
-// Beim Login aufrufen:
+// In loadStudentData() einbauen (ERWEITERE die bestehende Funktion):
 async function loadStudentData() {
     await loadMyLessons();
     await loadMyHomeworkOverview();
