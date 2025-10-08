@@ -8,7 +8,6 @@ const supabaseUrl = 'https://hfdjnttxavlghjfnjkms.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmZGpudHR4YXZsZ2hqZm5qa21zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk2OTQwNTIsImV4cCI6MjA3NTI3MDA1Mn0.LBLAkKzkquHvAmvFix4jIrudCVMGGjs5kfvK4l0RfIM';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-
 // AUTH CHECK
 // ===================================
 
@@ -27,6 +26,7 @@ async function checkAuth() {
 let students = [];
 let rescheduleRequests = [];
 let homework = [];
+let payments = [];
 let currentEditStudent = null;
 let currentEditHomework = null;
 let whatsappLink = '';
@@ -41,6 +41,7 @@ async function loadData() {
     await loadStudents();
     await loadRescheduleRequests();
     await loadHomework();
+    await loadPayments();
     renderAll();
 }
 
@@ -72,7 +73,7 @@ async function loadRescheduleRequests() {
 }
 
 async function loadHomework() {
-    console.log('🔄 Lade Hausaufgaben...');
+    console.log('📄 Lade Hausaufgaben...');
     const { data, error } = await supabase
         .from('homework')
         .select('*')
@@ -84,6 +85,19 @@ async function loadHomework() {
     }
     homework = data || [];
     console.log('✅ Hausaufgaben geladen:', homework.length, 'Einträge');
+}
+
+async function loadPayments() {
+    const { data, error } = await supabase
+        .from('payments')
+        .select('*')
+        .order('month', { ascending: false });
+    
+    if (error) {
+        console.error('Fehler beim Laden der Zahlungen:', error);
+        return;
+    }
+    payments = data || [];
 }
 
 // ===================================
@@ -320,11 +334,6 @@ window.handleRequest = async function(requestId, approve) {
 
 // ===================================
 // SCHÜLER-VERWALTUNG
-// ===================================
-
-// ===================================
-// AKTUALISIERTE renderStudentsList() für huepp.js
-// Ersetze die bestehende Funktion durch diese Version
 // ===================================
 
 function renderStudentsList() {
@@ -609,7 +618,7 @@ function generatePassword() {
 // ===================================
 
 function renderHomeworkManagement() {
-    console.log('🔄 Rendere Hausaufgaben-Management...', homework.length, 'Einträge');
+    console.log('📄 Rendere Hausaufgaben-Management...', homework.length, 'Einträge');
     const container = document.getElementById('hwStudentsGrid');
     
     if (students.length === 0) {
@@ -691,14 +700,14 @@ window.saveNewHomework = async function() {
     
     try {
         const { error } = await supabase
-    .from('homework')
-    .insert([{
-        student_id: studentId,
-        title: title,
-        description: description,
-        deadline: deadline,
-        type: submissionType,
-        submission_type: submissionType,
+            .from('homework')
+            .insert([{
+                student_id: studentId,
+                title: title,
+                description: description,
+                deadline: deadline,
+                type: submissionType,
+                submission_type: submissionType,
                 custom_submission_text: submissionType === 'custom' ? customText : null,
                 completed: false,
                 is_read: false,
@@ -728,7 +737,6 @@ window.saveNewHomework = async function() {
 };
 
 window.openEditHomeworkModal = async function(homeworkId) {
-    // Sicherstellen dass homeworkId eine Zahl ist
     const hwId = parseInt(homeworkId);
     const hw = homework.find(h => h.id === hwId);
     if (!hw) {
@@ -764,10 +772,6 @@ window.toggleEditCustomSubmission = function() {
     customGroup.style.display = type === 'custom' ? 'block' : 'none';
 };
 
-
-
-
-
 window.saveEditedHomework = async function() {
     console.log('💾 START: Speichere Hausaufgabe...', currentEditHomework);
     
@@ -779,7 +783,6 @@ window.saveEditedHomework = async function() {
     const homeworkId = parseInt(currentEditHomework);
     console.log('🔢 Homework ID als Zahl:', homeworkId);
     
-    // ZUERST: Prüfen ob die Hausaufgabe in unserer lokalen Variable existiert
     const localHomework = homework.find(h => h.id === homeworkId);
     if (!localHomework) {
         console.error('❌ Hausaufgabe nicht in lokaler Variable gefunden:', homeworkId);
@@ -815,7 +818,6 @@ window.saveEditedHomework = async function() {
         
         console.log('📦 Update-Daten:', updateData);
         
-        // UPDATE versuchen
         const { data, error } = await supabase
             .from('homework')
             .update(updateData)
@@ -824,9 +826,6 @@ window.saveEditedHomework = async function() {
         
         if (error) {
             console.error('❌ SUPABASE FEHLER:', error);
-            
-            // Wenn UPDATE fehlschlägt, versuche INSERT
-            console.log('🔄 Versuche INSERT statt UPDATE...');
             await tryInsertInstead(homeworkId, updateData, localHomework);
             return;
         }
@@ -839,7 +838,6 @@ window.saveEditedHomework = async function() {
         
         console.log('✅ UPDATE ERFOLGREICH:', data);
         
-        // Lokale Variable aktualisieren
         const homeworkIndex = homework.findIndex(h => h.id === homeworkId);
         if (homeworkIndex !== -1) {
             homework[homeworkIndex] = data[0];
@@ -857,12 +855,11 @@ window.saveEditedHomework = async function() {
     }
 };
 
-// Neue Funktion für INSERT falls UPDATE nicht funktioniert
 async function tryInsertInstead(homeworkId, updateData, localHomework) {
     try {
         const insertData = {
             ...updateData,
-            id: homeworkId, // Explizite ID setzen
+            id: homeworkId,
             student_id: localHomework.student_id,
             completed: localHomework.completed || false,
             created_at: localHomework.created_at || new Date().toISOString()
@@ -883,7 +880,6 @@ async function tryInsertInstead(homeworkId, updateData, localHomework) {
         
         console.log('✅ INSERT ERFOLGREICH:', data);
         
-        // Lokale Variable aktualisieren
         const homeworkIndex = homework.findIndex(h => h.id === homeworkId);
         if (homeworkIndex !== -1) {
             homework[homeworkIndex] = data[0];
@@ -902,7 +898,6 @@ async function tryInsertInstead(homeworkId, updateData, localHomework) {
         alert('Fehler: ' + error.message);
     }
 }
-
 
 window.deleteHomework = async function() {
     if (!currentEditHomework) return;
@@ -925,6 +920,157 @@ window.deleteHomework = async function() {
     } catch (error) {
         alert('Fehler: ' + error.message);
     }
+};
+
+// ===================================
+// ZAHLUNGS-TRACKING
+// ===================================
+
+function getCurrentMonth() {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function getNextMonth() {
+    const now = new Date();
+    const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    return `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}`;
+}
+
+async function ensurePaymentEntry(studentId, month) {
+    const existing = payments.find(p => p.student_id === studentId && p.month === month);
+    
+    if (existing) return existing;
+    
+    const { data, error } = await supabase
+        .from('payments')
+        .insert([{
+            student_id: studentId,
+            month: month,
+            paid: false
+        }])
+        .select()
+        .single();
+    
+    if (error) {
+        console.error('Fehler beim Erstellen des Payment-Eintrags:', error);
+        return null;
+    }
+    
+    payments.push(data);
+    return data;
+}
+
+window.markAsPaid = async function(studentId, month) {
+    await ensurePaymentEntry(studentId, month);
+    
+    const { error } = await supabase
+        .from('payments')
+        .update({
+            paid: true,
+            paid_date: new Date().toISOString()
+        })
+        .eq('student_id', studentId)
+        .eq('month', month);
+    
+    if (error) {
+        alert('Fehler beim Markieren: ' + error.message);
+        return;
+    }
+    
+    await loadPayments();
+    renderPaymentOverview();
+    alert('✅ Als bezahlt markiert!');
+};
+
+window.markAsUnpaid = async function(studentId, month) {
+    const { error } = await supabase
+        .from('payments')
+        .update({
+            paid: false,
+            paid_date: null
+        })
+        .eq('student_id', studentId)
+        .eq('month', month);
+    
+    if (error) {
+        alert('Fehler: ' + error.message);
+        return;
+    }
+    
+    await loadPayments();
+    renderPaymentOverview();
+};
+
+function renderPaymentOverview() {
+    const currentMonth = getCurrentMonth();
+    const nextMonth = getNextMonth();
+    const now = new Date();
+    const day = now.getDate();
+    
+    const trackingMonth = day >= 28 ? nextMonth : currentMonth;
+    
+    const container = document.getElementById('paymentOverview');
+    if (!container) return;
+    
+    const overviewHtml = students.map(student => {
+        const payment = payments.find(p => p.student_id === student.id && p.month === trackingMonth);
+        const isPaid = payment?.paid || false;
+        
+        return `
+            <div class="payment-card ${isPaid ? 'paid' : 'unpaid'}">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div class="student-name">${student.name}</div>
+                        <div style="color: #666; font-size: 0.9em;">
+                            ${trackingMonth} ${isPaid ? `✅ Bezahlt am ${new Date(payment.paid_date).toLocaleDateString('de-DE')}` : '⏳ Ausstehend'}
+                        </div>
+                    </div>
+                    <div>
+                        ${isPaid ? 
+                            `<button class="btn" style="background: #f44336; color: white;" onclick="markAsUnpaid(${student.id}, '${trackingMonth}')">
+                                ❌ Als unbezahlt markieren
+                            </button>` :
+                            `<button class="btn btn-approve" onclick="markAsPaid(${student.id}, '${trackingMonth}')">
+                                ✅ Als bezahlt markieren
+                            </button>`
+                        }
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    container.innerHTML = `
+        <h3 style="color: #8B4513; margin-bottom: 15px;">
+            💰 Zahlungsübersicht ${trackingMonth}
+        </h3>
+        ${overviewHtml}
+    `;
+}
+
+window.showPaymentHistory = function(studentId) {
+    const student = students.find(s => s.id === studentId);
+    if (!student) return;
+    
+    const studentPayments = payments
+        .filter(p => p.student_id === studentId)
+        .sort((a, b) => b.month.localeCompare(a.month));
+    
+    const historyHtml = studentPayments.length === 0 ? 
+        '<p>Keine Zahlungshistorie vorhanden</p>' :
+        studentPayments.map(p => `
+            <div style="background: rgba(255,255,255,0.3); padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+                <strong>${p.month}</strong>: 
+                ${p.paid ? 
+                    `✅ Bezahlt am ${new Date(p.paid_date).toLocaleDateString('de-DE')}` : 
+                    '❌ Nicht bezahlt'
+                }
+            </div>
+        `).join('');
+    
+    document.getElementById('paymentHistoryContent').innerHTML = historyHtml;
+    document.getElementById('paymentHistoryModal').classList.add('active');
 };
 
 // ===================================
@@ -994,6 +1140,7 @@ function renderAll() {
     renderRequests();
     renderStudentsList();
     renderHomeworkManagement();
+    renderPaymentOverview();
 }
 
 // ===================================
@@ -1011,199 +1158,3 @@ document.addEventListener('DOMContentLoaded', async function() {
     setInterval(checkUpcomingLessons, 60000);
     checkUpcomingLessons();
 });
-
-
-// ===================================
-// ZAHLUNGS-TRACKING FUNKTIONEN
-// Füge diese zu deiner bestehenden huepp.js hinzu
-// ===================================
-
-let payments = [];
-
-// Zum bestehenden loadData() hinzufügen
-async function loadPayments() {
-    const { data, error } = await supabase
-        .from('payments')
-        .select('*')
-        .order('month', { ascending: false });
-    
-    if (error) {
-        console.error('Fehler beim Laden der Zahlungen:', error);
-        return;
-    }
-    payments = data || [];
-}
-
-// Aktuellen Monat im Format "2025-10" bekommen
-function getCurrentMonth() {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-}
-
-// Nächsten Monat berechnen
-function getNextMonth() {
-    const now = new Date();
-    const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-    return `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}`;
-}
-
-// Payment-Eintrag für Schüler und Monat erstellen/laden
-async function ensurePaymentEntry(studentId, month) {
-    const existing = payments.find(p => p.student_id === studentId && p.month === month);
-    
-    if (existing) return existing;
-    
-    const { data, error } = await supabase
-        .from('payments')
-        .insert([{
-            student_id: studentId,
-            month: month,
-            paid: false
-        }])
-        .select()
-        .single();
-    
-    if (error) {
-        console.error('Fehler beim Erstellen des Payment-Eintrags:', error);
-        return null;
-    }
-    
-    payments.push(data);
-    return data;
-}
-
-// Payment als bezahlt markieren
-window.markAsPaid = async function(studentId, month) {
-    await ensurePaymentEntry(studentId, month);
-    
-    const { error } = await supabase
-        .from('payments')
-        .update({
-            paid: true,
-            paid_date: new Date().toISOString()
-        })
-        .eq('student_id', studentId)
-        .eq('month', month);
-    
-    if (error) {
-        alert('Fehler beim Markieren: ' + error.message);
-        return;
-    }
-    
-    await loadPayments();
-    renderPaymentOverview();
-    alert('✅ Als bezahlt markiert!');
-};
-
-// Payment als unbezahlt markieren
-window.markAsUnpaid = async function(studentId, month) {
-    const { error } = await supabase
-        .from('payments')
-        .update({
-            paid: false,
-            paid_date: null
-        })
-        .eq('student_id', studentId)
-        .eq('month', month);
-    
-    if (error) {
-        alert('Fehler: ' + error.message);
-        return;
-    }
-    
-    await loadPayments();
-    renderPaymentOverview();
-};
-
-// Zahlungsübersicht rendern
-function renderPaymentOverview() {
-    const currentMonth = getCurrentMonth();
-    const nextMonth = getNextMonth();
-    const now = new Date();
-    const day = now.getDate();
-    
-    // Welchen Monat tracken wir? Ab 28. des Monats = nächster Monat
-    const trackingMonth = day >= 28 ? nextMonth : currentMonth;
-    
-    const container = document.getElementById('paymentOverview');
-    if (!container) return;
-    
-    const overviewHtml = students.map(student => {
-        const payment = payments.find(p => p.student_id === student.id && p.month === trackingMonth);
-        const isPaid = payment?.paid || false;
-        
-        return `
-            <div class="payment-card ${isPaid ? 'paid' : 'unpaid'}">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <div class="student-name">${student.name}</div>
-                        <div style="color: #666; font-size: 0.9em;">
-                            ${trackingMonth} ${isPaid ? `✅ Bezahlt am ${new Date(payment.paid_date).toLocaleDateString('de-DE')}` : '⏳ Ausstehend'}
-                        </div>
-                    </div>
-                    <div>
-                        ${isPaid ? 
-                            `<button class="btn" style="background: #f44336; color: white;" onclick="markAsUnpaid(${student.id}, '${trackingMonth}')">
-                                ❌ Als unbezahlt markieren
-                            </button>` :
-                            `<button class="btn btn-approve" onclick="markAsPaid(${student.id}, '${trackingMonth}')">
-                                ✅ Als bezahlt markieren
-                            </button>`
-                        }
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
-    
-    container.innerHTML = `
-        <h3 style="color: #8B4513; margin-bottom: 15px;">
-            💰 Zahlungsübersicht ${trackingMonth}
-        </h3>
-        ${overviewHtml}
-    `;
-}
-
-// Zahlungshistorie anzeigen
-window.showPaymentHistory = function(studentId) {
-    const student = students.find(s => s.id === studentId);
-    if (!student) return;
-    
-    const studentPayments = payments
-        .filter(p => p.student_id === studentId)
-        .sort((a, b) => b.month.localeCompare(a.month));
-    
-    const historyHtml = studentPayments.length === 0 ? 
-        '<p>Keine Zahlungshistorie vorhanden</p>' :
-        studentPayments.map(p => `
-            <div style="background: rgba(255,255,255,0.3); padding: 10px; border-radius: 8px; margin-bottom: 8px;">
-                <strong>${p.month}</strong>: 
-                ${p.paid ? 
-                    `✅ Bezahlt am ${new Date(p.paid_date).toLocaleDateString('de-DE')}` : 
-                    '❌ Nicht bezahlt'
-                }
-            </div>
-        `).join('');
-    
-    document.getElementById('paymentHistoryContent').innerHTML = historyHtml;
-    document.getElementById('paymentHistoryModal').classList.add('active');
-};
-
-// Zur loadData() Funktion hinzufügen:
-async function loadData() {
-    await loadStudents();
-    await loadRescheduleRequests();
-    await loadHomework();
-    await loadPayments(); // ← NEU
-    renderAll();
-}
-
-// Zur renderAll() Funktion hinzufügen:
-function renderAll() {
-    renderNextStudent();
-    renderTodayLessons();
-    renderRequests();
-    renderStudentsList();
-    renderHomeworkManagement();
-    renderPaymentOverview(); // ← NEU
-}
