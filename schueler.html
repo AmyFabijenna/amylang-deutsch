@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dein Login - Amy Lang Deutsch</title>
+
+<!-- PWA Manifest -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#FF69B4">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Amy Deutsch">
+<link rel="apple-touch-icon" href="/icon-192.png">
+
     <style>
         * {
             margin: 0;
@@ -334,6 +343,200 @@
     box-shadow: 0 2px 8px rgba(70, 130, 180, 0.4);
 }
 
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+/* Prominente Stunden-Anzeige */
+.lesson-countdown-widget {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 25px;
+    color: white;
+    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+    text-align: center;
+}
+
+.lesson-countdown-widget.soon {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    animation: pulse 2s infinite;
+}
+
+.lesson-countdown-widget.very-soon {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    animation: pulse 1s infinite;
+}
+
+.countdown-title {
+    font-size: 1.1em;
+    margin-bottom: 10px;
+    opacity: 0.9;
+}
+
+.countdown-time {
+    font-size: 2.5em;
+    font-weight: bold;
+    margin: 15px 0;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.countdown-details {
+    font-size: 1em;
+    opacity: 0.95;
+    margin-top: 10px;
+}
+
+.countdown-live {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
+
+.countdown-unit {
+    background: rgba(255,255,255,0.2);
+    padding: 10px 15px;
+    border-radius: 10px;
+    min-width: 70px;
+}
+
+.countdown-number {
+    display: block;
+    font-size: 1.8em;
+    font-weight: bold;
+}
+
+.countdown-label {
+    display: block;
+    font-size: 0.8em;
+    opacity: 0.9;
+    margin-top: 5px;
+}
+
+/* Benachrichtigungs-Banner */
+.notification-banner {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 25px;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.5);
+    z-index: 10000;
+    max-width: 350px;
+    animation: slideInRight 0.5s ease;
+    display: none;
+}
+
+.notification-banner.warning {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.notification-banner.show {
+    display: block;
+}
+
+.notification-content {
+    display: flex;
+    align-items: start;
+    gap: 15px;
+}
+
+.notification-icon {
+    font-size: 2em;
+}
+
+.notification-text {
+    flex: 1;
+}
+
+.notification-title {
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-bottom: 5px;
+}
+
+.notification-message {
+    font-size: 0.95em;
+    opacity: 0.9;
+}
+
+.notification-close {
+    background: rgba(255,255,255,0.3);
+    border: none;
+    color: white;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.notification-close:hover {
+    background: rgba(255,255,255,0.5);
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Benachrichtigungs-Erlaubnis Banner */
+.permission-banner {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+}
+
+.permission-text {
+    flex: 1;
+    margin-right: 15px;
+}
+
+.permission-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.permission-btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.permission-btn.allow {
+    background: white;
+    color: #4facfe;
+}
+
+.permission-btn.deny {
+    background: rgba(255,255,255,0.3);
+    color: white;
+}
+
+.permission-btn:hover {
+    transform: scale(1.05);
+}
 
     </style>
 </head>
@@ -369,6 +572,32 @@
             <a href="index.html" class="back-btn">← Zurück zur Hauptseite</a>
             <div class="login-box">
                 <h1 id="welcomeText">Mein Schülerbereich</h1>
+                <div id="lessonCountdown"></div>
+                <!-- Benachrichtigungs-Erlaubnis Banner -->
+<div id="notificationPermissionBanner" style="display: none;">
+    <div class="permission-banner">
+        <div class="permission-text">
+            <strong>🔔 Erinnerungen aktivieren?</strong><br>
+            <small>Erhalte eine Benachrichtigung 30 Min vor deiner Stunde</small>
+        </div>
+        <div class="permission-buttons">
+            <button class="permission-btn allow" onclick="requestNotificationPermission()">Ja</button>
+            <button class="permission-btn deny" onclick="denyNotificationPermission()">Nein</button>
+        </div>
+    </div>
+</div>
+
+<!-- Benachrichtigungs-Banner (erscheint 30 Min vorher) -->
+<div id="notificationBanner" class="notification-banner">
+    <div class="notification-content">
+        <div class="notification-icon">🔔</div>
+        <div class="notification-text">
+            <div class="notification-title">Stunde beginnt bald!</div>
+            <div class="notification-message" id="notificationMessage"></div>
+        </div>
+        <button class="notification-close" onclick="closeNotificationBanner()">✕</button>
+    </div>
+</div>
                 <button class="btn btn-secondary" onclick="logout()" style="margin-bottom: 20px;">Ausloggen</button>
                 
                 <div class="info-card">
@@ -483,114 +712,229 @@
         });
 
         async function loadStudentData() {
-            await loadMyLessons();
-            await loadMyHomeworkOverview();
-            updateRescheduleButton();
-        }
+    await loadMyLessons();
+    await loadMyHomeworkOverview();
+    await checkPaymentStatus();
+    updateRescheduleButton();
+    checkNotificationPermission(); // ✨ NEU
+    startLessonReminder(); // ✨ NEU
+}
+
+
+function updateLessonCountdown() {
+    const container = document.getElementById('lessonCountdown');
+    
+    if (studentLessons.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    const nextLesson = studentLessons[0];
+    const now = new Date();
+    const lessonTime = new Date(nextLesson.date);
+    const timeDiff = lessonTime - now;
+    
+    // Berechne die Zeit
+    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+    
+    // Bestimme die Farbe basierend auf der verbleibenden Zeit (in Stunden)
+    const totalHours = timeDiff / (1000 * 60 * 60);
+    let widgetClass = 'lesson-countdown-widget';
+    if (totalHours <= 2) {
+        widgetClass += ' very-soon'; // Innerhalb von 2 Stunden
+    } else if (totalHours <= 24) {
+        widgetClass += ' soon'; // Innerhalb von 24 Stunden
+    }
+    
+    let countdownHTML = '';
+    
+    if (days > 0) {
+        countdownHTML = `
+            <div class="${widgetClass}">
+                <div class="countdown-title">🎓 Nächste Stunde</div>
+                <div class="countdown-time">${nextLesson.dayName}, ${lessonTime.toLocaleDateString('de-DE')}</div>
+                <div class="countdown-live">
+                    <div class="countdown-unit">
+                        <span class="countdown-number">${days}</span>
+                        <span class="countdown-label">Tag${days !== 1 ? 'e' : ''}</span>
+                    </div>
+                    <div class="countdown-unit">
+                        <span class="countdown-number">${hours}</span>
+                        <span class="countdown-label">Std</span>
+                    </div>
+                    <div class="countdown-unit">
+                        <span class="countdown-number">${minutes}</span>
+                        <span class="countdown-label">Min</span>
+                    </div>
+                </div>
+                <div class="countdown-details">⏰ ${nextLesson.time} Uhr • ⏱️ ${nextLesson.duration} Minuten</div>
+            </div>
+        `;
+    } else if (hours > 0) {
+        countdownHTML = `
+            <div class="${widgetClass}">
+                <div class="countdown-title">🎓 Nächste Stunde ${totalHours <= 2 ? '- BALD!' : '- HEUTE!'}</div>
+                <div class="countdown-time">${nextLesson.time} Uhr</div>
+                <div class="countdown-live">
+                    <div class="countdown-unit">
+                        <span class="countdown-number">${hours}</span>
+                        <span class="countdown-label">Std</span>
+                    </div>
+                    <div class="countdown-unit">
+                        <span class="countdown-number">${minutes}</span>
+                        <span class="countdown-label">Min</span>
+                    </div>
+                    <div class="countdown-unit">
+                        <span class="countdown-number">${seconds}</span>
+                        <span class="countdown-label">Sek</span>
+                    </div>
+                </div>
+                <div class="countdown-details">⏱️ ${nextLesson.duration} Minuten</div>
+            </div>
+        `;
+    } else {
+        countdownHTML = `
+            <div class="${widgetClass}">
+                <div class="countdown-title">🎓 Nächste Stunde - JETZT!</div>
+                <div class="countdown-time">${nextLesson.time} Uhr</div>
+                <div class="countdown-live">
+                    <div class="countdown-unit">
+                        <span class="countdown-number">${minutes}</span>
+                        <span class="countdown-label">Min</span>
+                    </div>
+                    <div class="countdown-unit">
+                        <span class="countdown-number">${seconds}</span>
+                        <span class="countdown-label">Sek</span>
+                    </div>
+                </div>
+                <div class="countdown-details">⏱️ ${nextLesson.duration} Minuten</div>
+            </div>
+        `;
+    }
+    
+    container.innerHTML = countdownHTML;
+}
+
 
         async function loadMyLessons() {
-            if (!currentStudent?.standard_times) {
-                document.getElementById('myLessons').innerHTML = '<p>Keine festen Termine vereinbart</p>';
-                studentLessons = [];
-                return;
-            }
-            
-            const upcomingLessons = [];
-            const today = new Date();
-            
-            currentStudent.standard_times.forEach(timeSlot => {
-                const stdDay = timeSlot.day;
-                const [hours, minutes] = timeSlot.time.split(':');
-                
-                let nextDate = new Date();
-                nextDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-                
-                while (nextDate.getDay() !== stdDay || nextDate < today) {
-                    nextDate.setDate(nextDate.getDate() + 1);
-                }
-                
-                upcomingLessons.push({
-                    date: nextDate,
-                    time: timeSlot.time,
-                    duration: timeSlot.duration,
-                    day: timeSlot.day,
-                    dayName: dayNames[timeSlot.day]
-                });
-            });
-            
-            upcomingLessons.sort((a, b) => a.date - b.date);
-            studentLessons = upcomingLessons;
-            
-            let html = '';
-            
-            if (upcomingLessons.length > 0) {
-                const nextLesson = upcomingLessons[0];
-                html = `
-                    <div class="next-lesson">
-                        <div class="lesson-time">⏰ Nächste Stunde: ${nextLesson.date.toLocaleDateString('de-DE')} um ${nextLesson.time} Uhr</div>
-                        <div>📅 ${nextLesson.dayName} | ⏱️ ${nextLesson.duration} Minuten</div>
-                    </div>
-                `;
-                
-                html += `<p><strong>Alle wöchentlichen Termine:</strong></p>`;
-                currentStudent.standard_times.forEach(time => {
-                    html += `<p>• ${dayNames[time.day]} ${time.time} Uhr (${time.duration} Min)</p>`;
-                });
-            } else {
-                html = '<p>Keine anstehenden Termine</p>';
-            }
-            
-            document.getElementById('myLessons').innerHTML = html;
+    if (!currentStudent?.standard_times) {
+        document.getElementById('myLessons').innerHTML = '<p>Keine festen Termine vereinbart</p>';
+        document.getElementById('lessonCountdown').innerHTML = '';
+        studentLessons = [];
+        return;
+    }
+    
+    const upcomingLessons = [];
+    const today = new Date();
+    
+    currentStudent.standard_times.forEach(timeSlot => {
+        const stdDay = timeSlot.day;
+        const [hours, minutes] = timeSlot.time.split(':');
+        
+        let nextDate = new Date();
+        nextDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+        
+        while (nextDate.getDay() !== stdDay || nextDate < today) {
+            nextDate.setDate(nextDate.getDate() + 1);
         }
+        
+        upcomingLessons.push({
+            date: nextDate,
+            time: timeSlot.time,
+            duration: timeSlot.duration,
+            day: timeSlot.day,
+            dayName: dayNames[timeSlot.day]
+        });
+    });
+    
+    upcomingLessons.sort((a, b) => a.date - b.date);
+    studentLessons = upcomingLessons;
+    
+    // ✨ NEU: Countdown-Widget anzeigen
+    updateLessonCountdown();
+    
+    let html = '';
+    
+    if (upcomingLessons.length > 0) {
+        html += `<p><strong>Alle wöchentlichen Termine:</strong></p>`;
+        currentStudent.standard_times.forEach(time => {
+            html += `<p>• ${dayNames[time.day]} ${time.time} Uhr (${time.duration} Min)</p>`;
+        });
+    } else {
+        html = '<p>Keine anstehenden Termine</p>';
+    }
+    
+    document.getElementById('myLessons').innerHTML = html;
+}
 
         async function loadMyHomeworkOverview() {
-            const { data, error } = await supabase
-                .from('homework')
-                .select('*')
-                .eq('student_id', currentStudent.id)
-                .order('deadline', { ascending: true });
+    const { data, error } = await supabase
+        .from('homework')
+        .select('*')
+        .eq('student_id', currentStudent.id)
+        .order('deadline', { ascending: true });
+    
+    if (error || !data || data.length === 0) {
+        document.getElementById('myHomework').innerHTML = '<p>🎉 Aktuell keine Hausaufgaben!</p>';
+        currentHomework = [];
+        return;
+    }
+    
+    currentHomework = data;
+    const pending = data.filter(hw => !hw.completed);
+    const completed = data.filter(hw => hw.completed);
+    const unread = data.filter(hw => !hw.is_read);
+    
+    let html = '';
+    
+    // ✨ NEU: Großer roter Hinweis für neue Hausaufgaben
+    if (unread.length > 0) {
+        html += `
+            <div style="
+                background: linear-gradient(135deg, #ff4444, #cc0000);
+                color: white;
+                padding: 15px;
+                border-radius: 15px;
+                margin-bottom: 15px;
+                font-size: 1.1em;
+                font-weight: bold;
+                text-align: center;
+                box-shadow: 0 4px 15px rgba(255, 68, 68, 0.4);
+                animation: pulse 2s infinite;
+            ">
+                🔴 ${unread.length} neue/geänderte Hausaufgabe${unread.length > 1 ? 'n' : ''}!
+            </div>
+        `;
+    }
+    
+    if (pending.length > 0) {
+        html += `<p><strong>${pending.length} offene Hausaufgabe(n):</strong></p>`;
+        pending.slice(0, 3).forEach(hw => {
+            const deadline = new Date(hw.deadline);
+            const today = new Date();
+            const isOverdue = deadline < today;
+            const isNew = !hw.is_read; // ✨ NEU: Markierung für neue HÜ
             
-            if (error || !data || data.length === 0) {
-                document.getElementById('myHomework').innerHTML = '<p>🎉 Aktuell keine Hausaufgaben!</p>';
-                currentHomework = [];
-                return;
-            }
-            
-            currentHomework = data;
-            const pending = data.filter(hw => !hw.completed);
-            const completed = data.filter(hw => hw.completed);
-            const unread = data.filter(hw => !hw.is_read);
-            
-            let html = '';
-            
-            if (unread.length > 0) {
-                html += `<p style="color: #f44336; font-weight: bold;">🔴 ${unread.length} neue/geänderte Hausaufgabe(n)</p>`;
-            }
-            
-            if (pending.length > 0) {
-                html += `<p><strong>${pending.length} offene Hausaufgabe(n):</strong></p>`;
-                pending.slice(0, 3).forEach(hw => {
-                    const deadline = new Date(hw.deadline);
-                    const today = new Date();
-                    const isOverdue = deadline < today;
-                    
-                    html += `<div style="margin: 5px 0; padding: 8px; background: ${isOverdue ? 'rgba(255,0,0,0.1)' : 'rgba(255,165,0,0.1)'}; border-radius: 8px;">
-                        <strong>${hw.title}</strong> ${!hw.is_read ? '🔴' : ''}<br>
-                        📅 Bis: ${deadline.toLocaleDateString('de-DE')} ${isOverdue ? '⚠️ Überfällig!' : ''}
-                    </div>`;
-                });
-                
-                if (pending.length > 3) {
-                    html += `<p style="color: #666; font-size: 0.9em;">... und ${pending.length - 3} weitere</p>`;
-                }
-            }
-            
-            if (completed.length > 0) {
-                html += `<p style="margin-top: 15px;"><strong>${completed.length} erledigt</strong> ✅</p>`;
-            }
-            
-            document.getElementById('myHomework').innerHTML = html;
+            html += `<div style="margin: 5px 0; padding: 8px; background: ${isOverdue ? 'rgba(255,0,0,0.1)' : 'rgba(255,165,0,0.1)'}; border-radius: 8px; border-left: 4px solid ${isNew ? '#ff4444' : '#FFA500'};">
+                <strong>${hw.title}</strong> ${isNew ? '🔴 NEU' : ''}<br>
+                📅 Bis: ${deadline.toLocaleDateString('de-DE')} ${isOverdue ? '⚠️ Überfällig!' : ''}
+            </div>`;
+        });
+        
+        if (pending.length > 3) {
+            html += `<p style="color: #666; font-size: 0.9em;">... und ${pending.length - 3} weitere</p>`;
         }
+    }
+    
+    if (completed.length > 0) {
+        html += `<p style="margin-top: 15px;"><strong>${completed.length} erledigt</strong> ✅</p>`;
+    }
+    
+    document.getElementById('myHomework').innerHTML = html;
+}
 
         function updateRescheduleButton() {
             const btn = document.getElementById('rescheduleBtn');
@@ -876,16 +1220,24 @@
         }
 
         window.logout = function() {
-            currentStudent = null;
-            studentLessons = [];
-            currentHomework = [];
-            document.getElementById('loginView').style.display = 'block';
-            document.getElementById('studentView').style.display = 'none';
-            document.getElementById('hwView').style.display = 'none';
-            document.getElementById('loginPhone').value = '';
-            document.getElementById('loginPassword').value = '';
-            document.getElementById('errorMsg').style.display = 'none';
-        };
+    currentStudent = null;
+    studentLessons = [];
+    currentHomework = [];
+    notificationShown = false; // ✨ NEU
+    
+    // Stoppe Reminder-Interval ✨ NEU
+    if (reminderInterval) {
+        clearInterval(reminderInterval);
+        reminderInterval = null;
+    }
+    
+    document.getElementById('loginView').style.display = 'block';
+    document.getElementById('studentView').style.display = 'none';
+    document.getElementById('hwView').style.display = 'none';
+    document.getElementById('loginPhone').value = '';
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('errorMsg').style.display = 'none';
+}
 
         setInterval(() => {
             if (currentStudent) {
@@ -894,7 +1246,12 @@
         }, 120000);
 
         setTimeout(updateRescheduleButton, 1000);
-
+// ✨ Live-Countdown alle 1 Sekunde aktualisieren
+setInterval(() => {
+    if (currentStudent && studentLessons.length > 0) {
+        updateLessonCountdown();
+    }
+}, 1000);
 
 // ===================================
 // ZAHLUNGSBENACHRICHTIGUNG FÜR SCHÜLER
@@ -993,12 +1350,157 @@ async function loadStudentData() {
     updateRescheduleButton();
 }
 
+
+
+// ===================================
+// BENACHRICHTIGUNGEN & ERINNERUNGEN
+// ===================================
+
+let notificationShown = false; // Verhindert mehrfaches Anzeigen
+let reminderInterval = null;
+
+function checkNotificationPermission() {
+    // Prüfe, ob Browser Benachrichtigungen unterstützt
+    if (!('Notification' in window)) {
+        console.log('Browser unterstützt keine Benachrichtigungen');
+        return;
+    }
+    
+    // Wenn noch nicht entschieden, Banner anzeigen
+    if (Notification.permission === 'default') {
+        document.getElementById('notificationPermissionBanner').style.display = 'block';
+    }
+}
+
+window.requestNotificationPermission = async function() {
+    try {
+        const permission = await Notification.requestPermission();
+        document.getElementById('notificationPermissionBanner').style.display = 'none';
+        
+        if (permission === 'granted') {
+            showSuccess('✅ Benachrichtigungen aktiviert! Du wirst 30 Min vor deiner Stunde erinnert.');
+        }
+    } catch (error) {
+        console.error('Fehler bei Benachrichtigungs-Berechtigung:', error);
+    }
+}
+
+window.denyNotificationPermission = function() {
+    document.getElementById('notificationPermissionBanner').style.display = 'none';
+    localStorage.setItem('notificationDenied', 'true');
+}
+
+function startLessonReminder() {
+    // Stoppe vorherigen Interval falls vorhanden
+    if (reminderInterval) {
+        clearInterval(reminderInterval);
+    }
+    
+    // Prüfe alle 30 Sekunden
+    reminderInterval = setInterval(() => {
+        checkLessonReminder();
+    }, 30000);
+    
+    // Sofort beim Start prüfen
+    checkLessonReminder();
+}
+
+function checkLessonReminder() {
+    if (!currentStudent || studentLessons.length === 0) return;
+    
+    const nextLesson = studentLessons[0];
+    const now = new Date();
+    const lessonTime = new Date(nextLesson.date);
+    const timeDiff = lessonTime - now;
+    const minutesUntil = timeDiff / (1000 * 60);
+    
+    // Wenn zwischen 30 und 31 Minuten (Zeitfenster von 1 Minute)
+    if (minutesUntil <= 31 && minutesUntil > 29 && !notificationShown) {
+        notificationShown = true;
+        showLessonReminder(nextLesson);
+    }
+    
+    // Reset wenn Stunde vorbei oder > 35 Min
+    if (minutesUntil > 35 || minutesUntil < 0) {
+        notificationShown = false;
+    }
+}
+
+function showLessonReminder(lesson) {
+    const message = `Deine Stunde beginnt um ${lesson.time} Uhr (${lesson.duration} Min)`;
+    
+    // Browser-Benachrichtigung (wenn erlaubt)
+    if (Notification.permission === 'granted') {
+        new Notification('🎓 Stunde beginnt in 30 Minuten!', {
+            body: message,
+            icon: '🔔',
+            badge: '🔔',
+            tag: 'lesson-reminder', // Verhindert Duplikate
+            requireInteraction: false
+        });
+    }
+    
+    // In-App Banner (immer anzeigen)
+    const banner = document.getElementById('notificationBanner');
+    const messageEl = document.getElementById('notificationMessage');
+    
+    messageEl.textContent = message;
+    banner.classList.add('show', 'warning');
+    
+    // Banner nach 10 Sekunden automatisch schließen
+    setTimeout(() => {
+        banner.classList.remove('show');
+    }, 10000);
+}
+
+window.closeNotificationBanner = function() {
+    document.getElementById('notificationBanner').classList.remove('show');
+}
+
+
 // Regelmäßig prüfen (alle 5 Minuten)
 setInterval(() => {
     if (currentStudent) {
         checkPaymentStatus();
     }
 }, 300000);
+
+// ===================================
+// PWA - SERVICE WORKER REGISTRIERUNG
+// ===================================
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then((registration) => {
+        console.log('✅ Service Worker registriert:', registration.scope);
+      })
+      .catch((error) => {
+        console.log('❌ Service Worker Fehler:', error);
+      });
+  });
+}
+
+// Install-Button anzeigen (nur wenn noch nicht installiert)
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  
+  // Optional: Zeige einen "App installieren" Button
+  console.log('💡 App kann installiert werden!');
+  
+  // Du kannst hier einen Button einblenden lassen
+  // showInstallButton();
+});
+
+window.addEventListener('appinstalled', () => {
+  console.log('🎉 PWA wurde installiert!');
+  deferredPrompt = null;
+});
+
+
     </script>
 </body>
 </html>
