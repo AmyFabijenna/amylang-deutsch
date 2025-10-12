@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wortschatz Memory-Spiel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .stat-box {
+            background: #f8f9fa;
+            padding: 15px 30px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .card {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: white;
+            transition: all 0.3s;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .card.flipped {
+            background: white;
+            color: #333;
+            border: 3px solid #667eea;
+        }
+
+        .card.matched {
+            background: #4caf50;
+            color: white;
+            cursor: default;
+            animation: matchPulse 0.5s;
+        }
+
+        @keyframes matchPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+        }
+
+        .card-front {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .card.flipped .card-back {
+            display: none;
+        }
+
+        .card.flipped .card-front {
+            display: flex;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+        }
+
+        .modal-content h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+
+        .modal-content p {
+            font-size: 1.3em;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Wortschatz Memory-Spiel</h1>
+        
+        <div class="controls">
+            <select id="levelSelect" class="btn btn-primary">
+                <option value="a2">A2 - Grundlagen</option>
+                <option value="b1">B1 - Mittel</option>
+                <option value="b2">B2 - Fortgeschritten</option>
+            </select>
+            <select id="themeSelect" class="btn btn-primary">
+                <option value="all">Alle Themen gemischt</option>
+                <option value="schule">Nur Schule</option>
+                <option value="familie">Nur Familie</option>
+                <option value="tiere">Nur Tiere</option>
+            </select>
+            <button class="btn btn-success" onclick="startGame()">🎲 Neues Spiel starten</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-value" id="moves">0</div>
+                <div class="stat-label">Züge</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="matches">0</div>
+                <div class="stat-label">Paare gefunden</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="timer">0:00</div>
+                <div class="stat-label">Zeit</div>
+            </div>
+        </div>
+
+        <div class="game-board" id="gameBoard"></div>
+    </div>
+
+    <div class="modal" id="winModal">
+        <div class="modal-content">
+            <h2>🎉 Gewonnen!</h2>
+            <p>Du hast alle Paare gefunden!</p>
+            <p><strong>Züge:</strong> <span id="finalMoves"></span></p>
+            <p><strong>Zeit:</strong> <span id="finalTime"></span></p>
+            <button class="btn btn-success" onclick="closeModal()">Nochmal spielen</button>
+        </div>
+    </div>
+
+    <script>
+        const vocabulary = {
+            a2: {
+                schule: [
+                    { word: 'das Heft', pair: 'Ich schreibe in mein...' },
+                    { word: 'die Pause', pair: 'In der ... spielen wir' },
+                    { word: 'die Tafel', pair: 'Lehrerin schreibt an die...' },
+                    { word: 'der Bleistift', pair: 'Damit male ich' },
+                    { word: 'die Schere', pair: 'Damit schneide ich' }
+                ],
+                familie: [
+                    { word: 'die Eltern', pair: 'Mutter und Vater = ...' },
+                    { word: 'die Geschwister', pair: 'Bruder und Schwester = ...' },
+                    { word: 'die Oma', pair: 'Mutter meiner Mutter' },
+                    { word: 'der Cousin', pair: 'Sohn von Tante/Onkel' },
+                    { word: 'die Tante', pair: 'Schwester meiner Mutter' }
+                ],
+                tiere: [
+                    { word: 'der Hund', pair: 'Er bellt: Wau wau!' },
+                    { word: 'die Katze', pair: 'Sie miaut: Miau!' },
+                    { word: 'das Pferd', pair: 'Es frisst Heu' },
+                    { word: 'die Kuh', pair: 'Sie gibt Milch' },
+                    { word: 'der Vogel', pair: 'Er kann fliegen' }
+                ]
+            },
+            b1: {
+                schule: [
+                    { word: 'die Schularbeit', pair: 'Prüfung in der Schule' },
+                    { word: 'das Zeugnis', pair: 'Alle Noten stehen drin' },
+                    { word: 'die Leistung', pair: 'Was man erreicht hat' },
+                    { word: 'wiederholen', pair: 'Nochmal lernen' },
+                    { word: 'verbessern', pair: 'Besser machen' }
+                ],
+                familie: [
+                    { word: 'aufgeregt', pair: 'Nervös vor Freude' },
+                    { word: 'enttäuscht', pair: 'Traurig über Ergebnis' },
+                    { word: 'stolz', pair: 'Freude über Erfolg' },
+                    { word: 'nervös', pair: 'Unruhig vor Prüfung' },
+                    { word: 'zufrieden', pair: 'Glücklich mit Ergebnis' }
+                ],
+                tiere: [
+                    { word: 'das Hobby', pair: 'Freizeitaktivität' },
+                    { word: 'trainieren', pair: 'Sport üben' },
+                    { word: 'der Verein', pair: 'Sportgruppe' },
+                    { word: 'der Wettkampf', pair: 'Sportwettbewerb' },
+                    { word: 'teilnehmen', pair: 'Mitmachen bei...' }
+                ]
+            },
+            b2: {
+                schule: [
+                    { word: 'zunächst', pair: 'Am Anfang, zuerst' },
+                    { word: 'daraufhin', pair: 'Danach, als Reaktion' },
+                    { word: 'schließlich', pair: 'Am Ende, endlich' },
+                    { word: 'währenddessen', pair: 'In der Zwischenzeit' },
+                    { word: 'infolgedessen', pair: 'Deshalb, als Folge' }
+                ],
+                familie: [
+                    { word: 'aufmerksam', pair: 'Konzentriert beobachtend' },
+                    { word: 'sorgfältig', pair: 'Sehr genau' },
+                    { word: 'gründlich', pair: 'Detailliert, genau' },
+                    { word: 'präzise', pair: 'Exakt, punktgenau' },
+                    { word: 'vielfältig', pair: 'Abwechslungsreich' }
+                ],
+                tiere: [
+                    { word: 'beobachten', pair: 'Genau ansehen' },
+                    { word: 'vermuten', pair: 'Annehmen, glauben' },
+                    { word: 'feststellen', pair: 'Erkennen, merken' },
+                    { word: 'schildern', pair: 'Beschreiben, erzählen' },
+                    { word: 'verdeutlichen', pair: 'Klar machen' }
+                ]
+            }
+        };
+
+        let gameData = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let moves = 0;
+        let timerInterval;
+        let seconds = 0;
+
+        function startGame() {
+            const level = document.getElementById('levelSelect').value;
+            const theme = document.getElementById('themeSelect').value;
+            
+            resetGame();
+            
+            // Select vocabulary
+            let selectedVocab = [];
+            if (theme === 'all') {
+                Object.values(vocabulary[level]).forEach(themeWords => {
+                    selectedVocab = selectedVocab.concat(themeWords);
+                });
+                // Shuffle and take 8 pairs
+                selectedVocab = selectedVocab.sort(() => Math.random() - 0.5).slice(0, 8);
+            } else {
+                selectedVocab = vocabulary[level][theme] || [];
+            }
+            
+            // Create card pairs
+            gameData = [];
+            selectedVocab.forEach((item, index) => {
+                gameData.push({ id: index, content: item.word, type: 'word' });
+                gameData.push({ id: index, content: item.pair, type: 'pair' });
+            });
+            
+            // Shuffle cards
+            gameData = gameData.sort(() => Math.random() - 0.5);
+            
+            // Create board
+            createBoard();
+            
+            // Start timer
+            startTimer();
+        }
+
+        function createBoard() {
+            const board = document.getElementById('gameBoard');
+            board.innerHTML = '';
+            
+            gameData.forEach((card, index) => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'card';
+                cardElement.dataset.id = card.id;
+                cardElement.dataset.index = index;
+                cardElement.innerHTML = `
+                    <div class="card-back">🎴</div>
+                    <div class="card-front">${card.content}</div>
+                `;
+                cardElement.onclick = () => flipCard(cardElement);
+                board.appendChild(cardElement);
+            });
+        }
+
+        function flipCard(card) {
+            if (flippedCards.length === 2 || card.classList.contains('flipped') || card.classList.contains('matched')) {
+                return;
+            }
+            
+            card.classList.add('flipped');
+            flippedCards.push(card);
+            
+            if (flippedCards.length === 2) {
+                moves++;
+                document.getElementById('moves').textContent = moves;
+                checkMatch();
+            }
+        }
+
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+            const id1 = card1.dataset.id;
+            const id2 = card2.dataset.id;
+            
+            setTimeout(() => {
+                if (id1 === id2) {
+                    card1.classList.add('matched');
+                    card2.classList.add('matched');
+                    matchedPairs++;
+                    document.getElementById('matches').textContent = matchedPairs;
+                    
+                    if (matchedPairs === gameData.length / 2) {
+                        endGame();
+                    }
+                } else {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                }
+                
+                flippedCards = [];
+            }, 1000);
+        }
+
+        function startTimer() {
+            seconds = 0;
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                seconds++;
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                document.getElementById('timer').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function resetGame() {
+            clearInterval(timerInterval);
+            matchedPairs = 0;
+            moves = 0;
+            flippedCards = [];
+            seconds = 0;
+            document.getElementById('moves').textContent = '0';
+            document.getElementById('matches').textContent = '0';
+            document.getElementById('timer').textContent = '0:00';
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            document.getElementById('finalMoves').textContent = moves;
+            document.getElementById('finalTime').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+            document.getElementById('winModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('winModal').classList.remove('active');
+            startGame();
+        }
+
+        // Start game on load
+        startGame();
+    </script>
+</body>
+</html>
