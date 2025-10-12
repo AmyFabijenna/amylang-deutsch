@@ -660,7 +660,7 @@ function renderHomeworkManagement() {
 </div>
                         `).join('')
                     }
-                    ${studentHomework.length > 3 ? `<p style="color: #1976D2; font-size: 0.9em; margin-top: 10px; cursor: pointer; text-decoration: underline; font-weight: bold;" onclick="event.stopPropagation();">📋 ... und ${studentHomework.length - 3} weitere (klicken Sie auf eine Hausaufgabe zum Bearbeiten)</p>` : ''}
+                    ${studentHomework.length > 10 ? `<p style="color: #666; font-size: 0.9em; margin-top: 10px;">... und ${studentHomework.length - 10} weitere</p>` : ''}
                 </div>
             </div>
         `;
