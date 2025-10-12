@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diktat: Das verrückte Sportfest</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #667eea;
+        }
+        .controls {
+            text-align: center;
+            margin: 30px 0;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .current-sentence {
+            font-size: 24px;
+            line-height: 1.6;
+            padding: 20px;
+            background: #f0f4ff;
+            border-radius: 8px;
+            margin: 20px 0;
+            min-height: 80px;
+            text-align: center;
+        }
+        .info {
+            text-align: center;
+            color: #666;
+            margin: 10px 0;
+        }
+        .full-text {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            display: none;
+        }
+        .full-text.show {
+            display: block;
+        }
+        .progress {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .progress-bar {
+            background: #667eea;
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+            width: 0%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏃‍♂️ Das verrückte Sportfest 🏃‍♀️</h1>
+        
+        <div class="controls">
+            <button id="startBtn" onclick="startDiktat()">▶ Diktat starten</button>
+            <button id="pauseBtn" onclick="pauseDiktat()" disabled>⏸ Pause</button>
+            <button id="repeatBtn" onclick="repeatSentence()" disabled>🔄 Satz wiederholen</button>
+            <button id="showTextBtn" onclick="toggleFullText()">📄 Volltext anzeigen</button>
+        </div>
+
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div class="info" id="info">Klicke auf "Diktat starten" um zu beginnen</div>
+        
+        <div class="current-sentence" id="currentSentence">
+            Bereit zum Schreiben? 📝
+        </div>
+
+        <div class="full-text" id="fullText">
+            <h3>Vollständiger Text:</h3>
+            <p><strong>Das verrückte Sportfest</strong></p>
+            <p>Letzte Woche fand an unserer Schule ein äußerst merkwürdiges Sportfest statt. Zuerst sollten wir beim Weitsprung über eine riesige Pfütze hüpfen. Dabei landete unser Lehrer Herr Müller mit einem lauten Platsch mitten im Wasser!</p>
+            <p>Beim Staffellauf verlor Emma ihren Schuh, hüpfte aber tapfer weiter. Die Zuschauer lächelten und feuerten sie begeistert an. Plötzlich rannte ein frecher Hund auf die Bahn und schnappte sich den Staffelstab. Was für ein Durcheinander!</p>
+            <p>Am lustigsten war der Sackhüpf-Wettbewerb. Paul verhedderte sich in seinem Sack und rollte wie ein Käfer auf dem Rücken. Seine Klassenkameraden halfen ihm schließlich wieder auf die Beine.</p>
+            <p>Das Highlight des Tages war das Tauziehen. Beide Mannschaften zogen so kräftig, dass plötzlich das Seil riss. Alle purzelten rückwärts ins weiche Gras und lachten herzlich.</p>
+            <p>Obwohl nichts nach Plan lief, waren wir uns einig: Es war das schönste Sportfest aller Zeiten!</p>
+        </div>
+    </div>
+
+    <script>
+        const sentences = [
+            "Das verrückte Sportfest",
+            "Letzte Woche fand an unserer Schule ein äußerst merkwürdiges Sportfest statt.",
+            "Zuerst sollten wir beim Weitsprung über eine riesige Pfütze hüpfen.",
+            "Dabei landete unser Lehrer Herr Müller mit einem lauten Platsch mitten im Wasser!",
+            "Beim Staffellauf verlor Emma ihren Schuh, hüpfte aber tapfer weiter.",
+            "Die Zuschauer lächelten und feuerten sie begeistert an.",
+            "Plötzlich rannte ein frecher Hund auf die Bahn und schnappte sich den Staffelstab.",
+            "Was für ein Durcheinander!",
+            "Am lustigsten war der Sackhüpf-Wettbewerb.",
+            "Paul verhedderte sich in seinem Sack und rollte wie ein Käfer auf dem Rücken.",
+            "Seine Klassenkameraden halfen ihm schließlich wieder auf die Beine.",
+            "Das Highlight des Tages war das Tauziehen.",
+            "Beide Mannschaften zogen so kräftig, dass plötzlich das Seil riss.",
+            "Alle purzelten rückwärts ins weiche Gras und lachten herzlich.",
+            "Obwohl nichts nach Plan lief, waren wir uns einig:",
+            "Es war das schönste Sportfest aller Zeiten!"
+        ];
+
+        let currentIndex = 0;
+        let isPaused = false;
+        let isRunning = false;
+
+        function updateProgress() {
+            const progress = (currentIndex / sentences.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function speak(text, callback) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'de-DE';
+                utterance.rate = 0.7; // Langsam sprechen
+                utterance.pitch = 1;
+                utterance.volume = 1;
+                
+                utterance.onend = callback;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function speakCurrentSentence() {
+            if (currentIndex >= sentences.length) {
+                finishDiktat();
+                return;
+            }
+
+            const sentence = sentences[currentIndex];
+            document.getElementById('currentSentence').textContent = sentence;
+            document.getElementById('info').textContent = `Satz ${currentIndex + 1} von ${sentences.length}`;
+            updateProgress();
+
+            speak(sentence, () => {
+                if (!isPaused && isRunning) {
+                    setTimeout(() => {
+                        if (!isPaused && isRunning) {
+                            currentIndex++;
+                            speakCurrentSentence();
+                        }
+                    }, 3000); // 3 Sekunden Pause zwischen Sätzen
+                }
+            });
+        }
+
+        function startDiktat() {
+            isRunning = true;
+            isPaused = false;
+            currentIndex = 0;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('pauseBtn').disabled = false;
+            document.getElementById('repeatBtn').disabled = false;
+            document.getElementById('info').textContent = 'Diktat läuft...';
+            speakCurrentSentence();
+        }
+
+        function pauseDiktat() {
+            if (isPaused) {
+                isPaused = false;
+                document.getElementById('pauseBtn').textContent = '⏸ Pause';
+                document.getElementById('info').textContent = 'Diktat läuft...';
+                speakCurrentSentence();
+            } else {
+                isPaused = true;
+                window.speechSynthesis.cancel();
+                document.getElementById('pauseBtn').textContent = '▶ Weiter';
+                document.getElementById('info').textContent = 'Diktat pausiert';
+            }
+        }
+
+        function repeatSentence() {
+            window.speechSynthesis.cancel();
+            speak(sentences[currentIndex], () => {});
+        }
+
+        function finishDiktat() {
+            isRunning = false;
+            document.getElementById('currentSentence').textContent = '✅ Diktat beendet!';
+            document.getElementById('info').textContent = 'Gut gemacht!';
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('repeatBtn').disabled = true;
+            updateProgress();
+        }
+
+        function toggleFullText() {
+            document.getElementById('fullText').classList.toggle('show');
+            const btn = document.getElementById('showTextBtn');
+            btn.textContent = document.getElementById('fullText').classList.contains('show') 
+                ? '📄 Volltext ausblenden' 
+                : '📄 Volltext anzeigen';
+        }
+    </script>
+</body>
+</html>
