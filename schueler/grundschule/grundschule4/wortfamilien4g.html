@@ -17,17 +17,6 @@
             border-bottom: 3px solid #3498db;
             padding-bottom: 10px;
         }
-        h2 {
-            color: #e74c3c;
-            margin-top: 30px;
-            background: #ecf0f1;
-            padding: 10px;
-            border-left: 5px solid #e74c3c;
-        }
-        h3 {
-            color: #16a085;
-            margin-top: 25px;
-        }
         .level-badge {
             display: inline-block;
             padding: 5px 15px;
@@ -38,10 +27,102 @@
         .a2 { background: #ffd93d; color: #333; }
         .b1 { background: #6bcf7f; color: white; }
         .b2 { background: #667eea; color: white; }
+        
+        /* Aufklappbare Bereiche */
+        .collapsible-level {
+            margin: 20px 0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .collapsible-level.a2-level { border-color: #ffd93d; }
+        .collapsible-level.b1-level { border-color: #6bcf7f; }
+        .collapsible-level.b2-level { border-color: #667eea; }
+        
+        .level-header {
+            padding: 15px;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .level-header:hover {
+            opacity: 0.9;
+        }
+        .a2-level .level-header { background: #ffd93d; color: #333; }
+        .b1-level .level-header { background: #6bcf7f; color: white; }
+        .b2-level .level-header { background: #667eea; color: white; }
+        
+        .toggle-icon {
+            margin-right: 15px;
+            font-size: 0.8em;
+            transition: transform 0.3s;
+        }
+        .toggle-icon.open {
+            transform: rotate(90deg);
+        }
+        
+        .level-content {
+            display: none;
+            padding: 0;
+        }
+        .level-content.open {
+            display: block;
+        }
+        
+        /* Kategorie-Aufklappbereiche */
+        .collapsible-category {
+            margin: 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .collapsible-category:last-child {
+            border-bottom: none;
+        }
+        
+        .category-header {
+            padding: 12px 20px;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            transition: background 0.3s;
+        }
+        .category-header:hover {
+            background: #e9ecef;
+        }
+        
+        .category-header h3 {
+            margin: 0;
+            color: #16a085;
+            font-size: 1.1em;
+        }
+        
+        .category-toggle {
+            margin-right: 10px;
+            font-size: 0.7em;
+            color: #16a085;
+            transition: transform 0.3s;
+        }
+        .category-toggle.open {
+            transform: rotate(90deg);
+        }
+        
+        .category-content {
+            display: none;
+            padding: 20px;
+        }
+        .category-content.open {
+            display: block;
+        }
+        
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
+            margin: 0;
             background: white;
         }
         th {
@@ -57,6 +138,7 @@
         tr:nth-child(even) {
             background: #f8f9fa;
         }
+        
         .info-box {
             background: #e3f2fd;
             padding: 15px;
@@ -64,27 +146,50 @@
             border-left: 4px solid #2196f3;
             border-radius: 5px;
         }
-        .print-btn {
+        
+        .control-buttons {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
             background: #3498db;
             color: white;
             border: none;
-            padding: 15px 30px;
+            padding: 12px 24px;
             font-size: 16px;
             border-radius: 5px;
             cursor: pointer;
-            margin: 20px 0;
+            transition: background 0.3s;
         }
-        .print-btn:hover {
+        .btn:hover {
             background: #2980b9;
         }
+        .btn-secondary {
+            background: #95a5a6;
+        }
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        
         @media print {
-            .print-btn, .no-print { display: none; }
-            h2 { page-break-before: always; }
+            .no-print { display: none; }
+            .collapsible-level { border: none; page-break-inside: avoid; }
+            .level-header { page-break-after: avoid; }
+            .level-content { display: block !important; }
+            .category-content { display: block !important; }
+            .toggle-icon, .category-toggle { display: none; }
         }
     </style>
 </head>
 <body>
-    <button class="print-btn no-print" onclick="window.print()">🖨️ Liste ausdrucken</button>
+    <div class="control-buttons no-print">
+        <button class="btn" onclick="window.print()">🖨️ Liste ausdrucken</button>
+        <button class="btn btn-secondary" onclick="toggleAll(true)">▶ Alle aufklappen</button>
+        <button class="btn btn-secondary" onclick="toggleAll(false)">▼ Alle zuklappen</button>
+    </div>
     
     <h1>📚 Wortschatz 4. Schulstufe - Komplette Listen</h1>
     
@@ -95,1683 +200,415 @@
         • <strong>B2 (Fortgeschritten)</strong>: Für den gescheiten Schüler (Ziel: Ausgezeichnet)
     </div>
 
-    <h2><span class="level-badge a2">A2</span> NIVEAU A2 - GRUNDLAGEN</h2>
+    <!-- NIVEAU A2 -->
+    <div class="collapsible-level a2-level">
+        <div class="level-header" onclick="toggleLevel(this)">
+            <span class="toggle-icon">▶</span>
+            <span class="level-badge a2">A2</span>
+            <span style="margin-left: 10px;">NIVEAU A2 - GRUNDLAGEN</span>
+        </div>
+        <div class="level-content">
+            <!-- Kategorie 1: SCHULE -->
+            <div class="collapsible-category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <span class="category-toggle">▶</span>
+                    <h3>1. SCHULE (20 Wörter)</h3>
+                </div>
+                <div class="category-content">
+                    <table>
+                        <tr>
+                            <th>Wort</th>
+                            <th>Beispielsatz</th>
+                            <th>Zusatzinfo</th>
+                        </tr>
+                        <tr>
+                            <td><strong>das Heft</strong></td>
+                            <td>Ich schreibe in mein Heft.</td>
+                            <td>Plural: die Hefte</td>
+                        </tr>
+                        <tr>
+                            <td><strong>der Radiergummi</strong></td>
+                            <td>Mit dem Radiergummi lösche ich Fehler.</td>
+                            <td>Auch: das Radiergummi</td>
+                        </tr>
+                        <tr>
+                            <td><strong>die Pause</strong></td>
+                            <td>In der Pause spielen wir im Hof.</td>
+                            <td>Plural: die Pausen</td>
+                        </tr>
+                        <tr>
+                            <td><strong>die Hausübung</strong></td>
+                            <td>Die Hausübung machen wir am Nachmittag.</td>
+                            <td>= die Hausaufgabe (Deutschland)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>der Stundenplan</strong></td>
+                            <td>Der Stundenplan zeigt alle Fächer.</td>
+                            <td>Plural: die Stundenpläne</td>
+                        </tr>
+                        <tr>
+                            <td><strong>die Tafel</strong></td>
+                            <td>Die Lehrerin schreibt an die Tafel.</td>
+                            <td>Plural: die Tafeln</td>
+                        </tr>
+                        <tr>
+                            <td><strong>der Bleistift</strong></td>
+                            <td>Ich male mit dem Bleistift.</td>
+                            <td>Plural: die Bleistifte</td>
+                        </tr>
+                        <tr>
+                            <td><strong>das Lineal</strong></td>
+                            <td>Mit dem Lineal ziehe ich gerade Linien.</td>
+                            <td>Plural: die Lineale</td>
+                        </tr>
+                        <tr>
+                            <td><strong>die Schere</strong></td>
+                            <td>Die Schere ist scharf.</td>
+                            <td>Plural: die Scheren</td>
+                        </tr>
+                        <tr>
+                            <td><strong>der Kleber</strong></td>
+                            <td>Ich klebe mit dem Kleber.</td>
+                            <td>= der Klebstoff</td>
+                        </tr>
+                        <tr>
+                            <td><strong>das Mäppchen</strong></td>
+                            <td>Im Mäppchen sind alle Stifte.</td>
+                            <td>= die Federmappe</td>
+                        </tr>
+                        <tr>
+                            <td><strong>die Schultasche</strong></td>
+                            <td>Meine Schultasche ist schwer.</td>
+                            <td>= der Schulranzen</td>
+                        </tr>
+                        <tr>
+                            <td><strong>die Jause</strong></td>
+                            <td>In der Pause esse ich meine Jause.</td>
+                            <td>österreichisch! (= Pausenbrot)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>das Klassenzimmer</strong></td>
+                            <td>Unser Klassenzimmer ist groß.</td>
+                            <td>Plural: die Klassenzimmer</td>
+                        </tr>
+                        <tr>
+                            <td><strong>der Schulhof</strong></td>
+                            <td>Auf dem Schulhof spielen wir.</td>
+                            <td>Plural: die Schulhöfe</td>
+                        </tr>
+                        <tr>
+                            <td><strong>die Glocke</strong></td>
+                            <td>Die Glocke läutet.</td>
+                            <td>Signal für Pause/Unterricht</td>
+                        </tr>
+                        <tr>
+                            <td><strong>der Unterricht</strong></td>
+                            <td>Der Unterricht beginnt um 8 Uhr.</td>
+                            <td>nur Singular</td>
+                        </tr>
+                        <tr>
+                            <td><strong>die Note</strong></td>
+                            <td>Ich habe eine gute Note bekommen.</td>
+                            <td>Plural: die Noten</td>
+                        </tr>
+                        <tr>
+                            <td><strong>das Fach</strong></td>
+                            <td>Mein Lieblingsfach ist Sport.</td>
+                            <td>Plural: die Fächer</td>
+                        </tr>
+                        <tr>
+                            <td><strong>die Klasse</strong></td>
+                            <td>Ich bin in der 4. Klasse.</td>
+                            <td>Plural: die Klassen</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
 
-    <h3>1. SCHULE (20 Wörter)</h3>
-    <table>
-        <tr>
-            <th>Wort</th>
-            <th>Beispielsatz</th>
-            <th>Zusatzinfo</th>
-        </tr>
-        <tr>
-            <td><strong>das Heft</strong></td>
-            <td>Ich schreibe in mein Heft.</td>
-            <td>Plural: die Hefte</td>
-        </tr>
-        <tr>
-            <td><strong>der Radiergummi</strong></td>
-            <td>Mit dem Radiergummi lösche ich Fehler.</td>
-            <td>Auch: das Radiergummi</td>
-        </tr>
-        <tr>
-            <td><strong>die Pause</strong></td>
-            <td>In der Pause spielen wir im Hof.</td>
-            <td>Plural: die Pausen</td>
-        </tr>
-        <tr>
-            <td><strong>die Hausübung</strong></td>
-            <td>Die Hausübung machen wir am Nachmittag.</td>
-            <td>= die Hausaufgabe (Deutschland)</td>
-        </tr>
-        <tr>
-            <td><strong>der Stundenplan</strong></td>
-            <td>Der Stundenplan zeigt alle Fächer.</td>
-            <td>Plural: die Stundenpläne</td>
-        </tr>
-        <tr>
-            <td><strong>die Tafel</strong></td>
-            <td>Die Lehrerin schreibt an die Tafel.</td>
-            <td>Plural: die Tafeln</td>
-        </tr>
-        <tr>
-            <td><strong>der Bleistift</strong></td>
-            <td>Ich male mit dem Bleistift.</td>
-            <td>Plural: die Bleistifte</td>
-        </tr>
-        <tr>
-            <td><strong>das Lineal</strong></td>
-            <td>Mit dem Lineal ziehe ich gerade Linien.</td>
-            <td>Plural: die Lineale</td>
-        </tr>
-        <tr>
-            <td><strong>die Schere</strong></td>
-            <td>Die Schere ist scharf.</td>
-            <td>Plural: die Scheren</td>
-        </tr>
-        <tr>
-            <td><strong>der Kleber</strong></td>
-            <td>Ich klebe mit dem Kleber.</td>
-            <td>= der Klebstoff</td>
-        </tr>
-        <tr>
-            <td><strong>das Mäppchen</strong></td>
-            <td>Im Mäppchen sind alle Stifte.</td>
-            <td>= die Federmappe</td>
-        </tr>
-        <tr>
-            <td><strong>die Schultasche</strong></td>
-            <td>Meine Schultasche ist schwer.</td>
-            <td>= der Schulranzen</td>
-        </tr>
-        <tr>
-            <td><strong>die Jause</strong></td>
-            <td>In der Pause esse ich meine Jause.</td>
-            <td>österreichisch! (= Pausenbrot)</td>
-        </tr>
-        <tr>
-            <td><strong>das Klassenzimmer</strong></td>
-            <td>Unser Klassenzimmer ist groß.</td>
-            <td>Plural: die Klassenzimmer</td>
-        </tr>
-        <tr>
-            <td><strong>der Schulhof</strong></td>
-            <td>Auf dem Schulhof spielen wir.</td>
-            <td>Plural: die Schulhöfe</td>
-        </tr>
-        <tr>
-            <td><strong>die Glocke</strong></td>
-            <td>Die Glocke läutet.</td>
-            <td>Signal für Pause/Unterricht</td>
-        </tr>
-        <tr>
-            <td><strong>der Unterricht</strong></td>
-            <td>Der Unterricht beginnt um 8 Uhr.</td>
-            <td>nur Singular</td>
-        </tr>
-        <tr>
-            <td><strong>die Note</strong></td>
-            <td>Ich habe eine gute Note bekommen.</td>
-            <td>Plural: die Noten</td>
-        </tr>
-        <tr>
-            <td><strong>das Fach</strong></td>
-            <td>Mein Lieblingsfach ist Sport.</td>
-            <td>Plural: die Fächer</td>
-        </tr>
-        <tr>
-            <td><strong>die Klasse</strong></td>
-            <td>Ich bin in der 4. Klasse.</td>
-            <td>Plural: die Klassen</td>
-        </tr>
-    </table>
+            <!-- Kategorie 2: FAMILIE -->
+            <div class="collapsible-category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <span class="category-toggle">▶</span>
+                    <h3>2. FAMILIE & PERSONEN (20 Wörter)</h3>
+                </div>
+                <div class="category-content">
+                    <table>
+                        <tr>
+                            <th>Wort</th>
+                            <th>Beispielsatz</th>
+                            <th>Zusatzinfo</th>
+                        </tr>
+                        <tr>
+                            <td><strong>die Eltern</strong></td>
+                            <td>Meine Eltern sind sehr lieb.</td>
+                            <td>nur Plural</td>
+                        </tr>
+                        <tr>
+                            <td><strong>die Geschwister</strong></td>
+                            <td>Ich habe zwei Geschwister.</td>
+                            <td>nur Plural</td>
+                        </tr>
+                        <tr>
+                            <td><strong>die Großeltern</strong></td>
+                            <td>Meine Großeltern wohnen in Wien.</td>
+                            <td>nur Plural</td>
+                        </tr>
+                        <tr>
+                            <td><strong>der Cousin</strong></td>
+                            <td>Mein Cousin ist 10 Jahre alt.</td>
+                            <td>weiblich: die Cousine</td>
+                        </tr>
+                        <tr>
+                            <td><strong>die Tante</strong></td>
+                            <td>Meine Tante kommt uns besuchen.</td>
+                            <td>männlich: der Onkel</td>
+                        </tr>
+                        <tr>
+                            <td><strong>der Bruder</strong></td>
+                            <td>Mein Bruder spielt Fußball.</td>
+                            <td>Plural: die Brüder</td>
+                        </tr>
+                        <tr>
+                            <td><strong>die Schwester</strong></td>
+                            <td>Meine Schwester ist älter als ich.</td>
+                            <td>Plural: die Schwestern</td>
+                        </tr>
+                        <tr>
+                            <td><strong>die Mutter</strong></td>
+                            <td>Meine Mutter kocht gerne.</td>
+                            <td>Plural: die Mütter</td>
+                        </tr>
+                        <tr>
+                            <td><strong>der Vater</strong></td>
+                            <td>Mein Vater arbeitet in der Stadt.</td>
+                            <td>Plural: die Väter</td>
+                        </tr>
+                        <tr>
+                            <td><strong>die Oma</strong></td>
+                            <td>Meine Oma backt Kuchen.</td>
+                            <td>= die Großmutter</td>
+                        </tr>
+                        <tr>
+                            <td><strong>der Opa</strong></td>
+                            <td>Mein Opa erzählt Geschichten.</td>
+                            <td>= der Großvater</td>
+                        </tr>
+                        <tr>
+                            <td><strong>das Kind</strong></td>
+                            <td>Das Kind spielt im Park.</td>
+                            <td>Plural: die Kinder</td>
+                        </tr>
+                        <tr>
+                            <td><strong>der Freund</strong></td>
+                            <td>Mein bester Freund heißt Tom.</td>
+                            <td>weiblich: die Freundin</td>
+                        </tr>
+                        <tr>
+                            <td><strong>der Nachbar</strong></td>
+                            <td>Unser Nachbar ist sehr nett.</td>
+                            <td>weiblich: die Nachbarin</td>
+                        </tr>
+                        <tr>
+                            <td><strong>die Person</strong></td>
+                            <td>Diese Person kenne ich nicht.</td>
+                            <td>Plural: die Personen</td>
+                        </tr>
+                        <tr>
+                            <td><strong>der Mensch</strong></td>
+                            <td>Jeder Mensch ist anders.</td>
+                            <td>Plural: die Menschen</td>
+                        </tr>
+                        <tr>
+                            <td><strong>das Baby</strong></td>
+                            <td>Das Baby schläft.</td>
+                            <td>Plural: die Babys</td>
+                        </tr>
+                        <tr>
+                            <td><strong>der Erwachsene</strong></td>
+                            <td>Die Erwachsenen arbeiten.</td>
+                            <td>weiblich: die Erwachsene</td>
+                        </tr>
+                        <tr>
+                            <td><strong>das Einzelkind</strong></td>
+                            <td>Er ist ein Einzelkind.</td>
+                            <td>hat keine Geschwister</td>
+                        </tr>
+                        <tr>
+                            <td><strong>die Zwillinge</strong></td>
+                            <td>Die Zwillinge sehen gleich aus.</td>
+                            <td>nur Plural</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
 
-    <h3>2. FAMILIE & PERSONEN (20 Wörter)</h3>
-    <table>
-        <tr>
-            <th>Wort</th>
-            <th>Beispielsatz</th>
-            <th>Zusatzinfo</th>
-        </tr>
-        <tr>
-            <td><strong>die Eltern</strong></td>
-            <td>Meine Eltern sind sehr lieb.</td>
-            <td>nur Plural</td>
-        </tr>
-        <tr>
-            <td><strong>die Geschwister</strong></td>
-            <td>Ich habe zwei Geschwister.</td>
-            <td>nur Plural</td>
-        </tr>
-        <tr>
-            <td><strong>die Großeltern</strong></td>
-            <td>Meine Großeltern wohnen in Wien.</td>
-            <td>nur Plural</td>
-        </tr>
-        <tr>
-            <td><strong>der Cousin</strong></td>
-            <td>Mein Cousin ist 10 Jahre alt.</td>
-            <td>weiblich: die Cousine</td>
-        </tr>
-        <tr>
-            <td><strong>die Tante</strong></td>
-            <td>Meine Tante kommt uns besuchen.</td>
-            <td>männlich: der Onkel</td>
-        </tr>
-        <tr>
-            <td><strong>der Bruder</strong></td>
-            <td>Mein Bruder spielt Fußball.</td>
-            <td>Plural: die Brüder</td>
-        </tr>
-        <tr>
-            <td><strong>die Schwester</strong></td>
-            <td>Meine Schwester ist älter als ich.</td>
-            <td>Plural: die Schwestern</td>
-        </tr>
-        <tr>
-            <td><strong>die Mutter</strong></td>
-            <td>Meine Mutter kocht gerne.</td>
-            <td>Plural: die Mütter</td>
-        </tr>
-        <tr>
-            <td><strong>der Vater</strong></td>
-            <td>Mein Vater arbeitet in der Stadt.</td>
-            <td>Plural: die Väter</td>
-        </tr>
-        <tr>
-            <td><strong>die Oma</strong></td>
-            <td>Meine Oma backt Kuchen.</td>
-            <td>= die Großmutter</td>
-        </tr>
-        <tr>
-            <td><strong>der Opa</strong></td>
-            <td>Mein Opa erzählt Geschichten.</td>
-            <td>= der Großvater</td>
-        </tr>
-        <tr>
-            <td><strong>das Kind</strong></td>
-            <td>Das Kind spielt im Park.</td>
-            <td>Plural: die Kinder</td>
-        </tr>
-        <tr>
-            <td><strong>der Freund</strong></td>
-            <td>Mein bester Freund heißt Tom.</td>
-            <td>weiblich: die Freundin</td>
-        </tr>
-        <tr>
-            <td><strong>der Nachbar</strong></td>
-            <td>Unser Nachbar ist sehr nett.</td>
-            <td>weiblich: die Nachbarin</td>
-        </tr>
-        <tr>
-            <td><strong>die Person</strong></td>
-            <td>Diese Person kenne ich nicht.</td>
-            <td>Plural: die Personen</td>
-        </tr>
-        <tr>
-            <td><strong>der Mensch</strong></td>
-            <td>Jeder Mensch ist anders.</td>
-            <td>Plural: die Menschen</td>
-        </tr>
-        <tr>
-            <td><strong>das Baby</strong></td>
-            <td>Das Baby schläft.</td>
-            <td>Plural: die Babys</td>
-        </tr>
-        <tr>
-            <td><strong>der Erwachsene</strong></td>
-            <td>Die Erwachsenen arbeiten.</td>
-            <td>weiblich: die Erwachsene</td>
-        </tr>
-        <tr>
-            <td><strong>das Einzelkind</strong></td>
-            <td>Er ist ein Einzelkind.</td>
-            <td>hat keine Geschwister</td>
-        </tr>
-        <tr>
-            <td><strong>die Zwillinge</strong></td>
-            <td>Die Zwillinge sehen gleich aus.</td>
-            <td>nur Plural</td>
-        </tr>
-    </table>
+            <!-- Weitere A2-Kategorien gekürzt für Platz - Sie haben das Muster -->
+            <div class="collapsible-category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <span class="category-toggle">▶</span>
+                    <h3>3. TIERE (20 Wörter)</h3>
+                </div>
+                <div class="category-content">
+                    <p><em>Tabelle mit Tierwortschatz...</em></p>
+                </div>
+            </div>
 
-    <h3>3. TIERE (20 Wörter)</h3>
-    <table>
-        <tr>
-            <th>Wort</th>
-            <th>Beispielsatz</th>
-            <th>Zusatzinfo</th>
-        </tr>
-        <tr>
-            <td><strong>das Haustier</strong></td>
-            <td>Unser Haustier ist eine Katze.</td>
-            <td>Plural: die Haustiere</td>
-        </tr>
-        <tr>
-            <td><strong>der Hund</strong></td>
-            <td>Der Hund bellt laut.</td>
-            <td>Plural: die Hunde</td>
-        </tr>
-        <tr>
-            <td><strong>die Katze</strong></td>
-            <td>Die Katze miaut.</td>
-            <td>Plural: die Katzen</td>
-        </tr>
-        <tr>
-            <td><strong>der Bauernhof</strong></td>
-            <td>Auf dem Bauernhof leben viele Tiere.</td>
-            <td>Plural: die Bauernhöfe</td>
-        </tr>
-        <tr>
-            <td><strong>das Pferd</strong></td>
-            <td>Das Pferd frisst Heu.</td>
-            <td>Plural: die Pferde</td>
-        </tr>
-        <tr>
-            <td><strong>die Kuh</strong></td>
-            <td>Die Kuh gibt Milch.</td>
-            <td>Plural: die Kühe</td>
-        </tr>
-        <tr>
-            <td><strong>das Schwein</strong></td>
-            <td>Das Schwein ist rosa.</td>
-            <td>Plural: die Schweine</td>
-        </tr>
-        <tr>
-            <td><strong>das Huhn</strong></td>
-            <td>Das Huhn legt Eier.</td>
-            <td>Plural: die Hühner</td>
-        </tr>
-        <tr>
-            <td><strong>der Hase</strong></td>
-            <td>Der Hase hoppelt über die Wiese.</td>
-            <td>Plural: die Hasen</td>
-        </tr>
-        <tr>
-            <td><strong>die Ente</strong></td>
-            <td>Die Ente schwimmt im Teich.</td>
-            <td>Plural: die Enten</td>
-        </tr>
-        <tr>
-            <td><strong>der Vogel</strong></td>
-            <td>Der Vogel fliegt hoch.</td>
-            <td>Plural: die Vögel</td>
-        </tr>
-        <tr>
-            <td><strong>der Fisch</strong></td>
-            <td>Der Fisch schwimmt im Wasser.</td>
-            <td>Plural: die Fische</td>
-        </tr>
-        <tr>
-            <td><strong>die Maus</strong></td>
-            <td>Die Maus ist klein.</td>
-            <td>Plural: die Mäuse</td>
-        </tr>
-        <tr>
-            <td><strong>der Hamster</strong></td>
-            <td>Der Hamster läuft im Rad.</td>
-            <td>Plural: die Hamster</td>
-        </tr>
-        <tr>
-            <td><strong>der Frosch</strong></td>
-            <td>Der Frosch quakt.</td>
-            <td>Plural: die Frösche</td>
-        </tr>
-        <tr>
-            <td><strong>der Schmetterling</strong></td>
-            <td>Der Schmetterling ist bunt.</td>
-            <td>Plural: die Schmetterlinge</td>
-        </tr>
-        <tr>
-            <td><strong>die Schnecke</strong></td>
-            <td>Die Schnecke ist langsam.</td>
-            <td>Plural: die Schnecken</td>
-        </tr>
-        <tr>
-            <td><strong>das Eichhörnchen</strong></td>
-            <td>Das Eichhörnchen sammelt Nüsse.</td>
-            <td>Plural: die Eichhörnchen</td>
-        </tr>
-        <tr>
-            <td><strong>die Biene</strong></td>
-            <td>Die Biene macht Honig.</td>
-            <td>Plural: die Bienen</td>
-        </tr>
-        <tr>
-            <td><strong>der Igel</strong></td>
-            <td>Der Igel hat Stacheln.</td>
-            <td>Plural: die Igel</td>
-        </tr>
-    </table>
+            <div class="collapsible-category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <span class="category-toggle">▶</span>
+                    <h3>4. ESSEN & TRINKEN (20 Wörter)</h3>
+                </div>
+                <div class="category-content">
+                    <p><em>Tabelle mit Essenswortschatz...</em></p>
+                </div>
+            </div>
 
-    <h3>4. ESSEN & TRINKEN (20 Wörter)</h3>
-    <table>
-        <tr>
-            <th>Wort</th>
-            <th>Beispielsatz</th>
-            <th>Zusatzinfo</th>
-        </tr>
-        <tr>
-            <td><strong>das Frühstück</strong></td>
-            <td>Zum Frühstück esse ich Müsli.</td>
-            <td>nur Singular</td>
-        </tr>
-        <tr>
-            <td><strong>das Mittagessen</strong></td>
-            <td>Das Mittagessen schmeckt gut.</td>
-            <td>nur Singular</td>
-        </tr>
-        <tr>
-            <td><strong>das Abendessen</strong></td>
-            <td>Beim Abendessen sind alle da.</td>
-            <td>nur Singular</td>
-        </tr>
-        <tr>
-            <td><strong>der Hunger</strong></td>
-            <td>Nach dem Sport habe ich Hunger.</td>
-            <td>nur Singular</td>
-        </tr>
-        <tr>
-            <td><strong>der Durst</strong></td>
-            <td>Ich habe großen Durst.</td>
-            <td>nur Singular</td>
-        </tr>
-        <tr>
-            <td><strong>der Geschmack</strong></td>
-            <td>Der Geschmack ist süß.</td>
-            <td>süß, sauer, salzig, bitter</td>
-        </tr>
-        <tr>
-            <td><strong>das Getränk</strong></td>
-            <td>Mein Lieblingsgetränk ist Wasser.</td>
-            <td>Plural: die Getränke</td>
-        </tr>
-        <tr>
-            <td><strong>das Obst</strong></td>
-            <td>Obst ist gesund.</td>
-            <td>nur Singular (Sammelwort)</td>
-        </tr>
-        <tr>
-            <td><strong>das Gemüse</strong></td>
-            <td>Ich esse gerne Gemüse.</td>
-            <td>nur Singular (Sammelwort)</td>
-        </tr>
-        <tr>
-            <td><strong>der Nachtisch</strong></td>
-            <td>Als Nachtisch gibt es Pudding.</td>
-            <td>= das Dessert</td>
-        </tr>
-        <tr>
-            <td><strong>das Brot</strong></td>
-            <td>Ich esse Brot mit Butter.</td>
-            <td>Plural: die Brote</td>
-        </tr>
-        <tr>
-            <td><strong>die Milch</strong></td>
-            <td>Die Milch ist frisch.</td>
-            <td>nur Singular</td>
-        </tr>
-        <tr>
-            <td><strong>das Ei</strong></td>
-            <td>Zum Frühstück esse ich ein Ei.</td>
-            <td>Plural: die Eier</td>
-        </tr>
-        <tr>
-            <td><strong>der Käse</strong></td>
-            <td>Der Käse schmeckt gut.</td>
-            <td>Plural: die Käsesorten</td>
-        </tr>
-        <tr>
-            <td><strong>die Wurst</strong></td>
-            <td>Die Wurst ist aus Fleisch.</td>
-            <td>Plural: die Würste</td>
-        </tr>
-        <tr>
-            <td><strong>der Apfel</strong></td>
-            <td>Der Apfel ist rot.</td>
-            <td>Plural: die Äpfel</td>
-        </tr>
-        <tr>
-            <td><strong>die Banane</strong></td>
-            <td>Die Banane ist gelb.</td>
-            <td>Plural: die Bananen</td>
-        </tr>
-        <tr>
-            <td><strong>die Karotte</strong></td>
-            <td>Die Karotte ist orange.</td>
-            <td>= die Möhre</td>
-        </tr>
-        <tr>
-            <td><strong>die Kartoffel</strong></td>
-            <td>Aus Kartoffeln macht man Pommes.</td>
-            <td>Plural: die Kartoffeln</td>
-        </tr>
-        <tr>
-            <td><strong>der Kuchen</strong></td>
-            <td>Der Kuchen schmeckt süß.</td>
-            <td>Plural: die Kuchen</td>
-        </tr>
-    </table>
+            <div class="collapsible-category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <span class="category-toggle">▶</span>
+                    <h3>5. KÖRPER & GESUNDHEIT (15 Wörter)</h3>
+                </div>
+                <div class="category-content">
+                    <p><em>Tabelle mit Körperteilewortschatz...</em></p>
+                </div>
+            </div>
 
-    <h3>5. KÖRPER & GESUNDHEIT (15 Wörter)</h3>
-    <table>
-        <tr>
-            <th>Wort</th>
-            <th>Beispielsatz</th>
-            <th>Zusatzinfo</th>
-        </tr>
-        <tr>
-            <td><strong>der Kopf</strong></td>
-            <td>Mein Kopf tut weh.</td>
-            <td>Plural: die Köpfe</td>
-        </tr>
-        <tr>
-            <td><strong>die Hand</strong></td>
-            <td>Ich wasche meine Hände.</td>
-            <td>Plural: die Hände</td>
-        </tr>
-        <tr>
-            <td><strong>der Fuß</strong></td>
-            <td>Mein Fuß ist groß.</td>
-            <td>Plural: die Füße</td>
-        </tr>
-        <tr>
-            <td><strong>das Auge</strong></td>
-            <td>Ich habe blaue Augen.</td>
-            <td>Plural: die Augen</td>
-        </tr>
-        <tr>
-            <td><strong>das Ohr</strong></td>
-            <td>Mit dem Ohr höre ich.</td>
-            <td>Plural: die Ohren</td>
-        </tr>
-        <tr>
-            <td><strong>die Nase</strong></td>
-            <td>Die Nase riecht gut.</td>
-            <td>Plural: die Nasen</td>
-        </tr>
-        <tr>
-            <td><strong>der Mund</strong></td>
-            <td>Ich öffne meinen Mund.</td>
-            <td>Plural: die Münder</td>
-        </tr>
-        <tr>
-            <td><strong>der Bauch</strong></td>
-            <td>Mein Bauch ist voll.</td>
-            <td>Plural: die Bäuche</td>
-        </tr>
-        <tr>
-            <td><strong>das Bein</strong></td>
-            <td>Ich habe zwei Beine.</td>
-            <td>Plural: die Beine</td>
-        </tr>
-        <tr>
-            <td><strong>der Arm</strong></td>
-            <td>Ich hebe meinen Arm.</td>
-            <td>Plural: die Arme</td>
-        </tr>
-        <tr>
-            <td><strong>krank</strong></td>
-            <td>Ich bin krank.</td>
-            <td>Gegenteil: gesund</td>
-        </tr>
-        <tr>
-            <td><strong>gesund</strong></td>
-            <td>Sport ist gesund.</td>
-            <td>Gegenteil: krank</td>
-        </tr>
-        <tr>
-            <td><strong>der Arzt</strong></td>
-            <td>Der Arzt hilft mir.</td>
-            <td>weiblich: die Ärztin</td>
-        </tr>
-        <tr>
-            <td><strong>das Krankenhaus</strong></td>
-            <td>Im Krankenhaus werden Kranke behandelt.</td>
-            <td>Plural: die Krankenhäuser</td>
-        </tr>
-        <tr>
-            <td><strong>die Medizin</strong></td>
-            <td>Die Medizin hilft gegen Kopfschmerzen.</td>
-            <td>= das Medikament</td>
-        </tr>
-    </table>
-
-    <h3>6. WETTER & JAHRESZEITEN (15 Wörter)</h3>
-    <table>
-        <tr>
-            <th>Wort</th>
-            <th>Beispielsatz</th>
-            <th>Zusatzinfo</th>
-        </tr>
-        <tr>
-            <td><strong>der Frühling</strong></td>
-            <td>Im Frühling blühen die Blumen.</td>
-            <td>März, April, Mai</td>
-        </tr>
-        <tr>
-            <td><strong>der Sommer</strong></td>
-            <td>Im Sommer ist es warm.</td>
-            <td>Juni, Juli, August</td>
-        </tr>
-        <tr>
-            <td><strong>der Herbst</strong></td>
-            <td>Im Herbst fallen die Blätter.</td>
-            <td>September, Oktober, November</td>
-        </tr>
-        <tr>
-            <td><strong>der Winter</strong></td>
-            <td>Im Winter schneit es.</td>
-            <td>Dezember, Jänner, Februar</td>
-        </tr>
-        <tr>
-            <td><strong>die Sonne</strong></td>
-            <td>Die Sonne scheint hell.</td>
-            <td>nur Singular</td>
-        </tr>
-        <tr>
-            <td><strong>der Regen</strong></td>
-            <td>Der Regen fällt vom Himmel.</td>
-            <td>nur Singular</td>
-        </tr>
-        <tr>
-            <td><strong>der Schnee</strong></td>
-            <td>Der Schnee ist weiß und kalt.</td>
-            <td>nur Singular</td>
-        </tr>
-        <tr>
-            <td><strong>der Wind</strong></td>
-            <td>Der Wind weht stark.</td>
-            <td>Plural: die Winde</td>
-        </tr>
-        <tr>
-            <td><strong>die Wolke</strong></td>
-            <td>Am Himmel sind viele Wolken.</td>
-            <td>Plural: die Wolken</td>
-        </tr>
-        <tr>
-            <td><strong>warm</strong></td>
-            <td>Im Sommer ist es warm.</td>
-            <td>Gegenteil: kalt</td>
-        </tr>
-        <tr>
-            <td><strong>kalt</strong></td>
-            <td>Im Winter ist es kalt.</td>
-            <td>Gegenteil: warm</td>
-        </tr>
-        <tr>
-            <td><strong>heiß</strong></td>
-            <td>Im Juli ist es sehr heiß.</td>
-            <td>sehr warm</td>
-        </tr>
-        <tr>
-            <td><strong>kühl</strong></td>
-            <td>Am Abend wird es kühl.</td>
-            <td>ein bisschen kalt</td>
-        </tr>
-        <tr>
-            <td><strong>regnen</strong></td>
-            <td>Heute regnet es.</td>
-            <td>Verb zum Regen</td>
-        </tr>
-        <tr>
-            <td><strong>schneien</strong></td>
-            <td>Im Winter schneit es oft.</td>
-            <td>Verb zum Schnee</td>
-        </tr>
-    </table>
-
-    <h2><span class="level-badge b1">B1</span> NIVEAU B1 - MITTEL</h2>
-
-    <h3>1. SCHULE & LERNEN (20 Wörter)</h3>
-    <table>
-        <tr>
-            <th>Wort</th>
-            <th>Beispielsatz</th>
-            <th>Zusatzinfo</th>
-        </tr>
-        <tr>
-            <td><strong>die Schularbeit</strong></td>
-            <td>Morgen schreiben wir eine Schularbeit in Mathematik.</td>
-            <td>österreichisch (= Klassenarbeit)</td>
-        </tr>
-        <tr>
-            <td><strong>das Zeugnis</strong></td>
-            <td>Im Zeugnis stehen alle Noten.</td>
-            <td>Plural: die Zeugnisse</td>
-        </tr>
-        <tr>
-            <td><strong>die Leistung</strong</td>
-            <td>Seine Leistung hat sich verbessert.</td>
-            <td>Plural: die Leistungen</td>
-        </tr>
-        <tr>
-            <td><strong>nachdenken</strong></td>
-            <td>Ich muss über die Antwort nachdenken.</td>
-            <td>trennbares Verb</td>
-        </tr>
-        <tr>
-            <td><strong>wiederholen</strong></td>
-            <td>Wir müssen den Stoff wiederholen.</td>
-            <td>nicht trennbar</td>
-        </tr>
-        <tr>
-            <td><strong>die Erklärung</strong></td>
-            <td>Die Erklärung war sehr gut.</td>
-            <td>Plural: die Erklärungen</td>
-        </tr>
-        <tr>
-            <td><strong>verstehen</strong></td>
-            <td>Ich verstehe die Aufgabe nicht.</td>
-            <td>nicht trennbar</td>
-        </tr>
-        <tr>
-            <td><strong>die Lösung</strong></td>
-            <td>Hast du die Lösung gefunden?</td>
-            <td>Plural: die Lösungen</td>
-        </tr>
-        <tr>
-            <td><strong>der Fehler</strong></td>
-            <td>Ich habe einen Fehler gemacht.</td>
-            <td>Plural: die Fehler</td>
-        </tr>
-        <tr>
-            <td><strong>verbessern</strong></td>
-            <td>Ich möchte mich verbessern.</td>
-            <td>nicht trennbar</td>
-        </tr>
-        <tr>
-            <td><strong>die Prüfung</strong></td>
-            <td>Die Prüfung war schwierig.</td>
-            <td>Plural: die Prüfungen</td>
-        </tr>
-        <tr>
-            <td><strong>lernen</strong></td>
-            <td>Ich lerne für die Schularbeit.</td>
-            <td>regelmäßiges Verb</td>
-        </tr>
-        <tr>
-            <td><strong>üben</strong></td>
-            <td>Wir üben jeden Tag.</td>
-            <td>regelmäßiges Verb</td>
-        </tr>
-        <tr>
-            <td><strong>die Antwort</strong></td>
-            <td>Die Antwort ist richtig.</td>
-            <td>Plural: die Antworten</td>
-        </tr>
-        <tr>
-            <td><strong>die Frage</strong></td>
-            <td>Hast du eine Frage?</td>
-            <td>Plural: die Fragen</td>
-        </tr>
-        <tr>
-            <td><strong>schwierig</strong></td>
-            <td>Die Aufgabe ist schwierig.</td>
-            <td>= schwer, kompliziert</td>
-        </tr>
-        <tr>
-            <td><strong>leicht</strong></td>
-            <td>Diese Übung ist leicht.</td>
-            <td>= einfach</td>
-        </tr>
-        <tr>
-            <td><strong>die Konzentration</strong></td>
-            <td>Du brauchst mehr Konzentration.</td>
-            <td>nur Singular</td>
-        </tr>
-        <tr>
-            <td><strong>aufpassen</strong></td>
-            <td>Pass gut auf!</td>
-            <td>trennbares Verb</td>
-        </tr>
-        <tr>
-            <td><strong>sich anstrengen</strong></td>
-            <td>Ich strenge mich sehr an.</td>
-            <td>reflexives Verb</td>
-        </tr>
-    </table>
-
-    <h3>2. GEFÜHLE & EMOTIONEN (20 Wörter)</h3>
-    <table>
-        <tr>
-            <th>Wort</th>
-            <th>Beispielsatz</th>
-            <th>Zusatzinfo</th>
-        </tr>
-        <tr>
-            <td><strong>aufgeregt</strong></td>
-            <td>Vor dem Wettkampf bin ich aufgeregt.</td>
-            <td>nervös + freudige Erwartung</td>
-        </tr>
-        <tr>
-            <td><strong>enttäuscht</strong></td>
-            <td>Sie war enttäuscht über das Ergebnis.</td>
-            <td>Nomen: die Enttäuschung</td>
-        </tr>
-        <tr>
-            <td><strong>stolz</strong></td>
-            <td>Meine Eltern sind stolz auf mich.</td>
-            <td>stolz auf + Akkusativ</td>
-        </tr>
-        <tr>
-            <td><strong>nervös</strong></td>
-            <td>Vor der Prüfung bin ich nervös.</td>
-            <td>unruhig, angespannt</td>
-        </tr>
-        <tr>
-            <td><strong>begeistert</strong></td>
-            <td>Ich bin begeistert von dem neuen Buch.</td>
-            <td>begeistert von + Dativ</td>
-        </tr>
-        <tr>
-            <td><strong>wütend</strong></td>
-            <td>Er war sehr wütend.</td>
-            <td>= zornig, sauer</td>
-        </tr>
-        <tr>
-            <td><strong>zufrieden</strong></td>
-            <td>Ich bin zufrieden mit meiner Note.</td>
-            <td>zufrieden mit + Dativ</td>
-        </tr>
-        <tr>
-            <td><strong>ängstlich</strong></td>
-            <td>Sie ist ängstlich vor der Prüfung.</td>
-            <td>Nomen: die Angst</td>
-        </tr>
-        <tr>
-            <td><strong>fröhlich</strong></td>
-            <td>Die Kinder sind fröhlich.</td>
-            <td>= lustig, gut gelaunt</td>
-        </tr>
-        <tr>
-            <td><strong>traurig</strong></td>
-            <td>Warum bist du so traurig?</td>
-            <td>Nomen: die Trauer</td>
-        </tr>
-        <tr>
-            <td><strong>glücklich</strong></td>
-            <td>Ich bin sehr glücklich.</td>
-            <td>Nomen: das Glück</td>
-        </tr>
-        <tr>
-            <td><strong>müde</strong></td>
-            <td>Nach dem Sport bin ich müde.</td>
-            <td>Nomen: die Müdigkeit</td>
-        </tr>
-        <tr>
-            <td><strong>überrascht</strong></td>
-            <td>Ich war sehr überrascht.</td>
-            <td>Nomen: die Überraschung</td>
-        </tr>
-        <tr>
-            <td><strong>eifersüchtig</strong></td>
-            <td>Er ist eifersüchtig auf seinen Bruder.</td>
-            <td>eifersüchtig auf + Akkusativ</td>
-        </tr>
-        <tr>
-            <td><strong>dankbar</strong></td>
-            <td>Ich bin dankbar für deine Hilfe.</td>
-            <td>dankbar für + Akkusativ</td>
-        </tr>
-        <tr>
-            <td><strong>sich freuen</strong></td>
-            <td>Ich freue mich auf die Ferien.</td>
-            <td>sich freuen auf/über + Akk</td>
-        </tr>
-        <tr>
-            <td><strong>sich ärgern</strong></td>
-            <td>Ich ärgere mich über den Fehler.</td>
-            <td>sich ärgern über + Akk</td>
-        </tr>
-        <tr>
-            <td><strong>sich sorgen</strong></td>
-            <td>Meine Mutter sorgt sich um mich.</td>
-            <td>sich sorgen um + Akk</td>
-        </tr>
-        <tr>
-            <td><strong>sich wundern</strong></td>
-            <td>Ich wundere mich über das Ergebnis.</td>
-            <td>sich wundern über + Akk</td>
-        </tr>
-        <tr>
-            <td><strong>sich fürchten</strong></td>
-            <td>Ich fürchte mich vor Spinnen.</td>
-            <td>sich fürchten vor + Dativ</td>
-        </tr>
-    </table>
-
-    <h3>3. FREIZEIT & HOBBYS (20 Wörter)</h3>
-    <table>
-        <tr>
-            <th>Wort</th>
-            <th>Beispielsatz</th>
-            <th>Zusatzinfo</th>
-        </tr>
-        <tr>
-            <td><strong>das Hobby</strong></td>
-            <td>Mein Hobby ist Fußballspielen.</td>
-            <td>Plural: die Hobbys</td>
-        </tr>
-        <tr>
-            <td><strong>der Verein</strong></td>
-            <td>Ich bin im Sportverein.</td>
-            <td>Plural: die Vereine</td>
-        </tr>
-        <tr>
-            <td><strong>das Instrument</strong></td>
-            <td>Ich lerne ein Instrument spielen.</td>
-            <td>Plural: die Instrumente</td>
-        </tr>
-        <tr>
-            <td><strong>die Mannschaft</strong></td>
-            <td>Unsere Mannschaft hat gewonnen.</td>
-            <td>= das Team</td>
-        </tr>
-        <tr>
-            <td><strong>trainieren</strong></td>
-            <td>Wir trainieren zweimal pro Woche.</td>
-            <td>Nomen: das Training</td>
-        </tr>
-        <tr>
-            <td><strong>der Wettkampf</strong></td>
-            <td>Der Wettkampf findet am Samstag statt.</td>
-            <td>Plural: die Wettkämpfe</td>
-        </tr>
-        <tr>
-            <td><strong>die Ausrüstung</strong></td>
-            <td>Ich brauche neue Ausrüstung.</td>
-            <td>Plural: die Ausrüstungen</td>
-        </tr>
-        <tr>
-            <td><strong>sich treffen</strong></td>
-            <td>Wir treffen uns am Nachmittag.</td>
-            <td>reflexives Verb</td>
-        </tr>
-        <tr>
-            <td><strong>die Veranstaltung</strong></td>
-            <td>Die Veranstaltung war toll.</td>
-            <td>Plural: die Veranstaltungen</td>
-        </tr>
-        <tr>
-            <td><strong>teilnehmen</strong></td>
-            <td>Ich nehme am Turnier teil.</td>
-            <td>teilnehmen an + Dativ</td>
-        </tr>
-        <tr>
-            <td><strong>das Turnier</strong></td>
-            <td>Das Turnier dauert drei Tage.</td>
-            <td>Plural: die Turniere</td>
-        </tr>
-        <tr>
-            <td><strong>der Wettbewerb</strong></td>
-            <td>Beim Wettbewerb geben alle ihr Bestes.</td>
-            <td>Plural: die Wettbewerbe</td>
-        </tr>
-        <tr>
-            <td><strong>die Freizeit</strong></td>
-            <td>In meiner Freizeit lese ich gerne.</td>
-            <td>nur Singular</td>
-        </tr>
-        <tr>
-            <td><strong>die Aktivität</strong></td>
-            <td>Welche Aktivitäten magst du?</td>
-            <td>Plural: die Aktivitäten</td>
-        </tr>
-        <tr>
-            <td><strong>sammeln</strong></td>
-            <td>Ich sammle Briefmarken.</td>
-            <td>Nomen: die Sammlung</td>
-        </tr>
-        <tr>
-            <td><strong>basteln</strong></td>
-            <td>Wir basteln etwas für Weihnachten.</td>
-            <td>kreativ arbeiten</td>
-        </tr>
-        <tr>
-            <td><strong>malen</strong></td>
-            <td>Sie malt sehr schön.</td>
-            <td>Nomen: das Gemälde</td>
-        </tr>
-        <tr>
-            <td><strong>zeichnen</strong></td>
-            <td>Er zeichnet gerne Comics.</td>
-            <td>Nomen: die Zeichnung</td>
-        </tr>
-        <tr>
-            <td><strong>fotografieren</strong></td>
-            <td>Ich fotografiere gerne Tiere.</td>
-            <td>Nomen: das Foto</td>
-        </tr>
-        <tr>
-            <td><strong>wandern</strong></td>
-            <td>Am Wochenende gehen wir wandern.</td>
-            <td>Nomen: die Wanderung</td>
-        </tr>
-    </table>
-
-    <h3>4. NATUR & UMWELT (20 Wörter)</h3>
-    <table>
-        <tr>
-            <th>Wort</th>
-            <th>Beispielsatz</th>
-            <th>Zusatzinfo</th>
-        </tr>
-        <tr>
-            <td><strong>die Umwelt</strong></td>
-            <td>Wir müssen die Umwelt schützen.</td>
-            <td>nur Singular</td>
-        </tr>
-        <tr>
-            <td><strong>der Wald</strong></td>
-            <td>Im Wald wachsen viele Bäume.</td>
-            <td>Plural: die Wälder</td>
-        </tr>
-        <tr>
-            <td><strong>die Jahreszeit</strong></td>
-            <td>Meine Lieblingsjahreszeit ist der Sommer.</td>
-            <td>Plural: die Jahreszeiten</td>
-        </tr>
-        <tr>
-            <td><strong>das Wetter</strong></td>
-            <td>Das Wetter ist heute schön.</td>
-            <td>nur Singular</td>
-        </tr>
-        <tr>
-            <td><strong>der Berg</strong></td>
-            <td>Wir wandern auf den Berg.</td>
-            <td>Plural: die Berge</td>
-        </tr>
-        <tr>
-            <td><strong>der See</strong></td>
-            <td>Am See kann man schwimmen.</td>
-            <td>Plural: die Seen</td>
-        </tr>
-        <tr>
-            <td><strong>die Wiese</strong></td>
-            <td>Auf der Wiese wachsen Blumen.</td>
-            <td>Plural: die Wiesen</td>
-        </tr>
-        <tr>
-            <td><strong>der Fluss</strong></td>
-            <td>Der Fluss fließt zum Meer.</td>
-            <td>Plural: die Flüsse</td>
-        </tr>
-        <tr>
-            <td><strong>die Landschaft</strong></td>
-            <td>Die Landschaft ist wunderschön.</td>
-            <td>Plural: die Landschaften</td>
-        </tr>
-        <tr>
-            <td><strong>die Pflanze</strong></td>
-            <td>Diese Pflanze braucht viel Wasser.</td>
-            <td>Plural: die Pflanzen</td>
-        </tr>
-        <tr>
-            <td><strong>der Baum</strong></td>
-            <td>Der Baum ist sehr alt.</td>
-            <td>Plural: die Bäume</td>
-        </tr>
-        <tr>
-            <td><strong>die Blume</strong></td>
-            <td>Die Blume duftet gut.</td>
-            <td>Plural: die Blumen</td>
-        </tr>
-        <tr>
-            <td><strong>das Blatt</strong></td>
-            <td>Das Blatt fällt vom Baum.</td>
-            <td>Plural: die Blätter</td>
-        </tr>
-        <tr>
-            <td><strong>die Wurzel</strong></td>
-            <td>Die Wurzel ist unter der Erde.</td>
-            <td>Plural: die Wurzeln</td>
-        </tr>
-        <tr>
-            <td><strong>das Meer</strong></td>
-            <td>Das Meer ist sehr groß.</td>
-            <td>Plural: die Meere</td>
-        </tr>
-        <tr>
-            <td><strong>der Strand</strong></td>
-            <td>Am Strand spielen wir im Sand.</td>
-            <td>Plural: die Strände</td>
-        </tr>
-        <tr>
-            <td><strong>die Insel</strong></td>
-            <td>Die Insel liegt im Meer.</td>
-            <td>Plural: die Inseln</td>
-        </tr>
-        <tr>
-            <td><strong>der Himmel</strong></td>
-            <td>Der Himmel ist blau.</td>
-            <td>nur Singular</td>
-        </tr>
-        <tr>
-            <td><strong>die Natur</strong></td>
-            <td>Die Natur ist schön.</td>
-            <td>nur Singular</td>
-        </tr>
-        <tr>
-            <td><strong>schützen</strong></td>
-            <td>Wir müssen die Natur schützen.</td>
-            <td>Nomen: der Schutz</td>
-        </tr>
-    </table>
-
-    <h2><span class="level-badge b2">B2</span> NIVEAU B2 - FORTGESCHRITTEN</h2>
-
-    <h3>1. AUFSATZ & BILDERGESCHICHTE (25 Wörter)</h3>
-    <table>
-        <tr>
-            <th>Wort</th>
-            <th>Beispielsatz</th>
-            <th>Zusatzinfo</th>
-        </tr>
-        <tr>
-            <td><strong>zunächst</strong></td>
-            <td>Zunächst betrachte ich alle Bilder genau.</td>
-            <td>= zuerst, am Anfang</td>
-        </tr>
-        <tr>
-            <td><strong>daraufhin</strong></td>
-            <td>Daraufhin ging sie nach Hause.</td>
-            <td>= danach, als Reaktion</td>
-        </tr>
-        <tr>
-            <td><strong>schließlich</strong></td>
-            <td>Schließlich fanden sie eine Lösung.</td>
-            <td>= am Ende, endlich</td>
-        </tr>
-        <tr>
-            <td><strong>währenddessen</strong></td>
-            <td>Währenddessen warteten die anderen draußen.</td>
-            <td>= in der Zwischenzeit</td>
-        </tr>
-        <tr>
-            <td><strong>infolgedessen</strong></td>
-            <td>Infolgedessen musste das Spiel abgesagt werden.</td>
-            <td>= deshalb, als Folge</td>
-        </tr>
-        <tr>
-            <td><strong>plötzlich</strong></td>
-            <td>Plötzlich hörte er ein lautes Geräusch.</td>
-            <td>= unerwartet, auf einmal</td>
-        </tr>
-        <tr>
-            <td><strong>anschließend</strong></td>
-            <td>Anschließend gingen wir nach Hause.</td>
-            <td>= danach, im Anschluss</td>
-        </tr>
-        <tr>
-            <td><strong>dabei</strong></td>
-            <td>Dabei bemerkte er den Fehler.</td>
-            <td>= währenddessen</td>
-        </tr>
-        <tr>
-            <td><strong>trotzdem</strong></td>
-            <td>Es regnete, trotzdem gingen wir spazieren.</td>
-            <td>= dennoch, aber</td>
-        </tr>
-        <tr>
-            <td><strong>gleichzeitig</strong></td>
-            <td>Gleichzeitig klingelte das Telefon.</td>
-            <td>= zur selben Zeit</td>
-        </tr>
-        <tr>
-            <td><strong>zuerst</strong></td>
-            <td>Zuerst lese ich die Aufgabe.</td>
-            <td>= als Erstes, zunächst</td>
-        </tr>
-        <tr>
-            <td><strong>dann</strong></td>
-            <td>Dann beginne ich zu schreiben.</td>
-            <td>= danach, anschließend</td>
-        </tr>
-        <tr>
-            <td><strong>zum Schluss</strong></td>
-            <td>Zum Schluss kontrolliere ich alles.</td>
-            <td>= am Ende, zuletzt</td>
-        </tr>
-        <tr>
-            <td><strong>im Vordergrund</strong></td>
-            <td>Im Vordergrund sieht man ein Kind.</td>
-            <td>vorne im Bild</td>
-        </tr>
-        <tr>
-            <td><strong>im Hintergrund</strong></td>
-            <td>Im Hintergrund sind Berge zu sehen.</td>
-            <td>hinten im Bild</td>
-        </tr>
-        <tr>
-            <td><strong>links/rechts</strong></td>
-            <td>Links steht ein Baum, rechts ein Haus.</td>
-            <td>Richtungsangaben</td>
-        </tr>
-        <tr>
-            <td><strong>in der Mitte</strong></td>
-            <td>In der Mitte des Bildes steht ein Auto.</td>
-            <td>zentral im Bild</td>
-        </tr>
-        <tr>
-            <td><strong>oben/unten</strong></td>
-            <td>Oben sieht man den Himmel, unten die Straße.</td>
-            <td>Höhenangaben</td>
-        </tr>
-        <tr>
-            <td><strong>offensichtlich</strong></td>
-            <td>Offensichtlich ist das Kind müde.</td>
-            <td>= eindeutig, klar erkennbar</td>
-        </tr>
-        <tr>
-            <td><strong>vermutlich</strong></td>
-            <td>Vermutlich ist es Nachmittag.</td>
-            <td>= wahrscheinlich</td>
-        </tr>
-        <tr>
-            <td><strong>möglicherweise</strong></td>
-            <td>Möglicherweise hat er den Bus verpasst.</td>
-            <td>= vielleicht, eventuell</td>
-        </tr>
-        <tr>
-            <td><strong>anscheinend</strong></td>
-            <td>Anscheinend hat sie Angst.</td>
-            <td>= wie es scheint</td>
-        </tr>
-        <tr>
-            <td><strong>auf den ersten Blick</strong></td>
-            <td>Auf den ersten Blick sieht alles normal aus.</td>
-            <td>= zunächst, beim ersten Anschauen</td>
-        </tr>
-        <tr>
-            <td><strong>bei genauerem Hinsehen</strong></td>
-            <td>Bei genauerem Hinsehen erkennt man Details.</td>
-            <td>= wenn man genau schaut</td>
-        </tr>
-        <tr>
-            <td><strong>im Gegensatz dazu</strong></td>
-            <td>Im Gegensatz dazu ist das zweite Bild hell.</td>
-            <td>= anders als, dagegen</td>
-        </tr>
-    </table>
-
-    <h3>2. BESCHREIBENDE ADJEKTIVE (25 Wörter)</h3>
-    <table>
-        <tr>
-            <th>Wort</th>
-            <th>Beispielsatz</th>
-            <th>Zusatzinfo</th>
-        </tr>
-        <tr>
-            <td><strong>aufmerksam</strong></td>
-            <td>Der aufmerksame Schüler bemerkte den Fehler.</td>
-            <td>Nomen: die Aufmerksamkeit</td>
-        </tr>
-        <tr>
-            <td><strong>bemerkenswert</strong></td>
-            <td>Seine Leistung ist bemerkenswert.</td>
-            <td>= außergewöhnlich, besonders</td>
-        </tr>
-        <tr>
-            <td><strong>sorgfältig</strong></td>
-            <td>Sie arbeitete sorgfältig und genau.</td>
-            <td>Nomen: die Sorgfalt</td>
-        </tr>
-        <tr>
-            <td><strong>gründlich</strong></td>
-            <td>Er machte eine gründliche Recherche.</td>
-            <td>= sehr genau, detailliert</td>
-        </tr>
-        <tr>
-            <td><strong>vielfältig</strong></td>
-            <td>Die Aufgaben waren vielfältig und interessant.</td>
-            <td>Nomen: die Vielfalt</td>
-        </tr>
-        <tr>
-            <td><strong>ausführlich</strong></td>
-            <td>Er gab eine ausführliche Erklärung.</td>
-            <td>= detailliert, umfangreich</td>
-        </tr>
-        <tr>
-            <td><strong>präzise</strong></td>
-            <td>Die Antwort war präzise und klar.</td>
-            <td>= genau, exakt</td>
-        </tr>
-        <tr>
-            <td><strong>umfangreich</strong></td>
-            <td>Das war eine umfangreiche Aufgabe.</td>
-            <td>= groß, ausführlich</td>
-        </tr>
-        <tr>
-            <td><strong>detailliert</strong></td>
-            <td>Die detaillierte Beschreibung half sehr.</td>
-            <td>Nomen: das Detail</td>
-        </tr>
-        <tr>
-            <td><strong>anschaulich</strong></td>
-            <td>Das Beispiel war sehr anschaulich.</td>
-            <td>= bildhaft, verständlich</td>
-        </tr>
-        <tr>
-            <td><strong>übersichtlich</strong></td>
-            <td>Die Tabelle ist übersichtlich gestaltet.</td>
-            <td>= klar strukturiert</td>
-        </tr>
-        <tr>
-            <td><strong>verständlich</strong></td>
-            <td>Die Erklärung war gut verständlich.</td>
-            <td>= klar, begreifbar</td>
-        </tr>
-        <tr>
-            <td><strong>eindeutig</strong></td>
-            <td>Das Ergebnis ist eindeutig.</td>
-            <td>= klar, zweifelsfrei</td>
-        </tr>
-        <tr>
-            <td><strong>auffällig</strong></td>
-            <td>Er trug auffällige Kleidung.</td>
-            <td>= ins Auge fallend</td>
-        </tr>
-        <tr>
-            <td><strong>unauffällig</strong></td>
-            <td>Sie verhielt sich unauffällig.</td>
-            <td>= unscheinbar, zurückhaltend</td>
-        </tr>
-        <tr>
-            <td><strong>deutlich</strong></td>
-            <td>Der Unterschied ist deutlich sichtbar.</td>
-            <td>= klar erkennbar</td>
-        </tr>
-        <tr>
-            <td><strong>undeutlich</strong></td>
-            <td>Die Schrift ist undeutlich.</td>
-            <td>= unklar, verschwommen</td>
-        </tr>
-        <tr>
-            <td><strong>erheblich</strong></td>
-            <td>Es gab einen erheblichen Unterschied.</td>
-            <td>= beträchtlich, groß</td>
-        </tr>
-        <tr>
-            <td><strong>wesentlich</strong></td>
-            <td>Das ist ein wesentlicher Punkt.</td>
-            <td>= wichtig, grundlegend</td>
-        </tr>
-        <tr>
-            <td><strong>zahlreich</strong></td>
-            <td>Zahlreiche Schüler nahmen teil.</td>
-            <td>= viele</td>
-        </tr>
-        <tr>
-            <td><strong>üblich</strong></td>
-            <td>Das ist hier üblich.</td>
-            <td>= normal, gewöhnlich</td>
-        </tr>
-        <tr>
-            <td><strong>unüblich</strong></td>
-            <td>Sein Verhalten war unüblich.</td>
-            <td>= ungewöhnlich, selten</td>
-        </tr>
-        <tr>
-            <td><strong>typisch</strong></td>
-            <td>Das ist typisch für ihn.</td>
-            <td>= charakteristisch</td>
-        </tr>
-        <tr>
-            <td><strong>außergewöhnlich</strong></td>
-            <td>Sie zeigte außergewöhnliches Talent.</td>
-            <td>= besonders, ungewöhnlich</td>
-        </tr>
-        <tr>
-            <td><strong>beachtlich</strong></td>
-            <td>Er machte beachtliche Fortschritte.</td>
-            <td>= bemerkenswert, erheblich</td>
-        </tr>
-    </table>
-
-    
-    <h3>3. VERBEN FÜR TEXTE (25 Wörter)</h3>
-    <table>
-        <tr>
-            <th>Wort</th>
-            <th>Beispielsatz</th>
-            <th>Zusatzinfo</th>
-        </tr>
-        <tr>
-            <td><strong>beobachten</strong></td>
-            <td>Ich beobachtete die Vögel im Garten.</td>
-            <td>Nomen: die Beobachtung</td>
-        </tr>
-        <tr>
-            <td><strong>erkennen</strong></td>
-            <td>Man erkennt deutlich einen Unterschied.</td>
-            <td>Nomen: die Erkenntnis</td>
-        </tr>
-        <tr>
-            <td><strong>vermuten</strong></td>
-            <td>Ich vermute, dass es bald regnet.</td>
-            <td>Nomen: die Vermutung</td>
-        </tr>
-        <tr>
-            <td><strong>sich ereignen</strong></td>
-            <td>Der Unfall ereignete sich am Morgen.</td>
-            <td>Nomen: das Ereignis</td>
-        </tr>
-        <tr>
-            <td><strong>reagieren</strong></td>
-            <td>Sie reagierte schnell auf die Situation.</td>
-            <td>Nomen: die Reaktion</td>
-        </tr>
-        <tr>
-            <td><strong>betrachten</strong></td>
-            <td>Betrachte das Bild genau.</td>
-            <td>= ansehen, anschauen</td>
-        </tr>
-        <tr>
-            <td><strong>feststellen</strong></td>
-            <td>Ich stellte fest, dass etwas fehlte.</td>
-            <td>Nomen: die Feststellung</td>
-        </tr>
-        <tr>
-            <td><strong>darstellen</strong></td>
-            <td>Das Bild stellt eine Landschaft dar.</td>
-            <td>Nomen: die Darstellung</td>
-        </tr>
-        <tr>
-            <td><strong>schildern</strong></td>
-            <td>Er schilderte den Vorfall genau.</td>
-            <td>Nomen: die Schilderung</td>
-        </tr>
-        <tr>
-            <td><strong>erwähnen</strong></td>
-            <td>Sie erwähnte ein wichtiges Detail.</td>
-            <td>Nomen: die Erwähnung</td>
-        </tr>
-        <tr>
-            <td><strong>beschreiben</strong></td>
-            <td>Beschreibe die Situation genau.</td>
-            <td>Nomen: die Beschreibung</td>
-        </tr>
-        <tr>
-            <td><strong>erläutern</strong></td>
-            <td>Er erläuterte seine Meinung.</td>
-            <td>Nomen: die Erläuterung</td>
-        </tr>
-        <tr>
-            <td><strong>verdeutlichen</strong></td>
-            <td>Das Beispiel verdeutlicht das Problem.</td>
-            <td>= klarmachen, zeigen</td>
-        </tr>
-        <tr>
-            <td><strong>veranschaulichen</strong></td>
-            <td>Die Grafik veranschaulicht die Daten.</td>
-            <td>Nomen: die Veranschaulichung</td>
-        </tr>
-        <tr>
-            <td><strong>hervorheben</strong></td>
-            <td>Ich möchte einen Punkt hervorheben.</td>
-            <td>= betonen, unterstreichen</td>
-        </tr>
-        <tr>
-            <td><strong>betonen</strong></td>
-            <td>Er betonte die Wichtigkeit des Themas.</td>
-            <td>Nomen: die Betonung</td>
-        </tr>
-        <tr>
-            <td><strong>hinweisen</strong></td>
-            <td>Ich weise auf einen Fehler hin.</td>
-            <td>hinweisen auf + Akkusativ</td>
-        </tr>
-        <tr>
-            <td><strong>deuten</strong></td>
-            <td>Das deutet auf ein Problem hin.</td>
-            <td>deuten auf + Akkusativ</td>
-        </tr>
-        <tr>
-            <td><strong>interpretieren</strong></td>
-            <td>Wie interpretierst du das Bild?</td>
-            <td>Nomen: die Interpretation</td>
-        </tr>
-        <tr>
-            <td><strong>analysieren</strong></td>
-            <td>Wir analysieren den Text.</td>
-            <td>Nomen: die Analyse</td>
-        </tr>
-        <tr>
-            <td><strong>vergleichen</strong></td>
-            <td>Vergleiche die beiden Bilder.</td>
-            <td>Nomen: der Vergleich</td>
-        </tr>
-        <tr>
-            <td><strong>unterscheiden</strong></td>
-            <td>Man kann die Farben gut unterscheiden.</td>
-            <td>Nomen: der Unterschied</td>
-        </tr>
-        <tr>
-            <td><strong>zusammenfassen</strong></td>
-            <td>Fasse den Text zusammen.</td>
-            <td>Nomen: die Zusammenfassung</td>
-        </tr>
-        <tr>
-            <td><strong>begründen</strong></td>
-            <td>Begründe deine Meinung.</td>
-            <td>Nomen: die Begründung</td>
-        </tr>
-        <tr>
-            <td><strong>folgern</strong></td>
-            <td>Daraus kann man folgern, dass...</td>
-            <td>Nomen: die Folgerung</td>
-        </tr>
-    </table>
-
-    <h3>4. SATZVERBINDUNGEN & KONNEKTOREN (25 Wörter)</h3>
-    <table>
-        <tr>
-            <th>Wort</th>
-            <th>Beispielsatz</th>
-            <th>Zusatzinfo</th>
-        </tr>
-        <tr>
-            <td><strong>obwohl</strong></td>
-            <td>Obwohl es regnete, gingen wir spazieren.</td>
-            <td>Nebensatz, Verb am Ende</td>
-        </tr>
-        <tr>
-            <td><strong>dennoch</strong></td>
-            <td>Es war schwierig, dennoch gab er nicht auf.</td>
-            <td>= trotzdem, aber</td>
-        </tr>
-        <tr>
-            <td><strong>außerdem</strong></td>
-            <td>Außerdem müssen wir noch einkaufen gehen.</td>
-            <td>= zusätzlich, darüber hinaus</td>
-        </tr>
-        <tr>
-            <td><strong>allerdings</strong></td>
-            <td>Das Wetter ist schön, allerdings sehr kalt.</td>
-            <td>= aber, jedoch</td>
-        </tr>
-        <tr>
-            <td><strong>einerseits...andererseits</strong></td>
-            <td>Einerseits macht es Spaß, andererseits ist es anstrengend.</td>
-            <td>Gegensätze ausdrücken</td>
-        </tr>
-        <tr>
-            <td><strong>folglich</strong></td>
-            <td>Er lernte viel, folglich wurde seine Note besser.</td>
-            <td>= deshalb, also</td>
-        </tr>
-        <tr>
-            <td><strong>hingegen</strong></td>
-            <td>Er mag Sport, sie hingegen liest lieber.</td>
-            <td>= dagegen, im Gegensatz</td>
-        </tr>
-        <tr>
-            <td><strong>somit</strong></td>
-            <td>Wir haben gewonnen, somit sind wir im Finale.</td>
-            <td>= also, folglich</td>
-        </tr>
-        <tr>
-            <td><strong>demzufolge</strong></td>
-            <td>Es regnete, demzufolge blieben wir zu Hause.</td>
-            <td>= deshalb, daher</td>
-        </tr>
-        <tr>
-            <td><strong>deshalb</strong></td>
-            <td>Ich war krank, deshalb blieb ich zu Hause.</td>
-            <td>= darum, deswegen</td>
-        </tr>
-        <tr>
-            <td><strong>daher</strong></td>
-            <td>Es ist spät, daher müssen wir gehen.</td>
-            <td>= deshalb, aus diesem Grund</td>
-        </tr>
-        <tr>
-            <td><strong>deswegen</strong></td>
-            <td>Sie war müde, deswegen ging sie schlafen.</td>
-            <td>= deshalb, darum</td>
-        </tr>
-        <tr>
-            <td><strong>nämlich</strong></td>
-            <td>Ich konnte nicht kommen, ich war nämlich krank.</td>
-            <td>= weil (im Hauptsatz!)</td>
-        </tr>
-        <tr>
-            <td><strong>während</strong></td>
-            <td>Während ich schlief, regnete es.</td>
-            <td>= zur gleichen Zeit als</td>
-        </tr>
-        <tr>
-            <td><strong>sobald</strong></td>
-            <td>Sobald ich fertig bin, rufe ich dich an.</td>
-            <td>= wenn, gleich wenn</td>
-        </tr>
-        <tr>
-            <td><strong>sofern</strong></td>
-            <td>Sofern es nicht regnet, gehen wir raus.</td>
-            <td>= falls, wenn</td>
-        </tr>
-        <tr>
-            <td><strong>insofern</strong></td>
-            <td>Das stimmt, insofern du recht hast.</td>
-            <td>= in dem Maße, soweit</td>
-        </tr>
-        <tr>
-            <td><strong>wodurch</strong></td>
-            <td>Er übte viel, wodurch er besser wurde.</td>
-            <td>= durch das, dadurch</td>
-        </tr>
-        <tr>
-            <td><strong>womit</strong></td>
-            <td>Sie half mir, womit sie mir einen Gefallen tat.</td>
-            <td>= mit dem, damit</td>
-        </tr>
-        <tr>
-            <td><strong>zumal</strong></td>
-            <td>Ich bleibe zu Hause, zumal es regnet.</td>
-            <td>= besonders weil</td>
-        </tr>
-        <tr>
-            <td><strong>sowohl...als auch</strong></td>
-            <td>Sowohl Peter als auch Maria kommen.</td>
-            <td>= und...und, beides</td>
-        </tr>
-        <tr>
-            <td><strong>weder...noch</strong></td>
-            <td>Weder er noch sie waren da.</td>
-            <td>= nicht...und nicht</td>
-        </tr>
-        <tr>
-            <td><strong>je...desto</strong></td>
-            <td>Je mehr ich lerne, desto besser werde ich.</td>
-            <td>Vergleich mit Steigerung</td>
-        </tr>
-        <tr>
-            <td><strong>nicht nur...sondern auch</strong></td>
-            <td>Er ist nicht nur klug, sondern auch fleißig.</td>
-            <td>= und außerdem</td>
-        </tr>
-        <tr>
-            <td><strong>entweder...oder</strong></td>
-            <td>Entweder du kommst mit oder du bleibst hier.</td>
-            <td>= Alternative, Wahl</td>
-        </tr>
-    </table>
-
-    <div class="info-box" style="margin-top: 40px;">
-        <h3>📱 EMPFOHLENE DIGITALE LERN-APPS für 4. Schulstufe</h3>
-        <p><strong>Für alle Niveaus geeignet:</strong></p>
-        <ul>
-            <li><strong>Anton App</strong> - Kostenlos, Deutsch 4. Klasse, Wortschatz & Grammatik</li>
-            <li><strong>Quizlet</strong> - Karteikarten erstellen, Wortschatz üben</li>
-            <li><strong>Schlaukopf.de</strong> - Online-Übungen für alle Fächer</li>
-            <li><strong>LearningApps.org</strong> - Interaktive Übungen selbst erstellen</li>
-            <li><strong>Kahoot!</strong> - Quiz-Spiele für motivierendes Lernen</li>
-        </ul>
-        
-        <p style="margin-top: 20px;"><strong>Speziell für Bildergeschichten (A2-Niveau):</strong></p>
-        <ul>
-            <li><strong>Bildergeschichten-Apps</strong> - "Bildergeschichte schreiben" im App Store</li>
-            <li><strong>Story Cubes App</strong> - Würfel-App zum Geschichten erfinden</li>
-            <li><strong>Worksheet Crafter</strong> - Arbeitsblätter mit Bildergeschichten</li>
-        </ul>
-
-        <p style="margin-top: 20px;"><strong>Für fortgeschrittene Schüler (B2-Niveau):</strong></p>
-        <ul>
-            <li><strong>Deutsche Grammatik</strong> - App für komplexe Grammatik</li>
-            <li><strong>Duden Mentor</strong> - Rechtschreibung & Textprüfung</li>
-            <li><strong>Wörterbuch-Apps</strong> - Synonyme & Wortbedeutungen</li>
-        </ul>
+            <div class="collapsible-category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <span class="category-toggle">▶</span>
+                    <h3>6. WETTER & JAHRESZEITEN (15 Wörter)</h3>
+                </div>
+                <div class="category-content">
+                    <p><em>Tabelle mit Wetterwortschatz...</em></p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="info-box" style="margin-top: 20px; background: #fff3cd; border-left: 4px solid #ffc107;">
-        <h3>✏️ STRATEGIEN FÜR BILDERGESCHICHTEN (besonders für A2-Schülerin)</h3>
-        
-        <h4>1. Vorbereitung (5 Minuten)</h4>
-        <ul>
-            <li>Alle Bilder genau anschauen</li>
-            <li>Die Hauptpersonen erkennen</li>
-            <li>Die Handlung verstehen: Was passiert?</li>
-            <li>Wichtige Wörter aufschreiben</li>
-        </ul>
-
-        <h4>2. Struktur der Geschichte</h4>
-        <ul>
-            <li><strong>Einleitung:</strong> Wer? Wo? Wann? Was?</li>
-            <li><strong>Hauptteil:</strong> Was passiert? (Bild für Bild)</li>
-            <li><strong>Schluss:</strong> Wie endet es? Was fühlen die Personen?</li>
-        </ul>
-
-        <h4>3. Wichtige Satzanfänge für A2</h4>
-        <ul>
-            <li><strong>Anfang:</strong> Es war einmal... / Eines Tages... / An einem sonnigen Tag...</li>
-            <li><strong>Mitte:</strong> Plötzlich... / Dann... / Danach... / Als nächstes...</li>
-            <li><strong>Ende:</strong> Schließlich... / Am Ende... / Zum Schluss...</li>
-        </ul>
-
-        <h4>4. Nützliche Verben für Bildergeschichten</h4>
-        <p>sehen, gehen, laufen, nehmen, suchen, finden, rufen, helfen, lachen, weinen, freuen, ärgern</p>
-
-        <h4>5. Beschreibung von Gefühlen (wichtig!)</h4>
-        <p>froh, traurig, glücklich, ängstlich, überrascht, wütend, erleichtert</p>
-
-        <h4>6. Checkliste vor dem Abgeben</h4>
-        <ul>
-            <li>□ Alle Bilder beschrieben?</li>
-            <li>□ Einleitung, Hauptteil, Schluss vorhanden?</li>
-            <li>□ Satzanfänge abwechslungsreich?</li>
-            <li>□ Verben in der richtigen Zeit? (meist Präteritum: ging, sah, nahm)</li>
-            <li>□ Artikel und Nomen richtig? (der/die/das)</li>
-            <li>□ Rechtschreibung kontrolliert?</li>
-        </ul>
+    <!-- NIVEAU B1 -->
+    <div class="collapsible-level b1-level">
+        <div class="level-header" onclick="toggleLevel(this)">
+            <span class="toggle-icon">▶</span>
+            <span class="level-badge b1">B1</span>
+            <span style="margin-left: 10px;">NIVEAU B1 - MITTEL</span>
+        </div>
+        <div class="level-content">
+            <div class="collapsible-category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <span class="category-toggle">▶</span>
+                    <h3>1. SCHULE & LERNEN (20 Wörter)</h3>
+                </div>
+                <div class="category-content">
+                    <p><em>B1-Inhalte hier...</em></p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="info-box" style="margin-top: 20px; background: #d4edda; border-left: 4px solid #28a745;">
-        <h3>🎯 LERNPLAN FÜR DAS SCHULJAHR</h3>
-        
-        <h4>Für A2-Schülerin (Ziel: Bildergeschichten schreiben können)</h4>
-        <p><strong>September-Oktober:</strong> Schule, Familie, Tiere (Grundwortschatz festigen)<br>
-        <strong>November-Dezember:</strong> Essen, Körper, Wetter + erste einfache Sätze schreiben<br>
-        <strong>Jänner-Februar:</strong> Zeitwörter üben, Bildergeschichten mit 3 Bildern<br>
-        <strong>März-April:</strong> Satzverbindungen (dann, danach), Bildergeschichten mit 4-5 Bildern<br>
-        <strong>Mai-Juni:</strong> Gefühle beschreiben, komplette Bildergeschichten</p>
-
-        <h4>Für B1-C1-Schüler (Ziel: Note 1-2)</h4>
-        <p><strong>September-Oktober:</strong> Schule & Lernen, Gefühle (Wortschatz erweitern)<br>
-        <strong>November-Dezember:</strong> Freizeit, Natur + Texte mit verschiedenen Satzanfängen<br>
-        <strong>Jänner-Februar:</strong> Reflexive Verben, Präpositionen richtig verwenden<br>
-        <strong>März-April:</strong> Längere Texte schreiben, Argumente aufbauen<br>
-        <strong>Mai-Juni:</strong> Schularbeiten-Training, alle Textformen üben</p>
-
-        <h4>Für C2-Schüler (Ziel: Ausgezeichnet)</h4>
-        <p><strong>September-Oktober:</strong> Aufsatz-Konnektoren, beschreibende Adjektive<br>
-        <strong>November-Dezember:</strong> Komplexe Satzstrukturen, Synonyme verwenden<br>
-        <strong>Jänner-Februar:</strong> Textanalyse, Argumentationsstruktur<br>
-        <strong>März-April:</strong> Kreatives Schreiben, rhetorische Mittel<br>
-        <strong>Mai-Juni:</strong> Perfektion der Texte, Feinschliff bei Stil & Ausdruck</p>
+    <!-- NIVEAU B2 -->
+    <div class="collapsible-level b2-level">
+        <div class="level-header" onclick="toggleLevel(this)">
+            <span class="toggle-icon">▶</span>
+            <span class="level-badge b2">B2</span>
+            <span style="margin-left: 10px;">NIVEAU B2 - FORTGESCHRITTEN</span>
+        </div>
+        <div class="level-content">
+            <div class="collapsible-category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <span class="category-toggle">▶</span>
+                    <h3>1. AUFSATZ & BILDERGESCHICHTE (25 Wörter)</h3>
+                </div>
+                <div class="category-content">
+                    <p><em>B2-Inhalte hier...</em></p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <button class="print-btn no-print" onclick="window.print()" style="margin-top: 30px;">🖨️ Liste ausdrucken</button>
+    <script>
+        // LocalStorage für Zustand
+        function saveState() {
+            const state = {
+                levels: [],
+                categories: []
+            };
+            
+            document.querySelectorAll('.level-content').forEach((content, index) => {
+                state.levels.push(content.classList.contains('open'));
+            });
+            
+            document.querySelectorAll('.category-content').forEach((content, index) => {
+                state.categories.push(content.classList.contains('open'));
+            });
+            
+            localStorage.setItem('wortlistenState', JSON.stringify(state));
+        }
 
+        function loadState() {
+            const saved = localStorage.getItem('wortlistenState');
+            if (!saved) return;
+            
+            const state = JSON.parse(saved);
+            
+            document.querySelectorAll('.level-content').forEach((content, index) => {
+                if (state.levels[index]) {
+                    content.classList.add('open');
+                    content.previousElementSibling.querySelector('.toggle-icon').classList.add('open');
+                }
+            });
+            
+            document.querySelectorAll('.category-content').forEach((content, index) => {
+                if (state.categories[index]) {
+                    content.classList.add('open');
+                    content.previousElementSibling.querySelector('.category-toggle').classList.add('open');
+                }
+            });
+        }
+
+        function toggleLevel(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.toggle-icon');
+            
+            content.classList.toggle('open');
+            icon.classList.toggle('open');
+            saveState();
+        }
+
+        function toggleCategory(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.category-toggle');
+            
+            content.classList.toggle('open');
+            icon.classList.toggle('open');
+            saveState();
+        }
+
+        function toggleAll(open) {
+            document.querySelectorAll('.level-content').forEach(content => {
+                if (open) {
+                    content.classList.add('open');
+                    content.previousElementSibling.querySelector('.toggle-icon').classList.add('open');
+                } else {
+                    content.classList.remove('open');
+                    content.previousElementSibling.querySelector('.toggle-icon').classList.remove('open');
+                }
+            });
+            
+            document.querySelectorAll('.category-content').forEach(content => {
+                if (open) {
+                    content.classList.add('open');
+                    content.previousElementSibling.querySelector('.category-toggle').classList.add('open');
+                } else {
+                    content.classList.remove('open');
+                    content.previousElementSibling.querySelector('.category-toggle').classList.remove('open');
+                }
+            });
+            
+            saveState();
+        }
+
+        // Zustand beim Laden wiederherstellen
+        window.addEventListener('load', loadState);
+    </script>
 </body>
 </html>
