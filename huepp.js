@@ -642,7 +642,7 @@ function renderHomeworkManagement() {
                 <div class="hw-list">
                     ${studentHomework.length === 0 ? 
                         '<p style="color: #666; font-style: italic;">Keine Hausaufgaben</p>' :
-                        studentHomework.slice(0, 3).map(hw => `
+                        studentHomework.slice(0, 10).map(hw => `
                     <div class="hw-item" onclick="event.stopPropagation(); openEditHomeworkModal(${hw.id});">
                         <div>
                             <div class="hw-item-title">${hw.title}</div>
@@ -660,7 +660,7 @@ function renderHomeworkManagement() {
 </div>
                         `).join('')
                     }
-                    ${studentHomework.length > 3 ? `<p style="color: #666; font-size: 0.9em; margin-top: 10px;">... und ${studentHomework.length - 3} weitere</p>` : ''}
+                    ${studentHomework.length > 3 ? `<p style="color: #1976D2; font-size: 0.9em; margin-top: 10px; cursor: pointer; text-decoration: underline; font-weight: bold;" onclick="event.stopPropagation();">📋 ... und ${studentHomework.length - 3} weitere (klicken Sie auf eine Hausaufgabe zum Bearbeiten)</p>` : ''}
                 </div>
             </div>
         `;
