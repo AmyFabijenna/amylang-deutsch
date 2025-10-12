@@ -890,51 +890,54 @@ function updateLessonCountdown() {
     
     let html = '';
     
-    // ✨ NEU: Großer roter Hinweis für neue Hausaufgaben
-    if (unread.length > 0) {
+   // ✨ NEU: Großer roter Hinweis für neue Hausaufgaben
+if (unread.length > 0) {
+    html += `
+        <div style="
+            background: linear-gradient(135deg, #ff4444, #cc0000);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(255, 68, 68, 0.4);
+            animation: pulse 2s infinite;
+        ">
+            🔴 ${unread.length} neue/geänderte Hausaufgabe${unread.length > 1 ? 'n' : ''}!
+        </div>
+    `;
+}
+
+if (pending.length > 0) {
+    html += `<p><strong>${pending.length} offene Hausaufgabe(n):</strong></p>`;
+    pending.slice(0, 10).forEach(hw => {
+        const deadline = new Date(hw.deadline);
+        const today = new Date();
+        const isOverdue = deadline < today;
+        const isNew = !hw.is_read;
+        
+        html += `<div style="margin: 5px 0; padding: 8px; background: ${isOverdue ? 'rgba(255,0,0,0.1)' : 'rgba(255,165,0,0.1)'}; border-radius: 8px; border-left: 4px solid ${isNew ? '#ff4444' : '#FFA500'};">
+            <strong>${hw.title}</strong> ${isNew ? '🔴 NEU' : ''}<br>
+            📅 Bis: ${deadline.toLocaleDateString('de-DE')} ${isOverdue ? '⚠️ Überfällig!' : ''}
+        </div>`;
+    });
+    
+    if (pending.length > 10) {
         html += `
-            <div style="
-                background: linear-gradient(135deg, #ff4444, #cc0000);
-                color: white;
-                padding: 15px;
-                border-radius: 15px;
-                margin-bottom: 15px;
-                font-size: 1.1em;
-                font-weight: bold;
-                text-align: center;
-                box-shadow: 0 4px 15px rgba(255, 68, 68, 0.4);
-                animation: pulse 2s infinite;
-            ">
-                🔴 ${unread.length} neue/geänderte Hausaufgabe${unread.length > 1 ? 'n' : ''}!
-            </div>
+            <button class="btn" onclick="switchToHomeworkView()" style="margin-top: 10px; width: 100%;">
+                📋 ${pending.length - 10} weitere Hausaufgabe${pending.length - 10 > 1 ? 'n' : ''} anzeigen
+            </button>
         `;
     }
-    
-    if (pending.length > 0) {
-        html += `<p><strong>${pending.length} offene Hausaufgabe(n):</strong></p>`;
-        pending.slice(0, 10).forEach(hw => {
-            const deadline = new Date(hw.deadline);
-            const today = new Date();
-            const isOverdue = deadline < today;
-            const isNew = !hw.is_read; // ✨ NEU: Markierung für neue HÜ
-            
-            html += `<div style="margin: 5px 0; padding: 8px; background: ${isOverdue ? 'rgba(255,0,0,0.1)' : 'rgba(255,165,0,0.1)'}; border-radius: 8px; border-left: 4px solid ${isNew ? '#ff4444' : '#FFA500'};">
-                <strong>${hw.title}</strong> ${isNew ? '🔴 NEU' : ''}<br>
-                📅 Bis: ${deadline.toLocaleDateString('de-DE')} ${isOverdue ? '⚠️ Überfällig!' : ''}
-            </div>`;
-        });
-        
-        if (pending.length > 10) {
-    html += `<p style="color: #666; font-size: 0.9em; cursor: pointer; text-decoration: underline;" onclick="switchToHomeworkView()">... und ${pending.length - 10} weitere → Alle anzeigen</p>`;
 }
-    }
-    
-    if (completed.length > 0) {
-        html += `<p style="margin-top: 15px;"><strong>${completed.length} erledigt</strong> ✅</p>`;
-    }
-    
-    document.getElementById('myHomework').innerHTML = html;
+
+if (completed.length > 0) {
+    html += `<p style="margin-top: 15px;"><strong>${completed.length} erledigt</strong> ✅</p>`;
 }
+
+document.getElementById('myHomework').innerHTML = html;
 
         function updateRescheduleButton() {
             const btn = document.getElementById('rescheduleBtn');
