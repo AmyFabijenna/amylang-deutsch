@@ -679,37 +679,48 @@
 
         const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const phone = document.getElementById('loginPhone').value.trim().replace(/\s+/g, '');
-            const password = document.getElementById('loginPassword').value.trim();
-            
-            try {
-                // Login mit Telefonnummer statt Email
-                const { data, error } = await supabase
-                    .from('students')
-                    .select('*')
-                    .eq('phone', phone)
-                    .eq('password', password)
-                    .single();
-                
-                if (error || !data) {
-                    showError('Telefonnummer oder Passwort falsch!');
-                    return;
-                }
-                
-                currentStudent = data;
-                document.getElementById('loginView').style.display = 'none';
-                document.getElementById('studentView').style.display = 'block';
-                document.getElementById('welcomeText').textContent = `Hallo ${currentStudent.name}!`;
-                
-                await loadStudentData();
-                
-            } catch (error) {
-                showError('Fehler beim Login: ' + error.message);
-            }
-        });
+        // Telefonnummer normalisieren (alle Zeichen außer Zahlen und + entfernen)
+function normalizePhone(phone) {
+    if (!phone) return '';
+    return phone.replace(/[\s\-\(\)\.]/g, '');
+}
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const inputPhone = normalizePhone(document.getElementById('loginPhone').value.trim());
+    const password = document.getElementById('loginPassword').value.trim();
+    
+    try {
+        // Alle Schüler laden
+        const { data: students, error } = await supabase
+            .from('students')
+            .select('*');
+        
+        if (error) throw error;
+        
+        // Finde Schüler mit passender Telefonnummer (normalisiert verglichen)
+        const student = students.find(s => 
+            normalizePhone(s.phone) === inputPhone && s.password === password
+        );
+        
+        if (!student) {
+    showError('Telefonnummer oder Passwort falsch!');
+    return;
+}
+
+currentStudent = student;
+
+document.getElementById('loginView').style.display = 'none';
+document.getElementById('studentView').style.display = 'block';
+document.getElementById('welcomeText').textContent = `Hallo ${currentStudent.name}!`;
+
+await loadStudentData();
+
+} catch (error) {
+    showError('Fehler beim Login: ' + error.message);
+}
+});
 
         async function loadStudentData() {
     await loadMyLessons();
