@@ -206,6 +206,32 @@
             border-color: #FF6347;
         }
 
+
+.direction-btn {
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.4);
+    border: 2px solid rgba(139, 69, 19, 0.3);
+    border-radius: 20px;
+    color: #8B4513;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.1em;
+}
+
+.direction-btn:hover {
+    background: #9966cc;
+    color: white;
+    border-color: #9966cc;
+}
+
+.direction-btn.active {
+    background: #9966cc;
+    color: white;
+    border-color: #9966cc;
+}
+
+
         .search-container {
             text-align: center;
             margin-bottom: 20px;
@@ -530,10 +556,13 @@
             </div>
 
             <div class="language-selector">
-                <button class="lang-btn active" onclick="setLanguage('en')">🇬🇧 English</button>
-                <button class="lang-btn" onclick="setLanguage('hu')">🇭🇺 Magyar</button>
-                <button class="lang-btn" onclick="setLanguage('it')">🇮🇹 Italiano</button>
-            </div>
+    <button class="lang-btn active" onclick="setLanguage('en')">🇬🇧 English</button>
+    <button class="lang-btn" onclick="setLanguage('hu')">🇭🇺 Magyar</button>
+    <button class="lang-btn" onclick="setLanguage('it')">🇮🇹 Italiano</button>
+    <button class="direction-btn" onclick="toggleDirection()" id="directionBtn" title="Lernrichtung umkehren">
+        🇩🇪 → 🇬🇧
+    </button>
+</div>
 
             <div class="filters">
                 <button class="filter-btn active" onclick="setFilter('all')">Alle</button>
@@ -1182,11 +1211,13 @@
         let quizScore = {correct: 0, total: 0};
         let filteredVocab = [];
         let isFlipped = false;
+        let isReversed = JSON.parse(localStorage.getItem('isReversed') || 'false');
 
         // Initialize app
         function init() {
             filterVocab();
             updateStats();
+            updateDirectionButton();
             renderContent();
         }
 
@@ -1204,12 +1235,41 @@
         }
 
         // Language switching
-        function setLanguage(lang) {
-            currentLanguage = lang;
-            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            renderContent();
-        }
+        // Language switching
+function setLanguage(lang) {
+    currentLanguage = lang;
+    document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    updateDirectionButton();
+    renderContent();
+}
+
+// Toggle learning direction
+function toggleDirection() {
+    isReversed = !isReversed;
+    localStorage.setItem('isReversed', JSON.stringify(isReversed));
+    updateDirectionButton();
+    if (currentMode === 'flashcard') {
+        isFlipped = false;
+        renderContent();
+    }
+}
+
+// Update direction button display
+function updateDirectionButton() {
+    const btn = document.getElementById('directionBtn');
+    if (!btn) return;
+    
+    const langFlag = currentLanguage === 'en' ? '🇬🇧' : currentLanguage === 'hu' ? '🇭🇺' : '🇮🇹';
+    
+    if (isReversed) {
+        btn.textContent = `${langFlag} → 🇩🇪`;
+        btn.classList.add('active');
+    } else {
+        btn.textContent = `🇩🇪 → ${langFlag}`;
+        btn.classList.remove('active');
+    }
+}
 
         // Filter switching
         function setFilter(filter) {
@@ -1297,14 +1357,14 @@
             
             container.innerHTML = `
                 <div class="flashcard" onclick="flipCard()">
-                    <div class="flashcard-word">${isFlipped ? item[currentLanguage] : item.word}</div>
+                    <div class="flashcard-word">${isFlipped ? (isReversed ? item.word : item[currentLanguage]) : (isReversed ? item[currentLanguage] : item.word)}</div>
                     ${!isFlipped ? `
                         <div class="flashcard-details">
                             <span class="vocab-type">${item.type}</span><br>
                             ${getDetails(item)}
                         </div>
                     ` : `
-                        <div class="flashcard-translation">${item.word}</div>
+                        <div class="flashcard-translation">${isReversed ? item[currentLanguage] : item.word}</div>
                     `}
                     <p style="margin-top: 20px; color: #999; font-size: 0.9em;">Klicken zum Umdrehen</p>
                 </div>
