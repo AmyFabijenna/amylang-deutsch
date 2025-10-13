@@ -1060,6 +1060,7 @@
             const content = header.nextElementSibling;
             const icon = header.querySelector('.accordion-icon');
             
+            // Schließe alle anderen Akkordeons
             document.querySelectorAll('.accordion-content').forEach(item => {
                 if (item !== content) {
                     item.classList.remove('active');
@@ -1067,6 +1068,7 @@
                 }
             });
             
+            // Toggle das angeklickte Akkordeon
             header.classList.toggle('active');
             content.classList.toggle('active');
         }
@@ -1097,4 +1099,66 @@
             });
 
             const feedback = exercise.querySelector('.feedback');
-            if (
+            if (correct === total) {
+                feedback.className = 'feedback correct';
+                feedback.textContent = `✅ Perfekt! Alle ${total} Antworten sind richtig!`;
+            } else {
+                feedback.className = 'feedback incorrect';
+                feedback.textContent = `❌ ${correct} von ${total} richtig. Versuche es nochmal!`;
+            }
+        }
+
+        function checkAnswersExact(exerciseId) {
+            const exercise = document.getElementById(exerciseId);
+            const input = exercise.querySelector('.input-field');
+            const userAnswer = input.value.trim();
+            const correctAnswer = input.dataset.answer.trim();
+
+            const feedback = exercise.querySelector('.feedback');
+            
+            if (userAnswer === correctAnswer) {
+                input.style.borderColor = '#28a745';
+                input.style.background = '#d4edda';
+                feedback.className = 'feedback correct';
+                feedback.textContent = '✅ Perfekt! Die Antwort ist richtig!';
+            } else {
+                input.style.borderColor = '#dc3545';
+                input.style.background = '#f8d7da';
+                feedback.className = 'feedback incorrect';
+                feedback.textContent = `❌ Nicht ganz. Die richtige Antwort wäre: "${correctAnswer}"`;
+            }
+        }
+
+        function checkRadio(exerciseId, questionName) {
+            const exercise = document.getElementById(exerciseId);
+            const selectedOption = exercise.querySelector(`input[name="${questionName}"]:checked`);
+            const feedback = exercise.querySelector('.feedback');
+
+            if (!selectedOption) {
+                feedback.className = 'feedback incorrect';
+                feedback.textContent = '❌ Bitte wähle eine Antwort aus!';
+                return;
+            }
+
+            if (selectedOption.dataset.correct) {
+                feedback.className = 'feedback correct';
+                feedback.textContent = '✅ Richtig! Sehr gut!';
+                selectedOption.parentElement.style.background = '#d4edda';
+                selectedOption.parentElement.style.borderColor = '#28a745';
+            } else {
+                feedback.className = 'feedback incorrect';
+                feedback.textContent = '❌ Leider falsch. Versuche es nochmal!';
+                selectedOption.parentElement.style.background = '#f8d7da';
+                selectedOption.parentElement.style.borderColor = '#dc3545';
+                
+                // Zeige die richtige Antwort
+                const correctOption = exercise.querySelector(`input[data-correct="true"]`);
+                if (correctOption) {
+                    correctOption.parentElement.style.background = '#d4edda';
+                    correctOption.parentElement.style.borderColor = '#28a745';
+                }
+            }
+        }
+    </script>
+</body>
+</html>
