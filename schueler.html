@@ -679,10 +679,12 @@
 
         const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 
-        // Telefonnummer normalisieren (alle Zeichen außer Zahlen und + entfernen)
+// Telefonnummer normalisieren (alle Zeichen außer Zahlen und + entfernen)
 function normalizePhone(phone) {
     if (!phone) return '';
-    return phone.replace(/[\s\-\(\)\.]/g, '');
+    const normalized = phone.replace(/[\s\-\(\)\.]/g, '');
+    console.log('📞 Normalisiert:', phone, '→', normalized);
+    return normalized;
 }
 
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -690,6 +692,8 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     
     const inputPhone = normalizePhone(document.getElementById('loginPhone').value.trim());
     const password = document.getElementById('loginPassword').value.trim();
+    
+    console.log('🔐 Login-Versuch:', inputPhone, password);
     
     try {
         // Alle Schüler laden
@@ -699,28 +703,39 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         
         if (error) throw error;
         
+        console.log('👥 Geladene Schüler:', students.length);
+        students.forEach(s => {
+            console.log(`  - ${s.name}: ${s.phone} → ${normalizePhone(s.phone)} | PW: ${s.password}`);
+        });
+        
         // Finde Schüler mit passender Telefonnummer (normalisiert verglichen)
-        const student = students.find(s => 
-            normalizePhone(s.phone) === inputPhone && s.password === password
-        );
+        const student = students.find(s => {
+            const match = normalizePhone(s.phone) === inputPhone && s.password === password;
+            console.log(`  ❓ Vergleich ${s.name}: ${normalizePhone(s.phone)} === ${inputPhone} && ${s.password} === ${password} → ${match}`);
+            return match;
+        });
+        
+        console.log('✅ Gefundener Schüler:', student);
         
         if (!student) {
-    showError('Telefonnummer oder Passwort falsch!');
-    return;
-}
-
-currentStudent = student;
-
-document.getElementById('loginView').style.display = 'none';
-document.getElementById('studentView').style.display = 'block';
-document.getElementById('welcomeText').textContent = `Hallo ${currentStudent.name}!`;
-
-await loadStudentData();
-
-} catch (error) {
-    showError('Fehler beim Login: ' + error.message);
-}
+            showError('Telefonnummer oder Passwort falsch!');
+            return;
+        }
+        
+        currentStudent = student;
+        document.getElementById('loginView').style.display = 'none';
+        document.getElementById('studentView').style.display = 'block';
+        document.getElementById('welcomeText').textContent = `Hallo ${currentStudent.name}!`;
+        
+        await loadStudentData();
+        
+    } catch (error) {
+        console.error('❌ Login-Fehler:', error);
+        showError('Fehler beim Login: ' + error.message);
+    }
 });
+
+
 
         async function loadStudentData() {
     await loadMyLessons();
