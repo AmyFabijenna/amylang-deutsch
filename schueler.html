@@ -737,13 +737,13 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
 
 
-        async function loadStudentData() {
+async function loadStudentData() {
     await loadMyLessons();
     await loadMyHomeworkOverview();
     await checkPaymentStatus();
     updateRescheduleButton();
-    checkNotificationPermission(); // ✨ NEU
-    startLessonReminder(); // ✨ NEU
+    checkNotificationPermission();
+    startLessonReminder();
 }
 
 
@@ -770,9 +770,9 @@ function updateLessonCountdown() {
     const totalHours = timeDiff / (1000 * 60 * 60);
     let widgetClass = 'lesson-countdown-widget';
     if (totalHours <= 2) {
-        widgetClass += ' very-soon'; // Innerhalb von 2 Stunden
+        widgetClass += ' very-soon';
     } else if (totalHours <= 24) {
-        widgetClass += ' soon'; // Innerhalb von 24 Stunden
+        widgetClass += ' soon';
     }
     
     let countdownHTML = '';
@@ -845,7 +845,7 @@ function updateLessonCountdown() {
 }
 
 
-        async function loadMyLessons() {
+async function loadMyLessons() {
     if (!currentStudent?.standard_times) {
         document.getElementById('myLessons').innerHTML = '<p>Keine festen Termine vereinbart</p>';
         document.getElementById('lessonCountdown').innerHTML = '';
@@ -879,7 +879,6 @@ function updateLessonCountdown() {
     upcomingLessons.sort((a, b) => a.date - b.date);
     studentLessons = upcomingLessons;
     
-    // ✨ NEU: Countdown-Widget anzeigen
     updateLessonCountdown();
     
     let html = '';
@@ -894,10 +893,10 @@ function updateLessonCountdown() {
     }
     
     document.getElementById('myLessons').innerHTML = html;
-} // ← Diese Klammer hat gefehlt!
+}
 
 
-        async function loadMyHomeworkOverview() {
+async function loadMyHomeworkOverview() {
     const { data, error } = await supabase
         .from('homework')
         .select('*')
@@ -917,159 +916,159 @@ function updateLessonCountdown() {
     
     let html = '';
     
-   // ✨ NEU: Großer roter Hinweis für neue Hausaufgaben
-if (unread.length > 0) {
-    html += `
-        <div style="
-            background: linear-gradient(135deg, #ff4444, #cc0000);
-            color: white;
-            padding: 15px;
-            border-radius: 15px;
-            margin-bottom: 15px;
-            font-size: 1.1em;
-            font-weight: bold;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(255, 68, 68, 0.4);
-            animation: pulse 2s infinite;
-        ">
-            🔴 ${unread.length} neue/geänderte Hausaufgabe${unread.length > 1 ? 'n' : ''}!
-        </div>
-    `;
+    if (unread.length > 0) {
+        html += `
+            <div style="
+                background: linear-gradient(135deg, #ff4444, #cc0000);
+                color: white;
+                padding: 15px;
+                border-radius: 15px;
+                margin-bottom: 15px;
+                font-size: 1.1em;
+                font-weight: bold;
+                text-align: center;
+                box-shadow: 0 4px 15px rgba(255, 68, 68, 0.4);
+                animation: pulse 2s infinite;
+            ">
+                🔴 ${unread.length} neue/geänderte Hausaufgabe${unread.length > 1 ? 'n' : ''}!
+            </div>
+        `;
+    }
+
+    if (pending.length > 0) {
+        html += `<p><strong>${pending.length} offene Hausaufgabe(n):</strong></p>`;
+        pending.slice(0, 10).forEach(hw => {
+            const deadline = new Date(hw.deadline);
+            const today = new Date();
+            const isOverdue = deadline < today;
+            const isNew = !hw.is_read;
+            
+            html += `<div style="margin: 5px 0; padding: 8px; background: ${isOverdue ? 'rgba(255,0,0,0.1)' : 'rgba(255,165,0,0.1)'}; border-radius: 8px; border-left: 4px solid ${isNew ? '#ff4444' : '#FFA500'};">
+                <strong>${hw.title}</strong> ${isNew ? '🔴 NEU' : ''}<br>
+                📅 Bis: ${deadline.toLocaleDateString('de-DE')} ${isOverdue ? '⚠️ Überfällig!' : ''}
+            </div>`;
+        });
+        
+        if (pending.length > 10) {
+            html += `
+                <button class="btn" onclick="switchToHomeworkView()" style="margin-top: 10px; width: 100%;">
+                    📋 ${pending.length - 10} weitere Hausaufgabe${pending.length - 10 > 1 ? 'n' : ''} anzeigen
+                </button>
+            `;
+        }
+    }
+
+    if (completed.length > 0) {
+        html += `<p style="margin-top: 15px;"><strong>${completed.length} erledigt</strong> ✅</p>`;
+    }
+
+    document.getElementById('myHomework').innerHTML = html;
 }
 
-if (pending.length > 0) {
-    html += `<p><strong>${pending.length} offene Hausaufgabe(n):</strong></p>`;
-    pending.slice(0, 10).forEach(hw => {
-        const deadline = new Date(hw.deadline);
-        const today = new Date();
-        const isOverdue = deadline < today;
-        const isNew = !hw.is_read;
-        
-        html += `<div style="margin: 5px 0; padding: 8px; background: ${isOverdue ? 'rgba(255,0,0,0.1)' : 'rgba(255,165,0,0.1)'}; border-radius: 8px; border-left: 4px solid ${isNew ? '#ff4444' : '#FFA500'};">
-            <strong>${hw.title}</strong> ${isNew ? '🔴 NEU' : ''}<br>
-            📅 Bis: ${deadline.toLocaleDateString('de-DE')} ${isOverdue ? '⚠️ Überfällig!' : ''}
-        </div>`;
-    });
+function updateRescheduleButton() {
+    const btn = document.getElementById('rescheduleBtn');
+    const info = document.getElementById('rescheduleInfo');
     
-    if (pending.length > 10) {
-        html += `
-            <button class="btn" onclick="switchToHomeworkView()" style="margin-top: 10px; width: 100%;">
-                📋 ${pending.length - 10} weitere Hausaufgabe${pending.length - 10 > 1 ? 'n' : ''} anzeigen
-            </button>
-        `;
+    if (studentLessons.length === 0) {
+        btn.disabled = true;
+        btn.textContent = 'Keine Termine verfügbar';
+        info.innerHTML = '';
+        return;
+    }
+    
+    const nextLesson = studentLessons[0];
+    const now = new Date();
+    const lessonTime = new Date(nextLesson.date);
+    const timeDiff = lessonTime - now;
+    const hoursDiff = timeDiff / (1000 * 60 * 60);
+    
+    if (hoursDiff <= 24) {
+        btn.disabled = true;
+        btn.textContent = 'Verschiebung nicht möglich';
+        info.innerHTML = `✖ Verschiebung nur möglich, wenn mehr als 24 Stunden vor Stunde (noch ${Math.round(hoursDiff)}h)`;
+    } else {
+        btn.disabled = false;
+        btn.textContent = 'Stunde verschieben';
+        info.innerHTML = `✅ Verschiebung möglich (noch ${Math.round(hoursDiff)}h vor Stunde)`;
     }
 }
 
-if (completed.length > 0) {
-    html += `<p style="margin-top: 15px;"><strong>${completed.length} erledigt</strong> ✅</p>`;
-}
+window.openRescheduleModal = async function() {
+    const select = document.getElementById('lessonToReschedule');
+    select.innerHTML = '<option value="">Lade Termine...</option>';
+    
+    studentLessons.forEach((lesson, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = `${lesson.date.toLocaleDateString('de-DE')} ${lesson.time} Uhr (${lesson.dayName})`;
+        select.appendChild(option);
+    });
+    
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('newDate').min = today;
+    
+    document.getElementById('rescheduleModal').style.display = 'flex';
+};
 
-document.getElementById('myHomework').innerHTML = html;
+window.closeModal = function(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+};
 
-        function updateRescheduleButton() {
-            const btn = document.getElementById('rescheduleBtn');
-            const info = document.getElementById('rescheduleInfo');
-            
-            if (studentLessons.length === 0) {
-                btn.disabled = true;
-                btn.textContent = 'Keine Termine verfügbar';
-                info.innerHTML = '';
-                return;
-            }
-            
-            const nextLesson = studentLessons[0];
-            const now = new Date();
-            const lessonTime = new Date(nextLesson.date);
-            const timeDiff = lessonTime - now;
-            const hoursDiff = timeDiff / (1000 * 60 * 60);
-            
-            if (hoursDiff <= 24) {
-                btn.disabled = true;
-                btn.textContent = 'Verschiebung nicht möglich';
-                info.innerHTML = `✖ Verschiebung nur möglich, wenn mehr als 24 Stunden vor Stunde (noch ${Math.round(hoursDiff)}h)`;
-            } else {
-                btn.disabled = false;
-                btn.textContent = 'Stunde verschieben';
-                info.innerHTML = `✅ Verschiebung möglich (noch ${Math.round(hoursDiff)}h vor Stunde)`;
-            }
-        }
-
-        window.openRescheduleModal = async function() {
-            const select = document.getElementById('lessonToReschedule');
-            select.innerHTML = '<option value="">Lade Termine...</option>';
-            
-            studentLessons.forEach((lesson, index) => {
-                const option = document.createElement('option');
-                option.value = index;
-                option.textContent = `${lesson.date.toLocaleDateString('de-DE')} ${lesson.time} Uhr (${lesson.dayName})`;
-                select.appendChild(option);
+window.submitRescheduleRequest = async function() {
+    const lessonIndex = document.getElementById('lessonToReschedule').value;
+    const newDate = document.getElementById('newDate').value;
+    const newTime = document.getElementById('newTime').value;
+    const reason = document.getElementById('rescheduleReason').value.trim();
+    
+    if (!lessonIndex || !newDate || !newTime) {
+        alert('Bitte wähle einen Termin aus und gib neues Datum/Uhrzeit an!');
+        return;
+    }
+    
+    const selectedLesson = studentLessons[lessonIndex];
+    
+    try {
+        const { error } = await supabase
+            .from('reschedule_requests')
+            .insert({
+                student_id: currentStudent.id,
+                student_name: currentStudent.name,
+                original_date: selectedLesson.date.toISOString(),
+                original_time: selectedLesson.time,
+                requested_date: newDate,
+                requested_time: newTime,
+                reason: reason || 'Kein Grund angegeben',
+                status: 'pending'
             });
-            
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('newDate').min = today;
-            
-            document.getElementById('rescheduleModal').style.display = 'flex';
-        };
+        
+        if (error) throw error;
+        
+        showSuccess('Verschiebungsanfrage wurde erfolgreich gesendet! Amy wird sich bald bei dir melden.');
+        closeModal('rescheduleModal');
+        
+        document.getElementById('newDate').value = '';
+        document.getElementById('newTime').value = '';
+        document.getElementById('rescheduleReason').value = '';
+        
+    } catch (error) {
+        alert('Fehler beim Senden der Anfrage: ' + error.message);
+    }
+};
 
-        window.closeModal = function(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        };
+window.switchToHomeworkView = function() {
+    document.getElementById('studentView').style.display = 'none';
+    document.getElementById('hwView').style.display = 'block';
+    document.getElementById('hwWelcomeText').textContent = `Hausaufgaben von ${currentStudent.name}`;
+    renderDetailedHomework();
+};
 
-        window.submitRescheduleRequest = async function() {
-            const lessonIndex = document.getElementById('lessonToReschedule').value;
-            const newDate = document.getElementById('newDate').value;
-            const newTime = document.getElementById('newTime').value;
-            const reason = document.getElementById('rescheduleReason').value.trim();
-            
-            if (!lessonIndex || !newDate || !newTime) {
-                alert('Bitte wähle einen Termin aus und gib neues Datum/Uhrzeit an!');
-                return;
-            }
-            
-            const selectedLesson = studentLessons[lessonIndex];
-            
-            try {
-                const { error } = await supabase
-                    .from('reschedule_requests')
-                    .insert({
-                        student_id: currentStudent.id,
-                        student_name: currentStudent.name,
-                        original_date: selectedLesson.date.toISOString(),
-                        original_time: selectedLesson.time,
-                        requested_date: newDate,
-                        requested_time: newTime,
-                        reason: reason || 'Kein Grund angegeben',
-                        status: 'pending'
-                    });
-                
-                if (error) throw error;
-                
-                showSuccess('Verschiebungsanfrage wurde erfolgreich gesendet! Amy wird sich bald bei dir melden.');
-                closeModal('rescheduleModal');
-                
-                document.getElementById('newDate').value = '';
-                document.getElementById('newTime').value = '';
-                document.getElementById('rescheduleReason').value = '';
-                
-            } catch (error) {
-                alert('Fehler beim Senden der Anfrage: ' + error.message);
-            }
-        };
+window.switchToDashboard = function() {
+    document.getElementById('hwView').style.display = 'none';
+    document.getElementById('studentView').style.display = 'block';
+    loadStudentData();
+};
 
-        window.switchToHomeworkView = function() {
-            document.getElementById('studentView').style.display = 'none';
-            document.getElementById('hwView').style.display = 'block';
-            document.getElementById('hwWelcomeText').textContent = `Hausaufgaben von ${currentStudent.name}`;
-            renderDetailedHomework();
-        };
-
-        window.switchToDashboard = function() {
-            document.getElementById('hwView').style.display = 'none';
-            document.getElementById('studentView').style.display = 'block';
-            loadStudentData();
-        };
-
-        window.filterHomework = function(filter, event) {  // ✅ event als Parameter
+window.filterHomework = function(filter, event) {
     currentFilter = filter;
     
     document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
@@ -1078,184 +1077,183 @@ document.getElementById('myHomework').innerHTML = html;
     renderDetailedHomework();
 };
 
-        async function renderDetailedHomework() {
-            let filteredHomework = currentHomework;
-            
-            if (currentFilter === 'pending') {
-                filteredHomework = currentHomework.filter(hw => !hw.completed);
-            } else if (currentFilter === 'completed') {
-                filteredHomework = currentHomework.filter(hw => hw.completed);
-            }
+async function renderDetailedHomework() {
+    let filteredHomework = currentHomework;
+    
+    if (currentFilter === 'pending') {
+        filteredHomework = currentHomework.filter(hw => !hw.completed);
+    } else if (currentFilter === 'completed') {
+        filteredHomework = currentHomework.filter(hw => hw.completed);
+    }
 
-            const container = document.getElementById('homeworkContainer');
-            
-            if (filteredHomework.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #8B4513; padding: 40px;">Keine Hausaufgaben in dieser Kategorie</p>';
-                return;
+    const container = document.getElementById('homeworkContainer');
+    
+    if (filteredHomework.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #8B4513; padding: 40px;">Keine Hausaufgaben in dieser Kategorie</p>';
+        return;
+    }
+    
+    container.innerHTML = filteredHomework.map(hw => createHwCard(hw)).join('');
+}
+
+function createHwCard(hw) {
+    const deadline = new Date(hw.deadline);
+    const today = new Date();
+    const isOverdue = !hw.completed && deadline < today;
+    const isCompleted = hw.completed;
+    
+    const submissionTypeText = {
+        'text': '📝 Text-Antwort',
+        'photo': '📸 Foto hochladen',
+        'whatsapp': '💬 Per WhatsApp',
+        'custom': `✏️ ${hw.custom_submission_text || 'Benutzerdefiniert'}`
+    };
+    
+    return `
+        <div class="hw-card ${isCompleted ? 'completed' : ''} ${hw.is_read ? 'read' : ''}" onclick="markAsRead('${hw.id}')">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div class="hw-title">${hw.title} ${isOverdue ? '⚠️' : ''}</div>
+                <div style="font-size: 1.5em;">${isCompleted ? '✅' : '⭕'}</div>
+            </div>
+            ${hw.description ? `<p style="color: #8B4513; margin: 10px 0;">${hw.description}</p>` : ''}
+            <div style="font-size: 0.9em; color: #666; margin: 10px 0;">
+                📅 Bis: ${deadline.toLocaleDateString('de-DE')} ${deadline.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                ${isOverdue ? '<br><span style="color: red;">⚠️ Überfällig!</span>' : ''}
+            </div>
+            <div class="submission-type-badge">
+                ${submissionTypeText[hw.submission_type] || submissionTypeText[hw.type] || '📝 Text-Antwort'}
+            </div>
+            ${isCompleted ? 
+                (hw.response ? `<div style="background: rgba(144,238,144,0.3); padding: 12px; border-radius: 8px; margin-top: 10px;"><strong>Deine Antwort:</strong> ${hw.response}</div>` : '') :
+                createResponseSection(hw)
             }
-            
-            container.innerHTML = filteredHomework.map(hw => createHwCard(hw)).join('');
+        </div>
+    `;
+}
+
+function createResponseSection(hw) {
+    const submissionType = hw.submission_type || hw.type;
+    
+    if (submissionType === 'text') {
+        return `
+            <textarea id="response-${hw.id}" placeholder="Schreibe deine Antwort hier..."></textarea>
+            <button class="btn" style="margin-top: 10px;" onclick="submitHomeworkResponse('${hw.id}', 'text'); event.stopPropagation();">
+                Antwort absenden
+            </button>
+        `;
+    } else if (submissionType === 'photo') {
+        return `
+            <p style="margin-top: 10px; color: #8B4513;">Bitte mache ein Foto deiner Hausaufgabe und markiere sie als erledigt.</p>
+            <button class="btn" style="margin-top: 10px;" onclick="submitHomeworkResponse('${hw.id}', 'photo'); event.stopPropagation();">
+                Foto gemacht - als erledigt markieren
+            </button>
+        `;
+    } else if (submissionType === 'whatsapp') {
+        return `
+            <p style="margin-top: 10px; color: #8B4513;">Bitte sende deine Antwort per WhatsApp an Amy und markiere die Aufgabe als erledigt.</p>
+            <button class="btn" style="margin-top: 10px;" onclick="submitHomeworkResponse('${hw.id}', 'whatsapp'); event.stopPropagation();">
+                Per WhatsApp gesendet - als erledigt markieren
+            </button>
+        `;
+    } else if (submissionType === 'custom') {
+        return `
+            <p style="margin-top: 10px; color: #8B4513;"><strong>Anweisung:</strong> ${hw.custom_submission_text || 'Siehe Beschreibung'}</p>
+            <button class="btn" style="margin-top: 10px;" onclick="submitHomeworkResponse('${hw.id}', 'custom'); event.stopPropagation();">
+                Als erledigt markieren
+            </button>
+        `;
+    }
+    return '';
+}
+
+window.markAsRead = async function(hwId) {
+    const hw = currentHomework.find(h => h.id === hwId);
+    if (!hw || hw.is_read) return;
+    
+    try {
+        await supabase
+            .from('homework')
+            .update({ is_read: true })
+            .eq('id', hwId);
+        
+        const hwIndex = currentHomework.findIndex(h => h.id === hwId);
+        if (hwIndex !== -1) {
+            currentHomework[hwIndex].is_read = true;
         }
+        
+        renderDetailedHomework();
+        loadMyHomeworkOverview();
+    } catch (error) {
+        console.error('Fehler beim Markieren als gelesen:', error);
+    }
+};
 
-        function createHwCard(hw) {
-            const deadline = new Date(hw.deadline);
-            const today = new Date();
-            const isOverdue = !hw.completed && deadline < today;
-            const isCompleted = hw.completed;
-            
-            const submissionTypeText = {
-                'text': '📝 Text-Antwort',
-                'photo': '📸 Foto hochladen',
-                'whatsapp': '💬 Per WhatsApp',
-                'custom': `✏️ ${hw.custom_submission_text || 'Benutzerdefiniert'}`
-            };
-            
-            return `
-                <div class="hw-card ${isCompleted ? 'completed' : ''} ${hw.is_read ? 'read' : ''}" onclick="markAsRead('${hw.id}')">
-                    <div style="display: flex; justify-content: space-between; align-items: start;">
-                        <div class="hw-title">${hw.title} ${isOverdue ? '⚠️' : ''}</div>
-                        <div style="font-size: 1.5em;">${isCompleted ? '✅' : '⭕'}</div>
-                    </div>
-                    ${hw.description ? `<p style="color: #8B4513; margin: 10px 0;">${hw.description}</p>` : ''}
-                    <div style="font-size: 0.9em; color: #666; margin: 10px 0;">
-                        📅 Bis: ${deadline.toLocaleDateString('de-DE')} ${deadline.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
-                        ${isOverdue ? '<br><span style="color: red;">⚠️ Überfällig!</span>' : ''}
-                    </div>
-                    <div class="submission-type-badge">
-                        ${submissionTypeText[hw.submission_type] || submissionTypeText[hw.type] || '📝 Text-Antwort'}
-                    </div>
-                    ${isCompleted ? 
-                        (hw.response ? `<div style="background: rgba(144,238,144,0.3); padding: 12px; border-radius: 8px; margin-top: 10px;"><strong>Deine Antwort:</strong> ${hw.response}</div>` : '') :
-                        createResponseSection(hw)
-                    }
-                </div>
-            `;
+window.submitHomeworkResponse = async function(hwId, type) {
+    let response = '';
+    
+    if (type === 'text') {
+        response = document.getElementById(`response-${hwId}`).value.trim();
+        if (!response) {
+            alert('Bitte schreibe eine Antwort.');
+            return;
         }
+    } else if (type === 'photo') {
+        response = 'Foto gemacht ✔';
+    } else if (type === 'whatsapp') {
+        response = 'Per WhatsApp gesendet ✔';
+    } else if (type === 'custom') {
+        response = 'Erledigt ✔';
+    }
 
-        function createResponseSection(hw) {
-            const submissionType = hw.submission_type || hw.type;
-            
-            if (submissionType === 'text') {
-                return `
-                    <textarea id="response-${hw.id}" placeholder="Schreibe deine Antwort hier..."></textarea>
-                    <button class="btn" style="margin-top: 10px;" onclick="submitHomeworkResponse('${hw.id}', 'text'); event.stopPropagation();">
-                        Antwort absenden
-                    </button>
-                `;
-            } else if (submissionType === 'photo') {
-                return `
-                    <p style="margin-top: 10px; color: #8B4513;">Bitte mache ein Foto deiner Hausaufgabe und markiere sie als erledigt.</p>
-                    <button class="btn" style="margin-top: 10px;" onclick="submitHomeworkResponse('${hw.id}', 'photo'); event.stopPropagation();">
-                        Foto gemacht - als erledigt markieren
-                    </button>
-                `;
-            } else if (submissionType === 'whatsapp') {
-                return `
-                    <p style="margin-top: 10px; color: #8B4513;">Bitte sende deine Antwort per WhatsApp an Amy und markiere die Aufgabe als erledigt.</p>
-                    <button class="btn" style="margin-top: 10px;" onclick="submitHomeworkResponse('${hw.id}', 'whatsapp'); event.stopPropagation();">
-                        Per WhatsApp gesendet - als erledigt markieren
-                    </button>
-                `;
-            } else if (submissionType === 'custom') {
-                return `
-                    <p style="margin-top: 10px; color: #8B4513;"><strong>Anweisung:</strong> ${hw.custom_submission_text || 'Siehe Beschreibung'}</p>
-                    <button class="btn" style="margin-top: 10px;" onclick="submitHomeworkResponse('${hw.id}', 'custom'); event.stopPropagation();">
-                        Als erledigt markieren
-                    </button>
-                `;
-            }
-            return '';
+    try {
+        const { error } = await supabase
+            .from('homework')
+            .update({
+                completed: true,
+                response: response,
+                completed_at: new Date().toISOString()
+            })
+            .eq('id', hwId);
+        
+        if (error) throw error;
+        
+        showSuccess('Hausaufgabe wurde als erledigt markiert!');
+        
+        const hwIndex = currentHomework.findIndex(h => h.id === hwId);
+        if (hwIndex !== -1) {
+            currentHomework[hwIndex].completed = true;
+            currentHomework[hwIndex].response = response;
         }
+        
+        renderDetailedHomework();
+        loadMyHomeworkOverview();
+        
+    } catch (error) {
+        alert('Fehler beim Absenden: ' + error.message);
+    }
+};
 
-        window.markAsRead = async function(hwId) {
-            const hw = currentHomework.find(h => h.id === hwId);
-            if (!hw || hw.is_read) return;
-            
-            try {
-                await supabase
-                    .from('homework')
-                    .update({ is_read: true })
-                    .eq('id', hwId);
-                
-                const hwIndex = currentHomework.findIndex(h => h.id === hwId);
-                if (hwIndex !== -1) {
-                    currentHomework[hwIndex].is_read = true;
-                }
-                
-                renderDetailedHomework();
-                loadMyHomeworkOverview();
-            } catch (error) {
-                console.error('Fehler beim Markieren als gelesen:', error);
-            }
-        };
+function showError(message) {
+    const errorEl = document.getElementById('errorMsg');
+    errorEl.textContent = message;
+    errorEl.style.display = 'block';
+}
 
-        window.submitHomeworkResponse = async function(hwId, type) {
-            let response = '';
-            
-            if (type === 'text') {
-                response = document.getElementById(`response-${hwId}`).value.trim();
-                if (!response) {
-                    alert('Bitte schreibe eine Antwort.');
-                    return;
-                }
-            } else if (type === 'photo') {
-                response = 'Foto gemacht ✔';
-            } else if (type === 'whatsapp') {
-                response = 'Per WhatsApp gesendet ✔';
-            } else if (type === 'custom') {
-                response = 'Erledigt ✔';
-            }
+function showSuccess(message) {
+    const successEl = document.getElementById('successMessage');
+    successEl.textContent = message;
+    successEl.style.display = 'block';
+    setTimeout(() => {
+        successEl.style.display = 'none';
+    }, 5000);
+}
 
-            try {
-                const { error } = await supabase
-                    .from('homework')
-                    .update({
-                        completed: true,
-                        response: response,
-                        completed_at: new Date().toISOString()
-                    })
-                    .eq('id', hwId);
-                
-                if (error) throw error;
-                
-                showSuccess('Hausaufgabe wurde als erledigt markiert!');
-                
-                const hwIndex = currentHomework.findIndex(h => h.id === hwId);
-                if (hwIndex !== -1) {
-                    currentHomework[hwIndex].completed = true;
-                    currentHomework[hwIndex].response = response;
-                }
-                
-                renderDetailedHomework();
-                loadMyHomeworkOverview();
-                
-            } catch (error) {
-                alert('Fehler beim Absenden: ' + error.message);
-            }
-        };
-
-        function showError(message) {
-            const errorEl = document.getElementById('errorMsg');
-            errorEl.textContent = message;
-            errorEl.style.display = 'block';
-        }
-
-        function showSuccess(message) {
-            const successEl = document.getElementById('successMessage');
-            successEl.textContent = message;
-            successEl.style.display = 'block';
-            setTimeout(() => {
-                successEl.style.display = 'none';
-            }, 5000);
-        }
-
-        window.logout = function() {
+window.logout = function() {
     currentStudent = null;
     studentLessons = [];
     currentHomework = [];
-    notificationShown = false; // ✨ NEU
+    notificationShown = false;
     
-    // Stoppe Reminder-Interval ✨ NEU
     if (reminderInterval) {
         clearInterval(reminderInterval);
         reminderInterval = null;
@@ -1269,24 +1267,19 @@ document.getElementById('myHomework').innerHTML = html;
     document.getElementById('errorMsg').style.display = 'none';
 }
 
-        setInterval(() => {
-            if (currentStudent) {
-                updateRescheduleButton();
-            }
-        }, 120000);
+setInterval(() => {
+    if (currentStudent) {
+        updateRescheduleButton();
+    }
+}, 120000);
 
-        setTimeout(updateRescheduleButton, 1000);
-// ✨ Live-Countdown alle 1 Sekunde aktualisieren
+setTimeout(updateRescheduleButton, 1000);
+
 setInterval(() => {
     if (currentStudent && studentLessons.length > 0) {
         updateLessonCountdown();
     }
 }, 1000);
-
-// ===================================
-// ZAHLUNGSBENACHRICHTIGUNG FÜR SCHÜLER
-// Füge diesen Code in schueler.html im <script>-Bereich ein
-// ===================================
 
 async function checkPaymentStatus() {
     if (!currentStudent) return;
@@ -1297,14 +1290,12 @@ async function checkPaymentStatus() {
     const year = now.getFullYear();
     const currentMonth = `${year}-${String(month).padStart(2, '0')}`;
     
-    // Ab 28. des Monats zeigen wir die Benachrichtigung für den NÄCHSTEN Monat
     let trackingMonth = currentMonth;
     if (day >= 28) {
-        const nextMonthDate = new Date(year, month, 1); // Nächster Monat
+        const nextMonthDate = new Date(year, month, 1);
         trackingMonth = `${nextMonthDate.getFullYear()}-${String(nextMonthDate.getMonth() + 1).padStart(2, '0')}`;
     }
     
-    // Payment-Status vom Server holen
     const { data: payment } = await supabase
         .from('payments')
         .select('*')
@@ -1316,12 +1307,10 @@ async function checkPaymentStatus() {
     const notificationContainer = document.getElementById('paymentNotification');
     
     if (isPaid) {
-        // Bezahlt = keine Benachrichtigung
         notificationContainer.style.display = 'none';
         return;
     }
     
-    // NICHT bezahlt = Benachrichtigung anzeigen
     let message = '';
     let bgColor = '';
     
@@ -1331,20 +1320,16 @@ async function checkPaymentStatus() {
     const monthName = monthNames[trackingMonthNum - 1];
     
     if (day >= 28 && day <= 31) {
-        // Vor Fälligkeit (28.-31. des Vormonats)
         bgColor = 'linear-gradient(135deg, #FFA500, #FF8C00)';
         message = `💰 Bitte überweise das Lehrhonorar bis zum 5. ${monthName}`;
     } else if (day >= 1 && day <= 5) {
-        // Noch innerhalb der Frist (1.-5.)
         bgColor = 'linear-gradient(135deg, #FFA500, #FF8C00)';
         message = `💰 Bitte überweise das Lehrhonorar bis zum 5. ${monthName}`;
     } else if (day >= 6 && day < 10) {
-        // Leicht überfällig (6.-9.)
         const daysOverdue = day - 5;
         bgColor = 'linear-gradient(135deg, #FF6B35, #F7931E)';
         message = `⚠️ Das Lehrhonorar ist seit dem 5. ${monthName} überfällig (${daysOverdue} Tag${daysOverdue > 1 ? 'e' : ''})`;
     } else if (day >= 10) {
-        // Stark überfällig (ab 10.)
         const daysOverdue = day - 5;
         bgColor = 'linear-gradient(135deg, #DC143C, #8B0000)';
         message = `🚨 DRINGEND: Das Lehrhonorar ist seit dem 5. ${monthName} überfällig (${daysOverdue} Tage)`;
@@ -1372,31 +1357,15 @@ async function checkPaymentStatus() {
     }
 }
 
-// In loadStudentData() einbauen (ERWEITERE die bestehende Funktion):
-async function loadStudentData() {
-    await loadMyLessons();
-    await loadMyHomeworkOverview();
-    await checkPaymentStatus(); // ← NEU hinzufügen
-    updateRescheduleButton();
-}
-
-
-
-// ===================================
-// BENACHRICHTIGUNGEN & ERINNERUNGEN
-// ===================================
-
-let notificationShown = false; // Verhindert mehrfaches Anzeigen
+let notificationShown = false;
 let reminderInterval = null;
 
 function checkNotificationPermission() {
-    // Prüfe, ob Browser Benachrichtigungen unterstützt
     if (!('Notification' in window)) {
         console.log('Browser unterstützt keine Benachrichtigungen');
         return;
     }
     
-    // Wenn noch nicht entschieden, Banner anzeigen
     if (Notification.permission === 'default') {
         document.getElementById('notificationPermissionBanner').style.display = 'block';
     }
@@ -1421,17 +1390,14 @@ window.denyNotificationPermission = function() {
 }
 
 function startLessonReminder() {
-    // Stoppe vorherigen Interval falls vorhanden
     if (reminderInterval) {
         clearInterval(reminderInterval);
     }
     
-    // Prüfe alle 30 Sekunden
     reminderInterval = setInterval(() => {
         checkLessonReminder();
     }, 30000);
     
-    // Sofort beim Start prüfen
     checkLessonReminder();
 }
 
@@ -1444,13 +1410,11 @@ function checkLessonReminder() {
     const timeDiff = lessonTime - now;
     const minutesUntil = timeDiff / (1000 * 60);
     
-    // Wenn zwischen 30 und 31 Minuten (Zeitfenster von 1 Minute)
     if (minutesUntil <= 31 && minutesUntil > 29 && !notificationShown) {
         notificationShown = true;
         showLessonReminder(nextLesson);
     }
     
-    // Reset wenn Stunde vorbei oder > 35 Min
     if (minutesUntil > 35 || minutesUntil < 0) {
         notificationShown = false;
     }
@@ -1459,25 +1423,22 @@ function checkLessonReminder() {
 function showLessonReminder(lesson) {
     const message = `Deine Stunde beginnt um ${lesson.time} Uhr (${lesson.duration} Min)`;
     
-    // Browser-Benachrichtigung (wenn erlaubt)
     if (Notification.permission === 'granted') {
         new Notification('🎓 Stunde beginnt in 30 Minuten!', {
             body: message,
             icon: '🔔',
             badge: '🔔',
-            tag: 'lesson-reminder', // Verhindert Duplikate
+            tag: 'lesson-reminder',
             requireInteraction: false
         });
     }
     
-    // In-App Banner (immer anzeigen)
     const banner = document.getElementById('notificationBanner');
     const messageEl = document.getElementById('notificationMessage');
     
     messageEl.textContent = message;
     banner.classList.add('show', 'warning');
     
-    // Banner nach 10 Sekunden automatisch schließen
     setTimeout(() => {
         banner.classList.remove('show');
     }, 10000);
@@ -1487,17 +1448,11 @@ window.closeNotificationBanner = function() {
     document.getElementById('notificationBanner').classList.remove('show');
 }
 
-
-// Regelmäßig prüfen (alle 5 Minuten)
 setInterval(() => {
     if (currentStudent) {
         checkPaymentStatus();
     }
 }, 300000);
-
-// ===================================
-// PWA - SERVICE WORKER REGISTRIERUNG
-// ===================================
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -1511,25 +1466,18 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// Install-Button anzeigen (nur wenn noch nicht installiert)
 let deferredPrompt;
 
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  
-  // Optional: Zeige einen "App installieren" Button
   console.log('💡 App kann installiert werden!');
-  
-  // Du kannst hier einen Button einblenden lassen
-  // showInstallButton();
 });
 
 window.addEventListener('appinstalled', () => {
   console.log('🎉 PWA wurde installiert!');
   deferredPrompt = null;
 });
-
 
     </script>
 </body>
