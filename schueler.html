@@ -679,13 +679,42 @@
 
         const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 
-// Telefonnummer normalisieren (alle Zeichen außer Zahlen und + entfernen)
+// Telefonnummer normalisieren (konsistente Formatierung)
 function normalizePhone(phone) {
     if (!phone) return '';
-    const normalized = phone.replace(/[\s\-\(\)\.]/g, '');
+    
+    // Entferne ALLE Nicht-Ziffern außer +
+    let normalized = phone.replace(/[^\d+]/g, '');
+    
+    // Standardisiere deutsche Nummern
+    if (normalized.startsWith('+49')) {
+        normalized = normalized.substring(1); // +49 → 49
+    } else if (normalized.startsWith('049')) {
+        normalized = '49' + normalized.substring(3); // 049... → 49...
+    } else if (normalized.startsWith('0')) {
+        normalized = '49' + normalized.substring(1); // 0... → 49...
+    }
+    
     console.log('📞 Normalisiert:', phone, '→', normalized);
     return normalized;
 }
+
+// Debug-Funktion für Login
+function debugLoginInfo(inputPhone, password, students) {
+    console.log('🔐 DETAILIERTE LOGIN-INFO:', {
+        inputPhone: inputPhone,
+        normalizedInput: normalizePhone(inputPhone),
+        password: password,
+        students: students.map(s => ({
+            name: s.name,
+            phone: s.phone,
+            normalizedPhone: normalizePhone(s.phone),
+            password: s.password,
+            match: normalizePhone(s.phone) === normalizePhone(inputPhone) && s.password === password
+        }))
+    });
+}
+
 
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -708,12 +737,21 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             console.log(`  - ${s.name}: ${s.phone} → ${normalizePhone(s.phone)} | PW: ${s.password}`);
         });
         
-        // Finde Schüler mit passender Telefonnummer (normalisiert verglichen)
-        const student = students.find(s => {
-            const match = normalizePhone(s.phone) === inputPhone && s.password === password;
-            console.log(`  ❓ Vergleich ${s.name}: ${normalizePhone(s.phone)} === ${inputPhone} && ${s.password} === ${password} → ${match}`);
-            return match;
-        });
+
+        
+        // Debug-Ausgabe
+debugLoginInfo(inputPhone, password, students);
+
+// Finde Schüler mit passender Telefonnummer (normalisiert verglichen)
+const student = students.find(s => {
+    const studentPhone = normalizePhone(s.phone);
+    const inputPhoneNormalized = normalizePhone(inputPhone);
+    const match = studentPhone === inputPhoneNormalized && s.password === password;
+    
+    console.log(`  ❓ Vergleich ${s.name}: ${studentPhone} === ${inputPhoneNormalized} && ${s.password} === ${password} → ${match}`);
+    return match;
+});
+
         
         console.log('✅ Gefundener Schüler:', student);
         
