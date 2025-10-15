@@ -707,53 +707,70 @@ const preteriteSentences = [
             });
         }
 
-        function generateMixedExercise() {
-            const container = document.getElementById('mixed-sentences');
-            container.innerHTML = '';
-            
-            mixedSentences.forEach((sentence, index) => {
-                const parts = sentence.text.split('___');
-                const div = document.createElement('div');
-                div.className = 'sentence';
-                
-                let html = `<span class="sentence-number">${index + 1}.</span>`;
-                
-                // Präteritum-Option
-                html += '<div style="margin-bottom: 10px;"><strong>Präteritum:</strong> ';
-                html += parts[0];
-                
-                // Erste Lücke für Präteritum
-                html += `<input type="text" class="gap-input" data-type="mixed-past" data-index="${index}" data-part="0" data-answer="${sentence.past[0]}">`;
-                
-                if (parts[1]) {
-                    html += parts[1];
-                }
-                
-                // Zweite Lücke für trennbare Verben im Präteritum
-                if (sentence.past.length > 1) {
-                    html += `<input type="text" class="gap-input" data-type="mixed-past" data-index="${index}" data-part="1" data-answer="${sentence.past[1]}">`;
-                    if (parts[2]) {
-                        html += parts[2];
-                    }
-                }
-                
-                html += '</div>';
-                
-                // Perfekt-Option
-                html += '<div><strong>Perfekt:</strong> ';
-                html += parts[0];
-                html += `<input type="text" class="gap-input" data-type="mixed-aux" data-index="${index}" data-answer="${sentence.aux}" placeholder="haben/sein" style="min-width: 80px;">`;
-                html += ' ';
-                html += `<input type="text" class="gap-input" data-type="mixed-part" data-index="${index}" data-answer="${sentence.partizip}" placeholder="Partizip II">`;
-                if (parts[1]) {
-                    html += parts[1];
-                }
-                html += '</div>';
-                
-                div.innerHTML = html;
-                container.appendChild(div);
-            });
+function generateMixedExercise() {
+    const container = document.getElementById('mixed-sentences');
+    container.innerHTML = '';
+    
+    mixedSentences.forEach((sentence, index) => {
+        const parts = sentence.text.split('___');
+        const div = document.createElement('div');
+        div.className = 'sentence';
+        
+        let html = `<span class="sentence-number">${index + 1}.</span>`;
+        
+        // Präteritum-Option
+        html += '<div style="margin-bottom: 10px;"><strong>Präteritum:</strong> ';
+        html += parts[0];
+        
+        // Erste Lücke für Präteritum
+        html += `<input type="text" class="gap-input" data-type="mixed-past" data-index="${index}" data-part="0" data-answer="${sentence.past[0]}">`;
+        
+        if (parts[1]) {
+            html += parts[1];
         }
+        
+        // Zweite Lücke für trennbare Verben im Präteritum
+        if (sentence.past.length > 1) {
+            html += `<input type="text" class="gap-input" data-type="mixed-past" data-index="${index}" data-part="1" data-answer="${sentence.past[1]}">`;
+            if (parts[2]) {
+                html += parts[2];
+            }
+        }
+        
+        html += '</div>';
+        
+        // Perfekt-Option - KORRIGIERT mit richtiger Satzstellung
+        html += '<div><strong>Perfekt:</strong> ';
+        
+        // Für Perfekt müssen wir den Satz umbauen: Hilfsverb + Rest + Partizip
+        const sentenceText = sentence.text.replace('___', '').replace('___', '');
+        const words = sentenceText.split(' ');
+        
+        // Hilfsverb an Position 1 oder 2 (nach Zeitangabe)
+        let auxPosition = 0;
+        if (words[0].includes('Gestern') || words[0].includes('Letztes') || words[0].includes('Das')) {
+            auxPosition = 1;
+        }
+        
+        // Baue den Perfekt-Satz auf
+        for (let i = 0; i < words.length; i++) {
+            if (i === auxPosition) {
+                html += `<input type="text" class="gap-input" data-type="mixed-aux" data-index="${index}" data-answer="${sentence.aux}" placeholder="haben/sein" style="min-width: 80px;"> `;
+            }
+            html += words[i] + ' ';
+            
+            // Partizip am Ende
+            if (i === words.length - 1) {
+                html += `<input type="text" class="gap-input" data-type="mixed-part" data-index="${index}" data-answer="${sentence.partizip}" placeholder="Partizip II">`;
+            }
+        }
+        
+        html += '</div>';
+        
+        div.innerHTML = html;
+        container.appendChild(div);
+    });
+}
 
         function checkAnswers(type) {
             const inputs = document.querySelectorAll(`#${type} .gap-input`);
