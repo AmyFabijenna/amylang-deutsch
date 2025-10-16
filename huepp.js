@@ -196,6 +196,36 @@ function renderNextStudent() {
     `;
 }
 
+
+// ===================================
+// GESAMTWOCHEINSTUNDEN BERECHNEN
+// ===================================
+
+function calculateTotalWeeklyHours() {
+    let totalMinutes = 0;
+    
+    students.forEach(student => {
+        if (student.standard_times) {
+            student.standard_times.forEach(timeSlot => {
+                totalMinutes += timeSlot.duration;
+            });
+        }
+    });
+    
+    return totalMinutes;
+}
+
+function renderTotalWeeklyHours() {
+    const totalMinutes = calculateTotalWeeklyHours();
+    const container = document.getElementById('totalWeeklyHours');
+    if (container) {
+        container.textContent = totalMinutes;
+    }
+}
+
+
+
+
 window.sendWhatsAppLink = function(phone, name) {
     const link = document.getElementById('whatsappLinkInput').value.trim();
     if (!link) {
