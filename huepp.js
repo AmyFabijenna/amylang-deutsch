@@ -1327,16 +1327,13 @@ function showNotification(student) {
 // RENDER ALL
 // ===================================
 
-// ===================================
-// RENDER ALL
-// ===================================
-
 function renderAll() {
     renderNextStudent();
     renderTodayLessons();
-    renderWeekOverview(); // DIESE FEHLTE NOCH
+    renderWeekOverview();
     renderRequests();
-    renderStudentsOverview(); // DIESE FEHLTE NOCH
+    renderTotalWeeklyHours();
+    renderStudentsOverview();
     renderStudentsList();
     renderHomeworkManagement();
     renderPaymentOverview();
