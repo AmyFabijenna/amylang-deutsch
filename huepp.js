@@ -217,9 +217,12 @@ function calculateTotalWeeklyHours() {
 
 function renderTotalWeeklyHours() {
     const totalMinutes = calculateTotalWeeklyHours();
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    
     const container = document.getElementById('totalWeeklyHours');
     if (container) {
-        container.textContent = totalMinutes;
+        container.textContent = `${hours}h ${minutes}min`;
     }
 }
 
