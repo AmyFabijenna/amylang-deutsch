@@ -219,6 +219,7 @@ window.sendWhatsAppLink = function(phone, name) {
 function renderTodayLessons() {
     const today = new Date();
     const todayDay = today.getDay();
+    const currentTime = today.getHours() * 60 + today.getMinutes(); // Aktuelle Zeit in Minuten
     
     document.getElementById('todayDate').textContent = today.toLocaleDateString('de-DE', { 
         weekday: 'long', 
@@ -234,11 +235,17 @@ function renderTodayLessons() {
         
         student.standard_times.forEach(timeSlot => {
             if (timeSlot.day === todayDay) {
-                todayLessons.push({
-                    student: student,
-                    time: timeSlot.time,
-                    duration: timeSlot.duration
-                });
+                // Nur zukünftige Stunden anzeigen
+                const [hours, minutes] = timeSlot.time.split(':');
+                const lessonTime = parseInt(hours) * 60 + parseInt(minutes);
+                
+                if (lessonTime >= currentTime) {
+                    todayLessons.push({
+                        student: student,
+                        time: timeSlot.time,
+                        duration: timeSlot.duration
+                    });
+                }
             }
         });
     });
@@ -248,7 +255,7 @@ function renderTodayLessons() {
     const container = document.getElementById('todayLessons');
     
     if (todayLessons.length === 0) {
-        container.innerHTML = '<p style="color: #8B4513; text-align: center; padding: 40px;">Keine Termine heute</p>';
+        container.innerHTML = '<p style="color: #8B4513; text-align: center; padding: 40px;">Keine weiteren Termine heute</p>';
         return;
     }
     
@@ -272,6 +279,105 @@ function renderTodayLessons() {
         `;
     }).join('');
 }
+
+
+
+// ===================================
+// WOCHENÜBERSICHT
+// ===================================
+
+function renderWeekOverview() {
+    const container = document.getElementById('weekOverview');
+    if (!container) return;
+    
+    const today = new Date();
+    const currentDay = today.getDay();
+    const currentTime = today.getHours() * 60 + today.getMinutes(); // Aktuelle Zeit in Minuten
+    
+    // Start der Woche (Montag)
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - currentDay + (currentDay === 0 ? -6 : 1));
+    
+    let weekHtml = '';
+    
+    // Für jeden Tag der Woche (Montag - Sonntag)
+    for (let i = 0; i < 7; i++) {
+        const dayDate = new Date(weekStart);
+        dayDate.setDate(weekStart.getDate() + i);
+        const dayOfWeek = dayDate.getDay();
+        const dayName = dayNames[dayOfWeek];
+        
+        // Schüler für diesen Tag finden
+        const dayStudents = [];
+        students.forEach(student => {
+            if (!student.standard_times) return;
+            
+            student.standard_times.forEach(timeSlot => {
+                if (timeSlot.day === dayOfWeek) {
+                    // Nur zukünftige Stunden für den aktuellen Tag anzeigen
+                    if (dayDate.toDateString() === today.toDateString()) {
+                        const [hours, minutes] = timeSlot.time.split(':');
+                        const lessonTime = parseInt(hours) * 60 + parseInt(minutes);
+                        if (lessonTime < currentTime) {
+                            return; // Vergangene Stunden überspringen
+                        }
+                    }
+                    
+                    dayStudents.push({
+                        student: student,
+                        time: timeSlot.time,
+                        duration: timeSlot.duration
+                    });
+                }
+            });
+        });
+        
+        // Nach Uhrzeit sortieren
+        dayStudents.sort((a, b) => a.time.localeCompare(b.time));
+        
+        const isToday = dayDate.toDateString() === today.toDateString();
+        
+        weekHtml += `
+            <div class="student-card" style="${isToday ? 'border-left-color: #1976d2; background: rgba(25,118,210,0.1);' : ''}">
+                <div style="font-weight: bold; color: #8B4513; margin-bottom: 10px;">
+                    ${dayName}
+                    ${isToday ? ' (Heute)' : ''}
+                    <div style="font-size: 0.8em; color: #666; font-weight: normal;">
+                        ${dayDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
+                    </div>
+                </div>
+                
+                ${dayStudents.length === 0 ? 
+                    '<div style="color: #666; font-style: italic; font-size: 0.9em;">Keine Termine</div>' :
+                    dayStudents.map(lesson => `
+                        <div style="margin-bottom: 8px; padding: 8px; background: rgba(255,255,255,0.5); border-radius: 8px;">
+                            <div style="font-weight: bold; font-size: 0.9em;">${lesson.student.name}</div>
+                            <div style="font-size: 0.8em; color: #666;">
+                                🕐 ${lesson.time} Uhr | ⏱️ ${lesson.duration} Min
+                            </div>
+                        </div>
+                    `).join('')
+                }
+            </div>
+        `;
+    }
+    
+    container.innerHTML = weekHtml;
+}
+
+// renderAll Funktion aktualisieren
+function renderAll() {
+    renderNextStudent();
+    renderTodayLessons();
+    renderWeekOverview(); // NEUE ZEILE HINZUFÜGEN
+    renderRequests();
+    renderStudentsList();
+    renderHomeworkManagement();
+    renderPaymentOverview();
+}
+
+
+
 
 // ===================================
 // ANFRAGEN
@@ -612,6 +718,63 @@ function generatePassword() {
     const words = ['katze', 'mango', 'ananas', 'koala', 'giraffe', 'kiwi', 'banane', 'tiger', 'panda', 'apfel', 'birne', 'elefant', 'zebra', 'orange', 'papaya', 'loewe', 'delfin', 'erdbeere', 'pinguin', 'affe'];
     return words[Math.floor(Math.random() * words.length)];
 }
+
+
+
+// ===================================
+// SCHÜLER-ÜBERSICHT
+// ===================================
+
+function renderStudentsOverview() {
+    const container = document.getElementById('studentsOverview');
+    if (!container) return;
+    
+    const overviewHtml = students.map(student => {
+        // Wochenminuten berechnen
+        const weeklyMinutes = student.standard_times ? 
+            student.standard_times.reduce((total, slot) => total + slot.duration, 0) : 0;
+        
+        // Niveau mit Farbe
+        const level = student.level || 'k.A.';
+        let levelColor = '#666';
+        if (level.startsWith('A')) levelColor = '#4CAF50';
+        if (level.startsWith('B')) levelColor = '#2196F3';
+        if (level.startsWith('C')) levelColor = '#9C27B0';
+        
+        return `
+            <div class="student-card" style="text-align: center; padding: 15px;">
+                <div class="student-name" style="font-size: 1.1em; margin-bottom: 8px;">${student.name}</div>
+                <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 10px;">
+                    <span style="background: ${levelColor}; color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.8em; font-weight: bold;">
+                        ${level}
+                    </span>
+                    <span style="background: #FF7F50; color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.8em; font-weight: bold;">
+                        ⏱️ ${weeklyMinutes} Min/Woche
+                    </span>
+                </div>
+                <div style="font-size: 0.8em; color: #666;">
+                    ${student.mother_language || 'k.A.'} | ${student.learning_type || 'k.A.'}
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    container.innerHTML = overviewHtml;
+}
+
+// renderAll Funktion aktualisieren
+function renderAll() {
+    renderNextStudent();
+    renderTodayLessons();
+    renderWeekOverview();
+    renderRequests();
+    renderStudentsOverview(); // NEUE ZEILE HINZUFÜGEN
+    renderStudentsList();
+    renderHomeworkManagement();
+    renderPaymentOverview();
+}
+
+
 
 // ===================================
 // HAUSAUFGABEN-VERWALTUNG
@@ -1134,10 +1297,16 @@ function showNotification(student) {
 // RENDER ALL
 // ===================================
 
+// ===================================
+// RENDER ALL
+// ===================================
+
 function renderAll() {
     renderNextStudent();
     renderTodayLessons();
+    renderWeekOverview(); // DIESE FEHLTE NOCH
     renderRequests();
+    renderStudentsOverview(); // DIESE FEHLTE NOCH
     renderStudentsList();
     renderHomeworkManagement();
     renderPaymentOverview();
