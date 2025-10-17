@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amy Lang Deutsch - Suche & Navigation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+
+        .kbd {
+            display: inline-block;
+            padding: 3px 8px;
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 15px 20px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            color: #667eea;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .tab-button:hover {
+            background: #f8f9ff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .tab-button.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .search-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .search-mode-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mode-button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mode-button.quick {
+            background: #fbbf24;
+            color: #78350f;
+        }
+
+        .mode-button.full {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .mode-button:not(.active) {
+            opacity: 0.5;
+        }
+
+        .mode-button:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px 15px 15px 50px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1.1em;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .result:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .result-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .result-title:hover {
+            text-decoration: underline;
+        }
+
+        .result-url {
+            font-size: 0.85em;
+            color: #059669;
+            margin-bottom: 10px;
+        }
+
+        .result-snippet {
+            color: #4b5563;
+            line-height: 1.6;
+        }
+
+        .result-snippet mark {
+            background: #fef08a;
+            font-weight: 600;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #9ca3af;
+        }
+
+        .tree {
+            list-style: none;
+            margin-left: 20px;
+        }
+
+        .tree-item {
+            margin: 8px 0;
+        }
+
+        .tree-toggle {
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+
+        .tree-toggle:hover {
+            background: #f3f4f6;
+        }
+
+        .tree-link {
+            color: #667eea;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        .tree-link:hover {
+            background: #f3f4f6;
+            text-decoration: underline;
+        }
+
+        .topic-group {
+            background: #f9fafb;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .topic-title {
+            font-size: 1.5em;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .topic-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .topic-link {
+            color: #4b5563;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 5px;
+            transition: all 0.2s;
+        }
+
+        .topic-link:hover {
+            background: white;
+            color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            padding: 80px 20px;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: block;
+        }
+
+        .modal-content {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+        }
+
+        .close-button {
+            float: right;
+            font-size: 2em;
+            color: #999;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close-button:hover {
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            
+            .tab-buttons {
+                flex-direction: column;
+            }
+
+            .search-mode-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Amy Lang Deutsch</h1>
+            <p class="subtitle">
+                Durchsuche alle Grammatik- und Textmaterialien • 
+                Drücke <span class="kbd">Strg+K</span> für Schnellzugriff
+            </p>
+        </div>
+
+        <div class="tab-buttons">
+            <button class="tab-button active" onclick="showTab('search')">
+                🔍 Suche
+            </button>
+            <button class="tab-button" onclick="showTab('structure')">
+                📁 Nach Struktur
+            </button>
+            <button class="tab-button" onclick="showTab('topics')">
+                📚 Nach Themen
+            </button>
+        </div>
+
+        <div id="search-tab" class="search-section">
+            <div class="search-mode-buttons">
+                <button class="mode-button quick active" onclick="setSearchMode('quick')">
+                    ⚡ Schnellsuche
+                </button>
+                <button class="mode-button full" onclick="setSearchMode('full')">
+                    🔎 Vollständige Suche
+                </button>
+            </div>
+
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input 
+                    type="text" 
+                    id="search-input" 
+                    placeholder="Suche nach Themen... (z.B. 'Adjektive')"
+                    oninput="handleSearch(this.value)"
+                >
+            </div>
+
+            <div id="results-container"></div>
+        </div>
+
+        <div id="structure-tab" class="search-section" style="display: none;">
+            <h2 style="margin-bottom: 20px; color: #667eea;">Seiten nach Struktur</h2>
+            <div id="structure-container">
+                <p style="color: #666;">Lade Index...</p>
+            </div>
+        </div>
+
+        <div id="topics-tab" class="search-section" style="display: none;">
+            <h2 style="margin-bottom: 20px; color: #667eea;">Seiten nach Themen</h2>
+            <div id="topics-container">
+                <p style="color: #666;">Lade Index...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="search-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal()">&times;</span>
+            <h2 style="margin-bottom: 20px; color: #667eea;">Schnellsuche</h2>
+            
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input 
+                    type="text" 
+                    id="modal-search-input" 
+                    placeholder="Suche..."
+                    oninput="handleSearch(this.value)"
+                >
+            </div>
+
+            <div id="modal-results-container"></div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = 'https://amyfabijenna.github.io/amylang-deutsch/';
+        let searchMode = 'quick';
+        let searchIndex = null;
+        let isSearching = false;
+        let searchTimeout = null;
+
+        // Load search index
+        fetch('/search-index.json')
+            .then(res => res.json())
+            .then(data => {
+                searchIndex = data;
+                console.log('Index geladen:', data.totalPages, 'Seiten');
+                loadStructureView();
+                loadTopicsView();
+            })
+            .catch(err => {
+                console.log('Kein Index gefunden - nur Vollsuche verfügbar');
+            });
+
+        // Keyboard shortcut
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                openModal();
+            }
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        function openModal() {
+            document.getElementById('search-modal').classList.add('active');
+            document.getElementById('modal-search-input').focus();
+        }
+
+        function closeModal() {
+            document.getElementById('search-modal').classList.remove('active');
+        }
+
+        function showTab(tab) {
+            // Update buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Show selected tab
+            document.getElementById('search-tab').style.display = 'none';
+            document.getElementById('structure-tab').style.display = 'none';
+            document.getElementById('topics-tab').style.display = 'none';
+            document.getElementById(tab + '-tab').style.display = 'block';
+        }
+
+        function setSearchMode(mode) {
+            searchMode = mode;
+            document.querySelectorAll('.mode-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Re-search if there's a query
+            const input = document.getElementById('search-input');
+            if (input.value) {
+                handleSearch(input.value);
+            }
+        }
+
+        function handleSearch(query) {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                if (searchMode === 'quick') {
+                    quickSearch(query);
+                } else {
+                    if (query.length >= 3) {
+                        fullSearch(query);
+                    } else {
+                        displayResults([]);
+                    }
+                }
+            }, 300);
+        }
+
+        function quickSearch(query) {
+            if (!searchIndex || !query.trim()) {
+                displayResults([]);
+                return;
+            }
+
+            const lowerQuery = query.toLowerCase();
+            const results = [];
+
+            searchIndex.pages.forEach(page => {
+                const titleMatch = page.title.toLowerCase().includes(lowerQuery);
+                const contentMatch = page.content.toLowerCase().includes(lowerQuery);
+
+                if (titleMatch || contentMatch) {
+                    results.push({
+                        title: page.title,
+                        url: page.url,
+                        snippet: extractSnippet(page.content, query),
+                        relevance: titleMatch ? 100 : 50
+                    });
+                }
+            });
+
+            results.sort((a, b) => b.relevance - a.relevance);
+            displayResults(results.slice(0, 50), query);
+        }
+
+        async function fullSearch(query) {
+            if (isSearching) return;
+            isSearching = true;
+            showLoading();
+
+            const visited = new Set();
+            const results = [];
+            const queue = [BASE_URL];
+
+            while (queue.length > 0 && visited.size < 200) {
+                const url = queue.shift();
+                if (visited.has(url)) continue;
+                visited.add(url);
+
+                try {
+                    const response = await fetch(url);
+                    const html = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+
+                    const title = doc.title || 'Ohne Titel';
+                    const bodyText = doc.body.innerText || '';
+
+                    const lowerQuery = query.toLowerCase();
+                    if (title.toLowerCase().includes(lowerQuery) || bodyText.toLowerCase().includes(lowerQuery)) {
+                        results.push({
+                            title: title,
+                            url: url,
+                            snippet: extractSnippet(bodyText, query),
+                            relevance: title.toLowerCase().includes(lowerQuery) ? 100 : 50
+                        });
+                    }
+
+                    // Find internal links
+                    const links = Array.from(doc.querySelectorAll('a[href]'))
+                        .map(a => {
+                            try {
+                                const href = a.getAttribute('href');
+                                if (!href || href.startsWith('#') || href.startsWith('mailto:')) return null;
+                                const fullUrl = new URL(href, url).href;
+                                return fullUrl.startsWith(BASE_URL) ? fullUrl : null;
+                            } catch {
+                                return null;
+                            }
+                        })
+                        .filter(link => link && !visited.has(link));
+
+                    queue.push(...links.slice(0, 10));
+
+                } catch (error) {
+                    console.error('Fehler:', error);
+                }
+            }
+
+            results.sort((a, b) => b.relevance - a.relevance);
+            displayResults(results.slice(0, 50), query);
+            isSearching = false;
+        }
+
+        function extractSnippet(text, query) {
+            const lowerText = text.toLowerCase();
+            const lowerQuery = query.toLowerCase();
+            const index = lowerText.indexOf(lowerQuery);
+
+            if (index === -1) {
+                return text.substring(0, 150) + '...';
+            }
+
+            const start = Math.max(0, index - 60);
+            const end = Math.min(text.length, index + query.length + 90);
+            let snippet = text.substring(start, end);
+
+            return (start > 0 ? '...' : '') + snippet + (end < text.length ? '...' : '');
+        }
+
+        function highlightTerm(text, term) {
+            if (!term) return text;
+            const regex = new RegExp(`(${term})`, 'gi');
+            return text.replace(regex, '<mark>$1</mark>');
+        }
+
+        function showLoading() {
+            const container = document.getElementById('results-container');
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Durchsuche Seiten...</p>
+                </div>
+            `;
+        }
+
+        function displayResults(results, query = '') {
+            const container = document.getElementById('results-container');
+
+            if (results.length === 0 && query) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <p style="font-size: 3em; margin-bottom: 10px;">🔍</p>
+                        <p>Keine Ergebnisse für "${query}"</p>
+                    </div>
+                `;
+                return;
+            }
+
+            if (results.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            container.innerHTML = results.map(result => `
+                <div class="result">
+                    <a href="${result.url}" target="_blank" style="text-decoration: none;">
+                        <div class="result-title">${result.title}</div>
+                        <div class="result-url">${result.url}</div>
+                        <div class="result-snippet">${highlightTerm(result.snippet, query)}</div>
+                    </a>
+                </div>
+            `).join('');
+        }
+
+        function loadStructureView() {
+            if (!searchIndex) return;
+
+            const container = document.getElementById('structure-container');
+            const structure = buildStructureTree(searchIndex.pages);
+            container.innerHTML = renderTree(structure);
+        }
+
+        function buildStructureTree(pages) {
+            const tree = {};
+
+            pages.forEach(page => {
+                const path = page.url.replace(BASE_URL, '').split('/').filter(p => p);
+                let current = tree;
+
+                path.forEach((part, idx) => {
+                    if (!current[part]) {
+                        current[part] = idx === path.length - 1 ? { _page: page } : {};
+                    }
+                    current = current[part];
+                });
+            });
+
+            return tree;
+        }
+
+        function renderTree(tree, level = 0) {
+            let html = '<ul class="tree">';
+
+            Object.keys(tree).forEach(key => {
+                if (key === '_page') return;
+
+                const item = tree[key];
+                const hasChildren = Object.keys(item).some(k => k !== '_page');
+
+                html += '<li class="tree-item">';
+
+                if (item._page) {
+                    html += `<a href="${item._page.url}" class="tree-link" target="_blank">📄 ${item._page.title}</a>`;
+                } else {
+                    html += `<span class="tree-toggle">📁 ${key}</span>`;
+                }
+
+                if (hasChildren) {
+                    html += renderTree(item, level + 1);
+                }
+
+                html += '</li>';
+            });
+
+            html += '</ul>';
+            return html;
+        }
+
+        function loadTopicsView() {
+            if (!searchIndex || !searchIndex.topics) return;
+
+            const container = document.getElementById('topics-container');
+            let html = '';
+
+            Object.keys(searchIndex.topics).sort().forEach(topic => {
+                const pages = searchIndex.topics[topic];
+                if (pages.length === 0) return;
+
+                html += `
+                    <div class="topic-group">
+                        <div class="topic-title">${topic} (${pages.length})</div>
+                        <div class="topic-links">
+                            ${pages.map(page => `
+                                <a href="${page.url}" class="topic-link" target="_blank">
+                                    📄 ${page.title}
+                                </a>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html || '<p style="color: #666;">Keine Themen gefunden.</p>';
+        }
+    </script>
+</body>
+</html>
