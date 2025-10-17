@@ -47,23 +47,22 @@ function extractLinks(html, baseUrl) {
     
     try {
       let fullUrl;
+      
       if (href.startsWith('http://') || href.startsWith('https://')) {
         fullUrl = href;
       } else if (href.startsWith('/')) {
-        // Absolute path von root
-        const urlObj = new URL(BASE_URL);
-        fullUrl = urlObj.origin + href;
+        fullUrl = BASE_URL.replace(/\/$/, '') + href;
       } else {
-        // Relative path
-        const base = baseUrl.endsWith('/') ? baseUrl : baseUrl.substring(0, baseUrl.lastIndexOf('/') + 1);
-        fullUrl = new URL(href, base).href;
+        // WICHTIG: Relative URLs korrekt auflösen
+        const baseDir = baseUrl.substring(0, baseUrl.lastIndexOf('/') + 1);
+        fullUrl = baseDir + href;
       }
       
-      if (fullUrl.startsWith(BASE_URL) && fullUrl.endsWith('.html')) {
+      if (fullUrl.startsWith(BASE_URL) && (fullUrl.endsWith('.html') || fullUrl.endsWith('/'))) {
         links.push(fullUrl);
       }
     } catch (e) {
-      console.error('Link-Fehler:', href, e.message);
+      console.error('Link-Fehler:', href, 'von', baseUrl);
     }
   }
   
