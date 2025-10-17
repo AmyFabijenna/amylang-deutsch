@@ -47,19 +47,24 @@ function extractLinks(html, baseUrl) {
     
     try {
       let fullUrl;
-      if (href.startsWith('http')) {
+      if (href.startsWith('http://') || href.startsWith('https://')) {
         fullUrl = href;
       } else if (href.startsWith('/')) {
-        fullUrl = BASE_URL.replace(/\/$/, '') + href;
+        // Absolute path von root
+        const urlObj = new URL(BASE_URL);
+        fullUrl = urlObj.origin + href;
       } else {
-        const base = baseUrl.substring(0, baseUrl.lastIndexOf('/') + 1);
-        fullUrl = base + href;
+        // Relative path
+        const base = baseUrl.endsWith('/') ? baseUrl : baseUrl.substring(0, baseUrl.lastIndexOf('/') + 1);
+        fullUrl = new URL(href, base).href;
       }
       
-      if (fullUrl.startsWith(BASE_URL)) {
+      if (fullUrl.startsWith(BASE_URL) && fullUrl.endsWith('.html')) {
         links.push(fullUrl);
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error('Link-Fehler:', href, e.message);
+    }
   }
   
   return [...new Set(links)];
