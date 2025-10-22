@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A1 Deutsch - Interaktive Übungen</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a2463 0%, #1e3c72 25%, #2a5298 50%, #3a6ea5 75%, #4b88c2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section-title {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.8em;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin: 30px 0 20px 0;
+        }
+
+        .category {
+            margin: 30px 0;
+            border: 2px solid #1a2980;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .category-header {
+            background: linear-gradient(135deg, #ffb347, #ff9500, #ffcc00);
+            color: white;
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.4em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .category-header:hover {
+            background: linear-gradient(135deg, #ffc266, #ffaa33, #ffd633);
+            transform: translateX(5px);
+        }
+
+        .category-header::after {
+            content: '▼';
+            font-size: 0.8em;
+            transition: transform 0.3s ease;
+        }
+
+        .category-header.active::after {
+            transform: rotate(180deg);
+        }
+
+        .category-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+            background: white;
+        }
+
+        .category-content.active {
+            max-height: 10000px;
+        }
+
+        .exercise-box {
+            padding: 30px;
+            background: #f8f9fa;
+            margin: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #1a2980;
+        }
+
+        .exercise-item {
+            margin: 15px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .exercise-number {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+            min-width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        input[type="text"] {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            min-width: 150px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #1a2980;
+            box-shadow: 0 0 5px rgba(26, 41, 128, 0.3);
+        }
+
+        input[type="text"].correct {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        input[type="text"].incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #ff9500, #ffcc00);
+        }
+
+        .btn-show {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+        }
+
+        .feedback {
+            margin: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+
+        .feedback.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .feedback.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 2px solid #bee5eb;
+        }
+
+        .score {
+            font-size: 1.2em;
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #ffb347, #ffcc00);
+            border-radius: 10px;
+            margin: 10px 20px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .vocab-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .vocab-table th {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .vocab-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .vocab-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+            text-align: center;
+            padding: 30px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+
+            .exercise-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            input[type="text"] {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>📚 A1 Deutsch - Interaktive Übungen 📚</h1>
+            <p>Umfassende Übungsmaterialien für Anfänger</p>
+        </header>
+
+        <main class="content">
+            <!-- Kategorie 1: Negation und Satzstruktur -->
+            <div class="category">
+                <div class="category-header">
+                    🚫 Negation: "nicht" oder "kein/e"
+                </div>
+                <div class="category-content">
+                    <div class="exercise-box" id="negation-exercise">
+                        <h3>Setze "nicht" oder "kein/e" ein!</h3>
+                        <div class="exercise-list">
+                            <div class="exercise-item">
+                                <span class="exercise-number">1</span>
+                                <span>Ich habe heute</span>
+                                <input type="text" data-answer="keine">
+                                <span>Zeit.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">2</span>
+                                <span>Sie ist</span>
+                                <input type="text" data-answer="nicht">
+                                <span>müde.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">3</span>
+                                <span>Wir sehen</span>
+                                <input type="text" data-answer="keinen">
+                                <span>Unterschied zwischen den beiden Bildern.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">4</span>
+                                <span>Er mag</span>
+                                <input type="text" data-answer="nicht">
+                                <span>Kaffee trinken.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">5</span>
+                                <span>Das ist</span>
+                                <input type="text" data-answer="keine">
+                                <span>gute Idee.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">6</span>
+                                <span>Ich finde die Aufgabe</span>
+                                <input type="text" data-answer="nicht">
+                                <span>leicht.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">7</span>
+                                <span>Meine Schwester hat</span>
+                                <input type="text" data-answer="kein">
+                                <span>Auto.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">8</span>
+                                <span>Ich kann heute</span>
+                                <input type="text" data-answer="nicht">
+                                <span>schwimmen gehen.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">9</span>
+                                <span>Sie trägt</span>
+                                <input type="text" data-answer="keine">
+                                <span>Jacke, weil es warm ist.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">10</span>
+                                <span>Das war</span>
+                                <input type="text" data-answer="kein">
+                                <span>kluger Vorschlag.</span>
+                            </div>
+                        </div>
+                        <div class="controls">
+                            <button class="btn" onclick="checkAnswers('negation-exercise')">Überprüfen</button>
+                            <button class="btn btn-show" onclick="showAnswers('negation-exercise')">Lösungen anzeigen</button>
+                            <button class="btn btn-reset" onclick="resetExercise('negation-exercise')">Zurücksetzen</button>
+                        </div>
+                        <div class="score" id="negation-exercise-score"></div>
+                        <div class="feedback" id="negation-exercise-feedback"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kategorie 2: Modalverben & Lückentexte -->
+            <div class="category">
+                <div class="category-header">
+                    🏃 Modalverben: Sportarten & Freizeit
+                </div>
+                <div class="category-content">
+                    <div class="exercise-box" id="sport-exercise">
+                        <h3>Lückentext: Verschiedene Sportarten</h3>
+                        <p><em>Setze die konjugierten Formen ein: sein, haben, wollen, können, dürfen, sollen, müssen, möchten</em></p>
+                        <div class="exercise-list">
+                            <div class="exercise-item">
+                                <span class="exercise-number">1</span>
+                                <span>Ich</span>
+                                <input type="text" data-answer="bin">
+                                <span>sehr sportlich und</span>
+                                <input type="text" data-answer="habe">
+                                <span>viele Hobbys.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">2</span>
+                                <span>Am liebsten</span>
+                                <input type="text" data-answer="möchte">
+                                <span>ich Fußball spielen, aber ich</span>
+                                <input type="text" data-answer="kann">
+                                <span>auch gern schwimmen.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">3</span>
+                                <span>Mein Freund Alex</span>
+                                <input type="text" data-answer="ist">
+                                <span>nicht so sportlich wie ich.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">4</span>
+                                <span>Er</span>
+                                <input type="text" data-answer="möchte">
+                                <span>lieber zu Hause bleiben und Videospiele spielen.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">5</span>
+                                <span>Aber er</span>
+                                <input type="text" data-answer="will">
+                                <span>manchmal mit mir Rad fahren.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">6</span>
+                                <span>Am Wochenende</span>
+                                <input type="text" data-answer="wollen">
+                                <span>wir oft Basketball spielen.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">7</span>
+                                <span>Man</span>
+                                <input type="text" data-answer="muss">
+                                <span>schnell rennen und gut werfen, wenn man gewinnen</span>
+                                <input type="text" data-answer="möchte">
+                                <span>.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">8</span>
+                                <span>Meine Schwester</span>
+                                <input type="text" data-answer="mag">
+                                <span>Tennis sehr gern. Sie</span>
+                                <input type="text" data-answer="muss">
+                                <span>jede Woche zum Training gehen.</span>
+                            </div>
+                        </div>
+                        <div class="controls">
+                            <button class="btn" onclick="checkAnswers('sport-exercise')">Überprüfen</button>
+                            <button class="btn btn-show" onclick="showAnswers('sport-exercise')">Lösungen anzeigen</button>
+                            <button class="btn btn-reset" onclick="resetExercise('sport-exercise')">Zurücksetzen</button>
+                        </div>
+                        <div class="score" id="sport-exercise-score"></div>
+                        <div class="feedback" id="sport-exercise-feedback"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kategorie 3: Haustiere -->
+            <div class="category">
+                <div class="category-header">
+                    🐕 Modalverben: Hunde & Katzen
+                </div>
+                <div class="category-content">
+                    <div class="exercise-box" id="pets-exercise">
+                        <h3>Lückentext: Leben mit Hunden und Katzen</h3>
+                        <div class="exercise-list">
+                            <div class="exercise-item">
+                                <span class="exercise-number">1</span>
+                                <span>Ich</span>
+                                <input type="text" data-answer="bin">
+                                <span>Anna und ich</span>
+                                <input type="text" data-answer="habe">
+                                <span>zwei Haustiere: eine Katze und einen Hund.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">2</span>
+                                <span>Mein Hund</span>
+                                <input type="text" data-answer="ist">
+                                <span>sehr aktiv, aber meine Katze</span>
+                                <input type="text" data-answer="ist">
+                                <span>oft faul.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">3</span>
+                                <span>Jeden Morgen</span>
+                                <input type="text" data-answer="muss">
+                                <span>ich mit meinem Hund spazieren gehen.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">4</span>
+                                <span>Er</span>
+                                <input type="text" data-answer="kann">
+                                <span>draußen rennen und spielen.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">5</span>
+                                <span>Meine Katze</span>
+                                <input type="text" data-answer="möchte">
+                                <span>nicht nach draußen gehen, sie bleibt lieber im Haus.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">6</span>
+                                <span>Hunde und Katzen</span>
+                                <input type="text" data-answer="müssen">
+                                <span>jeden Tag fressen.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">7</span>
+                                <span>Ich</span>
+                                <input type="text" data-answer="muss">
+                                <span>ihnen Futter geben und frisches Wasser hinstellen.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">8</span>
+                                <span>Mein Hund</span>
+                                <input type="text" data-answer="möchte">
+                                <span>am liebsten Fleisch, aber meine Katze</span>
+                                <input type="text" data-answer="will">
+                                <span>lieber Fisch.</span>
+                            </div>
+                        </div>
+                        <div class="controls">
+                            <button class="btn" onclick="checkAnswers('pets-exercise')">Überprüfen</button>
+                            <button class="btn btn-show" onclick="showAnswers('pets-exercise')">Lösungen anzeigen</button>
+                            <button class="btn btn-reset" onclick="resetExercise('pets-exercise')">Zurücksetzen</button>
+                        </div>
+                        <div class="score" id="pets-exercise-score"></div>
+                        <div class="feedback" id="pets-exercise-feedback"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kategorie 4: Graz - Stadt -->
+            <div class="category">
+                <div class="category-header">
+                    🏛️ Die Stadt Graz - Konjugation
+                </div>
+                <div class="category-content">
+                    <div class="exercise-box" id="graz-exercise">
+                        <h3>Graz – eine schöne Stadt</h3>
+                        <div class="exercise-list">
+                            <div class="exercise-item">
+                                <span class="exercise-number">1</span>
+                                <span>Graz</span>
+                                <input type="text" data-answer="ist">
+                                <span>eine Stadt in Österreich. Viele Menschen</span>
+                                <input type="text" data-answer="leben">
+                                <span>hier.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">2</span>
+                                <span>Die Stadt</span>
+                                <input type="text" data-answer="hat">
+                                <span>viele alte Häuser. Die Altstadt</span>
+                                <input type="text" data-answer="ist">
+                                <span>sehr schön.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">3</span>
+                                <span>Touristen</span>
+                                <input type="text" data-answer="kommen">
+                                <span>nach Graz. Sie</span>
+                                <input type="text" data-answer="wollen">
+                                <span>die Stadt</span>
+                                <input type="text" data-answer="sehen">
+                                <span>.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">4</span>
+                                <span>Der Schlossberg</span>
+                                <input type="text" data-answer="ist">
+                                <span>sehr hoch. Man</span>
+                                <input type="text" data-answer="kann">
+                                <span>nach oben</span>
+                                <input type="text" data-answer="gehen">
+                                <span>.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">5</span>
+                                <span>Der Uhrturm</span>
+                                <input type="text" data-answer="ist">
+                                <span>auf dem Schlossberg. Er</span>
+                                <input type="text" data-answer="ist">
+                                <span>sehr bekannt.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">6</span>
+                                <span>Viele Menschen</span>
+                                <input type="text" data-answer="machen">
+                                <span>Fotos vom Uhrturm.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">7</span>
+                                <span>Die Mur</span>
+                                <input type="text" data-answer="fließt">
+                                <span>durch Graz.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">8</span>
+                                <span>Das Kunsthaus</span>
+                                <input type="text" data-answer="ist">
+                                <span>sehr modern. Die Menschen</span>
+                                <input type="text" data-answer="mögen">
+                                <span>es.</span>
+                            </div>
+                        </div>
+                        <div class="controls">
+                            <button class="btn" onclick="checkAnswers('graz-exercise')">Überprüfen</button>
+                            <button class="btn btn-show" onclick="showAnswers('graz-exercise')">Lösungen anzeigen</button>
+                            <button class="btn btn-reset" onclick="resetExercise('graz-exercise')">Zurücksetzen</button>
+                        </div>
+                        <div class="score" id="graz-exercise-score"></div>
+                        <div class="feedback" id="graz-exercise-feedback"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kategorie 5: Personalpronomen -->
+            <div class="category">
+                <div class="category-header">
+                    👤 Personalpronomen - Gesunde Ernährung
+                </div>
+                <div class="category-content">
+                    <div class="exercise-box" id="pronoun-exercise">
+                        <h3>Personalpronomen im Nominativ</h3>
+                        <p><em>Setze das richtige Personalpronomen ein: ich, du, er, sie, es, wir, ihr, sie, Sie</em></p>
+                        <div class="exercise-list">
+                            <div class="exercise-item">
+                                <span class="exercise-number">1</span>
+                                <input type="text" data-answer="ich">
+                                <span>esse gerne Obst und Gemüse.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">2</span>
+                                <span>Was isst</span>
+                                <input type="text" data-answer="du">
+                                <span>am liebsten zum Frühstück?</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">3</span>
+                                <span>Tom kauft frische Äpfel auf dem Markt.</span>
+                                <input type="text" data-answer="er">
+                                <span>achtet auf gesunde Ernährung.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">4</span>
+                                <span>Lisa mag Salate mit Nüssen.</span>
+                                <input type="text" data-answer="sie">
+                                <span>isst sie fast jeden Tag.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">5</span>
+                                <span>Das Brot ist ohne Milch und Ei.</span>
+                                <input type="text" data-answer="es">
+                                <span>ist also vegan.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">6</span>
+                                <span>Meine Freunde und ich trinken viel Wasser.</span>
+                                <input type="text" data-answer="wir">
+                                <span>finden es wichtig für die Gesundheit.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">7</span>
+                                <span>Trinkt</span>
+                                <input type="text" data-answer="ihr">
+                                <span>genug Wasser am Tag?</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">8</span>
+                                <span>Meine Eltern kaufen nur Bio-Produkte.</span>
+                                <input type="text" data-answer="sie">
+                                <span>wollen keine Pestizide im Essen.</span>
+                            </div>
+                        </div>
+                        <div class="controls">
+                            <button class="btn" onclick="checkAnswers('pronoun-exercise')">Überprüfen</button>
+                            <button class="btn btn-show" onclick="showAnswers('pronoun-exercise')">Lösungen anzeigen</button>
+                            <button class="btn btn-reset" onclick="resetExercise('pronoun-exercise')">Zurücksetzen</button>
+                        </div>
+                        <div class="score" id="pronoun-exercise-score"></div>
+                        <div class="feedback" id="pronoun-exercise-feedback"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kategorie 6: Komparativ und Superlativ -->
+            <div class="category">
+                <div class="category-header">
+                    📊 Komparativ und Superlativ
+                </div>
+                <div class="category-content">
+                    <div class="exercise-box" id="comparative-exercise">
+                        <h3>Komparativ - Vergleiche</h3>
+                        <p><em>Setze die Adjektive in die Komparativform</em></p>
+                        <div class="exercise-list">
+                            <div class="exercise-item">
+                                <span class="exercise-number">1</span>
+                                <span>Mein Haus ist</span>
+                                <input type="text" data-answer="größer">
+                                <span>(groß) als dein Haus.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">2</span>
+                                <span>Anna ist</span>
+                                <input type="text" data-answer="jünger">
+                                <span>(jung) als ihr Bruder.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">3</span>
+                                <span>Heute ist das Wetter</span>
+                                <input type="text" data-answer="schöner">
+                                <span>(schön) als gestern.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">4</span>
+                                <span>Ein Auto ist</span>
+                                <input type="text" data-answer="schneller">
+                                <span>(schnell) als ein Fahrrad.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">5</span>
+                                <span>Mein Handy ist</span>
+                                <input type="text" data-answer="teurer">
+                                <span>(teuer) als deins.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">6</span>
+                                <span>Ich finde Mathe</span>
+                                <input type="text" data-answer="schwieriger">
+                                <span>(schwierig) als Deutsch.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">7</span>
+                                <span>Pizza ist</span>
+                                <input type="text" data-answer="leckerer">
+                                <span>(lecker) als Suppe.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">8</span>
+                                <span>Deine Idee ist</span>
+                                <input type="text" data-answer="besser">
+                                <span>(gut) als meine.</span>
+                            </div>
+                        </div>
+                        <div class="controls">
+                            <button class="btn" onclick="checkAnswers('comparative-exercise')">Überprüfen</button>
+                            <button class="btn btn-show" onclick="showAnswers('comparative-exercise')">Lösungen anzeigen</button>
+                            <button class="btn btn-reset" onclick="resetExercise('comparative-exercise')">Zurücksetzen</button>
+                        </div>
+                        <div class="score" id="comparative-exercise-score"></div>
+                        <div class="feedback" id="comparative-exercise-feedback"></div>
+                    </div>
+
+                    <div class="exercise-box" id="superlative-exercise">
+                        <h3>Superlativ</h3>
+                        <p><em>Setze die Adjektive in die Superlativform</em></p>
+                        <div class="exercise-list">
+                            <div class="exercise-item">
+                                <span class="exercise-number">1</span>
+                                <span>Das ist das</span>
+                                <input type="text" data-answer="teuerste">
+                                <span>(teuer) Auto im Geschäft.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">2</span>
+                                <span>Diese Stadt ist die</span>
+                                <input type="text" data-answer="schönste">
+                                <span>(schön) in Deutschland.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">3</span>
+                                <span>Heute ist der</span>
+                                <input type="text" data-answer="heißeste">
+                                <span>(heiß) Tag des Jahres.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">4</span>
+                                <span>Anna ist die</span>
+                                <input type="text" data-answer="netteste">
+                                <span>(nett) Person in unserer Klasse.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">5</span>
+                                <span>Das ist das</span>
+                                <input type="text" data-answer="interessanteste">
+                                <span>(interessant) Buch, das ich gelesen habe.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">6</span>
+                                <span>Der Mount Everest ist der</span>
+                                <input type="text" data-answer="höchste">
+                                <span>(hoch) Berg der Welt.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">7</span>
+                                <span>Mein Geburtstag war der</span>
+                                <input type="text" data-answer="glücklichste">
+                                <span>(glücklich) Tag des Jahres.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">8</span>
+                                <span>Das ist der</span>
+                                <input type="text" data-answer="beste">
+                                <span>(gut) Film, den ich kenne.</span>
+                            </div>
+                        </div>
+                        <div class="controls">
+                            <button class="btn" onclick="checkAnswers('superlative-exercise')">Überprüfen</button>
+                            <button class="btn btn-show" onclick="showAnswers('superlative-exercise')">Lösungen anzeigen</button>
+                            <button class="btn btn-reset" onclick="resetExercise('superlative-exercise')">Zurücksetzen</button>
+                        </div>
+                        <div class="score" id="superlative-exercise-score"></div>
+                        <div class="feedback" id="superlative-exercise-feedback"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kategorie 7: Nominativ, Akkusativ, Dativ -->
+            <div class="category">
+                <div class="category-header">
+                    📝 Artikel: Nominativ, Akkusativ, Dativ
+                </div>
+                <div class="category-content">
+                    <div class="exercise-box" id="cases-exercise">
+                        <h3>Artikel einsetzen</h3>
+                        <p><em>Setze den richtigen Artikel ein (der/die/das/ein/eine/einen/einem/einer)</em></p>
+                        <div class="exercise-list">
+                            <div class="exercise-item">
+                                <span class="exercise-number">1</span>
+                                <span>Ich sehe</span>
+                                <input type="text" data-answer="einen">
+                                <span>Hund im Garten.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">2</span>
+                                <input type="text" data-answer="die">
+                                <span>Katze sitzt auf</span>
+                                <input type="text" data-answer="dem">
+                                <span>Stuhl.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">3</span>
+                                <span>Er gibt</span>
+                                <input type="text" data-answer="dem">
+                                <span>Kind</span>
+                                <input type="text" data-answer="einen">
+                                <span>Apfel.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">4</span>
+                                <span>Ich kaufe</span>
+                                <input type="text" data-answer="einen">
+                                <span>Tisch für mein Wohnzimmer.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">5</span>
+                                <span>Wir besuchen</span>
+                                <input type="text" data-answer="einen">
+                                <span>Freund morgen.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">6</span>
+                                <span>Hast du</span>
+                                <input type="text" data-answer="den">
+                                <span>Schlüssel für</span>
+                                <input type="text" data-answer="die">
+                                <span>Tür?</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">7</span>
+                                <span>Sie schreibt</span>
+                                <input type="text" data-answer="einen">
+                                <span>Brief an</span>
+                                <input type="text" data-answer="den">
+                                <span>Lehrer.</span>
+                            </div>
+                            <div class="exercise-item">
+                                <span class="exercise-number">8</span>
+                                <span>Ich schenke</span>
+                                <input type="text" data-answer="der">
+                                <span>Frau</span>
+                                <input type="text" data-answer="eine">
+                                <span>Blume.</span>
+                            </div>
+                        </div>
+                        <div class="controls">
+                            <button class="btn" onclick="checkAnswers('cases-exercise')">Überprüfen</button>
+                            <button class="btn btn-show" onclick="showAnswers('cases-exercise')">Lösungen anzeigen</button>
+                            <button class="btn btn-reset" onclick="resetExercise('cases-exercise')">Zurücksetzen</button>
+                        </div>
+                        <div class="score" id="cases-exercise-score"></div>
+                        <div class="feedback" id="cases-exercise-feedback"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kategorie 8: Vokabeln -->
+            <div class="category">
+                <div class="category-header">
+                    📖 Wichtige Vokabeln
+                </div>
+                <div class="category-content">
+                    <div class="exercise-box">
+                        <h3>Vokabelliste: Sport und Freizeit</h3>
+                        <table class="vocab-table">
+                            <thead>
+                                <tr>
+                                    <th>Deutsch (mit Artikel)</th>
+                                    <th>Englisch</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>der Sport</td><td>the sport</td></tr>
+                                <tr><td>das Hobby</td><td>the hobby</td></tr>
+                                <tr><td>der Fußball</td><td>the soccer/football</td></tr>
+                                <tr><td>das Schwimmen</td><td>swimming</td></tr>
+                                <tr><td>das Fahrrad</td><td>the bicycle</td></tr>
+                                <tr><td>das Basketball</td><td>basketball</td></tr>
+                                <tr><td>das Tennis</td><td>tennis</td></tr>
+                                <tr><td>das Training</td><td>the training</td></tr>
+                                <tr><td>das Skifahren</td><td>skiing</td></tr>
+                                <tr><td>das Wandern</td><td>hiking</td></tr>
+                                <tr><td>der Park</td><td>park</td></tr>
+                                <tr><td>die Freizeit</td><td>free time</td></tr>
+                            </tbody>
+                        </table>
+
+                        <h3>Vokabelliste: Haustiere</h3>
+                        <table class="vocab-table">
+                            <thead>
+                                <tr>
+                                    <th>Deutsch (mit Artikel)</th>
+                                    <th>Englisch</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>der Hund</td><td>dog</td></tr>
+                                <tr><td>die Katze</td><td>cat</td></tr>
+                                <tr><td>das Haustier</td><td>pet</td></tr>
+                                <tr><td>das Futter</td><td>food</td></tr>
+                                <tr><td>das Wasser</td><td>water</td></tr>
+                                <tr><td>das Fleisch</td><td>meat</td></tr>
+                                <tr><td>der Fisch</td><td>fish</td></tr>
+                                <tr><td>das Spielzeug</td><td>toy</td></tr>
+                            </tbody>
+                        </table>
+
+                        <h3>Vokabelliste: Stadt Graz</h3>
+                        <table class="vocab-table">
+                            <thead>
+                                <tr>
+                                    <th>Deutsch (mit Artikel)</th>
+                                    <th>Englisch</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>die Stadt</td><td>city, town</td></tr>
+                                <tr><td>das Österreich</td><td>Austria</td></tr>
+                                <tr><td>der Schlossberg</td><td>castle hill</td></tr>
+                                <tr><td>der Uhrturm</td><td>clock tower</td></tr>
+                                <tr><td>die Altstadt</td><td>old town</td></tr>
+                                <tr><td>die Mur</td><td>(name of the river)</td></tr>
+                                <tr><td>die Murinsel</td><td>Mur Island</td></tr>
+                                <tr><td>das Kunsthaus</td><td>art museum</td></tr>
+                                <tr><td>der Hauptplatz</td><td>main square</td></tr>
+                                <tr><td>das Rathaus</td><td>town hall</td></tr>
+                                <tr><td>der Stadtpark</td><td>city park</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 A1 Deutsch Übungen - Viel Erfolg beim Lernen! 🎉</p>
+        </footer>
+    </div>
+
+    <script>
+        // Toggle category content
+        document.querySelectorAll('.category-header').forEach(header => {
+            header.addEventListener('click', function() {
+                this.classList.toggle('active');
+                const content = this.nextElementSibling;
+                content.classList.toggle('active');
+            });
+        });
+
+        // Check answers function
+        function checkAnswers(exerciseId) {
+            const exercise = document.getElementById(exerciseId);
+            const inputs = exercise.querySelectorAll('input[type="text"]');
+            let correct = 0;
+            let total = inputs.length;
+
+            inputs.forEach(input => {
+                const userAnswer = input.value.trim().toLowerCase();
+                const correctAnswer = input.dataset.answer.toLowerCase();
+                
+                input.classList.remove('correct', 'incorrect');
+                
+                if (userAnswer === correctAnswer) {
+                    input.classList.add('correct');
+                    correct++;
+                } else if (userAnswer !== '') {
+                    input.classList.add('incorrect');
+                }
+            });
+
+            const scoreElement = document.getElementById(exerciseId + '-score');
+            const feedbackElement = document.getElementById(exerciseId + '-feedback');
+            
+            scoreElement.textContent = `Ergebnis: ${correct} von ${total} richtig (${Math.round((correct/total)*100)}%)`;
+            scoreElement.style.display = 'block';
+            
+            feedbackElement.style.display = 'block';
+            if (correct === total) {
+                feedbackElement.className = 'feedback success';
+                feedbackElement.textContent = '🎉 Ausgezeichnet! Alle Antworten sind richtig!';
+            } else {
+                feedbackElement.className = 'feedback info';
+                feedbackElement.textContent = `Gut gemacht! Versuche die rot markierten Antworten noch einmal.`;
+            }
+        }
+
+        // Show answers function
+        function showAnswers(exerciseId) {
+            const exercise = document.getElementById(exerciseId);
+            const inputs = exercise.querySelectorAll('input[type="text"]');
+            
+            inputs.forEach(input => {
+                input.value = input.dataset.answer;
+                input.classList.remove('incorrect');
+                input.classList.add('correct');
+            });
+
+            const feedbackElement = document.getElementById(exerciseId + '-feedback');
+            feedbackElement.style.display = 'block';
+            feedbackElement.className = 'feedback info';
+            feedbackElement.textContent = '💡 Alle Lösungen werden angezeigt!';
+        }
+
+        // Reset exercise function
+        function resetExercise(exerciseId) {
+            const exercise = document.getElementById(exerciseId);
+            const inputs = exercise.querySelectorAll('input[type="text"]');
+            
+            inputs.forEach(input => {
+                input.value = '';
+                input.classList.remove('correct', 'incorrect');
+            });
+
+            const scoreElement = document.getElementById(exerciseId + '-score');
+            const feedbackElement = document.getElementById(exerciseId + '-feedback');
+            
+            scoreElement.style.display = 'none';
+            feedbackElement.style.display = 'none';
+        }
+
+        // Allow Enter key to check answers
+        document.querySelectorAll('input[type="text"]').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const exerciseBox = this.closest('.exercise-box');
+                    const exerciseId = exerciseBox.id;
+                    checkAnswers(exerciseId);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
