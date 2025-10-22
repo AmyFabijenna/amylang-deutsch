@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 900px;
+            max-width: 1000px;
             margin: 30px auto;
             padding: 20px;
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
@@ -37,37 +37,86 @@
             border-radius: 10px;
             border: 2px solid #dee2e6;
         }
-        .sentence {
-            font-size: 20px;
-            line-height: 2;
-            margin: 15px 0;
-            color: #333;
+        .exercise-number {
+            font-weight: bold;
+            color: #f5576c;
+            font-size: 18px;
+            margin-bottom: 10px;
         }
-        .blank {
-            display: inline-block;
-            min-width: 40px;
-            height: 40px;
-            border: 2px solid #6c757d;
-            border-radius: 5px;
-            margin: 0 5px;
-            text-align: center;
-            font-size: 24px;
-            vertical-align: middle;
+        .sentence-area {
+            min-height: 60px;
             background: white;
-            cursor: pointer;
-            padding: 0 5px;
-            line-height: 40px;
+            border: 3px dashed #6c757d;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 20px;
+            line-height: 1.8;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
         }
-        .blank:hover {
-            background: #e9ecef;
-        }
-        .blank.correct {
-            background: #d4edda;
+        .sentence-area.complete {
             border-color: #28a745;
+            border-style: solid;
         }
-        .blank.wrong {
+        .word-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+            justify-content: center;
+        }
+        .word-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: Arial, sans-serif;
+        }
+        .word-btn:hover {
+            background: #0056b3;
+            transform: scale(1.05);
+        }
+        .word-btn.used {
+            background: #e9ecef;
+            color: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        .word-btn.punctuation {
+            background: #6c757d;
+            font-weight: bold;
+            min-width: 50px;
+        }
+        .word-btn.punctuation:hover {
+            background: #495057;
+        }
+        .placed-word {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 18px;
+        }
+        .placed-word:hover {
+            background: #bee5eb;
+            transform: scale(1.05);
+        }
+        .placed-word.correct {
+            background: #d4edda;
+            color: #155724;
+        }
+        .placed-word.wrong {
             background: #f8d7da;
-            border-color: #dc3545;
+            color: #721c24;
         }
         .buttons {
             text-align: center;
@@ -88,30 +137,11 @@
             background: #e04456;
             transform: scale(1.05);
         }
-        .punctuation-buttons {
-            text-align: center;
-            margin: 20px 0;
+        .btn.secondary {
+            background: #6c757d;
         }
-        .punct-btn {
-            font-size: 28px;
-            min-width: 60px;
-            height: 60px;
-            margin: 5px;
-            border: 3px solid #6c757d;
-            border-radius: 10px;
-            background: white;
-            cursor: pointer;
-            transition: all 0.2s;
-            padding: 0 10px;
-        }
-        .punct-btn:hover {
-            background: #e9ecef;
-            transform: scale(1.1);
-        }
-        .punct-btn.selected {
-            background: #007bff;
-            color: white;
-            border-color: #007bff;
+        .btn.secondary:hover {
+            background: #5a6268;
         }
         .score {
             text-align: center;
@@ -139,173 +169,335 @@
         
         <div class="instructions">
             <strong>📚 So geht's:</strong><br>
-            1. Wähle das richtige Satzzeichen aus (. , ! ? „ ")<br>
-            2. Klicke auf die leere Box im Satz<br>
-            3. Drücke auf "Überprüfen" um deine Antworten zu kontrollieren<br>
-            <em>Tipp: Manche Sätze brauchen mehrere Satzzeichen!</em>
-        </div>
-
-        <div class="punctuation-buttons">
-            <button class="punct-btn" onclick="selectPunct('.')">.</button>
-            <button class="punct-btn" onclick="selectPunct(',')">,</button>
-            <button class="punct-btn" onclick="selectPunct('!')">!</button>
-            <button class="punct-btn" onclick="selectPunct('?')">?</button>
-            <button class="punct-btn" onclick="selectPunct('„')" style="font-size: 24px;">„</button>
-            <button class="punct-btn" onclick="selectPunct('"')" style="font-size: 24px;">"</button>
+            1. Klicke die Wörter und Satzzeichen in der richtigen Reihenfolge an<br>
+            2. Sie erscheinen dann im Satz oben<br>
+            3. Falsches Wort? Klick es nochmal an und es springt zurück!<br>
+            4. Drücke auf "Überprüfen" wenn alle Sätze fertig sind<br>
+            <em>Tipp: Achte auf Groß- und Kleinschreibung am Satzanfang!</em>
         </div>
 
         <div id="exercises"></div>
 
         <div class="buttons">
-            <button class="btn" onclick="checkAnswers()">✓ Überprüfen</button>
-            <button class="btn" onclick="resetExercise()">↻ Neu starten</button>
-            <button class="btn" onclick="showSolutions()">💡 Lösungen anzeigen</button>
+            <button class="btn" onclick="checkAllAnswers()">✓ Überprüfen</button>
+            <button class="btn secondary" onclick="resetExercise()">↻ Neu starten</button>
+            <button class="btn secondary" onclick="showAllSolutions()">💡 Lösungen anzeigen</button>
         </div>
 
         <div id="score" class="score hidden"></div>
     </div>
 
     <script>
-        const sentences = [
-            { text: "Wie heißt du", answer: ["?"], hint: "Eine Frage" },
-            { text: "Anna[] Lisa und Tom spielen Fußball", answer: [","], hint: "Aufzählung von Namen" },
-            { text: "Pass auf", answer: ["!"], hint: "Warnung/Ausruf" },
-            { text: "Ich mag Pizza[] Pasta und Eis", answer: [","], hint: "Aufzählung von Dingen" },
-            { text: "Kommst du mit ins Kino", answer: ["?"], hint: "Frage" },
-            { text: "Meine Lieblingsfächer sind Turnen[] Deutsch und Mathe", answer: [","], hint: "Aufzählung von Schulfächern" },
-            { text: "[]Komm schnell[][] rief Mama", answer: ["\u201E", "!", "\u201C"], hint: "Wörtliche Rede mit Ausruf" },
-            { text: "[]Hast du Hunger[][][] fragte Papa", answer: ["\u201E", "?", "\u201C", ","], hint: "Wörtliche Rede als Frage" },
-            { text: "Im Sommer schwimmen wir[] im Winter rodeln wir", answer: [","], hint: "Zwei Hauptsätze verbinden" },
-            { text: "Hilfe", answer: ["!"], hint: "Notruf/Ausruf" },
-            { text: "Lisa sagte[] []Ich komme morgen[][]", answer: [":", "\u201E", ".", "\u201C"], hint: "Ankündigung der wörtlichen Rede mit Doppelpunkt" },
-            { text: "Wir brauchen Mehl[] Eier[] Zucker und Butter", answer: [",", ","], hint: "Längere Aufzählung" },
-            { text: "[]Wo warst du[][][] wollte er wissen", answer: ["\u201E", "?", "\u201C", ","], hint: "Frage in wörtlicher Rede" },
-            { text: "Toll gemacht", answer: ["!"], hint: "Lob/Begeisterung" },
-            { text: "Gehst du heute schwimmen[] oder bleibst du zu Hause", answer: [","], hint: "Zwei Möglichkeiten mit 'oder'" },
-            { text: "[]Das ist super[][] jubelte Tim", answer: ["\u201E", "!", "\u201C"], hint: "Freude in wörtlicher Rede" },
-            { text: "Meine Freundin[] die neben mir sitzt[] heißt Emma", answer: [",", ","], hint: "Einschub mit Zusatzinformation" },
-            { text: "Was möchtest du werden", answer: ["?"], hint: "Frage nach Berufswunsch" },
-            { text: "Der Hund[] der dort liegt[] gehört meinem Nachbarn", answer: [",", ","], hint: "Relativsatz einschließen" },
-            { text: "[]Guten Morgen[][][] sagte die Lehrerin freundlich", answer: ["\u201E", "!", "\u201C", ","], hint: "Begrüßung in wörtlicher Rede" },
-            { text: "Wir gehen schwimmen[] wenn das Wetter schön ist", answer: [","], hint: "Nebensatz mit 'wenn'" },
-            { text: "[]Wann kommst du[][][] fragte Lisa ungeduldig", answer: ["\u201E", "?", "\u201C", ","], hint: "Ungeduld ausdrücken" },
-            { text: "Obwohl es regnete[] spielten die Kinder draußen", answer: [","], hint: "Nebensatz mit 'obwohl'" },
-            { text: "Mein Bruder[] der acht Jahre alt ist[] spielt gerne Fußball", answer: [",", ","], hint: "Altersangabe als Einschub" },
-            { text: "Fantastisch", answer: ["!"], hint: "Starke Begeisterung" },
-            { text: "In meinem Zimmer habe ich ein Bett[] einen Schrank[] einen Schreibtisch und ein Regal", answer: [",", ","], hint: "Mehrere Möbelstücke aufzählen" },
-            { text: "[]Darf ich mitspielen[][][] bat der kleine Junge", answer: ["\u201E", "?", "\u201C", ","], hint: "Höfliche Bitte als Frage" },
-            { text: "Wenn du fertig bist[] können wir losgehen", answer: [","], hint: "Bedingung mit 'wenn'" },
-            { text: "Achtung", answer: ["!"], hint: "Warnung" },
-            { text: "Der Lehrer erklärte[] []Morgen schreiben wir einen Test[][]", answer: [":", "\u201E", ".", "\u201C"], hint: "Ankündigung mit Doppelpunkt" }
+        const exercises = [
+            // Sehr einfach: Punkt (1-3)
+            { 
+                words: ["spielen", "Kinder", "Die", "."],
+                solution: ["Die", "Kinder", "spielen", "."],
+                hint: "Einfacher Aussagesatz mit Punkt"
+            },
+            { 
+                words: ["hell", "Die", "scheint", ".", "Sonne"],
+                solution: ["Die", "Sonne", "scheint", "hell", "."],
+                hint: "Aussagesatz mit Punkt am Ende"
+            },
+            { 
+                words: ["Tom", "ein", ".", "hat", "Fahrrad"],
+                solution: ["Tom", "hat", "ein", "Fahrrad", "."],
+                hint: "Punkt am Satzende"
+            },
+
+            // Einfach: Fragezeichen (4-6)
+            { 
+                words: ["du", "Wie", "heißt", "?"],
+                solution: ["Wie", "heißt", "du", "?"],
+                hint: "Frage nach dem Namen"
+            },
+            { 
+                words: ["alt", "du", "bist", "Wie", "?"],
+                solution: ["Wie", "alt", "bist", "du", "?"],
+                hint: "Frage braucht ein Fragezeichen"
+            },
+            { 
+                words: ["du", "mit", "Kommst", "?"],
+                solution: ["Kommst", "du", "mit", "?"],
+                hint: "Ja/Nein-Frage"
+            },
+
+            // Einfach: Ausrufezeichen (7-9)
+            { 
+                words: ["auf", "Pass", "!"],
+                solution: ["Pass", "auf", "!"],
+                hint: "Warnung mit Ausrufezeichen"
+            },
+            { 
+                words: ["gemacht", "Toll", "!"],
+                solution: ["Toll", "gemacht", "!"],
+                hint: "Lob und Freude"
+            },
+            { 
+                words: ["Hilfe", "!"],
+                solution: ["Hilfe", "!"],
+                hint: "Notruf"
+            },
+
+            // Mittel: Komma bei Aufzählungen (10-14)
+            { 
+                words: ["Äpfel", "Ich", ",", "und", "Bananen", "mag", "Birnen", "."],
+                solution: ["Ich", "mag", "Äpfel", ",", "Birnen", "und", "Bananen", "."],
+                hint: "Komma bei Aufzählung von Früchten"
+            },
+            { 
+                words: ["spielen", ",", "Wir", "und", "springen", ".", "laufen"],
+                solution: ["Wir", "laufen", ",", "springen", "und", "spielen", "."],
+                hint: "Drei Tätigkeiten aufzählen"
+            },
+            { 
+                words: ["Emma", ",", "Tom", "spielen", ".", "Lisa", "und"],
+                solution: ["Emma", ",", "Tom", "und", "Lisa", "spielen", "."],
+                hint: "Namen mit Komma trennen"
+            },
+            { 
+                words: ["rot", "ist", ",", "gelb", "Die", "und", "Ampel", ".", "grün"],
+                solution: ["Die", "Ampel", "ist", "rot", ",", "gelb", "und", "grün", "."],
+                hint: "Farben aufzählen"
+            },
+            { 
+                words: ["brauchen", ",", "Wir", "Mehl", "und", "Zucker", "Eier", "."],
+                solution: ["Wir", "brauchen", "Mehl", ",", "Eier", "und", "Zucker", "."],
+                hint: "Backzutaten mit Komma"
+            },
+
+            // Mittel: Komma bei Nebensätzen (15-17)
+            { 
+                words: ["gehen", ",", "Wir", "das", "wenn", "ist", "schwimmen", ".", "schön", "Wetter"],
+                solution: ["Wir", "gehen", "schwimmen", ",", "wenn", "das", "Wetter", "schön", "ist", "."],
+                hint: "Nebensatz mit 'wenn'"
+            },
+            { 
+                words: ["regnete", ",", "es", "Obwohl", "wir", "draußen", ".", "spielten"],
+                solution: ["Obwohl", "es", "regnete", ",", "spielten", "wir", "draußen", "."],
+                hint: "Nebensatz mit 'obwohl' am Anfang"
+            },
+            { 
+                words: ["fertig", ",", "bist", "Wenn", "losgehen", "wir", ".", "können", "du"],
+                solution: ["Wenn", "du", "fertig", "bist", ",", "können", "wir", "losgehen", "."],
+                hint: "Bedingung mit 'wenn'"
+            },
+
+            // Schwerer: Wörtliche Rede einfach (18-21)
+            { 
+                words: ["Mama", "\u201E", "schnell", "!", "\u201C", "Komm", "rief", "."],
+                solution: ["\u201E", "Komm", "schnell", "!", "\u201C", "rief", "Mama", "."],
+                hint: "Wörtliche Rede mit Ausrufezeichen"
+            },
+            { 
+                words: ["Papa", "\u201E", "Hunger", "?", "\u201C", "Hast", "fragte", ".", "du"],
+                solution: ["\u201E", "Hast", "du", "Hunger", "?", "\u201C", "fragte", "Papa", "."],
+                hint: "Frage in wörtlicher Rede"
+            },
+            { 
+                words: ["\u201E", "ist", "!", "\u201C", "Das", "jubelte", ".", "super", "Tim"],
+                solution: ["\u201E", "Das", "ist", "super", "!", "\u201C", "jubelte", "Tim", "."],
+                hint: "Freude ausdrücken"
+            },
+            { 
+                words: ["sagte", "\u201E", "Morgen", ".", "\u201C", "Ich", "Lisa", ".", "komme"],
+                solution: ["\u201E", "Ich", "komme", "morgen", ".", "\u201C", "sagte", "Lisa", "."],
+                hint: "Aussage in wörtlicher Rede"
+            },
+
+            // Schwerer: Wörtliche Rede mit Doppelpunkt (22-23)
+            { 
+                words: ["rief", ":", "\u201E", "Achtung", "!", "\u201C", "Er"],
+                solution: ["Er", "rief", ":", "\u201E", "Achtung", "!", "\u201C"],
+                hint: "Ankündigung mit Doppelpunkt"
+            },
+            { 
+                words: ["fragte", ":", "\u201E", "du", "?", "\u201C", "Wo", "Sie", "bist"],
+                solution: ["Sie", "fragte", ":", "\u201E", "Wo", "bist", "du", "?", "\u201C"],
+                hint: "Frage nach Doppelpunkt"
+            },
+
+            // Sehr schwer: Kombinationen (24-25)
+            { 
+                words: ["Im", "schwimmen", ",", "Sommer", "rodeln", "wir", "Winter", ".", "wir", "im"],
+                solution: ["Im", "Sommer", "schwimmen", "wir", ",", "im", "Winter", "rodeln", "wir", "."],
+                hint: "Zwei Hauptsätze mit Komma verbinden"
+            },
+            { 
+                words: ["Lehrerin", "\u201E", "!", "\u201C", ",", "Guten", "die", "Morgen", "sagte", "."],
+                solution: ["\u201E", "Guten", "Morgen", "!", "\u201C", ",", "sagte", "die", "Lehrerin", "."],
+                hint: "Begrüßung mit Komma nach wörtlicher Rede"
+            }
         ];
 
-        let selectedPunctuation = null;
-        let userAnswers = [];
-        let blankMapping = [];
+        let currentAnswers = [];
 
         function init() {
             const container = document.getElementById('exercises');
             container.innerHTML = '';
-            userAnswers = [];
-            blankMapping = [];
-            let globalBlankIndex = 0;
+            currentAnswers = [];
 
-            sentences.forEach((item, sentenceIndex) => {
-                let sentenceHTML = item.text;
-                let localBlankIndex = 0;
-
-                sentenceHTML = sentenceHTML.replace(/\[\]/g, () => {
-                    const idx = globalBlankIndex;
-                    userAnswers.push(null);
-                    blankMapping.push({ sentenceIndex, answerIndex: localBlankIndex });
-                    localBlankIndex++;
-                    globalBlankIndex++;
-                    return `<span class="blank" id="blank-${idx}" onclick="fillBlank(${idx})"></span>`;
-                });
-
-                if (!item.text.includes('[]')) {
-                    userAnswers.push(null);
-                    blankMapping.push({ sentenceIndex, answerIndex: 0 });
-                    sentenceHTML = item.text + `<span class="blank" id="blank-${globalBlankIndex}" onclick="fillBlank(${globalBlankIndex})"></span>`;
-                    globalBlankIndex++;
-                }
-
+            exercises.forEach((exercise, index) => {
                 const div = document.createElement('div');
                 div.className = 'exercise';
+                
+                const shuffledWords = [...exercise.words].sort(() => Math.random() - 0.5);
+                
                 div.innerHTML = `
-                    <div class="sentence">
-                        ${sentenceIndex + 1}. ${sentenceHTML}
+                    <div class="exercise-number">Aufgabe ${index + 1}</div>
+                    <div class="sentence-area" id="sentence-${index}"></div>
+                    <div class="word-pool" id="pool-${index}">
+                        ${shuffledWords.map((word, wordIndex) => {
+                            const isPunct = ['.', ',', '!', '?', ':', '\u201E', '\u201C'].includes(word);
+                            return `<button class="word-btn ${isPunct ? 'punctuation' : ''}" 
+                                    onclick="addWord(${index}, '${word.replace(/'/g, "\\'")}', ${wordIndex})"
+                                    id="word-${index}-${wordIndex}">${word}</button>`;
+                        }).join('')}
                     </div>
-                    <div class="hint">${item.hint}</div>
+                    <div class="hint">${exercise.hint}</div>
                 `;
+                
                 container.appendChild(div);
+                currentAnswers[index] = [];
             });
         }
 
-        function selectPunct(punct) {
-            selectedPunctuation = punct;
-            document.querySelectorAll('.punct-btn').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            event.target.classList.add('selected');
-        }
-
-        function fillBlank(index) {
-            if (selectedPunctuation) {
-                const blank = document.getElementById(`blank-${index}`);
-                blank.textContent = selectedPunctuation;
-                blank.classList.remove('correct', 'wrong');
-                userAnswers[index] = selectedPunctuation;
+        function addWord(exerciseIndex, word, wordBtnIndex) {
+            const sentenceArea = document.getElementById(`sentence-${exerciseIndex}`);
+            const wordBtn = document.getElementById(`word-${exerciseIndex}-${wordBtnIndex}`);
+            
+            // Prüfen ob das Wort bereits verwendet wurde
+            const isUsed = wordBtn.classList.contains('used');
+            
+            if (isUsed) {
+                // Wort zurück in den Pool
+                wordBtn.classList.remove('used');
+                
+                // Entferne das Wort aus currentAnswers
+                const indexInAnswer = currentAnswers[exerciseIndex].findIndex(
+                    item => item.word === word && item.btnIndex === wordBtnIndex
+                );
+                if (indexInAnswer !== -1) {
+                    currentAnswers[exerciseIndex].splice(indexInAnswer, 1);
+                }
+                
+                // Aktualisiere die Anzeige
+                updateSentenceDisplay(exerciseIndex);
+            } else {
+                // Wort hinzufügen
+                wordBtn.classList.add('used');
+                currentAnswers[exerciseIndex].push({ word: word, btnIndex: wordBtnIndex });
+                updateSentenceDisplay(exerciseIndex);
             }
         }
 
-        function checkAnswers() {
-            let correct = 0;
-            let totalBlanks = userAnswers.length;
+        function updateSentenceDisplay(exerciseIndex) {
+            const sentenceArea = document.getElementById(`sentence-${exerciseIndex}`);
+            sentenceArea.innerHTML = '';
+            
+            currentAnswers[exerciseIndex].forEach((item) => {
+                const span = document.createElement('span');
+                span.className = 'placed-word';
+                span.textContent = item.word;
+                span.onclick = () => addWord(exerciseIndex, item.word, item.btnIndex);
+                sentenceArea.appendChild(span);
+            });
 
-            userAnswers.forEach((answer, blankIndex) => {
-                const mapping = blankMapping[blankIndex];
-                const correctAnswer = sentences[mapping.sentenceIndex].answer[mapping.answerIndex];
-                const blank = document.getElementById(`blank-${blankIndex}`);
+            // Markiere Satz als komplett wenn alle Wörter platziert sind
+            if (currentAnswers[exerciseIndex].length === exercises[exerciseIndex].words.length) {
+                sentenceArea.classList.add('complete');
+            } else {
+                sentenceArea.classList.remove('complete');
+            }
+        }
 
-                if (answer === correctAnswer) {
-                    blank.classList.add('correct');
-                    blank.classList.remove('wrong');
-                    correct++;
-                } else if (answer) {
-                    blank.classList.add('wrong');
-                    blank.classList.remove('correct');
+        function checkAllAnswers() {
+            let totalCorrect = 0;
+            let totalExercises = exercises.length;
+
+            exercises.forEach((exercise, index) => {
+                const userAnswer = currentAnswers[index].map(item => item.word);
+                const correctAnswer = exercise.solution;
+                
+                const isCorrect = JSON.stringify(userAnswer) === JSON.stringify(correctAnswer);
+                
+                if (isCorrect) {
+                    totalCorrect++;
                 }
+
+                // Färbe die platzierten Wörter ein
+                const sentenceArea = document.getElementById(`sentence-${index}`);
+                const placedWords = sentenceArea.querySelectorAll('.placed-word');
+                
+                placedWords.forEach((wordSpan, wordIndex) => {
+                    if (userAnswer[wordIndex] === correctAnswer[wordIndex]) {
+                        wordSpan.classList.add('correct');
+                        wordSpan.classList.remove('wrong');
+                    } else {
+                        wordSpan.classList.add('wrong');
+                        wordSpan.classList.remove('correct');
+                    }
+                });
             });
 
             const score = document.getElementById('score');
             score.classList.remove('hidden');
             
-            if (correct === totalBlanks) {
-                score.innerHTML = `🎉 Perfekt! ${correct} von ${totalBlanks} richtig! 🌟`;
+            const percentage = (totalCorrect / totalExercises) * 100;
+            
+            if (totalCorrect === totalExercises) {
+                score.innerHTML = `🎉 Perfekt! ${totalCorrect} von ${totalExercises} Sätzen richtig! 🌟`;
                 score.style.background = '#d4edda';
                 score.style.color = '#155724';
-            } else if (correct >= totalBlanks * 0.8) {
-                score.innerHTML = `👍 Sehr gut! ${correct} von ${totalBlanks} richtig! Fast geschafft!`;
+            } else if (percentage >= 80) {
+                score.innerHTML = `👍 Sehr gut! ${totalCorrect} von ${totalExercises} Sätzen richtig! Fast geschafft!`;
                 score.style.background = '#d1ecf1';
                 score.style.color = '#0c5460';
-            } else {
-                score.innerHTML = `Du hast ${correct} von ${totalBlanks} richtig! 💪 Versuch es nochmal!`;
+            } else if (percentage >= 50) {
+                score.innerHTML = `💪 Gut gemacht! ${totalCorrect} von ${totalExercises} Sätzen richtig! Weiter so!`;
                 score.style.background = '#fff3cd';
                 score.style.color = '#856404';
+            } else {
+                score.innerHTML = `Du hast ${totalCorrect} von ${totalExercises} Sätzen richtig! 📚 Versuch es nochmal!`;
+                score.style.background = '#f8d7da';
+                score.style.color = '#721c24';
             }
+
+            // Scroll zur Auswertung
+            score.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
-        function showSolutions() {
-            userAnswers.forEach((answer, blankIndex) => {
-                const mapping = blankMapping[blankIndex];
-                const correctAnswer = sentences[mapping.sentenceIndex].answer[mapping.answerIndex];
-                const blank = document.getElementById(`blank-${blankIndex}`);
+        function showAllSolutions() {
+            exercises.forEach((exercise, index) => {
+                // Setze alle Buttons auf "nicht verwendet"
+                const pool = document.getElementById(`pool-${index}`);
+                const buttons = pool.querySelectorAll('.word-btn');
+                buttons.forEach(btn => btn.classList.remove('used'));
+
+                // Setze die Lösung
+                currentAnswers[index] = exercise.solution.map((word, wordIndex) => {
+                    // Finde den entsprechenden Button
+                    const originalIndex = exercise.words.findIndex((w, i) => 
+                        w === word && !document.getElementById(`word-${index}-${i}`).classList.contains('used')
+                    );
+                    
+                    if (originalIndex !== -1) {
+                        document.getElementById(`word-${index}-${originalIndex}`).classList.add('used');
+                        return { word: word, btnIndex: originalIndex };
+                    }
+                    return { word: word, btnIndex: wordIndex };
+                });
+
+                updateSentenceDisplay(index);
                 
-                blank.textContent = correctAnswer;
-                blank.classList.add('correct');
-                blank.classList.remove('wrong');
-                userAnswers[blankIndex] = correctAnswer;
+                // Färbe alle als korrekt ein
+                const sentenceArea = document.getElementById(`sentence-${index}`);
+                const placedWords = sentenceArea.querySelectorAll('.placed-word');
+                placedWords.forEach(wordSpan => {
+                    wordSpan.classList.add('correct');
+                    wordSpan.classList.remove('wrong');
+                });
             });
 
             const score = document.getElementById('score');
@@ -316,12 +508,9 @@
         }
 
         function resetExercise() {
-            selectedPunctuation = null;
-            document.querySelectorAll('.punct-btn').forEach(btn => {
-                btn.classList.remove('selected');
-            });
             document.getElementById('score').classList.add('hidden');
             init();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         init();
