@@ -540,10 +540,10 @@
             <h1>📚 DAF Vokabellern-App 📚</h1>
             <div class="photo-whatsapp-container">
                 <img src="../../images/amy_lang_photo.jpg" alt="Amy Lang" class="profile-photo">
-                <a href="https://wa.me/36301818503?text=Hallo%20Amy,%20ich%20möchte%20gerne%20Deutsch%20lernen!" 
+                <a href="https://wa.me/4368120283291?text=Hallo%20Amy,%20ich%20möchte%20gerne%20Deutsch%20lernen!" 
                    target="_blank" 
                    class="whatsapp-link">
-                    📱 WhatsApp: +36 30 181 8503
+                    📱 WhatsApp: +43 681 20283291
                 </a>
             </div>
         </header>
@@ -1355,17 +1355,28 @@ function updateDirectionButton() {
             if (currentIndex >= filteredVocab.length) currentIndex = 0;
             const item = filteredVocab[currentIndex];
             
+            // Bestimme, welche Seite Deutsch ist
+            const showingGerman = isFlipped ? isReversed : !isReversed;
+            
             container.innerHTML = `
                 <div class="flashcard" onclick="flipCard()">
                     <div class="flashcard-word">${isFlipped ? (isReversed ? item.word : item[currentLanguage]) : (isReversed ? item[currentLanguage] : item.word)}</div>
-                    ${!isFlipped ? `
+                    ${!isFlipped && showingGerman ? `
                         <div class="flashcard-details">
                             <span class="vocab-type">${item.type}</span><br>
                             ${getDetails(item)}
                         </div>
-                    ` : `
+                    ` : ``}
+                    ${isFlipped && !showingGerman ? `
+                        <div class="flashcard-translation">${isReversed ? item.word : item[currentLanguage]}</div>
+                    ` : ``}
+                    ${isFlipped && showingGerman ? `
                         <div class="flashcard-translation">${isReversed ? item[currentLanguage] : item.word}</div>
-                    `}
+                        <div class="flashcard-details">
+                            <span class="vocab-type">${item.type}</span><br>
+                            ${getDetails(item)}
+                        </div>
+                    ` : ``}
                     <p style="margin-top: 20px; color: #999; font-size: 0.9em;">Klicken zum Umdrehen</p>
                 </div>
                 <div class="flashcard-controls">
@@ -1456,15 +1467,21 @@ function updateDirectionButton() {
             const item = filteredVocab[currentIndex];
             const options = generateQuizOptions(item);
             
+            // Bestimme Frage und Antworten basierend auf Richtung
+            const question = isReversed ? item[currentLanguage] : item.word;
+            const correctAnswer = isReversed ? item.word : item[currentLanguage];
+            const questionLang = isReversed ? getLanguageName() : 'Deutsch';
+            const answerLang = isReversed ? 'Deutsch' : getLanguageName();
+            
             container.innerHTML = `
                 <div class="quiz-container">
                     <div class="quiz-score">Frage ${currentIndex + 1} von ${filteredVocab.length} | Richtig: ${quizScore.correct}/${quizScore.total}</div>
                     <div class="quiz-question">
-                        <div class="quiz-word">${item.word}</div>
-                        <p style="text-align: center; color: #666; margin-bottom: 20px;">Was bedeutet das auf ${getLanguageName()}?</p>
+                        <div class="quiz-word">${question}</div>
+                        <p style="text-align: center; color: #666; margin-bottom: 20px;">Was bedeutet das auf ${answerLang}?</p>
                         <div class="quiz-options" id="quizOptions">
                             ${options.map((opt, idx) => `
-                                <div class="quiz-option" onclick="checkAnswer('${opt}', '${item[currentLanguage]}', ${idx})">${opt}</div>
+                                <div class="quiz-option" onclick="checkAnswer('${opt}', '${correctAnswer}', ${idx})">${opt}</div>
                             `).join('')}
                         </div>
                     </div>
@@ -1473,12 +1490,16 @@ function updateDirectionButton() {
         }
 
         function generateQuizOptions(correctItem) {
-            const options = [correctItem[currentLanguage]];
+            // Bestimme, aus welcher Sprache die Optionen kommen sollen
+            const answerLanguage = isReversed ? 'word' : currentLanguage;
+            const correctAnswer = isReversed ? correctItem.word : correctItem[currentLanguage];
+            
+            const options = [correctAnswer];
             const sameType = vocabData.filter(v => v.type === correctItem.type && v.word !== correctItem.word);
             
             while (options.length < 4 && sameType.length > 0) {
                 const randomIndex = Math.floor(Math.random() * sameType.length);
-                const randomOption = sameType[randomIndex][currentLanguage];
+                const randomOption = isReversed ? sameType[randomIndex].word : sameType[randomIndex][currentLanguage];
                 if (!options.includes(randomOption)) {
                     options.push(randomOption);
                 }
@@ -1488,8 +1509,9 @@ function updateDirectionButton() {
             // If not enough same-type words, add from other types
             while (options.length < 4) {
                 const randomItem = vocabData[Math.floor(Math.random() * vocabData.length)];
-                if (!options.includes(randomItem[currentLanguage])) {
-                    options.push(randomItem[currentLanguage]);
+                const randomOption = isReversed ? randomItem.word : randomItem[currentLanguage];
+                if (!options.includes(randomOption)) {
+                    options.push(randomOption);
                 }
             }
             
