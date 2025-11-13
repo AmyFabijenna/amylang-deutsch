@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wortschatz 4. Schulstufe</title>
+    <title>Wortschatz 4. Schulstufe - Interaktive Lernplattform</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #87CEEB 0%, #4A90A4 50%, #2F6B7D 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -28,10 +28,11 @@
         }
 
         h1 {
-            color: #667eea;
+            color: #2F6B7D;
             text-align: center;
             margin-bottom: 30px;
             font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(47, 107, 125, 0.1);
         }
 
         .level-selector {
@@ -43,37 +44,75 @@
         }
 
         .level-btn {
-            padding: 12px 25px;
+            padding: 15px 30px;
             border: none;
-            border-radius: 25px;
+            border-radius: 30px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
             transition: all 0.3s;
         }
 
         .level-btn.a2 {
-            background: #ffd93d;
+            background: linear-gradient(135deg, #FFE082 0%, #FFD54F 100%);
             color: #333;
         }
 
         .level-btn.b1 {
-            background: #6bcf7f;
+            background: linear-gradient(135deg, #81C784 0%, #66BB6A 100%);
             color: white;
         }
 
         .level-btn.b2 {
-            background: #667eea;
+            background: linear-gradient(135deg, #64B5F6 0%, #42A5F5 100%);
             color: white;
         }
 
         .level-btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
         }
 
         .level-btn.active {
-            transform: scale(1.1);
+            transform: scale(1.15);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+        }
+
+        .stats-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #E0F7FA 0%, #B0E0E6 100%);
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid #87CEEB;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #2F6B7D;
+        }
+
+        .stat-label {
+            color: #4A90A4;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-top: 5px;
         }
 
         .theme-grid {
@@ -84,34 +123,38 @@
         }
 
         .theme-card {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            padding: 20px;
+            background: linear-gradient(135deg, #E0F7FA 0%, #B0E0E6 100%);
+            padding: 25px;
             border-radius: 15px;
             cursor: pointer;
             transition: all 0.3s;
+            border: 3px solid #87CEEB;
         }
 
         .theme-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+            border-color: #4A90A4;
         }
 
         .theme-card h3 {
-            color: #333;
+            color: #2F6B7D;
             margin-bottom: 10px;
+            font-size: 1.4em;
         }
 
         .theme-card .word-count {
-            color: #667eea;
+            color: #4A90A4;
             font-weight: bold;
+            font-size: 1.1em;
         }
 
-        .vocab-section {
+        .vocab-section, .quiz-section, .flashcard-section, .game-section {
             display: none;
             animation: fadeIn 0.5s;
         }
 
-        .vocab-section.active {
+        .vocab-section.active, .quiz-section.active, .flashcard-section.active, .game-section.active {
             display: block;
         }
 
@@ -121,41 +164,78 @@
         }
 
         .vocab-list {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
+            background: linear-gradient(135deg, #F5F9FA 0%, #E0F7FA 100%);
+            padding: 25px;
+            border-radius: 15px;
             margin-bottom: 20px;
         }
 
         .vocab-item {
             display: grid;
             grid-template-columns: 1fr 2fr;
-            gap: 15px;
-            padding: 15px;
+            gap: 20px;
+            padding: 18px;
             background: white;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
+            margin-bottom: 12px;
+            border-radius: 10px;
+            border-left: 5px solid #4A90A4;
+            transition: all 0.3s;
+        }
+
+        .vocab-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
         .vocab-word {
             font-weight: bold;
-            color: #333;
-            font-size: 1.1em;
+            color: #2F6B7D;
+            font-size: 1.2em;
         }
 
         .vocab-example {
-            color: #666;
+            color: #4A90A4;
             font-style: italic;
+            font-size: 1.05em;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .mode-btn {
+            padding: 12px 24px;
+            border: 3px solid #4A90A4;
+            background: white;
+            color: #2F6B7D;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .mode-btn:hover {
+            background: #E0F7FA;
+            transform: scale(1.05);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #4A90A4 0%, #2F6B7D 100%);
+            color: white;
         }
 
         .practice-btn {
-            background: #764ba2;
+            background: linear-gradient(135deg, #4A90A4 0%, #2F6B7D 100%);
             color: white;
             border: none;
-            padding: 15px 30px;
-            border-radius: 25px;
-            font-size: 18px;
+            padding: 18px 40px;
+            border-radius: 30px;
+            font-size: 20px;
             font-weight: bold;
             cursor: pointer;
             display: block;
@@ -164,286 +244,499 @@
         }
 
         .practice-btn:hover {
-            background: #667eea;
-            transform: scale(1.05);
+            transform: scale(1.08);
+            box-shadow: 0 8px 20px rgba(47, 107, 125, 0.4);
         }
 
         .quiz-container {
-            display: none;
-            background: #f8f9fa;
-            padding: 30px;
+            background: linear-gradient(135deg, #E0F7FA 0%, #B0E0E6 100%);
+            padding: 35px;
             border-radius: 15px;
             margin-top: 20px;
         }
 
-        .quiz-container.active {
-            display: block;
-        }
-
         .quiz-question {
-            font-size: 1.3em;
-            margin-bottom: 20px;
-            color: #333;
+            font-size: 1.5em;
+            margin-bottom: 25px;
+            color: #2F6B7D;
+            font-weight: 600;
         }
 
         .quiz-options {
             display: grid;
-            gap: 10px;
+            gap: 12px;
         }
 
         .quiz-option {
-            padding: 15px;
+            padding: 18px;
             background: white;
-            border: 2px solid #ddd;
-            border-radius: 10px;
+            border: 3px solid #B0E0E6;
+            border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s;
+            font-size: 1.1em;
         }
 
         .quiz-option:hover {
-            border-color: #667eea;
-            transform: translateX(5px);
+            border-color: #4A90A4;
+            transform: translateX(8px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
         .quiz-option.correct {
-            background: #6bcf7f;
+            background: linear-gradient(135deg, #81C784 0%, #66BB6A 100%);
             color: white;
-            border-color: #6bcf7f;
+            border-color: #66BB6A;
         }
 
         .quiz-option.wrong {
-            background: #ff6b6b;
+            background: linear-gradient(135deg, #EF5350 0%, #E53935 100%);
             color: white;
-            border-color: #ff6b6b;
+            border-color: #E53935;
+        }
+
+        .flashcard {
+            background: white;
+            border: 4px solid #4A90A4;
+            border-radius: 20px;
+            padding: 50px;
+            text-align: center;
+            cursor: pointer;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .flashcard:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .flashcard.flipped {
+            background: linear-gradient(135deg, #E0F7FA 0%, #B0E0E6 100%);
+        }
+
+        .flashcard-word {
+            font-size: 3em;
+            color: #2F6B7D;
+            font-weight: bold;
+        }
+
+        .flashcard-example {
+            font-size: 1.5em;
+            color: #4A90A4;
+            font-style: italic;
+            margin-top: 20px;
+        }
+
+        .game-area {
+            background: linear-gradient(135deg, #E0F7FA 0%, #B0E0E6 100%);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .hangman-word {
+            font-size: 3em;
+            letter-spacing: 10px;
+            margin: 30px 0;
+            color: #2F6B7D;
+            font-weight: bold;
+        }
+
+        .letter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .letter-btn {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #4A90A4;
+            background: white;
+            border-radius: 50%;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #2F6B7D;
+        }
+
+        .letter-btn:hover:not(:disabled) {
+            background: #4A90A4;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .letter-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
         }
 
         .back-btn {
-            background: #ddd;
-            color: #333;
+            background: linear-gradient(135deg, #87CEEB 0%, #5F9EA0 100%);
+            color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
+            transition: all 0.3s;
             margin-bottom: 20px;
         }
 
         .back-btn:hover {
-            background: #ccc;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(95, 158, 160, 0.4);
         }
 
-        .info-box {
-            background: #e3f2fd;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border-left: 4px solid #2196f3;
+        .progress-bar {
+            width: 100%;
+            height: 25px;
+            background: #E0F7FA;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #4A90A4 0%, #2F6B7D 100%);
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            .theme-grid {
+                grid-template-columns: 1fr;
+            }
+            .vocab-item {
+                grid-template-columns: 1fr;
+            }
+            .flashcard-word {
+                font-size: 2em;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📚 Wortschatz 4. Schulstufe</h1>
+        <h1>📚 Wortschatz 4. Schulstufe - Interaktive Lernplattform</h1>
         
-        <div class="info-box">
-            <strong>Für Lehrkräfte:</strong> Wählen Sie zuerst das Niveau Ihrer Schüler:innen aus. Jedes Thema enthält passende Wörter mit Beispielsätzen und interaktive Übungen.
+        <!-- Statistics Dashboard -->
+        <div class="stats-dashboard" id="statsDashboard">
+            <div class="stat-card">
+                <div class="stat-value" id="totalLearned">0</div>
+                <div class="stat-label">Wörter gelernt</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="quizzesDone">0</div>
+                <div class="stat-label">Quiz absolviert</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgScore">0%</div>
+                <div class="stat-label">Durchschnitt</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="bestStreak">0</div>
+                <div class="stat-label">Beste Serie</div>
+            </div>
         </div>
 
+        <!-- Level Selector -->
         <div class="level-selector">
             <button class="level-btn a2 active" onclick="selectLevel('a2')">A2 - Grundlagen</button>
             <button class="level-btn b1" onclick="selectLevel('b1')">B1 - Mittel</button>
             <button class="level-btn b2" onclick="selectLevel('b2')">B2 - Fortgeschritten</button>
         </div>
 
+        <!-- Main Content -->
         <div id="mainContent">
             <div class="theme-grid" id="themeGrid"></div>
         </div>
 
-        <div id="vocabContent" class="vocab-section"></div>
-        <div id="quizContent" class="quiz-container"></div>
+        <!-- Vocabulary Section -->
+        <div class="vocab-section" id="vocabContent">
+            <button class="back-btn" onclick="backToThemes()">← Zurück zu Themen</button>
+            <h2 id="vocabTitle" style="color: #2F6B7D; margin-bottom: 20px;"></h2>
+            
+            <!-- Mode Selector -->
+            <div class="mode-selector">
+                <button class="mode-btn active" onclick="selectMode('vocab')">📖 Wortliste</button>
+                <button class="mode-btn" onclick="selectMode('quiz')">🎯 Quiz</button>
+                <button class="mode-btn" onclick="selectMode('flashcards')">🎴 Lernkarten</button>
+                <button class="mode-btn" onclick="selectMode('fillblank')">✍️ Lückentext</button>
+                <button class="mode-btn" onclick="selectMode('hangman')">🎮 Hangman</button>
+                <button class="mode-btn" onclick="selectMode('scramble')">🔤 Wort-Scramble</button>
+            </div>
+
+            <div id="vocabList"></div>
+        </div>
+
+        <!-- Quiz Section -->
+        <div class="quiz-section" id="quizContent">
+            <button class="back-btn" onclick="backToVocab()">← Zurück zur Wortliste</button>
+            <div class="quiz-container" id="quizContainer"></div>
+        </div>
+
+        <!-- Flashcard Section -->
+        <div class="flashcard-section" id="flashcardContent">
+            <button class="back-btn" onclick="backToVocab()">← Zurück zur Wortliste</button>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="color: #2F6B7D;">Klicke auf die Karte zum Umdrehen</h2>
+                <p style="color: #4A90A4; margin: 10px 0;"><span id="cardNumber">1</span> / <span id="totalCards">0</span></p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="cardProgress" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="flashcard" id="flashcard" onclick="flipCard()">
+                <div id="flashcardContent"></div>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="practice-btn" onclick="nextCard()">Nächste Karte →</button>
+            </div>
+        </div>
+
+        <!-- Game Section -->
+        <div class="game-section" id="gameContent">
+            <button class="back-btn" onclick="backToVocab()">← Zurück zur Wortliste</button>
+            <div class="game-area" id="gameArea"></div>
+        </div>
     </div>
 
     <script>
-        let currentLevel = 'a2';
-        let currentTheme = '';
-        let quizScore = 0;
-        let currentQuestion = 0;
-
+        // Vocabulary Data
         const vocabData = {
             a2: {
                 'Schule': {
                     words: [
                         { word: 'das Heft', example: 'Ich schreibe in mein Heft.' },
-                        { word: 'der Radiergummi', example: 'Mit dem Radiergummi lösche ich Fehler.' },
-                        { word: 'die Pause', example: 'In der Pause spielen wir im Hof.' },
-                        { word: 'die Hausübung', example: 'Die Hausübung machen wir am Nachmittag.' },
-                        { word: 'der Stundenplan', example: 'Der Stundenplan zeigt alle Fächer.' },
+                        { word: 'die Pause', example: 'In der Pause spielen wir.' },
                         { word: 'die Tafel', example: 'Die Lehrerin schreibt an die Tafel.' },
                         { word: 'der Bleistift', example: 'Ich male mit dem Bleistift.' },
-                        { word: 'das Lineal', example: 'Mit dem Lineal ziehe ich gerade Linien.' },
-                        { word: 'die Schere', example: 'Die Schere ist scharf.' },
-                        { word: 'der Kleber', example: 'Ich klebe mit dem Kleber.' }
+                        { word: 'die Schere', example: 'Mit der Schere schneide ich Papier.' },
+                        { word: 'das Lineal', example: 'Mit dem Lineal ziehe ich Striche.' },
+                        { word: 'der Radiergummi', example: 'Der Radiergummi löscht Fehler.' },
+                        { word: 'der Spitzer', example: 'Der Spitzer macht Stifte spitz.' },
+                        { word: 'die Hausaufgabe', example: 'Die Hausaufgabe ist schwer.' },
+                        { word: 'die Klasse', example: 'Unsere Klasse hat 20 Schüler.' }
                     ]
                 },
                 'Familie': {
                     words: [
-                        { word: 'die Eltern', example: 'Meine Eltern sind sehr lieb.' },
+                        { word: 'die Eltern', example: 'Meine Eltern sind zu Hause.' },
                         { word: 'die Geschwister', example: 'Ich habe zwei Geschwister.' },
-                        { word: 'die Großeltern', example: 'Meine Großeltern wohnen in Wien.' },
-                        { word: 'der Cousin', example: 'Mein Cousin ist 10 Jahre alt.' },
-                        { word: 'die Tante', example: 'Meine Tante kommt uns besuchen.' },
-                        { word: 'der Bruder', example: 'Mein Bruder spielt Fußball.' },
-                        { word: 'die Schwester', example: 'Meine Schwester ist älter.' },
-                        { word: 'die Mutter', example: 'Meine Mutter kocht gerne.' },
-                        { word: 'der Vater', example: 'Mein Vater arbeitet in der Stadt.' },
-                        { word: 'die Oma', example: 'Meine Oma backt Kuchen.' }
+                        { word: 'die Oma', example: 'Meine Oma backt Kuchen.' },
+                        { word: 'der Opa', example: 'Mein Opa erzählt Geschichten.' },
+                        { word: 'die Tante', example: 'Meine Tante wohnt in Wien.' },
+                        { word: 'der Onkel', example: 'Mein Onkel hat ein Auto.' },
+                        { word: 'der Cousin', example: 'Mein Cousin ist sehr lustig.' },
+                        { word: 'die Cousine', example: 'Meine Cousine besucht uns oft.' },
+                        { word: 'das Baby', example: 'Das Baby schläft.' },
+                        { word: 'das Kind', example: 'Das Kind spielt im Garten.' }
                     ]
                 },
                 'Tiere': {
                     words: [
-                        { word: 'das Haustier', example: 'Unser Haustier ist eine Katze.' },
                         { word: 'der Hund', example: 'Der Hund bellt laut.' },
                         { word: 'die Katze', example: 'Die Katze miaut.' },
-                        { word: 'der Bauernhof', example: 'Auf dem Bauernhof leben viele Tiere.' },
                         { word: 'das Pferd', example: 'Das Pferd frisst Heu.' },
                         { word: 'die Kuh', example: 'Die Kuh gibt Milch.' },
-                        { word: 'der Hase', example: 'Der Hase hoppelt über die Wiese.' },
-                        { word: 'die Ente', example: 'Die Ente schwimmt im Teich.' },
+                        { word: 'das Schwein', example: 'Das Schwein ist rosa.' },
+                        { word: 'das Schaf', example: 'Das Schaf hat weiche Wolle.' },
                         { word: 'der Vogel', example: 'Der Vogel fliegt hoch.' },
-                        { word: 'der Fisch', example: 'Der Fisch schwimmt im Wasser.' }
+                        { word: 'das Huhn', example: 'Das Huhn legt Eier.' },
+                        { word: 'der Fisch', example: 'Der Fisch schwimmt im Wasser.' },
+                        { word: 'der Hase', example: 'Der Hase hüpft schnell.' }
                     ]
                 },
-                'Essen': {
+                'Haus & Wohnen': {
                     words: [
-                        { word: 'das Frühstück', example: 'Zum Frühstück esse ich Müsli.' },
-                        { word: 'das Mittagessen', example: 'Das Mittagessen schmeckt gut.' },
-                        { word: 'das Abendessen', example: 'Beim Abendessen sind alle da.' },
-                        { word: 'der Durst', example: 'Ich habe großen Durst.' },
-                        { word: 'der Hunger', example: 'Nach dem Sport habe ich Hunger.' },
-                        { word: 'der Geschmack', example: 'Der Geschmack ist süß.' },
-                        { word: 'das Getränk', example: 'Mein Lieblingsgetränk ist Wasser.' },
-                        { word: 'das Obst', example: 'Obst ist gesund.' },
-                        { word: 'das Gemüse', example: 'Ich esse gerne Gemüse.' },
-                        { word: 'der Nachtisch', example: 'Als Nachtisch gibt es Pudding.' }
+                        { word: 'das Haus', example: 'Unser Haus ist groß.' },
+                        { word: 'die Wohnung', example: 'Die Wohnung hat vier Zimmer.' },
+                        { word: 'das Zimmer', example: 'Mein Zimmer ist gemütlich.' },
+                        { word: 'die Küche', example: 'In der Küche wird gekocht.' },
+                        { word: 'das Wohnzimmer', example: 'Im Wohnzimmer sitzen wir zusammen.' },
+                        { word: 'das Schlafzimmer', example: 'Im Schlafzimmer schlafe ich.' },
+                        { word: 'das Badezimmer', example: 'Das Badezimmer ist sauber.' },
+                        { word: 'die Tür', example: 'Die Tür ist offen.' },
+                        { word: 'das Fenster', example: 'Das Fenster ist groß.' },
+                        { word: 'der Garten', example: 'Im Garten wachsen Blumen.' }
+                    ]
+                },
+                'Essen & Trinken': {
+                    words: [
+                        { word: 'das Essen', example: 'Das Essen schmeckt gut.' },
+                        { word: 'das Frühstück', example: 'Zum Frühstück esse ich Brot.' },
+                        { word: 'das Brot', example: 'Das Brot ist frisch.' },
+                        { word: 'die Butter', example: 'Ich esse Brot mit Butter.' },
+                        { word: 'der Käse', example: 'Der Käse schmeckt lecker.' },
+                        { word: 'die Milch', example: 'Die Milch ist kalt.' },
+                        { word: 'der Saft', example: 'Der Saft ist frisch gepresst.' },
+                        { word: 'das Wasser', example: 'Ich trinke viel Wasser.' },
+                        { word: 'der Apfel', example: 'Der Apfel ist rot.' },
+                        { word: 'die Banane', example: 'Die Banane ist gelb.' }
                     ]
                 }
             },
             b1: {
-                'Schule': {
+                'Bildergeschichte': {
                     words: [
-                        { word: 'die Schularbeit', example: 'Morgen schreiben wir eine Schularbeit in Mathematik.' },
-                        { word: 'das Zeugnis', example: 'Im Zeugnis stehen alle Noten.' },
+                        { word: 'zuerst', example: 'Zuerst schaue ich mir alle Bilder an.' },
+                        { word: 'dann', example: 'Dann beginne ich zu schreiben.' },
+                        { word: 'danach', example: 'Danach kontrolliere ich den Text.' },
+                        { word: 'plötzlich', example: 'Plötzlich hörte er ein lautes Geräusch.' },
+                        { word: 'endlich', example: 'Endlich kamen sie am Ziel an.' },
+                        { word: 'sofort', example: 'Er reagierte sofort.' },
+                        { word: 'gleichzeitig', example: 'Gleichzeitig klingelte das Telefon.' },
+                        { word: 'vorher', example: 'Vorher hatte er nichts davon gewusst.' },
+                        { word: 'nachher', example: 'Nachher gingen sie nach Hause.' },
+                        { word: 'währenddessen', example: 'Währenddessen warteten die anderen.' }
+                    ]
+                },
+                'Gefühle & Emotionen': {
+                    words: [
+                        { word: 'glücklich', example: 'Ich bin heute sehr glücklich.' },
+                        { word: 'traurig', example: 'Sie war traurig über die Nachricht.' },
+                        { word: 'aufgeregt', example: 'Die Kinder sind aufgeregt vor der Reise.' },
+                        { word: 'nervös', example: 'Er ist nervös vor der Prüfung.' },
+                        { word: 'stolz', example: 'Ich bin stolz auf meine Leistung.' },
+                        { word: 'enttäuscht', example: 'Sie war enttäuscht vom Ergebnis.' },
+                        { word: 'wütend', example: 'Er war wütend auf seinen Freund.' },
+                        { word: 'ängstlich', example: 'Das Kind war ängstlich im Dunkeln.' },
+                        { word: 'mutig', example: 'Der Junge war sehr mutig.' },
+                        { word: 'zufrieden', example: 'Ich bin zufrieden mit mir.' }
+                    ]
+                },
+                'Schule & Lernen': {
+                    words: [
+                        { word: 'die Schularbeit', example: 'Die Schularbeit war schwierig.' },
+                        { word: 'das Zeugnis', example: 'Mein Zeugnis ist gut.' },
                         { word: 'die Leistung', example: 'Seine Leistung hat sich verbessert.' },
-                        { word: 'nachdenken', example: 'Ich muss über die Antwort nachdenken.' },
-                        { word: 'wiederholen', example: 'Wir müssen den Stoff wiederholen.' },
-                        { word: 'die Erklärung', example: 'Die Erklärung war sehr gut.' },
-                        { word: 'verstehen', example: 'Ich verstehe die Aufgabe nicht.' },
-                        { word: 'die Lösung', example: 'Hast du die Lösung gefunden?' },
+                        { word: 'der Erfolg', example: 'Der Erfolg macht mich stolz.' },
                         { word: 'der Fehler', example: 'Ich habe einen Fehler gemacht.' },
-                        { word: 'verbessern', example: 'Ich möchte mich verbessern.' }
+                        { word: 'üben', example: 'Ich übe jeden Tag.' },
+                        { word: 'wiederholen', example: 'Wir wiederholen den Stoff.' },
+                        { word: 'verstehen', example: 'Ich verstehe die Aufgabe.' },
+                        { word: 'verbessern', example: 'Ich möchte mich verbessern.' },
+                        { word: 'fleißig', example: 'Der fleißige Schüler lernt viel.' }
                     ]
                 },
-                'Gefühle': {
+                'Natur & Wetter': {
                     words: [
-                        { word: 'aufgeregt', example: 'Vor dem Wettkampf bin ich aufgeregt.' },
-                        { word: 'enttäuscht', example: 'Sie war enttäuscht über das Ergebnis.' },
-                        { word: 'stolz', example: 'Meine Eltern sind stolz auf mich.' },
-                        { word: 'nervös', example: 'Vor der Prüfung bin ich nervös.' },
-                        { word: 'begeistert', example: 'Ich bin begeistert von dem neuen Buch.' },
-                        { word: 'wütend', example: 'Er war sehr wütend.' },
-                        { word: 'zufrieden', example: 'Ich bin zufrieden mit meiner Note.' },
-                        { word: 'ängstlich', example: 'Sie ist ängstlich vor der Prüfung.' },
-                        { word: 'fröhlich', example: 'Die Kinder sind fröhlich.' },
-                        { word: 'traurig', example: 'Warum bist du so traurig?' }
-                    ]
-                },
-                'Freizeit': {
-                    words: [
-                        { word: 'das Hobby', example: 'Mein Hobby ist Fußballspielen.' },
-                        { word: 'der Verein', example: 'Ich bin im Sportverein.' },
-                        { word: 'das Instrument', example: 'Ich lerne ein Instrument spielen.' },
-                        { word: 'die Mannschaft', example: 'Unsere Mannschaft hat gewonnen.' },
-                        { word: 'trainieren', example: 'Wir trainieren zweimal pro Woche.' },
-                        { word: 'der Wettkampf', example: 'Der Wettkampf findet am Samstag statt.' },
-                        { word: 'die Ausrüstung', example: 'Ich brauche neue Ausrüstung.' },
-                        { word: 'sich treffen', example: 'Wir treffen uns am Nachmittag.' },
-                        { word: 'die Veranstaltung', example: 'Die Veranstaltung war toll.' },
-                        { word: 'teilnehmen', example: 'Ich nehme am Turnier teil.' }
-                    ]
-                },
-                'Natur': {
-                    words: [
-                        { word: 'die Umwelt', example: 'Wir müssen die Umwelt schützen.' },
-                        { word: 'der Wald', example: 'Im Wald wachsen viele Bäume.' },
-                        { word: 'die Jahreszeit', example: 'Meine Lieblingsjahreszeit ist der Sommer.' },
-                        { word: 'das Wetter', example: 'Das Wetter ist heute schön.' },
-                        { word: 'der Berg', example: 'Wir wandern auf den Berg.' },
-                        { word: 'der See', example: 'Am See kann man schwimmen.' },
-                        { word: 'die Wiese', example: 'Auf der Wiese wachsen Blumen.' },
-                        { word: 'der Fluss', example: 'Der Fluss fließt zum Meer.' },
-                        { word: 'die Landschaft', example: 'Die Landschaft ist wunderschön.' },
-                        { word: 'die Pflanze', example: 'Diese Pflanze braucht viel Wasser.' }
+                        { word: 'die Sonne', example: 'Die Sonne scheint hell.' },
+                        { word: 'der Regen', example: 'Der Regen fällt stark.' },
+                        { word: 'der Schnee', example: 'Der Schnee ist weiß und kalt.' },
+                        { word: 'der Wind', example: 'Der Wind weht kräftig.' },
+                        { word: 'das Gewitter', example: 'Das Gewitter ist laut.' },
+                        { word: 'der Nebel', example: 'Im Nebel sieht man schlecht.' },
+                        { word: 'der Baum', example: 'Der Baum ist sehr alt.' },
+                        { word: 'die Blume', example: 'Die Blumen duften schön.' },
+                        { word: 'der Berg', example: 'Der Berg ist hoch.' },
+                        { word: 'der See', example: 'Am See kann man schwimmen.' }
                     ]
                 }
             },
             b2: {
-                'Aufsatz & Bildergeschichte': {
+                'Zeitliche Verknüpfungen': {
                     words: [
-                        { word: 'zunächst', example: 'Zunächst betrachte ich alle Bilder genau.' },
+                        { word: 'zunächst', example: 'Zunächst betrachte ich die Bilder genau.' },
                         { word: 'daraufhin', example: 'Daraufhin ging sie nach Hause.' },
                         { word: 'schließlich', example: 'Schließlich fanden sie eine Lösung.' },
                         { word: 'währenddessen', example: 'Währenddessen warteten die anderen draußen.' },
                         { word: 'infolgedessen', example: 'Infolgedessen musste das Spiel abgesagt werden.' },
-                        { word: 'plötzlich', example: 'Plötzlich hörte er ein lautes Geräusch.' },
                         { word: 'anschließend', example: 'Anschließend gingen wir nach Hause.' },
-                        { word: 'dabei', example: 'Dabei bemerkte er den Fehler.' },
-                        { word: 'trotzdem', example: 'Es regnete, trotzdem gingen wir spazieren.' },
-                        { word: 'gleichzeitig', example: 'Gleichzeitig klingelte das Telefon.' }
+                        { word: 'mittlerweile', example: 'Mittlerweile hat sich viel verändert.' },
+                        { word: 'zuvor', example: 'Zuvor hatte er nichts davon gewusst.' },
+                        { word: 'gleichzeitig', example: 'Gleichzeitig klingelte das Telefon.' },
+                        { word: 'unterdessen', example: 'Unterdessen war es dunkel geworden.' }
                     ]
                 },
-                'Beschreibungen': {
+                'Beschreibende Adjektive': {
                     words: [
                         { word: 'aufmerksam', example: 'Der aufmerksame Schüler bemerkte den Fehler.' },
-                        { word: 'bemerkenswert', example: 'Seine Leistung ist bemerkenswert.' },
                         { word: 'sorgfältig', example: 'Sie arbeitete sorgfältig und genau.' },
                         { word: 'gründlich', example: 'Er machte eine gründliche Recherche.' },
-                        { word: 'vielfältig', example: 'Die Aufgaben waren vielfältig und interessant.' },
-                        { word: 'ausführlich', example: 'Er gab eine ausführliche Erklärung.' },
                         { word: 'präzise', example: 'Die Antwort war präzise und klar.' },
+                        { word: 'vielfältig', example: 'Die Aufgaben waren vielfältig.' },
+                        { word: 'ausführlich', example: 'Er gab eine ausführliche Erklärung.' },
                         { word: 'umfangreich', example: 'Das war eine umfangreiche Aufgabe.' },
-                        { word: 'detailliert', example: 'Die detaillierte Beschreibung half sehr.' },
-                        { word: 'anschaulich', example: 'Das Beispiel war sehr anschaulich.' }
+                        { word: 'bemerkenswert', example: 'Seine Leistung ist bemerkenswert.' },
+                        { word: 'anschaulich', example: 'Das Beispiel war sehr anschaulich.' },
+                        { word: 'detailliert', example: 'Die detaillierte Beschreibung half sehr.' }
                     ]
                 },
-                'Verben für Texte': {
+                'Verben für Textanalyse': {
                     words: [
                         { word: 'beobachten', example: 'Ich beobachtete die Vögel im Garten.' },
-                        { word: 'erkennen', example: 'Man erkennt deutlich einen Unterschied.' },
                         { word: 'vermuten', example: 'Ich vermute, dass es bald regnet.' },
-                        { word: 'sich ereignen', example: 'Der Unfall ereignete sich am Morgen.' },
-                        { word: 'reagieren', example: 'Sie reagierte schnell auf die Situation.' },
-                        { word: 'betrachten', example: 'Betrachte das Bild genau.' },
                         { word: 'feststellen', example: 'Ich stellte fest, dass etwas fehlte.' },
-                        { word: 'darstellen', example: 'Das Bild stellt eine Landschaft dar.' },
                         { word: 'schildern', example: 'Er schilderte den Vorfall genau.' },
-                        { word: 'erwähnen', example: 'Sie erwähnte ein wichtiges Detail.' }
+                        { word: 'verdeutlichen', example: 'Das Beispiel verdeutlicht das Problem.' },
+                        { word: 'erläutern', example: 'Er erläuterte seine Theorie.' },
+                        { word: 'analysieren', example: 'Wir analysieren den Text.' },
+                        { word: 'interpretieren', example: 'Wie interpretierst du diese Szene?' },
+                        { word: 'betrachten', example: 'Betrachten wir die Situation genauer.' },
+                        { word: 'untersuchen', example: 'Der Arzt untersuchte den Patienten.' }
                     ]
                 },
-                'Erweiterte Satzverbindungen': {
+                'Gefühlszustände': {
                     words: [
-                        { word: 'obwohl', example: 'Obwohl es regnete, gingen wir spazieren.' },
-                        { word: 'dennoch', example: 'Es war schwierig, dennoch gab er nicht auf.' },
-                        { word: 'außerdem', example: 'Außerdem müssen wir noch einkaufen gehen.' },
-                        { word: 'allerdings', example: 'Das Wetter ist schön, allerdings sehr kalt.' },
-                        { word: 'einerseits...andererseits', example: 'Einerseits macht es Spaß, andererseits ist es anstrengend.' },
-                        { word: 'folglich', example: 'Er lernte viel, folglich wurde seine Note besser.' },
-                        { word: 'hingegen', example: 'Er mag Sport, sie hingegen liest lieber.' },
-                        { word: 'somit', example: 'Wir haben gewonnen, somit sind wir im Finale.' },
-                        { word: 'demzufolge', example: 'Es regnete, demzufolge blieben wir zu Hause.' },
-                        { word: 'deshalb', example: 'Ich war krank, deshalb blieb ich zu Hause.' }
+                        { word: 'erfreut', example: 'Ich bin erfreut über die gute Nachricht.' },
+                        { word: 'begeistert', example: 'Sie war begeistert von der Idee.' },
+                        { word: 'verzweifelt', example: 'Er war verzweifelt nach dem Verlust.' },
+                        { word: 'erleichtert', example: 'Sie war erleichtert nach der Prüfung.' },
+                        { word: 'verärgert', example: 'Er war verärgert über die Verspätung.' },
+                        { word: 'niedergeschlagen', example: 'Nach der Niederlage war er niedergeschlagen.' },
+                        { word: 'fröhlich', example: 'Die Kinder waren fröhlich beim Spielen.' },
+                        { word: 'gespannt', example: 'Ich bin gespannt auf das Ergebnis.' },
+                        { word: 'genervt', example: 'Sie war genervt von dem Lärm.' },
+                        { word: 'besorgt', example: 'Die Mutter war besorgt um ihr Kind.' }
                     ]
                 }
             }
         };
+
+        // State
+        let currentLevel = 'a2';
+        let currentTheme = '';
+        let currentMode = 'vocab';
+        let currentQuestion = 0;
+        let quizScore = 0;
+        let currentCard = 0;
+        let isFlipped = false;
+        let gameData = {};
+
+        // Statistics
+        let stats = JSON.parse(localStorage.getItem('wortschatzStats') || '{"learned": 0, "quizzes": 0, "totalScore": 0, "bestStreak": 0}');
+
+        function updateStats() {
+            document.getElementById('totalLearned').textContent = stats.learned;
+            document.getElementById('quizzesDone').textContent = stats.quizzes;
+            document.getElementById('avgScore').textContent = stats.quizzes > 0 ? 
+                Math.round(stats.totalScore / stats.quizzes) + '%' : '0%';
+            document.getElementById('bestStreak').textContent = stats.bestStreak;
+        }
+
+        function saveStats() {
+            localStorage.setItem('wortschatzStats', JSON.stringify(stats));
+            updateStats();
+        }
 
         function selectLevel(level) {
             currentLevel = level;
@@ -455,8 +748,7 @@
         function showThemes() {
             const grid = document.getElementById('themeGrid');
             grid.innerHTML = '';
-            document.getElementById('vocabContent').classList.remove('active');
-            document.getElementById('quizContent').classList.remove('active');
+            hideAllSections();
             document.getElementById('mainContent').style.display = 'block';
 
             const themes = vocabData[currentLevel];
@@ -465,7 +757,7 @@
                 card.className = 'theme-card';
                 card.innerHTML = `
                     <h3>${theme}</h3>
-                    <p class="word-count">${themes[theme].words.length} Wörter</p>
+                    <p class="word-count">🎯 ${themes[theme].words.length} Wörter</p>
                 `;
                 card.onclick = () => showVocab(theme);
                 grid.appendChild(card);
@@ -474,14 +766,17 @@
 
         function showVocab(theme) {
             currentTheme = theme;
-            const content = document.getElementById('vocabContent');
-            const words = vocabData[currentLevel][theme].words;
+            currentMode = 'vocab';
+            hideAllSections();
+            document.getElementById('vocabContent').classList.add('active');
+            document.getElementById('vocabTitle').textContent = `${theme} - ${currentLevel.toUpperCase()}`;
             
-            let html = `
-                <button class="back-btn" onclick="showThemes()">← Zurück zu Themen</button>
-                <h2>${theme} - ${currentLevel.toUpperCase()}</h2>
-                <div class="vocab-list">
-            `;
+            displayVocabList();
+        }
+
+        function displayVocabList() {
+            const words = vocabData[currentLevel][currentTheme].words;
+            let html = '<div class="vocab-list">';
 
             words.forEach(item => {
                 html += `
@@ -492,25 +787,42 @@
                 `;
             });
 
-            html += `
-                </div>
-                <button class="practice-btn" onclick="startQuiz()">🎯 Quiz starten</button>
-            `;
+            html += '</div>';
+            document.getElementById('vocabList').innerHTML = html;
+        }
 
-            content.innerHTML = html;
-            content.classList.add('active');
-            document.getElementById('mainContent').style.display = 'none';
+        function selectMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            switch(mode) {
+                case 'vocab':
+                    displayVocabList();
+                    break;
+                case 'quiz':
+                    startQuiz();
+                    break;
+                case 'flashcards':
+                    startFlashcards();
+                    break;
+                case 'fillblank':
+                    startFillBlank();
+                    break;
+                case 'hangman':
+                    startHangman();
+                    break;
+                case 'scramble':
+                    startScramble();
+                    break;
+            }
         }
 
         function startQuiz() {
-            const words = vocabData[currentLevel][currentTheme].words;
+            hideAllSections();
+            document.getElementById('quizContent').classList.add('active');
             quizScore = 0;
             currentQuestion = 0;
-            
-            const quizContainer = document.getElementById('quizContent');
-            document.getElementById('vocabContent').classList.remove('active');
-            quizContainer.classList.add('active');
-            
             showQuestion();
         }
 
@@ -530,7 +842,6 @@
             const options = [...wrongOptions, current].sort(() => Math.random() - 0.5);
 
             let html = `
-                <button class="back-btn" onclick="backToVocab()">← Zurück</button>
                 <div class="quiz-question">
                     Frage ${currentQuestion + 1}/${words.length}<br><br>
                     Welches Wort passt zu diesem Satz?<br>
@@ -540,11 +851,11 @@
             `;
 
             options.forEach(opt => {
-                html += `<div class="quiz-option" onclick="checkAnswer('${opt.word}', '${current.word}')">${opt.word}</div>`;
+                html += `<div class="quiz-option" onclick="checkAnswer('${opt.word.replace(/'/g, "\\'")}', '${current.word.replace(/'/g, "\\'")}')">${opt.word}</div>`;
             });
 
             html += '</div>';
-            document.getElementById('quizContent').innerHTML = html;
+            document.getElementById('quizContainer').innerHTML = html;
         }
 
         function checkAnswer(selected, correct) {
@@ -573,24 +884,231 @@
             const percentage = Math.round((quizScore / words.length) * 100);
             let emoji = percentage >= 80 ? '🌟' : percentage >= 60 ? '👍' : '💪';
             
-            document.getElementById('quizContent').innerHTML = `
-                <h2>${emoji} Quiz beendet!</h2>
-                <p style="font-size: 2em; margin: 20px 0;">${quizScore} / ${words.length}</p>
-                <p style="font-size: 1.2em; margin-bottom: 30px;">Das sind ${percentage}%!</p>
-                <button class="practice-btn" onclick="startQuiz()">🔄 Nochmal üben</button>
-                <button class="back-btn" onclick="backToVocab()">← Zurück zur Wortliste</button>
+            stats.quizzes++;
+            stats.totalScore += percentage;
+            if (quizScore > stats.bestStreak) {
+                stats.bestStreak = quizScore;
+            }
+            saveStats();
+
+            document.getElementById('quizContainer').innerHTML = `
+                <div style="text-align: center;">
+                    <h2 style="color: #2F6B7D;">${emoji} Quiz beendet!</h2>
+                    <p style="font-size: 3em; margin: 20px 0; color: #4A90A4;">${quizScore} / ${words.length}</p>
+                    <p style="font-size: 1.5em; margin-bottom: 30px; color: #2F6B7D;">Das sind ${percentage}%!</p>
+                    <button class="practice-btn" onclick="startQuiz()">🔄 Nochmal üben</button>
+                </div>
             `;
         }
 
-        function backToVocab() {
-            document.getElementById('quizContent').classList.remove('active');
-            document.getElementById('vocabContent').classList.add('active');
+        function startFlashcards() {
+            hideAllSections();
+            document.getElementById('flashcardContent').classList.add('active');
+            currentCard = 0;
+            isFlipped = false;
+            showCard();
         }
 
-        // Initial load
+        function showCard() {
+            const words = vocabData[currentLevel][currentTheme].words;
+            document.getElementById('totalCards').textContent = words.length;
+            document.getElementById('cardNumber').textContent = currentCard + 1;
+            
+            const progress = ((currentCard + 1) / words.length) * 100;
+            document.getElementById('cardProgress').style.width = progress + '%';
+            document.getElementById('cardProgress').textContent = Math.round(progress) + '%';
+
+            const current = words[currentCard];
+            const flashcard = document.getElementById('flashcard');
+            flashcard.classList.remove('flipped');
+            isFlipped = false;
+            
+            document.getElementById('flashcardContent').innerHTML = `
+                <div class="flashcard-word">${current.word}</div>
+            `;
+        }
+
+        function flipCard() {
+            const words = vocabData[currentLevel][currentTheme].words;
+            const current = words[currentCard];
+            const flashcard = document.getElementById('flashcard');
+            
+            if (!isFlipped) {
+                flashcard.classList.add('flipped');
+                document.getElementById('flashcardContent').innerHTML = `
+                    <div class="flashcard-example">${current.example}</div>
+                `;
+                isFlipped = true;
+            } else {
+                flashcard.classList.remove('flipped');
+                document.getElementById('flashcardContent').innerHTML = `
+                    <div class="flashcard-word">${current.word}</div>
+                `;
+                isFlipped = false;
+            }
+        }
+
+        function nextCard() {
+            const words = vocabData[currentLevel][currentTheme].words;
+            currentCard = (currentCard + 1) % words.length;
+            showCard();
+            
+            if (currentCard === 0) {
+                stats.learned += words.length;
+                saveStats();
+            }
+        }
+
+        function startFillBlank() {
+            hideAllSections();
+            document.getElementById('gameContent').classList.add('active');
+            
+            const words = vocabData[currentLevel][currentTheme].words;
+            const current = words[Math.floor(Math.random() * words.length)];
+            const wordToBlank = current.word;
+            const blanked = current.example.replace(wordToBlank, '___________');
+            
+            gameData = { current, blanked, wordToBlank };
+            
+            document.getElementById('gameArea').innerHTML = `
+                <h2 style="color: #2F6B7D;">✍️ Fülle die Lücke aus</h2>
+                <p style="font-size: 1.5em; margin: 30px 0; color: #4A90A4;">${blanked}</p>
+                <input type="text" id="fillInput" placeholder="Deine Antwort..." 
+                    style="font-size: 1.3em; padding: 15px; border: 3px solid #4A90A4; border-radius: 10px; width: 80%; max-width: 400px;">
+                <br><br>
+                <button class="practice-btn" onclick="checkFillBlank()">Überprüfen</button>
+                <div id="fillResult" style="margin-top: 20px; font-size: 1.2em;"></div>
+            `;
+        }
+
+        function checkFillBlank() {
+            const input = document.getElementById('fillInput').value.trim();
+            const result = document.getElementById('fillResult');
+            
+            if (input.toLowerCase() === gameData.wordToBlank.toLowerCase()) {
+                result.innerHTML = `<p style="color: #66BB6A; font-weight: bold;">✅ Richtig! ${gameData.wordToBlank}</p>`;
+                setTimeout(() => startFillBlank(), 2000);
+            } else {
+                result.innerHTML = `<p style="color: #E53935; font-weight: bold;">❌ Nicht ganz. Versuche es nochmal!</p>`;
+            }
+        }
+
+        function startHangman() {
+            hideAllSections();
+            document.getElementById('gameContent').classList.add('active');
+            
+            const words = vocabData[currentLevel][currentTheme].words;
+            const current = words[Math.floor(Math.random() * words.length)];
+            const word = current.word.toUpperCase();
+            const guessed = [];
+            let mistakes = 0;
+            
+            gameData = { word, guessed, mistakes, current };
+            displayHangman();
+        }
+
+        function displayHangman() {
+            const display = gameData.word.split('').map(letter => 
+                gameData.guessed.includes(letter) || letter === ' ' ? letter : '_'
+            ).join(' ');
+            
+            let html = `
+                <h2 style="color: #2F6B7D;">🎮 Hangman</h2>
+                <p style="color: #4A90A4; margin: 20px 0;">Fehler: ${gameData.mistakes} / 6</p>
+                <div class="hangman-word">${display}</div>
+                <p style="color: #4A90A4; font-style: italic; margin: 20px 0;">${gameData.current.example}</p>
+                <div class="letter-buttons">
+            `;
+            
+            for (let i = 65; i <= 90; i++) {
+                const letter = String.fromCharCode(i);
+                const disabled = gameData.guessed.includes(letter) ? 'disabled' : '';
+                html += `<button class="letter-btn" ${disabled} onclick="guessLetter('${letter}')">${letter}</button>`;
+            }
+            
+            html += '</div>';
+            
+            if (display.replace(/ /g, '') === gameData.word.replace(/ /g, '')) {
+                html += `<p style="color: #66BB6A; font-size: 1.5em; margin-top: 20px; font-weight: bold;">🎉 Gewonnen!</p>`;
+                html += `<button class="practice-btn" style="margin-top: 20px;" onclick="startHangman()">Nochmal spielen</button>`;
+            } else if (gameData.mistakes >= 6) {
+                html += `<p style="color: #E53935; font-size: 1.5em; margin-top: 20px; font-weight: bold;">😢 Verloren! Das Wort war: ${gameData.word}</p>`;
+                html += `<button class="practice-btn" style="margin-top: 20px;" onclick="startHangman()">Nochmal spielen</button>`;
+            }
+            
+            document.getElementById('gameArea').innerHTML = html;
+        }
+
+        function guessLetter(letter) {
+            if (!gameData.guessed.includes(letter)) {
+                gameData.guessed.push(letter);
+                if (!gameData.word.includes(letter)) {
+                    gameData.mistakes++;
+                }
+            }
+            displayHangman();
+        }
+
+        function startScramble() {
+            hideAllSections();
+            document.getElementById('gameContent').classList.add('active');
+            
+            const words = vocabData[currentLevel][currentTheme].words;
+            const current = words[Math.floor(Math.random() * words.length)];
+            const word = current.word;
+            const scrambled = word.split('').sort(() => Math.random() - 0.5).join('');
+            
+            gameData = { word, scrambled, current };
+            
+            document.getElementById('gameArea').innerHTML = `
+                <h2 style="color: #2F6B7D;">🔤 Wort-Scramble</h2>
+                <p style="font-size: 1.2em; color: #4A90A4; margin: 20px 0;">Ordne die Buchstaben:</p>
+                <p style="font-size: 2.5em; color: #2F6B7D; font-weight: bold; letter-spacing: 5px; margin: 20px 0;">${scrambled}</p>
+                <p style="color: #4A90A4; font-style: italic; margin: 20px 0;">${current.example}</p>
+                <input type="text" id="scrambleInput" placeholder="Deine Antwort..." 
+                    style="font-size: 1.3em; padding: 15px; border: 3px solid #4A90A4; border-radius: 10px; width: 80%; max-width: 400px;">
+                <br><br>
+                <button class="practice-btn" onclick="checkScramble()">Überprüfen</button>
+                <div id="scrambleResult" style="margin-top: 20px; font-size: 1.2em;"></div>
+            `;
+        }
+
+        function checkScramble() {
+            const input = document.getElementById('scrambleInput').value.trim();
+            const result = document.getElementById('scrambleResult');
+            
+            if (input.toLowerCase() === gameData.word.toLowerCase()) {
+                result.innerHTML = `<p style="color: #66BB6A; font-weight: bold;">✅ Richtig! ${gameData.word}</p>`;
+                setTimeout(() => startScramble(), 2000);
+            } else {
+                result.innerHTML = `<p style="color: #E53935; font-weight: bold;">❌ Nicht ganz. Versuche es nochmal!</p>`;
+            }
+        }
+
+        function hideAllSections() {
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('vocabContent').classList.remove('active');
+            document.getElementById('quizContent').classList.remove('active');
+            document.getElementById('flashcardContent').classList.remove('active');
+            document.getElementById('gameContent').classList.remove('active');
+        }
+
+        function backToThemes() {
+            showThemes();
+        }
+
+        function backToVocab() {
+            hideAllSections();
+            document.getElementById('vocabContent').classList.add('active');
+            currentMode = 'vocab';
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.mode-btn').classList.add('active');
+            displayVocabList();
+        }
+
+        // Initialize
+        updateStats();
         showThemes();
     </script>
 </body>
 </html>
-
-
