@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wortschatz Memory-Spiel</title>
+    <title>Wortschatz Memory-Spiel - Erweitert</title>
     <style>
         * {
             margin: 0;
@@ -13,13 +13,13 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e3a8a 0%, #0c4a6e 50%, #0f172a 100%);
             min-height: 100vh;
             padding: 20px;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -28,42 +28,60 @@
         }
 
         h1 {
-            color: #667eea;
+            color: #1e40af;
             text-align: center;
             margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(30, 64, 175, 0.2);
         }
 
         .controls {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
             margin-bottom: 30px;
-            flex-wrap: wrap;
-            justify-content: center;
         }
 
-        .btn {
-            padding: 12px 25px;
+        .btn, select {
+            padding: 12px 20px;
             border: none;
             border-radius: 25px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
             transition: all 0.3s;
+            text-align: center;
         }
 
-        .btn-primary {
-            background: #667eea;
+        .btn-primary, select {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
             color: white;
         }
 
-        .btn-primary:hover {
-            background: #5568d3;
+        .btn-primary:hover, select:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%);
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
         }
 
         .btn-success {
-            background: #4caf50;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
             color: white;
+            font-size: 18px;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(14, 165, 233, 0.4);
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            padding-right: 40px;
         }
 
         .stats {
@@ -75,58 +93,62 @@
         }
 
         .stat-box {
-            background: #f8f9fa;
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
             padding: 15px 30px;
-            border-radius: 10px;
+            border-radius: 15px;
             text-align: center;
+            border: 2px solid #3b82f6;
         }
 
         .stat-value {
             font-size: 2em;
             font-weight: bold;
-            color: #667eea;
+            color: #1e40af;
         }
 
         .stat-label {
-            color: #666;
+            color: #1e3a8a;
             margin-top: 5px;
+            font-weight: 600;
         }
 
         .game-board {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 15px;
             margin-top: 30px;
         }
 
         .card {
             aspect-ratio: 1;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
             border-radius: 15px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2em;
+            font-size: 1.1em;
             font-weight: bold;
             color: white;
             transition: all 0.3s;
             position: relative;
             transform-style: preserve-3d;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .card:hover {
             transform: scale(1.05);
+            box-shadow: 0 8px 15px rgba(59, 130, 246, 0.4);
         }
 
         .card.flipped {
-            background: white;
-            color: #333;
-            border: 3px solid #667eea;
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+            color: #0c4a6e;
+            border: 3px solid #0ea5e9;
         }
 
         .card.matched {
-            background: #4caf50;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
             color: white;
             cursor: default;
             animation: matchPulse 0.5s;
@@ -156,6 +178,7 @@
             justify-content: center;
             padding: 10px;
             text-align: center;
+            overflow: hidden;
         }
 
         .card.flipped .card-back {
@@ -173,7 +196,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.7);
+            background: rgba(15, 23, 42, 0.8);
             z-index: 1000;
             align-items: center;
             justify-content: center;
@@ -184,15 +207,16 @@
         }
 
         .modal-content {
-            background: white;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
             padding: 40px;
             border-radius: 20px;
             text-align: center;
             max-width: 500px;
+            border: 3px solid #0ea5e9;
         }
 
         .modal-content h2 {
-            color: #667eea;
+            color: #0c4a6e;
             margin-bottom: 20px;
             font-size: 2.5em;
         }
@@ -200,7 +224,53 @@
         .modal-content p {
             font-size: 1.3em;
             margin: 15px 0;
+            color: #0f172a;
         }
+
+        .highscore-section {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+            border: 2px solid #3b82f6;
+        }
+
+        .highscore-section h3 {
+            color: #1e40af;
+            margin-bottom: 15px;
+        }
+
+        .highscore-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .highscore-item {
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            border: 1px solid #93c5fd;
+        }
+
+        .highscore-rank {
+            font-weight: bold;
+            color: #1e40af;
+        }
+
+        .mode-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+
+        .mode-normal { background: #dbeafe; color: #1e40af; }
+        .mode-synonym { background: #bfdbfe; color: #1e3a8a; }
+        .mode-opposite { background: #93c5fd; color: #0c4a6e; }
+        .mode-article { background: #60a5fa; color: white; }
     </style>
 </head>
 <body>
@@ -208,16 +278,31 @@
         <h1>🎮 Wortschatz Memory-Spiel</h1>
         
         <div class="controls">
-            <select id="levelSelect" class="btn btn-primary">
-                <option value="a2">A2 - Grundlagen</option>
-                <option value="b1">B1 - Mittel</option>
-                <option value="b2">B2 - Fortgeschritten</option>
+            <select id="modeSelect" class="btn btn-primary">
+                <option value="normal">📖 Normal (Wort ↔ Erklärung)</option>
+                <option value="synonym">🔄 Synonyme</option>
+                <option value="opposite">⚡ Gegenteile</option>
+                <option value="article">📝 Artikel</option>
             </select>
             <select id="themeSelect" class="btn btn-primary">
-                <option value="all">Alle Themen gemischt</option>
-                <option value="schule">Nur Schule</option>
-                <option value="familie">Nur Familie</option>
-                <option value="tiere">Nur Tiere</option>
+                <option value="all">🎲 Alle Themen gemischt</option>
+                <option value="essen">🍽️ Essen & Trinken</option>
+                <option value="berufe">💼 Berufe</option>
+                <option value="hobbys">⚽ Hobbys & Freizeit</option>
+                <option value="wetter">🌤️ Wetter & Natur</option>
+                <option value="koerper">🏃 Körper & Gesundheit</option>
+                <option value="kleidung">👕 Kleidung</option>
+                <option value="reisen">✈️ Reisen & Verkehr</option>
+                <option value="haus">🏠 Haus & Wohnung</option>
+                <option value="emotionen">😊 Emotionen & Gefühle</option>
+                <option value="verben">🏃 Verben</option>
+                <option value="adjektive">✨ Adjektive</option>
+            </select>
+            <select id="pairCount" class="btn btn-primary">
+                <option value="8">8 Paare (leicht)</option>
+                <option value="12">12 Paare (mittel)</option>
+                <option value="16">16 Paare (schwer)</option>
+                <option value="20">20 Paare (extrem)</option>
             </select>
             <button class="btn btn-success" onclick="startGame()">🎲 Neues Spiel starten</button>
         </div>
@@ -238,6 +323,13 @@
         </div>
 
         <div class="game-board" id="gameBoard"></div>
+
+        <div class="highscore-section">
+            <h3>🏆 Highscores</h3>
+            <div class="highscore-list" id="highscoreList">
+                <p style="text-align: center; color: #64748b;">Noch keine Highscores. Spiele dein erstes Spiel!</p>
+            </div>
+        </div>
     </div>
 
     <div class="modal" id="winModal">
@@ -246,79 +338,402 @@
             <p>Du hast alle Paare gefunden!</p>
             <p><strong>Züge:</strong> <span id="finalMoves"></span></p>
             <p><strong>Zeit:</strong> <span id="finalTime"></span></p>
+            <p id="highscoreMessage"></p>
             <button class="btn btn-success" onclick="closeModal()">Nochmal spielen</button>
         </div>
     </div>
 
     <script>
         const vocabulary = {
-            a2: {
-                schule: [
-                    { word: 'das Heft', pair: 'Ich schreibe in mein...' },
-                    { word: 'die Pause', pair: 'In der ... spielen wir' },
-                    { word: 'die Tafel', pair: 'Lehrerin schreibt an die...' },
-                    { word: 'der Bleistift', pair: 'Damit male ich' },
-                    { word: 'die Schere', pair: 'Damit schneide ich' }
+            normal: {
+                essen: [
+                    { word: 'die Mahlzeit', pair: 'Frühstück, Mittag- oder Abendessen' },
+                    { word: 'das Rezept', pair: 'Anleitung zum Kochen' },
+                    { word: 'die Zutat', pair: 'Was man zum Kochen braucht' },
+                    { word: 'würzen', pair: 'Salz und Pfeffer hinzufügen' },
+                    { word: 'braten', pair: 'In der Pfanne kochen' },
+                    { word: 'backen', pair: 'Im Ofen zubereiten' },
+                    { word: 'rühren', pair: 'Mit Löffel mischen' },
+                    { word: 'schmecken', pair: 'Mit der Zunge probieren' },
+                    { word: 'das Besteck', pair: 'Messer, Gabel, Löffel' },
+                    { word: 'die Portion', pair: 'Menge Essen für eine Person' }
                 ],
-                familie: [
-                    { word: 'die Eltern', pair: 'Mutter und Vater = ...' },
-                    { word: 'die Geschwister', pair: 'Bruder und Schwester = ...' },
-                    { word: 'die Oma', pair: 'Mutter meiner Mutter' },
-                    { word: 'der Cousin', pair: 'Sohn von Tante/Onkel' },
-                    { word: 'die Tante', pair: 'Schwester meiner Mutter' }
+                berufe: [
+                    { word: 'der Arbeitgeber', pair: 'Chef, der Mitarbeiter einstellt' },
+                    { word: 'die Bewerbung', pair: 'Dokumente für neuen Job' },
+                    { word: 'das Gehalt', pair: 'Geld für Arbeit' },
+                    { word: 'die Ausbildung', pair: 'Lernen eines Berufs' },
+                    { word: 'die Schicht', pair: 'Arbeitszeit (Tag/Nacht)' },
+                    { word: 'der Kollege', pair: 'Person, die mit mir arbeitet' },
+                    { word: 'kündigen', pair: 'Job beenden' },
+                    { word: 'einstellen', pair: 'Jemanden anstellen' },
+                    { word: 'die Karriere', pair: 'Beruflicher Weg nach oben' },
+                    { word: 'die Beförderung', pair: 'Aufstieg zu besserer Position' }
                 ],
-                tiere: [
-                    { word: 'der Hund', pair: 'Er bellt: Wau wau!' },
-                    { word: 'die Katze', pair: 'Sie miaut: Miau!' },
-                    { word: 'das Pferd', pair: 'Es frisst Heu' },
-                    { word: 'die Kuh', pair: 'Sie gibt Milch' },
-                    { word: 'der Vogel', pair: 'Er kann fliegen' }
-                ]
-            },
-            b1: {
-                schule: [
-                    { word: 'die Schularbeit', pair: 'Prüfung in der Schule' },
-                    { word: 'das Zeugnis', pair: 'Alle Noten stehen drin' },
-                    { word: 'die Leistung', pair: 'Was man erreicht hat' },
-                    { word: 'wiederholen', pair: 'Nochmal lernen' },
+                hobbys: [
+                    { word: 'sammeln', pair: 'Briefmarken oder Münzen anhäufen' },
+                    { word: 'basteln', pair: 'Mit Händen etwas machen' },
+                    { word: 'der Verein', pair: 'Gruppe mit gleichem Interesse' },
+                    { word: 'trainieren', pair: 'Sport üben' },
+                    { word: 'wandern', pair: 'Lange Spaziergänge in der Natur' },
+                    { word: 'tanzen', pair: 'Sich zu Musik bewegen' },
+                    { word: 'malen', pair: 'Mit Farben Bilder machen' },
+                    { word: 'fotografieren', pair: 'Mit Kamera Bilder machen' },
+                    { word: 'angeln', pair: 'Fische fangen' },
+                    { word: 'zelten', pair: 'Im Zelt übernachten' }
+                ],
+                wetter: [
+                    { word: 'der Nebel', pair: 'Man sieht nicht weit' },
+                    { word: 'das Gewitter', pair: 'Blitz und Donner' },
+                    { word: 'die Wolke', pair: 'Weiß oder grau am Himmel' },
+                    { word: 'der Regenbogen', pair: 'Bunte Farben nach Regen' },
+                    { word: 'der Frost', pair: 'Unter 0 Grad' },
+                    { word: 'tauen', pair: 'Eis wird zu Wasser' },
+                    { word: 'stürmen', pair: 'Starker Wind' },
+                    { word: 'die Hitze', pair: 'Sehr hohe Temperatur' },
+                    { word: 'feucht', pair: 'Ein bisschen nass' },
+                    { word: 'trocken', pair: 'Ohne Wasser' }
+                ],
+                koerper: [
+                    { word: 'die Stirn', pair: 'Oberhalb der Augen' },
+                    { word: 'der Ellbogen', pair: 'Mitte des Arms' },
+                    { word: 'das Knie', pair: 'Gelenk im Bein' },
+                    { word: 'die Ferse', pair: 'Hinten am Fuß' },
+                    { word: 'atmen', pair: 'Luft holen' },
+                    { word: 'schlucken', pair: 'Essen in Hals runter' },
+                    { word: 'husten', pair: 'Laut aus dem Hals' },
+                    { word: 'niesen', pair: 'Plötzlich durch die Nase' },
+                    { word: 'die Wunde', pair: 'Verletzung der Haut' },
+                    { word: 'heilen', pair: 'Gesund werden' }
+                ],
+                kleidung: [
+                    { word: 'der Knopf', pair: 'Zum Schließen von Hemden' },
+                    { word: 'der Reißverschluss', pair: 'Zum Auf- und Zumachen' },
+                    { word: 'die Tasche', pair: 'Für Geldbeutel und Handy' },
+                    { word: 'der Gürtel', pair: 'Hält die Hose' },
+                    { word: 'anziehen', pair: 'Kleidung anlegen' },
+                    { word: 'ausziehen', pair: 'Kleidung ablegen' },
+                    { word: 'passen', pair: 'Die richtige Größe haben' },
+                    { word: 'waschen', pair: 'Sauber machen' },
+                    { word: 'bügeln', pair: 'Falten entfernen' },
+                    { word: 'der Stoff', pair: 'Material der Kleidung' }
+                ],
+                reisen: [
+                    { word: 'der Bahnhof', pair: 'Wo Züge ankommen' },
+                    { word: 'der Flughafen', pair: 'Wo Flugzeuge starten' },
+                    { word: 'die Verspätung', pair: 'Zug kommt zu spät' },
+                    { word: 'umsteigen', pair: 'Zug wechseln' },
+                    { word: 'der Reisepass', pair: 'Dokument fürs Ausland' },
+                    { word: 'die Unterkunft', pair: 'Wo man schläft' },
+                    { word: 'buchen', pair: 'Reservieren' },
+                    { word: 'packen', pair: 'Koffer füllen' },
+                    { word: 'die Sehenswürdigkeit', pair: 'Touristenattraktion' },
+                    { word: 'erkunden', pair: 'Neue Orte entdecken' }
+                ],
+                haus: [
+                    { word: 'der Keller', pair: 'Raum unter dem Haus' },
+                    { word: 'der Dachboden', pair: 'Raum ganz oben' },
+                    { word: 'die Treppe', pair: 'Nach oben gehen' },
+                    { word: 'der Schlüssel', pair: 'Öffnet die Tür' },
+                    { word: 'die Heizung', pair: 'Macht warm im Winter' },
+                    { word: 'der Wasserhahn', pair: 'Wasser kommt raus' },
+                    { word: 'die Steckdose', pair: 'Für Strom' },
+                    { word: 'der Mülleimer', pair: 'Für Abfall' },
+                    { word: 'aufräumen', pair: 'Ordnung machen' },
+                    { word: 'putzen', pair: 'Sauber machen' }
+                ],
+                emotionen: [
+                    { word: 'erleichtert', pair: 'Wenn Problem gelöst ist' },
+                    { word: 'aufgeregt', pair: 'Nervös vor etwas Gutem' },
+                    { word: 'enttäuscht', pair: 'Traurig über Ergebnis' },
+                    { word: 'begeistert', pair: 'Sehr enthusiastisch' },
+                    { word: 'ängstlich', pair: 'Voller Angst' },
+                    { word: 'verwirrt', pair: 'Nicht verstehen' },
+                    { word: 'zufrieden', pair: 'Glücklich mit Situation' },
+                    { word: 'neidisch', pair: 'Will haben, was andere haben' },
+                    { word: 'überrascht', pair: 'Hat nicht erwartet' },
+                    { word: 'dankbar', pair: 'Voller Dankbarkeit' }
+                ],
+                verben: [
+                    { word: 'erklären', pair: 'Etwas verständlich machen' },
+                    { word: 'überzeugen', pair: 'Jemanden zu etwas bringen' },
+                    { word: 'vermuten', pair: 'Glauben, aber nicht sicher' },
+                    { word: 'behaupten', pair: 'Sagen, dass etwas wahr ist' },
+                    { word: 'vergleichen', pair: 'Unterschiede finden' },
+                    { word: 'erreichen', pair: 'Ziel schaffen' },
+                    { word: 'verhindern', pair: 'Stoppen, dass etwas passiert' },
+                    { word: 'unterstützen', pair: 'Jemandem helfen' },
+                    { word: 'entwickeln', pair: 'Etwas Neues schaffen' },
                     { word: 'verbessern', pair: 'Besser machen' }
                 ],
-                familie: [
-                    { word: 'aufgeregt', pair: 'Nervös vor Freude' },
-                    { word: 'enttäuscht', pair: 'Traurig über Ergebnis' },
-                    { word: 'stolz', pair: 'Freude über Erfolg' },
-                    { word: 'nervös', pair: 'Unruhig vor Prüfung' },
-                    { word: 'zufrieden', pair: 'Glücklich mit Ergebnis' }
-                ],
-                tiere: [
-                    { word: 'das Hobby', pair: 'Freizeitaktivität' },
-                    { word: 'trainieren', pair: 'Sport üben' },
-                    { word: 'der Verein', pair: 'Sportgruppe' },
-                    { word: 'der Wettkampf', pair: 'Sportwettbewerb' },
-                    { word: 'teilnehmen', pair: 'Mitmachen bei...' }
+                adjektive: [
+                    { word: 'gründlich', pair: 'Sehr genau und detailliert' },
+                    { word: 'zuverlässig', pair: 'Man kann sich darauf verlassen' },
+                    { word: 'sorgfältig', pair: 'Mit großer Aufmerksamkeit' },
+                    { word: 'kreativ', pair: 'Voller neuer Ideen' },
+                    { word: 'praktisch', pair: 'Nützlich im Alltag' },
+                    { word: 'kompliziert', pair: 'Schwer zu verstehen' },
+                    { word: 'selbstständig', pair: 'Ohne Hilfe von anderen' },
+                    { word: 'vielfältig', pair: 'Sehr abwechslungsreich' },
+                    { word: 'genau', pair: 'Präzise, ohne Fehler' },
+                    { word: 'ordentlich', pair: 'Gut organisiert' }
                 ]
             },
-            b2: {
-                schule: [
-                    { word: 'zunächst', pair: 'Am Anfang, zuerst' },
-                    { word: 'daraufhin', pair: 'Danach, als Reaktion' },
-                    { word: 'schließlich', pair: 'Am Ende, endlich' },
-                    { word: 'währenddessen', pair: 'In der Zwischenzeit' },
-                    { word: 'infolgedessen', pair: 'Deshalb, als Folge' }
+            synonym: {
+                essen: [
+                    { word: 'lecker', pair: 'köstlich' },
+                    { word: 'hungrig', pair: 'ausgehungert' },
+                    { word: 'satt', pair: 'voll' },
+                    { word: 'essen', pair: 'speisen' },
+                    { word: 'trinken', pair: 'schlürfen' }
                 ],
-                familie: [
-                    { word: 'aufmerksam', pair: 'Konzentriert beobachtend' },
-                    { word: 'sorgfältig', pair: 'Sehr genau' },
-                    { word: 'gründlich', pair: 'Detailliert, genau' },
-                    { word: 'präzise', pair: 'Exakt, punktgenau' },
-                    { word: 'vielfältig', pair: 'Abwechslungsreich' }
+                berufe: [
+                    { word: 'arbeiten', pair: 'schaffen' },
+                    { word: 'verdienen', pair: 'einnehmen' },
+                    { word: 'Arbeit', pair: 'Job' },
+                    { word: 'Chef', pair: 'Vorgesetzter' },
+                    { word: 'kündigen', pair: 'aufhören' }
                 ],
-                tiere: [
-                    { word: 'beobachten', pair: 'Genau ansehen' },
-                    { word: 'vermuten', pair: 'Annehmen, glauben' },
-                    { word: 'feststellen', pair: 'Erkennen, merken' },
-                    { word: 'schildern', pair: 'Beschreiben, erzählen' },
-                    { word: 'verdeutlichen', pair: 'Klar machen' }
+                hobbys: [
+                    { word: 'spielen', pair: 'zocken' },
+                    { word: 'lesen', pair: 'schmökern' },
+                    { word: 'Spaß', pair: 'Freude' },
+                    { word: 'interessant', pair: 'spannend' },
+                    { word: 'langweilig', pair: 'öde' }
+                ],
+                wetter: [
+                    { word: 'heiß', pair: 'warm' },
+                    { word: 'kalt', pair: 'kühl' },
+                    { word: 'nass', pair: 'feucht' },
+                    { word: 'Regen', pair: 'Niederschlag' },
+                    { word: 'Sonne', pair: 'Sonnenschein' }
+                ],
+                koerper: [
+                    { word: 'krank', pair: 'erkrankt' },
+                    { word: 'gesund', pair: 'fit' },
+                    { word: 'müde', pair: 'erschöpft' },
+                    { word: 'wach', pair: 'munter' },
+                    { word: 'stark', pair: 'kräftig' }
+                ],
+                kleidung: [
+                    { word: 'schön', pair: 'hübsch' },
+                    { word: 'modern', pair: 'trendy' },
+                    { word: 'alt', pair: 'veraltet' },
+                    { word: 'sauber', pair: 'rein' },
+                    { word: 'dreckig', pair: 'schmutzig' }
+                ],
+                reisen: [
+                    { word: 'fahren', pair: 'reisen' },
+                    { word: 'schnell', pair: 'zügig' },
+                    { word: 'langsam', pair: 'gemächlich' },
+                    { word: 'weit', pair: 'fern' },
+                    { word: 'nah', pair: 'nahe' }
+                ],
+                haus: [
+                    { word: 'groß', pair: 'riesig' },
+                    { word: 'klein', pair: 'winzig' },
+                    { word: 'gemütlich', pair: 'behaglich' },
+                    { word: 'hell', pair: 'licht' },
+                    { word: 'dunkel', pair: 'finster' }
+                ],
+                emotionen: [
+                    { word: 'froh', pair: 'glücklich' },
+                    { word: 'traurig', pair: 'betrübt' },
+                    { word: 'ärgerlich', pair: 'wütend' },
+                    { word: 'nervös', pair: 'unruhig' },
+                    { word: 'ruhig', pair: 'gelassen' }
+                ],
+                verben: [
+                    { word: 'sagen', pair: 'äußern' },
+                    { word: 'machen', pair: 'tun' },
+                    { word: 'sehen', pair: 'erblicken' },
+                    { word: 'hören', pair: 'vernehmen' },
+                    { word: 'gehen', pair: 'laufen' },
+                    { word: 'denken', pair: 'überlegen' },
+                    { word: 'verstehen', pair: 'begreifen' },
+                    { word: 'anfangen', pair: 'beginnen' },
+                    { word: 'aufhören', pair: 'beenden' },
+                    { word: 'zeigen', pair: 'präsentieren' }
+                ],
+                adjektive: [
+                    { word: 'gut', pair: 'prima' },
+                    { word: 'schlecht', pair: 'übel' },
+                    { word: 'wichtig', pair: 'bedeutend' },
+                    { word: 'schwierig', pair: 'kompliziert' },
+                    { word: 'einfach', pair: 'leicht' },
+                    { word: 'neu', pair: 'frisch' },
+                    { word: 'richtig', pair: 'korrekt' },
+                    { word: 'falsch', pair: 'inkorrekt' },
+                    { word: 'schön', pair: 'wunderschön' },
+                    { word: 'schlimm', pair: 'übel' }
+                ]
+            },
+            opposite: {
+                essen: [
+                    { word: 'süß', pair: 'sauer' },
+                    { word: 'heiß', pair: 'kalt' },
+                    { word: 'hart', pair: 'weich' },
+                    { word: 'frisch', pair: 'alt' },
+                    { word: 'voll', pair: 'leer' }
+                ],
+                berufe: [
+                    { word: 'arbeiten', pair: 'feiern' },
+                    { word: 'früh', pair: 'spät' },
+                    { word: 'Anfang', pair: 'Ende' },
+                    { word: 'einstellen', pair: 'entlassen' },
+                    { word: 'Erfolg', pair: 'Misserfolg' }
+                ],
+                hobbys: [
+                    { word: 'gewinnen', pair: 'verlieren' },
+                    { word: 'stark', pair: 'schwach' },
+                    { word: 'schnell', pair: 'langsam' },
+                    { word: 'aktiv', pair: 'passiv' },
+                    { word: 'spannend', pair: 'langweilig' }
+                ],
+                wetter: [
+                    { word: 'warm', pair: 'kalt' },
+                    { word: 'trocken', pair: 'nass' },
+                    { word: 'hell', pair: 'dunkel' },
+                    { word: 'Tag', pair: 'Nacht' },
+                    { word: 'Sommer', pair: 'Winter' }
+                ],
+                koerper: [
+                    { word: 'gesund', pair: 'krank' },
+                    { word: 'groß', pair: 'klein' },
+                    { word: 'dick', pair: 'dünn' },
+                    { word: 'jung', pair: 'alt' },
+                    { word: 'stark', pair: 'schwach' }
+                ],
+                kleidung: [
+                    { word: 'eng', pair: 'weit' },
+                    { word: 'lang', pair: 'kurz' },
+                    { word: 'neu', pair: 'alt' },
+                    { word: 'sauber', pair: 'schmutzig' },
+                    { word: 'elegant', pair: 'schlampig' }
+                ],
+                reisen: [
+                    { word: 'ankommen', pair: 'abfahren' },
+                    { word: 'nah', pair: 'fern' },
+                    { word: 'oben', pair: 'unten' },
+                    { word: 'vorne', pair: 'hinten' },
+                    { word: 'Inland', pair: 'Ausland' }
+                ],
+                haus: [
+                    { word: 'innen', pair: 'außen' },
+                    { word: 'oben', pair: 'unten' },
+                    { word: 'öffnen', pair: 'schließen' },
+                    { word: 'aufräumen', pair: 'verwüsten' },
+                    { word: 'hell', pair: 'dunkel' }
+                ],
+                emotionen: [
+                    { word: 'glücklich', pair: 'traurig' },
+                    { word: 'mutig', pair: 'ängstlich' },
+                    { word: 'ruhig', pair: 'aufgeregt' },
+                    { word: 'freundlich', pair: 'unfreundlich' },
+                    { word: 'zufrieden', pair: 'unzufrieden' }
+                ],
+                verben: [
+                    { word: 'lieben', pair: 'hassen' },
+                    { word: 'geben', pair: 'nehmen' },
+                    { word: 'kaufen', pair: 'verkaufen' },
+                    { word: 'fragen', pair: 'antworten' },
+                    { word: 'kommen', pair: 'gehen' },
+                    { word: 'öffnen', pair: 'schließen' },
+                    { word: 'steigen', pair: 'fallen' },
+                    { word: 'finden', pair: 'verlieren' },
+                    { word: 'lernen', pair: 'vergessen' },
+                    { word: 'lachen', pair: 'weinen' }
+                ],
+                adjektive: [
+                    { word: 'gut', pair: 'schlecht' },
+                    { word: 'richtig', pair: 'falsch' },
+                    { word: 'leicht', pair: 'schwer' },
+                    { word: 'viel', pair: 'wenig' },
+                    { word: 'laut', pair: 'leise' },
+                    { word: 'schön', pair: 'hässlich' },
+                    { word: 'teuer', pair: 'billig' },
+                    { word: 'interessant', pair: 'langweilig' },
+                    { word: 'sauber', pair: 'dreckig' },
+                    { word: 'klug', pair: 'dumm' }
+                ]
+            },
+            article: {
+                essen: [
+                    { word: 'Mahlzeit', pair: 'die' },
+                    { word: 'Rezept', pair: 'das' },
+                    { word: 'Zutat', pair: 'die' },
+                    { word: 'Besteck', pair: 'das' },
+                    { word: 'Teller', pair: 'der' }
+                ],
+                berufe: [
+                    { word: 'Arbeit', pair: 'die' },
+                    { word: 'Gehalt', pair: 'das' },
+                    { word: 'Beruf', pair: 'der' },
+                    { word: 'Karriere', pair: 'die' },
+                    { word: 'Kollege', pair: 'der' }
+                ],
+                hobbys: [
+                    { word: 'Sport', pair: 'der' },
+                    { word: 'Spiel', pair: 'das' },
+                    { word: 'Musik', pair: 'die' },
+                    { word: 'Hobby', pair: 'das' },
+                    { word: 'Verein', pair: 'der' }
+                ],
+                wetter: [
+                    { word: 'Wetter', pair: 'das' },
+                    { word: 'Regen', pair: 'der' },
+                    { word: 'Sonne', pair: 'die' },
+                    { word: 'Gewitter', pair: 'das' },
+                    { word: 'Wind', pair: 'der' }
+                ],
+                koerper: [
+                    { word: 'Körper', pair: 'der' },
+                    { word: 'Gesundheit', pair: 'die' },
+                    { word: 'Herz', pair: 'das' },
+                    { word: 'Kopf', pair: 'der' },
+                    { word: 'Hand', pair: 'die' }
+                ],
+                kleidung: [
+                    { word: 'Kleidung', pair: 'die' },
+                    { word: 'Hemd', pair: 'das' },
+                    { word: 'Schuh', pair: 'der' },
+                    { word: 'Hose', pair: 'die' },
+                    { word: 'Jacke', pair: 'die' }
+                ],
+                reisen: [
+                    { word: 'Reise', pair: 'die' },
+                    { word: 'Flugzeug', pair: 'das' },
+                    { word: 'Zug', pair: 'der' },
+                    { word: 'Auto', pair: 'das' },
+                    { word: 'Bahnhof', pair: 'der' }
+                ],
+                haus: [
+                    { word: 'Haus', pair: 'das' },
+                    { word: 'Wohnung', pair: 'die' },
+                    { word: 'Zimmer', pair: 'das' },
+                    { word: 'Tür', pair: 'die' },
+                    { word: 'Fenster', pair: 'das' }
+                ],
+                emotionen: [
+                    { word: 'Freude', pair: 'die' },
+                    { word: 'Glück', pair: 'das' },
+                    { word: 'Angst', pair: 'die' },
+                    { word: 'Gefühl', pair: 'das' },
+                    { word: 'Schmerz', pair: 'der' }
+                ],
+                verben: [
+                    { word: 'Leben', pair: 'das' },
+                    { word: 'Wort', pair: 'das' },
+                    { word: 'Gedanke', pair: 'der' },
+                    { word: 'Frage', pair: 'die' },
+                    { word: 'Antwort', pair: 'die' }
+                ],
+                adjektive: [
+                    { word: 'Qualität', pair: 'die' },
+                    { word: 'Problem', pair: 'das' },
+                    { word: 'Unterschied', pair: 'der' },
+                    { word: 'Eigenschaft', pair: 'die' },
+                    { word: 'Merkmal', pair: 'das' }
                 ]
             }
         };
@@ -329,23 +744,46 @@
         let moves = 0;
         let timerInterval;
         let seconds = 0;
+        let currentMode = 'normal';
+        let currentTheme = 'all';
+        let currentPairCount = 8;
+
+        // Sound-Effekte
+        function playMatchSound() {
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBgoOEhYaHiImKi4yNjo+QkZKTlJWWl5iZmpucnZ6foKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr/AwcLDxMXGx8jJysvMzc7P0NHS09TV1tfY2drb3N3e3+Dh4uPk5ebn6Onq6+zt7u/w8fLz9PX29/j5+vv8/f7/AAABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj9AQUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpbXF1eX2BhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ent8fX5/gIGCg4SFhoeIiYqLjI2Oj5CRkpOUlZaXmJmam5ydnp+goaKjpKWmp6ipqqusra6vsLGys7S1tre4ubq7vL2+v8DBwsPExcbHyMnKy8zNzs/Q0dLT1NXW19jZ2tvc3d7f4OHi4+Tl5ufo6err7O3u7/Dx8vP09fb3+Pn6+/z9/v8AAAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn+AgYKDhIWGh4iJiouMjY6PkJGSk5SVlpeYmZqbnJ2en6ChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1dbX2Nna29zd3t/g4eLj5OXm5+jp6uvs7e7v8PHy8/T19vf4+fr7/P3+/w==');
+            audio.play().catch(() => {});
+        }
+
+        function playWinSound() {
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhIeKjY+Sk5SVlpeYmZqbnJ2en6ChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1dbX2Nna29zd3t/g4eLj5OXm5+jp6uvs7e7v8PHy8/T19vf4+fr7/P3+/wABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj9AQUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpbXF1eX2BhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ent8fX5/gIGCg4SFhoeIiYqLjI2Oj5CRkpOUlZaXmJmam5ydnp+goaKjpKWmp6ipqqusra6vsLGys7S1tre4ubq7vL2+v8DBwsPExcbHyMnKy8zNzs/Q0dLT1NXW19jZ2tvc3d7f4OHi4+Tl5ufo6err7O3u7/Dx8vP09fb3+Pn6+/z9/v8=');
+            audio.play().catch(() => {});
+        }
 
         function startGame() {
-            const level = document.getElementById('levelSelect').value;
+            const mode = document.getElementById('modeSelect').value;
             const theme = document.getElementById('themeSelect').value;
+            const pairCount = parseInt(document.getElementById('pairCount').value);
+            
+            currentMode = mode;
+            currentTheme = theme;
+            currentPairCount = pairCount;
             
             resetGame();
             
             // Select vocabulary
             let selectedVocab = [];
             if (theme === 'all') {
-                Object.values(vocabulary[level]).forEach(themeWords => {
+                Object.values(vocabulary[mode]).forEach(themeWords => {
                     selectedVocab = selectedVocab.concat(themeWords);
                 });
-                // Shuffle and take 8 pairs
-                selectedVocab = selectedVocab.sort(() => Math.random() - 0.5).slice(0, 8);
+                selectedVocab = selectedVocab.sort(() => Math.random() - 0.5).slice(0, pairCount);
             } else {
-                selectedVocab = vocabulary[level][theme] || [];
+                selectedVocab = vocabulary[mode][theme] || [];
+                if (selectedVocab.length < pairCount) {
+                    selectedVocab = selectedVocab.slice(0, selectedVocab.length);
+                } else {
+                    selectedVocab = selectedVocab.sort(() => Math.random() - 0.5).slice(0, pairCount);
+                }
             }
             
             // Create card pairs
@@ -368,6 +806,16 @@
         function createBoard() {
             const board = document.getElementById('gameBoard');
             board.innerHTML = '';
+            
+            // Adjust grid based on number of cards
+            const cardCount = gameData.length;
+            if (cardCount <= 16) {
+                board.style.gridTemplateColumns = 'repeat(4, 1fr)';
+            } else if (cardCount <= 24) {
+                board.style.gridTemplateColumns = 'repeat(6, 1fr)';
+            } else {
+                board.style.gridTemplateColumns = 'repeat(8, 1fr)';
+            }
             
             gameData.forEach((card, index) => {
                 const cardElement = document.createElement('div');
@@ -409,6 +857,7 @@
                     card2.classList.add('matched');
                     matchedPairs++;
                     document.getElementById('matches').textContent = matchedPairs;
+                    playMatchSound();
                     
                     if (matchedPairs === gameData.length / 2) {
                         endGame();
@@ -448,8 +897,16 @@
             clearInterval(timerInterval);
             const mins = Math.floor(seconds / 60);
             const secs = seconds % 60;
+            const timeString = `${mins}:${secs.toString().padStart(2, '0')}`;
+            
             document.getElementById('finalMoves').textContent = moves;
-            document.getElementById('finalTime').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+            document.getElementById('finalTime').textContent = timeString;
+            
+            playWinSound();
+            
+            // Save to highscores
+            saveHighscore(currentMode, currentTheme, currentPairCount, moves, seconds);
+            
             document.getElementById('winModal').classList.add('active');
         }
 
@@ -458,8 +915,90 @@
             startGame();
         }
 
-        // Start game on load
+        // Highscore System
+        function saveHighscore(mode, theme, pairCount, moves, time) {
+            let highscores = JSON.parse(localStorage.getItem('memoryHighscores') || '[]');
+            
+            const score = {
+                mode: mode,
+                theme: theme,
+                pairCount: pairCount,
+                moves: moves,
+                time: time,
+                date: new Date().toISOString()
+            };
+            
+            highscores.push(score);
+            
+            // Sort by time (fastest first), then by moves
+            highscores.sort((a, b) => {
+                if (a.time !== b.time) return a.time - b.time;
+                return a.moves - b.moves;
+            });
+            
+            // Keep only top 10
+            highscores = highscores.slice(0, 10);
+            
+            localStorage.setItem('memoryHighscores', JSON.stringify(highscores));
+            
+            displayHighscores();
+            
+            // Check if new highscore
+            if (highscores[0].time === time && highscores[0].moves === moves) {
+                document.getElementById('highscoreMessage').innerHTML = '<strong style="color: #0ea5e9;">🏆 Neuer Highscore! 🏆</strong>';
+            }
+        }
+
+        function displayHighscores() {
+            const highscores = JSON.parse(localStorage.getItem('memoryHighscores') || '[]');
+            const container = document.getElementById('highscoreList');
+            
+            if (highscores.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #64748b;">Noch keine Highscores. Spiele dein erstes Spiel!</p>';
+                return;
+            }
+            
+            container.innerHTML = highscores.map((score, index) => {
+                const mins = Math.floor(score.time / 60);
+                const secs = score.time % 60;
+                const timeString = `${mins}:${secs.toString().padStart(2, '0')}`;
+                
+                const modeLabels = {
+                    'normal': '📖',
+                    'synonym': '🔄',
+                    'opposite': '⚡',
+                    'article': '📝'
+                };
+                
+                const themeLabels = {
+                    'all': '🎲 Gemischt',
+                    'essen': '🍽️ Essen',
+                    'berufe': '💼 Berufe',
+                    'hobbys': '⚽ Hobbys',
+                    'wetter': '🌤️ Wetter',
+                    'koerper': '🏃 Körper',
+                    'kleidung': '👕 Kleidung',
+                    'reisen': '✈️ Reisen',
+                    'haus': '🏠 Haus',
+                    'emotionen': '😊 Emotionen',
+                    'verben': '🏃 Verben',
+                    'adjektive': '✨ Adjektive'
+                };
+                
+                return `
+                    <div class="highscore-item">
+                        <span class="highscore-rank">#${index + 1}</span>
+                        <span>${modeLabels[score.mode]} ${themeLabels[score.theme]}</span>
+                        <span>${score.pairCount} Paare</span>
+                        <span><strong>${timeString}</strong> (${score.moves} Züge)</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Initialize
         startGame();
+        displayHighscores();
     </script>
 </body>
 </html>
