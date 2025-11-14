@@ -753,7 +753,7 @@
                 <a href="https://wa.me/4368120283291?text=Hallo%20Amy,%20ich%20möchte%20gerne%20Deutsch%20lernen!" 
                    target="_blank" 
                    class="whatsapp-link">
-                    📱 WhatsApp: +43 681 202 83291
+                    📱 WhatsApp: +43 681 20283291
                 </a>
             </div>
         </header>
@@ -1458,17 +1458,8 @@
             isReversed = !isReversed;
             localStorage.setItem('kinderIsReversed', JSON.stringify(isReversed));
             updateDirectionButton();
-            
-            // Reset Spiele die von der Richtung abhängen
-            if (currentMode === 'hangman') {
-                initHangman();
-            }
-            if (currentMode === 'puzzle') {
-                initPuzzle();
-            }
-            
-            // Render neu für alle betroffenen Modi
-            if (['flashcard', 'quiz', 'hangman', 'puzzle'].includes(currentMode)) {
+            // Render neu für Flashcards UND Quiz
+            if (currentMode === 'flashcard' || currentMode === 'quiz') {
                 isFlipped = false;
                 renderContent();
             }
@@ -1586,18 +1577,47 @@
             if (currentIndex >= filteredVocab.length) currentIndex = 0;
             const item = filteredVocab[currentIndex];
             
+            // Determine which side is showing
+            const frontSide = isReversed ? currentLanguage : 'de';  // HU/EN or DE
+            const backSide = isReversed ? 'de' : currentLanguage;   // DE or HU/EN
+            
+            // Get the word for current side
+            const currentWord = isFlipped ? 
+                (backSide === 'de' ? item.word : item[backSide]) :
+                (frontSide === 'de' ? item.word : item[frontSide]);
+            
+            // Get details ONLY for the current language side
+            let currentDetails = '';
+            if (!isFlipped) {
+                // Front side - show details only for the language being displayed
+                if (frontSide === 'de' && item.type === 'Nomen' && item.plural) {
+                    currentDetails = `Plural: ${item.plural}`;
+                } else if (frontSide === 'de' && item.type === 'Verb' && item.preterite) {
+                    currentDetails = `Präteritum: ${item.preterite}<br>Perfekt: ${item.perfect}`;
+                }
+                // Foreign language side shows NO German details!
+            } else {
+                // Back side - show translation details only
+                if (backSide === 'de' && item.type === 'Nomen' && item.plural) {
+                    currentDetails = `Plural: ${item.plural}`;
+                } else if (backSide === 'de' && item.type === 'Verb' && item.preterite) {
+                    currentDetails = `Präteritum: ${item.preterite}<br>Perfekt: ${item.perfect}`;
+                }
+            }
+            
             container.innerHTML = `
                 <div class="flashcard" onclick="flipCard()">
                     ${item.emoji ? `<div class="flashcard-emoji">${item.emoji}</div>` : ''}
-                    <div class="flashcard-word">${isFlipped ? (isReversed ? item.word : item[currentLanguage]) : (isReversed ? item[currentLanguage] : item.word)}</div>
-                    ${!isFlipped ? `
+                    <div class="flashcard-word">${currentWord}</div>
+                    ${!isFlipped && currentDetails ? `
                         <div class="flashcard-details">
                             <span class="vocab-type">${item.type}</span><br>
-                            ${getDetails(item)}
+                            ${currentDetails}
                         </div>
-                    ` : `
-                        <div class="flashcard-translation">${isReversed ? item[currentLanguage] : item.word}</div>
-                    `}
+                    ` : isFlipped ? `
+                        <div class="flashcard-translation">${currentWord}</div>
+                        ${currentDetails ? `<div class="flashcard-details">${currentDetails}</div>` : ''}
+                    ` : ''}
                     <p style="margin-top: 20px; color: #999; font-size: 0.9em;">Klicken zum Umdrehen</p>
                 </div>
                 <div class="flashcard-controls">
@@ -1852,18 +1872,8 @@
 
         function initHangman() {
             const item = filteredVocab[Math.floor(Math.random() * filteredVocab.length)];
-            
-            // Beachte die Sprachrichtung!
-            if (isReversed) {
-                // Von Fremdsprache → Deutsch
-                hangmanWord = item[currentLanguage];
-                hangmanTranslation = item.word;
-            } else {
-                // Von Deutsch → Fremdsprache
-                hangmanWord = item.word;
-                hangmanTranslation = item[currentLanguage];
-            }
-            
+            hangmanWord = item.word;
+            hangmanTranslation = item[currentLanguage];
             hangmanGuessed = [];
             hangmanWrongGuesses = 0;
         }
@@ -1892,9 +1902,7 @@
             ).join('');
             
             if (!displayWord.includes('_')) {
-                // Speichere das DEUTSCHE Wort als gelernt
-                const germanWord = isReversed ? hangmanTranslation : hangmanWord;
-                toggleLearned(germanWord, true);
+                toggleLearned(hangmanWord, true);
             }
         }
 
@@ -2087,17 +2095,8 @@
 
         function initPuzzle() {
             const item = filteredVocab[Math.floor(Math.random() * filteredVocab.length)];
-            
-            // Beachte die Sprachrichtung!
-            if (isReversed) {
-                // Von Fremdsprache → Deutsch
-                puzzleWord = item[currentLanguage];
-                puzzleTranslation = item.word;
-            } else {
-                // Von Deutsch → Fremdsprache
-                puzzleWord = item.word;
-                puzzleTranslation = item[currentLanguage];
-            }
+            puzzleWord = item.word;
+            puzzleTranslation = item[currentLanguage];
             
             let wordToScramble = puzzleWord.replace(/^(der|die|das|ein|eine) /, '');
             puzzleScrambled = shuffleArray(wordToScramble.split('')).join(' ');
@@ -2113,9 +2112,7 @@
             if (inputLower === puzzleWord.toLowerCase() || inputLower === correctWithoutArticle) {
                 result.innerHTML = '🎉 Richtig! Super gemacht! 🎉';
                 result.style.color = '#4CAF50';
-                // Speichere das DEUTSCHE Wort als gelernt
-                const germanWord = isReversed ? puzzleTranslation : puzzleWord;
-                toggleLearned(germanWord, true);
+                toggleLearned(puzzleWord, true);
                 setTimeout(() => {
                     initPuzzle();
                     renderContent();
