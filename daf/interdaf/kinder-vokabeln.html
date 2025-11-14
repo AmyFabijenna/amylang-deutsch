@@ -753,7 +753,7 @@
                 <a href="https://wa.me/4368120283291?text=Hallo%20Amy,%20ich%20möchte%20gerne%20Deutsch%20lernen!" 
                    target="_blank" 
                    class="whatsapp-link">
-                    📱 WhatsApp: +43 681 20283291
+                    📱 WhatsApp: +43 681 202 83291
                 </a>
             </div>
         </header>
@@ -1458,8 +1458,17 @@
             isReversed = !isReversed;
             localStorage.setItem('kinderIsReversed', JSON.stringify(isReversed));
             updateDirectionButton();
-            // Render neu für Flashcards UND Quiz
-            if (currentMode === 'flashcard' || currentMode === 'quiz') {
+            
+            // Reset Spiele die von der Richtung abhängen
+            if (currentMode === 'hangman') {
+                initHangman();
+            }
+            if (currentMode === 'puzzle') {
+                initPuzzle();
+            }
+            
+            // Render neu für alle betroffenen Modi
+            if (['flashcard', 'quiz', 'hangman', 'puzzle'].includes(currentMode)) {
                 isFlipped = false;
                 renderContent();
             }
@@ -1843,8 +1852,18 @@
 
         function initHangman() {
             const item = filteredVocab[Math.floor(Math.random() * filteredVocab.length)];
-            hangmanWord = item.word;
-            hangmanTranslation = item[currentLanguage];
+            
+            // Beachte die Sprachrichtung!
+            if (isReversed) {
+                // Von Fremdsprache → Deutsch
+                hangmanWord = item[currentLanguage];
+                hangmanTranslation = item.word;
+            } else {
+                // Von Deutsch → Fremdsprache
+                hangmanWord = item.word;
+                hangmanTranslation = item[currentLanguage];
+            }
+            
             hangmanGuessed = [];
             hangmanWrongGuesses = 0;
         }
@@ -1873,7 +1892,9 @@
             ).join('');
             
             if (!displayWord.includes('_')) {
-                toggleLearned(hangmanWord, true);
+                // Speichere das DEUTSCHE Wort als gelernt
+                const germanWord = isReversed ? hangmanTranslation : hangmanWord;
+                toggleLearned(germanWord, true);
             }
         }
 
@@ -2066,8 +2087,17 @@
 
         function initPuzzle() {
             const item = filteredVocab[Math.floor(Math.random() * filteredVocab.length)];
-            puzzleWord = item.word;
-            puzzleTranslation = item[currentLanguage];
+            
+            // Beachte die Sprachrichtung!
+            if (isReversed) {
+                // Von Fremdsprache → Deutsch
+                puzzleWord = item[currentLanguage];
+                puzzleTranslation = item.word;
+            } else {
+                // Von Deutsch → Fremdsprache
+                puzzleWord = item.word;
+                puzzleTranslation = item[currentLanguage];
+            }
             
             let wordToScramble = puzzleWord.replace(/^(der|die|das|ein|eine) /, '');
             puzzleScrambled = shuffleArray(wordToScramble.split('')).join(' ');
@@ -2083,7 +2113,9 @@
             if (inputLower === puzzleWord.toLowerCase() || inputLower === correctWithoutArticle) {
                 result.innerHTML = '🎉 Richtig! Super gemacht! 🎉';
                 result.style.color = '#4CAF50';
-                toggleLearned(puzzleWord, true);
+                // Speichere das DEUTSCHE Wort als gelernt
+                const germanWord = isReversed ? puzzleTranslation : puzzleWord;
+                toggleLearned(germanWord, true);
                 setTimeout(() => {
                     initPuzzle();
                     renderContent();
