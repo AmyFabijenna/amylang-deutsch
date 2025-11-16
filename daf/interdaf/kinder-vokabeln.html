@@ -479,18 +479,24 @@
             transform: translateX(5px);
         }
 
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1.05); }
+            50% { transform: scale(1.15); }
+        }
+
         .quiz-option.correct {
             background: #32CD32 !important;
             color: white !important;
             border-color: #32CD32 !important;
-            transform: scale(1.05) !important;
             cursor: default !important;
             transition: none !important;
+            animation: correctPulse 0.5s ease-in-out 2 !important;
+            font-weight: bold !important;
+            box-shadow: 0 0 20px #32CD32 !important;
         }
 
         .quiz-option.correct:hover {
             background: #32CD32 !important;
-            transform: scale(1.05) !important;
         }
 
         .quiz-option.incorrect {
@@ -753,6 +759,10 @@
     </style>
 </head>
 <body>
+    <!-- GLOBALES FEEDBACK OVERLAY - IMMER VORHANDEN -->
+    <div id="quizBackdrop" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9998;"></div>
+    <div id="quizFeedback" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999; background: white; padding: 60px 80px; border-radius: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); text-align: center; font-size: 4em; font-weight: bold; border: 10px solid black;"></div>
+    
     <div class="container">
         <div class="top-navigation">
             <div class="top-nav-links">
@@ -1775,7 +1785,26 @@
         }
 
         function checkAnswer(selected, correct, optionIndex) {
+            console.log('=== checkAnswer START ===');
+            console.log('selected:', selected);
+            console.log('correct:', correct);
+            console.log('optionIndex:', optionIndex);
+            console.log('Are equal?', selected === correct);
+            
             const options = document.querySelectorAll('.quiz-option');
+            console.log('Found options:', options.length);
+            
+            const feedback = document.getElementById('quizFeedback');
+            const backdrop = document.getElementById('quizBackdrop');
+            console.log('Feedback element found?', feedback !== null);
+            console.log('Backdrop element found?', backdrop !== null);
+            
+            // Verhindere mehrfache Aufrufe - nur einmal pro Frage!
+            if (window.answerInProgress) {
+                console.log('BLOCKED: Answer already in progress!');
+                return;
+            }
+            window.answerInProgress = true;
             
             // Entferne vorherige falsche Markierungen
             options.forEach(opt => {
@@ -1786,39 +1815,78 @@
             });
             
             if (selected === correct) {
-                // RICHTIGE ANTWORT
+                console.log('>>> CORRECT BRANCH <<<');
+                // RICHTIGE ANTWORT - GROSSES GRÜNES FEEDBACK
                 playCorrectSound();
                 quizScore.correct++;
                 quizScore.total++;
                 
-                const targetOption = options[optionIndex];
+                // Zeige Backdrop und großes grünes Feedback
+                console.log('Setting backdrop and feedback display to block...');
+                backdrop.style.display = 'block';
+                feedback.style.display = 'block';
+                feedback.style.backgroundColor = '#32CD32';
+                feedback.style.color = 'white';
+                feedback.innerHTML = '✅<br>RICHTIG!';
+                console.log('Feedback styles set:', {
+                    display: feedback.style.display,
+                    bg: feedback.style.backgroundColor,
+                    color: feedback.style.color
+                });
                 
-                // Mehrere Methoden gleichzeitig um sicherzustellen dass es funktioniert
-                targetOption.classList.add('correct');
-                targetOption.setAttribute('style', 'background-color: #32CD32 !important; color: white !important; border-color: #32CD32 !important; transform: scale(1.05) !important;');
-                targetOption.style.setProperty('background-color', '#32CD32', 'important');
-                targetOption.style.setProperty('color', 'white', 'important');
-                targetOption.style.setProperty('border-color', '#32CD32', 'important');
+                // Markiere auch die Option grün
+                const targetOption = options[optionIndex];
+                console.log('Setting option styles...');
+                targetOption.style.backgroundColor = '#32CD32';
+                targetOption.style.color = 'white';
+                targetOption.style.borderColor = '#32CD32';
+                targetOption.style.transform = 'scale(1.1)';
+                targetOption.style.fontWeight = 'bold';
+                console.log('Option styles set:', targetOption.style.backgroundColor);
                 
                 toggleLearned(filteredVocab[currentIndex].word, true);
                 
                 // Disable all options
                 options.forEach(opt => opt.style.pointerEvents = 'none');
                 
-                // 1,5 Sekunden grün anzeigen, dann zum nächsten Wort
+                console.log('Setting timeout for 1200ms...');
+                // Nach 1,2 Sekunden weiter
                 setTimeout(() => {
+                    console.log('Timeout executed, hiding feedback and moving to next...');
+                    backdrop.style.display = 'none';
+                    feedback.style.display = 'none';
+                    window.answerInProgress = false;
                     currentIndex++;
                     renderContent();
-                }, 1500);
+                }, 1200);
             } else {
-                // FALSCHE ANTWORT
+                console.log('>>> INCORRECT BRANCH <<<');
+                // FALSCHE ANTWORT - GROSSES ROTES FEEDBACK
                 playIncorrectSound();
-                options[optionIndex].classList.add('incorrect');
+                
+                // Zeige Backdrop und großes rotes Feedback kurz
+                backdrop.style.display = 'block';
+                feedback.style.display = 'block';
+                feedback.style.backgroundColor = '#f44336';
+                feedback.style.color = 'white';
+                feedback.innerHTML = '❌<br>FALSCH!';
+                console.log('Red feedback shown');
+                
+                // Markiere Option rot
                 options[optionIndex].style.backgroundColor = '#f44336';
                 options[optionIndex].style.color = 'white';
                 options[optionIndex].style.borderColor = '#f44336';
+                
+                // Verstecke Feedback nach 0,8 Sekunden, aber lass Option rot
+                setTimeout(() => {
+                    backdrop.style.display = 'none';
+                    feedback.style.display = 'none';
+                    window.answerInProgress = false;
+                }, 800);
+                
                 // Nicht weiterspringen - Schüler muss richtige Antwort finden
             }
+            console.log('=== checkAnswer END ===');
         }
 
         function restartQuiz() {
