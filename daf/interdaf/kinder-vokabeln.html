@@ -1761,32 +1761,37 @@
         }
 
         function checkAnswer(selected, correct, optionIndex) {
-            quizScore.total++;
             const options = document.querySelectorAll('.quiz-option');
             
+            // Entferne vorherige falsche Markierungen
+            options.forEach(opt => {
+                if (opt.classList.contains('incorrect')) {
+                    opt.classList.remove('incorrect');
+                }
+            });
+            
             if (selected === correct) {
+                // RICHTIGE ANTWORT
+                playCorrectSound();
                 quizScore.correct++;
+                quizScore.total++;
                 options[optionIndex].classList.add('correct');
                 toggleLearned(filteredVocab[currentIndex].word, true);
+                
+                // Disable all options
+                options.forEach(opt => opt.style.pointerEvents = 'none');
+                
+                // Kurze Siegesfeier, dann zum nächsten Wort
+                setTimeout(() => {
+                    currentIndex++;
+                    renderContent();
+                }, 800);
             } else {
+                // FALSCHE ANTWORT
+                playIncorrectSound();
                 options[optionIndex].classList.add('incorrect');
-                // Highlight correct answer
-                options.forEach(opt => {
-                    if (opt.textContent === correct) {
-                        opt.classList.add('correct');
-                    }
-                });
-                toggleLearned(filteredVocab[currentIndex].word, false);
+                // Nicht weiterspringen - Schüler muss richtige Antwort finden
             }
-            
-            // Disable all options
-            options.forEach(opt => opt.style.pointerEvents = 'none');
-            
-            // Move to next question after delay
-            setTimeout(() => {
-                currentIndex++;
-                renderContent();
-            }, 1500);
         }
 
         function restartQuiz() {
@@ -2056,6 +2061,59 @@
                 [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
             }
             return newArray;
+        }
+
+        // ============================================
+        // AUDIO FEEDBACK
+        // ============================================
+        function playCorrectSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 523.25; // C5
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+            
+            // Zweiter Ton für positiven Akkord
+            setTimeout(() => {
+                const osc2 = audioContext.createOscillator();
+                const gain2 = audioContext.createGain();
+                osc2.connect(gain2);
+                gain2.connect(audioContext.destination);
+                osc2.frequency.value = 659.25; // E5
+                osc2.type = 'sine';
+                gain2.gain.setValueAtTime(0.2, audioContext.currentTime);
+                gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                osc2.start(audioContext.currentTime);
+                osc2.stop(audioContext.currentTime + 0.2);
+            }, 100);
+        }
+
+        function playIncorrectSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 200; // Tiefer Ton
+            oscillator.type = 'sawtooth';
+            
+            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.2);
         }
 
         // ============================================
