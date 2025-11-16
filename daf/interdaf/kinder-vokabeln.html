@@ -481,15 +481,28 @@
         }
 
         .quiz-option.correct {
-            background: #32CD32;
-            color: white;
-            border-color: #32CD32;
+            background: #32CD32 !important;
+            color: white !important;
+            border-color: #32CD32 !important;
+            transform: scale(1.05) !important;
+            cursor: default !important;
+        }
+
+        .quiz-option.correct:hover {
+            background: #32CD32 !important;
+            transform: scale(1.05) !important;
         }
 
         .quiz-option.incorrect {
-            background: #FFD700;
-            color: white;
-            border-color: #FFD700;
+            background: #f44336 !important;
+            color: white !important;
+            border-color: #f44336 !important;
+            cursor: default !important;
+        }
+
+        .quiz-option.incorrect:hover {
+            background: #f44336 !important;
+            transform: none !important;
         }
 
         .quiz-score {
@@ -1761,7 +1774,12 @@
         }
 
         function checkAnswer(selected, correct, optionIndex) {
+            console.log('checkAnswer called:', {selected, correct, optionIndex});
+            console.log('Are they equal?', selected === correct);
+            
             const options = document.querySelectorAll('.quiz-option');
+            console.log('Found options:', options.length);
+            console.log('Option at index:', options[optionIndex]);
             
             // Entferne vorherige falsche Markierungen
             options.forEach(opt => {
@@ -1772,10 +1790,16 @@
             
             if (selected === correct) {
                 // RICHTIGE ANTWORT
+                console.log('CORRECT ANSWER! Adding green class');
                 playCorrectSound();
                 quizScore.correct++;
                 quizScore.total++;
-                options[optionIndex].classList.add('correct');
+                
+                const targetOption = options[optionIndex];
+                console.log('Target option before:', targetOption.className);
+                targetOption.classList.add('correct');
+                console.log('Target option after:', targetOption.className);
+                
                 toggleLearned(filteredVocab[currentIndex].word, true);
                 
                 // Disable all options
@@ -1788,8 +1812,10 @@
                 }, 800);
             } else {
                 // FALSCHE ANTWORT
+                console.log('WRONG ANSWER! Adding red class');
                 playIncorrectSound();
                 options[optionIndex].classList.add('incorrect');
+                console.log('After adding incorrect:', options[optionIndex].className);
                 // Nicht weiterspringen - Schüler muss richtige Antwort finden
             }
         }
