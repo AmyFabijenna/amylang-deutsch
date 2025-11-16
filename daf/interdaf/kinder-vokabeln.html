@@ -470,7 +470,6 @@
             border: 2px solid #2a5298;
             border-radius: 10px;
             cursor: pointer;
-            transition: all 0.3s ease;
             font-size: 1.1em;
             text-align: center;
         }
@@ -486,6 +485,7 @@
             border-color: #32CD32 !important;
             transform: scale(1.05) !important;
             cursor: default !important;
+            transition: none !important;
         }
 
         .quiz-option.correct:hover {
@@ -498,6 +498,7 @@
             color: white !important;
             border-color: #f44336 !important;
             cursor: default !important;
+            transition: none !important;
         }
 
         .quiz-option.incorrect:hover {
@@ -1774,48 +1775,48 @@
         }
 
         function checkAnswer(selected, correct, optionIndex) {
-            console.log('checkAnswer called:', {selected, correct, optionIndex});
-            console.log('Are they equal?', selected === correct);
-            
             const options = document.querySelectorAll('.quiz-option');
-            console.log('Found options:', options.length);
-            console.log('Option at index:', options[optionIndex]);
             
             // Entferne vorherige falsche Markierungen
             options.forEach(opt => {
                 if (opt.classList.contains('incorrect')) {
                     opt.classList.remove('incorrect');
+                    opt.style.cssText = '';
                 }
             });
             
             if (selected === correct) {
                 // RICHTIGE ANTWORT
-                console.log('CORRECT ANSWER! Adding green class');
                 playCorrectSound();
                 quizScore.correct++;
                 quizScore.total++;
                 
                 const targetOption = options[optionIndex];
-                console.log('Target option before:', targetOption.className);
+                
+                // Mehrere Methoden gleichzeitig um sicherzustellen dass es funktioniert
                 targetOption.classList.add('correct');
-                console.log('Target option after:', targetOption.className);
+                targetOption.setAttribute('style', 'background-color: #32CD32 !important; color: white !important; border-color: #32CD32 !important; transform: scale(1.05) !important;');
+                targetOption.style.setProperty('background-color', '#32CD32', 'important');
+                targetOption.style.setProperty('color', 'white', 'important');
+                targetOption.style.setProperty('border-color', '#32CD32', 'important');
                 
                 toggleLearned(filteredVocab[currentIndex].word, true);
                 
                 // Disable all options
                 options.forEach(opt => opt.style.pointerEvents = 'none');
                 
-                // Kurze Siegesfeier, dann zum nächsten Wort
+                // 1,5 Sekunden grün anzeigen, dann zum nächsten Wort
                 setTimeout(() => {
                     currentIndex++;
                     renderContent();
-                }, 800);
+                }, 1500);
             } else {
                 // FALSCHE ANTWORT
-                console.log('WRONG ANSWER! Adding red class');
                 playIncorrectSound();
                 options[optionIndex].classList.add('incorrect');
-                console.log('After adding incorrect:', options[optionIndex].className);
+                options[optionIndex].style.backgroundColor = '#f44336';
+                options[optionIndex].style.color = 'white';
+                options[optionIndex].style.borderColor = '#f44336';
                 // Nicht weiterspringen - Schüler muss richtige Antwort finden
             }
         }
