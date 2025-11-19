@@ -72,6 +72,24 @@
             margin-top: 5px;
         }
 
+        .skip-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #FFA726 0%, #FF7043 100%);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-left: 10px;
+        }
+
+        .skip-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 112, 67, 0.4);
+        }
+
         .theme-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -442,6 +460,10 @@
                 <div class="stat-value" id="statsGames">0</div>
                 <div class="stat-label">Spiele gespielt</div>
             </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statsSkipped">0</div>
+                <div class="stat-label">Wörter übersprungen</div>
+            </div>
         </div>
 
         <div id="mainContent">
@@ -487,6 +509,7 @@
             </div>
             <div class="flashcard-controls">
                 <button class="practice-btn" onclick="nextCard()">Nächste Karte →</button>
+                <button class="skip-btn" onclick="skipFlashcard()">Überspringen</button>
             </div>
         </div>
 
@@ -1731,7 +1754,8 @@
         let stats = {
             learned: 0,
             quizzes: 0,
-            games: 0
+            games: 0,
+            skipped: 0
         };
 
         function loadStats() {
@@ -1750,6 +1774,10 @@
             document.getElementById('statsWords').textContent = stats.learned;
             document.getElementById('statsQuizzes').textContent = stats.quizzes;
             document.getElementById('statsGames').textContent = stats.games;
+            const skippedElement = document.getElementById('statsSkipped');
+            if (skippedElement) {
+                skippedElement.textContent = stats.skipped || 0;
+            }
         }
 
         function showThemes() {
@@ -1849,6 +1877,9 @@
             
             options.sort(() => Math.random() - 0.5);
             
+            // Store correct answer in a variable, NOT in the HTML
+            window.currentQuizAnswer = current.word;
+            
             let html = `
                 <div class="quiz-question">
                     <h3>Frage ${currentQuestion + 1} von ${words.length}</h3>
@@ -1856,19 +1887,25 @@
                     <div class="quiz-options">
             `;
             
-            options.forEach(option => {
+            options.forEach((option, index) => {
                 html += `
-                    <div class="quiz-option" onclick="checkAnswer('${option}', '${current.word}')">
+                    <div class="quiz-option" onclick="checkAnswer(${index})">
                         ${option}
                     </div>
                 `;
             });
             
-            html += '</div></div>';
+            html += '</div><button class="skip-btn" onclick="skipQuizQuestion()">Nächstes Wort</button></div>';
             document.getElementById('quizArea').innerHTML = html;
+            
+            // Store options in a global variable
+            window.currentQuizOptions = options;
         }
 
-        function checkAnswer(selected, correct) {
+        function checkAnswer(selectedIndex) {
+            const selected = window.currentQuizOptions[selectedIndex];
+            const correct = window.currentQuizAnswer;
+            
             const options = document.querySelectorAll('.quiz-option');
             options.forEach(option => {
                 option.style.pointerEvents = 'none';
@@ -1885,6 +1922,17 @@
                 currentQuestion++;
                 showQuizQuestion();
             }, 1500);
+        }
+        
+        function skipQuizQuestion() {
+            stats.skipped++;
+            saveStats();
+            // Add current question back to the end of the array
+            const words = vocabData[currentTheme].words;
+            const skippedWord = words[currentQuestion];
+            words.push(skippedWord);
+            currentQuestion++;
+            showQuizQuestion();
         }
 
         function showQuizResults() {
@@ -1959,6 +2007,16 @@
                 saveStats();
             }
         }
+        
+        function skipFlashcard() {
+            stats.skipped++;
+            saveStats();
+            const words = vocabData[currentTheme].words;
+            const skippedCard = words[currentCard];
+            words.push(skippedCard);
+            currentCard = (currentCard + 1) % words.length;
+            showCard();
+        }
 
         function showGames() {
             document.getElementById('contentArea').innerHTML = `
@@ -1998,6 +2056,7 @@
                     style="font-size: 1.3em; padding: 15px; border: 3px solid #4A90A4; border-radius: 10px; width: 80%; max-width: 400px;">
                 <br><br>
                 <button class="practice-btn" onclick="checkFillBlank()">Überprüfen</button>
+                <button class="skip-btn" onclick="skipFillBlank()">Nächstes Wort</button>
                 <div id="fillResult" style="margin-top: 20px; font-size: 1.2em;"></div>
             `;
         }
@@ -2014,6 +2073,14 @@
             } else {
                 result.innerHTML = `<p style="color: #E53935; font-weight: bold;">❌ Nicht ganz. Versuche es nochmal!</p>`;
             }
+        }
+        
+        function skipFillBlank() {
+            stats.skipped++;
+            saveStats();
+            const words = vocabData[currentTheme].words;
+            words.push(gameData.current);
+            startFillBlank();
         }
 
         function startHangman() {
@@ -2061,10 +2128,20 @@
                 html += `<p style="color: #E53935; font-size: 1.5em; margin-top: 20px; font-weight: bold;">😢 Verloren! Das Wort war: ${gameData.word}</p>`;
                 html += `<button class="practice-btn" style="margin-top: 20px;" onclick="startHangman()">Nächstes Wort</button>`;
             } else {
-                html += `<button class="practice-btn" style="margin-top: 20px;" onclick="startHangman()">Nächstes Wort</button>`;
+                html += `<button class="skip-btn" style="margin-top: 20px;" onclick="skipHangman()">Nächstes Wort</button>`;
             }
             
             document.getElementById('gameArea').innerHTML = html;
+        }
+        
+        function skipHangman() {
+            stats.skipped++;
+            saveStats();
+            // Save current word to be repeated later
+            const words = vocabData[currentTheme].words;
+            const skippedWord = gameData.current;
+            words.push(skippedWord);
+            startHangman();
         }
 
         function guessLetter(letter) {
@@ -2097,6 +2174,7 @@
                     style="font-size: 1.3em; padding: 15px; border: 3px solid #4A90A4; border-radius: 10px; width: 80%; max-width: 400px;">
                 <br><br>
                 <button class="practice-btn" onclick="checkScramble()">Überprüfen</button>
+                <button class="skip-btn" onclick="skipScramble()">Nächstes Wort</button>
                 <div id="scrambleResult" style="margin-top: 20px; font-size: 1.2em;"></div>
             `;
         }
@@ -2113,6 +2191,14 @@
             } else {
                 result.innerHTML = `<p style="color: #E53935; font-weight: bold;">❌ Nicht ganz. Versuche es nochmal!</p>`;
             }
+        }
+        
+        function skipScramble() {
+            stats.skipped++;
+            saveStats();
+            const words = vocabData[currentTheme].words;
+            words.push(gameData.current);
+            startScramble();
         }
 
         function hideAllSections() {
