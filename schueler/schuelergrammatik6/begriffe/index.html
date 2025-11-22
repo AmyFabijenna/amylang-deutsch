@@ -1038,7 +1038,7 @@
                 html += `
                     <div class="vocab-item">
                         <div class="vocab-word">${item.word}</div>
-                        <div class="vocab-example">${item.example}</div>
+                        <div class="vocab-example">${item.question} → <strong>${item.hint}</strong></div>
                     </div>
                 `;
             });
@@ -1068,12 +1068,15 @@
             
             const current = words[currentQuestion];
             const otherWords = words.filter(w => w.word !== current.word);
-            const options = [current.word];
             
+            // Create options using hints (pedagogically meaningful)
+            const options = [current.hint];
+            
+            // Get 3 other hints as wrong answers
             while (options.length < 4 && otherWords.length > 0) {
                 const random = otherWords[Math.floor(Math.random() * otherWords.length)];
-                if (!options.includes(random.word)) {
-                    options.push(random.word);
+                if (!options.includes(random.hint)) {
+                    options.push(random.hint);
                 }
                 otherWords.splice(otherWords.indexOf(random), 1);
             }
@@ -1081,12 +1084,13 @@
             options.sort(() => Math.random() - 0.5);
             
             // Store correct answer in a variable, NOT in the HTML
-            window.currentQuizAnswer = current.word;
+            window.currentQuizAnswer = current.hint;
             
             let html = `
                 <div class="quiz-question">
                     <h3>Frage ${currentQuestion + 1} von ${words.length}</h3>
-                    <p style="font-size: 1.2em; margin: 20px 0; color: #2E5C8A;">${current.example}</p>
+                    <p style="font-size: 1.3em; margin: 20px 0; color: #1E3A5F; font-weight: bold;">${current.question}</p>
+                    <p style="font-size: 0.9em; margin: 10px 0 30px 0; color: #666; font-style: italic;">Wähle die passende Bedeutung:</p>
                     <div class="quiz-options">
             `;
             
@@ -1098,7 +1102,7 @@
                 `;
             });
             
-            html += '</div><button class="skip-btn" onclick="skipQuizQuestion()">Nächstes Wort</button></div>';
+            html += '</div><button class="skip-btn" onclick="skipQuizQuestion()">Nächste Frage</button></div>';
             document.getElementById('quizArea').innerHTML = html;
             
             // Store options in a global variable
@@ -1176,16 +1180,22 @@
 
             const current = words[currentCard];
             const flashcard = document.getElementById('flashcard');
+            
+            // First remove the flipped state
             flashcard.classList.remove('flipped');
             isFlipped = false;
             
-            document.getElementById('flashcardFront').innerHTML = `
-                <div class="flashcard-word">${current.question}</div>
-            `;
-            
-            document.getElementById('flashcardBack').innerHTML = `
-                <div class="flashcard-word">${current.word}</div>
-            `;
+            // Wait for the flip animation to complete before updating content
+            // This prevents the answer from being visible during the flip
+            setTimeout(() => {
+                document.getElementById('flashcardFront').innerHTML = `
+                    <div class="flashcard-word">${current.question}</div>
+                `;
+                
+                document.getElementById('flashcardBack').innerHTML = `
+                    <div class="flashcard-word">${current.word}</div>
+                `;
+            }, 300);
         }
 
         function flipCard() {
@@ -1248,13 +1258,22 @@
             const words = vocabData[currentTheme].words;
             const current = words[Math.floor(Math.random() * words.length)];
             const wordToBlank = current.word;
-            const blanked = current.example.replace(wordToBlank, '___________');
+            
+            // Create a fill-in-the-blank from the question
+            // Replace the word with blanks if it appears in the question
+            let blanked = current.question.replace(new RegExp(wordToBlank, 'gi'), '___________');
+            
+            // If the word doesn't appear in the question, create a meaningful sentence
+            if (blanked === current.question) {
+                blanked = `Die richtige Antwort auf "${current.question}" ist: ___________`;
+            }
             
             gameData = { current, blanked, wordToBlank };
             
             document.getElementById('gameArea').innerHTML = `
                 <h2 style="color: #1E3A5F;">✍️ Fülle die Lücke aus</h2>
                 <p style="font-size: 1.5em; margin: 30px 0; color: #2E5C8A;">${blanked}</p>
+                <p style="color: #666; font-style: italic; font-size: 0.9em; margin-bottom: 20px;">Hinweis: ${current.hint}</p>
                 <input type="text" id="fillInput" placeholder="Deine Antwort..." 
                     style="font-size: 1.3em; padding: 15px; border: 3px solid #2E5C8A; border-radius: 10px; width: 80%; max-width: 400px;">
                 <br><br>
