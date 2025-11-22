@@ -781,19 +781,17 @@
                 selectedVocab = selectedVocab.sort(() => Math.random() - 0.5).slice(0, pairCount);
             } else {
                 const themeWords = vocabulary[mode][theme] || [];
-                // Wenn nicht genug Wörter vorhanden, wiederverwende sie
-                while (selectedVocab.length < pairCount && themeWords.length > 0) {
-                    const remaining = pairCount - selectedVocab.length;
-                    if (remaining >= themeWords.length) {
+                
+                // Wenn nicht genug einzigartige Wörter vorhanden, auf "Gemischt" wechseln
+                if (themeWords.length < pairCount) {
+                    console.log(`Nicht genug Wörter im Thema "${theme}". Wechsel zu "Gemischt".`);
+                    Object.values(vocabulary[mode]).forEach(themeWords => {
                         selectedVocab = selectedVocab.concat(themeWords);
-                    } else {
-                        const shuffled = [...themeWords].sort(() => Math.random() - 0.5);
-                        selectedVocab = selectedVocab.concat(shuffled.slice(0, remaining));
-                    }
-                }
-                // Wenn mehr als genug Wörter, zufällig auswählen
-                if (selectedVocab.length > pairCount) {
+                    });
                     selectedVocab = selectedVocab.sort(() => Math.random() - 0.5).slice(0, pairCount);
+                } else {
+                    // Genug Wörter vorhanden, zufällig auswählen
+                    selectedVocab = [...themeWords].sort(() => Math.random() - 0.5).slice(0, pairCount);
                 }
             }
             
