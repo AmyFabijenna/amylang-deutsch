@@ -1,5 +1,5 @@
 // ===================================
-// HÜPP.JS - Vollständig überarbeitet
+// HÜPP.JS - Mit neuem Notizen-System
 // ===================================
 
 // Supabase Initialisierung
@@ -73,11 +73,11 @@ async function loadRescheduleRequests() {
 }
 
 async function loadHomework() {
-    console.log('📄 Lade Hausaufgaben...');
+    console.log('📄 Lade Hausaufgaben/Notizen...');
     const { data, error } = await supabase
         .from('homework')
         .select('*')
-        .order('deadline', { ascending: true });
+        .order('created_at', { ascending: false }); // Neueste zuerst
     
     if (error) {
         console.error('Fehler beim Laden der Hausaufgaben:', error);
@@ -98,6 +98,82 @@ async function loadPayments() {
         return;
     }
     payments = data || [];
+}
+
+// ===================================
+// ZEITSTEMPEL-FORMATIERUNG
+// ===================================
+
+function formatTimestamp(date = new Date()) {
+    const days = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+    const months = ['Jan.', 'Feb.', 'März', 'Apr.', 'Mai', 'Juni', 'Juli', 'Aug.', 'Sept.', 'Okt.', 'Nov.', 'Dez.'];
+    
+    const dayName = days[date.getDay()];
+    const day = date.getDate();
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    
+    return `${dayName}, ${day}. ${month} ${year} – ${hours}:${minutes} Uhr`;
+}
+
+// ===================================
+// MINI-TEXTEDITOR FUNKTIONEN
+// ===================================
+
+window.formatText = function(command, value = null) {
+    document.execCommand(command, false, value);
+    document.getElementById('noteEditor').focus();
+};
+
+window.formatTextEdit = function(command, value = null) {
+    document.execCommand(command, false, value);
+    document.getElementById('editNoteEditor').focus();
+};
+
+window.insertLink = function() {
+    const url = prompt('Link-URL eingeben:', 'https://');
+    if (url && url !== 'https://') {
+        const linkText = prompt('Link-Text (optional, leer lassen für URL):', '');
+        const selection = window.getSelection();
+        
+        if (linkText) {
+            document.execCommand('insertHTML', false, `<a href="${url}" target="_blank">${linkText}</a>`);
+        } else {
+            document.execCommand('createLink', false, url);
+        }
+    }
+    document.getElementById('noteEditor').focus();
+};
+
+window.insertLinkEdit = function() {
+    const url = prompt('Link-URL eingeben:', 'https://');
+    if (url && url !== 'https://') {
+        const linkText = prompt('Link-Text (optional, leer lassen für URL):', '');
+        const selection = window.getSelection();
+        
+        if (linkText) {
+            document.execCommand('insertHTML', false, `<a href="${url}" target="_blank">${linkText}</a>`);
+        } else {
+            document.execCommand('createLink', false, url);
+        }
+    }
+    document.getElementById('editNoteEditor').focus();
+};
+
+// Automatische Link-Erkennung
+window.autoDetectLinks = function(element) {
+    // Diese Funktion wird bei jedem Input aufgerufen
+    // Wir machen die vollständige Konvertierung beim Speichern
+};
+
+function convertUrlsToLinks(html) {
+    // Regex für URLs (die noch nicht in <a> Tags sind)
+    const urlRegex = /(?<!href=["'])(?<!["'>])(https?:\/\/[^\s<>"']+)/gi;
+    
+    // Ersetze URLs durch Links
+    return html.replace(urlRegex, '<a href="$1" target="_blank">$1</a>');
 }
 
 // ===================================
@@ -397,19 +473,6 @@ function renderWeekOverview() {
     
     container.innerHTML = weekHtml;
 }
-
-// renderAll Funktion aktualisieren
-function renderAll() {
-    renderNextStudent();
-    renderTodayLessons();
-    renderWeekOverview(); // NEUE ZEILE HINZUFÜGEN
-    renderRequests();
-    renderStudentsList();
-    renderHomeworkManagement();
-    renderPaymentOverview();
-}
-
-
 
 
 // ===================================
@@ -795,68 +858,60 @@ function renderStudentsOverview() {
     container.innerHTML = overviewHtml;
 }
 
-// renderAll Funktion aktualisieren
-function renderAll() {
-    renderNextStudent();
-    renderTodayLessons();
-    renderWeekOverview();
-    renderRequests();
-    renderStudentsOverview(); // NEUE ZEILE HINZUFÜGEN
-    renderStudentsList();
-    renderHomeworkManagement();
-    renderPaymentOverview();
-}
-
-
 
 // ===================================
-// HAUSAUFGABEN-VERWALTUNG
+// HAUSAUFGABEN/NOTIZEN-VERWALTUNG (NEU)
 // ===================================
 
 function renderHomeworkManagement() {
-    console.log('📄 Rendere Hausaufgaben-Management...', homework.length, 'Einträge');
+    console.log('📄 Rendere Hausaufgaben/Notizen-Management...', homework.length, 'Einträge');
     const container = document.getElementById('hwStudentsGrid');
     
     if (students.length === 0) {
-        container.innerHTML = '<p style="color: #8B4513; text-align: center; padding: 40px;">Keine Schüler vorhanden</p>';
+        container.innerHTML = '<p style="color: white; text-align: center; padding: 40px;">Keine Schüler vorhanden</p>';
         return;
     }
     
     container.innerHTML = students.map(student => {
-        const studentHomework = homework.filter(hw => hw.student_id === student.id);
-        const pending = studentHomework.filter(hw => !hw.completed);
+        const studentHomework = homework
+            .filter(hw => hw.student_id === student.id)
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // Neueste zuerst
+        
         const hasUnread = studentHomework.some(hw => !hw.is_read);
         
         return `
             <div class="hw-student-card">
-                ${hasUnread ? '<div class="hw-status-indicator unread" title="Ungelesene Hausaufgaben"></div>' : '<div class="hw-status-indicator read"></div>'}
+                ${hasUnread ? '<div class="hw-status-indicator unread" title="Ungelesene Notizen"></div>' : '<div class="hw-status-indicator read"></div>'}
                 <div class="student-name">${student.name}</div>
                 <div class="student-details">
-                    📝 ${pending.length} offene | ✅ ${studentHomework.length - pending.length} erledigt
+                    📝 ${studentHomework.length} Notizen | ${hasUnread ? '🔴 Ungelesen' : '✅ Alle gelesen'}
                 </div>
                 
                 <div class="hw-list">
                     ${studentHomework.length === 0 ? 
-                        '<p style="color: #666; font-style: italic;">Keine Hausaufgaben</p>' :
-                        studentHomework.slice(0, 10).map(hw => `
-                    <div class="hw-item" onclick="event.stopPropagation(); openEditHomeworkModal(${hw.id});">
-                        <div>
-                            <div class="hw-item-title">${hw.title}</div>
-                            ${hw.description ? `<div style="font-size: 0.9em; color: #666; margin-top: 5px;">${hw.description}</div>` : ''}
-                            <div class="hw-item-meta">
-                            📅 ${new Date(hw.deadline).toLocaleDateString('de-DE')} 
-                            ${hw.completed ? '| ✅ Erledigt' : ''}
-                        </div>
-                    </div>
-                <div>
-        <span class="read-badge ${hw.is_read ? 'read' : ''}">
-            ${hw.is_read ? '👁️ Gelesen' : '🔴 Ungelesen'}
-        </span>
-    </div>
-</div>
-                        `).join('')
+                        '<p style="color: rgba(255,255,255,0.6); font-style: italic;">Keine Notizen</p>' :
+                        studentHomework.slice(0, 10).map(hw => {
+                            // Vorschau-Text erstellen (HTML entfernen)
+                            const previewText = hw.description ? 
+                                hw.description.replace(/<[^>]*>/g, '').substring(0, 80) + (hw.description.length > 80 ? '...' : '') : 
+                                'Keine Beschreibung';
+                            
+                            return `
+                                <div class="hw-item" onclick="event.stopPropagation(); openEditHomeworkModal(${hw.id});">
+                                    <div style="flex: 1;">
+                                        <div class="hw-item-title">📅 ${hw.title}</div>
+                                        <div class="hw-item-preview">${previewText}</div>
+                                    </div>
+                                    <div>
+                                        <span class="read-badge ${hw.is_read ? 'read' : ''}">
+                                            ${hw.is_read ? '👁️' : '🔴'}
+                                        </span>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')
                     }
-                    ${studentHomework.length > 10 ? `<p style="color: #666; font-size: 0.9em; margin-top: 10px;">... und ${studentHomework.length - 10} weitere</p>` : ''}
+                    ${studentHomework.length > 10 ? `<p style="color: rgba(255,255,255,0.6); font-size: 0.9em; margin-top: 10px;">... und ${studentHomework.length - 10} weitere</p>` : ''}
                 </div>
             </div>
         `;
@@ -865,67 +920,80 @@ function renderHomeworkManagement() {
     console.log('✅ Hausaufgaben-Management gerendert');
 }
 
+// Zeitstempel aktualisieren wenn Schüler ausgewählt wird
+window.updateTimestamp = function() {
+    const select = document.getElementById('hwStudentSelect');
+    const timestampDisplay = document.getElementById('timestampDisplay');
+    const timestampText = document.getElementById('currentTimestamp');
+    
+    if (select.value) {
+        timestampDisplay.style.display = 'block';
+        timestampText.textContent = formatTimestamp(new Date());
+    } else {
+        timestampDisplay.style.display = 'none';
+    }
+};
+
 window.openAddHomeworkModal = function() {
     const select = document.getElementById('hwStudentSelect');
     select.innerHTML = '<option value="">Bitte wählen</option>' + 
         students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
     
+    // Editor leeren
+    document.getElementById('noteEditor').innerHTML = '';
+    document.getElementById('timestampDisplay').style.display = 'none';
+    
     document.getElementById('addHomeworkModal').classList.add('active');
 };
 
-window.toggleCustomSubmission = function() {
-    const type = document.getElementById('hwSubmissionType').value;
-    const customGroup = document.getElementById('customSubmissionGroup');
-    customGroup.style.display = type === 'custom' ? 'block' : 'none';
-};
-
-window.saveNewHomework = async function() {
+window.saveNewNote = async function() {
     const studentId = document.getElementById('hwStudentSelect').value;
-    const title = document.getElementById('hwTitle').value.trim();
-    const description = document.getElementById('hwDescription').value.trim();
-    const deadlineDate = document.getElementById('hwDeadline').value;
-    const deadlineTime = document.getElementById('hwDeadlineTime').value || '23:59';
-    const deadline = `${deadlineDate}T${deadlineTime}:00`;
-    const submissionType = document.getElementById('hwSubmissionType').value;
-    const customText = document.getElementById('hwCustomSubmission').value.trim();
+    let noteContent = document.getElementById('noteEditor').innerHTML.trim();
     
-    if (!studentId || !title || !deadline) {
-        alert('Bitte alle Pflichtfelder ausfüllen!');
+    if (!studentId) {
+        alert('Bitte einen Schüler auswählen!');
         return;
     }
+    
+    if (!noteContent || noteContent === '<br>') {
+        alert('Bitte eine Notiz eingeben!');
+        return;
+    }
+    
+    // Links automatisch konvertieren
+    noteContent = convertUrlsToLinks(noteContent);
+    
+    // Zeitstempel als Titel
+    const timestamp = formatTimestamp(new Date());
+    const now = new Date().toISOString();
     
     try {
         const { error } = await supabase
             .from('homework')
             .insert([{
                 student_id: studentId,
-                title: title,
-                description: description,
-                deadline: deadline,
-                type: submissionType,
-                submission_type: submissionType,
-                custom_submission_text: submissionType === 'custom' ? customText : null,
+                title: timestamp,
+                description: noteContent,
+                deadline: now, // Für Kompatibilität
+                type: 'note',
+                submission_type: 'note',
                 completed: false,
                 is_read: false,
-                last_updated: new Date().toISOString(),
-                created_at: new Date().toISOString()
+                last_updated: now,
+                created_at: now
             }]);
         
         if (error) throw error;
         
-        alert('✅ Hausaufgabe erfolgreich erstellt!');
+        alert('✅ Notiz erfolgreich gespeichert!');
         closeModal();
         await loadHomework();
         renderHomeworkManagement();
         
-        // Formular leeren
+        // Editor leeren
+        document.getElementById('noteEditor').innerHTML = '';
         document.getElementById('hwStudentSelect').value = '';
-        document.getElementById('hwTitle').value = '';
-        document.getElementById('hwDescription').value = '';
-        document.getElementById('hwDeadline').value = '';
-        document.getElementById('hwSubmissionType').value = 'text';
-        document.getElementById('hwCustomSubmission').value = '';
-        document.getElementById('customSubmissionGroup').style.display = 'none';
+        document.getElementById('timestampDisplay').style.display = 'none';
         
     } catch (error) {
         alert('Fehler: ' + error.message);
@@ -936,20 +1004,18 @@ window.openEditHomeworkModal = async function(homeworkId) {
     const hwId = parseInt(homeworkId);
     const hw = homework.find(h => h.id === hwId);
     if (!hw) {
-        console.error('Hausaufgabe nicht gefunden:', homeworkId, homework);
+        console.error('Notiz nicht gefunden:', homeworkId, homework);
         return;
     }
     
     currentEditHomework = hwId;
-    console.log('Bearbeite Hausaufgabe:', hwId, hw);
+    console.log('Bearbeite Notiz:', hwId, hw);
     
-    document.getElementById('editHwTitle').value = hw.title;
-    document.getElementById('editHwDescription').value = hw.description || '';
-    document.getElementById('editHwDeadline').value = hw.deadline.slice(0, 16);
-    document.getElementById('editHwSubmissionType').value = hw.submission_type;
-    document.getElementById('editHwCustomSubmission').value = hw.custom_submission_text || '';
+    // Zeitstempel anzeigen
+    document.getElementById('editTimestamp').textContent = hw.title;
     
-    toggleEditCustomSubmission();
+    // Inhalt in Editor laden
+    document.getElementById('editNoteEditor').innerHTML = hw.description || '';
     
     // Als gelesen markieren
     if (!hw.is_read) {
@@ -957,148 +1023,61 @@ window.openEditHomeworkModal = async function(homeworkId) {
             .from('homework')
             .update({ is_read: true })
             .eq('id', homeworkId);
+        
+        // Lokale Variable aktualisieren
+        const hwIndex = homework.findIndex(h => h.id === hwId);
+        if (hwIndex !== -1) {
+            homework[hwIndex].is_read = true;
+        }
     }
     
     document.getElementById('editHomeworkModal').classList.add('active');
 };
 
-window.toggleEditCustomSubmission = function() {
-    const type = document.getElementById('editHwSubmissionType').value;
-    const customGroup = document.getElementById('editCustomSubmissionGroup');
-    customGroup.style.display = type === 'custom' ? 'block' : 'none';
-};
-
-window.saveEditedHomework = async function() {
-    console.log('💾 START: Speichere Hausaufgabe...', currentEditHomework);
+window.saveEditedNote = async function() {
+    console.log('💾 START: Speichere Notiz...', currentEditHomework);
     
     if (!currentEditHomework) {
-        alert('Keine Hausaufgabe ausgewählt!');
+        alert('Keine Notiz ausgewählt!');
         return;
     }
     
     const homeworkId = parseInt(currentEditHomework);
-    console.log('🔢 Homework ID als Zahl:', homeworkId);
+    let noteContent = document.getElementById('editNoteEditor').innerHTML.trim();
     
-    const localHomework = homework.find(h => h.id === homeworkId);
-    if (!localHomework) {
-        console.error('❌ Hausaufgabe nicht in lokaler Variable gefunden:', homeworkId);
-        alert('Fehler: Hausaufgabe wurde lokal nicht gefunden. Bitte Seite neu laden.');
+    if (!noteContent || noteContent === '<br>') {
+        alert('Bitte eine Notiz eingeben!');
         return;
     }
     
-    console.log('✅ Hausaufgabe lokal gefunden:', localHomework);
-    
-    const title = document.getElementById('editHwTitle').value.trim();
-    const description = document.getElementById('editHwDescription').value.trim();
-    const deadline = document.getElementById('editHwDeadline').value;
-    const submissionType = document.getElementById('editHwSubmissionType').value;
-    const customText = document.getElementById('editHwCustomSubmission').value.trim();
-    
-    if (!title || !deadline) {
-        alert('Bitte alle Pflichtfelder ausfüllen!');
-        return;
-    }
+    // Links automatisch konvertieren
+    noteContent = convertUrlsToLinks(noteContent);
     
     try {
-        console.log('📤 Versuche UPDATE für ID:', homeworkId);
-        
-        const updateData = {
-            title: title,
-            description: description,
-            deadline: deadline,
-            submission_type: submissionType,
-            custom_submission_text: submissionType === 'custom' ? customText : null,
-            is_read: false,
-            last_updated: new Date().toISOString()
-        };
-        
-        console.log('📦 Update-Daten:', updateData);
-        
-        const { data, error } = await supabase
+        const { error } = await supabase
             .from('homework')
-            .update(updateData)
-            .eq('id', homeworkId)
-            .select();
+            .update({
+                description: noteContent,
+                last_updated: new Date().toISOString()
+            })
+            .eq('id', homeworkId);
         
-        if (error) {
-            console.error('❌ SUPABASE FEHLER:', error);
-            await tryInsertInstead(homeworkId, updateData, localHomework);
-            return;
-        }
+        if (error) throw error;
         
-        if (!data || data.length === 0) {
-            console.log('🔄 UPDATE hat keine Zeile betroffen, versuche INSERT...');
-            await tryInsertInstead(homeworkId, updateData, localHomework);
-            return;
-        }
-        
-        console.log('✅ UPDATE ERFOLGREICH:', data);
-        
-        const homeworkIndex = homework.findIndex(h => h.id === homeworkId);
-        if (homeworkIndex !== -1) {
-            homework[homeworkIndex] = data[0];
-        }
-        
+        alert('✅ Notiz erfolgreich gespeichert!');
         closeModal();
         await loadHomework();
         renderHomeworkManagement();
         
-        alert('✅ Hausaufgabe aktualisiert!');
-        
     } catch (error) {
-        console.error('❌ FEHLER:', error);
         alert('Fehler: ' + error.message);
     }
 };
 
-async function tryInsertInstead(homeworkId, updateData, localHomework) {
-    try {
-        const insertData = {
-            ...updateData,
-            id: homeworkId,
-            student_id: localHomework.student_id,
-            completed: localHomework.completed || false,
-            created_at: localHomework.created_at || new Date().toISOString()
-        };
-        
-        console.log('📤 INSERT mit Daten:', insertData);
-        
-        const { data, error } = await supabase
-            .from('homework')
-            .insert([insertData])
-            .select();
-            
-        if (error) {
-            console.error('❌ INSERT FEHLER:', error);
-            alert('Fehler beim Erstellen der Hausaufgabe: ' + error.message);
-            return;
-        }
-        
-        console.log('✅ INSERT ERFOLGREICH:', data);
-        
-        const homeworkIndex = homework.findIndex(h => h.id === homeworkId);
-        if (homeworkIndex !== -1) {
-            homework[homeworkIndex] = data[0];
-        } else {
-            homework.push(data[0]);
-        }
-        
-        closeModal();
-        await loadHomework();
-        renderHomeworkManagement();
-        
-        alert('✅ Hausaufgabe erstellt!');
-        
-    } catch (error) {
-        console.error('❌ INSERT FEHLER:', error);
-        alert('Fehler: ' + error.message);
-    }
-}
-
 window.deleteHomework = async function() {
     if (!currentEditHomework) return;
     
-    if (!confirm('Hausaufgabe wirklich löschen?')) return;
+    if (!confirm('Notiz wirklich löschen?')) return;
     
     try {
         const { error } = await supabase
@@ -1108,7 +1087,7 @@ window.deleteHomework = async function() {
         
         if (error) throw error;
         
-        alert('🗑️ Hausaufgabe gelöscht!');
+        alert('🗑️ Notiz gelöscht!');
         closeModal();
         await loadHomework();
         renderHomeworkManagement();

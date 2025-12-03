@@ -452,6 +452,102 @@
         padding: 15px;
         background: rgba(255,255,255,0.15);
     }
+
+    /* ===== MINI-TEXTEDITOR STYLES ===== */
+    .editor-toolbar {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+        padding: 10px;
+        background: rgba(255,255,255,0.95);
+        border: 2px solid #FF00FF;
+        border-bottom: none;
+        border-radius: 10px 10px 0 0;
+    }
+
+    .editor-toolbar button {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        background: white;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        color: #333;
+    }
+
+    .editor-toolbar button:hover {
+        background: #FF00FF;
+        color: white;
+        border-color: #FF00FF;
+    }
+
+    .editor-toolbar button.active {
+        background: #FF00FF;
+        color: white;
+        border-color: #FF00FF;
+    }
+
+    .editor-toolbar .separator {
+        width: 1px;
+        background: #ddd;
+        margin: 0 5px;
+    }
+
+    .editor-content {
+        min-height: 200px;
+        padding: 15px;
+        border: 2px solid #FF00FF;
+        border-top: none;
+        border-radius: 0 0 10px 10px;
+        background: rgba(255,255,255,0.95);
+        outline: none;
+        font-family: inherit;
+        font-size: 1em;
+        line-height: 1.6;
+        color: #333;
+    }
+
+    .editor-content:focus {
+        box-shadow: 0 0 0 3px rgba(255, 0, 255, 0.2);
+    }
+
+    .editor-content a {
+        color: #0066CC;
+        text-decoration: underline;
+    }
+
+    .editor-content ul, .editor-content ol {
+        margin-left: 20px;
+        margin-bottom: 10px;
+    }
+
+    .editor-content li {
+        margin-bottom: 5px;
+    }
+
+    /* Timestamp Display */
+    .timestamp-display {
+        background: rgba(255, 0, 255, 0.2);
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        border: 2px solid #FF00FF;
+        text-align: center;
+        font-size: 1.2em;
+        font-weight: bold;
+        color: white;
+    }
+
+    /* Notiz-Vorschau in der Liste */
+    .hw-item-preview {
+        font-size: 0.85em;
+        color: rgba(255,255,255,0.7);
+        margin-top: 5px;
+        max-height: 40px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 </style>
 
 
@@ -528,9 +624,9 @@
 </div>
 
         <div id="homework-section" class="content-section">
-            <h2>Hausaufgaben-Verwaltung</h2>
+            <h2>Hausaufgaben & Notizen</h2>
             <button class="btn btn-approve" onclick="openAddHomeworkModal()" style="margin-bottom: 20px;">
-                ➕ Neue Hausaufgabe
+                ➕ Neue Notiz erstellen
             </button>
             <div id="hwStudentsGrid"></div>
         </div>
@@ -648,6 +744,8 @@
                         <option value="A1">A1</option>
                         <option value="A2">A2</option>
                         <option value="B1">B1</option>
+                        <option value="A2">A2</option>
+                        <option value="B1">B1</option>
                         <option value="B2">B2</option>
                         <option value="C1">C1</option>
                         <option value="C2">C2</option>
@@ -667,99 +765,76 @@
             </div>
         </div>
 
-        <!-- Modal: Neue Hausaufgabe -->
+        <!-- Modal: Neue Notiz (vereinfacht) -->
         <div class="modal" id="addHomeworkModal">
             <div class="modal-content">
-                <h3 style="color: #8B4513; margin-bottom: 20px;">Neue Hausaufgabe erstellen</h3>
+                <h3 style="color: white; margin-bottom: 20px;">📝 Neue Notiz erstellen</h3>
                 
                 <div class="form-group">
-                    <label>Schüler *</label>
-                    <select id="hwStudentSelect" required>
+                    <label>Schüler auswählen *</label>
+                    <select id="hwStudentSelect" required onchange="updateTimestamp()">
                         <option value="">Bitte wählen</option>
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label>Titel *</label>
-                    <input type="text" id="hwTitle" placeholder="z.B. Grammatikübung Seite 42" required>
+                <!-- Automatischer Zeitstempel -->
+                <div class="timestamp-display" id="timestampDisplay" style="display: none;">
+                    📅 <span id="currentTimestamp"></span>
                 </div>
 
+                <!-- Mini-Texteditor -->
                 <div class="form-group">
-                    <label>Beschreibung</label>
-                    <textarea id="hwDescription" rows="3" placeholder="Du kannst <b>fett</b> und <br> für Zeilenumbrüche nutzen! 🎉"></textarea>
-                    <div style="font-size: 0.85em; color: #666; margin-top: 5px;">
-                        💡 Tipp: Nutze &lt;b&gt;text&lt;/b&gt; für Fettschrift und &lt;br&gt; für Zeilenumbrüche
+                    <label>Notiz</label>
+                    <div class="editor-toolbar" id="editorToolbar">
+                        <button type="button" onclick="formatText('bold')" title="Fett"><b>F</b></button>
+                        <button type="button" onclick="formatText('italic')" title="Kursiv"><i>K</i></button>
+                        <div class="separator"></div>
+                        <button type="button" onclick="formatText('insertUnorderedList')" title="Aufzählung">• Liste</button>
+                        <button type="button" onclick="formatText('insertOrderedList')" title="Nummerierung">1. Liste</button>
+                        <div class="separator"></div>
+                        <button type="button" onclick="insertLink()" title="Link einfügen">🔗 Link</button>
+                        <button type="button" onclick="formatText('insertHorizontalRule')" title="Trennlinie">― Linie</button>
                     </div>
+                    <div class="editor-content" id="noteEditor" contenteditable="true" 
+                         placeholder="Schreibe hier deine Notizen..." 
+                         oninput="autoDetectLinks(this)"></div>
                 </div>
 
-                <div class="form-group">
-                    <label>Deadline *</label>
-                    <input type="date" id="hwDeadline" required>
-                    <input type="time" id="hwDeadlineTime" placeholder="Optional: 14:00">
-                    <div style="font-size: 0.85em; color: #666; margin-top: 5px;">
-                        💡 Uhrzeit ist optional - Standard: 17:00 Uhr
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Antwort-Art *</label>
-                    <select id="hwSubmissionType" required onchange="toggleCustomSubmission()">
-                        <option value="text">📝 Text-Antwort</option>
-                        <option value="photo">📸 Foto-Upload</option>
-                        <option value="whatsapp">💬 WhatsApp-Nachricht</option>
-                        <option value="custom">✏️ Benutzerdefiniert</option>
-                    </select>
-                </div>
-
-                <div class="form-group" id="customSubmissionGroup" style="display: none;">
-                    <label>Benutzerdefinierte Anweisung</label>
-                    <input type="text" id="hwCustomSubmission" placeholder="z.B. Per Email senden">
-                </div>
-
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn btn-approve" onclick="saveNewHomework()">💾 Hausaufgabe erstellen</button>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-approve" onclick="saveNewNote()">💾 Speichern</button>
                     <button class="btn" style="background: #999; color: white;" onclick="closeModal()">Abbrechen</button>
                 </div>
             </div>
         </div>
 
-        <!-- Modal: Hausaufgabe bearbeiten -->
+        <!-- Modal: Notiz ansehen/bearbeiten -->
         <div class="modal" id="editHomeworkModal">
             <div class="modal-content">
-                <h3 style="color: #8B4513; margin-bottom: 20px;">Hausaufgabe bearbeiten</h3>
+                <h3 style="color: white; margin-bottom: 20px;">📝 Notiz bearbeiten</h3>
                 
+                <!-- Zeitstempel der bestehenden Notiz -->
+                <div class="timestamp-display" id="editTimestampDisplay">
+                    📅 <span id="editTimestamp"></span>
+                </div>
+
+                <!-- Mini-Texteditor für Bearbeitung -->
                 <div class="form-group">
-                    <label>Titel *</label>
-                    <input type="text" id="editHwTitle" required>
+                    <label>Notiz</label>
+                    <div class="editor-toolbar">
+                        <button type="button" onclick="formatTextEdit('bold')" title="Fett"><b>F</b></button>
+                        <button type="button" onclick="formatTextEdit('italic')" title="Kursiv"><i>K</i></button>
+                        <div class="separator"></div>
+                        <button type="button" onclick="formatTextEdit('insertUnorderedList')" title="Aufzählung">• Liste</button>
+                        <button type="button" onclick="formatTextEdit('insertOrderedList')" title="Nummerierung">1. Liste</button>
+                        <div class="separator"></div>
+                        <button type="button" onclick="insertLinkEdit()" title="Link einfügen">🔗 Link</button>
+                        <button type="button" onclick="formatTextEdit('insertHorizontalRule')" title="Trennlinie">― Linie</button>
+                    </div>
+                    <div class="editor-content" id="editNoteEditor" contenteditable="true"></div>
                 </div>
 
-                <div class="form-group">
-                    <label>Beschreibung</label>
-                    <textarea id="editHwDescription" rows="3"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Deadline *</label>
-                    <input type="datetime-local" id="editHwDeadline" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Antwort-Art *</label>
-                    <select id="editHwSubmissionType" required onchange="toggleEditCustomSubmission()">
-                        <option value="text">📝 Text-Antwort</option>
-                        <option value="photo">📸 Foto-Upload</option>
-                        <option value="whatsapp">💬 WhatsApp-Nachricht</option>
-                        <option value="custom">✏️ Benutzerdefiniert</option>
-                    </select>
-                </div>
-
-                <div class="form-group" id="editCustomSubmissionGroup" style="display: none;">
-                    <label>Benutzerdefinierte Anweisung</label>
-                    <input type="text" id="editHwCustomSubmission">
-                </div>
-
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn btn-approve" onclick="saveEditedHomework()">💾 Speichern</button>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-approve" onclick="saveEditedNote()">💾 Speichern</button>
                     <button class="btn btn-delete" onclick="deleteHomework()">🗑️ Löschen</button>
                     <button class="btn" style="background: #999; color: white;" onclick="closeModal()">Abbrechen</button>
                 </div>

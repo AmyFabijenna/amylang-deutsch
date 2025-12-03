@@ -176,6 +176,10 @@
             opacity: 0.7;
         }
 
+        .hw-card.note-card {
+            border-left-color: #9C27B0;
+        }
+
         .hw-card::before {
             content: '';
             position: absolute;
@@ -196,6 +200,42 @@
             font-size: 1.3em;
             font-weight: bold;
             margin-bottom: 10px;
+        }
+
+        /* Notiz-Inhalt Styling */
+        .note-content {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            line-height: 1.8;
+        }
+
+        .note-content ul, .note-content ol {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .note-content li {
+            margin-bottom: 5px;
+        }
+
+        .note-content a {
+            display: inline-block;
+            background: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 5px 5px 5px 0;
+            box-shadow: 0 4px 12px rgba(70, 130, 180, 0.3);
+        }
+
+        .note-content a:hover {
+            background: linear-gradient(135deg, #4682B4 0%, #1e3a5f 100%);
+            transform: translateY(-2px);
         }
 
         textarea {
@@ -306,6 +346,11 @@
             border-radius: 12px;
             font-size: 0.85em;
             margin-top: 8px;
+        }
+
+        .note-badge {
+            background: linear-gradient(135deg, #9C27B0, #7B1FA2);
+            color: white;
         }
 
         .phone-hint {
@@ -499,105 +544,98 @@
     padding: 15px 20px;
     border-radius: 15px;
     margin-bottom: 20px;
+    display: none;
+}
+
+.permission-banner-content {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+    gap: 15px;
+    flex-wrap: wrap;
 }
 
-.permission-text {
+.permission-banner-text {
     flex: 1;
-    margin-right: 15px;
+    min-width: 200px;
 }
 
-.permission-buttons {
+.permission-banner-buttons {
     display: flex;
     gap: 10px;
 }
 
 .permission-btn {
     padding: 8px 15px;
+    border-radius: 20px;
     border: none;
-    border-radius: 10px;
     cursor: pointer;
     font-weight: bold;
     transition: all 0.3s ease;
 }
 
-.permission-btn.allow {
+.permission-btn-yes {
     background: white;
-    color: #4facfe;
+    color: #667eea;
 }
 
-.permission-btn.deny {
+.permission-btn-no {
     background: rgba(255,255,255,0.3);
     color: white;
 }
-
-.permission-btn:hover {
-    transform: scale(1.05);
-}
-
     </style>
 </head>
 <body>
     <div class="container">
-
-        <!-- Zahlungsbenachrichtigung einfügen -->
-<div id="paymentNotification" style="display: none;"></div>
-        
         <div id="loginView">
             <div class="login-box">
-                <h1>🎓 Schüler Login</h1>
+                <h1>🎓 Mein Amy Lang Bereich</h1>
                 <div id="errorMsg" class="error"></div>
                 <form id="loginForm">
                     <div class="form-group">
-                        <label>WhatsApp-Telefonnummer</label>
-                        <input type="tel" id="loginPhone" placeholder="+49 123 456789" required>
-                        <div class="phone-hint">📱 Dieselbe Nummer wie bei der Anmeldung</div>
+                        <label>Telefonnummer</label>
+                        <input type="tel" id="loginPhone" placeholder="+43..." required>
+                        <p class="phone-hint">Format: +43 oder 0043 oder mit 0</p>
                     </div>
                     <div class="form-group">
                         <label>Passwort</label>
-                        <input type="text" id="loginPassword" placeholder="z.B. katze, tiger, banane..." required>
+                        <input type="password" id="loginPassword" required>
                     </div>
                     <button type="submit" class="btn">Einloggen</button>
                 </form>
             </div>
         </div>
 
-
-
-
         <div id="studentView" class="student-view">
-            <a href="index.html" class="back-btn">← Zurück zur Hauptseite</a>
             <div class="login-box">
-                <h1 id="welcomeText">Mein Schülerbereich</h1>
-                <div id="lessonCountdown"></div>
-                <!-- Benachrichtigungs-Erlaubnis Banner -->
-<div id="notificationPermissionBanner" style="display: none;">
-    <div class="permission-banner">
-        <div class="permission-text">
-            <strong>🔔 Erinnerungen aktivieren?</strong><br>
-            <small>Erhalte eine Benachrichtigung 30 Min vor deiner Stunde</small>
-        </div>
-        <div class="permission-buttons">
-            <button class="permission-btn allow" onclick="requestNotificationPermission()">Ja</button>
-            <button class="permission-btn deny" onclick="denyNotificationPermission()">Nein</button>
-        </div>
-    </div>
-</div>
+                <h1 id="welcomeText">Willkommen!</h1>
+                
+                <div id="paymentNotification"></div>
+                
+                <div id="notificationPermissionBanner" class="permission-banner">
+                    <div class="permission-banner-content">
+                        <div class="permission-banner-text">
+                            🔔 Möchtest du 30 Minuten vor deiner Stunde erinnert werden?
+                        </div>
+                        <div class="permission-banner-buttons">
+                            <button class="permission-btn permission-btn-yes" onclick="requestNotificationPermission()">Ja!</button>
+                            <button class="permission-btn permission-btn-no" onclick="denyNotificationPermission()">Nein</button>
+                        </div>
+                    </div>
+                </div>
 
-<!-- Benachrichtigungs-Banner (erscheint 30 Min vorher) -->
-<div id="notificationBanner" class="notification-banner">
-    <div class="notification-content">
-        <div class="notification-icon">🔔</div>
-        <div class="notification-text">
-            <div class="notification-title">Stunde beginnt bald!</div>
-            <div class="notification-message" id="notificationMessage"></div>
-        </div>
-        <button class="notification-close" onclick="closeNotificationBanner()">✕</button>
-    </div>
-</div>
+                <div id="notificationBanner" class="notification-banner">
+                    <div class="notification-content">
+                        <div class="notification-icon">🔔</div>
+                        <div class="notification-text">
+                            <div class="notification-title">Stunde beginnt bald!</div>
+                            <div class="notification-message" id="notificationMessage"></div>
+                        </div>
+                        <button class="notification-close" onclick="closeNotificationBanner()">×</button>
+                    </div>
+                </div>
+                
+                <div id="lessonCountdown"></div>
+                
                 <button class="btn btn-secondary" onclick="logout()" style="margin-bottom: 20px;">Ausloggen</button>
                 
                 <div class="info-card">
@@ -610,10 +648,10 @@
                 </div>
 
                 <div class="info-card">
-                    <div class="info-title">📝 Meine Hausaufgaben</div>
-                    <div id="myHomework">Lade Hausaufgaben...</div>
+                    <div class="info-title">📝 Meine Notizen & Hausaufgaben</div>
+                    <div id="myHomework">Lade...</div>
                     <button class="btn" onclick="switchToHomeworkView()" style="margin-top: 10px;">
-                        Hausaufgabe(n) anzeigen
+                        Alle anzeigen
                     </button>
                 </div>
 
@@ -624,12 +662,13 @@
         <div id="hwView" class="hw-view">
             <a href="#" class="back-btn" onclick="switchToDashboard(); return false;">← Zurück zum Dashboard</a>
             <div class="login-box">
-                <h1 id="hwWelcomeText">Meine Hausübungen</h1>
+                <h1 id="hwWelcomeText">Meine Notizen & Hausaufgaben</h1>
                 
                 <div class="filter-toggle">
     <button class="filter-btn active" onclick="filterHomework('all', event)">Alle</button>
-    <button class="filter-btn" onclick="filterHomework('pending', event)">Offen</button>
-    <button class="filter-btn" onclick="filterHomework('completed', event)">Erledigt</button>
+    <button class="filter-btn" onclick="filterHomework('notes', event)">📝 Notizen</button>
+    <button class="filter-btn" onclick="filterHomework('pending', event)">⏳ Offen</button>
+    <button class="filter-btn" onclick="filterHomework('completed', event)">✅ Erledigt</button>
 </div>
                 
                 <div id="homeworkContainer"></div>
@@ -798,6 +837,11 @@ function updateLessonCountdown() {
     const lessonTime = new Date(nextLesson.date);
     const timeDiff = lessonTime - now;
     
+    if (timeDiff <= 0) {
+        container.innerHTML = '';
+        return;
+    }
+    
     // Berechne die Zeit
     const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -935,21 +979,25 @@ async function loadMyLessons() {
 
 
 async function loadMyHomeworkOverview() {
+    // GEÄNDERT: Sortiere nach created_at (neueste zuerst)
     const { data, error } = await supabase
         .from('homework')
         .select('*')
         .eq('student_id', currentStudent.id)
-        .order('deadline', { ascending: true });
+        .order('created_at', { ascending: false });
     
     if (error || !data || data.length === 0) {
-        document.getElementById('myHomework').innerHTML = '<p>🎉 Aktuell keine Hausaufgaben!</p>';
+        document.getElementById('myHomework').innerHTML = '<p>🎉 Aktuell keine Notizen oder Hausaufgaben!</p>';
         currentHomework = [];
         return;
     }
     
     currentHomework = data;
-    const pending = data.filter(hw => !hw.completed);
-    const completed = data.filter(hw => hw.completed);
+    
+    // Zähle verschiedene Typen
+    const notes = data.filter(hw => hw.type === 'note' || hw.submission_type === 'note');
+    const tasks = data.filter(hw => hw.type !== 'note' && hw.submission_type !== 'note');
+    const pending = tasks.filter(hw => !hw.completed);
     const unread = data.filter(hw => !hw.is_read);
     
     let html = '';
@@ -968,36 +1016,29 @@ async function loadMyHomeworkOverview() {
                 box-shadow: 0 4px 15px rgba(255, 68, 68, 0.4);
                 animation: pulse 2s infinite;
             ">
-                🔴 ${unread.length} neue/geänderte Hausaufgabe${unread.length > 1 ? 'n' : ''}!
+                🔴 ${unread.length} neue Nachricht${unread.length > 1 ? 'en' : ''}!
             </div>
         `;
     }
 
-    if (pending.length > 0) {
-        html += `<p><strong>${pending.length} offene Hausaufgabe(n):</strong></p>`;
-        pending.slice(0, 10).forEach(hw => {
-            const deadline = new Date(hw.deadline);
-            const today = new Date();
-            const isOverdue = deadline < today;
-            const isNew = !hw.is_read;
-            
-            html += `<div style="margin: 5px 0; padding: 8px; background: ${isOverdue ? 'rgba(255,0,0,0.1)' : 'rgba(255,165,0,0.1)'}; border-radius: 8px; border-left: 4px solid ${isNew ? '#ff4444' : '#FFA500'};">
-                <strong>${hw.title}</strong> ${isNew ? '🔴 NEU' : ''}<br>
-                📅 Bis: ${deadline.toLocaleDateString('de-DE')} ${isOverdue ? '⚠️ Überfällig!' : ''}
-            </div>`;
-        });
+    // Neueste Einträge anzeigen (max 5)
+    const recent = data.slice(0, 5);
+    recent.forEach(hw => {
+        const isNote = hw.type === 'note' || hw.submission_type === 'note';
+        const isNew = !hw.is_read;
         
-        if (pending.length > 10) {
-            html += `
-                <button class="btn" onclick="switchToHomeworkView()" style="margin-top: 10px; width: 100%;">
-                    📋 ${pending.length - 10} weitere Hausaufgabe${pending.length - 10 > 1 ? 'n' : ''} anzeigen
-                </button>
-            `;
-        }
-    }
-
-    if (completed.length > 0) {
-        html += `<p style="margin-top: 15px;"><strong>${completed.length} erledigt</strong> ✅</p>`;
+        // Vorschau-Text erstellen
+        let preview = hw.description ? hw.description.replace(/<[^>]*>/g, '').substring(0, 60) : '';
+        if (preview.length >= 60) preview += '...';
+        
+        html += `<div style="margin: 8px 0; padding: 10px; background: ${isNew ? 'rgba(255,0,0,0.1)' : 'rgba(255,255,255,0.3)'}; border-radius: 8px; border-left: 4px solid ${isNote ? '#9C27B0' : '#FF9800'};">
+            <strong>${isNote ? '📝' : '📚'} ${hw.title}</strong> ${isNew ? '🔴 NEU' : ''}<br>
+            <span style="font-size: 0.9em; color: #666;">${preview}</span>
+        </div>`;
+    });
+    
+    if (data.length > 5) {
+        html += `<p style="color: #666; font-size: 0.9em; margin-top: 10px;">... und ${data.length - 5} weitere</p>`;
     }
 
     document.getElementById('myHomework').innerHTML = html;
@@ -1096,7 +1137,7 @@ window.submitRescheduleRequest = async function() {
 window.switchToHomeworkView = function() {
     document.getElementById('studentView').style.display = 'none';
     document.getElementById('hwView').style.display = 'block';
-    document.getElementById('hwWelcomeText').textContent = `Hausaufgaben von ${currentStudent.name}`;
+    document.getElementById('hwWelcomeText').textContent = `Notizen & Hausaufgaben von ${currentStudent.name}`;
     renderDetailedHomework();
 };
 
@@ -1118,8 +1159,11 @@ window.filterHomework = function(filter, event) {
 async function renderDetailedHomework() {
     let filteredHomework = currentHomework;
     
-    if (currentFilter === 'pending') {
-        filteredHomework = currentHomework.filter(hw => !hw.completed);
+    // GEÄNDERT: Neue Filter für Notizen
+    if (currentFilter === 'notes') {
+        filteredHomework = currentHomework.filter(hw => hw.type === 'note' || hw.submission_type === 'note');
+    } else if (currentFilter === 'pending') {
+        filteredHomework = currentHomework.filter(hw => !hw.completed && hw.type !== 'note' && hw.submission_type !== 'note');
     } else if (currentFilter === 'completed') {
         filteredHomework = currentHomework.filter(hw => hw.completed);
     }
@@ -1127,7 +1171,7 @@ async function renderDetailedHomework() {
     const container = document.getElementById('homeworkContainer');
     
     if (filteredHomework.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #8B4513; padding: 40px;">Keine Hausaufgaben in dieser Kategorie</p>';
+        container.innerHTML = '<p style="text-align: center; color: #8B4513; padding: 40px;">Keine Einträge in dieser Kategorie</p>';
         return;
     }
     
@@ -1135,10 +1179,34 @@ async function renderDetailedHomework() {
 }
 
 function createHwCard(hw) {
+    const isNote = hw.type === 'note' || hw.submission_type === 'note';
+    const isCompleted = hw.completed;
+    
+    // Für Notizen: Nur Anzeige, kein "Erledigt"-Status
+    if (isNote) {
+        return `
+            <div class="hw-card note-card ${hw.is_read ? 'read' : ''}" onclick="markAsRead('${hw.id}')">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div class="hw-title">📝 ${hw.title}</div>
+                    <div style="font-size: 1.2em;">${hw.is_read ? '👁️' : '🔴'}</div>
+                </div>
+                ${hw.description ? `<div class="note-content">${hw.description}</div>` : ''}
+                <div class="submission-type-badge note-badge">
+                    📝 Notiz von Amy
+                </div>
+                ${!hw.is_read ? `
+                    <button class="btn" style="margin-top: 15px;" onclick="markAsRead('${hw.id}'); event.stopPropagation();">
+                        ✅ Als gelesen markieren
+                    </button>
+                ` : ''}
+            </div>
+        `;
+    }
+    
+    // Für alte Hausaufgaben: Original-Verhalten
     const deadline = new Date(hw.deadline);
     const today = new Date();
     const isOverdue = !hw.completed && deadline < today;
-    const isCompleted = hw.completed;
     
     const submissionTypeText = {
         'text': '📝 Text-Antwort',
@@ -1205,7 +1273,7 @@ function createResponseSection(hw) {
 }
 
 window.markAsRead = async function(hwId) {
-    const hw = currentHomework.find(h => h.id === hwId);
+    const hw = currentHomework.find(h => h.id == hwId);
     if (!hw || hw.is_read) return;
     
     try {
@@ -1214,7 +1282,7 @@ window.markAsRead = async function(hwId) {
             .update({ is_read: true })
             .eq('id', hwId);
         
-        const hwIndex = currentHomework.findIndex(h => h.id === hwId);
+        const hwIndex = currentHomework.findIndex(h => h.id == hwId);
         if (hwIndex !== -1) {
             currentHomework[hwIndex].is_read = true;
         }
@@ -1257,7 +1325,7 @@ window.submitHomeworkResponse = async function(hwId, type) {
         
         showSuccess('Hausaufgabe wurde als erledigt markiert!');
         
-        const hwIndex = currentHomework.findIndex(h => h.id === hwId);
+        const hwIndex = currentHomework.findIndex(h => h.id == hwId);
         if (hwIndex !== -1) {
             currentHomework[hwIndex].completed = true;
             currentHomework[hwIndex].response = response;
