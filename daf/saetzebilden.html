@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deutsch-Sprachspiele für Kinder</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(180deg, #a8d4f0 0%, #6bb3e0 50%, #4a9fd4 100%);
+            min-height: 100vh;
+            color: #1a3a52;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; padding: 20px; margin-bottom: 20px; }
+        .header h1 { font-size: 2rem; font-weight: 700; color: #0d3a5c; }
+        .header-emoji { font-size: 2rem; display: block; margin-bottom: 10px; }
+
+        .welcome-screen {
+            background: #fff; border-radius: 16px; padding: 35px; max-width: 450px;
+            margin: 0 auto; box-shadow: 0 8px 30px rgba(13,58,92,0.2); text-align: center;
+        }
+        .welcome-screen h2 { color: #0d3a5c; font-size: 1.5rem; margin-bottom: 18px; }
+        .welcome-screen p { color: #2c5070; margin-bottom: 20px; font-size: 1.1rem; }
+        .name-input {
+            width: 100%; padding: 14px 18px; font-size: 1.15rem; font-family: Arial;
+            border: 2px solid #4a9fd4; border-radius: 10px; outline: none; text-align: center;
+        }
+        .name-input:focus { border-color: #2980b9; box-shadow: 0 0 0 3px rgba(41,128,185,0.2); }
+        .start-btn {
+            margin-top: 22px; padding: 14px 45px; font-size: 1.15rem; font-family: Arial;
+            font-weight: 700; background: #27ae60; color: white; border: none;
+            border-radius: 25px; cursor: pointer; transition: all 0.2s;
+        }
+        .start-btn:hover:not(:disabled) { background: #219a52; transform: translateY(-2px); }
+        .start-btn:disabled { background: #95a5a6; cursor: not-allowed; }
+
+        .game-area { display: none; }
+        .game-area.active { display: block; }
+
+        .score-bar {
+            background: #fff; border-radius: 12px; padding: 14px 22px; margin-bottom: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(13,58,92,0.15);
+        }
+        .player-info { display: flex; align-items: center; gap: 10px; }
+        .player-avatar {
+            width: 42px; height: 42px; background: linear-gradient(135deg, #f1c40f, #e67e22);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+        }
+        .player-name { font-weight: 700; font-size: 1.05rem; color: #0d3a5c; }
+        .score-display {
+            display: flex; align-items: center; gap: 6px;
+            background: linear-gradient(135deg, #f1c40f, #e67e22);
+            padding: 9px 18px; border-radius: 20px; font-weight: 700; color: #1a3a52;
+        }
+
+        .game-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
+        .tab-btn {
+            padding: 11px 16px; font-family: Arial; font-weight: 700; font-size: 0.9rem;
+            background: #fff; color: #0d3a5c; border: 2px solid #4a9fd4;
+            border-radius: 10px; cursor: pointer; transition: all 0.2s;
+        }
+        .tab-btn:hover { background: #e8f4fc; }
+        .tab-btn.active { background: #2980b9; color: white; border-color: #2471a3; }
+
+        .game-panel {
+            display: none; background: #fff; border-radius: 16px; padding: 25px;
+            box-shadow: 0 8px 30px rgba(13,58,92,0.2);
+        }
+        .game-panel.active { display: block; }
+        .game-title { font-size: 1.4rem; font-weight: 700; color: #0d3a5c; text-align: center; margin-bottom: 8px; }
+        .game-description { text-align: center; color: #2c5070; margin-bottom: 20px; font-size: 1rem; }
+
+        .dice-container { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .dice {
+            width: 100px; height: 100px; background: linear-gradient(145deg, #fff, #e0e0e0);
+            border-radius: 16px; display: flex; align-items: center; justify-content: center;
+            font-size: 3rem; font-weight: 900; color: #0d3a5c;
+            box-shadow: 0 6px 20px rgba(13,58,92,0.2); cursor: pointer; user-select: none;
+        }
+        .dice:hover { transform: scale(1.05); }
+        .dice.rolling { animation: diceRoll 0.5s ease-out; }
+        @keyframes diceRoll { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.1); } 100% { transform: rotate(360deg) scale(1); } }
+        .dice-result { font-size: 1.1rem; font-weight: 600; color: #0d3a5c; padding: 14px 28px; background: #e8f4fc; border-radius: 10px; text-align: center; }
+        .dice-result .pronoun { font-size: 1.4rem; font-weight: 700; color: #e67e22; display: block; margin-top: 4px; }
+        .verb-display { font-size: 1.1rem; font-weight: 600; padding: 16px; background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; border-radius: 10px; text-align: center; }
+        .verb-display .infinitive { font-size: 1.6rem; font-weight: 700; display: block; margin-bottom: 4px; }
+        .conjugation-options { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 20px 0; }
+        .conj-btn { padding: 10px 20px; font-size: 1rem; font-family: Arial; font-weight: 700; background: #fff; color: #1a3a52; border: 2px solid #4a9fd4; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .conj-btn:hover { background: #e8f4fc; }
+        .conj-btn.correct { background: #27ae60 !important; border-color: #1e8449 !important; color: white !important; }
+        .conj-btn.wrong { background: #e74c3c !important; border-color: #c0392b !important; color: white !important; animation: shake 0.4s ease; }
+        @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);} }
+
+        .action-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 15px; }
+        .game-btn { padding: 10px 22px; font-size: 0.95rem; font-family: Arial; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background: #2980b9; color: white; }
+        .btn-primary:hover { background: #2471a3; }
+        .btn-secondary { background: #fff; color: #0d3a5c; border: 2px solid #4a9fd4; }
+        .btn-secondary:hover { background: #e8f4fc; }
+        .btn-success { background: #27ae60; color: white; }
+        .btn-success:hover { background: #219a52; }
+
+        .sentence-builder { display: flex; flex-direction: column; gap: 15px; }
+        .step-indicator { display: flex; justify-content: center; gap: 8px; margin-bottom: 12px; }
+        .step { width: 34px; height: 34px; border-radius: 50%; background: #d5e8f5; color: #5a7a94; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+        .step.active { background: #2980b9; color: white; }
+        .step.completed { background: #27ae60; color: white; }
+
+        .sentence-display { background: #f0f7fc; border: 2px dashed #4a9fd4; border-radius: 12px; padding: 18px; min-height: 60px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; font-size: 1.15rem; font-weight: 700; }
+        .sentence-part { padding: 8px 14px; background: #fff; border-radius: 6px; box-shadow: 0 2px 8px rgba(13,58,92,0.1); }
+        .sentence-part.subject { background: linear-gradient(135deg, #f1c40f, #e67e22); color: #1a3a52; }
+        .sentence-part.verb { background: linear-gradient(135deg, #27ae60, #1e8449); color: white; }
+        .sentence-part.object { background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; }
+        .sentence-part.placeholder { background: #d5e8f5; color: #5a7a94; border: 2px dashed #4a9fd4; }
+
+        .selection-area { background: #f0f7fc; border-radius: 12px; padding: 15px; }
+        .selection-label { font-weight: 700; color: #0d3a5c; margin-bottom: 10px; font-size: 1rem; }
+        .selection-options { display: flex; flex-wrap: wrap; gap: 8px; max-height: 280px; overflow-y: auto; padding: 5px; }
+        .select-btn { padding: 8px 12px; font-size: 0.9rem; font-family: Arial; font-weight: 600; background: #fff; color: #1a3a52; border: 2px solid #4a9fd4; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+        .select-btn:hover { background: #4a9fd4; color: white; }
+        .select-btn.correct { background: #27ae60 !important; border-color: #1e8449 !important; color: white !important; }
+        .select-btn.wrong { background: #e74c3c !important; border-color: #c0392b !important; color: white !important; }
+
+        /* SATZSAMMLUNG - GUT SICHTBAR */
+        .sentence-collection {
+            margin-top: 25px;
+            background: linear-gradient(135deg, #fff8e7, #ffefc1);
+            border: 3px solid #f1c40f;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(241,196,15,0.3);
+        }
+        .collection-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px dashed #f1c40f;
+        }
+        .collection-title {
+            font-weight: 700;
+            color: #0d3a5c;
+            font-size: 1.1rem;
+        }
+        .collection-count {
+            background: linear-gradient(135deg, #f1c40f, #e67e22);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1rem;
+            box-shadow: 0 2px 8px rgba(230,126,34,0.3);
+        }
+        .sentence-list {
+            max-height: 300px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 5px;
+        }
+        .collected-sentence {
+            background: #fff;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border-left: 5px solid #27ae60;
+            font-size: 1.05rem;
+            color: #1a3a52;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .collected-sentence:nth-child(even) { border-left-color: #3498db; }
+        .collected-sentence:nth-child(3n) { border-left-color: #9b59b6; }
+        .collected-sentence:nth-child(4n) { border-left-color: #e67e22; }
+        .no-sentences {
+            color: #7f8c8d;
+            font-style: italic;
+            text-align: center;
+            padding: 30px;
+            font-size: 1rem;
+        }
+        .save-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px dashed #f1c40f;
+            text-align: center;
+        }
+
+        .help-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+        .help-modal.active { display: flex; }
+        .help-content { background: #fff; border-radius: 16px; padding: 25px; max-width: 550px; max-height: 80vh; overflow-y: auto; position: relative; }
+        .help-close { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; background: #e74c3c; color: white; border: none; border-radius: 50%; font-size: 1.1rem; cursor: pointer; }
+        .help-title { font-size: 1.2rem; font-weight: 700; color: #0d3a5c; margin-bottom: 15px; }
+        .conj-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.85rem; }
+        .conj-table th, .conj-table td { padding: 8px; text-align: left; border-bottom: 1px solid #d5e8f5; }
+        .conj-table th { background: #e8f4fc; color: #0d3a5c; font-weight: 700; }
+
+        .success-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(39,174,96,0.92); z-index: 1000; align-items: center; justify-content: center; flex-direction: column; }
+        .success-overlay.active { display: flex; }
+        .success-emoji { font-size: 4rem; }
+        .success-text { font-size: 1.8rem; font-weight: 700; color: white; margin-top: 15px; }
+        .success-points { font-size: 1.2rem; font-weight: 700; color: white; margin-top: 8px; }
+
+        .confetti { position: fixed; width: 10px; height: 10px; top: -10px; z-index: 1001; pointer-events: none; animation: confettiFall 2s ease-out forwards; }
+        @keyframes confettiFall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+
+        /* GROSSER SPEICHER-BUTTON */
+        .save-all-section {
+            margin-top: 25px;
+            background: linear-gradient(135deg, #27ae60, #1e8449);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 6px 20px rgba(39,174,96,0.3);
+        }
+        .save-all-section h3 {
+            color: white;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+        .save-all-btn {
+            padding: 16px 40px;
+            font-size: 1.2rem;
+            font-family: Arial;
+            font-weight: 700;
+            background: white;
+            color: #27ae60;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .save-all-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 12px; }
+            .game-panel { padding: 18px; }
+            .dice { width: 80px; height: 80px; font-size: 2.4rem; }
+            .tab-btn { padding: 9px 12px; font-size: 0.8rem; }
+            .score-bar { justify-content: center; }
+            .selection-options { max-height: 200px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <span class="header-emoji">🎮📚✨</span>
+            <h1>Deutsch-Sprachspiele</h1>
+        </header>
+
+        <div class="welcome-screen" id="welcomeScreen">
+            <h2>Willkommen! 👋</h2>
+            <p>Wie heißt du?</p>
+            <input type="text" class="name-input" id="playerName" placeholder="Dein Name..." maxlength="20">
+            <button class="start-btn" id="startBtn" disabled>Los geht's! 🚀</button>
+        </div>
+
+        <div class="game-area" id="gameArea">
+            <div class="score-bar">
+                <div class="player-info">
+                    <div class="player-avatar">🧒</div>
+                    <span class="player-name" id="displayName">Spieler</span>
+                </div>
+                <div class="score-display">
+                    <span>⭐</span>
+                    <span id="scoreValue">0</span> Punkte
+                </div>
+            </div>
+
+            <div class="game-tabs">
+                <button class="tab-btn active" data-game="dice">🎲 Würfel-Konjugation</button>
+                <button class="tab-btn" data-game="sein">🌈 Sein + Adjektiv</button>
+                <button class="tab-btn" data-game="haben">🎁 Haben + Nomen</button>
+                <button class="tab-btn" data-game="modal">🎭 Modalverben</button>
+            </div>
+
+            <!-- DICE GAME -->
+            <div class="game-panel active" id="diceGame">
+                <h2 class="game-title">🎲 Würfel-Konjugation</h2>
+                <p class="game-description">Würfle und konjugiere das Verb richtig!</p>
+                <div class="dice-container">
+                    <div class="dice" id="dice">🎲</div>
+                    <div class="dice-result" id="diceResult">Klicke auf den Würfel!<span class="pronoun"></span></div>
+                    <div class="verb-display" id="verbDisplay" style="display:none;">
+                        <span class="infinitive" id="currentVerb"></span>
+                        <span>Wie konjugierst du dieses Verb?</span>
+                    </div>
+                    <div class="conjugation-options" id="conjOptions"></div>
+                    <div class="action-btns">
+                        <button class="game-btn btn-secondary" id="helpDice">📖 Hilfe</button>
+                        <button class="game-btn btn-primary" id="newDice">🔄 Neues Verb</button>
+                    </div>
+                </div>
+                <!-- SATZSAMMLUNG -->
+                <div class="sentence-collection">
+                    <div class="collection-header">
+                        <span class="collection-title">📝 Deine konjugierten Verben:</span>
+                        <span class="collection-count" id="diceCount">0 Sätze</span>
+                    </div>
+                    <div class="sentence-list" id="diceList">
+                        <div class="no-sentences">Noch keine Verben konjugiert... Würfle los! 🎲</div>
+                    </div>
+                    <div class="save-section">
+                        <button class="game-btn btn-success" id="saveDice">💾 Diese Sätze speichern</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEIN GAME -->
+            <div class="game-panel" id="seinGame">
+                <h2 class="game-title">🌈 Sein + Adjektiv</h2>
+                <p class="game-description">Bilde Sätze mit "sein" und Adjektiven!</p>
+                <div class="sentence-builder">
+                    <div class="step-indicator" id="seinSteps"><div class="step active">1</div><div class="step">2</div><div class="step">3</div></div>
+                    <div class="sentence-display" id="seinSentence"></div>
+                    <div class="selection-area" id="seinSelection"></div>
+                    <div class="action-btns">
+                        <button class="game-btn btn-secondary" id="helpSein">📖 Hilfe</button>
+                        <button class="game-btn btn-primary" id="newSein">🔄 Neuer Satz</button>
+                    </div>
+                </div>
+                <div class="sentence-collection">
+                    <div class="collection-header">
+                        <span class="collection-title">📝 Deine Sätze mit "sein":</span>
+                        <span class="collection-count" id="seinCount">0 Sätze</span>
+                    </div>
+                    <div class="sentence-list" id="seinList">
+                        <div class="no-sentences">Noch keine Sätze gebildet... Wähle ein Subjekt! 👆</div>
+                    </div>
+                    <div class="save-section">
+                        <button class="game-btn btn-success" id="saveSein">💾 Diese Sätze speichern</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HABEN GAME -->
+            <div class="game-panel" id="habenGame">
+                <h2 class="game-title">🎁 Haben + Nomen</h2>
+                <p class="game-description">Bilde Sätze mit "haben"!</p>
+                <div class="sentence-builder">
+                    <div class="step-indicator" id="habenSteps"><div class="step active">1</div><div class="step">2</div><div class="step">3</div></div>
+                    <div class="sentence-display" id="habenSentence"></div>
+                    <div class="selection-area" id="habenSelection"></div>
+                    <div class="action-btns">
+                        <button class="game-btn btn-secondary" id="helpHaben">📖 Hilfe</button>
+                        <button class="game-btn btn-primary" id="newHaben">🔄 Neuer Satz</button>
+                    </div>
+                </div>
+                <div class="sentence-collection">
+                    <div class="collection-header">
+                        <span class="collection-title">📝 Deine Sätze mit "haben":</span>
+                        <span class="collection-count" id="habenCount">0 Sätze</span>
+                    </div>
+                    <div class="sentence-list" id="habenList">
+                        <div class="no-sentences">Noch keine Sätze gebildet... Wähle ein Subjekt! 👆</div>
+                    </div>
+                    <div class="save-section">
+                        <button class="game-btn btn-success" id="saveHaben">💾 Diese Sätze speichern</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MODAL GAME -->
+            <div class="game-panel" id="modalGame">
+                <h2 class="game-title">🎭 Modalverben</h2>
+                <p class="game-description">Bilde Sätze mit Modalverben!</p>
+                <div class="sentence-builder">
+                    <div class="step-indicator" id="modalSteps"><div class="step active">1</div><div class="step">2</div><div class="step">3</div><div class="step">4</div></div>
+                    <div class="sentence-display" id="modalSentence"></div>
+                    <div class="selection-area" id="modalSelection"></div>
+                    <div class="action-btns">
+                        <button class="game-btn btn-secondary" id="helpModalBtn">📖 Hilfe</button>
+                        <button class="game-btn btn-primary" id="newModal">🔄 Neuer Satz</button>
+                    </div>
+                </div>
+                <div class="sentence-collection">
+                    <div class="collection-header">
+                        <span class="collection-title">📝 Deine Modalverb-Sätze:</span>
+                        <span class="collection-count" id="modalCount">0 Sätze</span>
+                    </div>
+                    <div class="sentence-list" id="modalList">
+                        <div class="no-sentences">Noch keine Sätze gebildet... Wähle ein Subjekt! 👆</div>
+                    </div>
+                    <div class="save-section">
+                        <button class="game-btn btn-success" id="saveModal">💾 Diese Sätze speichern</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ALLE SPEICHERN -->
+            <div class="save-all-section">
+                <h3>🏆 Fertig mit Spielen?</h3>
+                <button class="save-all-btn" id="saveAll">💾 ALLE MEINE SÄTZE SPEICHERN</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="help-modal" id="helpModal"><div class="help-content" id="helpContent"></div></div>
+    <div class="success-overlay" id="successOverlay">
+        <span class="success-emoji">🎉</span>
+        <span class="success-text">Super gemacht!</span>
+        <span class="success-points" id="successPoints">+10 Punkte</span>
+    </div>
+
+    <script>
+    (function() {
+        // ============ RIESIGE DATENBANK ============
+        
+        // 100 VERBEN
+        var verbs = [
+            {inf:"machen",ich:"mache",du:"machst",er:"macht",wir:"machen",ihr:"macht",sie:"machen"},
+            {inf:"spielen",ich:"spiele",du:"spielst",er:"spielt",wir:"spielen",ihr:"spielt",sie:"spielen"},
+            {inf:"lernen",ich:"lerne",du:"lernst",er:"lernt",wir:"lernen",ihr:"lernt",sie:"lernen"},
+            {inf:"schreiben",ich:"schreibe",du:"schreibst",er:"schreibt",wir:"schreiben",ihr:"schreibt",sie:"schreiben"},
+            {inf:"lesen",ich:"lese",du:"liest",er:"liest",wir:"lesen",ihr:"lest",sie:"lesen"},
+            {inf:"malen",ich:"male",du:"malst",er:"malt",wir:"malen",ihr:"malt",sie:"malen"},
+            {inf:"singen",ich:"singe",du:"singst",er:"singt",wir:"singen",ihr:"singt",sie:"singen"},
+            {inf:"tanzen",ich:"tanze",du:"tanzt",er:"tanzt",wir:"tanzen",ihr:"tanzt",sie:"tanzen"},
+            {inf:"rechnen",ich:"rechne",du:"rechnest",er:"rechnet",wir:"rechnen",ihr:"rechnet",sie:"rechnen"},
+            {inf:"zeichnen",ich:"zeichne",du:"zeichnest",er:"zeichnet",wir:"zeichnen",ihr:"zeichnet",sie:"zeichnen"},
+            {inf:"stricken",ich:"stricke",du:"strickst",er:"strickt",wir:"stricken",ihr:"strickt",sie:"stricken"},
+            {inf:"häkeln",ich:"häkele",du:"häkelst",er:"häkelt",wir:"häkeln",ihr:"häkelt",sie:"häkeln"},
+            {inf:"weben",ich:"webe",du:"webst",er:"webt",wir:"weben",ihr:"webt",sie:"weben"},
+            {inf:"filzen",ich:"filze",du:"filzt",er:"filzt",wir:"filzen",ihr:"filzt",sie:"filzen"},
+            {inf:"schnitzen",ich:"schnitze",du:"schnitzt",er:"schnitzt",wir:"schnitzen",ihr:"schnitzt",sie:"schnitzen"},
+            {inf:"töpfern",ich:"töpfere",du:"töpferst",er:"töpfert",wir:"töpfern",ihr:"töpfert",sie:"töpfern"},
+            {inf:"aquarellieren",ich:"aquarelliere",du:"aquarellierst",er:"aquarelliert",wir:"aquarellieren",ihr:"aquarelliert",sie:"aquarellieren"},
+            {inf:"eurythmieren",ich:"eurythmiere",du:"eurythmierst",er:"eurythmiert",wir:"eurythmieren",ihr:"eurythmiert",sie:"eurythmieren"},
+            {inf:"flöten",ich:"flöte",du:"flötest",er:"flötet",wir:"flöten",ihr:"flötet",sie:"flöten"},
+            {inf:"musizieren",ich:"musiziere",du:"musizierst",er:"musiziert",wir:"musizieren",ihr:"musiziert",sie:"musizieren"},
+            {inf:"laufen",ich:"laufe",du:"läufst",er:"läuft",wir:"laufen",ihr:"lauft",sie:"laufen"},
+            {inf:"springen",ich:"springe",du:"springst",er:"springt",wir:"springen",ihr:"springt",sie:"springen"},
+            {inf:"klettern",ich:"klettere",du:"kletterst",er:"klettert",wir:"klettern",ihr:"klettert",sie:"klettern"},
+            {inf:"schwimmen",ich:"schwimme",du:"schwimmst",er:"schwimmt",wir:"schwimmen",ihr:"schwimmt",sie:"schwimmen"},
+            {inf:"turnen",ich:"turne",du:"turnst",er:"turnt",wir:"turnen",ihr:"turnt",sie:"turnen"},
+            {inf:"werfen",ich:"werfe",du:"wirfst",er:"wirft",wir:"werfen",ihr:"werft",sie:"werfen"},
+            {inf:"fangen",ich:"fange",du:"fängst",er:"fängt",wir:"fangen",ihr:"fangt",sie:"fangen"},
+            {inf:"hüpfen",ich:"hüpfe",du:"hüpfst",er:"hüpft",wir:"hüpfen",ihr:"hüpft",sie:"hüpfen"},
+            {inf:"rennen",ich:"renne",du:"rennst",er:"rennt",wir:"rennen",ihr:"rennt",sie:"rennen"},
+            {inf:"balancieren",ich:"balanciere",du:"balancierst",er:"balanciert",wir:"balancieren",ihr:"balanciert",sie:"balancieren"},
+            {inf:"pflanzen",ich:"pflanze",du:"pflanzt",er:"pflanzt",wir:"pflanzen",ihr:"pflanzt",sie:"pflanzen"},
+            {inf:"gießen",ich:"gieße",du:"gießt",er:"gießt",wir:"gießen",ihr:"gießt",sie:"gießen"},
+            {inf:"ernten",ich:"ernte",du:"erntest",er:"erntet",wir:"ernten",ihr:"erntet",sie:"ernten"},
+            {inf:"säen",ich:"säe",du:"säst",er:"sät",wir:"säen",ihr:"sät",sie:"säen"},
+            {inf:"graben",ich:"grabe",du:"gräbst",er:"gräbt",wir:"graben",ihr:"grabt",sie:"graben"},
+            {inf:"kochen",ich:"koche",du:"kochst",er:"kocht",wir:"kochen",ihr:"kocht",sie:"kochen"},
+            {inf:"backen",ich:"backe",du:"bäckst",er:"bäckt",wir:"backen",ihr:"backt",sie:"backen"},
+            {inf:"rühren",ich:"rühre",du:"rührst",er:"rührt",wir:"rühren",ihr:"rührt",sie:"rühren"},
+            {inf:"kneten",ich:"knete",du:"knetest",er:"knetet",wir:"kneten",ihr:"knetet",sie:"kneten"},
+            {inf:"schneiden",ich:"schneide",du:"schneidest",er:"schneidet",wir:"schneiden",ihr:"schneidet",sie:"schneiden"},
+            {inf:"sprechen",ich:"spreche",du:"sprichst",er:"spricht",wir:"sprechen",ihr:"sprecht",sie:"sprechen"},
+            {inf:"erzählen",ich:"erzähle",du:"erzählst",er:"erzählt",wir:"erzählen",ihr:"erzählt",sie:"erzählen"},
+            {inf:"fragen",ich:"frage",du:"fragst",er:"fragt",wir:"fragen",ihr:"fragt",sie:"fragen"},
+            {inf:"antworten",ich:"antworte",du:"antwortest",er:"antwortet",wir:"antworten",ihr:"antwortet",sie:"antworten"},
+            {inf:"hören",ich:"höre",du:"hörst",er:"hört",wir:"hören",ihr:"hört",sie:"hören"},
+            {inf:"rufen",ich:"rufe",du:"rufst",er:"ruft",wir:"rufen",ihr:"ruft",sie:"rufen"},
+            {inf:"lachen",ich:"lache",du:"lachst",er:"lacht",wir:"lachen",ihr:"lacht",sie:"lachen"},
+            {inf:"weinen",ich:"weine",du:"weinst",er:"weint",wir:"weinen",ihr:"weint",sie:"weinen"},
+            {inf:"denken",ich:"denke",du:"denkst",er:"denkt",wir:"denken",ihr:"denkt",sie:"denken"},
+            {inf:"träumen",ich:"träume",du:"träumst",er:"träumt",wir:"träumen",ihr:"träumt",sie:"träumen"},
+            {inf:"essen",ich:"esse",du:"isst",er:"isst",wir:"essen",ihr:"esst",sie:"essen"},
+            {inf:"trinken",ich:"trinke",du:"trinkst",er:"trinkt",wir:"trinken",ihr:"trinkt",sie:"trinken"},
+            {inf:"schlafen",ich:"schlafe",du:"schläfst",er:"schläft",wir:"schlafen",ihr:"schlaft",sie:"schlafen"},
+            {inf:"helfen",ich:"helfe",du:"hilfst",er:"hilft",wir:"helfen",ihr:"helft",sie:"helfen"},
+            {inf:"gehen",ich:"gehe",du:"gehst",er:"geht",wir:"gehen",ihr:"geht",sie:"gehen"},
+            {inf:"kommen",ich:"komme",du:"kommst",er:"kommt",wir:"kommen",ihr:"kommt",sie:"kommen"},
+            {inf:"fahren",ich:"fahre",du:"fährst",er:"fährt",wir:"fahren",ihr:"fahrt",sie:"fahren"},
+            {inf:"fliegen",ich:"fliege",du:"fliegst",er:"fliegt",wir:"fliegen",ihr:"fliegt",sie:"fliegen"},
+            {inf:"nehmen",ich:"nehme",du:"nimmst",er:"nimmt",wir:"nehmen",ihr:"nehmt",sie:"nehmen"},
+            {inf:"geben",ich:"gebe",du:"gibst",er:"gibt",wir:"geben",ihr:"gebt",sie:"geben"},
+            {inf:"basteln",ich:"bastle",du:"bastelst",er:"bastelt",wir:"basteln",ihr:"bastelt",sie:"basteln"},
+            {inf:"bauen",ich:"baue",du:"baust",er:"baut",wir:"bauen",ihr:"baut",sie:"bauen"},
+            {inf:"nähen",ich:"nähe",du:"nähst",er:"näht",wir:"nähen",ihr:"näht",sie:"nähen"},
+            {inf:"üben",ich:"übe",du:"übst",er:"übt",wir:"üben",ihr:"übt",sie:"üben"},
+            {inf:"warten",ich:"warte",du:"wartest",er:"wartet",wir:"warten",ihr:"wartet",sie:"warten"},
+            {inf:"zeigen",ich:"zeige",du:"zeigst",er:"zeigt",wir:"zeigen",ihr:"zeigt",sie:"zeigen"},
+            {inf:"suchen",ich:"suche",du:"suchst",er:"sucht",wir:"suchen",ihr:"sucht",sie:"suchen"},
+            {inf:"finden",ich:"finde",du:"findest",er:"findet",wir:"finden",ihr:"findet",sie:"finden"},
+            {inf:"bringen",ich:"bringe",du:"bringst",er:"bringt",wir:"bringen",ihr:"bringt",sie:"bringen"},
+            {inf:"tragen",ich:"trage",du:"trägst",er:"trägt",wir:"tragen",ihr:"tragt",sie:"tragen"},
+            {inf:"kaufen",ich:"kaufe",du:"kaufst",er:"kauft",wir:"kaufen",ihr:"kauft",sie:"kaufen"},
+            {inf:"verkaufen",ich:"verkaufe",du:"verkaufst",er:"verkauft",wir:"verkaufen",ihr:"verkauft",sie:"verkaufen"},
+            {inf:"öffnen",ich:"öffne",du:"öffnest",er:"öffnet",wir:"öffnen",ihr:"öffnet",sie:"öffnen"},
+            {inf:"schließen",ich:"schließe",du:"schließt",er:"schließt",wir:"schließen",ihr:"schließt",sie:"schließen"},
+            {inf:"beginnen",ich:"beginne",du:"beginnst",er:"beginnt",wir:"beginnen",ihr:"beginnt",sie:"beginnen"},
+            {inf:"enden",ich:"ende",du:"endest",er:"endet",wir:"enden",ihr:"endet",sie:"enden"},
+            {inf:"lieben",ich:"liebe",du:"liebst",er:"liebt",wir:"lieben",ihr:"liebt",sie:"lieben"},
+            {inf:"hassen",ich:"hasse",du:"hasst",er:"hasst",wir:"hassen",ihr:"hasst",sie:"hassen"},
+            {inf:"kennen",ich:"kenne",du:"kennst",er:"kennt",wir:"kennen",ihr:"kennt",sie:"kennen"},
+            {inf:"wissen",ich:"weiß",du:"weißt",er:"weiß",wir:"wissen",ihr:"wisst",sie:"wissen"},
+            {inf:"vergessen",ich:"vergesse",du:"vergisst",er:"vergisst",wir:"vergessen",ihr:"vergesst",sie:"vergessen"},
+            {inf:"erinnern",ich:"erinnere",du:"erinnerst",er:"erinnert",wir:"erinnern",ihr:"erinnert",sie:"erinnern"},
+            {inf:"besuchen",ich:"besuche",du:"besuchst",er:"besucht",wir:"besuchen",ihr:"besucht",sie:"besuchen"},
+            {inf:"einladen",ich:"lade ein",du:"lädst ein",er:"lädt ein",wir:"laden ein",ihr:"ladet ein",sie:"laden ein"},
+            {inf:"schenken",ich:"schenke",du:"schenkst",er:"schenkt",wir:"schenken",ihr:"schenkt",sie:"schenken"},
+            {inf:"danken",ich:"danke",du:"dankst",er:"dankt",wir:"danken",ihr:"dankt",sie:"danken"},
+            {inf:"grüßen",ich:"grüße",du:"grüßt",er:"grüßt",wir:"grüßen",ihr:"grüßt",sie:"grüßen"},
+            {inf:"küssen",ich:"küsse",du:"küsst",er:"küsst",wir:"küssen",ihr:"küsst",sie:"küssen"},
+            {inf:"umarmen",ich:"umarme",du:"umarmst",er:"umarmt",wir:"umarmen",ihr:"umarmt",sie:"umarmen"},
+            {inf:"winken",ich:"winke",du:"winkst",er:"winkt",wir:"winken",ihr:"winkt",sie:"winken"},
+            {inf:"klatschen",ich:"klatsche",du:"klatschst",er:"klatscht",wir:"klatschen",ihr:"klatscht",sie:"klatschen"},
+            {inf:"trommeln",ich:"trommle",du:"trommelst",er:"trommelt",wir:"trommeln",ihr:"trommelt",sie:"trommeln"},
+            {inf:"pfeifen",ich:"pfeife",du:"pfeifst",er:"pfeift",wir:"pfeifen",ihr:"pfeift",sie:"pfeifen"},
+            {inf:"rudern",ich:"rudere",du:"ruderst",er:"rudert",wir:"rudern",ihr:"rudert",sie:"rudern"},
+            {inf:"segeln",ich:"segle",du:"segelst",er:"segelt",wir:"segeln",ihr:"segelt",sie:"segeln"},
+            {inf:"wandern",ich:"wandere",du:"wanderst",er:"wandert",wir:"wandern",ihr:"wandert",sie:"wandern"},
+            {inf:"zelten",ich:"zelte",du:"zeltest",er:"zeltet",wir:"zelten",ihr:"zeltet",sie:"zelten"},
+            {inf:"angeln",ich:"angle",du:"angelst",er:"angelt",wir:"angeln",ihr:"angelt",sie:"angeln"}
+        ];
+
+        var pronouns = {
+            1:{text:"ich",key:"ich",emoji:"👆"},
+            2:{text:"du",key:"du",emoji:"👉"},
+            3:{text:"er/sie/es",key:"er",emoji:"👤"},
+            4:{text:"wir",key:"wir",emoji:"👥"},
+            5:{text:"ihr",key:"ihr",emoji:"👫"},
+            6:{text:"sie (Plural)",key:"sie",emoji:"👨‍👩‍👧‍👦"}
+        };
+
+        // 60 SUBJEKTE
+        var subjects = [
+            {text:"Ich",verb:"bin",haben:"habe",emoji:"👆"},
+            {text:"Du",verb:"bist",haben:"hast",emoji:"👉"},
+            {text:"Er",verb:"ist",haben:"hat",emoji:"👦"},
+            {text:"Sie",verb:"ist",haben:"hat",emoji:"👧"},
+            {text:"Es",verb:"ist",haben:"hat",emoji:"🧸"},
+            {text:"Wir",verb:"sind",haben:"haben",emoji:"👥"},
+            {text:"Ihr",verb:"seid",haben:"habt",emoji:"👫"},
+            {text:"Sie (Plural)",verb:"sind",haben:"haben",emoji:"👨‍👩‍👧‍👦"},
+            {text:"Der Hund",verb:"ist",haben:"hat",emoji:"🐕"},
+            {text:"Die Katze",verb:"ist",haben:"hat",emoji:"🐱"},
+            {text:"Das Kind",verb:"ist",haben:"hat",emoji:"👶"},
+            {text:"Die Kinder",verb:"sind",haben:"haben",emoji:"👧👦"},
+            {text:"Der Junge",verb:"ist",haben:"hat",emoji:"👦"},
+            {text:"Das Mädchen",verb:"ist",haben:"hat",emoji:"👧"},
+            {text:"Mama",verb:"ist",haben:"hat",emoji:"👩"},
+            {text:"Papa",verb:"ist",haben:"hat",emoji:"👨"},
+            {text:"Oma",verb:"ist",haben:"hat",emoji:"👵"},
+            {text:"Opa",verb:"ist",haben:"hat",emoji:"👴"},
+            {text:"Die Lehrerin",verb:"ist",haben:"hat",emoji:"👩‍🏫"},
+            {text:"Der Lehrer",verb:"ist",haben:"hat",emoji:"👨‍🏫"},
+            {text:"Mein Freund",verb:"ist",haben:"hat",emoji:"🧑"},
+            {text:"Meine Freundin",verb:"ist",haben:"hat",emoji:"👧"},
+            {text:"Die Schüler",verb:"sind",haben:"haben",emoji:"📚"},
+            {text:"Der Vogel",verb:"ist",haben:"hat",emoji:"🐦"},
+            {text:"Die Vögel",verb:"sind",haben:"haben",emoji:"🐦🐦"},
+            {text:"Der Elefant",verb:"ist",haben:"hat",emoji:"🐘"},
+            {text:"Die Maus",verb:"ist",haben:"hat",emoji:"🐭"},
+            {text:"Der Bär",verb:"ist",haben:"hat",emoji:"🐻"},
+            {text:"Die Schmetterlinge",verb:"sind",haben:"haben",emoji:"🦋"},
+            {text:"Der Baum",verb:"ist",haben:"hat",emoji:"🌳"},
+            {text:"Die Blume",verb:"ist",haben:"hat",emoji:"🌸"},
+            {text:"Die Blumen",verb:"sind",haben:"haben",emoji:"🌸🌸"},
+            {text:"Die Sonne",verb:"ist",haben:"hat",emoji:"☀️"},
+            {text:"Der Mond",verb:"ist",haben:"hat",emoji:"🌙"},
+            {text:"Die Sterne",verb:"sind",haben:"haben",emoji:"⭐"},
+            {text:"Das Baby",verb:"ist",haben:"hat",emoji:"👶"},
+            {text:"Der Bruder",verb:"ist",haben:"hat",emoji:"👦"},
+            {text:"Die Schwester",verb:"ist",haben:"hat",emoji:"👧"},
+            {text:"Die Geschwister",verb:"sind",haben:"haben",emoji:"👧👦"},
+            {text:"Der Hase",verb:"ist",haben:"hat",emoji:"🐰"},
+            {text:"Das Pferd",verb:"ist",haben:"hat",emoji:"🐴"},
+            {text:"Die Pferde",verb:"sind",haben:"haben",emoji:"🐴🐴"},
+            {text:"Der Fisch",verb:"ist",haben:"hat",emoji:"🐟"},
+            {text:"Die Fische",verb:"sind",haben:"haben",emoji:"🐟🐟"},
+            {text:"Die Ente",verb:"ist",haben:"hat",emoji:"🦆"},
+            {text:"Der Frosch",verb:"ist",haben:"hat",emoji:"🐸"},
+            {text:"Die Biene",verb:"ist",haben:"hat",emoji:"🐝"},
+            {text:"Der Löwe",verb:"ist",haben:"hat",emoji:"🦁"},
+            {text:"Die Giraffe",verb:"ist",haben:"hat",emoji:"🦒"},
+            {text:"Der Affe",verb:"ist",haben:"hat",emoji:"🐵"},
+            {text:"Der Onkel",verb:"ist",haben:"hat",emoji:"👨"},
+            {text:"Die Tante",verb:"ist",haben:"hat",emoji:"👩"},
+            {text:"Der Koch",verb:"ist",haben:"hat",emoji:"👨‍🍳"},
+            {text:"Die Ärztin",verb:"ist",haben:"hat",emoji:"👩‍⚕️"},
+            {text:"Der Polizist",verb:"ist",haben:"hat",emoji:"👮"},
+            {text:"Die Feuerwehr",verb:"ist",haben:"hat",emoji:"🚒"},
+            {text:"Der Clown",verb:"ist",haben:"hat",emoji:"🤡"},
+            {text:"Die Prinzessin",verb:"ist",haben:"hat",emoji:"👸"},
+            {text:"Der König",verb:"ist",haben:"hat",emoji:"🤴"},
+            {text:"Die Fee",verb:"ist",haben:"hat",emoji:"🧚"}
+        ];
+
+        // 100 ADJEKTIVE
+        var adjectives = [
+            {text:"glücklich",emoji:"😊"},{text:"fröhlich",emoji:"😄"},{text:"lustig",emoji:"🤣"},{text:"nett",emoji:"😇"},
+            {text:"freundlich",emoji:"🤗"},{text:"lieb",emoji:"💕"},{text:"klug",emoji:"🧠"},{text:"schlau",emoji:"🦊"},
+            {text:"mutig",emoji:"🦁"},{text:"stark",emoji:"💪"},{text:"schnell",emoji:"⚡"},{text:"fleißig",emoji:"🐝"},
+            {text:"kreativ",emoji:"🎨"},{text:"schön",emoji:"✨"},{text:"toll",emoji:"👍"},{text:"wunderbar",emoji:"🌟"},
+            {text:"fantastisch",emoji:"🎉"},{text:"super",emoji:"🦸"},{text:"großartig",emoji:"🏆"},{text:"prima",emoji:"👌"},
+            {text:"groß",emoji:"📏"},{text:"klein",emoji:"🐜"},{text:"alt",emoji:"👴"},{text:"jung",emoji:"👶"},
+            {text:"neu",emoji:"🆕"},{text:"lang",emoji:"📐"},{text:"kurz",emoji:"✂️"},{text:"dick",emoji:"🔵"},
+            {text:"dünn",emoji:"📍"},{text:"hoch",emoji:"⬆️"},{text:"niedrig",emoji:"⬇️"},{text:"breit",emoji:"↔️"},
+            {text:"laut",emoji:"📢"},{text:"leise",emoji:"🤫"},{text:"still",emoji:"🔇"},{text:"hell",emoji:"💡"},
+            {text:"dunkel",emoji:"🌑"},{text:"bunt",emoji:"🌈"},{text:"rot",emoji:"🔴"},{text:"blau",emoji:"🔵"},
+            {text:"grün",emoji:"🟢"},{text:"gelb",emoji:"🟡"},{text:"orange",emoji:"🟠"},{text:"lila",emoji:"🟣"},
+            {text:"rosa",emoji:"💗"},{text:"weiß",emoji:"⚪"},{text:"schwarz",emoji:"⚫"},{text:"braun",emoji:"🟤"},
+            {text:"golden",emoji:"🥇"},{text:"silbern",emoji:"🥈"},{text:"warm",emoji:"🔥"},{text:"kalt",emoji:"🥶"},
+            {text:"heiß",emoji:"🥵"},{text:"kühl",emoji:"❄️"},{text:"weich",emoji:"☁️"},{text:"hart",emoji:"🪨"},
+            {text:"glatt",emoji:"🧊"},{text:"rau",emoji:"🪵"},{text:"nass",emoji:"💦"},{text:"trocken",emoji:"🏜️"},
+            {text:"sauber",emoji:"✨"},{text:"schmutzig",emoji:"💩"},{text:"ordentlich",emoji:"📦"},{text:"müde",emoji:"😴"},
+            {text:"wach",emoji:"👀"},{text:"traurig",emoji:"😢"},{text:"wütend",emoji:"😠"},{text:"ängstlich",emoji:"😨"},
+            {text:"nervös",emoji:"😰"},{text:"aufgeregt",emoji:"🤩"},{text:"ruhig",emoji:"😌"},{text:"friedlich",emoji:"☮️"},
+            {text:"hungrig",emoji:"🍽️"},{text:"durstig",emoji:"🥤"},{text:"satt",emoji:"😋"},{text:"krank",emoji:"🤒"},
+            {text:"gesund",emoji:"💪"},{text:"fit",emoji:"🏃"},{text:"sportlich",emoji:"⚽"},{text:"musikalisch",emoji:"🎵"},
+            {text:"hilfsbereit",emoji:"🤝"},{text:"höflich",emoji:"🙏"},{text:"ehrlich",emoji:"💯"},{text:"geduldig",emoji:"🧘"},
+            {text:"neugierig",emoji:"🔍"},{text:"tapfer",emoji:"🛡️"},{text:"stolz",emoji:"👑"},{text:"fertig",emoji:"✅"},
+            {text:"bereit",emoji:"🚀"},{text:"langsam",emoji:"🐢"},{text:"faul",emoji:"😴"},{text:"aktiv",emoji:"🏃"},
+            {text:"süß",emoji:"🍬"},{text:"sauer",emoji:"🍋"},{text:"bitter",emoji:"☕"},{text:"salzig",emoji:"🧂"},
+            {text:"lecker",emoji:"😋"},{text:"eklig",emoji:"🤢"},{text:"interessant",emoji:"🤔"},{text:"langweilig",emoji:"😐"},
+            {text:"spannend",emoji:"📖"},{text:"wichtig",emoji:"❗"}
+        ];
+
+        // 80 HABEN-OBJEKTE
+        var habenObjects = [
+            {text:"Hunger",emoji:"🍽️"},{text:"Durst",emoji:"🥤"},{text:"Angst",emoji:"😨"},{text:"Glück",emoji:"🍀"},
+            {text:"Spaß",emoji:"🎉"},{text:"Zeit",emoji:"⏰"},{text:"Geduld",emoji:"🧘"},{text:"Mut",emoji:"🦁"},
+            {text:"Lust",emoji:"😊"},{text:"Langeweile",emoji:"😐"},{text:"Heimweh",emoji:"🏠"},{text:"Fieber",emoji:"🤒"},
+            {text:"Kopfschmerzen",emoji:"🤕"},{text:"Bauchschmerzen",emoji:"😣"},{text:"einen Hund",emoji:"🐕"},
+            {text:"eine Katze",emoji:"🐱"},{text:"einen Hamster",emoji:"🐹"},{text:"einen Vogel",emoji:"🐦"},
+            {text:"ein Kaninchen",emoji:"🐰"},{text:"einen Fisch",emoji:"🐟"},{text:"eine Schildkröte",emoji:"🐢"},
+            {text:"ein Meerschweinchen",emoji:"🐹"},{text:"ein Pferd",emoji:"🐴"},{text:"einen Papagei",emoji:"🦜"},
+            {text:"ein Buch",emoji:"📚"},{text:"einen Ball",emoji:"⚽"},{text:"ein Fahrrad",emoji:"🚲"},
+            {text:"einen Computer",emoji:"💻"},{text:"ein Handy",emoji:"📱"},{text:"eine Tasche",emoji:"👜"},
+            {text:"einen Rucksack",emoji:"🎒"},{text:"ein Heft",emoji:"📓"},{text:"einen Bleistift",emoji:"✏️"},
+            {text:"eine Schere",emoji:"✂️"},{text:"einen Kleber",emoji:"🧴"},{text:"ein Lineal",emoji:"📏"},
+            {text:"eine Blockflöte",emoji:"🎵"},{text:"eine Gitarre",emoji:"🎸"},{text:"ein Klavier",emoji:"🎹"},
+            {text:"eine Geige",emoji:"🎻"},{text:"eine Trommel",emoji:"🥁"},{text:"Stricknadeln",emoji:"🧶"},
+            {text:"Aquarellfarben",emoji:"🎨"},{text:"Bienenwachskreiden",emoji:"🖍️"},{text:"ein Epochenheft",emoji:"📔"},
+            {text:"einen Webrahmen",emoji:"🧵"},{text:"Filzwolle",emoji:"🐑"},{text:"Schnitzholz",emoji:"🪵"},
+            {text:"eine Schwester",emoji:"👧"},{text:"einen Bruder",emoji:"👦"},{text:"Geschwister",emoji:"👧👦"},
+            {text:"Großeltern",emoji:"👴👵"},{text:"Eltern",emoji:"👨👩"},{text:"eine Familie",emoji:"👨‍👩‍👧‍👦"},
+            {text:"blaue Augen",emoji:"👁️"},{text:"braune Augen",emoji:"👁️"},{text:"grüne Augen",emoji:"👁️"},
+            {text:"blonde Haare",emoji:"👱"},{text:"braune Haare",emoji:"👩‍🦰"},{text:"schwarze Haare",emoji:"👩"},
+            {text:"eine Idee",emoji:"💡"},{text:"einen Traum",emoji:"💭"},{text:"ein Geheimnis",emoji:"🤫"},
+            {text:"einen Wunsch",emoji:"⭐"},{text:"ein Ziel",emoji:"🎯"},{text:"ein Hobby",emoji:"🎨"},
+            {text:"viele Freunde",emoji:"👫"},{text:"gute Laune",emoji:"😄"},{text:"schlechte Laune",emoji:"😤"},
+            {text:"ein Zimmer",emoji:"🛏️"},{text:"ein Haus",emoji:"🏠"},{text:"einen Garten",emoji:"🌻"},
+            {text:"ein Spielzeug",emoji:"🧸"},{text:"eine Puppe",emoji:"🎎"},{text:"ein Auto",emoji:"🚗"},
+            {text:"Sommerferien",emoji:"☀️"},{text:"Geburtstag",emoji:"🎂"},{text:"ein Geschenk",emoji:"🎁"},
+            {text:"einen Teddy",emoji:"🧸"},{text:"eine Decke",emoji:"🛋️"}
+        ];
+
+        // MODALVERBEN
+        var modalVerbs = [
+            {inf:"können",ich:"kann",du:"kannst",er:"kann",wir:"können",ihr:"könnt",sie:"können",emoji:"💪"},
+            {inf:"dürfen",ich:"darf",du:"darfst",er:"darf",wir:"dürfen",ihr:"dürft",sie:"dürfen",emoji:"✅"},
+            {inf:"müssen",ich:"muss",du:"musst",er:"muss",wir:"müssen",ihr:"müsst",sie:"müssen",emoji:"❗"},
+            {inf:"wollen",ich:"will",du:"willst",er:"will",wir:"wollen",ihr:"wollt",sie:"wollen",emoji:"🎯"},
+            {inf:"sollen",ich:"soll",du:"sollst",er:"soll",wir:"sollen",ihr:"sollt",sie:"sollen",emoji:"👆"},
+            {inf:"mögen",ich:"mag",du:"magst",er:"mag",wir:"mögen",ihr:"mögt",sie:"mögen",emoji:"❤️"},
+            {inf:"möchten",ich:"möchte",du:"möchtest",er:"möchte",wir:"möchten",ihr:"möchtet",sie:"möchten",emoji:"🌟"}
+        ];
+
+        // 80 MODAL-INFINITIVE
+        var modalInfs = [
+            {text:"zur Schule gehen",emoji:"🏫"},{text:"Hausaufgaben machen",emoji:"📝"},{text:"still sitzen",emoji:"🪑"},
+            {text:"aufpassen",emoji:"👀"},{text:"zuhören",emoji:"👂"},{text:"fragen",emoji:"❓"},
+            {text:"antworten",emoji:"💬"},{text:"lernen",emoji:"📚"},{text:"schreiben",emoji:"✍️"},
+            {text:"lesen",emoji:"📖"},{text:"rechnen",emoji:"🔢"},{text:"malen",emoji:"🎨"},
+            {text:"stricken",emoji:"🧶"},{text:"häkeln",emoji:"🪢"},{text:"Flöte spielen",emoji:"🎵"},
+            {text:"Gitarre spielen",emoji:"🎸"},{text:"eurythmieren",emoji:"💃"},{text:"aquarellieren",emoji:"🎨"},
+            {text:"im Garten arbeiten",emoji:"🌻"},{text:"Brot backen",emoji:"🍞"},{text:"schnitzen",emoji:"🪵"},
+            {text:"weben",emoji:"🧵"},{text:"töpfern",emoji:"🏺"},{text:"filzen",emoji:"🐑"},
+            {text:"basteln",emoji:"✂️"},{text:"bauen",emoji:"🔨"},{text:"draußen spielen",emoji:"🌳"},
+            {text:"drinnen spielen",emoji:"🏠"},{text:"aufbleiben",emoji:"🌙"},{text:"fernsehen",emoji:"📺"},
+            {text:"Eis essen",emoji:"🍦"},{text:"Kuchen essen",emoji:"🎂"},{text:"Bonbons essen",emoji:"🍬"},
+            {text:"schwimmen gehen",emoji:"🏊"},{text:"Fahrrad fahren",emoji:"🚲"},{text:"klettern",emoji:"🧗"},
+            {text:"tanzen",emoji:"💃"},{text:"singen",emoji:"🎤"},{text:"Sport machen",emoji:"⚽"},
+            {text:"turnen",emoji:"🤸"},{text:"rennen",emoji:"🏃"},{text:"springen",emoji:"🦘"},
+            {text:"früh aufstehen",emoji:"🌅"},{text:"Zähne putzen",emoji:"🦷"},{text:"duschen",emoji:"🚿"},
+            {text:"baden",emoji:"🛁"},{text:"ins Bett gehen",emoji:"🛏️"},{text:"aufräumen",emoji:"🧹"},
+            {text:"helfen",emoji:"🤝"},{text:"teilen",emoji:"🤲"},{text:"leise sein",emoji:"🤫"},
+            {text:"Freunde treffen",emoji:"👫"},{text:"Gemüse essen",emoji:"🥕"},{text:"Obst essen",emoji:"🍎"},
+            {text:"Wasser trinken",emoji:"💧"},{text:"kochen",emoji:"👨‍🍳"},{text:"den Tisch decken",emoji:"🍽️"},
+            {text:"spazieren gehen",emoji:"🚶"},{text:"Musik hören",emoji:"🎧"},{text:"ein Buch lesen",emoji:"📖"},
+            {text:"mitspielen",emoji:"🎮"},{text:"freundlich sein",emoji:"😊"},{text:"Geschichten erzählen",emoji:"📚"},
+            {text:"Witze erzählen",emoji:"🤣"},{text:"Bilder malen",emoji:"🖼️"},{text:"Lieder singen",emoji:"🎵"},
+            {text:"Tiere füttern",emoji:"🐾"},{text:"Blumen gießen",emoji:"🌸"},{text:"den Hund ausführen",emoji:"🐕"},
+            {text:"einkaufen gehen",emoji:"🛒"},{text:"Pizza backen",emoji:"🍕"},{text:"Plätzchen backen",emoji:"🍪"},
+            {text:"Geschenke basteln",emoji:"🎁"},{text:"Karten spielen",emoji:"🃏"},{text:"Verstecken spielen",emoji:"🙈"},
+            {text:"Fußball spielen",emoji:"⚽"},{text:"Tennis spielen",emoji:"🎾"},{text:"Schach spielen",emoji:"♟️"},
+            {text:"Computer spielen",emoji:"🎮"},{text:"Trampolin springen",emoji:"🦘"}
+        ];
+
+        // Modal-Subjekte
+        var modalSubjList = [
+            {text:"Ich",type:"ich",emoji:"👆"},{text:"Du",type:"du",emoji:"👉"},
+            {text:"Er",type:"er",emoji:"👦"},{text:"Sie",type:"er",emoji:"👧"},
+            {text:"Es",type:"er",emoji:"🧸"},{text:"Wir",type:"wir",emoji:"👥"},
+            {text:"Ihr",type:"ihr",emoji:"👫"},{text:"Die Kinder",type:"sie",emoji:"👧👦"},
+            {text:"Der Junge",type:"er",emoji:"👦"},{text:"Das Mädchen",type:"er",emoji:"👧"},
+            {text:"Mama",type:"er",emoji:"👩"},{text:"Papa",type:"er",emoji:"👨"},
+            {text:"Der Hund",type:"er",emoji:"🐕"},{text:"Die Katze",type:"er",emoji:"🐱"},
+            {text:"Mein Freund",type:"er",emoji:"🧑"},{text:"Meine Freundin",type:"er",emoji:"👧"}
+        ];
+
+        // ============ STATE ============
+        var playerName = "";
+        var score = 0;
+        var currentVerb = null;
+        var currentPronoun = null;
+        var seinStep=1, seinSubj=null, seinVerb=null, seinAdj=null;
+        var habenStep=1, habenSubj=null, habenVerb=null, habenObj=null;
+        var modalStep=1, modalSubj=null, modalV=null, modalVC=null, modalInf=null;
+        
+        // GESAMMELTE SÄTZE
+        var diceSentences = [];
+        var seinSentences = [];
+        var habenSentences = [];
+        var modalSentences = [];
+
+        // ============ HELPERS ============
+        function $(id) { return document.getElementById(id); }
+        function shuffle(arr) {
+            var a = arr.slice();
+            for (var i = a.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var t = a[i]; a[i] = a[j]; a[j] = t;
+            }
+            return a;
+        }
+        
+        function addPoints(p) {
+            score += p;
+            var el = $("scoreValue");
+            if (el) el.textContent = score;
+            var sp = $("successPoints");
+            if (sp) sp.textContent = "+" + p + " Punkte";
+        }
+        
+        function showSuccess() {
+            var ov = $("successOverlay");
+            if (ov) {
+                ov.classList.add("active");
+                createConfetti();
+                setTimeout(function() { ov.classList.remove("active"); }, 1000);
+            }
+        }
+        
+        function createConfetti() {
+            var colors = ["#f1c40f","#e74c3c","#27ae60","#9b59b6","#3498db"];
+            for (var i = 0; i < 30; i++) {
+                var c = document.createElement("div");
+                c.className = "confetti";
+                c.style.left = Math.random() * 100 + "vw";
+                c.style.background = colors[Math.floor(Math.random() * colors.length)];
+                c.style.width = c.style.height = (Math.random() * 8 + 4) + "px";
+                c.style.borderRadius = Math.random() > 0.5 ? "50%" : "0";
+                c.style.animationDuration = (Math.random() * 1.5 + 1) + "s";
+                c.style.animationDelay = Math.random() * 0.3 + "s";
+                document.body.appendChild(c);
+                setTimeout(function(el) { el.remove(); }, 2500, c);
+            }
+        }
+
+        // SATZLISTE AKTUALISIEREN
+        function updateSentenceList(listId, countId, sentences) {
+            var list = $(listId);
+            var count = $(countId);
+            if (count) count.textContent = sentences.length + " Sätze";
+            if (list) {
+                if (sentences.length === 0) {
+                    list.innerHTML = '<div class="no-sentences">Noch keine Sätze gebildet... 🎮</div>';
+                } else {
+                    list.innerHTML = sentences.map(function(s, i) {
+                        return '<div class="collected-sentence">' + (i+1) + '. ' + s + '</div>';
+                    }).join('');
+                    list.scrollTop = list.scrollHeight;
+                }
+            }
+        }
+
+        // SPEICHERN ALS TXT
+        function saveToTxt(filename, title, sentences) {
+            if (sentences.length === 0) {
+                alert("Du hast noch keine Sätze gebildet! Spiele erst ein bisschen. 😊");
+                return;
+            }
+            var text = "═══════════════════════════════════════\n";
+            text += "  " + title + "\n";
+            text += "  Name: " + playerName + "\n";
+            text += "  Datum: " + new Date().toLocaleDateString('de-DE') + "\n";
+            text += "═══════════════════════════════════════\n\n";
+            sentences.forEach(function(s, i) {
+                text += (i + 1) + ". " + s + "\n";
+            });
+            text += "\n═══════════════════════════════════════\n";
+            text += "  Insgesamt: " + sentences.length + " Sätze\n";
+            text += "  ⭐ Punkte: " + score + "\n";
+            text += "═══════════════════════════════════════\n";
+            
+            var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            alert("Gespeichert! 🎉 Die Datei '" + filename + "' wurde heruntergeladen.");
+        }
+
+        // ALLE SÄTZE SPEICHERN
+        function saveAllSentences() {
+            var total = diceSentences.length + seinSentences.length + habenSentences.length + modalSentences.length;
+            if (total === 0) {
+                alert("Du hast noch keine Sätze gebildet! Spiele erst ein bisschen. 😊");
+                return;
+            }
+            
+            var text = "╔═══════════════════════════════════════════════════╗\n";
+            text += "║     🎮 MEINE DEUTSCH-SÄTZE 🎮                       ║\n";
+            text += "╠═══════════════════════════════════════════════════╣\n";
+            text += "║  👤 Name: " + playerName + "\n";
+            text += "║  📅 Datum: " + new Date().toLocaleDateString('de-DE') + "\n";
+            text += "║  ⭐ Punkte: " + score + "\n";
+            text += "╚═══════════════════════════════════════════════════╝\n\n";
+            
+            if (diceSentences.length > 0) {
+                text += "🎲 WÜRFEL-KONJUGATION (" + diceSentences.length + " Sätze)\n";
+                text += "─────────────────────────────────────────\n";
+                diceSentences.forEach(function(s, i) { text += (i+1) + ". " + s + "\n"; });
+                text += "\n";
+            }
+            if (seinSentences.length > 0) {
+                text += "🌈 SEIN + ADJEKTIV (" + seinSentences.length + " Sätze)\n";
+                text += "─────────────────────────────────────────\n";
+                seinSentences.forEach(function(s, i) { text += (i+1) + ". " + s + "\n"; });
+                text += "\n";
+            }
+            if (habenSentences.length > 0) {
+                text += "🎁 HABEN + NOMEN (" + habenSentences.length + " Sätze)\n";
+                text += "─────────────────────────────────────────\n";
+                habenSentences.forEach(function(s, i) { text += (i+1) + ". " + s + "\n"; });
+                text += "\n";
+            }
+            if (modalSentences.length > 0) {
+                text += "🎭 MODALVERBEN (" + modalSentences.length + " Sätze)\n";
+                text += "─────────────────────────────────────────\n";
+                modalSentences.forEach(function(s, i) { text += (i+1) + ". " + s + "\n"; });
+                text += "\n";
+            }
+            
+            text += "═════════════════════════════════════════════════════\n";
+            text += "📊 ZUSAMMENFASSUNG\n";
+            text += "─────────────────────────────────────────\n";
+            text += "• Würfel-Konjugation: " + diceSentences.length + " Sätze\n";
+            text += "• Sein + Adjektiv: " + seinSentences.length + " Sätze\n";
+            text += "• Haben + Nomen: " + habenSentences.length + " Sätze\n";
+            text += "• Modalverben: " + modalSentences.length + " Sätze\n";
+            text += "─────────────────────────────────────────\n";
+            text += "🏆 INSGESAMT: " + total + " Sätze!\n";
+            text += "═════════════════════════════════════════════════════\n";
+            text += "\nSuper gemacht, " + playerName + "! 🌟\n";
+            
+            var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement("a");
+            a.href = url;
+            a.download = "meine-deutsch-saetze-" + playerName.toLowerCase().replace(/\s+/g, '-') + ".txt";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            alert("Alle Sätze gespeichert! 🎉🏆\n\nDu hast insgesamt " + total + " Sätze gebildet!");
+        }
+
+        // ============ SPIEL STARTEN ============
+        function startGame() {
+            var nameEl = $("playerName");
+            if (!nameEl) return;
+            playerName = nameEl.value.trim();
+            var dn = $("displayName");
+            if (dn) dn.textContent = playerName;
+            var ws = $("welcomeScreen");
+            if (ws) ws.style.display = "none";
+            var ga = $("gameArea");
+            if (ga) ga.classList.add("active");
+            newDiceRound();
+        }
+
+        function switchGame(game) {
+            document.querySelectorAll(".tab-btn").forEach(function(b) {
+                b.classList.toggle("active", b.getAttribute("data-game") === game);
+            });
+            document.querySelectorAll(".game-panel").forEach(function(p) { p.classList.remove("active"); });
+            var panel = $(game + "Game");
+            if (panel) panel.classList.add("active");
+            if (game === "dice") newDiceRound();
+            else if (game === "sein") newSeinRound();
+            else if (game === "haben") newHabenRound();
+            else if (game === "modal") newModalRound();
+        }
+
+        // ============ WÜRFEL-SPIEL ============
+        function rollDice() {
+            var dice = $("dice");
+            if (!dice) return;
+            dice.classList.add("rolling");
+            var count = 0;
+            var iv = setInterval(function() {
+                dice.textContent = Math.floor(Math.random() * 6) + 1;
+                if (++count >= 10) {
+                    clearInterval(iv);
+                    var roll = Math.floor(Math.random() * 6) + 1;
+                    dice.textContent = roll;
+                    dice.classList.remove("rolling");
+                    currentPronoun = pronouns[roll];
+                    var dr = $("diceResult");
+                    if (dr) dr.innerHTML = "Du hast eine <strong>" + roll + "</strong> gewürfelt!<span class='pronoun'>" + currentPronoun.emoji + " " + currentPronoun.text + "</span>";
+                    showVerbOptions();
+                }
+            }, 50);
+        }
+
+        function showVerbOptions() {
+            currentVerb = verbs[Math.floor(Math.random() * verbs.length)];
+            var vd = $("verbDisplay");
+            var cv = $("currentVerb");
+            if (vd) vd.style.display = "block";
+            if (cv) cv.textContent = currentVerb.inf;
+            var correct = currentVerb[currentPronoun.key];
+            var allForms = [currentVerb.ich, currentVerb.du, currentVerb.er, currentVerb.wir, currentVerb.ihr, currentVerb.sie];
+            var unique = allForms.filter(function(v, i, a) { return a.indexOf(v) === i; });
+            var opts = shuffle(unique);
+            if (opts.indexOf(correct) < 0) { opts.push(correct); opts = shuffle(opts); }
+            var co = $("conjOptions");
+            if (!co) return;
+            co.innerHTML = "";
+            opts.forEach(function(o) {
+                var btn = document.createElement("button");
+                btn.className = "conj-btn";
+                btn.textContent = o;
+                btn.onclick = function() {
+                    if (this.classList.contains("correct") || this.classList.contains("wrong")) return;
+                    if (this.textContent === correct) {
+                        this.classList.add("correct");
+                        // SATZ SPEICHERN
+                        var sentence = currentPronoun.text.charAt(0).toUpperCase() + currentPronoun.text.slice(1) + " " + correct + ". (" + currentVerb.inf + ")";
+                        diceSentences.push(sentence);
+                        updateSentenceList("diceList", "diceCount", diceSentences);
+                        addPoints(10);
+                        showSuccess();
+                        setTimeout(newDiceRound, 1200);
+                    } else {
+                        this.classList.add("wrong");
+                        var self = this;
+                        setTimeout(function() { self.classList.remove("wrong"); }, 400);
+                    }
+                };
+                co.appendChild(btn);
+            });
+        }
+
+        function newDiceRound() {
+            var dice = $("dice");
+            if (dice) dice.textContent = "🎲";
+            var dr = $("diceResult");
+            if (dr) dr.innerHTML = "Klicke auf den Würfel!<span class='pronoun'></span>";
+            var vd = $("verbDisplay");
+            if (vd) vd.style.display = "none";
+            var co = $("conjOptions");
+            if (co) co.innerHTML = "";
+        }
+
+        // ============ SEIN-SPIEL ============
+        function newSeinRound() {
+            seinStep = 1; seinSubj = null; seinVerb = null; seinAdj = null;
+            updateSeinUI();
+        }
+
+        function updateSeinUI() {
+            var steps = document.querySelectorAll("#seinSteps .step");
+            steps.forEach(function(s, i) {
+                s.classList.remove("active", "completed");
+                if (i + 1 < seinStep) s.classList.add("completed");
+                if (i + 1 === seinStep) s.classList.add("active");
+            });
+            var sen = $("seinSentence");
+            if (sen) {
+                sen.innerHTML = 
+                    "<span class='sentence-part " + (seinSubj ? "subject" : "placeholder") + "'>" + (seinSubj ? seinSubj.emoji + " " + seinSubj.text : "Subjekt") + "</span>" +
+                    "<span class='sentence-part " + (seinVerb ? "verb" : "placeholder") + "'>" + (seinVerb || "Verb") + "</span>" +
+                    "<span class='sentence-part " + (seinAdj ? "object" : "placeholder") + "'>" + (seinAdj ? seinAdj.emoji + " " + seinAdj.text : "Adjektiv") + "</span>";
+            }
+            var sel = $("seinSelection");
+            if (!sel) return;
+            sel.innerHTML = "";
+            
+            if (seinStep === 1) {
+                sel.innerHTML = "<div class='selection-label'>👤 Wähle ein Subjekt (scroll für mehr!):</div><div class='selection-options' id='seinOpts'></div>";
+                var so = document.getElementById("seinOpts");
+                shuffle(subjects).forEach(function(s) {
+                    var b = document.createElement("button");
+                    b.className = "select-btn";
+                    b.textContent = s.emoji + " " + s.text;
+                    b.onclick = function() {
+                        seinSubj = {text: s.text, verb: s.verb, emoji: s.emoji};
+                        seinStep = 2;
+                        updateSeinUI();
+                    };
+                    so.appendChild(b);
+                });
+            } else if (seinStep === 2) {
+                sel.innerHTML = "<div class='selection-label'>🔤 Wie konjugiert man \"sein\" für \"" + seinSubj.text + "\"?</div><div class='selection-options' id='seinOpts'></div>";
+                var so = document.getElementById("seinOpts");
+                ["bin", "bist", "ist", "sind", "seid"].forEach(function(v) {
+                    var b = document.createElement("button");
+                    b.className = "select-btn";
+                    b.textContent = v;
+                    b.onclick = function() {
+                        if (v === seinSubj.verb) {
+                            this.classList.add("correct");
+                            seinVerb = v;
+                            setTimeout(function() { seinStep = 3; updateSeinUI(); }, 400);
+                        } else {
+                            this.classList.add("wrong");
+                            var self = this;
+                            setTimeout(function() { self.classList.remove("wrong"); }, 400);
+                        }
+                    };
+                    so.appendChild(b);
+                });
+            } else if (seinStep === 3) {
+                sel.innerHTML = "<div class='selection-label'>🌈 Wähle ein Adjektiv (scroll für mehr!):</div><div class='selection-options' id='seinOpts'></div>";
+                var so = document.getElementById("seinOpts");
+                shuffle(adjectives).forEach(function(a) {
+                    var b = document.createElement("button");
+                    b.className = "select-btn";
+                    b.textContent = a.emoji + " " + a.text;
+                    b.onclick = function() {
+                        seinAdj = {text: a.text, emoji: a.emoji};
+                        updateSeinUI();
+                        // SATZ SPEICHERN
+                        var sentence = seinSubj.text + " " + seinVerb + " " + seinAdj.text + ".";
+                        seinSentences.push(sentence);
+                        updateSentenceList("seinList", "seinCount", seinSentences);
+                        addPoints(15);
+                        showSuccess();
+                        setTimeout(newSeinRound, 1200);
+                    };
+                    so.appendChild(b);
+                });
+            }
+        }
+
+        // ============ HABEN-SPIEL ============
+        function newHabenRound() {
+            habenStep = 1; habenSubj = null; habenVerb = null; habenObj = null;
+            updateHabenUI();
+        }
+
+        function updateHabenUI() {
+            var steps = document.querySelectorAll("#habenSteps .step");
+            steps.forEach(function(s, i) {
+                s.classList.remove("active", "completed");
+                if (i + 1 < habenStep) s.classList.add("completed");
+                if (i + 1 === habenStep) s.classList.add("active");
+            });
+            var sen = $("habenSentence");
+            if (sen) {
+                sen.innerHTML = 
+                    "<span class='sentence-part " + (habenSubj ? "subject" : "placeholder") + "'>" + (habenSubj ? habenSubj.emoji + " " + habenSubj.text : "Subjekt") + "</span>" +
+                    "<span class='sentence-part " + (habenVerb ? "verb" : "placeholder") + "'>" + (habenVerb || "Verb") + "</span>" +
+                    "<span class='sentence-part " + (habenObj ? "object" : "placeholder") + "'>" + (habenObj ? habenObj.emoji + " " + habenObj.text : "Objekt") + "</span>";
+            }
+            var sel = $("habenSelection");
+            if (!sel) return;
+            sel.innerHTML = "";
+            
+            if (habenStep === 1) {
+                sel.innerHTML = "<div class='selection-label'>👤 Wähle ein Subjekt (scroll für mehr!):</div><div class='selection-options' id='habenOpts'></div>";
+                var so = document.getElementById("habenOpts");
+                shuffle(subjects).forEach(function(s) {
+                    var b = document.createElement("button");
+                    b.className = "select-btn";
+                    b.textContent = s.emoji + " " + s.text;
+                    b.onclick = function() {
+                        habenSubj = {text: s.text, haben: s.haben, emoji: s.emoji};
+                        habenStep = 2;
+                        updateHabenUI();
+                    };
+                    so.appendChild(b);
+                });
+            } else if (habenStep === 2) {
+                sel.innerHTML = "<div class='selection-label'>🔤 Wie konjugiert man \"haben\" für \"" + habenSubj.text + "\"?</div><div class='selection-options' id='habenOpts'></div>";
+                var so = document.getElementById("habenOpts");
+                ["habe", "hast", "hat", "haben", "habt"].forEach(function(v) {
+                    var b = document.createElement("button");
+                    b.className = "select-btn";
+                    b.textContent = v;
+                    b.onclick = function() {
+                        if (v === habenSubj.haben) {
+                            this.classList.add("correct");
+                            habenVerb = v;
+                            setTimeout(function() { habenStep = 3; updateHabenUI(); }, 400);
+                        } else {
+                            this.classList.add("wrong");
+                            var self = this;
+                            setTimeout(function() { self.classList.remove("wrong"); }, 400);
+                        }
+                    };
+                    so.appendChild(b);
+                });
+            } else if (habenStep === 3) {
+                sel.innerHTML = "<div class='selection-label'>🎁 Was hat/haben...? (scroll für mehr!):</div><div class='selection-options' id='habenOpts'></div>";
+                var so = document.getElementById("habenOpts");
+                shuffle(habenObjects).forEach(function(o) {
+                    var b = document.createElement("button");
+                    b.className = "select-btn";
+                    b.textContent = o.emoji + " " + o.text;
+                    b.onclick = function() {
+                        habenObj = {text: o.text, emoji: o.emoji};
+                        updateHabenUI();
+                        // SATZ SPEICHERN
+                        var sentence = habenSubj.text + " " + habenVerb + " " + habenObj.text + ".";
+                        habenSentences.push(sentence);
+                        updateSentenceList("habenList", "habenCount", habenSentences);
+                        addPoints(15);
+                        showSuccess();
+                        setTimeout(newHabenRound, 1200);
+                    };
+                    so.appendChild(b);
+                });
+            }
+        }
+
+        // ============ MODAL-SPIEL ============
+        function newModalRound() {
+            modalStep = 1; modalSubj = null; modalV = null; modalVC = null; modalInf = null;
+            updateModalUI();
+        }
+
+        function updateModalUI() {
+            var steps = document.querySelectorAll("#modalSteps .step");
+            steps.forEach(function(s, i) {
+                s.classList.remove("active", "completed");
+                if (i + 1 < modalStep) s.classList.add("completed");
+                if (i + 1 === modalStep) s.classList.add("active");
+            });
+            var sen = $("modalSentence");
+            if (sen) {
+                sen.innerHTML = 
+                    "<span class='sentence-part " + (modalSubj ? "subject" : "placeholder") + "'>" + (modalSubj ? modalSubj.emoji + " " + modalSubj.text : "Subjekt") + "</span>" +
+                    "<span class='sentence-part " + (modalVC ? "verb" : "placeholder") + "'>" + (modalVC || "Modalverb") + "</span>" +
+                    "<span class='sentence-part " + (modalInf ? "object" : "placeholder") + "'>" + (modalInf ? modalInf.emoji + " " + modalInf.text : "Infinitiv") + "</span>";
+            }
+            var sel = $("modalSelection");
+            if (!sel) return;
+            sel.innerHTML = "";
+            
+            if (modalStep === 1) {
+                sel.innerHTML = "<div class='selection-label'>👤 Wähle ein Subjekt:</div><div class='selection-options' id='modalOpts'></div>";
+                var so = document.getElementById("modalOpts");
+                shuffle(modalSubjList).forEach(function(s) {
+                    var b = document.createElement("button");
+                    b.className = "select-btn";
+                    b.textContent = s.emoji + " " + s.text;
+                    b.onclick = function() {
+                        modalSubj = {text: s.text, type: s.type, emoji: s.emoji};
+                        modalStep = 2;
+                        updateModalUI();
+                    };
+                    so.appendChild(b);
+                });
+            } else if (modalStep === 2) {
+                sel.innerHTML = "<div class='selection-label'>🎭 Wähle ein Modalverb:</div><div class='selection-options' id='modalOpts'></div>";
+                var so = document.getElementById("modalOpts");
+                modalVerbs.forEach(function(v) {
+                    var correct = v[modalSubj.type];
+                    var b = document.createElement("button");
+                    b.className = "select-btn";
+                    b.textContent = v.emoji + " " + v.inf;
+                    b.onclick = function() {
+                        modalV = {inf: v.inf, correct: correct, emoji: v.emoji, data: v};
+                        modalStep = 3;
+                        updateModalUI();
+                    };
+                    so.appendChild(b);
+                });
+            } else if (modalStep === 3) {
+                var mv = modalV.data;
+                var unique = [mv.ich, mv.du, mv.er, mv.wir, mv.ihr, mv.sie].filter(function(v, i, a) { return a.indexOf(v) === i; });
+                sel.innerHTML = "<div class='selection-label'>🔤 Konjugiere \"" + modalV.inf + "\" für \"" + modalSubj.text + "\":</div><div class='selection-options' id='modalOpts'></div>";
+                var so = document.getElementById("modalOpts");
+                shuffle(unique).forEach(function(f) {
+                    var b = document.createElement("button");
+                    b.className = "select-btn";
+                    b.textContent = f;
+                    b.onclick = function() {
+                        if (f === modalV.correct) {
+                            this.classList.add("correct");
+                            modalVC = f;
+                            setTimeout(function() { modalStep = 4; updateModalUI(); }, 400);
+                        } else {
+                            this.classList.add("wrong");
+                            var self = this;
+                            setTimeout(function() { self.classList.remove("wrong"); }, 400);
+                        }
+                    };
+                    so.appendChild(b);
+                });
+            } else if (modalStep === 4) {
+                sel.innerHTML = "<div class='selection-label'>🎯 Was " + modalVC + " " + modalSubj.text.toLowerCase() + "? (scroll für mehr!):</div><div class='selection-options' id='modalOpts'></div>";
+                var so = document.getElementById("modalOpts");
+                shuffle(modalInfs).forEach(function(inf) {
+                    var b = document.createElement("button");
+                    b.className = "select-btn";
+                    b.textContent = inf.emoji + " " + inf.text;
+                    b.onclick = function() {
+                        modalInf = {text: inf.text, emoji: inf.emoji};
+                        updateModalUI();
+                        // SATZ SPEICHERN
+                        var sentence = modalSubj.text + " " + modalVC + " " + modalInf.text + ".";
+                        modalSentences.push(sentence);
+                        updateSentenceList("modalList", "modalCount", modalSentences);
+                        addPoints(20);
+                        showSuccess();
+                        setTimeout(newModalRound, 1200);
+                    };
+                    so.appendChild(b);
+                });
+            }
+        }
+
+        // ============ HILFE ============
+        function showHelp(type) {
+            var hc = $("helpContent");
+            if (!hc) return;
+            var html = "<button class='help-close' id='helpClose2'>✕</button>";
+            if (type === "conjugation") {
+                html += "<h3 class='help-title'>📖 Konjugation</h3><table class='conj-table'><tr><th>Pronomen</th><th>Endung</th><th>spielen</th></tr><tr><td>ich</td><td>-e</td><td>spiele</td></tr><tr><td>du</td><td>-st</td><td>spielst</td></tr><tr><td>er/sie/es</td><td>-t</td><td>spielt</td></tr><tr><td>wir</td><td>-en</td><td>spielen</td></tr><tr><td>ihr</td><td>-t</td><td>spielt</td></tr><tr><td>sie</td><td>-en</td><td>spielen</td></tr></table><p style='margin-top:12px'>⚠️ Manche Verben ändern sich: lesen → du <b>liest</b></p>";
+            } else if (type === "sein") {
+                html += "<h3 class='help-title'>📖 sein</h3><table class='conj-table'><tr><th>Pronomen</th><th>sein</th></tr><tr><td>ich</td><td><b>bin</b></td></tr><tr><td>du</td><td><b>bist</b></td></tr><tr><td>er/sie/es</td><td><b>ist</b></td></tr><tr><td>wir</td><td><b>sind</b></td></tr><tr><td>ihr</td><td><b>seid</b></td></tr><tr><td>sie</td><td><b>sind</b></td></tr></table>";
+            } else if (type === "haben") {
+                html += "<h3 class='help-title'>📖 haben</h3><table class='conj-table'><tr><th>Pronomen</th><th>haben</th></tr><tr><td>ich</td><td><b>habe</b></td></tr><tr><td>du</td><td><b>hast</b></td></tr><tr><td>er/sie/es</td><td><b>hat</b></td></tr><tr><td>wir</td><td><b>haben</b></td></tr><tr><td>ihr</td><td><b>habt</b></td></tr><tr><td>sie</td><td><b>haben</b></td></tr></table>";
+            } else if (type === "modal") {
+                html += "<h3 class='help-title'>📖 Modalverben</h3><table class='conj-table'><tr><th></th><th>können</th><th>müssen</th><th>wollen</th><th>dürfen</th></tr><tr><td>ich</td><td>kann</td><td>muss</td><td>will</td><td>darf</td></tr><tr><td>du</td><td>kannst</td><td>musst</td><td>willst</td><td>darfst</td></tr><tr><td>er</td><td>kann</td><td>muss</td><td>will</td><td>darf</td></tr><tr><td>wir</td><td>können</td><td>müssen</td><td>wollen</td><td>dürfen</td></tr><tr><td>ihr</td><td>könnt</td><td>müsst</td><td>wollt</td><td>dürft</td></tr><tr><td>sie</td><td>können</td><td>müssen</td><td>wollen</td><td>dürfen</td></tr></table>";
+            }
+            hc.innerHTML = html;
+            var hm = $("helpModal");
+            if (hm) hm.classList.add("active");
+            var hc2 = document.getElementById("helpClose2");
+            if (hc2) hc2.onclick = closeHelp;
+        }
+
+        function closeHelp() {
+            var hm = $("helpModal");
+            if (hm) hm.classList.remove("active");
+        }
+
+        // ============ INIT ============
+        document.addEventListener("DOMContentLoaded", function() {
+            var nameEl = $("playerName");
+            var startBtn = $("startBtn");
+            if (nameEl && startBtn) {
+                nameEl.oninput = function() { startBtn.disabled = this.value.trim().length < 1; };
+                nameEl.onkeypress = function(e) { if (e.key === "Enter" && this.value.trim().length >= 1) startGame(); };
+                startBtn.onclick = startGame;
+            }
+            
+            var dice = $("dice"); if (dice) dice.onclick = rollDice;
+            var nd = $("newDice"); if (nd) nd.onclick = newDiceRound;
+            var ns = $("newSein"); if (ns) ns.onclick = newSeinRound;
+            var nh = $("newHaben"); if (nh) nh.onclick = newHabenRound;
+            var nm = $("newModal"); if (nm) nm.onclick = newModalRound;
+            
+            var hd = $("helpDice"); if (hd) hd.onclick = function() { showHelp("conjugation"); };
+            var hs = $("helpSein"); if (hs) hs.onclick = function() { showHelp("sein"); };
+            var hh = $("helpHaben"); if (hh) hh.onclick = function() { showHelp("haben"); };
+            var hmb = $("helpModalBtn"); if (hmb) hmb.onclick = function() { showHelp("modal"); };
+            
+            var hmo = $("helpModal");
+            if (hmo) hmo.onclick = function(e) { if (e.target === hmo) closeHelp(); };
+            
+            document.querySelectorAll(".tab-btn").forEach(function(b) {
+                b.onclick = function() { switchGame(this.getAttribute("data-game")); };
+            });
+            
+            // SPEICHER-BUTTONS
+            var sd = $("saveDice"); 
+            if (sd) sd.onclick = function() { saveToTxt("wuerfel-konjugation-" + playerName + ".txt", "🎲 WÜRFEL-KONJUGATION", diceSentences); };
+            var ss = $("saveSein"); 
+            if (ss) ss.onclick = function() { saveToTxt("sein-adjektiv-" + playerName + ".txt", "🌈 SEIN + ADJEKTIV", seinSentences); };
+            var sh = $("saveHaben"); 
+            if (sh) sh.onclick = function() { saveToTxt("haben-nomen-" + playerName + ".txt", "🎁 HABEN + NOMEN", habenSentences); };
+            var sm = $("saveModal"); 
+            if (sm) sm.onclick = function() { saveToTxt("modalverben-" + playerName + ".txt", "🎭 MODALVERBEN", modalSentences); };
+            var sa = $("saveAll"); 
+            if (sa) sa.onclick = saveAllSentences;
+        });
+    })();
+    </script>
+</body>
+</html>
