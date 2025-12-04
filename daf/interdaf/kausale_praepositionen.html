@@ -173,6 +173,16 @@
             color: var(--white);
         }
 
+        select.correct {
+            border-color: var(--correct);
+            background: rgba(45, 134, 89, 0.2);
+        }
+
+        select.incorrect {
+            border-color: var(--incorrect);
+            background: rgba(196, 69, 54, 0.2);
+        }
+
         .button-group {
             display: flex;
             gap: 15px;
@@ -241,65 +251,6 @@
             color: var(--pale-blue);
         }
 
-        /* Kombinationsübung */
-        .combo-container {
-            display: grid;
-            grid-template-columns: 1fr auto 1fr auto 1fr;
-            gap: 15px;
-            align-items: start;
-        }
-
-        .combo-column {
-            background: rgba(0,0,0,0.15);
-            padding: 15px;
-            border-radius: 10px;
-        }
-
-        .combo-column h3 {
-            color: var(--light-blue);
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-        }
-
-        .combo-item {
-            padding: 8px 12px;
-            margin-bottom: 8px;
-            background: rgba(255,255,255,0.08);
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .combo-item:hover {
-            background: rgba(255,255,255,0.15);
-        }
-
-        .combo-item.selected {
-            background: var(--accent-blue);
-        }
-
-        .combo-arrow {
-            font-size: 2rem;
-            color: var(--accent-blue);
-            align-self: center;
-        }
-
-        .combo-result {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 10px;
-        }
-
-        .combo-sentence {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-        }
-
         /* Markierungsübung */
         .mark-options {
             display: inline-flex;
@@ -344,28 +295,8 @@
         }
 
         .cloze-text input {
-            width: 120px;
+            width: 100px;
             text-align: center;
-        }
-
-        /* Zuordnung */
-        .matching-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .matching-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 12px 15px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 8px;
-        }
-
-        .matching-item select {
-            min-width: 140px;
         }
 
         /* Transformation */
@@ -433,19 +364,6 @@
                 font-size: 1.8rem;
             }
             
-            .combo-container {
-                grid-template-columns: 1fr;
-            }
-            
-            .combo-arrow {
-                transform: rotate(90deg);
-                text-align: center;
-            }
-            
-            .matching-container {
-                grid-template-columns: 1fr;
-            }
-            
             .button-group {
                 flex-direction: column;
             }
@@ -453,24 +371,15 @@
             button {
                 width: 100%;
             }
-        }
 
-        /* Fortschrittsanzeige */
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 4px;
-            margin-top: 15px;
-            overflow: hidden;
-        }
+            .exercise-item {
+                padding: 12px 15px;
+            }
 
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--light-blue), var(--correct));
-            border-radius: 4px;
-            transition: width 0.5s ease;
-            width: 0%;
+            select, input[type="text"] {
+                font-size: 0.9rem;
+                padding: 6px 10px;
+            }
         }
 
         /* Navigation */
@@ -505,6 +414,18 @@
         nav a:hover {
             background: var(--accent-blue);
             color: var(--white);
+        }
+
+        .genus-hint {
+            color: var(--light-blue);
+            font-size: 0.85rem;
+            font-style: italic;
+        }
+
+        .noun-display {
+            font-weight: 600;
+            color: var(--pale-blue);
+            margin: 0 5px;
         }
     </style>
 </head>
@@ -600,7 +521,7 @@
         <!-- Übung 1: Kombinieren -->
         <section class="exercise-section" id="uebung1">
             <h2><span class="number">1</span> Kombinieren Sie</h2>
-            <p class="instruction">Verbinden Sie die Präposition mit dem passenden Genitivausdruck und dem richtigen Satzteil.</p>
+            <p class="instruction">Wählen Sie die passende Präposition und den richtigen Artikel im Genitiv. Das Nomen ist vorgegeben.</p>
             
             <div id="combo-exercises">
                 <!-- Wird durch JavaScript generiert -->
@@ -633,7 +554,7 @@
 
         <!-- Übung 3: Lückentext mit aus/vor/wegen -->
         <section class="exercise-section" id="uebung3">
-            <h2><span class="number">3</span> Der Umzug – aus, vor oder wegen?</h2>
+            <h2><span class="number">3</span> Die Prüfungswoche – aus, vor oder wegen?</h2>
             <p class="instruction">Ergänzen Sie die passende Präposition im folgenden Text.</p>
             
             <div class="cloze-text" id="cloze-text1">
@@ -757,42 +678,34 @@
 
     <script>
         // ==================== ÜBUNG 1: Kombinieren ====================
+        // Schüler wählt: Präposition + Artikel (Genitiv) | Nomen ist vorgegeben
         const combo1Data = [
-            { prep: "Wegen", genitive: "des starken Regens", ending: "wurde das Konzert abgesagt." },
-            { prep: "Mangels", genitive: "ausreichender Beweise", ending: "wurde der Angeklagte freigesprochen." },
-            { prep: "Angesichts", genitive: "der steigenden Inflation", ending: "forderten die Gewerkschaften höhere Löhne." },
-            { prep: "Kraft", genitive: "seines Amtes", ending: "unterzeichnete der Minister das Abkommen." },
-            { prep: "Anlässlich", genitive: "des Firmenjubiläums", ending: "gab es eine große Feier." },
-            { prep: "Dank", genitive: "ihrer Hilfsbereitschaft", ending: "konnte das Projekt rechtzeitig abgeschlossen werden." },
-            { prep: "Aufgrund", genitive: "technischer Probleme", ending: "verspätete sich der Flug um drei Stunden." },
-            { prep: "Infolge", genitive: "des Erdbebens", ending: "mussten tausende Menschen evakuiert werden." },
-            { prep: "Wegen", genitive: "seiner Unpünktlichkeit", ending: "bekam er eine Abmahnung." },
-            { prep: "Mangels", genitive: "finanzieller Mittel", ending: "wurde das Projekt eingestellt." },
-            { prep: "Angesichts", genitive: "der drohenden Gefahr", ending: "rief die Regierung den Notstand aus." },
-            { prep: "Kraft", genitive: "ihrer Vollmacht", ending: "handelte die Anwältin im Namen des Klienten." },
-            { prep: "Anlässlich", genitive: "seines Geburtstags", ending: "lud er alle Freunde ein." },
-            { prep: "Dank", genitive: "des medizinischen Fortschritts", ending: "können viele Krankheiten geheilt werden." },
-            { prep: "Aufgrund", genitive: "der neuen Regelungen", ending: "müssen alle Formulare überarbeitet werden." },
-            { prep: "Infolge", genitive: "der Pandemie", ending: "veränderte sich das Arbeitsleben grundlegend." },
-            { prep: "Wegen", genitive: "des Streiks", ending: "fielen alle Züge aus." },
-            { prep: "Mangels", genitive: "geeigneter Kandidaten", ending: "wurde die Stelle nicht besetzt." },
-            { prep: "Angesichts", genitive: "der Klimakrise", ending: "fordern Wissenschaftler sofortiges Handeln." },
-            { prep: "Dank", genitive: "seiner Erfahrung", ending: "löste er das Problem schnell." },
-            { prep: "Aufgrund", genitive: "eines Missverständnisses", ending: "kam es zum Streit." },
-            { prep: "Infolge", genitive: "des Unfalls", ending: "war die Straße stundenlang gesperrt." },
-            { prep: "Kraft", genitive: "des Gesetzes", ending: "ist diese Handlung verboten." },
-            { prep: "Anlässlich", genitive: "der Hochzeit", ending: "reiste die ganze Familie an." },
-            { prep: "Mangels", genitive: "eines Alibis", ending: "geriet er unter Verdacht." }
+            { prep: "Wegen", artikel: "des", noun: "Schneesturms", genus: "m.", ending: "mussten alle Flughäfen schließen." },
+            { prep: "Mangels", artikel: "der", noun: "Erfahrung", genus: "f.", ending: "bekam sie die Stelle nicht." },
+            { prep: "Angesichts", artikel: "der", noun: "Wirtschaftskrise", genus: "f.", ending: "kündigte die Firma Sparmaßnahmen an." },
+            { prep: "Kraft", artikel: "seines", noun: "Ranges", genus: "m.", ending: "durfte der General die Truppen befehligen." },
+            { prep: "Anlässlich", artikel: "des", noun: "Stadtjubiläums", genus: "n.", ending: "organisierte man ein großes Volksfest." },
+            { prep: "Dank", artikel: "der", noun: "Solaranlage", genus: "f.", ending: "spart die Familie viel Stromkosten." },
+            { prep: "Aufgrund", artikel: "eines", noun: "Softwarefehlers", genus: "m.", ending: "stürzte das gesamte System ab." },
+            { prep: "Infolge", artikel: "des", noun: "Vulkanausbruchs", genus: "m.", ending: "wurde der Luftraum gesperrt." },
+            { prep: "Wegen", artikel: "der", noun: "Baustelle", genus: "f.", ending: "gibt es lange Staus auf der Autobahn." },
+            { prep: "Mangels", artikel: "eines", noun: "Sponsors", genus: "m.", ending: "konnte das Festival nicht stattfinden." },
+            { prep: "Angesichts", artikel: "des", noun: "Fachkräftemangels", genus: "m.", ending: "werben Firmen im Ausland." },
+            { prep: "Kraft", artikel: "ihrer", noun: "Position", genus: "f.", ending: "konnte die Ministerin das Veto einlegen." },
+            { prep: "Anlässlich", artikel: "ihrer", noun: "Pensionierung", genus: "f.", ending: "erhielt sie eine goldene Uhr." },
+            { prep: "Dank", artikel: "des", noun: "Navigationssystems", genus: "n.", ending: "fanden wir das Restaurant sofort." },
+            { prep: "Aufgrund", artikel: "der", noun: "Zeugenaussagen", genus: "Pl.", ending: "wurde der Verdächtige verhaftet." },
+            { prep: "Infolge", artikel: "der", noun: "Überschwemmungen", genus: "Pl.", ending: "waren viele Straßen unpassierbar." },
+            { prep: "Wegen", artikel: "eines", noun: "Missverständnisses", genus: "n.", ending: "kam es zum Streit zwischen den Nachbarn." },
+            { prep: "Mangels", artikel: "der", noun: "Genehmigung", genus: "f.", ending: "durfte der Bau nicht beginnen." },
+            { prep: "Angesichts", artikel: "der", noun: "Bedrohung", genus: "f.", ending: "verstärkte die Regierung die Sicherheitsmaßnahmen." },
+            { prep: "Kraft", artikel: "des", noun: "Vertrages", genus: "m.", ending: "ist die Kündigung erst nach zwei Jahren möglich." },
+            { prep: "Anlässlich", artikel: "des", noun: "Nationalfeiertages", genus: "m.", ending: "hielt der Präsident eine Rede." },
+            { prep: "Dank", artikel: "seiner", noun: "Geduld", genus: "f.", ending: "gelang es ihm, das Problem zu lösen." },
+            { prep: "Aufgrund", artikel: "des", noun: "Protests", genus: "m.", ending: "zog die Regierung das Gesetz zurück." },
+            { prep: "Infolge", artikel: "des", noun: "Unfalls", genus: "m.", ending: "leidet er noch immer an Rückenschmerzen." },
+            { prep: "Wegen", artikel: "der", noun: "Hitze", genus: "f.", ending: "fiel der Sportunterricht aus." }
         ];
-
-        function shuffleArray(array) {
-            const shuffled = [...array];
-            for (let i = shuffled.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-            }
-            return shuffled;
-        }
 
         function initExercise1() {
             const container = document.getElementById('combo-exercises');
@@ -800,7 +713,7 @@
             
             combo1Data.forEach((item, index) => {
                 const div = document.createElement('div');
-                div.className = 'exercise-item combo-sentence';
+                div.className = 'exercise-item';
                 div.innerHTML = `
                     <span>${index + 1}.</span>
                     <select data-index="${index}" data-type="prep">
@@ -814,9 +727,21 @@
                         <option value="Aufgrund">Aufgrund</option>
                         <option value="Infolge">Infolge</option>
                     </select>
-                    <input type="text" data-index="${index}" data-type="genitive" placeholder="Genitivausdruck" style="width: 200px;">
+                    <select data-index="${index}" data-type="artikel">
+                        <option value="">-- Artikel --</option>
+                        <option value="des">des</option>
+                        <option value="der">der</option>
+                        <option value="eines">eines</option>
+                        <option value="einer">einer</option>
+                        <option value="seines">seines</option>
+                        <option value="seiner">seiner</option>
+                        <option value="ihres">ihres</option>
+                        <option value="ihrer">ihrer</option>
+                    </select>
+                    <span class="noun-display">${item.noun}</span>
+                    <span class="genus-hint">(${item.genus})</span>
                     <span>${item.ending}</span>
-                    <span class="solution" id="sol1-${index}">(${item.prep} ${item.genitive})</span>
+                    <span class="solution" id="sol1-${index}">(${item.prep} ${item.artikel} ${item.noun})</span>
                 `;
                 container.appendChild(div);
             });
@@ -826,18 +751,29 @@
             let correct = 0;
             combo1Data.forEach((item, index) => {
                 const prepSelect = document.querySelector(`select[data-index="${index}"][data-type="prep"]`);
-                const genInput = document.querySelector(`input[data-index="${index}"][data-type="genitive"]`);
+                const artikelSelect = document.querySelector(`select[data-index="${index}"][data-type="artikel"]`);
                 const parent = prepSelect.closest('.exercise-item');
                 
                 const prepCorrect = prepSelect.value === item.prep;
-                const genCorrect = genInput.value.toLowerCase().trim() === item.genitive.toLowerCase();
+                const artikelCorrect = artikelSelect.value === item.artikel;
                 
+                prepSelect.classList.remove('correct', 'incorrect');
+                artikelSelect.classList.remove('correct', 'incorrect');
                 parent.classList.remove('correct', 'incorrect');
-                if (prepCorrect && genCorrect) {
+                
+                if (prepCorrect && artikelCorrect) {
                     parent.classList.add('correct');
+                    prepSelect.classList.add('correct');
+                    artikelSelect.classList.add('correct');
                     correct++;
-                } else if (prepSelect.value || genInput.value) {
-                    parent.classList.add('incorrect');
+                } else {
+                    if (prepSelect.value || artikelSelect.value) {
+                        parent.classList.add('incorrect');
+                    }
+                    if (prepSelect.value && !prepCorrect) prepSelect.classList.add('incorrect');
+                    if (prepSelect.value && prepCorrect) prepSelect.classList.add('correct');
+                    if (artikelSelect.value && !artikelCorrect) artikelSelect.classList.add('incorrect');
+                    if (artikelSelect.value && artikelCorrect) artikelSelect.classList.add('correct');
                 }
             });
             document.getElementById('score1').textContent = `Ergebnis: ${correct} von ${combo1Data.length} richtig`;
@@ -852,9 +788,11 @@
         function resetExercise1() {
             combo1Data.forEach((item, index) => {
                 const prepSelect = document.querySelector(`select[data-index="${index}"][data-type="prep"]`);
-                const genInput = document.querySelector(`input[data-index="${index}"][data-type="genitive"]`);
+                const artikelSelect = document.querySelector(`select[data-index="${index}"][data-type="artikel"]`);
                 prepSelect.value = '';
-                genInput.value = '';
+                artikelSelect.value = '';
+                prepSelect.classList.remove('correct', 'incorrect');
+                artikelSelect.classList.remove('correct', 'incorrect');
                 prepSelect.closest('.exercise-item').classList.remove('correct', 'incorrect');
                 document.getElementById(`sol1-${index}`).classList.remove('visible');
             });
@@ -863,31 +801,31 @@
 
         // ==================== ÜBUNG 2: aus oder vor ====================
         const ausVorData = [
-            { sentence: "Sein Gesicht war rot", answer: "vor", rest: "Wut. Er schrie laut." },
-            { sentence: "Sie konnte", answer: "vor", rest: "Nervosität kein Wort sagen." },
-            { sentence: "Er macht das nur", answer: "aus", rest: "Liebe zu ihr." },
-            { sentence: "Ich surfe", answer: "aus", rest: "Langeweile im Internet." },
-            { sentence: "Sie zitterte", answer: "vor", rest: "Angst am ganzen Körper." },
-            { sentence: "Er ist stumm", answer: "vor", rest: "Mitleid. Er kann nichts sagen." },
-            { sentence: "Sie handelte", answer: "aus", rest: "Überzeugung, nicht aus Pflicht." },
-            { sentence: "Das Kind weinte", answer: "vor", rest: "Freude, als es das Geschenk sah." },
-            { sentence: "Er tat es", answer: "aus", rest: "Rache für die Demütigung." },
-            { sentence: "Sie konnte", answer: "vor", rest: "Aufregung nicht schlafen." },
-            { sentence: "Er log", answer: "aus", rest: "Angst vor den Konsequenzen." },
-            { sentence: "Sie strahlte", answer: "vor", rest: "Glück, als sie die Nachricht hörte." },
-            { sentence: "Er schwieg", answer: "aus", rest: "Respekt vor den Trauernden." },
-            { sentence: "Das Baby schrie", answer: "vor", rest: "Hunger die ganze Nacht." },
-            { sentence: "Sie kündigte", answer: "aus", rest: "Prinzip, obwohl sie das Geld brauchte." },
-            { sentence: "Er wurde blass", answer: "vor", rest: "Schreck, als er die Nachricht hörte." },
-            { sentence: "Sie half ihm", answer: "aus", rest: "Mitleid, nicht aus Pflicht." },
-            { sentence: "Er platzte fast", answer: "vor", rest: "Neugier, wollte aber nicht fragen." },
-            { sentence: "Sie lernt Deutsch", answer: "aus", rest: "beruflichen Gründen." },
-            { sentence: "Er konnte", answer: "vor", rest: "Lachen nicht mehr sprechen." },
-            { sentence: "Sie unterschrieb", answer: "aus", rest: "Höflichkeit, obwohl sie Bedenken hatte." },
-            { sentence: "Der Hund bellte", answer: "vor", rest: "Freude, als sein Herrchen kam." },
-            { sentence: "Er stotterte", answer: "vor", rest: "Verlegenheit bei seiner Rede." },
-            { sentence: "Sie spendete", answer: "aus", rest: "Großzügigkeit ihr halbes Vermögen." },
-            { sentence: "Er erstarrte", answer: "vor", rest: "Entsetzen, als er den Unfall sah." }
+            { sentence: "Die Zuschauer sprangen", answer: "vor", rest: "Begeisterung von ihren Sitzen." },
+            { sentence: "Er kündigte seinen Job", answer: "aus", rest: "Prinzip, obwohl er das Geld brauchte." },
+            { sentence: "Das Kind versteckte sich", answer: "vor", rest: "Angst hinter dem Sofa." },
+            { sentence: "Sie spendete ihr Erbe", answer: "aus", rest: "Großzügigkeit an ein Waisenhaus." },
+            { sentence: "Er konnte", answer: "vor", rest: "Schmerzen kaum noch laufen." },
+            { sentence: "Die Studentin lernte Tag und Nacht", answer: "aus", rest: "Ehrgeiz, nicht aus Pflicht." },
+            { sentence: "Seine Hände zitterten", answer: "vor", rest: "Aufregung während der Präsentation." },
+            { sentence: "Sie verzieh ihm", answer: "aus", rest: "Liebe, obwohl er sie verletzt hatte." },
+            { sentence: "Der Welpe bellte", answer: "vor", rest: "Freude, als sein Besitzer nach Hause kam." },
+            { sentence: "Er log seinen Chef an", answer: "aus", rest: "Feigheit, nicht aus böser Absicht." },
+            { sentence: "Sie wurde rot", answer: "vor", rest: "Scham, als alle sie anstarrten." },
+            { sentence: "Der Aktivist protestierte", answer: "aus", rest: "Überzeugung gegen das neue Gesetz." },
+            { sentence: "Die alte Frau weinte", answer: "vor", rest: "Rührung bei der Hochzeit ihrer Enkelin." },
+            { sentence: "Er aß nichts", answer: "aus", rest: "Respekt vor den fastenden Kollegen." },
+            { sentence: "Das Publikum schwieg", answer: "vor", rest: "Staunen nach dem Zaubertrick." },
+            { sentence: "Sie arbeitete ehrenamtlich", answer: "aus", rest: "Pflichtgefühl gegenüber der Gemeinde." },
+            { sentence: "Er konnte nicht sprechen,", answer: "vor", rest: "Lachen war er völlig außer Atem." },
+            { sentence: "Die Journalistin schrieb den Artikel", answer: "aus", rest: "Neugier, nicht für Geld." },
+            { sentence: "Das Baby schrie", answer: "vor", rest: "Hunger die halbe Nacht." },
+            { sentence: "Sie half dem Fremden", answer: "aus", rest: "Mitgefühl, ohne etwas zu erwarten." },
+            { sentence: "Er erstarrte", answer: "vor", rest: "Entsetzen, als er den Brand sah." },
+            { sentence: "Die Ärztin operierte auch nachts", answer: "aus", rest: "Pflichtbewusstsein für ihre Patienten." },
+            { sentence: "Sie platzte fast", answer: "vor", rest: "Neugier, wollte aber nicht fragen." },
+            { sentence: "Er schwieg", answer: "aus", rest: "Höflichkeit, obwohl er anderer Meinung war." },
+            { sentence: "Der Sportler brach zusammen", answer: "vor", rest: "Erschöpfung nach dem Marathon." }
         ];
 
         function initExercise2() {
@@ -967,26 +905,26 @@
 
         // ==================== ÜBUNG 3: Lückentext ====================
         const clozeData = [
-            { text: "Sie haben sich ", answer: "aus", rest: " Liebe für diesen schwierigen Weg entschieden." },
-            { text: "In der Nacht vor dem Umzug konnte sie ", answer: "vor", rest: " Aufregung nicht schlafen." },
-            { text: "Der Umzug war ", answer: "wegen", rest: " der hohen Mieten in der Stadt nötig geworden." },
-            { text: "Sie packte ", answer: "aus", rest: " Frust die Sachen viel zu schnell ein." },
-            { text: "Er half ihr ", answer: "aus", rest: " Freundschaft beim Tragen der schweren Möbel." },
-            { text: "Sie weinte ", answer: "vor", rest: " Freude, als sie die neue Wohnung zum ersten Mal sah." },
-            { text: "", answer: "Wegen", rest: " des schlechten Wetters musste der Möbelwagen warten." },
-            { text: "Sie zitterte ", answer: "vor", rest: " Kälte, weil die Heizung noch nicht funktionierte." },
-            { text: "Der Vermieter kam ", answer: "aus", rest: " Neugier vorbei, um die neuen Mieter zu sehen." },
-            { text: "Sie konnten ", answer: "vor", rest: " Erschöpfung kaum noch die Treppen steigen." },
-            { text: "Die Nachbarn brachten ", answer: "aus", rest: " Höflichkeit einen Kuchen vorbei." },
-            { text: "", answer: "Wegen", rest: " eines Wasserschadens musste das Bad renoviert werden." },
-            { text: "Er fluchte ", answer: "vor", rest: " Wut, als er den Schaden entdeckte." },
-            { text: "Sie renovierten alles ", answer: "aus", rest: " eigenem Antrieb, ohne auf den Vermieter zu warten." },
-            { text: "Die Kinder sprangen ", answer: "vor", rest: " Begeisterung durch die leeren Zimmer." },
-            { text: "", answer: "Wegen", rest: " der vielen Arbeit konnten sie erst spät auspacken." },
-            { text: "Sie schliefen ", answer: "aus", rest: " Müdigkeit auf dem Boden ein." },
-            { text: "Am nächsten Tag strahlte sie ", answer: "vor", rest: " Stolz über ihr neues Zuhause." },
-            { text: "Die Katze versteckte sich ", answer: "aus", rest: " Angst tagelang unter dem Sofa." },
-            { text: "", answer: "Wegen", rest: " des Umzugsstresses vergaßen sie fast den Hochzeitstag." }
+            { text: "Die Studentin Maria konnte ", answer: "vor", rest: " Nervosität in der Nacht vor der Prüfung nicht einschlafen." },
+            { text: "Sie hatte sich ", answer: "aus", rest: " Ehrgeiz monatelang vorbereitet." },
+            { text: "", answer: "Wegen", rest: " einer Erkältung war sie letzte Woche nicht in der Vorlesung gewesen." },
+            { text: "Trotzdem lernte sie ", answer: "aus", rest: " Pflichtgefühl jeden Tag mehrere Stunden." },
+            { text: "Am Prüfungstag zitterten ihre Hände ", answer: "vor", rest: " Aufregung." },
+            { text: "Sie trank drei Tassen Kaffee ", answer: "wegen", rest: " der Müdigkeit." },
+            { text: "Im Prüfungsraum saß sie ", answer: "vor", rest: " Anspannung ganz starr da." },
+            { text: "Der Professor verspätete sich ", answer: "wegen", rest: " eines Staus." },
+            { text: "Die Studenten murmelten ", answer: "aus", rest: " Ungeduld untereinander." },
+            { text: "Als die Prüfung endlich begann, wurde Maria blass ", answer: "vor", rest: " Schreck – sie hatte ihren Taschenrechner vergessen!" },
+            { text: "Eine Kommilitonin lieh ihr ", answer: "aus", rest: " Solidarität einen zweiten Rechner." },
+            { text: "Maria war so dankbar, dass sie fast ", answer: "vor", rest: " Erleichterung weinte." },
+            { text: "Sie konzentrierte sich nun ", answer: "aus", rest: " aller Kraft auf die Aufgaben." },
+            { text: "", answer: "Wegen", rest: " der schwierigen Fragen brauchte sie die volle Zeit." },
+            { text: "Nach der Prüfung war sie völlig erschöpft ", answer: "vor", rest: " Anstrengung." },
+            { text: "Sie rief ihre Mutter an ", answer: "aus", rest: " dem Bedürfnis, mit jemandem zu sprechen." },
+            { text: "Die Mutter freute sich ", answer: "vor", rest: " Stolz über ihre fleißige Tochter." },
+            { text: "Maria belohnte sich ", answer: "wegen", rest: " der harten Arbeit mit einem guten Essen." },
+            { text: "Sie schlief diese Nacht ", answer: "vor", rest: " Erschöpfung zwölf Stunden." },
+            { text: "Eine Woche später tanzte sie ", answer: "vor", rest: " Freude durchs Zimmer – sie hatte bestanden!" }
         ];
 
         function initExercise3() {
@@ -1041,31 +979,31 @@
 
         // ==================== ÜBUNG 4: Genitiv bilden ====================
         const genitivData = [
-            { hint: "(eine große Spende, f.)", answer: "Dank einer großen Spende", rest: "konnte das Krankenhaus modernisiert werden." },
-            { hint: "(mein Geburtstag, m.)", answer: "Anlässlich meines Geburtstags", rest: "mache ich eine Party." },
-            { hint: "(ein geeignetes Werkzeug, n.)", answer: "Mangels eines geeigneten Werkzeugs", rest: "konnte er nicht arbeiten." },
-            { hint: "(seine Sprachkenntnis, f.)", answer: "Angesichts seiner Sprachkenntnis", rest: "ist es erstaunlich, dass er so wenig spricht." },
-            { hint: "(das Geld, n.) meines Vaters", answer: "Dank des Geldes", rest: "meines Vaters kann ich studieren." },
-            { hint: "(genügend Anmeldungen, Pl.)", answer: "Mangels genügender Anmeldungen", rest: "musste die Veranstaltung ausfallen." },
-            { hint: "(die Katastrophe, f.)", answer: "Angesichts der Katastrophe", rest: "spendeten viele Leute Geld." },
-            { hint: "(unser 20-jähriges Jubiläum, n.)", answer: "Anlässlich unseres 20-jährigen Jubiläums", rest: "veranstalten wir ein großes Fest." },
-            { hint: "(ihr Engagement, n.)", answer: "Dank ihres Engagements", rest: "wurde das Projekt ein Erfolg." },
-            { hint: "(der Nationalfeiertag, m.)", answer: "Anlässlich des Nationalfeiertags", rest: "gibt es ein Feuerwerk." },
-            { hint: "(ausreichend Zeit, f.)", answer: "Mangels ausreichender Zeit", rest: "konnte er die Arbeit nicht beenden." },
-            { hint: "(die drohende Rezession, f.)", answer: "Angesichts der drohenden Rezession", rest: "spart die Regierung." },
-            { hint: "(seine schnelle Reaktion, f.)", answer: "Dank seiner schnellen Reaktion", rest: "konnte Schlimmeres verhindert werden." },
-            { hint: "(sein Ruhestand, m.)", answer: "Anlässlich seines Ruhestands", rest: "gab es eine Abschiedsfeier." },
-            { hint: "(ein gültiger Ausweis, m.)", answer: "Mangels eines gültigen Ausweises", rest: "durfte er nicht einreisen." },
-            { hint: "(die steigenden Kosten, Pl.)", answer: "Angesichts der steigenden Kosten", rest: "müssen wir sparen." },
-            { hint: "(moderne Technologie, f.)", answer: "Dank moderner Technologie", rest: "ist vieles einfacher geworden." },
-            { hint: "(die Eröffnung, f.) des neuen Museums", answer: "Anlässlich der Eröffnung", rest: "des neuen Museums kamen viele Gäste." },
-            { hint: "(ein klarer Beweis, m.)", answer: "Mangels eines klaren Beweises", rest: "wurde er freigelassen." },
-            { hint: "(die aktuelle Lage, f.)", answer: "Angesichts der aktuellen Lage", rest: "müssen wir flexibel bleiben." },
-            { hint: "(ihre Unterstützung, f.)", answer: "Dank ihrer Unterstützung", rest: "haben wir es geschafft." },
-            { hint: "(das Firmenjubiläum, n.)", answer: "Anlässlich des Firmenjubiläums", rest: "bekamen alle Mitarbeiter einen Bonus." },
-            { hint: "(Interesse, n.)", answer: "Mangels Interesses", rest: "wurde der Kurs abgesagt." },
-            { hint: "(die Umweltverschmutzung, f.)", answer: "Angesichts der Umweltverschmutzung", rest: "protestieren viele Menschen." },
-            { hint: "(das gute Wetter, n.)", answer: "Dank des guten Wetters", rest: "wurde das Fest ein voller Erfolg." }
+            { hint: "(eine großzügige Erbschaft, f.)", answer: "Dank einer großzügigen Erbschaft", rest: "konnte sie ihr eigenes Café eröffnen." },
+            { hint: "(sein Ruhestand, m.)", answer: "Anlässlich seines Ruhestands", rest: "organisierten die Kollegen ein Abschiedsfest." },
+            { hint: "(ausreichende Nachweise, Pl.)", answer: "Mangels ausreichender Nachweise", rest: "lehnte die Bank den Kredit ab." },
+            { hint: "(die dramatische Lage, f.)", answer: "Angesichts der dramatischen Lage", rest: "rief das Rote Kreuz zu Spenden auf." },
+            { hint: "(ihr Einsatz, m.)", answer: "Dank ihres Einsatzes", rest: "konnte das Feuer schnell gelöscht werden." },
+            { hint: "(die Eröffnung, f.) der neuen Bibliothek", answer: "Anlässlich der Eröffnung", rest: "der neuen Bibliothek gab es freien Eintritt." },
+            { hint: "(qualifiziertes Personal, n.)", answer: "Mangels qualifizierten Personals", rest: "musste die Firma Aufträge ablehnen." },
+            { hint: "(die explodierenden Preise, Pl.)", answer: "Angesichts der explodierenden Preise", rest: "fordern Verbraucher staatliche Hilfe." },
+            { hint: "(moderne Medizin, f.)", answer: "Dank moderner Medizin", rest: "überleben heute viele schwere Krankheiten." },
+            { hint: "(das 150-jährige Bestehen, n.) der Firma", answer: "Anlässlich des 150-jährigen Bestehens", rest: "der Firma erschien ein Jubiläumsbuch." },
+            { hint: "(ein klares Konzept, n.)", answer: "Mangels eines klaren Konzepts", rest: "scheiterte das Start-up nach zwei Jahren." },
+            { hint: "(die wachsende Unruhe, f.)", answer: "Angesichts der wachsenden Unruhe", rest: "verstärkte die Polizei ihre Präsenz." },
+            { hint: "(seine Kontakte, Pl.)", answer: "Dank seiner Kontakte", rest: "fand er schnell eine neue Arbeitsstelle." },
+            { hint: "(ihr runder Geburtstag, m.)", answer: "Anlässlich ihres runden Geburtstags", rest: "lud sie alle Freunde ein." },
+            { hint: "(Interesse, n.)", answer: "Mangels Interesses", rest: "wurde der Verein aufgelöst." },
+            { hint: "(der Ernst, m.) der Situation", answer: "Angesichts des Ernsts", rest: "der Situation blieben alle ruhig." },
+            { hint: "(die rechtzeitige Warnung, f.)", answer: "Dank der rechtzeitigen Warnung", rest: "konnten alle Bewohner evakuiert werden." },
+            { hint: "(sein Amtsjubiläum, n.)", answer: "Anlässlich seines Amtsjubiläums", rest: "hielt der Bürgermeister eine Rede." },
+            { hint: "(eine Alternative, f.)", answer: "Mangels einer Alternative", rest: "akzeptierte er das ungünstige Angebot." },
+            { hint: "(die vielen Beschwerden, Pl.)", answer: "Angesichts der vielen Beschwerden", rest: "überarbeitete die Firma ihr Produkt." },
+            { hint: "(das Internet, n.)", answer: "Dank des Internets", rest: "kann man heute von überall arbeiten." },
+            { hint: "(die Hochzeit, f.) seiner Schwester", answer: "Anlässlich der Hochzeit", rest: "seiner Schwester flog er nach Hause." },
+            { hint: "(Beweise, Pl.)", answer: "Mangels Beweisen", rest: "wurde das Verfahren eingestellt." },
+            { hint: "(der Klimawandel, m.)", answer: "Angesichts des Klimawandels", rest: "investieren viele in erneuerbare Energien." },
+            { hint: "(ihre Geduld, f.)", answer: "Dank ihrer Geduld", rest: "gelang es ihr, das scheue Tier zu zähmen." }
         ];
 
         function initExercise4() {
@@ -1135,129 +1073,129 @@
         // ==================== ÜBUNG 5: Präpositionen und Endungen ====================
         const endungenData = [
             {
-                template: "Ein Mitarbeiter hat {1} ein{2} Kontrollverlust{3} (m) einige Aufregung verursacht.",
+                template: "Ein Politiker hat {1} ein{2} Skandal{3} (m) seinen Rücktritt erklärt.",
                 answers: ["infolge", "es", "s"],
-                solution: "infolge eines Kontrollverlusts"
+                solution: "infolge eines Skandals"
             },
             {
-                template: "Der Mitarbeiter hatte sich ungerecht behandelt gefühlt und {1} d{2} Ärger{3} (m) laut geschrien.",
-                answers: ["vor", "em", ""],
-                solution: "vor dem Ärger"
+                template: "Die Angestellte bekam eine Beförderung {1} ihr{2} ausgezeichnet{3} Leistung{4} (f).",
+                answers: ["aufgrund", "er", "en", ""],
+                solution: "aufgrund ihrer ausgezeichneten Leistung"
             },
             {
-                template: "{1} d{2} Heftigkeit (f) dieser Reaktion bekam der Kollege Angst.",
+                template: "{1} d{2} Wasserknappheit (f) musste die Stadt Einschränkungen einführen.",
                 answers: ["Angesichts", "er", ""],
-                solution: "Angesichts der Heftigkeit"
+                solution: "Angesichts der Wasserknappheit"
             },
             {
-                template: "{1} d{2} Bericht{3} (Pl.) von anderen Mitarbeitern wurde klar, was passiert war.",
-                answers: ["Aufgrund", "er", "e"],
-                solution: "Aufgrund der Berichte"
-            },
-            {
-                template: "Der Chef entschied {1} sein{2} Amt{3} (n), den Mitarbeiter zu suspendieren.",
-                answers: ["kraft", "es", "es"],
-                solution: "kraft seines Amtes"
-            },
-            {
-                template: "{1} dies{2} Maßnahme (f) beruhigte sich die Situation.",
-                answers: ["Infolge", "er", ""],
-                solution: "Infolge dieser Maßnahme"
-            },
-            {
-                template: "{1} d{2} Klimawandel{3} (m) schmelzen die Gletscher immer schneller.",
-                answers: ["Infolge", "es", "s"],
-                solution: "Infolge des Klimawandels"
-            },
-            {
-                template: "{1} d{2} neu{3} Gesetz{4} (n) müssen alle Autos eine Umweltplakette haben.",
-                answers: ["Kraft", "es", "en", "es"],
-                solution: "Kraft des neuen Gesetzes"
-            },
-            {
-                template: "{1} d{2} wachsend{3} Unzufriedenheit (f) forderten die Bürger Reformen.",
-                answers: ["Angesichts", "er", "en"],
-                solution: "Angesichts der wachsenden Unzufriedenheit"
-            },
-            {
-                template: "Er zitterte {1} d{2} Kälte (f) am ganzen Körper.",
-                answers: ["vor", "er", ""],
-                solution: "vor der Kälte"
-            },
-            {
-                template: "{1} d{2} Sturmwarnung (f) wurden alle Flüge gestrichen.",
-                answers: ["Aufgrund", "er", ""],
-                solution: "Aufgrund der Sturmwarnung"
-            },
-            {
-                template: "{1} d{2} Regierung{3}wechsel{4} (m) änderte sich die Politik grundlegend.",
-                answers: ["Infolge", "es", "s", "s"],
-                solution: "Infolge des Regierungswechsels"
-            },
-            {
-                template: "Sie handelte {1} ihr{2} Gewissen{3} (n), nicht aus Pflicht.",
-                answers: ["aus", "em", ""],
-                solution: "aus ihrem Gewissen"
-            },
-            {
-                template: "{1} d{2} knapp{3} Ressourcen (Pl.) musste rationiert werden.",
-                answers: ["Angesichts", "er", "en"],
-                solution: "Angesichts der knappen Ressourcen"
-            },
-            {
-                template: "{1} sein{2} Vollmacht (f) unterschrieb der Anwalt den Vertrag.",
-                answers: ["Kraft", "er", ""],
-                solution: "Kraft seiner Vollmacht"
-            },
-            {
-                template: "Das Kind weinte {1} d{2} Freude (f), als es das Geschenk sah.",
+                template: "Die Kinder sprangen {1} d{2} Freude (f) ins Schwimmbecken.",
                 answers: ["vor", "er", ""],
                 solution: "vor der Freude"
             },
             {
-                template: "{1} d{2} technisch{3} Defekt{4} (m) fiel der Strom aus.",
-                answers: ["Infolge", "es", "en", "s"],
-                solution: "Infolge des technischen Defekts"
+                template: "Der Richter entschied {1} sein{2} Befugnis{3} (f), die Strafe zu mildern.",
+                answers: ["kraft", "er", ""],
+                solution: "kraft seiner Befugnis"
             },
             {
-                template: "{1} d{2} schlecht{3} Wirtschaftslage (f) stiegen die Arbeitslosenzahlen.",
-                answers: ["Aufgrund", "er", "en"],
-                solution: "Aufgrund der schlechten Wirtschaftslage"
+                template: "{1} d{2} massiv{3} Schneefälle (Pl.) blieben die Schulen geschlossen.",
+                answers: ["Infolge", "er", "en"],
+                solution: "Infolge der massiven Schneefälle"
             },
             {
-                template: "Er schwieg {1} d{2} Respekt{3} (m) vor den Anwesenden.",
-                answers: ["aus", "em", ""],
-                solution: "aus dem Respekt"
+                template: "Er handelte {1} d{2} Überzeugung (f), das Richtige zu tun.",
+                answers: ["aus", "er", ""],
+                solution: "aus der Überzeugung"
             },
             {
-                template: "{1} d{2} akut{3} Gefahr (f) wurde das Gebäude evakuiert.",
+                template: "{1} d{2} verändert{3} Situation (f) mussten wir unsere Pläne anpassen.",
                 answers: ["Angesichts", "er", "en"],
-                solution: "Angesichts der akuten Gefahr"
+                solution: "Angesichts der veränderten Situation"
             },
             {
-                template: "{1} d{2} Verordnung (f) ist das Rauchen hier verboten.",
-                answers: ["Kraft", "er", ""],
-                solution: "Kraft der Verordnung"
+                template: "Das Gesetz trat {1} ein{2} Parlamentsbeschluss{3} (m) in Kraft.",
+                answers: ["kraft", "es", "es"],
+                solution: "kraft eines Parlamentsbeschlusses"
             },
             {
-                template: "Sie erstarrte {1} d{2} Schreck{3} (m), als sie die Nachricht hörte.",
+                template: "Sie zitterte {1} d{2} Kälte (f) am ganzen Körper.",
+                answers: ["vor", "er", ""],
+                solution: "vor der Kälte"
+            },
+            {
+                template: "{1} d{2} global{3} Erwärmung (f) schmelzen die Polkappen.",
+                answers: ["Infolge", "er", "en"],
+                solution: "Infolge der globalen Erwärmung"
+            },
+            {
+                template: "Die Firma expandierte {1} d{2} groß{3} Nachfrage (f).",
+                answers: ["aufgrund", "er", "en"],
+                solution: "aufgrund der großen Nachfrage"
+            },
+            {
+                template: "Er wurde blass {1} d{2} Schreck{3} (m), als er die Nachricht las.",
                 answers: ["vor", "em", ""],
                 solution: "vor dem Schreck"
             },
             {
-                template: "{1} d{2} Erdbeben{3} (n) wurden viele Gebäude zerstört.",
-                answers: ["Infolge", "es", "s"],
-                solution: "Infolge des Erdbebens"
-            },
-            {
-                template: "{1} d{2} steigend{3} Nachfrage (f) wurden die Preise erhöht.",
-                answers: ["Aufgrund", "er", "en"],
-                solution: "Aufgrund der steigenden Nachfrage"
-            },
-            {
-                template: "{1} d{2} humanitär{3} Krise (f) rief die UN zu Spenden auf.",
+                template: "{1} d{2} drohend{3} Insolvenz (f) suchte die Firma nach Investoren.",
                 answers: ["Angesichts", "er", "en"],
-                solution: "Angesichts der humanitären Krise"
+                solution: "Angesichts der drohenden Insolvenz"
+            },
+            {
+                template: "Der Minister unterschrieb {1} sein{2} Amt{3} (n) das Abkommen.",
+                answers: ["kraft", "es", "es"],
+                solution: "kraft seines Amtes"
+            },
+            {
+                template: "Sie lernte Chinesisch {1} d{2} Interesse{3} (n) an der Kultur.",
+                answers: ["aus", "em", ""],
+                solution: "aus dem Interesse"
+            },
+            {
+                template: "{1} d{2} Cyberangriff{3} (m) waren alle Systeme lahmgelegt.",
+                answers: ["Infolge", "es", "s"],
+                solution: "Infolge des Cyberangriffs"
+            },
+            {
+                template: "Die Evakuierung erfolgte {1} d{2} akut{3} Brandgefahr (f).",
+                answers: ["aufgrund", "er", "en"],
+                solution: "aufgrund der akuten Brandgefahr"
+            },
+            {
+                template: "Das Kind versteckte sich {1} d{2} Angst (f) unterm Bett.",
+                answers: ["vor", "er", ""],
+                solution: "vor der Angst"
+            },
+            {
+                template: "{1} d{2} alternierend{3} Bevölkerung (f) fehlen Arbeitskräfte.",
+                answers: ["Angesichts", "er", "en"],
+                solution: "Angesichts der alternierenden Bevölkerung"
+            },
+            {
+                template: "Sie half dem Obdachlosen {1} d{2} Mitgefühl{3} (n).",
+                answers: ["aus", "em", ""],
+                solution: "aus dem Mitgefühl"
+            },
+            {
+                template: "Die Verordnung gilt {1} d{2} Beschluss{3} (m) des Stadtrats.",
+                answers: ["kraft", "es", "es"],
+                solution: "kraft des Beschlusses"
+            },
+            {
+                template: "{1} d{2} anhaltend{3} Dürre (f) verdorrten die Felder.",
+                answers: ["Infolge", "er", "en"],
+                solution: "Infolge der anhaltenden Dürre"
+            },
+            {
+                template: "Die Preise stiegen {1} d{2} Inflation (f) stark an.",
+                answers: ["aufgrund", "er", ""],
+                solution: "aufgrund der Inflation"
+            },
+            {
+                template: "Er schrie {1} d{2} Wut (f) laut auf.",
+                answers: ["vor", "er", ""],
+                solution: "vor der Wut"
             }
         ];
 
@@ -1341,129 +1279,129 @@
         // ==================== ÜBUNG 6: Satzumformung ====================
         const transformData = [
             {
-                original: "Weil das Wetter schlecht war, blieben wir zu Hause.",
+                original: "Weil der Sturm so stark war, fiel der Strom aus.",
                 preposition: "wegen",
-                answer: "Wegen des schlechten Wetters blieben wir zu Hause."
+                answer: "Wegen des starken Sturms fiel der Strom aus."
             },
             {
-                original: "Weil er Angst hatte, sagte er nichts.",
+                original: "Weil er Mitleid hatte, half er dem verletzten Vogel.",
                 preposition: "aus",
-                answer: "Aus Angst sagte er nichts."
+                answer: "Aus Mitleid half er dem verletzten Vogel."
             },
             {
-                original: "Weil sie so nervös war, konnte sie nicht schlafen.",
+                original: "Weil sie so aufgeregt war, vergaß sie ihren Text.",
                 preposition: "vor",
-                answer: "Vor Nervosität konnte sie nicht schlafen."
+                answer: "Vor Aufregung vergaß sie ihren Text."
             },
             {
-                original: "Weil seine Freundin ihm geholfen hat, hat er die Prüfung bestanden.",
+                original: "Weil die Feuerwehr schnell kam, breitete sich das Feuer nicht aus.",
                 preposition: "dank",
-                answer: "Dank der Hilfe seiner Freundin hat er die Prüfung bestanden."
+                answer: "Dank der schnellen Feuerwehr breitete sich das Feuer nicht aus."
             },
             {
-                original: "Weil es nicht genug Interesse gab, wurde der Kurs abgesagt.",
+                original: "Weil es keine Zeugen gab, konnte die Polizei niemanden verhaften.",
                 preposition: "mangels",
-                answer: "Mangels Interesses wurde der Kurs abgesagt."
+                answer: "Mangels Zeugen konnte die Polizei niemanden verhaften."
             },
             {
-                original: "Weil die Lage so kritisch ist, müssen wir handeln.",
+                original: "Weil die Lage so bedrohlich war, wurden Soldaten eingesetzt.",
                 preposition: "angesichts",
-                answer: "Angesichts der kritischen Lage müssen wir handeln."
+                answer: "Angesichts der bedrohlichen Lage wurden Soldaten eingesetzt."
             },
             {
-                original: "Weil sie Geburtstag hatte, gab es eine Feier.",
+                original: "Weil sie ihren Doktortitel erhielt, gab es ein Festessen.",
                 preposition: "anlässlich",
-                answer: "Anlässlich ihres Geburtstags gab es eine Feier."
+                answer: "Anlässlich des Erhalts ihres Doktortitels gab es ein Festessen."
             },
             {
-                original: "Weil er diese Autorität hat, kann er die Entscheidung treffen.",
+                original: "Weil der Bürgermeister die Befugnis hatte, konnte er den Notstand ausrufen.",
                 preposition: "kraft",
-                answer: "Kraft seiner Autorität kann er die Entscheidung treffen."
+                answer: "Kraft seiner Befugnis konnte der Bürgermeister den Notstand ausrufen."
             },
             {
-                original: "Weil es einen Unfall gab, war die Straße gesperrt.",
+                original: "Weil es einen Hackerangriff gab, waren die Server stundenlang offline.",
                 preposition: "infolge",
-                answer: "Infolge eines Unfalls war die Straße gesperrt."
+                answer: "Infolge eines Hackerangriffs waren die Server stundenlang offline."
             },
             {
-                original: "Weil es neue Erkenntnisse gibt, muss das Urteil überprüft werden.",
+                original: "Weil es neue Forschungsergebnisse gab, musste die Theorie überarbeitet werden.",
                 preposition: "aufgrund",
-                answer: "Aufgrund neuer Erkenntnisse muss das Urteil überprüft werden."
+                answer: "Aufgrund neuer Forschungsergebnisse musste die Theorie überarbeitet werden."
             },
             {
-                original: "Weil sie so wütend war, konnte sie nicht klar denken.",
+                original: "Weil er so erschrocken war, ließ er die Tasse fallen.",
                 preposition: "vor",
-                answer: "Vor Wut konnte sie nicht klar denken."
+                answer: "Vor Schreck ließ er die Tasse fallen."
             },
             {
-                original: "Weil er Mitleid empfand, half er dem Fremden.",
+                original: "Weil sie neugierig war, las sie das fremde Tagebuch.",
                 preposition: "aus",
-                answer: "Aus Mitleid half er dem Fremden."
+                answer: "Aus Neugier las sie das fremde Tagebuch."
             },
             {
-                original: "Weil das Medikament wirkte, ging es ihr besser.",
+                original: "Weil der Pilot erfahren war, landete das Flugzeug sicher.",
                 preposition: "dank",
-                answer: "Dank des Medikaments ging es ihr besser."
+                answer: "Dank des erfahrenen Piloten landete das Flugzeug sicher."
             },
             {
-                original: "Weil die Beweise fehlten, wurde er freigesprochen.",
+                original: "Weil es kein Geld gab, wurde das Projekt abgebrochen.",
                 preposition: "mangels",
-                answer: "Mangels Beweisen wurde er freigesprochen."
+                answer: "Mangels Geldes wurde das Projekt abgebrochen."
             },
             {
-                original: "Weil die Preise so stark gestiegen sind, protestieren die Menschen.",
+                original: "Weil die Armut so groß war, riefen die Hilfsorganisationen zu Spenden auf.",
                 preposition: "angesichts",
-                answer: "Angesichts der stark gestiegenen Preise protestieren die Menschen."
+                answer: "Angesichts der großen Armut riefen die Hilfsorganisationen zu Spenden auf."
             },
             {
-                original: "Weil das Unternehmen sein 50-jähriges Bestehen feiert, gibt es einen Empfang.",
+                original: "Weil das Museum sein Jubiläum feierte, war der Eintritt frei.",
                 preposition: "anlässlich",
-                answer: "Anlässlich des 50-jährigen Bestehens des Unternehmens gibt es einen Empfang."
+                answer: "Anlässlich des Museumsjubiläums war der Eintritt frei."
             },
             {
-                original: "Weil er diese Vollmacht hat, kann er unterschreiben.",
+                original: "Weil sie die Vollmacht hatte, konnte sie den Vertrag unterschreiben.",
                 preposition: "kraft",
-                answer: "Kraft seiner Vollmacht kann er unterschreiben."
+                answer: "Kraft ihrer Vollmacht konnte sie den Vertrag unterschreiben."
             },
             {
-                original: "Weil es die Pandemie gab, veränderte sich vieles.",
+                original: "Weil es Proteste gab, trat der Minister zurück.",
                 preposition: "infolge",
-                answer: "Infolge der Pandemie veränderte sich vieles."
+                answer: "Infolge der Proteste trat der Minister zurück."
             },
             {
-                original: "Weil es technische Probleme gab, startete der Flug verspätet.",
-                preposition: "aufgrund",
-                answer: "Aufgrund technischer Probleme startete der Flug verspätet."
-            },
-            {
-                original: "Weil es so kalt war, blieben wir drinnen.",
+                original: "Weil der Verkehr dicht war, verpasste er seinen Termin.",
                 preposition: "wegen",
-                answer: "Wegen der Kälte blieben wir drinnen."
+                answer: "Wegen des dichten Verkehrs verpasste er seinen Termin."
             },
             {
-                original: "Weil sie so glücklich war, tanzte sie durch die Wohnung.",
+                original: "Weil sie so müde war, schlief sie im Zug ein.",
                 preposition: "vor",
-                answer: "Vor Glück tanzte sie durch die Wohnung."
+                answer: "Vor Müdigkeit schlief sie im Zug ein."
             },
             {
-                original: "Weil er Überzeugung handelte, bereute er nichts.",
+                original: "Weil er höflich sein wollte, hielt er ihr die Tür auf.",
                 preposition: "aus",
-                answer: "Aus Überzeugung bereute er nichts."
+                answer: "Aus Höflichkeit hielt er ihr die Tür auf."
             },
             {
-                original: "Weil die Nachbarn halfen, war der Umzug schnell erledigt.",
+                original: "Weil das Navigationssystem gut war, fanden sie den Weg sofort.",
                 preposition: "dank",
-                answer: "Dank der Hilfe der Nachbarn war der Umzug schnell erledigt."
+                answer: "Dank des guten Navigationssystems fanden sie den Weg sofort."
             },
             {
-                original: "Weil die Alternative fehlte, nahm er das Angebot an.",
+                original: "Weil es keine Alternativen gab, mussten sie zustimmen.",
                 preposition: "mangels",
-                answer: "Mangels einer Alternative nahm er das Angebot an."
+                answer: "Mangels Alternativen mussten sie zustimmen."
             },
             {
-                original: "Weil die Zahlen so alarmierend sind, wurde eine Sondersitzung einberufen.",
+                original: "Weil die Zahlen so alarmierend waren, wurde eine Krisensitzung einberufen.",
                 preposition: "angesichts",
-                answer: "Angesichts der alarmierenden Zahlen wurde eine Sondersitzung einberufen."
+                answer: "Angesichts der alarmierenden Zahlen wurde eine Krisensitzung einberufen."
+            },
+            {
+                original: "Weil die Stadt ihren 800. Geburtstag feierte, gab es ein großes Fest.",
+                preposition: "anlässlich",
+                answer: "Anlässlich des 800. Stadtgeburtstags gab es ein großes Fest."
             }
         ];
 
@@ -1528,31 +1466,31 @@
 
         // ==================== ÜBUNG 7: Fehlerkorrektur ====================
         const errorData = [
-            { wrong: "wegen dem schlechten Wetter", correct: "wegen des schlechten Wetters", explanation: "wegen + Genitiv" },
-            { wrong: "aufgrund des Streik", correct: "aufgrund des Streiks", explanation: "Genitiv: des Streiks" },
-            { wrong: "dank seinem Hilfe", correct: "dank seiner Hilfe", explanation: "Genitiv: seiner Hilfe (f.)" },
-            { wrong: "mangels Geld", correct: "mangels Geldes", explanation: "Genitiv: des Geldes" },
-            { wrong: "angesichts der drohender Gefahr", correct: "angesichts der drohenden Gefahr", explanation: "Adjektivdeklination: drohenden" },
-            { wrong: "infolge dem Unfall", correct: "infolge des Unfalls", explanation: "infolge + Genitiv" },
+            { wrong: "wegen dem starken Verkehr", correct: "wegen des starken Verkehrs", explanation: "wegen + Genitiv" },
+            { wrong: "aufgrund des Problem", correct: "aufgrund des Problems", explanation: "Genitiv: des Problems" },
+            { wrong: "dank seinem Unterstützung", correct: "dank seiner Unterstützung", explanation: "Genitiv: seiner Unterstützung (f.)" },
+            { wrong: "mangels Interesse", correct: "mangels Interesses", explanation: "Genitiv: des Interesses" },
+            { wrong: "angesichts der steigender Preise", correct: "angesichts der steigenden Preise", explanation: "Adjektivdeklination: steigenden" },
+            { wrong: "infolge dem Erdbeben", correct: "infolge des Erdbebens", explanation: "infolge + Genitiv" },
             { wrong: "kraft seinen Amtes", correct: "kraft seines Amtes", explanation: "Genitiv: seines Amtes" },
-            { wrong: "anlässlich dem Jubiläum", correct: "anlässlich des Jubiläums", explanation: "anlässlich + Genitiv" },
-            { wrong: "sie weinte aus Freude", correct: "sie weinte vor Freude", explanation: "vor bei überwältigender Emotion" },
-            { wrong: "er tat es vor Überzeugung", correct: "er tat es aus Überzeugung", explanation: "aus bei innerer Motivation" },
-            { wrong: "wegen des starkes Regen", correct: "wegen des starken Regens", explanation: "Adjektivdeklination + Genitiv" },
-            { wrong: "aufgrund technischen Problems", correct: "aufgrund eines technischen Problems", explanation: "Artikel fehlt / Genitiv" },
-            { wrong: "dank dem guten Wetter", correct: "dank des guten Wetters", explanation: "dank + Genitiv (formell)" },
-            { wrong: "mangels ein Beweis", correct: "mangels eines Beweises", explanation: "mangels + Genitiv" },
-            { wrong: "angesichts das Problem", correct: "angesichts des Problems", explanation: "angesichts + Genitiv" },
-            { wrong: "infolge der Pandemie", correct: "infolge der Pandemie", explanation: "Korrekt! (f. → der)" },
-            { wrong: "er zitterte aus Kälte", correct: "er zitterte vor Kälte", explanation: "vor bei körperlicher Reaktion" },
-            { wrong: "sie half vor Mitleid", correct: "sie half aus Mitleid", explanation: "aus bei bewusster Handlung" },
-            { wrong: "kraft seiner Vollmacht", correct: "kraft seiner Vollmacht", explanation: "Korrekt! (f. → seiner)" },
-            { wrong: "wegen meinem Fehler", correct: "wegen meines Fehlers", explanation: "wegen + Genitiv (formal)" },
-            { wrong: "aufgrund die Umstände", correct: "aufgrund der Umstände", explanation: "aufgrund + Genitiv" },
-            { wrong: "dank ihrer schneller Reaktion", correct: "dank ihrer schnellen Reaktion", explanation: "Adjektivdeklination: schnellen" },
-            { wrong: "mangels finanzielle Mittel", correct: "mangels finanzieller Mittel", explanation: "mangels + Genitiv Plural" },
-            { wrong: "angesichts diesem Chaos", correct: "angesichts dieses Chaos", explanation: "angesichts + Genitiv" },
-            { wrong: "sie schrie aus Schmerz", correct: "sie schrie vor Schmerz", explanation: "vor bei unkontrollierter Reaktion" }
+            { wrong: "anlässlich dem Fest", correct: "anlässlich des Festes", explanation: "anlässlich + Genitiv" },
+            { wrong: "sie tanzte aus Freude", correct: "sie tanzte vor Freude", explanation: "vor bei überwältigender Emotion" },
+            { wrong: "er handelte vor Überzeugung", correct: "er handelte aus Überzeugung", explanation: "aus bei innerer Motivation" },
+            { wrong: "wegen des heftiger Regen", correct: "wegen des heftigen Regens", explanation: "Adjektivdeklination + Genitiv" },
+            { wrong: "aufgrund technischem Versagen", correct: "aufgrund technischen Versagens", explanation: "Genitiv ohne Artikel" },
+            { wrong: "dank dem schnellen Eingreifen", correct: "dank des schnellen Eingreifens", explanation: "dank + Genitiv (formell)" },
+            { wrong: "mangels ein Alibi", correct: "mangels eines Alibis", explanation: "mangels + Genitiv" },
+            { wrong: "angesichts das Chaos", correct: "angesichts des Chaos", explanation: "angesichts + Genitiv" },
+            { wrong: "infolge der Entscheidung", correct: "infolge der Entscheidung", explanation: "Korrekt! (f. → der)" },
+            { wrong: "er verstummte aus Schreck", correct: "er verstummte vor Schreck", explanation: "vor bei körperlicher Reaktion" },
+            { wrong: "sie log vor Angst", correct: "sie log aus Angst", explanation: "aus bei bewusster Handlung" },
+            { wrong: "kraft ihrer Autorität", correct: "kraft ihrer Autorität", explanation: "Korrekt! (f. → ihrer)" },
+            { wrong: "wegen meinem Irrtum", correct: "wegen meines Irrtums", explanation: "wegen + Genitiv (formal)" },
+            { wrong: "aufgrund die Nachrichten", correct: "aufgrund der Nachrichten", explanation: "aufgrund + Genitiv" },
+            { wrong: "dank seiner umsichtiger Planung", correct: "dank seiner umsichtigen Planung", explanation: "Adjektivdeklination: umsichtigen" },
+            { wrong: "mangels finanzielle Ressourcen", correct: "mangels finanzieller Ressourcen", explanation: "mangels + Genitiv Plural" },
+            { wrong: "angesichts diesem Problem", correct: "angesichts dieses Problems", explanation: "angesichts + Genitiv" },
+            { wrong: "das Kind weinte aus Enttäuschung", correct: "das Kind weinte vor Enttäuschung", explanation: "vor bei unkontrollierter Reaktion" }
         ];
 
         function initExercise7() {
@@ -1571,7 +1509,7 @@
                     ${hasError ? `
                         <input type="text" id="err7-${index}" placeholder="Korrigierter Ausdruck..." style="width: 100%; max-width: 350px;">
                         <span class="solution" id="sol7-${index}">(${item.correct} – ${item.explanation})</span>
-                    ` : `<span style="color: var(--correct);">Dieser Satz ist korrekt.</span>`}
+                    ` : `<span style="color: var(--correct);">Dieser Ausdruck ist korrekt.</span>`}
                 `;
                 container.appendChild(div);
             });
@@ -1630,154 +1568,154 @@
         // ==================== ÜBUNG 8: Kontextverständnis ====================
         const kontextData = [
             {
-                situation: "Ein Unternehmen feiert sein 100-jähriges Bestehen und veranstaltet deshalb eine große Gala.",
+                situation: "Eine Universität feiert ihr 200-jähriges Bestehen und veranstaltet deshalb eine Festwoche.",
                 options: ["wegen", "anlässlich", "infolge", "mangels"],
                 answer: "anlässlich",
-                context: "_____ des 100-jährigen Bestehens findet eine große Gala statt."
+                context: "_____ des 200-jährigen Bestehens findet eine Festwoche statt."
             },
             {
-                situation: "Die Produktion musste gestoppt werden, weil nicht genügend Rohstoffe vorhanden waren.",
+                situation: "Ein Bauunternehmen muss ein Projekt stoppen, weil die notwendigen Baumaterialien fehlen.",
                 options: ["dank", "mangels", "anlässlich", "kraft"],
                 answer: "mangels",
-                context: "Die Produktion wurde _____ ausreichender Rohstoffe gestoppt."
+                context: "Das Projekt wurde _____ der notwendigen Baumaterialien gestoppt."
             },
             {
-                situation: "Ein Team hat ein Projekt erfolgreich abgeschlossen, weil alle gut zusammengearbeitet haben.",
+                situation: "Eine Bergsteigerin überlebt einen Sturz, weil ihr Sicherheitsseil sie gehalten hat.",
                 options: ["mangels", "infolge", "dank", "angesichts"],
                 answer: "dank",
-                context: "_____ der guten Zusammenarbeit war das Projekt erfolgreich."
+                context: "_____ des Sicherheitsseils überlebte die Bergsteigerin den Sturz."
             },
             {
-                situation: "Die Regierung muss angesichts der ernsten Wirtschaftslage schnell reagieren.",
+                situation: "Die Behörden müssen wegen der kritischen Hochwassersituation schnell Maßnahmen ergreifen.",
                 options: ["anlässlich", "kraft", "angesichts", "wegen"],
                 answer: "angesichts",
-                context: "_____ der ernsten Wirtschaftslage muss die Regierung handeln."
+                context: "_____ der kritischen Hochwassersituation müssen die Behörden handeln."
             },
             {
-                situation: "Ein Richter urteilt und nutzt dabei seine offizielle Befugnis.",
+                situation: "Ein Notar beglaubigt ein Dokument mit seiner offiziellen Befugnis.",
                 options: ["kraft", "dank", "mangels", "infolge"],
                 answer: "kraft",
-                context: "Der Richter entschied _____ seines Amtes."
+                context: "Der Notar beglaubigte das Dokument _____ seiner Befugnis."
             },
             {
-                situation: "Nach dem Hochwasser mussten viele Häuser abgerissen werden.",
+                situation: "Nach einem schweren Chemieunfall musste die gesamte Region evakuiert werden.",
                 options: ["anlässlich", "infolge", "dank", "mangels"],
                 answer: "infolge",
-                context: "_____ des Hochwassers mussten viele Häuser abgerissen werden."
+                context: "_____ des Chemieunfalls musste die Region evakuiert werden."
             },
             {
-                situation: "Er konnte vor lauter Freude nicht sprechen, als er die Nachricht hörte.",
+                situation: "Ein Kind kann vor lauter Aufregung nicht stillsitzen, als es erfährt, dass es in den Zoo geht.",
                 options: ["aus", "vor", "wegen", "dank"],
                 answer: "vor",
-                context: "Er konnte _____ Freude nicht sprechen."
+                context: "Das Kind konnte _____ Aufregung nicht stillsitzen."
             },
             {
-                situation: "Sie entschied sich bewusst, aus ihrer inneren Überzeugung heraus zu handeln.",
+                situation: "Eine Whistleblowerin entscheidet sich bewusst, trotz persönlicher Risiken die Wahrheit zu sagen.",
                 options: ["vor", "aus", "infolge", "kraft"],
                 answer: "aus",
-                context: "Sie handelte _____ Überzeugung."
+                context: "Sie sprach die Wahrheit _____ Überzeugung."
             },
             {
-                situation: "Der Flug wurde gestrichen, weil es ein technisches Problem gab.",
+                situation: "Ein Konzert wurde abgesagt, weil der Sänger erkrankt ist.",
                 options: ["aufgrund", "anlässlich", "dank", "kraft"],
                 answer: "aufgrund",
-                context: "_____ eines technischen Problems wurde der Flug gestrichen."
+                context: "_____ der Erkrankung des Sängers wurde das Konzert abgesagt."
             },
             {
-                situation: "Weil der Arzt so erfahren war, verlief die Operation erfolgreich.",
+                situation: "Eine OP verlief erfolgreich, weil das Ärzteteam so erfahren war.",
                 options: ["mangels", "wegen", "dank", "infolge"],
                 answer: "dank",
-                context: "_____ der Erfahrung des Arztes verlief die Operation erfolgreich."
+                context: "_____ des erfahrenen Ärzteteams verlief die OP erfolgreich."
             },
             {
-                situation: "Der Fall wurde eingestellt, weil es keine Beweise gab.",
+                situation: "Ein Gericht stellt ein Verfahren ein, weil die Beweislage nicht ausreicht.",
                 options: ["anlässlich", "mangels", "kraft", "angesichts"],
                 answer: "mangels",
-                context: "Der Fall wurde _____ Beweisen eingestellt."
+                context: "Das Verfahren wurde _____ ausreichender Beweise eingestellt."
             },
             {
-                situation: "Die Preise wurden erhöht, weil die Nachfrage gestiegen war.",
+                situation: "Die Mieten in der Stadt steigen, weil die Nachfrage nach Wohnungen so hoch ist.",
                 options: ["dank", "anlässlich", "aufgrund", "mangels"],
                 answer: "aufgrund",
-                context: "_____ der gestiegenen Nachfrage wurden die Preise erhöht."
+                context: "_____ der hohen Nachfrage steigen die Mieten."
             },
             {
-                situation: "Sie zitterte am ganzen Körper, weil sie solche Angst hatte.",
+                situation: "Ein Redner kann nicht sprechen, weil er so nervös ist.",
                 options: ["aus", "vor", "wegen", "infolge"],
                 answer: "vor",
-                context: "Sie zitterte _____ Angst am ganzen Körper."
+                context: "Der Redner verstummte _____ Nervosität."
             },
             {
-                situation: "Er half dem Fremden, weil er Mitleid empfand.",
+                situation: "Ein Mann entscheidet sich bewusst, einem Fremden zu helfen, weil er Mitgefühl empfindet.",
                 options: ["vor", "aus", "kraft", "angesichts"],
                 answer: "aus",
-                context: "Er half dem Fremden _____ Mitleid."
+                context: "Er half dem Fremden _____ Mitgefühl."
             },
             {
-                situation: "Die Minister tagten wegen der internationalen Krise.",
+                situation: "Politiker beraten über neue Maßnahmen wegen der steigenden Energiepreise.",
                 options: ["dank", "anlässlich", "angesichts", "mangels"],
                 answer: "angesichts",
-                context: "_____ der internationalen Krise tagten die Minister."
+                context: "_____ der steigenden Energiepreise beraten die Politiker."
             },
             {
-                situation: "Ein Gesetz verbietet bestimmte Handlungen.",
+                situation: "Eine Verordnung verbietet bestimmte Praktiken aufgrund eines Gesetzesbeschlusses.",
                 options: ["kraft", "dank", "anlässlich", "aus"],
                 answer: "kraft",
-                context: "_____ des Gesetzes sind diese Handlungen verboten."
+                context: "_____ des Gesetzes sind diese Praktiken verboten."
             },
             {
-                situation: "Nach dem Skandal trat der Politiker zurück.",
+                situation: "Nach den Wahlen kam es zu einem Regierungswechsel.",
                 options: ["anlässlich", "dank", "infolge", "kraft"],
                 answer: "infolge",
-                context: "_____ des Skandals trat der Politiker zurück."
+                context: "_____ der Wahlen kam es zu einem Regierungswechsel."
             },
             {
-                situation: "Zum 200. Geburtstag des Komponisten gibt es ein Konzert.",
+                situation: "Zum 90. Geburtstag der Großmutter versammelt sich die ganze Familie.",
                 options: ["infolge", "mangels", "anlässlich", "kraft"],
                 answer: "anlässlich",
-                context: "_____ des 200. Geburtstags gibt es ein Konzert."
+                context: "_____ des 90. Geburtstags versammelt sich die Familie."
             },
             {
-                situation: "Die Veranstaltung wurde abgesagt, weil zu wenige Teilnehmer angemeldet waren.",
+                situation: "Ein Sportverein muss aufgelöst werden, weil sich keine neuen Mitglieder finden.",
                 options: ["dank", "mangels", "anlässlich", "kraft"],
                 answer: "mangels",
-                context: "_____ ausreichender Teilnehmer wurde die Veranstaltung abgesagt."
+                context: "_____ neuer Mitglieder wurde der Verein aufgelöst."
             },
             {
-                situation: "Das Projekt konnte dank der großzügigen Spende realisiert werden.",
+                situation: "Ein Rettungseinsatz war erfolgreich, weil die Helfer so schnell vor Ort waren.",
                 options: ["mangels", "dank", "infolge", "angesichts"],
                 answer: "dank",
-                context: "_____ der großzügigen Spende konnte das Projekt realisiert werden."
+                context: "_____ der schnellen Helfer war der Einsatz erfolgreich."
             },
             {
-                situation: "Er wurde blass, als er die schreckliche Nachricht hörte.",
+                situation: "Eine Frau erstarrt, als sie eine Spinne sieht.",
                 options: ["aus", "vor", "aufgrund", "kraft"],
                 answer: "vor",
-                context: "Er wurde _____ Schreck ganz blass."
+                context: "Sie erstarrte _____ Schreck."
             },
             {
-                situation: "Sie unterschrieb aus Höflichkeit, obwohl sie Bedenken hatte.",
+                situation: "Ein Anwalt verteidigt einen Mandanten, obwohl der Fall aussichtslos erscheint – weil es seine Pflicht ist.",
                 options: ["vor", "aus", "infolge", "angesichts"],
                 answer: "aus",
-                context: "Sie unterschrieb _____ Höflichkeit."
+                context: "Er übernahm den Fall _____ Pflichtgefühl."
             },
             {
-                situation: "Die neue Regelung tritt aufgrund eines Parlamentsbeschlusses in Kraft.",
+                situation: "Ein Unternehmen muss Stellen abbauen, weil der Umsatz eingebrochen ist.",
                 options: ["aufgrund", "dank", "anlässlich", "vor"],
                 answer: "aufgrund",
-                context: "_____ eines Parlamentsbeschlusses tritt die neue Regelung in Kraft."
+                context: "_____ des Umsatzeinbruchs werden Stellen abgebaut."
             },
             {
-                situation: "Angesichts der vielen Todesfälle wurde Trauer angeordnet.",
+                situation: "Die Regierung handelt, weil der Handlungsbedarf so groß ist.",
                 options: ["kraft", "anlässlich", "angesichts", "dank"],
                 answer: "angesichts",
-                context: "_____ der vielen Todesfälle wurde Trauer angeordnet."
+                context: "_____ des großen Handlungsbedarfs ergreift die Regierung Maßnahmen."
             },
             {
-                situation: "Der Vertrag wurde kraft der Unterschrift des Direktors gültig.",
+                situation: "Ein Vertrag wird gültig, nachdem der Geschäftsführer unterschrieben hat.",
                 options: ["kraft", "dank", "infolge", "mangels"],
                 answer: "kraft",
-                context: "Der Vertrag wurde _____ der Unterschrift des Direktors gültig."
+                context: "Der Vertrag wurde _____ der Unterschrift des Geschäftsführers gültig."
             }
         ];
 
@@ -1853,21 +1791,30 @@
             { prep: "aus", meaning: "innere Motivation, bewusste Entscheidung" },
             { prep: "vor", meaning: "überwältigende, unkontrollierbare Emotion" },
             { prep: "halber", meaning: "um ... willen (nachgestellt)" },
-            { prep: "wegen (ugs.)", meaning: "mit Dativ in der Umgangssprache" }
+            { prep: "zufolge", meaning: "laut, gemäß einer Quelle (nach- oder vorangestellt)" }
         ];
 
         const meaningOptions = matchingData.map(item => item.meaning);
 
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
         function initExercise9() {
             const container = document.getElementById('matching-exercises');
-            container.innerHTML = '<div class="matching-container">';
+            container.innerHTML = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 15px;">';
             
             const shuffledMeanings = shuffleArray(meaningOptions);
             
             matchingData.forEach((item, index) => {
                 container.innerHTML += `
-                    <div class="matching-item">
-                        <strong style="min-width: 120px;">${item.prep}</strong>
+                    <div class="exercise-item" style="display: flex; align-items: center; gap: 10px;">
+                        <strong style="min-width: 100px;">${item.prep}</strong>
                         <span>→</span>
                         <select id="match9-${index}" style="flex: 1;">
                             <option value="">-- Bedeutung wählen --</option>
@@ -1885,7 +1832,7 @@
             let correct = 0;
             matchingData.forEach((item, index) => {
                 const select = document.getElementById(`match9-${index}`);
-                const parent = select.closest('.matching-item');
+                const parent = select.closest('.exercise-item');
                 
                 parent.classList.remove('correct', 'incorrect');
                 
@@ -1909,7 +1856,7 @@
             matchingData.forEach((item, index) => {
                 const select = document.getElementById(`match9-${index}`);
                 select.value = '';
-                select.closest('.matching-item').classList.remove('correct', 'incorrect');
+                select.closest('.exercise-item').classList.remove('correct', 'incorrect');
                 document.getElementById(`sol9-${index}`).classList.remove('visible');
             });
             document.getElementById('score9').textContent = '';
