@@ -7,17 +7,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #3d2e0a;
-            --primary-light: #5c4a1f;
-            --accent: #e6b800;
-            --accent-glow: #ffd633;
-            --success: #7cb342;
-            --error: #e57373;
-            --warning: #ffb74d;
-            --bg-dark: #1a1400;
-            --bg-card: #2d2409;
-            --text: #fff8e1;
-            --text-muted: #c9b896;
+            --primary: #1a1a2e;
+            --primary-light: #2d2d4a;
+            --accent: #4a9eff;
+            --accent-glow: #7ab8ff;
+            --indefinite: #f5c842;
+            --indefinite-glow: #ffe066;
+            --success: #4ecdc4;
+            --error: #ff6b6b;
+            --warning: #ffa94d;
+            --bg-dark: #0f0f1a;
+            --bg-card: #1a1a2e;
+            --text: #ffffff;
+            --text-muted: #a0a0c0;
             --gold: #ffd700;
             --silver: #c0c0c0;
             --bronze: #cd7f32;
@@ -49,7 +51,7 @@
 
         .star {
             position: absolute;
-            background: #ffd633;
+            background: #ffe066;
             border-radius: 50%;
             animation: twinkle 2s infinite;
         }
@@ -376,8 +378,8 @@
         }
 
         .article-slot.correct.type-indefinite {
-            background: #7cb342;
-            border-color: #8bc34a;
+            background: var(--indefinite);
+            border-color: var(--indefinite-glow);
         }
 
         .article-slot.correct.type-negation {
@@ -414,13 +416,13 @@
         }
 
         .article-slot.type-indefinite {
-            border-color: #8bc34a;
-            background: rgba(139, 195, 74, 0.1);
+            border-color: var(--indefinite);
+            background: rgba(245, 200, 66, 0.1);
         }
 
         .article-slot.type-indefinite.selected {
-            border-color: #aed581;
-            box-shadow: 0 0 20px rgba(139, 195, 74, 0.5);
+            border-color: var(--indefinite-glow);
+            box-shadow: 0 0 20px rgba(245, 200, 66, 0.5);
         }
 
         .article-slot.type-negation {
@@ -466,16 +468,16 @@
             background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent) 100%);
         }
 
-        /* Indefinite article buttons - green */
+        /* Indefinite article buttons - gelb */
         .article-btn.type-indefinite {
-            border-color: #8bc34a;
-            box-shadow: 0 0 10px rgba(139, 195, 74, 0.2);
+            border-color: var(--indefinite);
+            box-shadow: 0 0 10px rgba(245, 200, 66, 0.2);
         }
 
         .article-btn.type-indefinite:hover {
-            box-shadow: 0 8px 25px rgba(139, 195, 74, 0.5);
-            border-color: #aed581;
-            background: linear-gradient(135deg, var(--primary-light) 0%, #7cb342 100%);
+            box-shadow: 0 8px 25px rgba(245, 200, 66, 0.5);
+            border-color: var(--indefinite-glow);
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--indefinite) 100%);
         }
 
         /* Negation article buttons - red/coral */
@@ -492,6 +494,16 @@
 
         .article-btn:active {
             transform: translateY(0);
+        }
+
+        .article-btn.empty-article {
+            font-style: italic;
+            font-size: 1rem;
+        }
+
+        .article-slot.empty-article {
+            font-style: italic;
+            font-size: 1rem;
         }
 
         .article-btn.flying {
@@ -530,8 +542,8 @@
         }
 
         .legend-dot.indefinite {
-            border-color: #8bc34a;
-            background: rgba(139, 195, 74, 0.2);
+            border-color: var(--indefinite);
+            background: rgba(245, 200, 66, 0.2);
         }
 
         .legend-dot.negation {
@@ -1521,8 +1533,10 @@
                 articles.push(
                     { text: 'ein', type: 'indefinite' },
                     { text: 'eine', type: 'indefinite' },
+                    { text: 'einer', type: 'indefinite' },
                     { text: 'einen', type: 'indefinite' },
-                    { text: 'einem', type: 'indefinite' }
+                    { text: 'einem', type: 'indefinite' },
+                    { text: '—', type: 'indefinite', empty: true }
                 );
             }
             
@@ -1531,14 +1545,17 @@
                 articles.push(
                     { text: 'kein', type: 'negation' },
                     { text: 'keine', type: 'negation' },
+                    { text: 'keiner', type: 'negation' },
                     { text: 'keinen', type: 'negation' },
                     { text: 'keinem', type: 'negation' }
                 );
             }
             
-            grid.innerHTML = articles.map(a => 
-                `<button class="article-btn type-${a.type}" onclick="selectArticle('${a.text}', '${a.type}')">${a.text}</button>`
-            ).join('');
+            grid.innerHTML = articles.map(a => {
+                const displayText = a.empty ? '(kein)' : a.text;
+                const valueText = a.empty ? '' : a.text;
+                return `<button class="article-btn type-${a.type}${a.empty ? ' empty-article' : ''}" onclick="selectArticle('${valueText}', '${a.type}')">${displayText}</button>`;
+            }).join('');
         }
 
         function updateTimer() {
@@ -1591,7 +1608,13 @@
                     ? ['definite', 'indefinite', 'negation']
                     : ['definite', 'indefinite'];
                 dativType = types[Math.floor(Math.random() * types.length)];
-                accType = types[Math.floor(Math.random() * types.length)];
+                
+                // Für den zweiten Slot: wenn der erste Verneinung ist, keine Verneinung erlauben
+                let accTypes = types;
+                if (dativType === 'negation') {
+                    accTypes = types.filter(t => t !== 'negation');
+                }
+                accType = accTypes[Math.floor(Math.random() * accTypes.length)];
             }
             
             const dativArticle = getArticle(dativGender, 'dative', dativType);
@@ -1642,9 +1665,12 @@
             if (article === correctAnswer) {
                 // Correct!
                 playSound('correct');
-                slot.textContent = article;
+                slot.textContent = article === '' ? '(kein)' : article;
                 slot.classList.remove('selected');
                 slot.classList.add('correct', `type-${correctType}`);
+                if (article === '') {
+                    slot.classList.add('empty-article');
+                }
                 
                 gameState.streak++;
                 if (gameState.streak > gameState.bestStreak) {
@@ -1746,7 +1772,7 @@
         }
 
         function createConfetti() {
-            const colors = ['#ffd700', '#e6b800', '#ffd633', '#7cb342', '#ffb74d', '#e57373'];
+            const colors = ['#ffd700', '#4a9eff', '#f5c842', '#7ab8ff', '#ffa94d', '#ff6b6b'];
             
             for (let i = 0; i < 100; i++) {
                 const confetti = document.createElement('div');
