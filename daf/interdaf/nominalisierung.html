@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nominalisierungs-Labor 🧠</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a1a2e; --primary-light: #2d2d4a; --accent: #9b59b6; --accent-glow: #bb77d4;
+            --success: #2ecc71; --error: #e74c3c; --bg-dark: #0f0f1a; --bg-card: #1a1a2e;
+            --text: #ffffff; --text-muted: #a0a0c0; --gold: #ffd700;
+            --cat-verb: #3498db; --cat-adj: #e74c3c; --cat-nebensatz: #2ecc71;
+            --cat-modal: #f39c12; --cat-pronomen: #9b59b6; --cat-fvg: #1abc9c; --cat-komplex: #e91e63;
+            --theme-psycho: #9b59b6; --theme-tech: #3498db;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Quicksand', sans-serif; background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1a2e 50%, var(--bg-dark) 100%); min-height: 100vh; color: var(--text); overflow-x: hidden; }
+        .neural-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; opacity: 0.3; }
+        .neuron { position: absolute; width: 4px; height: 4px; background: var(--accent-glow); border-radius: 50%; animation: pulse-neuron 3s ease-in-out infinite; }
+        @keyframes pulse-neuron { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+        .container { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 20px; }
+        header { text-align: center; margin-bottom: 30px; }
+        h1 { font-family: 'Fredoka', sans-serif; font-size: 2.8rem; background: linear-gradient(135deg, var(--accent-glow), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px; }
+        .subtitle { color: var(--text-muted); font-size: 1.1rem; }
+        .level-badge { display: inline-block; background: linear-gradient(135deg, var(--accent) 0%, var(--accent-glow) 100%); padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; margin-top: 10px; color: white; }
+        .screen { display: none; animation: fadeIn 0.5s ease; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .menu-card { background: var(--bg-card); border-radius: 20px; padding: 30px; margin-bottom: 20px; border: 2px solid var(--primary-light); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); }
+        .mode-title { font-family: 'Fredoka', sans-serif; font-size: 1.4rem; margin-bottom: 20px; color: var(--accent-glow); display: flex; align-items: center; gap: 10px; }
+        .theme-buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .theme-btn { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); border: 3px solid var(--primary-light); border-radius: 20px; padding: 30px; color: var(--text); font-family: 'Quicksand', sans-serif; cursor: pointer; transition: all 0.3s ease; text-align: center; position: relative; overflow: hidden; }
+        .theme-btn:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(155, 89, 182, 0.4); }
+        .theme-btn.psycho:hover, .theme-btn.psycho.selected { border-color: var(--theme-psycho); box-shadow: 0 10px 30px rgba(155, 89, 182, 0.5); }
+        .theme-btn.tech:hover, .theme-btn.tech.selected { border-color: var(--theme-tech); box-shadow: 0 10px 30px rgba(52, 152, 219, 0.5); }
+        .theme-btn .theme-icon { font-size: 3rem; margin-bottom: 15px; display: block; }
+        .theme-btn .theme-name { font-family: 'Fredoka', sans-serif; font-size: 1.5rem; margin-bottom: 10px; display: block; }
+        .theme-btn .theme-desc { font-size: 0.9rem; color: var(--text-muted); }
+        .theme-btn .theme-count { display: inline-block; background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; margin-top: 15px; }
+        .mode-buttons { display: flex; flex-direction: column; gap: 12px; }
+        .mode-btn { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); border: 2px solid var(--accent); border-radius: 15px; padding: 18px 25px; color: var(--text); font-family: 'Quicksand', sans-serif; font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-align: left; position: relative; display: flex; align-items: center; gap: 15px; }
+        .mode-btn:hover { transform: translateX(10px); box-shadow: 0 5px 20px rgba(155, 89, 182, 0.4); border-color: var(--accent-glow); }
+        .mode-btn .mode-icon { font-size: 1.5rem; width: 40px; text-align: center; }
+        .mode-btn .mode-info { flex: 1; }
+        .mode-btn .mode-name { display: block; margin-bottom: 3px; }
+        .mode-btn .mode-desc { font-size: 0.8rem; color: var(--text-muted); font-weight: 400; }
+        .mode-btn .mode-arrow { font-size: 1.2rem; color: var(--accent); }
+        .mode-badge { display: inline-block; background: var(--gold); color: #1a1a2e; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; margin-left: 10px; }
+        .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted); cursor: pointer; margin-bottom: 20px; transition: color 0.3s; }
+        .back-link:hover { color: var(--accent-glow); }
+        .selected-theme-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(155, 89, 182, 0.2); padding: 8px 15px; border-radius: 10px; margin-bottom: 20px; font-size: 0.9rem; }
+        .selected-theme-badge.psycho { background: rgba(155, 89, 182, 0.2); border: 1px solid var(--theme-psycho); }
+        .selected-theme-badge.tech { background: rgba(52, 152, 219, 0.2); border: 1px solid var(--theme-tech); }
+        .game-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .stats-bar { display: flex; gap: 12px; flex-wrap: wrap; }
+        .stat-item { background: var(--bg-card); padding: 10px 18px; border-radius: 12px; border: 1px solid var(--primary-light); text-align: center; min-width: 80px; }
+        .stat-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .stat-value { font-family: 'Fredoka', sans-serif; font-size: 1.2rem; color: var(--accent-glow); }
+        .streak-fire { display: inline-block; animation: flame 0.5s ease infinite alternate; }
+        @keyframes flame { from { transform: scale(1); } to { transform: scale(1.2); } }
+        .progress-bar { background: var(--bg-card); border-radius: 10px; height: 16px; overflow: hidden; margin-bottom: 15px; border: 1px solid var(--primary-light); }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-glow)); transition: width 0.5s ease; }
+        .progress-text { text-align: center; margin-bottom: 20px; color: var(--text-muted); font-size: 0.85rem; }
+        .exercise-card { background: var(--bg-card); border-radius: 20px; padding: 25px; margin-bottom: 20px; border: 2px solid var(--primary-light); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); }
+        .exercise-type { display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; margin-bottom: 15px; color: white; }
+        .exercise-instruction { font-size: 1.05rem; color: var(--text-muted); margin-bottom: 18px; line-height: 1.6; }
+        .exercise-instruction strong { color: var(--accent-glow); }
+        .original-sentence { background: rgba(0,0,0,0.3); padding: 18px; border-radius: 12px; margin-bottom: 18px; border-left: 4px solid var(--text-muted); }
+        .original-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .original-text { font-size: 1.1rem; line-height: 1.8; }
+        .transform-section { margin-top: 20px; }
+        .transform-label { font-size: 0.75rem; color: var(--accent-glow); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .transform-input-container { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 1.05rem; line-height: 2.2; }
+        .static-text { color: var(--text); }
+        .input-slot { display: inline-block; min-width: 140px; padding: 8px 12px; background: var(--primary); border: 2px dashed var(--accent); border-radius: 8px; color: var(--text); font-family: 'Quicksand', sans-serif; font-size: 1rem; transition: all 0.3s ease; }
+        .input-slot:focus { outline: none; border-style: solid; box-shadow: 0 0 15px rgba(155, 89, 182, 0.5); }
+        .input-slot.correct { border-color: var(--success); background: rgba(46, 204, 113, 0.2); border-style: solid; }
+        .input-slot.incorrect { border-color: var(--error); background: rgba(231, 76, 60, 0.2); border-style: solid; }
+        .mc-options { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+        .mc-option { background: var(--primary); border: 2px solid var(--primary-light); border-radius: 12px; padding: 14px 18px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 12px; }
+        .mc-option:hover { border-color: var(--accent); transform: translateX(5px); }
+        .mc-option.selected { border-color: var(--accent-glow); background: rgba(155, 89, 182, 0.2); }
+        .mc-option.correct { border-color: var(--success); background: rgba(46, 204, 113, 0.2); }
+        .mc-option.incorrect { border-color: var(--error); background: rgba(231, 76, 60, 0.2); }
+        .mc-letter { width: 28px; height: 28px; border-radius: 50%; background: var(--primary-light); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; flex-shrink: 0; }
+        .mc-option.selected .mc-letter { background: var(--accent); }
+        .mc-text { flex: 1; font-size: 0.95rem; }
+        .hint-box { background: rgba(155, 89, 182, 0.15); border: 1px solid var(--accent); border-radius: 12px; padding: 12px 18px; margin-bottom: 18px; font-size: 0.9rem; }
+        .hint-box strong { color: var(--accent-glow); }
+        .explanation-box { background: rgba(46, 204, 113, 0.1); border: 1px solid var(--success); border-radius: 12px; padding: 18px; margin-top: 18px; display: none; }
+        .explanation-box.show { display: block; animation: fadeIn 0.3s ease; }
+        .explanation-title { color: var(--success); font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+        .explanation-text { line-height: 1.6; color: var(--text-muted); font-size: 0.9rem; }
+        .explanation-text strong { color: var(--text); }
+        .control-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+        .control-btn { background: var(--bg-card); border: 2px solid var(--primary-light); border-radius: 12px; padding: 10px 20px; color: var(--text); font-family: 'Quicksand', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; }
+        .control-btn:hover { border-color: var(--accent); background: var(--primary); }
+        .control-btn.primary { background: linear-gradient(135deg, var(--accent) 0%, var(--accent-glow) 100%); border-color: var(--accent-glow); color: white; }
+        .control-btn.primary:hover { box-shadow: 0 5px 20px rgba(155, 89, 182, 0.5); }
+        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .points-popup { position: fixed; font-family: 'Fredoka', sans-serif; font-size: 1.5rem; color: var(--gold); pointer-events: none; animation: floatUp 1s ease forwards; z-index: 1000; text-shadow: 0 0 10px var(--gold); }
+        @keyframes floatUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-50px); } }
+        .result-card { background: var(--bg-card); border-radius: 25px; padding: 35px; text-align: center; border: 2px solid var(--accent); box-shadow: 0 20px 60px rgba(155, 89, 182, 0.3); }
+        .result-title { font-family: 'Fredoka', sans-serif; font-size: 2.2rem; background: linear-gradient(135deg, var(--accent-glow), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 25px; }
+        .result-stats { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin-bottom: 25px; }
+        .result-stat { text-align: center; }
+        .result-stat-value { font-family: 'Fredoka', sans-serif; font-size: 2.5rem; color: var(--accent-glow); }
+        .result-stat-label { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+        .accuracy-ring { width: 140px; height: 140px; margin: 0 auto 25px; position: relative; }
+        .accuracy-ring svg { transform: rotate(-90deg); }
+        .accuracy-ring circle { fill: none; stroke-width: 10; }
+        .accuracy-ring .bg { stroke: var(--primary-light); }
+        .accuracy-ring .progress { stroke: var(--accent-glow); stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
+        .accuracy-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Fredoka', sans-serif; font-size: 1.8rem; color: var(--accent-glow); }
+        .category-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 25px 0; text-align: left; }
+        .cat-stat { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .cat-stat-name { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
+        .cat-stat-dot { width: 10px; height: 10px; border-radius: 3px; }
+        .cat-stat-score { font-family: 'Fredoka', sans-serif; color: var(--accent-glow); }
+        .leaderboard-entry { display: flex; align-items: center; padding: 10px 12px; background: rgba(0,0,0,0.2); border-radius: 10px; margin-bottom: 6px; font-size: 0.9rem; }
+        .leaderboard-rank { width: 30px; font-family: 'Fredoka', sans-serif; font-size: 1.1rem; }
+        .leaderboard-name { flex: 1; font-weight: 600; }
+        .leaderboard-score { font-family: 'Fredoka', sans-serif; color: var(--accent-glow); font-size: 0.85rem; }
+        .name-input { background: var(--primary); border: 2px solid var(--primary-light); border-radius: 12px; padding: 10px 18px; color: var(--text); font-family: 'Quicksand', sans-serif; font-size: 1rem; width: 100%; max-width: 280px; margin-bottom: 12px; text-align: center; }
+        .name-input:focus { outline: none; border-color: var(--accent); }
+        .nav-btn { position: fixed; top: 20px; width: 42px; height: 42px; border-radius: 50%; background: var(--bg-card); border: 2px solid var(--primary-light); color: var(--text); font-size: 1.1rem; cursor: pointer; z-index: 100; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; }
+        .nav-btn:hover { border-color: var(--accent); transform: scale(1.1); }
+        #backBtn { left: 20px; }
+        #soundBtn { right: 20px; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
+        .modal-overlay.show { display: flex; }
+        .modal-content { background: var(--bg-card); border-radius: 20px; padding: 25px; max-width: 850px; width: 100%; max-height: 85vh; overflow-y: auto; border: 2px solid var(--accent); }
+        .modal-title { font-family: 'Fredoka', sans-serif; font-size: 1.6rem; color: var(--accent-glow); margin-bottom: 20px; }
+        .theory-section { margin-bottom: 20px; }
+        .theory-section h3 { color: var(--accent-glow); margin-bottom: 8px; font-size: 1rem; }
+        .theory-section p { color: var(--text-muted); line-height: 1.6; margin-bottom: 8px; font-size: 0.9rem; }
+        .theory-example { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 10px; margin: 8px 0; border-left: 3px solid var(--accent); font-size: 0.9rem; }
+        .theory-example .original { color: var(--text-muted); margin-bottom: 4px; }
+        .theory-example .transform { color: var(--success); }
+        .exercise-counter { background: rgba(0,0,0,0.3); padding: 8px 15px; border-radius: 20px; font-size: 0.8rem; color: var(--text-muted); }
+        .confetti { position: fixed; z-index: 1001; pointer-events: none; }
+        @media (max-width: 768px) { 
+            h1 { font-size: 2rem; } 
+            .container { padding: 15px; } 
+            .exercise-card { padding: 18px; } 
+            .input-slot { min-width: 110px; font-size: 0.9rem; padding: 6px 10px; } 
+            .theme-buttons { grid-template-columns: 1fr; }
+            .theme-btn { padding: 20px; }
+            .theme-btn .theme-icon { font-size: 2.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="neural-bg" id="neuralBg"></div>
+    <button class="nav-btn" id="backBtn" style="display: none;">←</button>
+    <button class="nav-btn" id="soundBtn">🔊</button>
+
+    <div class="container">
+        <header>
+            <h1>Nominalisierungs-Labor 🧠</h1>
+            <p class="subtitle">Verwandle Verben und Nebensätze in akademisches Deutsch</p>
+            <span class="level-badge">B2/C1 · Wissenschafts- & Fachsprache · 200 Übungen</span>
+        </header>
+
+        <!-- SCREEN 1: Theme Selection -->
+        <div class="screen active" id="themeScreen">
+            <div class="menu-card">
+                <h2 class="mode-title">🎯 Wähle dein Fachgebiet:</h2>
+                <div class="theme-buttons">
+                    <button class="theme-btn psycho" onclick="selectTheme('psychologie')">
+                        <span class="theme-icon">🧠</span>
+                        <span class="theme-name">Psychologie</span>
+                        <span class="theme-desc">Therapie, Forschung, Diagnostik, klinische Psychologie</span>
+                        <span class="theme-count">100 Übungen</span>
+                    </button>
+                    <button class="theme-btn tech" onclick="selectTheme('techrecht')">
+                        <span class="theme-icon">⚖️💻</span>
+                        <span class="theme-name">IT & Recht</span>
+                        <span class="theme-desc">Datenschutz, DSGVO, Geldwäschegesetz, IT-Sicherheit</span>
+                        <span class="theme-count">100 Übungen</span>
+                    </button>
+                </div>
+            </div>
+            <div class="menu-card">
+                <h2 class="mode-title">🏅 Bestenliste</h2>
+                <div id="menuLeaderboard"><p style="color: var(--text-muted); text-align: center;">Noch keine Einträge. Sei die Erste!</p></div>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: Mode Selection -->
+        <div class="screen" id="modeScreen">
+            <div class="menu-card">
+                <div class="back-link" onclick="goToThemeSelect()">← Zurück zur Themenwahl</div>
+                <div class="selected-theme-badge" id="selectedThemeBadge">
+                    <span id="themeIcon">🧠</span>
+                    <span id="themeName">Psychologie</span>
+                </div>
+                <h2 class="mode-title">🎮 Wähle deinen Trainingsmodus:</h2>
+                <div class="mode-buttons">
+                    <button class="mode-btn" onclick="startGame('fokus-verb')">
+                        <span class="mode-icon">📝</span>
+                        <div class="mode-info"><span class="mode-name">Fokus: Verb → Nomen</span><span class="mode-desc">untersuchen → die Untersuchung</span></div>
+                        <span class="mode-arrow">→</span>
+                    </button>
+                    <button class="mode-btn" onclick="startGame('fokus-adjektiv')">
+                        <span class="mode-icon">🎨</span>
+                        <div class="mode-info"><span class="mode-name">Fokus: Adjektiv → Nomen</span><span class="mode-desc">wichtig → die Wichtigkeit</span></div>
+                        <span class="mode-arrow">→</span>
+                    </button>
+                    <button class="mode-btn" onclick="startGame('fokus-nebensatz')">
+                        <span class="mode-icon">🔄</span>
+                        <div class="mode-info"><span class="mode-name">Fokus: Nebensätze umformen</span><span class="mode-desc">weil → wegen, obwohl → trotz</span></div>
+                        <span class="mode-arrow">→</span>
+                    </button>
+                    <button class="mode-btn" onclick="startGame('fokus-modal')">
+                        <span class="mode-icon">💭</span>
+                        <div class="mode-info"><span class="mode-name">Fokus: Modalverben & Pronomen</span><span class="mode-desc">können → die Fähigkeit</span></div>
+                        <span class="mode-arrow">→</span>
+                    </button>
+                    <button class="mode-btn" onclick="startGame('fokus-fvg')">
+                        <span class="mode-icon">⚡</span>
+                        <div class="mode-info"><span class="mode-name">Fokus: Funktionsverbgefüge</span><span class="mode-desc">entscheiden → eine Entscheidung treffen</span></div>
+                        <span class="mode-arrow">→</span>
+                    </button>
+                    <button class="mode-btn" onclick="startGame('fokus-komplex')">
+                        <span class="mode-icon">🧩</span>
+                        <div class="mode-info"><span class="mode-name">Fokus: Komplexe Umformungen</span><span class="mode-desc">Mehrfache Nominalisierungen kombiniert</span></div>
+                        <span class="mode-arrow">→</span>
+                    </button>
+                    <button class="mode-btn" onclick="startGame('master')" style="border-color: var(--gold);">
+                        <span class="mode-icon">🏆</span>
+                        <div class="mode-info"><span class="mode-name">Master-Modus <span class="mode-badge">ALLE</span></span><span class="mode-desc">50 Übungen aus allen Kategorien gemischt</span></div>
+                        <span class="mode-arrow">→</span>
+                    </button>
+                </div>
+                <div style="margin-top: 20px; text-align: center;">
+                    <button class="control-btn" onclick="showTheory()">📖 Theorie anzeigen</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: Game -->
+        <div class="screen" id="gameScreen">
+            <div class="game-header">
+                <div class="stats-bar">
+                    <div class="stat-item"><div class="stat-label">Punkte</div><div class="stat-value" id="points">0</div></div>
+                    <div class="stat-item"><div class="stat-label">Serie</div><div class="stat-value"><span id="streak">0</span><span class="streak-fire" id="streakFire" style="display:none;">🔥</span></div></div>
+                    <div class="stat-item"><div class="stat-label">Richtig</div><div class="stat-value"><span id="correct">0</span>/<span id="total">0</span></div></div>
+                </div>
+                <div class="exercise-counter" id="exerciseCounter">Übung 1/40</div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+            <div id="exerciseContainer"></div>
+            <div class="control-buttons">
+                <button class="control-btn" onclick="showHint()" id="hintBtn">💡 Tipp</button>
+                <button class="control-btn" onclick="skipExercise()">⏭️ Überspringen</button>
+                <button class="control-btn primary" onclick="checkAnswer()" id="checkBtn">✅ Überprüfen</button>
+            </div>
+        </div>
+
+        <!-- SCREEN 4: Results -->
+        <div class="screen" id="resultScreen">
+            <div class="result-card">
+                <h2 class="result-title">🎉 Training abgeschlossen!</h2>
+                <div class="accuracy-ring">
+                    <svg width="140" height="140"><circle class="bg" cx="70" cy="70" r="55"></circle><circle class="progress" cx="70" cy="70" r="55" stroke-dasharray="345" stroke-dashoffset="345" id="accuracyCircle"></circle></svg>
+                    <div class="accuracy-text" id="accuracyText">0%</div>
+                </div>
+                <div class="result-stats">
+                    <div class="result-stat"><div class="result-stat-value" id="finalPoints">0</div><div class="result-stat-label">Punkte</div></div>
+                    <div class="result-stat"><div class="result-stat-value" id="finalCorrect">0</div><div class="result-stat-label">Richtig</div></div>
+                    <div class="result-stat"><div class="result-stat-value" id="finalStreak">0</div><div class="result-stat-label">Beste Serie</div></div>
+                </div>
+                <div class="category-stats" id="categoryStats"></div>
+                <input type="text" class="name-input" id="playerName" placeholder="Dein Name" maxlength="20">
+                <button class="control-btn primary" onclick="saveScore()">💾 Speichern</button>
+                <div id="resultLeaderboard" style="margin-top: 25px;"></div>
+                <div style="margin-top: 25px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                    <button class="control-btn primary" onclick="playAgain()">🔄 Nochmal</button>
+                    <button class="control-btn" onclick="goToModeSelect()">🎯 Anderer Modus</button>
+                    <button class="control-btn" onclick="goToThemeSelect()">🏠 Themenwahl</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Theory Modal -->
+    <div class="modal-overlay" id="theoryModal">
+        <div class="modal-content">
+            <h2 class="modal-title">📖 Nominalisierung - Theorie & Regeln</h2>
+            <div class="theory-section"><h3>1. Verb → Nomen</h3><p>Verben werden mit verschiedenen Suffixen nominalisiert:</p><div class="theory-example"><div class="original">forschen → <strong>die Forschung</strong> (-ung)</div><div class="original">analysieren → <strong>die Analyse</strong> (Stamm)</div><div class="original">verhalten → <strong>das Verhalten</strong> (Infinitiv)</div></div><p><strong>Häufige Suffixe:</strong> -ung, -heit, -keit, -nis, -tion, -ment, -e</p></div>
+            <div class="theory-section"><h3>2. Adjektiv → Nomen</h3><div class="theory-example"><div class="original">wichtig → <strong>die Wichtigkeit</strong></div><div class="original">sicher → <strong>die Sicherheit</strong></div><div class="original">wirksam → <strong>die Wirksamkeit</strong></div></div></div>
+            <div class="theory-section"><h3>3. Nebensatz → Präpositionalphrase</h3><div class="theory-example"><div class="original"><strong>weil/da</strong> → wegen/aufgrund + Genitiv</div><div class="transform">Weil er krank war → Wegen seiner Krankheit</div></div><div class="theory-example"><div class="original"><strong>obwohl</strong> → trotz + Genitiv</div><div class="transform">Obwohl es riskant war → Trotz des Risikos</div></div><div class="theory-example"><div class="original"><strong>wenn/falls</strong> → bei + Dativ</div><div class="transform">Wenn Fehler auftreten → Bei Auftreten von Fehlern</div></div><div class="theory-example"><div class="original"><strong>bevor</strong> → vor + Dativ</div><div class="transform">Bevor man speichert → Vor dem Speichern</div></div><div class="theory-example"><div class="original"><strong>nachdem</strong> → nach + Dativ</div><div class="transform">Nachdem man prüfte → Nach der Prüfung</div></div><div class="theory-example"><div class="original"><strong>indem/dadurch dass</strong> → durch + Akkusativ</div><div class="transform">Indem man verschlüsselt → Durch Verschlüsselung</div></div><div class="theory-example"><div class="original"><strong>damit/um...zu</strong> → zu/zur/zum + Dativ</div><div class="transform">Um Daten zu schützen → Zum Schutz der Daten</div></div></div>
+            <div class="theory-section"><h3>4. Modalverben nominalisieren</h3><div class="theory-example"><div class="original">können → <strong>die Fähigkeit / die Möglichkeit</strong></div><div class="original">müssen → <strong>die Notwendigkeit / die Pflicht</strong></div><div class="original">dürfen → <strong>die Erlaubnis / das Recht / die Berechtigung</strong></div><div class="original">sollen → <strong>die Pflicht / die Verpflichtung</strong></div><div class="original">wollen → <strong>der Wille / die Absicht</strong></div></div></div>
+            <div class="theory-section"><h3>5. Pronomen → Possessivattribut</h3><div class="theory-example"><div class="original">er prüft → <strong>seine Prüfung</strong></div><div class="original">sie analysiert → <strong>ihre Analyse</strong></div><div class="original">wir implementieren → <strong>unsere Implementierung</strong></div></div></div>
+            <div class="theory-section"><h3>6. Funktionsverbgefüge (FVG)</h3><p>Verben werden durch Nomen + Funktionsverb ersetzt:</p><div class="theory-example"><div class="original">entscheiden → <strong>eine Entscheidung treffen</strong></div><div class="original">kritisieren → <strong>Kritik üben an</strong></div><div class="original">beeinflussen → <strong>Einfluss nehmen auf</strong></div><div class="original">berücksichtigen → <strong>in Betracht ziehen</strong></div><div class="original">anwenden → <strong>zur Anwendung bringen/kommen</strong></div><div class="original">informieren → <strong>in Kenntnis setzen</strong></div></div></div>
+            <div style="text-align: center; margin-top: 25px;"><button class="control-btn primary" onclick="hideTheory()">Verstanden! ✓</button></div>
+        </div>
+    </div>
+<script>
+// =====================================================
+// EXERCISE DATABASE - 200 EXERCISES TOTAL
+// =====================================================
+
+const exercises = {
+    psychologie: {
+        verb: [
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Die Forscher <strong>untersuchen</strong>, wie Stress das Gehirn beeinflusst.', template: ['Die', {id: 'a', correct: ['Untersuchung'], width: 140}, 'zeigt, wie Stress das Gehirn beeinflusst.'], hint: 'untersuchen → die Untersuchung', explanation: '<strong>untersuchen</strong> → <strong>die Untersuchung</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Man muss psychische Störungen frühzeitig <strong>erkennen</strong>.', template: ['Die frühzeitige', {id: 'a', correct: ['Erkennung'], width: 130}, 'psychischer Störungen ist wichtig.'], hint: 'erkennen → die Erkennung', explanation: '<strong>erkennen</strong> → <strong>die Erkennung</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Der Therapeut <strong>behandelt</strong> Patienten mit Angststörungen.', template: ['Die', {id: 'a', correct: ['Behandlung'], width: 130}, 'von Angstpatienten erfordert Erfahrung.'], hint: 'behandeln → die Behandlung', explanation: '<strong>behandeln</strong> → <strong>die Behandlung</strong>', points: 10 },
+            { type: 'mc', category: 'verb', instruction: 'Welches Nomen passt zu "diagnostizieren"?', original: 'Der Arzt muss die Störung korrekt <strong>diagnostizieren</strong>.', options: [{ text: 'die Diagnostizierung', correct: false }, { text: 'die Diagnose', correct: true }, { text: 'das Diagnostizieren', correct: false }, { text: 'die Diagnostik', correct: false }], hint: 'Fremdwörter auf -ieren haben oft ein Stammwort', explanation: '<strong>diagnostizieren</strong> → <strong>die Diagnose</strong>', points: 15 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Die Psychologen <strong>beobachten</strong> das Verhalten der Probanden.', template: ['Die', {id: 'a', correct: ['Beobachtung', 'Verhaltensbeobachtung'], width: 180}, 'liefert wichtige Erkenntnisse.'], hint: 'beobachten → die Beobachtung', explanation: '<strong>beobachten</strong> → <strong>die Beobachtung</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Die Studie <strong>analysiert</strong>, wie Emotionen entstehen.', template: ['Die', {id: 'a', correct: ['Analyse'], width: 110}, 'der Emotionsentstehung ist komplex.'], hint: 'analysieren → die Analyse', explanation: '<strong>analysieren</strong> → <strong>die Analyse</strong>', points: 10 },
+            { type: 'mc', category: 'verb', instruction: 'Welche Nominalisierung passt am besten?', original: 'Der Proband musste sich an die Wörter <strong>erinnern</strong>.', options: [{ text: 'Das Erinnern fiel schwer.', correct: false }, { text: 'Die Erinnerung fiel schwer.', correct: true }, { text: 'Das Sich-Erinnern war schwer.', correct: false }, { text: 'Die Erinnerungsfähigkeit war gering.', correct: false }], hint: 'sich erinnern → die Erinnerung', explanation: '<strong>sich erinnern</strong> → <strong>die Erinnerung</strong>', points: 15 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Die Therapie hilft, Traumata zu <strong>verarbeiten</strong>.', template: ['Die Therapie unterstützt die', {id: 'a', correct: ['Verarbeitung'], width: 140}, 'von Traumata.'], hint: 'verarbeiten → die Verarbeitung', explanation: '<strong>verarbeiten</strong> → <strong>die Verarbeitung</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Man will <strong>verstehen</strong>, wie Emotionen funktionieren.', template: ['Das', {id: 'a', correct: ['Verständnis', 'Verstehen'], width: 130}, 'von Emotionen ist das Ziel.'], hint: 'verstehen → das Verständnis', explanation: '<strong>verstehen</strong> → <strong>das Verständnis</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Patienten <strong>entwickeln</strong> oft Bewältigungsstrategien.', template: ['Die', {id: 'a', correct: ['Entwicklung'], width: 130}, 'von Bewältigungsstrategien ist häufig.'], hint: 'entwickeln → die Entwicklung', explanation: '<strong>entwickeln</strong> → <strong>die Entwicklung</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Forscher <strong>erforschen</strong> die Ursachen von Depressionen.', template: ['Die', {id: 'a', correct: ['Erforschung'], width: 130}, 'der Depressionsursachen ist wichtig.'], hint: 'erforschen → die Erforschung', explanation: '<strong>erforschen</strong> → <strong>die Erforschung</strong>', points: 10 },
+            { type: 'mc', category: 'verb', instruction: 'Welches Nomen passt zu "wahrnehmen"?', original: 'Der Patient kann Reize nicht richtig <strong>wahrnehmen</strong>.', options: [{ text: 'die Wahrnehmung', correct: true }, { text: 'das Wahrnehmen', correct: false }, { text: 'die Wahrnahme', correct: false }, { text: 'die Wahrnehmigkeit', correct: false }], hint: 'wahrnehmen → die Wahrnehmung', explanation: '<strong>wahrnehmen</strong> → <strong>die Wahrnehmung</strong>', points: 15 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Das Kind <strong>verhält</strong> sich auffällig.', template: ['Das auffällige', {id: 'a', correct: ['Verhalten'], width: 120}, 'des Kindes wurde dokumentiert.'], hint: 'sich verhalten → das Verhalten', explanation: '<strong>sich verhalten</strong> → <strong>das Verhalten</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Der Therapeut muss die Situation <strong>einschätzen</strong>.', template: ['Die', {id: 'a', correct: ['Einschätzung'], width: 130}, 'der Situation ist entscheidend.'], hint: 'einschätzen → die Einschätzung', explanation: '<strong>einschätzen</strong> → <strong>die Einschätzung</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Man muss Stress <strong>bewältigen</strong> lernen.', template: ['Die', {id: 'a', correct: ['Bewältigung'], width: 130}, 'von Stress ist erlernbar.'], hint: 'bewältigen → die Bewältigung', explanation: '<strong>bewältigen</strong> → <strong>die Bewältigung</strong>', points: 10 },
+            { type: 'mc', category: 'verb', instruction: 'Welches Nomen passt zu "interpretieren"?', original: 'Man muss Testergebnisse richtig <strong>interpretieren</strong>.', options: [{ text: 'die Interpretierung', correct: false }, { text: 'die Interpretation', correct: true }, { text: 'das Interpretieren', correct: false }, { text: 'die Interpretanz', correct: false }], hint: 'interpretieren → die Interpretation', explanation: '<strong>interpretieren</strong> → <strong>die Interpretation</strong>', points: 15 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Der Patient soll seine Gefühle <strong>regulieren</strong>.', template: ['Die', {id: 'a', correct: ['Regulierung', 'Regulation'], width: 130}, 'von Gefühlen wird trainiert.'], hint: 'regulieren → die Regulierung', explanation: '<strong>regulieren</strong> → <strong>die Regulierung/Regulation</strong>', points: 10 }
+        ],
+        adjektiv: [
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Es ist <strong>wichtig</strong>, Symptome ernst zu nehmen.', template: ['Die', {id: 'a', correct: ['Wichtigkeit'], width: 130}, 'der Symptomerkennung ist unbestritten.'], hint: 'wichtig → die Wichtigkeit', explanation: '<strong>wichtig</strong> → <strong>die Wichtigkeit</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Der Patient ist emotional <strong>abhängig</strong>.', template: ['Die emotionale', {id: 'a', correct: ['Abhängigkeit'], width: 140}, 'ist problematisch.'], hint: 'abhängig → die Abhängigkeit', explanation: '<strong>abhängig</strong> → <strong>die Abhängigkeit</strong>', points: 10 },
+            { type: 'mc', category: 'adjektiv', instruction: 'Welches Nomen passt zu "wirksam"?', original: 'Die Methode ist besonders <strong>wirksam</strong>.', options: [{ text: 'die Wirksamkeit', correct: true }, { text: 'die Wirkung', correct: false }, { text: 'die Wirklichkeit', correct: false }, { text: 'das Wirken', correct: false }], hint: 'wirksam → die Wirksamkeit', explanation: '<strong>wirksam</strong> → <strong>die Wirksamkeit</strong>', points: 15 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Der Proband war <strong>bereit</strong> teilzunehmen.', template: ['Die', {id: 'a', correct: ['Bereitschaft'], width: 130}, 'zur Teilnahme war gegeben.'], hint: 'bereit → die Bereitschaft', explanation: '<strong>bereit</strong> → <strong>die Bereitschaft</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Die Testperson war <strong>müde</strong>.', template: ['Die', {id: 'a', correct: ['Müdigkeit'], width: 120}, 'beeinträchtigte die Ergebnisse.'], hint: 'müde → die Müdigkeit', explanation: '<strong>müde</strong> → <strong>die Müdigkeit</strong>', points: 10 },
+            { type: 'mc', category: 'adjektiv', instruction: 'Welche Nominalisierung passt?', original: 'Die Studie zeigt, wie <strong>kreativ</strong> Kinder denken.', options: [{ text: 'die Kreativität', correct: true }, { text: 'das Kreative', correct: false }, { text: 'die Kreation', correct: false }, { text: 'die Kreativheit', correct: false }], hint: 'kreativ → die Kreativität', explanation: '<strong>kreativ</strong> → <strong>die Kreativität</strong>', points: 15 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Die Patientin wurde <strong>ängstlich</strong>.', template: ['Die zunehmende', {id: 'a', correct: ['Ängstlichkeit'], width: 140}, 'wurde dokumentiert.'], hint: 'ängstlich → die Ängstlichkeit', explanation: '<strong>ängstlich</strong> → <strong>die Ängstlichkeit</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Das Verfahren ist <strong>zuverlässig</strong>.', template: ['Die', {id: 'a', correct: ['Zuverlässigkeit'], width: 140}, 'des Verfahrens wurde bestätigt.'], hint: 'zuverlässig → die Zuverlässigkeit', explanation: '<strong>zuverlässig</strong> → <strong>die Zuverlässigkeit</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Der Patient war <strong>aggressiv</strong>.', template: ['Die', {id: 'a', correct: ['Aggressivität', 'Aggression'], width: 130}, 'wurde notiert.'], hint: 'aggressiv → die Aggressivität', explanation: '<strong>aggressiv</strong> → <strong>die Aggressivität</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Die Therapie war <strong>erfolgreich</strong>.', template: ['Der', {id: 'a', correct: ['Erfolg'], width: 100}, 'der Therapie wurde evaluiert.'], hint: 'erfolgreich → der Erfolg', explanation: '<strong>erfolgreich</strong> → <strong>der Erfolg</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Das Kind ist emotional <strong>stabil</strong>.', template: ['Die emotionale', {id: 'a', correct: ['Stabilität'], width: 120}, 'des Kindes ist gut.'], hint: 'stabil → die Stabilität', explanation: '<strong>stabil</strong> → <strong>die Stabilität</strong>', points: 10 },
+            { type: 'mc', category: 'adjektiv', instruction: 'Welches Nomen passt zu "sensibel"?', original: 'Der Patient ist sehr <strong>sensibel</strong>.', options: [{ text: 'die Sensibilität', correct: true }, { text: 'die Sensibleheit', correct: false }, { text: 'die Sensibelkeit', correct: false }, { text: 'das Sensible', correct: false }], hint: 'sensibel → die Sensibilität', explanation: '<strong>sensibel</strong> → <strong>die Sensibilität</strong>', points: 15 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Der Therapeut ist sehr <strong>kompetent</strong>.', template: ['Die', {id: 'a', correct: ['Kompetenz'], width: 120}, 'des Therapeuten ist entscheidend.'], hint: 'kompetent → die Kompetenz', explanation: '<strong>kompetent</strong> → <strong>die Kompetenz</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Die Ergebnisse sind <strong>eindeutig</strong>.', template: ['Die', {id: 'a', correct: ['Eindeutigkeit'], width: 140}, 'der Ergebnisse überzeugt.'], hint: 'eindeutig → die Eindeutigkeit', explanation: '<strong>eindeutig</strong> → <strong>die Eindeutigkeit</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Der Patient ist <strong>unsicher</strong>.', template: ['Die', {id: 'a', correct: ['Unsicherheit'], width: 130}, 'des Patienten zeigt sich deutlich.'], hint: 'unsicher → die Unsicherheit', explanation: '<strong>unsicher</strong> → <strong>die Unsicherheit</strong>', points: 10 },
+            { type: 'mc', category: 'adjektiv', instruction: 'Welches Nomen passt zu "depressiv"?', original: 'Der Patient ist <strong>depressiv</strong>.', options: [{ text: 'die Depressivität', correct: false }, { text: 'die Depression', correct: true }, { text: 'das Depressive', correct: false }, { text: 'die Depressiertheit', correct: false }], hint: 'depressiv → die Depression', explanation: '<strong>depressiv</strong> → <strong>die Depression</strong>', points: 15 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Das Verfahren ist wissenschaftlich <strong>gültig</strong>.', template: ['Die wissenschaftliche', {id: 'a', correct: ['Gültigkeit', 'Validität'], width: 130}, 'wurde geprüft.'], hint: 'gültig → die Gültigkeit', explanation: '<strong>gültig</strong> → <strong>die Gültigkeit/Validität</strong>', points: 10 }
+        ],
+        nebensatz: [
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>weil</strong>-Satz um:', original: '<strong>Weil</strong> der Patient Stress hatte, verschlechterten sich die Symptome.', template: [{id: 'a', correct: ['Wegen', 'Aufgrund'], width: 100}, 'des Stresses verschlechterten sich die Symptome.'], hint: 'weil → wegen + Genitiv', explanation: '<strong>weil</strong> → <strong>wegen + Genitiv</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>obwohl</strong>-Satz um:', original: '<strong>Obwohl</strong> die Therapie intensiv war, zeigte sie keine Wirkung.', template: [{id: 'a', correct: ['Trotz'], width: 80}, 'der intensiven Therapie zeigte sich keine Wirkung.'], hint: 'obwohl → trotz + Genitiv', explanation: '<strong>obwohl</strong> → <strong>trotz + Genitiv</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>wenn</strong>-Satz um:', original: '<strong>Wenn</strong> Symptome auftreten, sollte man handeln.', template: [{id: 'a', correct: ['Beim', 'Bei'], width: 80}, 'Auftreten von Symptomen sollte man handeln.'], hint: 'wenn → bei + Dativ', explanation: '<strong>wenn</strong> → <strong>bei + Dativ</strong>', points: 15 },
+            { type: 'mc', category: 'nebensatz', instruction: 'Welche Umformung ist korrekt?', original: '<strong>Nachdem</strong> die Diagnose gestellt wurde, begann die Behandlung.', options: [{ text: 'Nach Stellung der Diagnose begann die Behandlung.', correct: true }, { text: 'Nach dem Stellen der Diagnose begann die Behandlung.', correct: false }, { text: 'Nachdem der Diagnose begann die Behandlung.', correct: false }, { text: 'Nach die Diagnosestellung begann die Behandlung.', correct: false }], hint: 'nachdem → nach + Dativ', explanation: '<strong>nachdem</strong> → <strong>nach + Dativ</strong>', points: 20 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>bevor</strong>-Satz um:', original: '<strong>Bevor</strong> die Studie begann, wurden die Probanden informiert.', template: [{id: 'a', correct: ['Vor'], width: 60}, 'Beginn der Studie wurden die Probanden informiert.'], hint: 'bevor → vor + Dativ', explanation: '<strong>bevor</strong> → <strong>vor + Dativ</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>während</strong>-Satz um:', original: '<strong>Während</strong> das Experiment lief, wurden Daten gesammelt.', template: [{id: 'a', correct: ['Während'], width: 100}, 'des Experiments wurden Daten gesammelt.'], hint: 'während (Konj.) → während + Genitiv', explanation: '<strong>während</strong> (Konjunktion) → <strong>während + Genitiv</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>damit</strong>-Satz um:', original: 'Die Therapie wird eingesetzt, <strong>damit</strong> die Angst reduziert wird.', template: ['Die Therapie wird', {id: 'a', correct: ['zur'], width: 60}, 'Reduktion der Angst eingesetzt.'], hint: 'damit → zu/zur + Dativ', explanation: '<strong>damit</strong> → <strong>zur + Dativ</strong>', points: 15 },
+            { type: 'mc', category: 'nebensatz', instruction: 'Welche Umformung des <strong>indem</strong>-Satzes ist korrekt?', original: 'Der Therapeut hilft, <strong>indem</strong> er aktiv zuhört.', options: [{ text: 'Der Therapeut hilft durch aktives Zuhören.', correct: true }, { text: 'Der Therapeut hilft bei aktivem Zuhören.', correct: false }, { text: 'Der Therapeut hilft mit aktivem Zuhören.', correct: false }, { text: 'Der Therapeut hilft wegen aktiven Zuhörens.', correct: false }], hint: 'indem → durch + Akkusativ', explanation: '<strong>indem</strong> → <strong>durch + Akkusativ</strong>', points: 20 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>dass</strong>-Satz um:', original: 'Die Studie zeigt, <strong>dass</strong> Meditation wirkt.', template: ['Die Studie zeigt die', {id: 'a', correct: ['Wirksamkeit', 'Wirkung'], width: 130}, 'der Meditation.'], hint: 'dass-Sätze → Genitivkonstruktion', explanation: '<strong>dass</strong>-Satz → Genitivkonstruktion', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den kausalen Nebensatz um:', original: '<strong>Da</strong> die Ressourcen begrenzt waren, wurde die Studie abgebrochen.', template: [{id: 'a', correct: ['Aufgrund', 'Wegen'], width: 110}, 'der begrenzten Ressourcen wurde die Studie abgebrochen.'], hint: 'da → aufgrund + Genitiv', explanation: '<strong>da</strong> → <strong>aufgrund + Genitiv</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>sobald</strong>-Satz um:', original: '<strong>Sobald</strong> Symptome auftreten, muss man reagieren.', template: [{id: 'a', correct: ['Bei', 'Beim'], width: 70}, 'Auftreten von Symptomen muss man reagieren.'], hint: 'sobald → bei + Dativ', explanation: '<strong>sobald</strong> → <strong>bei + Dativ</strong>', points: 15 },
+            { type: 'mc', category: 'nebensatz', instruction: 'Welche Umformung ist korrekt?', original: '<strong>Falls</strong> Komplikationen auftreten, muss der Arzt informiert werden.', options: [{ text: 'Bei Auftreten von Komplikationen muss der Arzt informiert werden.', correct: true }, { text: 'Im Fall dass Komplikationen auftreten, muss der Arzt informiert werden.', correct: false }, { text: 'Wegen Komplikationen muss der Arzt informiert werden.', correct: false }, { text: 'Durch Komplikationen muss der Arzt informiert werden.', correct: false }], hint: 'falls → bei + Dativ', explanation: '<strong>falls</strong> → <strong>bei + Dativ</strong>', points: 20 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>um...zu</strong>-Satz um:', original: 'Die Therapie wird eingesetzt, <strong>um</strong> Ängste <strong>zu</strong> reduzieren.', template: ['Die Therapie wird', {id: 'a', correct: ['zur'], width: 60}, 'Reduktion von Ängsten eingesetzt.'], hint: 'um...zu → zur + Nomen', explanation: '<strong>um...zu</strong> → <strong>zur + Nomen</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>ohne dass</strong>-Satz um:', original: 'Die Therapie endete, <strong>ohne dass</strong> Fortschritte erzielt wurden.', template: ['Die Therapie endete', {id: 'a', correct: ['ohne'], width: 70}, 'Fortschritte.'], hint: 'ohne dass → ohne + Akkusativ', explanation: '<strong>ohne dass</strong> → <strong>ohne + Akkusativ</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>seitdem</strong>-Satz um:', original: '<strong>Seitdem</strong> die Behandlung begann, geht es dem Patienten besser.', template: [{id: 'a', correct: ['Seit'], width: 70}, 'Beginn der Behandlung geht es dem Patienten besser.'], hint: 'seitdem → seit + Dativ', explanation: '<strong>seitdem</strong> → <strong>seit + Dativ</strong>', points: 15 },
+            { type: 'mc', category: 'nebensatz', instruction: 'Welche Umformung ist korrekt?', original: '<strong>Obgleich</strong> die Prognose schlecht war, erholte sich der Patient.', options: [{ text: 'Trotz der schlechten Prognose erholte sich der Patient.', correct: true }, { text: 'Wegen der schlechten Prognose erholte sich der Patient.', correct: false }, { text: 'Bei schlechter Prognose erholte sich der Patient.', correct: false }, { text: 'Durch die schlechte Prognose erholte sich der Patient.', correct: false }], hint: 'obgleich → trotz + Genitiv', explanation: '<strong>obgleich</strong> → <strong>trotz + Genitiv</strong>', points: 20 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>anstatt dass</strong>-Satz um:', original: '<strong>Anstatt dass</strong> der Patient ruht, arbeitet er weiter.', template: [{id: 'a', correct: ['Anstatt', 'Statt'], width: 90}, 'Ruhe arbeitet der Patient weiter.'], hint: 'anstatt dass → anstatt + Genitiv', explanation: '<strong>anstatt dass</strong> → <strong>anstatt + Genitiv</strong>', points: 15 }
+        ],
+        modal: [
+            { type: 'fill', category: 'modal', instruction: 'Nominalisiere <strong>können</strong>:', original: 'Der Patient <strong>kann</strong> seine Emotionen nicht regulieren.', template: ['Die fehlende', {id: 'a', correct: ['Fähigkeit'], width: 120}, 'zur Emotionsregulation ist problematisch.'], hint: 'können → die Fähigkeit', explanation: '<strong>können</strong> → <strong>die Fähigkeit</strong>', points: 15 },
+            { type: 'fill', category: 'modal', instruction: 'Nominalisiere <strong>müssen</strong>:', original: 'Man <strong>muss</strong> die Daten analysieren.', template: ['Die', {id: 'a', correct: ['Notwendigkeit'], width: 140}, 'der Datenanalyse ist gegeben.'], hint: 'müssen → die Notwendigkeit', explanation: '<strong>müssen</strong> → <strong>die Notwendigkeit</strong>', points: 15 },
+            { type: 'mc', category: 'modal', instruction: 'Welche Nominalisierung passt zu "wollen"?', original: 'Die Patientin <strong>will</strong> ihre Ängste überwinden.', options: [{ text: 'Der Wille zur Angstüberwindung', correct: true }, { text: 'Das Wollen der Angstüberwindung', correct: false }, { text: 'Die Willigkeit zur Angstüberwindung', correct: false }, { text: 'Das Gewollte der Angstüberwindung', correct: false }], hint: 'wollen → der Wille', explanation: '<strong>wollen</strong> → <strong>der Wille</strong>', points: 20 },
+            { type: 'fill', category: 'modal', instruction: 'Nominalisiere <strong>dürfen</strong>:', original: 'Der Forscher <strong>darf</strong> auf die Akten zugreifen.', template: ['Die', {id: 'a', correct: ['Erlaubnis', 'Berechtigung'], width: 130}, 'zum Aktenzugriff wurde erteilt.'], hint: 'dürfen → die Erlaubnis', explanation: '<strong>dürfen</strong> → <strong>die Erlaubnis</strong>', points: 15 },
+            { type: 'fill', category: 'pronomen', instruction: 'Wandle das Pronomen um:', original: '<strong>Sie</strong> forscht zu Depressionen.', template: [{id: 'a', correct: ['Ihre'], width: 80}, 'Forschung zu Depressionen ist bedeutsam.'], hint: 'sie → ihre', explanation: '<strong>sie</strong> → <strong>ihre</strong>', points: 10 },
+            { type: 'fill', category: 'pronomen', instruction: 'Wandle das Pronomen um:', original: '<strong>Er</strong> entschied sich für die Therapie.', template: [{id: 'a', correct: ['Seine'], width: 80}, 'Entscheidung für die Therapie war richtig.'], hint: 'er → seine', explanation: '<strong>er</strong> → <strong>seine</strong>', points: 10 },
+            { type: 'mc', category: 'modal', instruction: 'Wie nominalisiert man "sollen"?', original: 'Die Therapeuten <strong>sollen</strong> Richtlinien befolgen.', options: [{ text: 'Die Pflicht zur Befolgung der Richtlinien', correct: true }, { text: 'Das Sollen der Richtlinienbefolgung', correct: false }, { text: 'Die Sollheit der Richtlinien', correct: false }, { text: 'Das Gesollte der Richtlinien', correct: false }], hint: 'sollen → die Pflicht', explanation: '<strong>sollen</strong> → <strong>die Pflicht</strong>', points: 20 },
+            { type: 'fill', category: 'pronomen', instruction: 'Wandle das Pronomen um:', original: '<strong>Wir</strong> beobachteten eine Verbesserung.', template: [{id: 'a', correct: ['Unsere'], width: 100}, 'Beobachtung bestätigt die Hypothese.'], hint: 'wir → unsere', explanation: '<strong>wir</strong> → <strong>unsere</strong>', points: 10 },
+            { type: 'fill', category: 'modal', instruction: 'Nominalisiere <strong>können</strong> (Möglichkeit):', original: 'Man <strong>kann</strong> Depressionen behandeln.', template: ['Die', {id: 'a', correct: ['Möglichkeit'], width: 130}, 'der Depressionsbehandlung besteht.'], hint: 'können (extern) → die Möglichkeit', explanation: '<strong>können</strong> → <strong>die Möglichkeit</strong>', points: 15 },
+            { type: 'fill', category: 'pronomen', instruction: 'Wandle das Subjekt um:', original: '<strong>Der Therapeut</strong> interpretierte die Träume.', template: ['Die Trauminterpretation', {id: 'a', correct: ['des Therapeuten'], width: 150}, 'war aufschlussreich.'], hint: 'Der Therapeut → des Therapeuten', explanation: 'Subjekt → Genitivattribut', points: 10 },
+            { type: 'fill', category: 'modal', instruction: 'Nominalisiere <strong>müssen</strong>:', original: 'Der Patient <strong>muss</strong> Medikamente nehmen.', template: ['Die', {id: 'a', correct: ['Pflicht', 'Notwendigkeit'], width: 130}, 'zur Medikamenteneinnahme besteht.'], hint: 'müssen → die Pflicht', explanation: '<strong>müssen</strong> → <strong>die Pflicht</strong>', points: 15 },
+            { type: 'mc', category: 'modal', instruction: 'Welche Nominalisierung passt zu "nicht dürfen"?', original: 'Man <strong>darf</strong> hier nicht rauchen.', options: [{ text: 'das Verbot zu rauchen', correct: true }, { text: 'das Dürfen des Rauchens', correct: false }, { text: 'die Dürfnis des Rauchens', correct: false }, { text: 'die Erlaubnis zu rauchen', correct: false }], hint: 'nicht dürfen → das Verbot', explanation: '<strong>nicht dürfen</strong> → <strong>das Verbot</strong>', points: 20 },
+            { type: 'fill', category: 'pronomen', instruction: 'Wandle das Pronomen um:', original: '<strong>Sie</strong> (Pl.) dokumentierten die Ergebnisse.', template: [{id: 'a', correct: ['Ihre'], width: 80}, 'Dokumentation ist vollständig.'], hint: 'sie (Pl.) → ihre', explanation: '<strong>sie</strong> → <strong>ihre</strong>', points: 10 },
+            { type: 'fill', category: 'modal', instruction: 'Nominalisiere <strong>wollen</strong>:', original: 'Der Patient <strong>will</strong> gesund werden.', template: ['Der', {id: 'a', correct: ['Wille', 'Wunsch'], width: 100}, 'zur Genesung ist stark.'], hint: 'wollen → der Wille', explanation: '<strong>wollen</strong> → <strong>der Wille</strong>', points: 15 },
+            { type: 'fill', category: 'pronomen', instruction: 'Wandle das Subjekt um:', original: '<strong>Die Forscher</strong> veröffentlichten die Studie.', template: ['Die Veröffentlichung', {id: 'a', correct: ['der Forscher'], width: 130}, 'erfolgte im Journal.'], hint: 'Die Forscher → der Forscher (Gen.)', explanation: 'Subjekt → Genitivattribut', points: 10 },
+            { type: 'mc', category: 'modal', instruction: 'Welche Nominalisierung passt?', original: 'Der Arzt <strong>kann</strong> die Diagnose stellen.', options: [{ text: 'Die Fähigkeit des Arztes zur Diagnosestellung', correct: true }, { text: 'Das Können des Arztes bei der Diagnose', correct: false }, { text: 'Die Könnlichkeit des Arztes', correct: false }, { text: 'Das Gekonnte des Arztes', correct: false }], hint: 'können → die Fähigkeit', explanation: '<strong>können</strong> → <strong>die Fähigkeit</strong>', points: 20 }
+        ],
+        fvg: [
+            { type: 'mc', category: 'fvg', instruction: 'Welches FVG entspricht "entscheiden"?', original: 'Der Arzt muss schnell <strong>entscheiden</strong>.', options: [{ text: 'eine Entscheidung treffen', correct: true }, { text: 'eine Entscheidung machen', correct: false }, { text: 'eine Entscheidung geben', correct: false }, { text: 'Entscheidung nehmen', correct: false }], hint: 'entscheiden → eine Entscheidung treffen', explanation: '<strong>entscheiden</strong> → <strong>eine Entscheidung treffen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Die Forscherin <strong>kritisierte</strong> die Methodik.', template: ['Die Forscherin übte', {id: 'a', correct: ['Kritik'], width: 80}, 'an der Methodik.'], hint: 'kritisieren → Kritik üben an', explanation: '<strong>kritisieren</strong> → <strong>Kritik üben an</strong>', points: 15 },
+            { type: 'mc', category: 'fvg', instruction: 'Welches FVG passt zu "untersuchen"?', original: 'Die Wissenschaftler <strong>untersuchten</strong> das Phänomen.', options: [{ text: 'eine Untersuchung durchführen', correct: true }, { text: 'eine Untersuchung machen', correct: false }, { text: 'eine Untersuchung nehmen', correct: false }, { text: 'Untersuchung stellen', correct: false }], hint: 'untersuchen → eine Untersuchung durchführen', explanation: '<strong>untersuchen</strong> → <strong>eine Untersuchung durchführen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Der Therapeut <strong>berücksichtigte</strong> die Vorgeschichte.', template: ['Der Therapeut zog die Vorgeschichte in', {id: 'a', correct: ['Betracht'], width: 100}, '.'], hint: 'berücksichtigen → in Betracht ziehen', explanation: '<strong>berücksichtigen</strong> → <strong>in Betracht ziehen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Die Therapie <strong>beeinflusst</strong> das Verhalten.', template: ['Die Therapie nimmt', {id: 'a', correct: ['Einfluss'], width: 100}, 'auf das Verhalten.'], hint: 'beeinflussen → Einfluss nehmen auf', explanation: '<strong>beeinflussen</strong> → <strong>Einfluss nehmen auf</strong>', points: 15 },
+            { type: 'mc', category: 'fvg', instruction: 'Welches FVG passt zu "anwenden"?', original: 'Man sollte die Methode <strong>anwenden</strong>.', options: [{ text: 'zur Anwendung bringen', correct: true }, { text: 'eine Anwendung machen', correct: false }, { text: 'Anwendung geben', correct: false }, { text: 'in Anwendung setzen', correct: false }], hint: 'anwenden → zur Anwendung bringen', explanation: '<strong>anwenden</strong> → <strong>zur Anwendung bringen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Der Wissenschaftler <strong>fragte</strong> nach den Ursachen.', template: ['Der Wissenschaftler stellte die', {id: 'a', correct: ['Frage'], width: 80}, 'nach den Ursachen.'], hint: 'fragen → eine Frage stellen', explanation: '<strong>fragen</strong> → <strong>eine Frage stellen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Die Hypothese <strong>bewährt sich</strong>.', template: ['Die Hypothese findet', {id: 'a', correct: ['Bestätigung'], width: 120}, '.'], hint: 'sich bewähren → Bestätigung finden', explanation: '<strong>sich bewähren</strong> → <strong>Bestätigung finden</strong>', points: 15 },
+            { type: 'mc', category: 'fvg', instruction: 'Welches FVG entspricht "informieren"?', original: 'Die Forscher <strong>informierten</strong> die Öffentlichkeit.', options: [{ text: 'in Kenntnis setzen', correct: true }, { text: 'Information geben', correct: false }, { text: 'Informierung machen', correct: false }, { text: 'zur Information bringen', correct: false }], hint: 'informieren → in Kenntnis setzen', explanation: '<strong>informieren</strong> → <strong>in Kenntnis setzen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Die Resultate <strong>bestätigten</strong> die Theorie.', template: ['Die Resultate lieferten', {id: 'a', correct: ['Bestätigung', 'den Beweis'], width: 130}, 'für die Theorie.'], hint: 'bestätigen → Bestätigung liefern', explanation: '<strong>bestätigen</strong> → <strong>Bestätigung liefern</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Der Patient <strong>vertraute</strong> dem Therapeuten.', template: ['Der Patient schenkte dem Therapeuten', {id: 'a', correct: ['Vertrauen'], width: 120}, '.'], hint: 'vertrauen → Vertrauen schenken', explanation: '<strong>vertrauen</strong> → <strong>Vertrauen schenken</strong>', points: 15 },
+            { type: 'mc', category: 'fvg', instruction: 'Welches FVG passt zu "zweifeln"?', original: 'Die Forscher <strong>zweifeln</strong> an der Methode.', options: [{ text: 'Zweifel hegen an', correct: true }, { text: 'Zweifel machen an', correct: false }, { text: 'in Zweifel nehmen', correct: false }, { text: 'Zweifel geben an', correct: false }], hint: 'zweifeln → Zweifel hegen', explanation: '<strong>zweifeln</strong> → <strong>Zweifel hegen an</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Die Studie <strong>beweist</strong> die Wirksamkeit.', template: ['Die Studie liefert den', {id: 'a', correct: ['Beweis', 'Nachweis'], width: 110}, 'für die Wirksamkeit.'], hint: 'beweisen → den Beweis liefern', explanation: '<strong>beweisen</strong> → <strong>den Beweis liefern</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Der Therapeut <strong>unterstützte</strong> den Patienten.', template: ['Der Therapeut leistete dem Patienten', {id: 'a', correct: ['Unterstützung', 'Hilfe'], width: 140}, '.'], hint: 'unterstützen → Unterstützung leisten', explanation: '<strong>unterstützen</strong> → <strong>Unterstützung leisten</strong>', points: 15 },
+            { type: 'mc', category: 'fvg', instruction: 'Welches FVG passt zu "hoffen"?', original: 'Der Patient <strong>hofft</strong> auf Besserung.', options: [{ text: 'Hoffnung haben auf', correct: true }, { text: 'Hoffnung machen auf', correct: false }, { text: 'in Hoffnung sein', correct: false }, { text: 'Hoffnung geben auf', correct: false }], hint: 'hoffen → Hoffnung haben', explanation: '<strong>hoffen</strong> → <strong>Hoffnung haben auf</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Der Arzt <strong>rät</strong> zur Therapie.', template: ['Der Arzt gibt den', {id: 'a', correct: ['Rat', 'Ratschlag'], width: 100}, 'zur Therapie.'], hint: 'raten → einen Rat geben', explanation: '<strong>raten</strong> → <strong>einen Rat geben</strong>', points: 15 }
+        ],
+        komplex: [
+            { type: 'mc', category: 'komplex', instruction: 'Welche Nominalisierung ist korrekt?', original: 'Obwohl der Patient regelmäßig meditierte, verbesserte sich sein Zustand nicht.', options: [{ text: 'Trotz der regelmäßigen Meditation des Patienten verbesserte sich sein Zustand nicht.', correct: true }, { text: 'Trotz dass der Patient regelmäßig meditierte, verbesserte sich sein Zustand nicht.', correct: false }, { text: 'Trotz regelmäßigem Meditieren verbesserte sich der Zustand nicht.', correct: false }, { text: 'Obwohl der regelmäßigen Meditation verbesserte sich sein Zustand nicht.', correct: false }], hint: 'obwohl → trotz + Genitiv', explanation: '<strong>obwohl</strong> → <strong>trotz + Genitiv</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Umformung ist stilistisch am besten?', original: 'Nachdem man die Daten analysiert hatte, konnte man Schlüsse ziehen.', options: [{ text: 'Nach der Datenanalyse konnten Schlüsse gezogen werden.', correct: true }, { text: 'Nach dem Analysieren der Daten konnte man Schlüsse ziehen.', correct: false }, { text: 'Nachdem die Daten analysiert worden waren, wurden Schlüsse gezogen.', correct: false }, { text: 'Nach Analyse der Daten zog man Schlüsse.', correct: false }], hint: 'Passiv ist akademischer', explanation: '<strong>nach + Nomen</strong> + <strong>Passiv</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welcher Satz ist korrekt nominalisiert?', original: 'Wenn man Kinder therapeutisch behandelt, muss man vorsichtig sein.', options: [{ text: 'Bei der therapeutischen Behandlung von Kindern ist Vorsicht geboten.', correct: true }, { text: 'Wenn man Kinder therapeutisch behandelt, ist Vorsicht geboten.', correct: false }, { text: 'Bei therapeutischem Behandeln von Kindern muss man vorsichtig sein.', correct: false }, { text: 'Beim Behandeln der Kinder therapeutisch ist Vorsicht nötig.', correct: false }], hint: 'wenn → bei + Dativ', explanation: '<strong>wenn</strong> → <strong>bei + Dativ</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche nominale Variante ist korrekt?', original: 'Da die Patienten nicht wissen, welche Behandlung sie erhalten, spricht man von einer Blindstudie.', options: [{ text: 'Aufgrund der Unkenntnis der Patienten über die erhaltene Behandlung spricht man von einer Blindstudie.', correct: true }, { text: 'Wegen des Nichtwissens der Patienten über die Behandlung spricht man von einer Blindstudie.', correct: false }, { text: 'Da die Unwissenheit der Patienten, spricht man von einer Blindstudie.', correct: false }, { text: 'Aufgrund dass die Patienten nicht wissen, spricht man von einer Blindstudie.', correct: false }], hint: 'nicht wissen → die Unkenntnis', explanation: '<strong>nicht wissen</strong> → <strong>die Unkenntnis</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Version ist akademisch am besten?', original: 'Obwohl viele Therapeuten die Methode ablehnen, wird sie häufig eingesetzt.', options: [{ text: 'Trotz der Ablehnung durch viele Therapeuten findet die Methode häufige Anwendung.', correct: true }, { text: 'Trotzdem viele Therapeuten die Methode ablehnen, wird sie häufig eingesetzt.', correct: false }, { text: 'Obwohl der Ablehnung vieler Therapeuten wird die Methode angewendet.', correct: false }, { text: 'Trotz dass viele Therapeuten ablehnen, wendet man die Methode an.', correct: false }], hint: 'obwohl → trotz; einsetzen → Anwendung finden', explanation: '<strong>trotz + Genitiv</strong>; <strong>einsetzen</strong> → <strong>Anwendung finden</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Umformung ist korrekt?', original: 'Bevor der Therapeut die Diagnose stellt, muss er den Patienten gründlich untersuchen.', options: [{ text: 'Vor der Diagnosestellung muss eine gründliche Untersuchung des Patienten erfolgen.', correct: true }, { text: 'Bevor der Diagnosestellung muss der Patient gründlich untersucht werden.', correct: false }, { text: 'Vor dem Stellen der Diagnose muss der Therapeut gründlich untersuchen.', correct: false }, { text: 'Vor dass die Diagnose gestellt wird, erfolgt eine Untersuchung.', correct: false }], hint: 'bevor → vor + Dativ; untersuchen → Untersuchung', explanation: '<strong>bevor</strong> → <strong>vor</strong>; <strong>untersuchen</strong> → <strong>Untersuchung</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Nominalisierung ist korrekt?', original: 'Weil die Patientin ihre Medikamente regelmäßig einnahm, konnte sie schneller genesen.', options: [{ text: 'Dank der regelmäßigen Medikamenteneinnahme konnte die Patientin schneller genesen.', correct: true }, { text: 'Wegen der regelmäßigen Medikamenteneinnahme konnte die Patientin schneller genesen.', correct: false }, { text: 'Durch das regelmäßige Einnehmen der Medikamente genas die Patientin schneller.', correct: false }, { text: 'Aufgrund dass die Patientin Medikamente einnahm, genas sie schneller.', correct: false }], hint: 'weil (positiv) → dank + Genitiv', explanation: '<strong>weil</strong> (positiv) → <strong>dank + Genitiv</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Umformung ist am elegantesten?', original: 'Indem die Forscher verschiedene Methoden kombinierten, konnten sie bessere Ergebnisse erzielen.', options: [{ text: 'Durch die Kombination verschiedener Methoden konnten bessere Ergebnisse erzielt werden.', correct: true }, { text: 'Mittels Kombinierung verschiedener Methoden erzielten die Forscher bessere Ergebnisse.', correct: false }, { text: 'Indem verschiedener Methoden kombiniert wurden, erzielte man bessere Ergebnisse.', correct: false }, { text: 'Mit dem Kombinieren verschiedener Methoden konnten Ergebnisse erzielt werden.', correct: false }], hint: 'indem → durch + Akkusativ', explanation: '<strong>indem</strong> → <strong>durch + Akkusativ</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Version ist korrekt?', original: 'Damit die Therapie erfolgreich ist, muss der Patient aktiv mitarbeiten.', options: [{ text: 'Für den Erfolg der Therapie ist die aktive Mitarbeit des Patienten erforderlich.', correct: true }, { text: 'Zum erfolgreichen Sein der Therapie muss der Patient aktiv mitarbeiten.', correct: false }, { text: 'Damit der Erfolg der Therapie, ist aktive Mitarbeit nötig.', correct: false }, { text: 'Zur erfolgreichen Therapie muss der Patient aktiv mitarbeiten.', correct: false }], hint: 'damit → für + Akkusativ', explanation: '<strong>damit</strong> → <strong>für + Akkusativ</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Nominalisierung ist am besten?', original: 'Während die Studie durchgeführt wurde, traten keine Komplikationen auf.', options: [{ text: 'Während der Durchführung der Studie traten keine Komplikationen auf.', correct: true }, { text: 'Während des Durchführens der Studie traten keine Komplikationen auf.', correct: false }, { text: 'Bei der Studiendurchführung traten keine Komplikationen auf.', correct: false }, { text: 'Im Verlauf dass die Studie durchgeführt wurde, gab es keine Komplikationen.', correct: false }], hint: 'während → während + Genitiv', explanation: '<strong>während</strong> → <strong>während + Genitiv</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Umformung ist korrekt?', original: 'Nachdem die Symptome erkannt wurden, konnte die Behandlung beginnen.', options: [{ text: 'Nach der Erkennung der Symptome konnte mit der Behandlung begonnen werden.', correct: true }, { text: 'Nach dem Erkennen der Symptome begann man die Behandlung.', correct: false }, { text: 'Nachdem der Symptomerkennung konnte die Behandlung beginnen.', correct: false }, { text: 'Nach dass die Symptome erkannt wurden, begann die Behandlung.', correct: false }], hint: 'nachdem → nach + Dativ', explanation: '<strong>nachdem</strong> → <strong>nach + Dativ</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Version ist akademisch korrekt?', original: 'Obwohl die Ressourcen knapp waren, konnte die Studie erfolgreich abgeschlossen werden.', options: [{ text: 'Trotz knapper Ressourcen konnte die Studie erfolgreich abgeschlossen werden.', correct: true }, { text: 'Trotz der Knappheit der Ressourcen wurde die Studie erfolgreich.', correct: false }, { text: 'Obwohl knapper Ressourcen wurde die Studie abgeschlossen.', correct: false }, { text: 'Trotz dass die Ressourcen knapp waren, schloss man die Studie ab.', correct: false }], hint: 'obwohl → trotz + Genitiv', explanation: '<strong>obwohl</strong> → <strong>trotz + Genitiv</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Nominalisierung ist korrekt?', original: 'Um die Diagnose zu bestätigen, wurden weitere Tests durchgeführt.', options: [{ text: 'Zur Bestätigung der Diagnose wurden weitere Tests durchgeführt.', correct: true }, { text: 'Zum Bestätigen der Diagnose führte man weitere Tests durch.', correct: false }, { text: 'Um der Diagnosebestätigung wurden weitere Tests durchgeführt.', correct: false }, { text: 'Für das Bestätigen der Diagnose wurden Tests gemacht.', correct: false }], hint: 'um...zu → zur + Nomen', explanation: '<strong>um...zu</strong> → <strong>zur + Nomen</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Umformung ist am besten?', original: 'Weil der Patient nicht kooperierte, musste die Therapie abgebrochen werden.', options: [{ text: 'Aufgrund der mangelnden Kooperation des Patienten musste die Therapie abgebrochen werden.', correct: true }, { text: 'Wegen des Nicht-Kooperierens des Patienten brach man die Therapie ab.', correct: false }, { text: 'Aufgrund dass der Patient nicht kooperierte, wurde die Therapie abgebrochen.', correct: false }, { text: 'Durch die fehlende Kooperation des Patienten musste man die Therapie abbrechen.', correct: false }], hint: 'nicht kooperieren → mangelnde Kooperation', explanation: '<strong>nicht kooperieren</strong> → <strong>mangelnde Kooperation</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Version ist korrekt?', original: 'Sobald sich der Zustand verschlechtert, muss der Arzt informiert werden.', options: [{ text: 'Bei einer Verschlechterung des Zustands muss der Arzt informiert werden.', correct: true }, { text: 'Sobald der Zustandsverschlechterung muss der Arzt informiert werden.', correct: false }, { text: 'Im Falle dass sich der Zustand verschlechtert, informiert man den Arzt.', correct: false }, { text: 'Bei Verschlechtern des Zustands muss der Arzt informiert werden.', correct: false }], hint: 'sobald → bei + Dativ', explanation: '<strong>sobald</strong> → <strong>bei + Dativ</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Nominalisierung ist akademisch am besten?', original: 'Da die Ergebnisse signifikant waren, wurde die Hypothese bestätigt.', options: [{ text: 'Aufgrund der Signifikanz der Ergebnisse wurde die Hypothese bestätigt.', correct: true }, { text: 'Wegen der signifikanten Ergebnisse bestätigte man die Hypothese.', correct: false }, { text: 'Da der Signifikanz der Ergebnisse wurde die Hypothese bestätigt.', correct: false }, { text: 'Durch die signifikanten Ergebnisse fand die Hypothese Bestätigung.', correct: false }], hint: 'signifikant → die Signifikanz', explanation: '<strong>signifikant sein</strong> → <strong>die Signifikanz</strong>', points: 25 }
+        ]
+    },
+    techrecht: {
+        verb: [
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Der Datenschutzbeauftragte muss die Daten <strong>verarbeiten</strong>.', template: ['Die', {id: 'a', correct: ['Verarbeitung'], width: 140}, 'der Daten unterliegt strengen Regeln.'], hint: 'verarbeiten → die Verarbeitung', explanation: '<strong>verarbeiten</strong> → <strong>die Verarbeitung</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Das Unternehmen muss personenbezogene Daten <strong>schützen</strong>.', template: ['Der', {id: 'a', correct: ['Schutz'], width: 100}, 'personenbezogener Daten ist Pflicht.'], hint: 'schützen → der Schutz', explanation: '<strong>schützen</strong> → <strong>der Schutz</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Man muss den Nutzer über die Datennutzung <strong>informieren</strong>.', template: ['Die', {id: 'a', correct: ['Information'], width: 130}, 'des Nutzers ist gesetzlich vorgeschrieben.'], hint: 'informieren → die Information', explanation: '<strong>informieren</strong> → <strong>die Information</strong>', points: 10 },
+            { type: 'mc', category: 'verb', instruction: 'Welches Nomen passt zu "verschlüsseln"?', original: 'Sensible Daten muss man <strong>verschlüsseln</strong>.', options: [{ text: 'die Verschlüsselung', correct: true }, { text: 'das Verschlüsseln', correct: false }, { text: 'die Verschlüsselheit', correct: false }, { text: 'die Verschlüsselnis', correct: false }], hint: 'verschlüsseln → die Verschlüsselung', explanation: '<strong>verschlüsseln</strong> → <strong>die Verschlüsselung</strong>', points: 15 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Das System <strong>speichert</strong> alle Transaktionen.', template: ['Die', {id: 'a', correct: ['Speicherung'], width: 130}, 'aller Transaktionen erfolgt automatisch.'], hint: 'speichern → die Speicherung', explanation: '<strong>speichern</strong> → <strong>die Speicherung</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Der Verpflichtete muss verdächtige Transaktionen <strong>melden</strong>.', template: ['Die', {id: 'a', correct: ['Meldung'], width: 110}, 'verdächtiger Transaktionen ist Pflicht.'], hint: 'melden → die Meldung', explanation: '<strong>melden</strong> → <strong>die Meldung</strong>', points: 10 },
+            { type: 'mc', category: 'verb', instruction: 'Welches Nomen passt zu "identifizieren"?', original: 'Man muss den Kunden <strong>identifizieren</strong>.', options: [{ text: 'die Identifizierung', correct: true }, { text: 'die Identifikation', correct: true }, { text: 'das Identifizieren', correct: false }, { text: 'die Identität', correct: false }], hint: 'identifizieren → die Identifizierung', explanation: '<strong>identifizieren</strong> → <strong>die Identifizierung/Identifikation</strong>', points: 15 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Das GwG verpflichtet Unternehmen, Risiken zu <strong>bewerten</strong>.', template: ['Die', {id: 'a', correct: ['Bewertung'], width: 120}, 'von Risiken ist gesetzlich vorgeschrieben.'], hint: 'bewerten → die Bewertung', explanation: '<strong>bewerten</strong> → <strong>die Bewertung</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Der Server muss die Anfragen <strong>protokollieren</strong>.', template: ['Die', {id: 'a', correct: ['Protokollierung'], width: 140}, 'aller Anfragen ist erforderlich.'], hint: 'protokollieren → die Protokollierung', explanation: '<strong>protokollieren</strong> → <strong>die Protokollierung</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Die Aufsichtsbehörde kann Bußgelder <strong>verhängen</strong>.', template: ['Die', {id: 'a', correct: ['Verhängung'], width: 130}, 'von Bußgeldern ist möglich.'], hint: 'verhängen → die Verhängung', explanation: '<strong>verhängen</strong> → <strong>die Verhängung</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Der Nutzer kann seine Daten <strong>löschen</strong> lassen.', template: ['Die', {id: 'a', correct: ['Löschung'], width: 110}, 'der Daten kann beantragt werden.'], hint: 'löschen → die Löschung', explanation: '<strong>löschen</strong> → <strong>die Löschung</strong>', points: 10 },
+            { type: 'mc', category: 'verb', instruction: 'Welches Nomen passt zu "authentifizieren"?', original: 'Der Nutzer muss sich <strong>authentifizieren</strong>.', options: [{ text: 'die Authentifizierung', correct: true }, { text: 'die Authentifikation', correct: false }, { text: 'das Authentifizieren', correct: false }, { text: 'die Authentizität', correct: false }], hint: 'authentifizieren → die Authentifizierung', explanation: '<strong>authentifizieren</strong> → <strong>die Authentifizierung</strong>', points: 15 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Das System muss Zugriffe <strong>überwachen</strong>.', template: ['Die', {id: 'a', correct: ['Überwachung'], width: 130}, 'der Zugriffe ist notwendig.'], hint: 'überwachen → die Überwachung', explanation: '<strong>überwachen</strong> → <strong>die Überwachung</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Man muss die Einwilligung <strong>dokumentieren</strong>.', template: ['Die', {id: 'a', correct: ['Dokumentation', 'Dokumentierung'], width: 150}, 'der Einwilligung ist Pflicht.'], hint: 'dokumentieren → die Dokumentation', explanation: '<strong>dokumentieren</strong> → <strong>die Dokumentation</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Der Geldwäschebeauftragte muss Mitarbeiter <strong>schulen</strong>.', template: ['Die', {id: 'a', correct: ['Schulung'], width: 110}, 'der Mitarbeiter ist verpflichtend.'], hint: 'schulen → die Schulung', explanation: '<strong>schulen</strong> → <strong>die Schulung</strong>', points: 10 },
+            { type: 'mc', category: 'verb', instruction: 'Welches Nomen passt zu "implementieren"?', original: 'Man muss Sicherheitsmaßnahmen <strong>implementieren</strong>.', options: [{ text: 'die Implementierung', correct: true }, { text: 'die Implementation', correct: false }, { text: 'das Implementieren', correct: false }, { text: 'die Implementanz', correct: false }], hint: 'implementieren → die Implementierung', explanation: '<strong>implementieren</strong> → <strong>die Implementierung</strong>', points: 15 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Die Software muss Daten <strong>anonymisieren</strong>.', template: ['Die', {id: 'a', correct: ['Anonymisierung'], width: 150}, 'der Daten schützt die Privatsphäre.'], hint: 'anonymisieren → die Anonymisierung', explanation: '<strong>anonymisieren</strong> → <strong>die Anonymisierung</strong>', points: 10 }
+        ],
+        adjektiv: [
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Die Daten müssen <strong>vertraulich</strong> behandelt werden.', template: ['Die', {id: 'a', correct: ['Vertraulichkeit'], width: 150}, 'der Daten muss gewährleistet sein.'], hint: 'vertraulich → die Vertraulichkeit', explanation: '<strong>vertraulich</strong> → <strong>die Vertraulichkeit</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Die Daten müssen <strong>verfügbar</strong> sein.', template: ['Die', {id: 'a', correct: ['Verfügbarkeit'], width: 140}, 'der Daten ist zu gewährleisten.'], hint: 'verfügbar → die Verfügbarkeit', explanation: '<strong>verfügbar</strong> → <strong>die Verfügbarkeit</strong>', points: 10 },
+            { type: 'mc', category: 'adjektiv', instruction: 'Welches Nomen passt zu "integer" (unverletzt)?', original: 'Die Daten müssen <strong>integer</strong> bleiben.', options: [{ text: 'die Integrität', correct: true }, { text: 'die Integerness', correct: false }, { text: 'die Integerheit', correct: false }, { text: 'das Integre', correct: false }], hint: 'integer → die Integrität', explanation: '<strong>integer</strong> → <strong>die Integrität</strong>', points: 15 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Die Verarbeitung muss <strong>rechtmäßig</strong> sein.', template: ['Die', {id: 'a', correct: ['Rechtmäßigkeit'], width: 150}, 'der Verarbeitung ist zu prüfen.'], hint: 'rechtmäßig → die Rechtmäßigkeit', explanation: '<strong>rechtmäßig</strong> → <strong>die Rechtmäßigkeit</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Die Maßnahmen müssen <strong>verhältnismäßig</strong> sein.', template: ['Die', {id: 'a', correct: ['Verhältnismäßigkeit'], width: 170}, 'der Maßnahmen ist zu beachten.'], hint: 'verhältnismäßig → die Verhältnismäßigkeit', explanation: '<strong>verhältnismäßig</strong> → <strong>die Verhältnismäßigkeit</strong>', points: 10 },
+            { type: 'mc', category: 'adjektiv', instruction: 'Welches Nomen passt zu "transparent"?', original: 'Die Datenverarbeitung muss <strong>transparent</strong> sein.', options: [{ text: 'die Transparenz', correct: true }, { text: 'die Transparentheit', correct: false }, { text: 'die Transparentität', correct: false }, { text: 'das Transparente', correct: false }], hint: 'transparent → die Transparenz', explanation: '<strong>transparent</strong> → <strong>die Transparenz</strong>', points: 15 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Das System ist <strong>sicher</strong>.', template: ['Die', {id: 'a', correct: ['Sicherheit'], width: 120}, 'des Systems wurde geprüft.'], hint: 'sicher → die Sicherheit', explanation: '<strong>sicher</strong> → <strong>die Sicherheit</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Die Transaktion ist <strong>verdächtig</strong>.', template: ['Der', {id: 'a', correct: ['Verdacht'], width: 110}, 'auf Geldwäsche wurde gemeldet.'], hint: 'verdächtig → der Verdacht', explanation: '<strong>verdächtig</strong> → <strong>der Verdacht</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Die Datenerhebung muss <strong>zweckgebunden</strong> sein.', template: ['Die', {id: 'a', correct: ['Zweckbindung'], width: 140}, 'der Datenerhebung ist einzuhalten.'], hint: 'zweckgebunden → die Zweckbindung', explanation: '<strong>zweckgebunden</strong> → <strong>die Zweckbindung</strong>', points: 10 },
+            { type: 'mc', category: 'adjektiv', instruction: 'Welches Nomen passt zu "anonym"?', original: 'Die Daten sind <strong>anonym</strong>.', options: [{ text: 'die Anonymität', correct: true }, { text: 'die Anonymisierung', correct: false }, { text: 'die Anonymheit', correct: false }, { text: 'das Anonyme', correct: false }], hint: 'anonym → die Anonymität', explanation: '<strong>anonym</strong> → <strong>die Anonymität</strong>', points: 15 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Die Maßnahme ist <strong>wirksam</strong>.', template: ['Die', {id: 'a', correct: ['Wirksamkeit'], width: 130}, 'der Maßnahme wurde überprüft.'], hint: 'wirksam → die Wirksamkeit', explanation: '<strong>wirksam</strong> → <strong>die Wirksamkeit</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Das Unternehmen ist <strong>verantwortlich</strong> für den Datenschutz.', template: ['Die', {id: 'a', correct: ['Verantwortlichkeit', 'Verantwortung'], width: 170}, 'für den Datenschutz liegt beim Unternehmen.'], hint: 'verantwortlich → die Verantwortlichkeit', explanation: '<strong>verantwortlich</strong> → <strong>die Verantwortlichkeit</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Die Daten sind <strong>personenbezogen</strong>.', template: ['Der', {id: 'a', correct: ['Personenbezug'], width: 150}, 'der Daten erfordert besonderen Schutz.'], hint: 'personenbezogen → der Personenbezug', explanation: '<strong>personenbezogen</strong> → <strong>der Personenbezug</strong>', points: 10 },
+            { type: 'mc', category: 'adjektiv', instruction: 'Welches Nomen passt zu "zuständig"?', original: 'Die Behörde ist <strong>zuständig</strong>.', options: [{ text: 'die Zuständigkeit', correct: true }, { text: 'die Zuständnis', correct: false }, { text: 'die Zuständung', correct: false }, { text: 'das Zuständige', correct: false }], hint: 'zuständig → die Zuständigkeit', explanation: '<strong>zuständig</strong> → <strong>die Zuständigkeit</strong>', points: 15 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Die Verarbeitung ist <strong>notwendig</strong>.', template: ['Die', {id: 'a', correct: ['Notwendigkeit'], width: 140}, 'der Verarbeitung muss nachgewiesen werden.'], hint: 'notwendig → die Notwendigkeit', explanation: '<strong>notwendig</strong> → <strong>die Notwendigkeit</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Die Daten müssen <strong>richtig</strong> sein.', template: ['Die', {id: 'a', correct: ['Richtigkeit'], width: 120}, 'der Daten ist zu gewährleisten.'], hint: 'richtig → die Richtigkeit', explanation: '<strong>richtig</strong> → <strong>die Richtigkeit</strong>', points: 10 },
+            { type: 'mc', category: 'adjektiv', instruction: 'Welches Nomen passt zu "konform"?', original: 'Das System ist DSGVO-<strong>konform</strong>.', options: [{ text: 'die Konformität', correct: true }, { text: 'die Konformheit', correct: false }, { text: 'die Konformanz', correct: false }, { text: 'das Konforme', correct: false }], hint: 'konform → die Konformität', explanation: '<strong>konform</strong> → <strong>die Konformität</strong>', points: 15 }
+        ],
+        nebensatz: [
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>weil</strong>-Satz um:', original: '<strong>Weil</strong> die Daten sensibel sind, müssen sie verschlüsselt werden.', template: [{id: 'a', correct: ['Wegen', 'Aufgrund'], width: 100}, 'der Sensibilität der Daten müssen sie verschlüsselt werden.'], hint: 'weil → wegen + Genitiv', explanation: '<strong>weil</strong> → <strong>wegen + Genitiv</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>bevor</strong>-Satz um:', original: '<strong>Bevor</strong> Daten verarbeitet werden, muss die Einwilligung vorliegen.', template: [{id: 'a', correct: ['Vor'], width: 60}, 'der Datenverarbeitung muss die Einwilligung vorliegen.'], hint: 'bevor → vor + Dativ', explanation: '<strong>bevor</strong> → <strong>vor + Dativ</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>wenn</strong>-Satz um:', original: '<strong>Wenn</strong> ein Datenschutzverstoß vorliegt, muss er gemeldet werden.', template: [{id: 'a', correct: ['Bei', 'Im Falle'], width: 100}, 'eines Datenschutzverstoßes muss er gemeldet werden.'], hint: 'wenn → bei + Dativ', explanation: '<strong>wenn</strong> → <strong>bei + Dativ</strong>', points: 15 },
+            { type: 'mc', category: 'nebensatz', instruction: 'Welche Umformung ist korrekt?', original: '<strong>Nachdem</strong> die Risikoanalyse durchgeführt wurde, werden Maßnahmen ergriffen.', options: [{ text: 'Nach Durchführung der Risikoanalyse werden Maßnahmen ergriffen.', correct: true }, { text: 'Nach dem Durchführen der Risikoanalyse werden Maßnahmen ergriffen.', correct: false }, { text: 'Nachdem der Risikoanalyse werden Maßnahmen ergriffen.', correct: false }, { text: 'Nach dass die Risikoanalyse durchgeführt wurde, werden Maßnahmen ergriffen.', correct: false }], hint: 'nachdem → nach + Dativ', explanation: '<strong>nachdem</strong> → <strong>nach + Dativ</strong>', points: 20 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>damit</strong>-Satz um:', original: 'Die Daten werden verschlüsselt, <strong>damit</strong> sie geschützt sind.', template: ['Die Daten werden', {id: 'a', correct: ['zum'], width: 60}, 'Schutz verschlüsselt.'], hint: 'damit → zum + Nomen', explanation: '<strong>damit</strong> → <strong>zum + Nomen</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>obwohl</strong>-Satz um:', original: '<strong>Obwohl</strong> die Maßnahmen teuer waren, wurden sie implementiert.', template: [{id: 'a', correct: ['Trotz'], width: 80}, 'der hohen Kosten wurden die Maßnahmen implementiert.'], hint: 'obwohl → trotz + Genitiv', explanation: '<strong>obwohl</strong> → <strong>trotz + Genitiv</strong>', points: 15 },
+            { type: 'mc', category: 'nebensatz', instruction: 'Welche Umformung ist korrekt?', original: '<strong>Indem</strong> man starke Passwörter verwendet, erhöht man die Sicherheit.', options: [{ text: 'Durch die Verwendung starker Passwörter erhöht man die Sicherheit.', correct: true }, { text: 'Mit der Verwendung starker Passwörter erhöht man die Sicherheit.', correct: false }, { text: 'Indem starker Passwörter verwendet werden, erhöht man die Sicherheit.', correct: false }, { text: 'Bei Verwendung starker Passwörter erhöht sich die Sicherheit.', correct: false }], hint: 'indem → durch + Akkusativ', explanation: '<strong>indem</strong> → <strong>durch + Akkusativ</strong>', points: 20 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>während</strong>-Satz um:', original: '<strong>Während</strong> die Daten übertragen werden, sind sie verschlüsselt.', template: [{id: 'a', correct: ['Während'], width: 100}, 'der Übertragung sind die Daten verschlüsselt.'], hint: 'während → während + Genitiv', explanation: '<strong>während</strong> (Konj.) → <strong>während + Genitiv</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>um...zu</strong>-Satz um:', original: 'Der Server wird gesichert, <strong>um</strong> Angriffe <strong>zu</strong> verhindern.', template: ['Der Server wird', {id: 'a', correct: ['zur'], width: 60}, 'Verhinderung von Angriffen gesichert.'], hint: 'um...zu → zur + Nomen', explanation: '<strong>um...zu</strong> → <strong>zur + Nomen</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>da</strong>-Satz um:', original: '<strong>Da</strong> die DSGVO gilt, müssen Unternehmen compliant sein.', template: [{id: 'a', correct: ['Aufgrund', 'Wegen'], width: 110}, 'der Geltung der DSGVO müssen Unternehmen compliant sein.'], hint: 'da → aufgrund + Genitiv', explanation: '<strong>da</strong> → <strong>aufgrund + Genitiv</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>falls</strong>-Satz um:', original: '<strong>Falls</strong> ein Verstoß vorliegt, drohen hohe Bußgelder.', template: [{id: 'a', correct: ['Bei', 'Im Falle'], width: 100}, 'eines Verstoßes drohen hohe Bußgelder.'], hint: 'falls → bei/im Falle + Genitiv', explanation: '<strong>falls</strong> → <strong>bei/im Falle + Genitiv</strong>', points: 15 },
+            { type: 'mc', category: 'nebensatz', instruction: 'Welche Umformung ist korrekt?', original: '<strong>Sobald</strong> verdächtige Aktivitäten erkannt werden, erfolgt eine Meldung.', options: [{ text: 'Bei Erkennung verdächtiger Aktivitäten erfolgt eine Meldung.', correct: true }, { text: 'Sobald der Erkennung verdächtiger Aktivitäten erfolgt eine Meldung.', correct: false }, { text: 'Nach Erkennung verdächtiger Aktivitäten erfolgt eine Meldung.', correct: false }, { text: 'Wegen der Erkennung verdächtiger Aktivitäten erfolgt eine Meldung.', correct: false }], hint: 'sobald → bei + Dativ', explanation: '<strong>sobald</strong> → <strong>bei + Dativ</strong>', points: 20 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>ohne dass</strong>-Satz um:', original: 'Die Daten wurden gespeichert, <strong>ohne dass</strong> der Nutzer informiert wurde.', template: ['Die Daten wurden', {id: 'a', correct: ['ohne'], width: 70}, 'Information des Nutzers gespeichert.'], hint: 'ohne dass → ohne + Akkusativ', explanation: '<strong>ohne dass</strong> → <strong>ohne + Akkusativ</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>seitdem</strong>-Satz um:', original: '<strong>Seitdem</strong> die DSGVO gilt, sind die Anforderungen strenger.', template: [{id: 'a', correct: ['Seit'], width: 70}, 'Geltung der DSGVO sind die Anforderungen strenger.'], hint: 'seitdem → seit + Dativ', explanation: '<strong>seitdem</strong> → <strong>seit + Dativ</strong>', points: 15 },
+            { type: 'mc', category: 'nebensatz', instruction: 'Welche Umformung ist korrekt?', original: '<strong>Obgleich</strong> die Implementierung aufwändig war, wurde sie durchgeführt.', options: [{ text: 'Trotz des hohen Aufwands der Implementierung wurde sie durchgeführt.', correct: true }, { text: 'Wegen des hohen Aufwands der Implementierung wurde sie durchgeführt.', correct: false }, { text: 'Obgleich des Aufwands wurde die Implementierung durchgeführt.', correct: false }, { text: 'Bei hohem Aufwand wurde die Implementierung durchgeführt.', correct: false }], hint: 'obgleich → trotz + Genitiv', explanation: '<strong>obgleich</strong> → <strong>trotz + Genitiv</strong>', points: 20 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>nachdem</strong>-Satz um:', original: '<strong>Nachdem</strong> die Identität verifiziert wurde, wird der Zugang gewährt.', template: [{id: 'a', correct: ['Nach'], width: 70}, 'Verifizierung der Identität wird der Zugang gewährt.'], hint: 'nachdem → nach + Dativ', explanation: '<strong>nachdem</strong> → <strong>nach + Dativ</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>damit</strong>-Satz um:', original: 'Logs werden gespeichert, <strong>damit</strong> Vorfälle nachverfolgt werden können.', template: ['Logs werden', {id: 'a', correct: ['zur'], width: 60}, 'Nachverfolgung von Vorfällen gespeichert.'], hint: 'damit → zur + Nomen', explanation: '<strong>damit</strong> → <strong>zur + Nomen</strong>', points: 15 }
+        ],
+        modal: [
+            { type: 'fill', category: 'modal', instruction: 'Nominalisiere <strong>müssen</strong>:', original: 'Das Unternehmen <strong>muss</strong> die DSGVO einhalten.', template: ['Die', {id: 'a', correct: ['Pflicht', 'Verpflichtung'], width: 130}, 'zur DSGVO-Einhaltung besteht.'], hint: 'müssen → die Pflicht', explanation: '<strong>müssen</strong> → <strong>die Pflicht</strong>', points: 15 },
+            { type: 'fill', category: 'modal', instruction: 'Nominalisiere <strong>dürfen</strong>:', original: 'Nur autorisierte Personen <strong>dürfen</strong> auf die Daten zugreifen.', template: ['Die', {id: 'a', correct: ['Berechtigung', 'Erlaubnis'], width: 140}, 'zum Datenzugriff ist eingeschränkt.'], hint: 'dürfen → die Berechtigung', explanation: '<strong>dürfen</strong> → <strong>die Berechtigung</strong>', points: 15 },
+            { type: 'mc', category: 'modal', instruction: 'Welche Nominalisierung passt zu "können"?', original: 'Der Nutzer <strong>kann</strong> seine Daten exportieren.', options: [{ text: 'Die Möglichkeit des Datenexports', correct: true }, { text: 'Das Können des Datenexports', correct: false }, { text: 'Die Könnlichkeit des Exports', correct: false }, { text: 'Das Gekönnte des Exports', correct: false }], hint: 'können → die Möglichkeit', explanation: '<strong>können</strong> → <strong>die Möglichkeit</strong>', points: 20 },
+            { type: 'fill', category: 'modal', instruction: 'Nominalisiere <strong>sollen</strong>:', original: 'Mitarbeiter <strong>sollen</strong> regelmäßig geschult werden.', template: ['Die', {id: 'a', correct: ['Pflicht', 'Verpflichtung'], width: 130}, 'zur regelmäßigen Schulung besteht.'], hint: 'sollen → die Pflicht', explanation: '<strong>sollen</strong> → <strong>die Pflicht</strong>', points: 15 },
+            { type: 'fill', category: 'pronomen', instruction: 'Wandle das Pronomen um:', original: '<strong>Das Unternehmen</strong> verarbeitet Kundendaten.', template: ['Die Verarbeitung von Kundendaten durch', {id: 'a', correct: ['das Unternehmen'], width: 150}, 'ist geregelt.'], hint: 'Subjekt → Präpositionalphrase', explanation: 'Subjekt → Präpositionalphrase', points: 10 },
+            { type: 'fill', category: 'pronomen', instruction: 'Wandle das Pronomen um:', original: '<strong>Der Nutzer</strong> willigt ein.', template: ['Die Einwilligung', {id: 'a', correct: ['des Nutzers'], width: 120}, 'ist erforderlich.'], hint: 'Der Nutzer → des Nutzers', explanation: 'Subjekt → Genitivattribut', points: 10 },
+            { type: 'mc', category: 'modal', instruction: 'Nominalisiere "nicht dürfen":', original: 'Dritte <strong>dürfen</strong> die Daten <strong>nicht</strong> einsehen.', options: [{ text: 'das Verbot der Dateneinsicht durch Dritte', correct: true }, { text: 'die Nichterlaubnis der Dateneinsicht', correct: false }, { text: 'das Nichtdürfen der Dateneinsicht', correct: false }, { text: 'die Unerlaubtheit der Dateneinsicht', correct: false }], hint: 'nicht dürfen → das Verbot', explanation: '<strong>nicht dürfen</strong> → <strong>das Verbot</strong>', points: 20 },
+            { type: 'fill', category: 'pronomen', instruction: 'Wandle das Pronomen um:', original: '<strong>Sie</strong> (die Behörde) prüft die Einhaltung.', template: [{id: 'a', correct: ['Ihre', 'Die'], width: 80}, 'Prüfung der Einhaltung ist umfassend.'], hint: 'sie → ihre', explanation: '<strong>sie</strong> → <strong>ihre</strong>', points: 10 },
+            { type: 'fill', category: 'modal', instruction: 'Nominalisiere <strong>können</strong> (Fähigkeit):', original: 'Das System <strong>kann</strong> Anomalien erkennen.', template: ['Die', {id: 'a', correct: ['Fähigkeit'], width: 120}, 'zur Anomalieerkennung ist gegeben.'], hint: 'können → die Fähigkeit', explanation: '<strong>können</strong> → <strong>die Fähigkeit</strong>', points: 15 },
+            { type: 'fill', category: 'pronomen', instruction: 'Wandle das Subjekt um:', original: '<strong>Der Datenschutzbeauftragte</strong> überwacht die Einhaltung.', template: ['Die Überwachung durch', {id: 'a', correct: ['den Datenschutzbeauftragten'], width: 220}, 'ist vorgeschrieben.'], hint: 'Subjekt → Präpositionalphrase', explanation: 'Subjekt → durch + Akkusativ', points: 10 },
+            { type: 'fill', category: 'modal', instruction: 'Nominalisiere <strong>müssen</strong>:', original: 'Verdächtige Transaktionen <strong>müssen</strong> gemeldet werden.', template: ['Die', {id: 'a', correct: ['Pflicht', 'Meldepflicht'], width: 130}, 'besteht.'], hint: 'müssen → die Pflicht', explanation: '<strong>müssen</strong> → <strong>die Pflicht</strong>', points: 15 },
+            { type: 'mc', category: 'modal', instruction: 'Welche Nominalisierung passt?', original: 'Der Verpflichtete <strong>muss</strong> die Identität feststellen.', options: [{ text: 'Die Pflicht zur Identitätsfeststellung', correct: true }, { text: 'Das Müssen der Identitätsfeststellung', correct: false }, { text: 'Die Mussung der Identität', correct: false }, { text: 'Das Gemüsste der Feststellung', correct: false }], hint: 'müssen → die Pflicht', explanation: '<strong>müssen</strong> → <strong>die Pflicht</strong>', points: 20 },
+            { type: 'fill', category: 'pronomen', instruction: 'Wandle das Pronomen um:', original: '<strong>Wir</strong> implementieren neue Sicherheitsmaßnahmen.', template: [{id: 'a', correct: ['Unsere'], width: 100}, 'Implementierung beginnt morgen.'], hint: 'wir → unsere', explanation: '<strong>wir</strong> → <strong>unsere</strong>', points: 10 },
+            { type: 'fill', category: 'modal', instruction: 'Nominalisiere <strong>dürfen</strong>:', original: 'Daten <strong>dürfen</strong> nur zweckgebunden verarbeitet werden.', template: ['Die', {id: 'a', correct: ['Erlaubnis', 'Berechtigung'], width: 130}, 'zur Verarbeitung ist zweckgebunden.'], hint: 'dürfen → die Erlaubnis', explanation: '<strong>dürfen</strong> → <strong>die Erlaubnis</strong>', points: 15 },
+            { type: 'fill', category: 'pronomen', instruction: 'Wandle das Subjekt um:', original: '<strong>Die Aufsichtsbehörde</strong> verhängt Bußgelder.', template: ['Die Verhängung von Bußgeldern durch', {id: 'a', correct: ['die Aufsichtsbehörde'], width: 180}, 'ist möglich.'], hint: 'Subjekt → durch + Akkusativ', explanation: 'Subjekt → durch + Akkusativ', points: 10 },
+            { type: 'mc', category: 'modal', instruction: 'Welche Nominalisierung passt zu "wollen"?', original: 'Das Unternehmen <strong>will</strong> die Compliance verbessern.', options: [{ text: 'Die Absicht zur Compliance-Verbesserung', correct: true }, { text: 'Das Wollen der Compliance-Verbesserung', correct: false }, { text: 'Die Willigkeit zur Compliance', correct: false }, { text: 'Das Gewollte der Verbesserung', correct: false }], hint: 'wollen → die Absicht', explanation: '<strong>wollen</strong> → <strong>die Absicht</strong>', points: 20 }
+        ],
+        fvg: [
+            { type: 'mc', category: 'fvg', instruction: 'Welches FVG entspricht "prüfen"?', original: 'Die Behörde <strong>prüft</strong> die Einhaltung.', options: [{ text: 'eine Prüfung durchführen', correct: true }, { text: 'eine Prüfung machen', correct: false }, { text: 'Prüfung nehmen', correct: false }, { text: 'in Prüfung gehen', correct: false }], hint: 'prüfen → eine Prüfung durchführen', explanation: '<strong>prüfen</strong> → <strong>eine Prüfung durchführen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Das Unternehmen <strong>berücksichtigt</strong> den Datenschutz.', template: ['Das Unternehmen zieht den Datenschutz in', {id: 'a', correct: ['Betracht'], width: 100}, '.'], hint: 'berücksichtigen → in Betracht ziehen', explanation: '<strong>berücksichtigen</strong> → <strong>in Betracht ziehen</strong>', points: 15 },
+            { type: 'mc', category: 'fvg', instruction: 'Welches FVG passt zu "anwenden"?', original: 'Man <strong>wendet</strong> die Vorschriften <strong>an</strong>.', options: [{ text: 'zur Anwendung bringen', correct: true }, { text: 'eine Anwendung machen', correct: false }, { text: 'Anwendung geben', correct: false }, { text: 'in Anwendung setzen', correct: false }], hint: 'anwenden → zur Anwendung bringen', explanation: '<strong>anwenden</strong> → <strong>zur Anwendung bringen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Der Mitarbeiter <strong>verstößt</strong> gegen die Richtlinien.', template: ['Der Mitarbeiter begeht einen', {id: 'a', correct: ['Verstoß'], width: 100}, 'gegen die Richtlinien.'], hint: 'verstoßen → einen Verstoß begehen', explanation: '<strong>verstoßen</strong> → <strong>einen Verstoß begehen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Die Behörde <strong>entscheidet</strong> über den Antrag.', template: ['Die Behörde trifft eine', {id: 'a', correct: ['Entscheidung'], width: 130}, 'über den Antrag.'], hint: 'entscheiden → eine Entscheidung treffen', explanation: '<strong>entscheiden</strong> → <strong>eine Entscheidung treffen</strong>', points: 15 },
+            { type: 'mc', category: 'fvg', instruction: 'Welches FVG entspricht "informieren"?', original: 'Der Verantwortliche <strong>informiert</strong> den Betroffenen.', options: [{ text: 'in Kenntnis setzen', correct: true }, { text: 'Information geben', correct: false }, { text: 'Informierung machen', correct: false }, { text: 'zur Information bringen', correct: false }], hint: 'informieren → in Kenntnis setzen', explanation: '<strong>informieren</strong> → <strong>in Kenntnis setzen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Das Gesetz <strong>verpflichtet</strong> die Unternehmen.', template: ['Das Gesetz erlegt den Unternehmen', {id: 'a', correct: ['Pflichten', 'Verpflichtungen'], width: 140}, 'auf.'], hint: 'verpflichten → Pflichten auferlegen', explanation: '<strong>verpflichten</strong> → <strong>Pflichten auferlegen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Die Maßnahme <strong>wirkt</strong> präventiv.', template: ['Die Maßnahme entfaltet präventive', {id: 'a', correct: ['Wirkung'], width: 100}, '.'], hint: 'wirken → Wirkung entfalten', explanation: '<strong>wirken</strong> → <strong>Wirkung entfalten</strong>', points: 15 },
+            { type: 'mc', category: 'fvg', instruction: 'Welches FVG passt zu "schaden"?', original: 'Der Verstoß <strong>schadet</strong> dem Ruf.', options: [{ text: 'Schaden zufügen', correct: true }, { text: 'Schaden machen', correct: false }, { text: 'einen Schaden geben', correct: false }, { text: 'in Schaden bringen', correct: false }], hint: 'schaden → Schaden zufügen', explanation: '<strong>schaden</strong> → <strong>Schaden zufügen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Das System <strong>protokolliert</strong> alle Zugriffe.', template: ['Das System führt über alle Zugriffe', {id: 'a', correct: ['Protokoll'], width: 100}, '.'], hint: 'protokollieren → Protokoll führen', explanation: '<strong>protokollieren</strong> → <strong>Protokoll führen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Die Behörde <strong>ermittelt</strong> gegen das Unternehmen.', template: ['Die Behörde führt', {id: 'a', correct: ['Ermittlungen'], width: 130}, 'gegen das Unternehmen.'], hint: 'ermitteln → Ermittlungen führen', explanation: '<strong>ermitteln</strong> → <strong>Ermittlungen führen</strong>', points: 15 },
+            { type: 'mc', category: 'fvg', instruction: 'Welches FVG entspricht "bestimmen"?', original: 'Der Verantwortliche <strong>bestimmt</strong> die Zwecke.', options: [{ text: 'eine Bestimmung treffen', correct: true }, { text: 'eine Bestimmung machen', correct: false }, { text: 'Bestimmung geben', correct: false }, { text: 'in Bestimmung setzen', correct: false }], hint: 'bestimmen → eine Bestimmung treffen', explanation: '<strong>bestimmen</strong> → <strong>eine Bestimmung treffen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Der Nutzer <strong>widerspricht</strong> der Verarbeitung.', template: ['Der Nutzer erhebt', {id: 'a', correct: ['Widerspruch'], width: 120}, 'gegen die Verarbeitung.'], hint: 'widersprechen → Widerspruch erheben', explanation: '<strong>widersprechen</strong> → <strong>Widerspruch erheben</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Die Vorschrift <strong>gilt</strong> ab sofort.', template: ['Die Vorschrift tritt in', {id: 'a', correct: ['Kraft', 'Geltung'], width: 100}, '.'], hint: 'gelten → in Kraft treten', explanation: '<strong>gelten</strong> → <strong>in Kraft treten</strong>', points: 15 },
+            { type: 'mc', category: 'fvg', instruction: 'Welches FVG passt zu "überprüfen"?', original: 'Der Auditor <strong>überprüft</strong> die Compliance.', options: [{ text: 'eine Überprüfung vornehmen', correct: true }, { text: 'eine Überprüfung machen', correct: false }, { text: 'Überprüfung geben', correct: false }, { text: 'in Überprüfung gehen', correct: false }], hint: 'überprüfen → eine Überprüfung vornehmen', explanation: '<strong>überprüfen</strong> → <strong>eine Überprüfung vornehmen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Das Unternehmen <strong>haftet</strong> für Schäden.', template: ['Das Unternehmen übernimmt die', {id: 'a', correct: ['Haftung'], width: 100}, 'für Schäden.'], hint: 'haften → die Haftung übernehmen', explanation: '<strong>haften</strong> → <strong>die Haftung übernehmen</strong>', points: 15 }
+        ],
+        komplex: [
+            { type: 'mc', category: 'komplex', instruction: 'Welche Nominalisierung ist korrekt?', original: 'Obwohl das Unternehmen die Vorschriften kannte, wurden sie nicht eingehalten.', options: [{ text: 'Trotz Kenntnis der Vorschriften wurden sie nicht eingehalten.', correct: true }, { text: 'Trotz dass das Unternehmen die Vorschriften kannte, wurden sie nicht eingehalten.', correct: false }, { text: 'Obwohl der Vorschriftenkenntnis wurden sie nicht eingehalten.', correct: false }, { text: 'Trotz dem Kennen der Vorschriften wurden sie nicht eingehalten.', correct: false }], hint: 'obwohl → trotz; kennen → die Kenntnis', explanation: '<strong>obwohl</strong> → <strong>trotz</strong>; <strong>kennen</strong> → <strong>die Kenntnis</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Umformung ist juristisch am präzisesten?', original: 'Bevor personenbezogene Daten verarbeitet werden, muss die Einwilligung eingeholt werden.', options: [{ text: 'Vor der Verarbeitung personenbezogener Daten ist die Einholung der Einwilligung erforderlich.', correct: true }, { text: 'Vor dem Verarbeiten personenbezogener Daten muss man die Einwilligung einholen.', correct: false }, { text: 'Bevor der Verarbeitung muss die Einwilligung eingeholt werden.', correct: false }, { text: 'Vor dass Daten verarbeitet werden, holt man die Einwilligung ein.', correct: false }], hint: 'bevor → vor; verarbeiten → Verarbeitung', explanation: '<strong>bevor</strong> → <strong>vor</strong>; <strong>verarbeiten</strong> → <strong>Verarbeitung</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welcher Satz ist korrekt nominalisiert?', original: 'Wenn ein Datenschutzverstoß festgestellt wird, muss die Aufsichtsbehörde informiert werden.', options: [{ text: 'Bei Feststellung eines Datenschutzverstoßes ist die Aufsichtsbehörde zu informieren.', correct: true }, { text: 'Wenn der Feststellung eines Verstoßes muss die Behörde informiert werden.', correct: false }, { text: 'Bei Feststellen eines Datenschutzverstoßes informiert man die Behörde.', correct: false }, { text: 'Im Falle dass ein Verstoß festgestellt wird, informiert man die Behörde.', correct: false }], hint: 'wenn → bei; feststellen → Feststellung', explanation: '<strong>wenn</strong> → <strong>bei</strong>; <strong>feststellen</strong> → <strong>Feststellung</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche nominale Variante ist korrekt?', original: 'Damit die Daten sicher sind, müssen sie verschlüsselt werden.', options: [{ text: 'Zur Gewährleistung der Datensicherheit ist eine Verschlüsselung erforderlich.', correct: true }, { text: 'Damit der Datensicherheit müssen sie verschlüsselt werden.', correct: false }, { text: 'Zum sicheren Sein der Daten ist Verschlüsselung nötig.', correct: false }, { text: 'Für dass die Daten sicher sind, verschlüsselt man sie.', correct: false }], hint: 'damit sicher → zur Gewährleistung der Sicherheit', explanation: '<strong>damit sicher</strong> → <strong>zur Gewährleistung der Sicherheit</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Version ist fachsprachlich am besten?', original: 'Weil die Transaktion verdächtig war, wurde sie der FIU gemeldet.', options: [{ text: 'Aufgrund des Verdachts wurde die Transaktion der FIU gemeldet.', correct: true }, { text: 'Wegen der verdächtigen Transaktion meldete man sie der FIU.', correct: false }, { text: 'Da der Verdächtigkeit wurde die Transaktion gemeldet.', correct: false }, { text: 'Durch die verdächtige Transaktion erfolgte eine Meldung.', correct: false }], hint: 'verdächtig sein → der Verdacht', explanation: '<strong>verdächtig sein</strong> → <strong>der Verdacht</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Umformung ist korrekt?', original: 'Nachdem die Risikoanalyse abgeschlossen wurde, wurden Maßnahmen implementiert.', options: [{ text: 'Nach Abschluss der Risikoanalyse wurden Maßnahmen implementiert.', correct: true }, { text: 'Nach dem Abschließen der Risikoanalyse implementierte man Maßnahmen.', correct: false }, { text: 'Nachdem des Abschlusses wurden Maßnahmen implementiert.', correct: false }, { text: 'Nach dass die Risikoanalyse abgeschlossen wurde, wurden Maßnahmen implementiert.', correct: false }], hint: 'nachdem → nach; abschließen → Abschluss', explanation: '<strong>nachdem</strong> → <strong>nach</strong>; <strong>abschließen</strong> → <strong>Abschluss</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Nominalisierung ist korrekt?', original: 'Indem man die Zugriffsrechte einschränkt, erhöht man die Sicherheit.', options: [{ text: 'Durch Einschränkung der Zugriffsrechte wird die Sicherheit erhöht.', correct: true }, { text: 'Mit der Einschränkung der Zugriffsrechte erhöht man die Sicherheit.', correct: false }, { text: 'Indem der Zugriffsrechte eingeschränkt werden, erhöht sich die Sicherheit.', correct: false }, { text: 'Bei Einschränkung der Zugriffsrechte erhöht man die Sicherheit.', correct: false }], hint: 'indem → durch; einschränken → Einschränkung', explanation: '<strong>indem</strong> → <strong>durch</strong>; <strong>einschränken</strong> → <strong>Einschränkung</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Umformung ist am elegantesten?', original: 'Obwohl die Kosten hoch waren, wurde das System implementiert.', options: [{ text: 'Trotz der hohen Kosten wurde das System implementiert.', correct: true }, { text: 'Trotz dass die Kosten hoch waren, wurde das System implementiert.', correct: false }, { text: 'Obwohl der hohen Kosten wurde das System implementiert.', correct: false }, { text: 'Wegen der hohen Kosten wurde das System trotzdem implementiert.', correct: false }], hint: 'obwohl → trotz', explanation: '<strong>obwohl</strong> → <strong>trotz + Genitiv</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Version ist korrekt?', original: 'Um die Compliance sicherzustellen, werden regelmäßige Audits durchgeführt.', options: [{ text: 'Zur Sicherstellung der Compliance werden regelmäßige Audits durchgeführt.', correct: true }, { text: 'Zum Sicherstellen der Compliance führt man regelmäßige Audits durch.', correct: false }, { text: 'Um der Compliance-Sicherstellung werden Audits durchgeführt.', correct: false }, { text: 'Für dass die Compliance sichergestellt wird, führt man Audits durch.', correct: false }], hint: 'um...zu → zur + Nomen', explanation: '<strong>um...zu</strong> → <strong>zur + Nomen</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Nominalisierung ist korrekt?', original: 'Da die Daten sensibel sind, gelten besondere Schutzmaßnahmen.', options: [{ text: 'Aufgrund der Sensibilität der Daten gelten besondere Schutzmaßnahmen.', correct: true }, { text: 'Wegen der sensiblen Daten gelten besondere Schutzmaßnahmen.', correct: false }, { text: 'Da der Datensensibilität gelten besondere Schutzmaßnahmen.', correct: false }, { text: 'Durch die sensiblen Daten gelten besondere Schutzmaßnahmen.', correct: false }], hint: 'sensibel sein → die Sensibilität', explanation: '<strong>sensibel sein</strong> → <strong>die Sensibilität</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Umformung ist juristisch präzise?', original: 'Während die Daten übertragen werden, müssen sie verschlüsselt sein.', options: [{ text: 'Während der Übertragung müssen die Daten verschlüsselt sein.', correct: true }, { text: 'Während des Übertragens müssen die Daten verschlüsselt sein.', correct: false }, { text: 'Bei der Datenübertragung müssen sie verschlüsselt sein.', correct: false }, { text: 'Im Verlauf der Übertragung müssen die Daten verschlüsselt werden.', correct: false }], hint: 'während → während + Genitiv', explanation: '<strong>während</strong> → <strong>während + Genitiv</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Version ist korrekt?', original: 'Sobald verdächtige Aktivitäten erkannt werden, muss eine Meldung erfolgen.', options: [{ text: 'Bei Erkennung verdächtiger Aktivitäten muss eine Meldung erfolgen.', correct: true }, { text: 'Sobald der Erkennung verdächtiger Aktivitäten erfolgt eine Meldung.', correct: false }, { text: 'Nach Erkennung verdächtiger Aktivitäten muss eine Meldung erfolgen.', correct: false }, { text: 'Im Falle der Erkennung verdächtiger Aktivitäten meldet man.', correct: false }], hint: 'sobald → bei + Dativ', explanation: '<strong>sobald</strong> → <strong>bei + Dativ</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Nominalisierung ist am besten?', original: 'Obwohl die Implementierung komplex war, wurde sie fristgerecht abgeschlossen.', options: [{ text: 'Trotz der Komplexität der Implementierung wurde sie fristgerecht abgeschlossen.', correct: true }, { text: 'Trotz der komplexen Implementierung schloss man sie fristgerecht ab.', correct: false }, { text: 'Obwohl der Implementierungskomplexität wurde sie fristgerecht abgeschlossen.', correct: false }, { text: 'Trotz dass die Implementierung komplex war, schloss man sie ab.', correct: false }], hint: 'komplex sein → die Komplexität', explanation: '<strong>komplex sein</strong> → <strong>die Komplexität</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Umformung ist fachsprachlich korrekt?', original: 'Nachdem der Kunde identifiziert wurde, kann die Geschäftsbeziehung beginnen.', options: [{ text: 'Nach Identifizierung des Kunden kann die Geschäftsbeziehung beginnen.', correct: true }, { text: 'Nach dem Identifizieren des Kunden beginnt die Geschäftsbeziehung.', correct: false }, { text: 'Nachdem der Kundenidentifizierung kann die Beziehung beginnen.', correct: false }, { text: 'Nach dass der Kunde identifiziert wurde, beginnt die Beziehung.', correct: false }], hint: 'nachdem → nach; identifizieren → Identifizierung', explanation: '<strong>nachdem</strong> → <strong>nach</strong>; <strong>identifizieren</strong> → <strong>Identifizierung</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Version ist korrekt?', original: 'Um Geldwäsche zu verhindern, müssen strenge Kontrollen durchgeführt werden.', options: [{ text: 'Zur Verhinderung von Geldwäsche müssen strenge Kontrollen durchgeführt werden.', correct: true }, { text: 'Zum Verhindern von Geldwäsche führt man strenge Kontrollen durch.', correct: false }, { text: 'Um der Geldwäscheverhinderung müssen Kontrollen durchgeführt werden.', correct: false }, { text: 'Für dass Geldwäsche verhindert wird, führt man Kontrollen durch.', correct: false }], hint: 'um...zu → zur + Nomen', explanation: '<strong>um...zu</strong> → <strong>zur + Nomen</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Nominalisierung ist korrekt?', original: 'Da der Verantwortliche gegen die DSGVO verstieß, wurde ein Bußgeld verhängt.', options: [{ text: 'Aufgrund des Verstoßes gegen die DSGVO wurde ein Bußgeld verhängt.', correct: true }, { text: 'Wegen des Verstoßens gegen die DSGVO verhängte man ein Bußgeld.', correct: false }, { text: 'Da des DSGVO-Verstoßes wurde ein Bußgeld verhängt.', correct: false }, { text: 'Durch den Verstoß gegen die DSGVO wurde ein Bußgeld verhängt.', correct: false }], hint: 'verstoßen → der Verstoß', explanation: '<strong>verstoßen</strong> → <strong>der Verstoß</strong>', points: 25 }
+        ]
+    }
+};
+
+// =====================================================
+// GAME STATE & LOGIC
+// =====================================================
+
+let gameState = {
+    theme: 'psychologie',
+    mode: 'master',
+    currentExerciseIndex: 0,
+    exercises: [],
+    points: 0,
+    correct: 0,
+    incorrect: 0,
+    streak: 0,
+    bestStreak: 0,
+    totalExercises: 40,
+    soundEnabled: true,
+    categoryStats: {
+        verb: { correct: 0, total: 0 },
+        adjektiv: { correct: 0, total: 0 },
+        nebensatz: { correct: 0, total: 0 },
+        modal: { correct: 0, total: 0 },
+        pronomen: { correct: 0, total: 0 },
+        fvg: { correct: 0, total: 0 },
+        komplex: { correct: 0, total: 0 }
+    },
+    answered: false,
+    hintUsed: false
+};
+
+let audioContext = null;
+
+// =====================================================
+// INITIALIZATION
+// =====================================================
+
+function init() {
+    createNeuralBackground();
+    updateMenuLeaderboard();
+    document.getElementById('backBtn').addEventListener('click', confirmExit);
+    document.getElementById('soundBtn').addEventListener('click', toggleSound);
+}
+
+function createNeuralBackground() {
+    const bg = document.getElementById('neuralBg');
+    for (let i = 0; i < 25; i++) {
+        const n = document.createElement('div');
+        n.className = 'neuron';
+        n.style.left = Math.random() * 100 + '%';
+        n.style.top = Math.random() * 100 + '%';
+        n.style.animationDelay = Math.random() * 3 + 's';
+        bg.appendChild(n);
+    }
+}
+
+function toggleSound() {
+    gameState.soundEnabled = !gameState.soundEnabled;
+    document.getElementById('soundBtn').textContent = gameState.soundEnabled ? '🔊' : '🔇';
+}
+
+// =====================================================
+// AUDIO
+// =====================================================
+
+function initAudio() {
+    if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+}
+
+function playSound(type) {
+    if (!gameState.soundEnabled) return;
+    initAudio();
+    const o = audioContext.createOscillator();
+    const g = audioContext.createGain();
+    o.connect(g);
+    g.connect(audioContext.destination);
+    
+    if (type === 'correct') {
+        o.frequency.setValueAtTime(523.25, audioContext.currentTime);
+        o.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1);
+        g.gain.setValueAtTime(0.15, audioContext.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.25);
+        o.start();
+        o.stop(audioContext.currentTime + 0.25);
+    } else if (type === 'incorrect') {
+        o.frequency.setValueAtTime(200, audioContext.currentTime);
+        g.gain.setValueAtTime(0.12, audioContext.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+        o.start();
+        o.stop(audioContext.currentTime + 0.2);
+    } else if (type === 'complete') {
+        [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
+            const os = audioContext.createOscillator();
+            const ga = audioContext.createGain();
+            os.connect(ga);
+            ga.connect(audioContext.destination);
+            os.frequency.setValueAtTime(f, audioContext.currentTime + i * 0.1);
+            ga.gain.setValueAtTime(0.15, audioContext.currentTime + i * 0.1);
+            ga.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.1 + 0.2);
+            os.start(audioContext.currentTime + i * 0.1);
+            os.stop(audioContext.currentTime + i * 0.1 + 0.2);
+        });
+    }
+}
+
+// =====================================================
+// NAVIGATION
+// =====================================================
+
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+function selectTheme(theme) {
+    gameState.theme = theme;
+    const badge = document.getElementById('selectedThemeBadge');
+    const icon = document.getElementById('themeIcon');
+    const name = document.getElementById('themeName');
+    
+    badge.className = 'selected-theme-badge ' + (theme === 'psychologie' ? 'psycho' : 'tech');
+    
+    if (theme === 'psychologie') {
+        icon.textContent = '🧠';
+        name.textContent = 'Psychologie';
+    } else {
+        icon.textContent = '⚖️💻';
+        name.textContent = 'IT & Recht';
+    }
+    
+    showScreen('modeScreen');
+}
+
+function goToThemeSelect() {
+    document.getElementById('backBtn').style.display = 'none';
+    showScreen('themeScreen');
+    updateMenuLeaderboard();
+}
+
+function goToModeSelect() {
+    document.getElementById('backBtn').style.display = 'none';
+    showScreen('modeScreen');
+}
+
+function confirmExit() {
+    if (gameState.currentExerciseIndex > 0 && !gameState.answered) {
+        if (confirm('Möchtest du das Training wirklich beenden? Dein Fortschritt geht verloren.')) {
+            goToModeSelect();
+        }
+    } else {
+        goToModeSelect();
+    }
+}
+
+function showTheory() {
+    document.getElementById('theoryModal').classList.add('show');
+}
+
+function hideTheory() {
+    document.getElementById('theoryModal').classList.remove('show');
+}
+
+// =====================================================
+// GAME LOGIC
+// =====================================================
+
+function startGame(mode) {
+    gameState = {
+        theme: gameState.theme,
+        mode: mode,
+        currentExerciseIndex: 0,
+        exercises: [],
+        points: 0,
+        correct: 0,
+        incorrect: 0,
+        streak: 0,
+        bestStreak: 0,
+        totalExercises: mode === 'master' ? 50 : 40,
+        soundEnabled: gameState.soundEnabled,
+        categoryStats: {
+            verb: { correct: 0, total: 0 },
+            adjektiv: { correct: 0, total: 0 },
+            nebensatz: { correct: 0, total: 0 },
+            modal: { correct: 0, total: 0 },
+            pronomen: { correct: 0, total: 0 },
+            fvg: { correct: 0, total: 0 },
+            komplex: { correct: 0, total: 0 }
+        },
+        answered: false,
+        hintUsed: false
+    };
+    
+    const themeExercises = exercises[gameState.theme];
+    let selectedExercises = [];
+    
+    if (mode === 'fokus-verb') {
+        selectedExercises = [...themeExercises.verb];
+    } else if (mode === 'fokus-adjektiv') {
+        selectedExercises = [...themeExercises.adjektiv];
+    } else if (mode === 'fokus-nebensatz') {
+        selectedExercises = [...themeExercises.nebensatz];
+    } else if (mode === 'fokus-modal') {
+        selectedExercises = [...themeExercises.modal];
+    } else if (mode === 'fokus-fvg') {
+        selectedExercises = [...themeExercises.fvg];
+    } else if (mode === 'fokus-komplex') {
+        selectedExercises = [...themeExercises.komplex];
+    } else if (mode === 'master') {
+        Object.values(themeExercises).forEach(catExercises => {
+            selectedExercises.push(...catExercises);
+        });
+    }
+    
+    // Shuffle and limit
+    gameState.exercises = selectedExercises
+        .sort(() => Math.random() - 0.5)
+        .slice(0, gameState.totalExercises);
+    
+    showScreen('gameScreen');
+    document.getElementById('backBtn').style.display = 'flex';
+    loadExercise();
+    updateStats();
+}
+
+function loadExercise() {
+    if (gameState.currentExerciseIndex >= gameState.exercises.length) {
+        endGame();
+        return;
+    }
+    
+    gameState.answered = false;
+    gameState.hintUsed = false;
+    
+    const ex = gameState.exercises[gameState.currentExerciseIndex];
+    const container = document.getElementById('exerciseContainer');
+    
+    document.getElementById('checkBtn').disabled = false;
+    document.getElementById('checkBtn').textContent = '✅ Überprüfen';
+    document.getElementById('hintBtn').disabled = false;
+    
+    const catNames = {
+        verb: '📝 Verb → Nomen',
+        adjektiv: '🎨 Adjektiv → Nomen',
+        nebensatz: '🔄 Nebensatz',
+        modal: '💭 Modalverb',
+        pronomen: '👤 Pronomen',
+        fvg: '⚡ FVG',
+        komplex: '🧩 Komplex'
+    };
+    
+    let html = `
+        <div class="exercise-card">
+            <span class="exercise-type" style="background: var(--cat-${ex.category});">
+                ${catNames[ex.category] || ex.category}
+            </span>
+            <p class="exercise-instruction">${ex.instruction}</p>
+            <div class="original-sentence">
+                <div class="original-label">Originalsatz:</div>
+                <div class="original-text">${ex.original}</div>
+            </div>
+            <div class="transform-section">
+                <div class="transform-label">✨ Deine Umformung:</div>
+    `;
+    
+    if (ex.type === 'fill') {
+        html += '<div class="transform-input-container">';
+        ex.template.forEach(p => {
+            if (typeof p === 'string') {
+                html += `<span class="static-text">${p}</span>`;
+            } else {
+                html += `<input type="text" class="input-slot" data-correct='${JSON.stringify(p.correct)}' style="width:${p.width}px" placeholder="..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">`;
+            }
+        });
+        html += '</div>';
+    } else if (ex.type === 'mc') {
+        html += '<div class="mc-options">';
+        ex.options.forEach((o, i) => {
+            html += `
+                <div class="mc-option" data-correct="${o.correct}" onclick="selectMC(this)">
+                    <span class="mc-letter">${String.fromCharCode(65 + i)}</span>
+                    <span class="mc-text">${o.text}</span>
+                </div>
+            `;
+        });
+        html += '</div>';
+    }
+    
+    html += `
+            </div>
+            <div class="explanation-box" id="explanation">
+                <div class="explanation-title">💡 Erklärung</div>
+                <div class="explanation-text">${ex.explanation}</div>
+            </div>
+        </div>
+    `;
+    
+    container.innerHTML = html;
+    
+    // Focus first input if fill type
+    if (ex.type === 'fill') {
+        const firstInput = container.querySelector('.input-slot');
+        if (firstInput) {
+            setTimeout(() => firstInput.focus(), 100);
+        }
+    }
+    
+    updateStats();
+}
+
+function selectMC(el) {
+    if (gameState.answered) return;
+    document.querySelectorAll('.mc-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+}
+
+function showHint() {
+    const ex = gameState.exercises[gameState.currentExerciseIndex];
+    
+    // Remove existing hint
+    const existingHint = document.querySelector('.hint-box');
+    if (existingHint) existingHint.remove();
+    
+    const h = document.createElement('div');
+    h.className = 'hint-box';
+    h.innerHTML = `<strong>💡 Tipp:</strong> ${ex.hint}`;
+    
+    const transformSection = document.querySelector('.transform-section');
+    transformSection.parentNode.insertBefore(h, transformSection);
+    
+    gameState.hintUsed = true;
+    document.getElementById('hintBtn').disabled = true;
+}
+
+function checkAnswer() {
+    if (gameState.answered) {
+        gameState.currentExerciseIndex++;
+        loadExercise();
+        return;
+    }
+    
+    const ex = gameState.exercises[gameState.currentExerciseIndex];
+    let isCorrect = false;
+    
+    if (ex.type === 'fill') {
+        isCorrect = checkFillAnswer();
+    } else if (ex.type === 'mc') {
+        isCorrect = checkMCAnswer();
+    }
+    
+    gameState.answered = true;
+    
+    const cat = ex.category;
+    gameState.categoryStats[cat].total++;
+    
+    if (isCorrect) {
+        gameState.correct++;
+        gameState.streak++;
+        gameState.categoryStats[cat].correct++;
+        
+        if (gameState.streak > gameState.bestStreak) {
+            gameState.bestStreak = gameState.streak;
+        }
+        
+        let pts = ex.points;
+        if (!gameState.hintUsed) pts += 5;
+        if (gameState.streak >= 3) pts += gameState.streak * 2;
+        
+        gameState.points += pts;
+        showPointsPopup(pts);
+        playSound('correct');
+    } else {
+        gameState.incorrect++;
+        gameState.streak = 0;
+        playSound('incorrect');
+    }
+    
+    document.getElementById('explanation').classList.add('show');
+    document.getElementById('checkBtn').textContent = '➡️ Weiter';
+    updateStats();
+}
+
+function checkFillAnswer() {
+    const inputs = document.querySelectorAll('.input-slot');
+    let allCorrect = true;
+    
+    inputs.forEach(inp => {
+        const correctAnswers = JSON.parse(inp.dataset.correct);
+        const userAnswer = inp.value.trim();
+        const isCorrect = correctAnswers.some(c => 
+            userAnswer.toLowerCase() === c.toLowerCase()
+        );
+        
+        if (isCorrect) {
+            inp.classList.add('correct');
+        } else {
+            inp.classList.add('incorrect');
+            allCorrect = false;
+            
+            const hint = document.createElement('span');
+            hint.style.cssText = 'color: var(--success); margin-left: 8px; font-size: 0.9rem;';
+            hint.textContent = '→ ' + correctAnswers[0];
+            inp.parentNode.insertBefore(hint, inp.nextSibling);
+        }
+        inp.disabled = true;
+    });
+    
+    return allCorrect;
+}
+
+function checkMCAnswer() {
+    const selected = document.querySelector('.mc-option.selected');
+    
+    if (!selected) {
+        alert('Bitte wähle eine Option aus!');
+        gameState.answered = false;
+        return false;
+    }
+    
+    const isCorrect = selected.dataset.correct === 'true';
+    
+    document.querySelectorAll('.mc-option').forEach(option => {
+        if (option.dataset.correct === 'true') {
+            option.classList.add('correct');
+        } else if (option.classList.contains('selected')) {
+            option.classList.add('incorrect');
+        }
+    });
+    
+    return isCorrect;
+}
+
+function skipExercise() {
+    const ex = gameState.exercises[gameState.currentExerciseIndex];
+    gameState.categoryStats[ex.category].total++;
+    gameState.incorrect++;
+    gameState.streak = 0;
+    gameState.currentExerciseIndex++;
+    loadExercise();
+    updateStats();
+}
+
+function showPointsPopup(pts) {
+    const p = document.createElement('div');
+    p.className = 'points-popup';
+    p.textContent = '+' + pts;
+    p.style.left = '50%';
+    p.style.top = '35%';
+    p.style.transform = 'translateX(-50%)';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 1000);
+}
+
+function updateStats() {
+    document.getElementById('points').textContent = gameState.points;
+    document.getElementById('streak').textContent = gameState.streak;
+    document.getElementById('correct').textContent = gameState.correct;
+    document.getElementById('total').textContent = gameState.correct + gameState.incorrect;
+    
+    document.getElementById('streakFire').style.display = 
+        gameState.streak >= 3 ? 'inline-block' : 'none';
+    
+    const progress = (gameState.currentExerciseIndex / gameState.totalExercises) * 100;
+    document.getElementById('progressFill').style.width = progress + '%';
+    document.getElementById('exerciseCounter').textContent = 
+        `Übung ${gameState.currentExerciseIndex + 1}/${gameState.totalExercises}`;
+}
+
+// =====================================================
+// END GAME
+// =====================================================
+
+function endGame() {
+    playSound('complete');
+    createConfetti();
+    
+    const total = gameState.correct + gameState.incorrect;
+    const accuracy = total > 0 ? Math.round((gameState.correct / total) * 100) : 0;
+    
+    document.getElementById('finalPoints').textContent = gameState.points;
+    document.getElementById('finalCorrect').textContent = `${gameState.correct}/${total}`;
+    document.getElementById('finalStreak').textContent = gameState.bestStreak;
+    
+    // Animate accuracy ring
+    const circle = document.getElementById('accuracyCircle');
+    const circumference = 2 * Math.PI * 55;
+    setTimeout(() => {
+        circle.style.strokeDashoffset = circumference - (accuracy / 100) * circumference;
+        document.getElementById('accuracyText').textContent = accuracy + '%';
+    }, 100);
+    
+    // Category stats
+    const catColors = {
+        verb: 'var(--cat-verb)',
+        adjektiv: 'var(--cat-adj)',
+        nebensatz: 'var(--cat-nebensatz)',
+        modal: 'var(--cat-modal)',
+        pronomen: 'var(--cat-pronomen)',
+        fvg: 'var(--cat-fvg)',
+        komplex: 'var(--cat-komplex)'
+    };
+    
+    const catNames = {
+        verb: 'Verb → Nomen',
+        adjektiv: 'Adjektiv → Nomen',
+        nebensatz: 'Nebensatz',
+        modal: 'Modalverben',
+        pronomen: 'Pronomen',
+        fvg: 'FVG',
+        komplex: 'Komplex'
+    };
+    
+    let catHtml = '';
+    for (const [cat, stats] of Object.entries(gameState.categoryStats)) {
+        if (stats.total > 0) {
+            catHtml += `
+                <div class="cat-stat">
+                    <div class="cat-stat-name">
+                        <div class="cat-stat-dot" style="background: ${catColors[cat]}"></div>
+                        <span>${catNames[cat]}</span>
+                    </div>
+                    <span class="cat-stat-score">${stats.correct}/${stats.total}</span>
+                </div>
+            `;
+        }
+    }
+    document.getElementById('categoryStats').innerHTML = catHtml;
+    
+    showScreen('resultScreen');
+    document.getElementById('backBtn').style.display = 'none';
+    updateResultLeaderboard();
+}
+
+function createConfetti() {
+    const colors = ['#9b59b6', '#bb77d4', '#ffd700', '#3498db', '#2ecc71', '#e74c3c'];
+    for (let i = 0; i < 50; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.left = Math.random() * 100 + 'vw';
+        c.style.top = '-10px';
+        c.style.background = colors[Math.floor(Math.random() * colors.length)];
+        c.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+        c.style.width = c.style.height = (Math.random() * 8 + 4) + 'px';
+        document.body.appendChild(c);
+        
+        const anim = c.animate([
+            { transform: 'translateY(0) rotate(0)', opacity: 1 },
+            { transform: `translateY(100vh) rotate(${Math.random() * 720}deg)`, opacity: 0 }
+        ], {
+            duration: Math.random() * 2000 + 2000,
+            easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+        });
+        anim.onfinish = () => c.remove();
+    }
+}
+
+// =====================================================
+// LEADERBOARD
+// =====================================================
+
+function loadLeaderboard() {
+    const saved = localStorage.getItem('nominalisierungLeaderboard2');
+    return saved ? JSON.parse(saved) : [];
+}
+
+function saveLeaderboard(lb) {
+    localStorage.setItem('nominalisierungLeaderboard2', JSON.stringify(lb));
+}
+
+function saveScore() {
+    const nameInput = document.getElementById('playerName');
+    const name = nameInput.value.trim() || 'Anonym';
+    const total = gameState.correct + gameState.incorrect;
+    const accuracy = total > 0 ? Math.round((gameState.correct / total) * 100) : 0;
+    
+    const themeNames = {
+        psychologie: '🧠 Psychologie',
+        techrecht: '⚖️ IT & Recht'
+    };
+    
+    const entry = {
+        name: name,
+        points: gameState.points,
+        accuracy: accuracy,
+        theme: themeNames[gameState.theme],
+        mode: gameState.mode,
+        date: new Date().toLocaleDateString('de-DE')
+    };
+    
+    const lb = loadLeaderboard();
+    lb.push(entry);
+    lb.sort((a, b) => b.points - a.points);
+    saveLeaderboard(lb.slice(0, 15));
+    
+    updateResultLeaderboard();
+    updateMenuLeaderboard();
+    
+    nameInput.disabled = true;
+    event.target.disabled = true;
+    event.target.textContent = '✓ Gespeichert!';
+}
+
+function updateMenuLeaderboard() {
+    const container = document.getElementById('menuLeaderboard');
+    const lb = loadLeaderboard();
+    
+    if (!lb.length) {
+        container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Noch keine Einträge. Sei die Erste!</p>';
+        return;
+    }
+    
+    container.innerHTML = lb.slice(0, 5).map((e, i) => `
+        <div class="leaderboard-entry">
+            <span class="leaderboard-rank">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1) + '.'}</span>
+            <span class="leaderboard-name">${e.name}</span>
+            <span class="leaderboard-score">${e.points} Pkt</span>
+        </div>
+    `).join('');
+}
+
+function updateResultLeaderboard() {
+    const container = document.getElementById('resultLeaderboard');
+    const lb = loadLeaderboard();
+    
+    container.innerHTML = `
+        <h3 style="font-family: 'Fredoka', sans-serif; color: var(--accent-glow); margin-bottom: 12px; font-size: 1.1rem;">🏅 Bestenliste</h3>
+        ${lb.slice(0, 5).map((e, i) => `
+            <div class="leaderboard-entry">
+                <span class="leaderboard-rank">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1) + '.'}</span>
+                <span class="leaderboard-name">${e.name}</span>
+                <span class="leaderboard-score">${e.points} Pkt</span>
+            </div>
+        `).join('')}
+    `;
+}
+
+function playAgain() {
+    const nameInput = document.getElementById('playerName');
+    nameInput.disabled = false;
+    nameInput.value = '';
+    
+    const saveBtn = document.querySelector('#resultScreen .control-btn.primary');
+    if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = '💾 Speichern';
+    }
+    
+    startGame(gameState.mode);
+}
+
+// =====================================================
+// EVENT LISTENERS
+// =====================================================
+
+document.addEventListener('DOMContentLoaded', init);
+
+document.getElementById('theoryModal').addEventListener('click', function(e) {
+    if (e.target === this) hideTheory();
+});
+
+// Enter key to check answer
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && document.getElementById('gameScreen').classList.contains('active')) {
+        checkAnswer();
+    }
+});
+</script>
+</body>
+</html>
