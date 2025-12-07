@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nominalisierungs-Labor 2 🏥🏃</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a1a2e; --primary-light: #2d2d4a; --accent: #2ecc71; --accent-glow: #58d68d;
+            --success: #2ecc71; --error: #e74c3c; --bg-dark: #0f0f1a; --bg-card: #1a1a2e;
+            --text: #ffffff; --text-muted: #a0a0c0; --gold: #ffd700;
+            --cat-verb: #3498db; --cat-adj: #e74c3c; --cat-nebensatz: #2ecc71;
+            --cat-modal: #f39c12; --cat-pronomen: #9b59b6; --cat-fvg: #1abc9c; --cat-komplex: #e91e63;
+            --theme-sport: #e67e22; --theme-medizin: #1abc9c;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Quicksand', sans-serif; background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1a2e 50%, var(--bg-dark) 100%); min-height: 100vh; color: var(--text); overflow-x: hidden; }
+        .neural-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; opacity: 0.3; }
+        .neuron { position: absolute; width: 4px; height: 4px; background: var(--accent-glow); border-radius: 50%; animation: pulse-neuron 3s ease-in-out infinite; }
+        @keyframes pulse-neuron { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+        .container { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 20px; }
+        header { text-align: center; margin-bottom: 30px; }
+        h1 { font-family: 'Fredoka', sans-serif; font-size: 2.8rem; background: linear-gradient(135deg, var(--accent-glow), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px; }
+        .subtitle { color: var(--text-muted); font-size: 1.1rem; }
+        .level-badge { display: inline-block; background: linear-gradient(135deg, var(--accent) 0%, var(--accent-glow) 100%); padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; margin-top: 10px; color: white; }
+        .screen { display: none; animation: fadeIn 0.5s ease; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .menu-card { background: var(--bg-card); border-radius: 20px; padding: 30px; margin-bottom: 20px; border: 2px solid var(--primary-light); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); }
+        
+        /* Theme Selection */
+        .theme-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
+        .theme-card { background: var(--bg-card); border-radius: 20px; padding: 30px; text-align: center; cursor: pointer; transition: all 0.3s ease; border: 3px solid transparent; position: relative; overflow: hidden; }
+        .theme-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.4); }
+        .theme-card.sport { border-color: var(--theme-sport); }
+        .theme-card.sport:hover { background: linear-gradient(135deg, rgba(230,126,34,0.2), transparent); }
+        .theme-card.medizin { border-color: var(--theme-medizin); }
+        .theme-card.medizin:hover { background: linear-gradient(135deg, rgba(26,188,156,0.2), transparent); }
+        .theme-icon { font-size: 4rem; margin-bottom: 15px; display: block; }
+        .theme-title { font-family: 'Fredoka', sans-serif; font-size: 1.8rem; margin-bottom: 10px; }
+        .theme-card.sport .theme-title { color: var(--theme-sport); }
+        .theme-card.medizin .theme-title { color: var(--theme-medizin); }
+        .theme-desc { color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; }
+        .theme-count { display: inline-block; background: var(--primary-light); padding: 5px 12px; border-radius: 15px; font-size: 0.85rem; margin-top: 15px; color: var(--gold); }
+        
+        /* Selected Theme Badge */
+        .selected-theme-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 20px; font-weight: 600; margin-bottom: 20px; }
+        .selected-theme-badge.sport { background: linear-gradient(135deg, var(--theme-sport), #d35400); }
+        .selected-theme-badge.medizin { background: linear-gradient(135deg, var(--theme-medizin), #16a085); }
+        
+        /* Mode Grid */
+        .mode-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-top: 20px; }
+        .mode-btn { background: linear-gradient(135deg, var(--primary-light), var(--primary)); border: 2px solid var(--accent); border-radius: 15px; padding: 20px 15px; text-align: center; cursor: pointer; transition: all 0.3s ease; }
+        .mode-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(46, 204, 113, 0.3); background: linear-gradient(135deg, var(--accent), var(--accent-glow)); }
+        .mode-btn .icon { font-size: 2rem; margin-bottom: 8px; display: block; }
+        .mode-btn .label { font-weight: 700; font-size: 0.95rem; }
+        .mode-btn.master { border-color: var(--gold); }
+        .mode-btn.master:hover { box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3); background: linear-gradient(135deg, #f39c12, var(--gold)); }
+        
+        /* Back to Theme Button */
+        .back-to-theme { display: inline-flex; align-items: center; gap: 8px; background: var(--primary-light); border: none; color: var(--text-muted); padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 0.9rem; margin-bottom: 15px; transition: all 0.3s ease; }
+        .back-to-theme:hover { background: var(--primary); color: var(--text); }
+        
+        /* Leaderboard */
+        .leaderboard-mini { margin-top: 20px; }
+        .leaderboard-mini h3 { font-family: 'Fredoka', sans-serif; color: var(--accent-glow); margin-bottom: 15px; font-size: 1.2rem; }
+        .leaderboard-entry { display: flex; align-items: center; padding: 10px 15px; background: var(--primary-light); border-radius: 10px; margin-bottom: 8px; }
+        .leaderboard-rank { font-size: 1.2rem; margin-right: 12px; min-width: 30px; }
+        .leaderboard-name { flex: 1; font-weight: 600; }
+        .leaderboard-score { color: var(--gold); font-weight: 700; }
+        
+        /* Game Screen */
+        .game-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
+        .stats-bar { display: flex; gap: 20px; flex-wrap: wrap; }
+        .stat { background: var(--bg-card); padding: 10px 20px; border-radius: 12px; text-align: center; border: 1px solid var(--primary-light); }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--accent-glow); }
+        .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+        .streak-fire { display: none; animation: bounce 0.5s ease infinite; }
+        @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+        
+        .progress-container { width: 100%; background: var(--primary-light); border-radius: 10px; height: 12px; margin-bottom: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-glow), var(--gold)); border-radius: 10px; transition: width 0.5s ease; width: 0%; }
+        .exercise-counter { text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; }
+        
+        /* Exercise Card */
+        .exercise-card { background: var(--bg-card); border-radius: 20px; padding: 30px; border: 2px solid var(--primary-light); margin-bottom: 20px; }
+        .exercise-type { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; margin-bottom: 15px; color: white; }
+        .exercise-instruction { font-size: 1.1rem; margin-bottom: 20px; line-height: 1.6; }
+        .original-sentence { background: linear-gradient(135deg, var(--primary-light), var(--primary)); padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid var(--accent); }
+        .original-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+        .original-text { font-size: 1.15rem; line-height: 1.6; }
+        
+        .transform-section { background: rgba(46, 204, 113, 0.1); padding: 20px; border-radius: 12px; border: 2px dashed var(--accent); }
+        .transform-label { font-size: 0.9rem; color: var(--accent-glow); margin-bottom: 12px; font-weight: 600; }
+        .transform-input-container { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; line-height: 2.2; }
+        .static-text { font-size: 1.1rem; }
+        .input-slot { background: var(--primary); border: 2px solid var(--accent); border-radius: 8px; padding: 8px 12px; color: var(--text); font-size: 1rem; font-family: inherit; transition: all 0.3s ease; }
+        .input-slot:focus { outline: none; border-color: var(--accent-glow); box-shadow: 0 0 15px rgba(46, 204, 113, 0.4); }
+        .input-slot.correct { border-color: var(--success); background: rgba(46, 204, 113, 0.2); }
+        .input-slot.incorrect { border-color: var(--error); background: rgba(231, 76, 60, 0.2); }
+        
+        /* MC Options */
+        .mc-options { display: grid; gap: 12px; }
+        .mc-option { display: flex; align-items: center; gap: 15px; background: var(--primary-light); padding: 15px 20px; border-radius: 12px; cursor: pointer; transition: all 0.3s ease; border: 2px solid transparent; }
+        .mc-option:hover { border-color: var(--accent); transform: translateX(5px); }
+        .mc-option.selected { border-color: var(--accent); background: rgba(46, 204, 113, 0.15); }
+        .mc-option.correct { border-color: var(--success); background: rgba(46, 204, 113, 0.2); }
+        .mc-option.incorrect { border-color: var(--error); background: rgba(231, 76, 60, 0.2); }
+        .mc-letter { width: 35px; height: 35px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+        .mc-text { font-size: 1rem; line-height: 1.5; }
+        
+        /* Hint & Explanation */
+        .hint-box { background: rgba(243, 156, 18, 0.15); border: 1px solid #f39c12; padding: 15px; border-radius: 10px; margin-bottom: 15px; font-size: 0.95rem; }
+        .explanation-box { background: rgba(46, 204, 113, 0.1); border: 2px solid var(--success); padding: 20px; border-radius: 12px; margin-top: 20px; display: none; }
+        .explanation-box.show { display: block; animation: fadeIn 0.3s ease; }
+        .explanation-title { font-weight: 700; color: var(--success); margin-bottom: 10px; }
+        .explanation-text { line-height: 1.6; }
+        
+        /* Buttons */
+        .btn-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
+        .control-btn { padding: 12px 25px; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; border: none; font-family: inherit; }
+        .control-btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent-glow)); color: white; }
+        .control-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(46, 204, 113, 0.4); }
+        .control-btn.secondary { background: var(--primary-light); color: var(--text); border: 2px solid var(--primary-light); }
+        .control-btn.secondary:hover { border-color: var(--accent); }
+        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        
+        /* Header Buttons */
+        .header-btns { position: fixed; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 100; }
+        .header-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--bg-card); border: 2px solid var(--primary-light); color: var(--text); font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; }
+        .header-btn:hover { border-color: var(--accent); transform: scale(1.1); }
+        
+        /* Results Screen */
+        .result-card { background: var(--bg-card); border-radius: 20px; padding: 40px; text-align: center; border: 2px solid var(--gold); }
+        .result-title { font-family: 'Fredoka', sans-serif; font-size: 2.5rem; margin-bottom: 10px; background: linear-gradient(135deg, var(--gold), var(--accent-glow)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .result-subtitle { color: var(--text-muted); margin-bottom: 30px; }
+        .final-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .final-stat { background: var(--primary-light); padding: 20px; border-radius: 15px; }
+        .final-stat-value { font-size: 2rem; font-weight: 700; color: var(--accent-glow); }
+        .final-stat-label { font-size: 0.85rem; color: var(--text-muted); margin-top: 5px; }
+        
+        .accuracy-ring { width: 150px; height: 150px; margin: 0 auto 30px; position: relative; }
+        .accuracy-ring svg { transform: rotate(-90deg); }
+        .accuracy-ring circle { fill: none; stroke-width: 10; }
+        .accuracy-ring .bg { stroke: var(--primary-light); }
+        .accuracy-ring .progress { stroke: var(--accent-glow); stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
+        .accuracy-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2rem; font-weight: 700; color: var(--accent-glow); }
+        
+        .category-breakdown { background: var(--primary-light); border-radius: 15px; padding: 20px; margin-bottom: 25px; text-align: left; }
+        .cat-stat { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--primary); }
+        .cat-stat:last-child { border-bottom: none; }
+        .cat-stat-name { display: flex; align-items: center; gap: 10px; }
+        .cat-stat-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .cat-stat-score { font-weight: 700; color: var(--accent-glow); }
+        
+        .save-score { display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
+        .save-score input { background: var(--primary); border: 2px solid var(--accent); border-radius: 10px; padding: 12px 20px; color: var(--text); font-size: 1rem; width: 200px; }
+        .save-score input:focus { outline: none; border-color: var(--accent-glow); }
+        
+        /* Theory Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: all 0.3s ease; padding: 20px; }
+        .modal-overlay.show { opacity: 1; visibility: visible; }
+        .modal-content { background: var(--bg-card); border-radius: 20px; max-width: 800px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 30px; border: 2px solid var(--accent); }
+        .modal-close { float: right; background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+        .modal-close:hover { color: var(--text); }
+        .modal-title { font-family: 'Fredoka', sans-serif; font-size: 1.8rem; color: var(--accent-glow); margin-bottom: 20px; }
+        .theory-section { margin-bottom: 25px; }
+        .theory-section h3 { color: var(--gold); margin-bottom: 12px; font-size: 1.1rem; }
+        .theory-section p, .theory-section li { color: var(--text-muted); line-height: 1.7; margin-bottom: 8px; }
+        .theory-section ul { padding-left: 20px; }
+        .theory-example { background: var(--primary-light); padding: 12px 15px; border-radius: 8px; margin: 10px 0; border-left: 3px solid var(--accent); }
+        .theory-example .from { color: var(--error); }
+        .theory-example .to { color: var(--success); }
+        
+        /* Confetti */
+        .confetti { position: fixed; z-index: 1001; pointer-events: none; }
+        
+        /* Points Popup */
+        .points-popup { position: fixed; font-size: 2rem; font-weight: 700; color: var(--gold); pointer-events: none; z-index: 100; animation: popUp 1s ease forwards; }
+        @keyframes popUp { 0% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); } 100% { opacity: 0; transform: translateX(-50%) translateY(-50px) scale(1.5); } }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .theme-grid { grid-template-columns: 1fr; }
+            .mode-grid { grid-template-columns: repeat(2, 1fr); }
+            .stats-bar { justify-content: center; }
+            .exercise-card { padding: 20px; }
+            .header-btns { top: 10px; right: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="neural-bg" id="neuralBg"></div>
+    
+    <div class="header-btns">
+        <button class="header-btn" id="backBtn" onclick="confirmExit()" style="display: none;">✕</button>
+        <button class="header-btn" id="soundBtn" onclick="toggleSound()">🔊</button>
+    </div>
+    
+    <div class="container">
+        <header>
+            <h1>Nominalisierungs-Labor 2</h1>
+            <p class="subtitle">Sport & Medizin Edition</p>
+            <span class="level-badge">🏥🏃 200 Übungen • C1/C2</span>
+        </header>
+        
+        <!-- THEME SELECTION SCREEN -->
+        <div class="screen active" id="themeScreen">
+            <div class="menu-card">
+                <h2 style="text-align: center; font-family: 'Fredoka', sans-serif; color: var(--accent-glow); margin-bottom: 10px;">Wähle dein Fachgebiet</h2>
+                <p style="text-align: center; color: var(--text-muted); margin-bottom: 20px;">Jedes Thema enthält 100 fachspezifische Übungen</p>
+                
+                <div class="theme-grid">
+                    <div class="theme-card sport" onclick="selectTheme('sport')">
+                        <span class="theme-icon">🏃⚽</span>
+                        <h3 class="theme-title">Sport</h3>
+                        <p class="theme-desc">Training, Wettkampf, Sportmedizin, Ernährung, Leistungsdiagnostik</p>
+                        <span class="theme-count">100 Übungen</span>
+                    </div>
+                    
+                    <div class="theme-card medizin" onclick="selectTheme('medizin')">
+                        <span class="theme-icon">🏥🔬</span>
+                        <h3 class="theme-title">Medizin & Forschung</h3>
+                        <p class="theme-desc">Diagnose, Behandlung, Klinische Studien, Pharmazie, Labormedizin</p>
+                        <span class="theme-count">100 Übungen</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="menu-card">
+                <div class="leaderboard-mini">
+                    <h3>🏆 Bestenliste</h3>
+                    <div id="menuLeaderboard"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- MODE SELECTION SCREEN -->
+        <div class="screen" id="modeScreen">
+            <div class="menu-card">
+                <button class="back-to-theme" onclick="goToThemeSelect()">← Thema wechseln</button>
+                
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div class="selected-theme-badge" id="selectedThemeBadge">
+                        <span id="themeIcon">🏃</span>
+                        <span id="themeName">Sport</span>
+                    </div>
+                </div>
+                
+                <h2 style="text-align: center; font-family: 'Fredoka', sans-serif; color: var(--accent-glow); margin-bottom: 20px;">Wähle deinen Trainingsmodus</h2>
+                
+                <div class="mode-grid">
+                    <div class="mode-btn" onclick="startGame('fokus-verb')">
+                        <span class="icon">📝</span>
+                        <span class="label">Verb → Nomen</span>
+                    </div>
+                    <div class="mode-btn" onclick="startGame('fokus-adjektiv')">
+                        <span class="icon">🎨</span>
+                        <span class="label">Adjektiv → Nomen</span>
+                    </div>
+                    <div class="mode-btn" onclick="startGame('fokus-nebensatz')">
+                        <span class="icon">🔄</span>
+                        <span class="label">Nebensatz</span>
+                    </div>
+                    <div class="mode-btn" onclick="startGame('fokus-modal')">
+                        <span class="icon">💭</span>
+                        <span class="label">Modal & Pronomen</span>
+                    </div>
+                    <div class="mode-btn" onclick="startGame('fokus-fvg')">
+                        <span class="icon">⚡</span>
+                        <span class="label">FVG</span>
+                    </div>
+                    <div class="mode-btn" onclick="startGame('fokus-komplex')">
+                        <span class="icon">🧩</span>
+                        <span class="label">Komplex</span>
+                    </div>
+                    <div class="mode-btn master" onclick="startGame('master')" style="grid-column: span 2;">
+                        <span class="icon">🏆</span>
+                        <span class="label">MASTER-MODUS (Alle Kategorien)</span>
+                    </div>
+                </div>
+                
+                <div class="btn-row" style="margin-top: 25px;">
+                    <button class="control-btn secondary" onclick="showTheory()">📚 Theorie ansehen</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- GAME SCREEN -->
+        <div class="screen" id="gameScreen">
+            <div class="game-header">
+                <div class="stats-bar">
+                    <div class="stat">
+                        <div class="stat-value" id="points">0</div>
+                        <div class="stat-label">Punkte</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value"><span id="streak">0</span> <span class="streak-fire" id="streakFire">🔥</span></div>
+                        <div class="stat-label">Serie</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value"><span id="correct">0</span>/<span id="total">0</span></div>
+                        <div class="stat-label">Richtig</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="exercise-counter" id="exerciseCounter">Übung 1/40</div>
+            
+            <div id="exerciseContainer"></div>
+            
+            <div class="btn-row">
+                <button class="control-btn secondary" id="hintBtn" onclick="showHint()">💡 Tipp</button>
+                <button class="control-btn primary" id="checkBtn" onclick="checkAnswer()">✅ Überprüfen</button>
+                <button class="control-btn secondary" onclick="skipExercise()">⏭️ Überspringen</button>
+            </div>
+        </div>
+        
+        <!-- RESULT SCREEN -->
+        <div class="screen" id="resultScreen">
+            <div class="result-card">
+                <h2 class="result-title">🎉 Training abgeschlossen!</h2>
+                <p class="result-subtitle">Hier ist deine Auswertung</p>
+                
+                <div class="accuracy-ring">
+                    <svg width="150" height="150">
+                        <circle class="bg" cx="75" cy="75" r="55"/>
+                        <circle class="progress" cx="75" cy="75" r="55" stroke-dasharray="345.58" stroke-dashoffset="345.58" id="accuracyCircle"/>
+                    </svg>
+                    <div class="accuracy-text" id="accuracyText">0%</div>
+                </div>
+                
+                <div class="final-stats">
+                    <div class="final-stat">
+                        <div class="final-stat-value" id="finalPoints">0</div>
+                        <div class="final-stat-label">Punkte</div>
+                    </div>
+                    <div class="final-stat">
+                        <div class="final-stat-value" id="finalCorrect">0/0</div>
+                        <div class="final-stat-label">Richtig</div>
+                    </div>
+                    <div class="final-stat">
+                        <div class="final-stat-value" id="finalStreak">0</div>
+                        <div class="final-stat-label">Beste Serie</div>
+                    </div>
+                </div>
+                
+                <div class="category-breakdown" id="categoryStats"></div>
+                
+                <div class="save-score">
+                    <input type="text" id="playerName" placeholder="Dein Name..." maxlength="20">
+                    <button class="control-btn primary" onclick="saveScore()">💾 Speichern</button>
+                </div>
+                
+                <div id="resultLeaderboard" style="margin-bottom: 20px;"></div>
+                
+                <div class="btn-row">
+                    <button class="control-btn secondary" onclick="goToModeSelect()">🔄 Anderer Modus</button>
+                    <button class="control-btn secondary" onclick="goToThemeSelect()">🎯 Anderes Thema</button>
+                    <button class="control-btn primary" onclick="playAgain()">🔁 Nochmal spielen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- THEORY MODAL -->
+    <div class="modal-overlay" id="theoryModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="hideTheory()">✕</button>
+            <h2 class="modal-title">📚 Nominalisierung - Theorie</h2>
+            
+            <div class="theory-section">
+                <h3>1. Verb → Nomen</h3>
+                <p>Verben werden zu Nomen umgewandelt, oft mit Suffixen wie -ung, -tion, -heit:</p>
+                <div class="theory-example">
+                    <span class="from">trainieren</span> → <span class="to">das Training / die Trainierung</span><br>
+                    <span class="from">diagnostizieren</span> → <span class="to">die Diagnose / die Diagnostizierung</span>
+                </div>
+            </div>
+            
+            <div class="theory-section">
+                <h3>2. Adjektiv → Nomen</h3>
+                <p>Adjektive werden mit -heit, -keit, -ität zu Nomen:</p>
+                <div class="theory-example">
+                    <span class="from">fit</span> → <span class="to">die Fitness</span><br>
+                    <span class="from">steril</span> → <span class="to">die Sterilität</span>
+                </div>
+            </div>
+            
+            <div class="theory-section">
+                <h3>3. Nebensatz → Präpositionalphrase</h3>
+                <p>Konjunktionen werden zu Präpositionen:</p>
+                <div class="theory-example">
+                    <span class="from">weil</span> → <span class="to">wegen + Genitiv</span><br>
+                    <span class="from">obwohl</span> → <span class="to">trotz + Genitiv</span><br>
+                    <span class="from">bevor</span> → <span class="to">vor + Dativ</span><br>
+                    <span class="from">nachdem</span> → <span class="to">nach + Dativ</span>
+                </div>
+            </div>
+            
+            <div class="theory-section">
+                <h3>4. Modalverben</h3>
+                <p>Modalverben werden zu abstrakten Nomen:</p>
+                <div class="theory-example">
+                    <span class="from">können</span> → <span class="to">die Fähigkeit / die Möglichkeit</span><br>
+                    <span class="from">müssen</span> → <span class="to">die Notwendigkeit / die Pflicht</span><br>
+                    <span class="from">dürfen</span> → <span class="to">die Erlaubnis / die Berechtigung</span>
+                </div>
+            </div>
+            
+            <div class="theory-section">
+                <h3>5. Funktionsverbgefüge (FVG)</h3>
+                <p>Einfache Verben werden zu Nomen + Funktionsverb:</p>
+                <div class="theory-example">
+                    <span class="from">entscheiden</span> → <span class="to">eine Entscheidung treffen</span><br>
+                    <span class="from">operieren</span> → <span class="to">eine Operation durchführen</span><br>
+                    <span class="from">kritisieren</span> → <span class="to">Kritik üben an</span>
+                </div>
+            </div>
+            
+            <div class="theory-section">
+                <h3>6. Komplexe Umformungen</h3>
+                <p>Mehrere Transformationen gleichzeitig anwenden:</p>
+                <div class="theory-example">
+                    <span class="from">Obwohl der Athlet intensiv trainierte, gewann er nicht.</span><br>
+                    → <span class="to">Trotz intensiven Trainings gewann der Athlet nicht.</span>
+                </div>
+            </div>
+            
+            <button class="control-btn primary" onclick="hideTheory()" style="width: 100%; margin-top: 20px;">Verstanden! 👍</button>
+        </div>
+    </div>
+    
+<script>
+// =====================================================
+// EXERCISE DATABASE - SPORT & MEDIZIN
+// =====================================================
+
+const exercises = {
+    sport: {
+        verb: [
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Der Athlet muss regelmäßig <strong>trainieren</strong>.', template: ['Das regelmäßige', {id: 'a', correct: ['Training'], width: 120}, 'ist entscheidend für den Erfolg.'], hint: 'trainieren → das Training', explanation: '<strong>trainieren</strong> → <strong>das Training</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Die Mannschaft konnte den Gegner <strong>besiegen</strong>.', template: ['Die', {id: 'a', correct: ['Besiegung', 'Niederlage'], width: 130}, 'des Gegners war überraschend.'], hint: 'besiegen → die Besiegung', explanation: '<strong>besiegen</strong> → <strong>die Besiegung</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Der Trainer will die Technik <strong>verbessern</strong>.', template: ['Die', {id: 'a', correct: ['Verbesserung'], width: 140}, 'der Technik steht im Fokus.'], hint: 'verbessern → die Verbesserung', explanation: '<strong>verbessern</strong> → <strong>die Verbesserung</strong>', points: 10 },
+            { type: 'mc', category: 'verb', instruction: 'Welches Nomen passt zu "regenerieren"?', original: 'Der Körper muss nach dem Wettkampf <strong>regenerieren</strong>.', options: [{ text: 'die Regeneration', correct: true }, { text: 'das Regenerieren', correct: false }, { text: 'die Regenerierung', correct: false }, { text: 'die Regenerheit', correct: false }], hint: 'regenerieren → die Regeneration', explanation: '<strong>regenerieren</strong> → <strong>die Regeneration</strong>', points: 15 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Der Spieler muss die Muskeln <strong>dehnen</strong>.', template: ['Die', {id: 'a', correct: ['Dehnung'], width: 110}, 'der Muskeln beugt Verletzungen vor.'], hint: 'dehnen → die Dehnung', explanation: '<strong>dehnen</strong> → <strong>die Dehnung</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Die Athletin konnte ihren Rekord <strong>brechen</strong>.', template: ['Das', {id: 'a', correct: ['Brechen'], width: 110}, 'des Rekords wurde gefeiert.'], hint: 'brechen → das Brechen', explanation: '<strong>brechen</strong> → <strong>das Brechen</strong> (substantivierter Infinitiv)', points: 10 },
+            { type: 'mc', category: 'verb', instruction: 'Welches Nomen passt zu "qualifizieren"?', original: 'Das Team konnte sich für die WM <strong>qualifizieren</strong>.', options: [{ text: 'die Qualifikation', correct: true }, { text: 'die Qualifizierung', correct: false }, { text: 'das Qualifizieren', correct: false }, { text: 'die Qualifiziertheit', correct: false }], hint: 'qualifizieren → die Qualifikation', explanation: '<strong>qualifizieren</strong> → <strong>die Qualifikation</strong>', points: 15 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Der Coach muss das Team <strong>motivieren</strong>.', template: ['Die', {id: 'a', correct: ['Motivation', 'Motivierung'], width: 130}, 'des Teams ist wichtig.'], hint: 'motivieren → die Motivation', explanation: '<strong>motivieren</strong> → <strong>die Motivation</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Der Sportler muss die Leistung <strong>steigern</strong>.', template: ['Die', {id: 'a', correct: ['Steigerung'], width: 120}, 'der Leistung erfordert Disziplin.'], hint: 'steigern → die Steigerung', explanation: '<strong>steigern</strong> → <strong>die Steigerung</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Das Schiedsgericht muss den Spieler <strong>sperren</strong>.', template: ['Die', {id: 'a', correct: ['Sperrung', 'Sperre'], width: 110}, 'des Spielers beträgt drei Spiele.'], hint: 'sperren → die Sperrung', explanation: '<strong>sperren</strong> → <strong>die Sperrung/Sperre</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Die Mannschaft will den Pokal <strong>verteidigen</strong>.', template: ['Die', {id: 'a', correct: ['Verteidigung'], width: 140}, 'des Pokals ist das Ziel.'], hint: 'verteidigen → die Verteidigung', explanation: '<strong>verteidigen</strong> → <strong>die Verteidigung</strong>', points: 10 },
+            { type: 'mc', category: 'verb', instruction: 'Welches Nomen passt zu "disqualifizieren"?', original: 'Der Läufer wurde wegen Dopings <strong>disqualifiziert</strong>.', options: [{ text: 'die Disqualifikation', correct: true }, { text: 'die Disqualifizierung', correct: false }, { text: 'das Disqualifizieren', correct: false }, { text: 'die Disqualifiziertheit', correct: false }], hint: 'disqualifizieren → die Disqualifikation', explanation: '<strong>disqualifizieren</strong> → <strong>die Disqualifikation</strong>', points: 15 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Der Physiotherapeut muss den Sportler <strong>behandeln</strong>.', template: ['Die', {id: 'a', correct: ['Behandlung'], width: 130}, 'des Sportlers dauert Wochen.'], hint: 'behandeln → die Behandlung', explanation: '<strong>behandeln</strong> → <strong>die Behandlung</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Der Verein will neue Spieler <strong>verpflichten</strong>.', template: ['Die', {id: 'a', correct: ['Verpflichtung'], width: 140}, 'neuer Spieler kostet Millionen.'], hint: 'verpflichten → die Verpflichtung', explanation: '<strong>verpflichten</strong> → <strong>die Verpflichtung</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Die Sportler müssen sich <strong>aufwärmen</strong>.', template: ['Das', {id: 'a', correct: ['Aufwärmen'], width: 120}, 'vor dem Spiel ist Pflicht.'], hint: 'aufwärmen → das Aufwärmen', explanation: '<strong>aufwärmen</strong> → <strong>das Aufwärmen</strong>', points: 10 },
+            { type: 'mc', category: 'verb', instruction: 'Welches Nomen passt zu "konkurrieren"?', original: 'Die Athleten <strong>konkurrieren</strong> um den ersten Platz.', options: [{ text: 'die Konkurrenz', correct: true }, { text: 'die Konkurrierung', correct: false }, { text: 'das Konkurrieren', correct: false }, { text: 'die Konkurrenzheit', correct: false }], hint: 'konkurrieren → die Konkurrenz', explanation: '<strong>konkurrieren</strong> → <strong>die Konkurrenz</strong>', points: 15 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Der Athlet muss seine Ernährung <strong>optimieren</strong>.', template: ['Die', {id: 'a', correct: ['Optimierung'], width: 130}, 'der Ernährung verbessert die Leistung.'], hint: 'optimieren → die Optimierung', explanation: '<strong>optimieren</strong> → <strong>die Optimierung</strong>', points: 10 }
+        ],
+        adjektiv: [
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Der Sportler ist sehr <strong>fit</strong>.', template: ['Die', {id: 'a', correct: ['Fitness'], width: 100}, 'des Sportlers ist beeindruckend.'], hint: 'fit → die Fitness', explanation: '<strong>fit</strong> → <strong>die Fitness</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Die Mannschaft war sehr <strong>ausdauernd</strong>.', template: ['Die', {id: 'a', correct: ['Ausdauer'], width: 110}, 'der Mannschaft war entscheidend.'], hint: 'ausdauernd → die Ausdauer', explanation: '<strong>ausdauernd</strong> → <strong>die Ausdauer</strong>', points: 10 },
+            { type: 'mc', category: 'adjektiv', instruction: 'Welches Nomen passt zu "schnell"?', original: 'Der Sprinter ist extrem <strong>schnell</strong>.', options: [{ text: 'die Schnelligkeit', correct: true }, { text: 'die Schnelle', correct: false }, { text: 'die Schnellheit', correct: false }, { text: 'das Schnelle', correct: false }], hint: 'schnell → die Schnelligkeit', explanation: '<strong>schnell</strong> → <strong>die Schnelligkeit</strong>', points: 15 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Der Athlet ist sehr <strong>beweglich</strong>.', template: ['Die', {id: 'a', correct: ['Beweglichkeit'], width: 140}, 'ist für Turner wichtig.'], hint: 'beweglich → die Beweglichkeit', explanation: '<strong>beweglich</strong> → <strong>die Beweglichkeit</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Der Boxer ist mental <strong>stark</strong>.', template: ['Die mentale', {id: 'a', correct: ['Stärke'], width: 90}, 'entscheidet im Kampf.'], hint: 'stark → die Stärke', explanation: '<strong>stark</strong> → <strong>die Stärke</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Die Spieler müssen <strong>aggressiv</strong> spielen.', template: ['Die', {id: 'a', correct: ['Aggressivität', 'Aggression'], width: 140}, 'ist Teil der Taktik.'], hint: 'aggressiv → die Aggressivität', explanation: '<strong>aggressiv</strong> → <strong>die Aggressivität</strong>', points: 10 },
+            { type: 'mc', category: 'adjektiv', instruction: 'Welches Nomen passt zu "präzise"?', original: 'Der Schütze muss <strong>präzise</strong> sein.', options: [{ text: 'die Präzision', correct: true }, { text: 'die Präzisität', correct: false }, { text: 'die Präzisheit', correct: false }, { text: 'das Präzise', correct: false }], hint: 'präzise → die Präzision', explanation: '<strong>präzise</strong> → <strong>die Präzision</strong>', points: 15 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Das Training war sehr <strong>intensiv</strong>.', template: ['Die', {id: 'a', correct: ['Intensität'], width: 120}, 'des Trainings war hoch.'], hint: 'intensiv → die Intensität', explanation: '<strong>intensiv</strong> → <strong>die Intensität</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Der Trainer ist sehr <strong>erfahren</strong>.', template: ['Die', {id: 'a', correct: ['Erfahrung'], width: 120}, 'des Trainers ist wertvoll.'], hint: 'erfahren → die Erfahrung', explanation: '<strong>erfahren</strong> → <strong>die Erfahrung</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Der Spieler ist sehr <strong>talentiert</strong>.', template: ['Das', {id: 'a', correct: ['Talent'], width: 100}, 'des Spielers ist außergewöhnlich.'], hint: 'talentiert → das Talent', explanation: '<strong>talentiert</strong> → <strong>das Talent</strong>', points: 10 },
+            { type: 'mc', category: 'adjektiv', instruction: 'Welches Nomen passt zu "explosiv"?', original: 'Der Start war <strong>explosiv</strong>.', options: [{ text: 'die Explosivität', correct: true }, { text: 'die Explosion', correct: false }, { text: 'die Explosivheit', correct: false }, { text: 'das Explosive', correct: false }], hint: 'explosiv → die Explosivität', explanation: '<strong>explosiv</strong> → <strong>die Explosivität</strong>', points: 15 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Der Spieler ist sehr <strong>reaktionsschnell</strong>.', template: ['Die', {id: 'a', correct: ['Reaktionsschnelligkeit'], width: 190}, 'ist entscheidend.'], hint: 'reaktionsschnell → die Reaktionsschnelligkeit', explanation: '<strong>reaktionsschnell</strong> → <strong>die Reaktionsschnelligkeit</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Die Technik war nicht <strong>korrekt</strong>.', template: ['Die', {id: 'a', correct: ['Korrektheit'], width: 120}, 'der Technik fehlte.'], hint: 'korrekt → die Korrektheit', explanation: '<strong>korrekt</strong> → <strong>die Korrektheit</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Der Athlet ist sehr <strong>diszipliniert</strong>.', template: ['Die', {id: 'a', correct: ['Disziplin'], width: 110}, 'des Athleten ist vorbildlich.'], hint: 'diszipliniert → die Disziplin', explanation: '<strong>diszipliniert</strong> → <strong>die Disziplin</strong>', points: 10 },
+            { type: 'mc', category: 'adjektiv', instruction: 'Welches Nomen passt zu "koordiniert"?', original: 'Die Bewegungen waren gut <strong>koordiniert</strong>.', options: [{ text: 'die Koordination', correct: true }, { text: 'die Koordiniertheit', correct: false }, { text: 'die Koordinierung', correct: false }, { text: 'das Koordinierte', correct: false }], hint: 'koordiniert → die Koordination', explanation: '<strong>koordiniert</strong> → <strong>die Koordination</strong>', points: 15 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Der Sportler ist sehr <strong>belastbar</strong>.', template: ['Die', {id: 'a', correct: ['Belastbarkeit'], width: 140}, 'ist im Hochleistungssport wichtig.'], hint: 'belastbar → die Belastbarkeit', explanation: '<strong>belastbar</strong> → <strong>die Belastbarkeit</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Das Team war sehr <strong>erfolgreich</strong>.', template: ['Der', {id: 'a', correct: ['Erfolg'], width: 90}, 'des Teams war verdient.'], hint: 'erfolgreich → der Erfolg', explanation: '<strong>erfolgreich</strong> → <strong>der Erfolg</strong>', points: 10 }
+        ],
+        nebensatz: [
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>weil</strong>-Satz um:', original: '<strong>Weil</strong> der Spieler verletzt war, konnte er nicht spielen.', template: [{id: 'a', correct: ['Wegen', 'Aufgrund'], width: 100}, 'der Verletzung konnte der Spieler nicht spielen.'], hint: 'weil → wegen + Genitiv', explanation: '<strong>weil</strong> → <strong>wegen + Genitiv</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>bevor</strong>-Satz um:', original: '<strong>Bevor</strong> das Spiel beginnt, wärmen sich die Spieler auf.', template: [{id: 'a', correct: ['Vor'], width: 60}, 'Spielbeginn wärmen sich die Spieler auf.'], hint: 'bevor → vor + Dativ', explanation: '<strong>bevor</strong> → <strong>vor + Dativ</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>wenn</strong>-Satz um:', original: '<strong>Wenn</strong> man regelmäßig trainiert, verbessert sich die Kondition.', template: [{id: 'a', correct: ['Bei', 'Durch'], width: 80}, 'regelmäßiges Training verbessert sich die Kondition.'], hint: 'wenn → bei + Dativ', explanation: '<strong>wenn</strong> → <strong>bei + Dativ</strong>', points: 15 },
+            { type: 'mc', category: 'nebensatz', instruction: 'Welche Umformung ist korrekt?', original: '<strong>Nachdem</strong> der Läufer das Ziel erreicht hatte, brach er zusammen.', options: [{ text: 'Nach Erreichen des Ziels brach der Läufer zusammen.', correct: true }, { text: 'Nach dem Erreichen das Ziel brach der Läufer zusammen.', correct: false }, { text: 'Nachdem des Zielerreichens brach er zusammen.', correct: false }, { text: 'Nach dass er das Ziel erreicht hatte, brach er zusammen.', correct: false }], hint: 'nachdem → nach + Dativ', explanation: '<strong>nachdem</strong> → <strong>nach + Dativ</strong>', points: 20 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>damit</strong>-Satz um:', original: 'Die Athleten dehnen sich, <strong>damit</strong> sie Verletzungen vermeiden.', template: ['Die Athleten dehnen sich', {id: 'a', correct: ['zur'], width: 60}, 'Vermeidung von Verletzungen.'], hint: 'damit → zur + Nomen', explanation: '<strong>damit</strong> → <strong>zur + Nomen</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>obwohl</strong>-Satz um:', original: '<strong>Obwohl</strong> das Team gut spielte, verlor es das Finale.', template: [{id: 'a', correct: ['Trotz'], width: 80}, 'guten Spiels verlor das Team das Finale.'], hint: 'obwohl → trotz + Genitiv', explanation: '<strong>obwohl</strong> → <strong>trotz + Genitiv</strong>', points: 15 },
+            { type: 'mc', category: 'nebensatz', instruction: 'Welche Umformung ist korrekt?', original: '<strong>Indem</strong> der Trainer die Taktik änderte, gewann das Team.', options: [{ text: 'Durch die Taktikänderung gewann das Team.', correct: true }, { text: 'Mit dem Ändern der Taktik gewann das Team.', correct: false }, { text: 'Indem der Taktikänderung gewann das Team.', correct: false }, { text: 'Bei Änderung der Taktik gewann das Team.', correct: false }], hint: 'indem → durch + Akkusativ', explanation: '<strong>indem</strong> → <strong>durch + Akkusativ</strong>', points: 20 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>während</strong>-Satz um:', original: '<strong>Während</strong> der Athlet sprintete, stieg sein Puls stark an.', template: [{id: 'a', correct: ['Während'], width: 100}, 'des Sprints stieg sein Puls stark an.'], hint: 'während → während + Genitiv', explanation: '<strong>während</strong> (Konj.) → <strong>während + Genitiv</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>um...zu</strong>-Satz um:', original: 'Der Sportler trainiert hart, <strong>um</strong> die Olympiade <strong>zu</strong> gewinnen.', template: ['Der Sportler trainiert hart', {id: 'a', correct: ['zum'], width: 60}, 'Gewinn der Olympiade.'], hint: 'um...zu → zum + Nomen', explanation: '<strong>um...zu</strong> → <strong>zum + Nomen</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>da</strong>-Satz um:', original: '<strong>Da</strong> der Schiedsrichter einen Fehler machte, war das Tor ungültig.', template: [{id: 'a', correct: ['Aufgrund', 'Wegen'], width: 110}, 'des Schiedsrichterfehlers war das Tor ungültig.'], hint: 'da → aufgrund + Genitiv', explanation: '<strong>da</strong> → <strong>aufgrund + Genitiv</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>falls</strong>-Satz um:', original: '<strong>Falls</strong> es regnet, wird das Spiel verschoben.', template: [{id: 'a', correct: ['Bei', 'Im Falle von'], width: 110}, 'Regen wird das Spiel verschoben.'], hint: 'falls → bei/im Falle + Genitiv', explanation: '<strong>falls</strong> → <strong>bei/im Falle + Genitiv</strong>', points: 15 },
+            { type: 'mc', category: 'nebensatz', instruction: 'Welche Umformung ist korrekt?', original: '<strong>Sobald</strong> der Startschuss fiel, sprinteten die Läufer los.', options: [{ text: 'Bei Ertönen des Startschusses sprinteten die Läufer los.', correct: true }, { text: 'Sobald des Startschusses sprinteten die Läufer los.', correct: false }, { text: 'Nach dem Startschuss sprinteten die Läufer sofort los.', correct: false }, { text: 'Wegen des Startschusses sprinteten die Läufer los.', correct: false }], hint: 'sobald → bei + Dativ', explanation: '<strong>sobald</strong> → <strong>bei + Dativ</strong>', points: 20 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>ohne dass</strong>-Satz um:', original: 'Der Spieler verließ das Feld, <strong>ohne dass</strong> er sich verabschiedete.', template: ['Der Spieler verließ das Feld', {id: 'a', correct: ['ohne'], width: 70}, 'Verabschiedung.'], hint: 'ohne dass → ohne + Akkusativ', explanation: '<strong>ohne dass</strong> → <strong>ohne + Akkusativ</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>seitdem</strong>-Satz um:', original: '<strong>Seitdem</strong> der neue Trainer da ist, gewinnt das Team.', template: [{id: 'a', correct: ['Seit'], width: 70}, 'Amtsantritt des neuen Trainers gewinnt das Team.'], hint: 'seitdem → seit + Dativ', explanation: '<strong>seitdem</strong> → <strong>seit + Dativ</strong>', points: 15 },
+            { type: 'mc', category: 'nebensatz', instruction: 'Welche Umformung ist korrekt?', original: '<strong>Obgleich</strong> der Favorit gut spielte, schied er aus.', options: [{ text: 'Trotz guten Spiels schied der Favorit aus.', correct: true }, { text: 'Wegen guten Spiels schied der Favorit aus.', correct: false }, { text: 'Obgleich des guten Spiels schied er aus.', correct: false }, { text: 'Bei gutem Spiel schied der Favorit aus.', correct: false }], hint: 'obgleich → trotz + Genitiv', explanation: '<strong>obgleich</strong> → <strong>trotz + Genitiv</strong>', points: 20 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>nachdem</strong>-Satz um:', original: '<strong>Nachdem</strong> die Halbzeit gepfiffen wurde, gingen die Spieler in die Kabine.', template: [{id: 'a', correct: ['Nach'], width: 70}, 'dem Halbzeitpfiff gingen die Spieler in die Kabine.'], hint: 'nachdem → nach + Dativ', explanation: '<strong>nachdem</strong> → <strong>nach + Dativ</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>damit</strong>-Satz um:', original: 'Der Trainer analysiert Videos, <strong>damit</strong> er die Gegner besser kennt.', template: ['Der Trainer analysiert Videos', {id: 'a', correct: ['zur'], width: 60}, 'besseren Kenntnis der Gegner.'], hint: 'damit → zur + Nomen', explanation: '<strong>damit</strong> → <strong>zur + Nomen</strong>', points: 15 }
+        ],
+        modal: [
+            { type: 'fill', category: 'modal', instruction: 'Nominalisiere <strong>können</strong>:', original: 'Der Athlet <strong>kann</strong> 100 Meter in 10 Sekunden laufen.', template: ['Die', {id: 'a', correct: ['Fähigkeit'], width: 120}, ', 100 Meter in 10 Sekunden zu laufen, ist beeindruckend.'], hint: 'können → die Fähigkeit', explanation: '<strong>können</strong> → <strong>die Fähigkeit</strong>', points: 15 },
+            { type: 'fill', category: 'modal', instruction: 'Nominalisiere <strong>müssen</strong>:', original: 'Der Spieler <strong>muss</strong> die Regeln beachten.', template: ['Die', {id: 'a', correct: ['Pflicht', 'Verpflichtung'], width: 130}, 'zur Regelbeachtung besteht.'], hint: 'müssen → die Pflicht', explanation: '<strong>müssen</strong> → <strong>die Pflicht</strong>', points: 15 },
+            { type: 'mc', category: 'modal', instruction: 'Welche Nominalisierung passt zu "wollen"?', original: 'Das Team <strong>will</strong> den Titel gewinnen.', options: [{ text: 'Der Wille zum Titelgewinn', correct: true }, { text: 'Das Wollen des Titelgewinns', correct: false }, { text: 'Die Willigkeit zum Titel', correct: false }, { text: 'Das Gewollte des Titels', correct: false }], hint: 'wollen → der Wille', explanation: '<strong>wollen</strong> → <strong>der Wille</strong>', points: 20 },
+            { type: 'fill', category: 'modal', instruction: 'Nominalisiere <strong>dürfen</strong>:', original: 'Nur lizenzierte Spieler <strong>dürfen</strong> teilnehmen.', template: ['Die', {id: 'a', correct: ['Berechtigung', 'Erlaubnis'], width: 140}, 'zur Teilnahme haben nur Lizenzierte.'], hint: 'dürfen → die Berechtigung', explanation: '<strong>dürfen</strong> → <strong>die Berechtigung</strong>', points: 15 },
+            { type: 'fill', category: 'pronomen', instruction: 'Wandle das Pronomen um:', original: '<strong>Der Trainer</strong> entwickelte eine neue Strategie.', template: ['Die Strategieentwicklung', {id: 'a', correct: ['des Trainers'], width: 130}, 'war erfolgreich.'], hint: 'Der Trainer → des Trainers', explanation: 'Subjekt → Genitivattribut', points: 10 },
+            { type: 'fill', category: 'pronomen', instruction: 'Wandle das Pronomen um:', original: '<strong>Sie</strong> gewann die Goldmedaille.', template: [{id: 'a', correct: ['Ihr'], width: 60}, 'Gewinn der Goldmedaille war historisch.'], hint: 'sie → ihr', explanation: '<strong>sie</strong> → <strong>ihr</strong>', points: 10 },
+            { type: 'mc', category: 'modal', instruction: 'Wie nominalisiert man "sollen"?', original: 'Die Spieler <strong>sollen</strong> Fair Play zeigen.', options: [{ text: 'Die Pflicht zum Fair Play', correct: true }, { text: 'Das Sollen des Fair Play', correct: false }, { text: 'Die Sollheit des Fair Play', correct: false }, { text: 'Das Gesollte des Fair Play', correct: false }], hint: 'sollen → die Pflicht', explanation: '<strong>sollen</strong> → <strong>die Pflicht</strong>', points: 20 },
+            { type: 'fill', category: 'pronomen', instruction: 'Wandle das Pronomen um:', original: '<strong>Wir</strong> feierten den Sieg.', template: [{id: 'a', correct: ['Unsere'], width: 100}, 'Siegesfeier dauerte die ganze Nacht.'], hint: 'wir → unsere', explanation: '<strong>wir</strong> → <strong>unsere</strong>', points: 10 },
+            { type: 'fill', category: 'modal', instruction: 'Nominalisiere <strong>können</strong> (Möglichkeit):', original: 'Man <strong>kann</strong> im Stadion 50.000 Zuschauer unterbringen.', template: ['Die', {id: 'a', correct: ['Möglichkeit'], width: 130}, ', 50.000 Zuschauer unterzubringen, besteht.'], hint: 'können (extern) → die Möglichkeit', explanation: '<strong>können</strong> → <strong>die Möglichkeit</strong>', points: 15 },
+            { type: 'fill', category: 'pronomen', instruction: 'Wandle das Subjekt um:', original: '<strong>Die Mannschaft</strong> kämpfte bis zum Schluss.', template: ['Der Kampf', {id: 'a', correct: ['der Mannschaft'], width: 140}, 'bis zum Schluss war beeindruckend.'], hint: 'Die Mannschaft → der Mannschaft', explanation: 'Subjekt → Genitivattribut', points: 10 },
+            { type: 'fill', category: 'modal', instruction: 'Nominalisiere <strong>müssen</strong>:', original: 'Alle Athleten <strong>müssen</strong> sich testen lassen.', template: ['Die', {id: 'a', correct: ['Pflicht', 'Testpflicht'], width: 130}, 'besteht für alle Athleten.'], hint: 'müssen → die Pflicht', explanation: '<strong>müssen</strong> → <strong>die Pflicht</strong>', points: 15 },
+            { type: 'mc', category: 'modal', instruction: 'Welche Nominalisierung passt zu "nicht dürfen"?', original: 'Man <strong>darf</strong> im Stadion nicht rauchen.', options: [{ text: 'das Rauchverbot im Stadion', correct: true }, { text: 'das Dürfen des Rauchens', correct: false }, { text: 'die Nichterlaubnis des Rauchens', correct: false }, { text: 'die Rauchunerlaubtheit', correct: false }], hint: 'nicht dürfen → das Verbot', explanation: '<strong>nicht dürfen</strong> → <strong>das Verbot</strong>', points: 20 },
+            { type: 'fill', category: 'pronomen', instruction: 'Wandle das Pronomen um:', original: '<strong>Er</strong> schoss das entscheidende Tor.', template: [{id: 'a', correct: ['Sein'], width: 70}, 'Tor war entscheidend.'], hint: 'er → sein', explanation: '<strong>er</strong> → <strong>sein</strong>', points: 10 },
+            { type: 'fill', category: 'modal', instruction: 'Nominalisiere <strong>wollen</strong>:', original: 'Der Verein <strong>will</strong> aufsteigen.', template: ['Der', {id: 'a', correct: ['Wille', 'Aufstiegswille'], width: 130}, 'des Vereins ist stark.'], hint: 'wollen → der Wille', explanation: '<strong>wollen</strong> → <strong>der Wille</strong>', points: 15 },
+            { type: 'fill', category: 'pronomen', instruction: 'Wandle das Subjekt um:', original: '<strong>Die Fans</strong> unterstützten das Team lautstark.', template: ['Die Unterstützung', {id: 'a', correct: ['der Fans'], width: 100}, 'war lautstark.'], hint: 'Die Fans → der Fans (Gen.)', explanation: 'Subjekt → Genitivattribut', points: 10 },
+            { type: 'mc', category: 'modal', instruction: 'Welche Nominalisierung passt?', original: 'Der Spieler <strong>kann</strong> beide Füße gleich gut nutzen.', options: [{ text: 'Die Fähigkeit zur Beidfüßigkeit', correct: true }, { text: 'Das Können der Beidfüßigkeit', correct: false }, { text: 'Die Könnlichkeit beider Füße', correct: false }, { text: 'Das Gekonnte der Füße', correct: false }], hint: 'können → die Fähigkeit', explanation: '<strong>können</strong> → <strong>die Fähigkeit</strong>', points: 20 }
+        ],
+        fvg: [
+            { type: 'mc', category: 'fvg', instruction: 'Welches FVG entspricht "entscheiden"?', original: 'Der Schiedsrichter muss schnell <strong>entscheiden</strong>.', options: [{ text: 'eine Entscheidung treffen', correct: true }, { text: 'eine Entscheidung machen', correct: false }, { text: 'eine Entscheidung geben', correct: false }, { text: 'Entscheidung nehmen', correct: false }], hint: 'entscheiden → eine Entscheidung treffen', explanation: '<strong>entscheiden</strong> → <strong>eine Entscheidung treffen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Die Mannschaft <strong>kritisierte</strong> den Schiedsrichter.', template: ['Die Mannschaft übte', {id: 'a', correct: ['Kritik'], width: 80}, 'am Schiedsrichter.'], hint: 'kritisieren → Kritik üben an', explanation: '<strong>kritisieren</strong> → <strong>Kritik üben an</strong>', points: 15 },
+            { type: 'mc', category: 'fvg', instruction: 'Welches FVG passt zu "angreifen"?', original: 'Das Team <strong>greift</strong> konstant <strong>an</strong>.', options: [{ text: 'Angriffe starten', correct: true }, { text: 'Angriffe machen', correct: false }, { text: 'in Angriff gehen', correct: false }, { text: 'Angriff nehmen', correct: false }], hint: 'angreifen → Angriffe starten', explanation: '<strong>angreifen</strong> → <strong>Angriffe starten</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Der Trainer <strong>berücksichtigt</strong> die Fitness der Spieler.', template: ['Der Trainer zieht die Fitness in', {id: 'a', correct: ['Betracht'], width: 100}, '.'], hint: 'berücksichtigen → in Betracht ziehen', explanation: '<strong>berücksichtigen</strong> → <strong>in Betracht ziehen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Die Taktik <strong>beeinflusst</strong> das Spielergebnis.', template: ['Die Taktik nimmt', {id: 'a', correct: ['Einfluss'], width: 100}, 'auf das Spielergebnis.'], hint: 'beeinflussen → Einfluss nehmen auf', explanation: '<strong>beeinflussen</strong> → <strong>Einfluss nehmen auf</strong>', points: 15 },
+            { type: 'mc', category: 'fvg', instruction: 'Welches FVG passt zu "anwenden"?', original: 'Der Trainer <strong>wendet</strong> neue Methoden <strong>an</strong>.', options: [{ text: 'zur Anwendung bringen', correct: true }, { text: 'eine Anwendung machen', correct: false }, { text: 'Anwendung geben', correct: false }, { text: 'in Anwendung setzen', correct: false }], hint: 'anwenden → zur Anwendung bringen', explanation: '<strong>anwenden</strong> → <strong>zur Anwendung bringen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Der Reporter <strong>fragte</strong> nach der Niederlage.', template: ['Der Reporter stellte die', {id: 'a', correct: ['Frage'], width: 80}, 'nach der Niederlage.'], hint: 'fragen → eine Frage stellen', explanation: '<strong>fragen</strong> → <strong>eine Frage stellen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Die neue Taktik <strong>bewährt sich</strong>.', template: ['Die neue Taktik findet', {id: 'a', correct: ['Bestätigung', 'Bewährung'], width: 130}, '.'], hint: 'sich bewähren → Bestätigung finden', explanation: '<strong>sich bewähren</strong> → <strong>Bestätigung finden</strong>', points: 15 },
+            { type: 'mc', category: 'fvg', instruction: 'Welches FVG entspricht "protestieren"?', original: 'Die Fans <strong>protestierten</strong> gegen die Entscheidung.', options: [{ text: 'Protest einlegen gegen', correct: true }, { text: 'Protest machen gegen', correct: false }, { text: 'in Protest gehen', correct: false }, { text: 'Protest geben', correct: false }], hint: 'protestieren → Protest einlegen', explanation: '<strong>protestieren</strong> → <strong>Protest einlegen gegen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Das Training <strong>wirkt</strong> positiv.', template: ['Das Training entfaltet positive', {id: 'a', correct: ['Wirkung'], width: 100}, '.'], hint: 'wirken → Wirkung entfalten', explanation: '<strong>wirken</strong> → <strong>Wirkung entfalten</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Der Spieler <strong>vertraut</strong> seinem Trainer.', template: ['Der Spieler schenkt seinem Trainer', {id: 'a', correct: ['Vertrauen'], width: 120}, '.'], hint: 'vertrauen → Vertrauen schenken', explanation: '<strong>vertrauen</strong> → <strong>Vertrauen schenken</strong>', points: 15 },
+            { type: 'mc', category: 'fvg', instruction: 'Welches FVG passt zu "siegen"?', original: 'Die Mannschaft <strong>siegte</strong> überlegen.', options: [{ text: 'einen Sieg erringen', correct: true }, { text: 'einen Sieg machen', correct: false }, { text: 'Sieg nehmen', correct: false }, { text: 'in Sieg gehen', correct: false }], hint: 'siegen → einen Sieg erringen', explanation: '<strong>siegen</strong> → <strong>einen Sieg erringen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Der Athlet <strong>zweifelt</strong> an seiner Form.', template: ['Der Athlet hegt', {id: 'a', correct: ['Zweifel'], width: 90}, 'an seiner Form.'], hint: 'zweifeln → Zweifel hegen', explanation: '<strong>zweifeln</strong> → <strong>Zweifel hegen an</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Das Team <strong>kämpfte</strong> um den Sieg.', template: ['Das Team führte einen', {id: 'a', correct: ['Kampf'], width: 90}, 'um den Sieg.'], hint: 'kämpfen → einen Kampf führen', explanation: '<strong>kämpfen</strong> → <strong>einen Kampf führen</strong>', points: 15 },
+            { type: 'mc', category: 'fvg', instruction: 'Welches FVG passt zu "hoffen"?', original: 'Die Fans <strong>hoffen</strong> auf den Titel.', options: [{ text: 'Hoffnung haben auf', correct: true }, { text: 'Hoffnung machen auf', correct: false }, { text: 'in Hoffnung sein', correct: false }, { text: 'Hoffnung geben auf', correct: false }], hint: 'hoffen → Hoffnung haben', explanation: '<strong>hoffen</strong> → <strong>Hoffnung haben auf</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Der Trainer <strong>rät</strong> zur Pause.', template: ['Der Trainer gibt den', {id: 'a', correct: ['Rat', 'Ratschlag'], width: 100}, 'zur Pause.'], hint: 'raten → einen Rat geben', explanation: '<strong>raten</strong> → <strong>einen Rat geben</strong>', points: 15 }
+        ],
+        komplex: [
+            { type: 'mc', category: 'komplex', instruction: 'Welche Nominalisierung ist korrekt?', original: 'Obwohl der Spieler intensiv trainierte, verbesserte sich seine Leistung nicht.', options: [{ text: 'Trotz intensiven Trainings verbesserte sich seine Leistung nicht.', correct: true }, { text: 'Trotz dass der Spieler intensiv trainierte, verbesserte sich seine Leistung nicht.', correct: false }, { text: 'Trotz intensivem Trainieren verbesserte sich seine Leistung nicht.', correct: false }, { text: 'Obwohl des intensiven Trainings verbesserte sich seine Leistung nicht.', correct: false }], hint: 'obwohl → trotz + Genitiv', explanation: '<strong>obwohl</strong> → <strong>trotz + Genitiv</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Umformung ist stilistisch am besten?', original: 'Nachdem das Training beendet wurde, besprach der Trainer die Taktik.', options: [{ text: 'Nach Beendigung des Trainings besprach der Trainer die Taktik.', correct: true }, { text: 'Nach dem Beenden des Trainings besprach der Trainer die Taktik.', correct: false }, { text: 'Nachdem der Trainingsbeendigung besprach der Trainer die Taktik.', correct: false }, { text: 'Nach dass das Training beendet wurde, besprach er die Taktik.', correct: false }], hint: 'nachdem → nach; beenden → Beendigung', explanation: '<strong>nachdem</strong> → <strong>nach</strong>; <strong>beenden</strong> → <strong>Beendigung</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welcher Satz ist korrekt nominalisiert?', original: 'Wenn man die Muskeln richtig aufwärmt, vermeidet man Verletzungen.', options: [{ text: 'Durch richtiges Aufwärmen der Muskeln vermeidet man Verletzungen.', correct: true }, { text: 'Bei richtig Aufwärmen der Muskeln vermeidet man Verletzungen.', correct: false }, { text: 'Wenn des Aufwärmens der Muskeln vermeidet man Verletzungen.', correct: false }, { text: 'Mit dem richtigen Aufwärmen vermeidet man Verletzungen.', correct: false }], hint: 'wenn → durch + Akkusativ', explanation: '<strong>wenn</strong> → <strong>durch + Akkusativ</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche nominale Variante ist korrekt?', original: 'Da die Spieler erschöpft waren, verloren sie das Spiel.', options: [{ text: 'Aufgrund der Erschöpfung der Spieler verloren sie das Spiel.', correct: true }, { text: 'Wegen der erschöpften Spieler verloren sie das Spiel.', correct: false }, { text: 'Da der Spielererschöpfung verloren sie das Spiel.', correct: false }, { text: 'Aufgrund dass die Spieler erschöpft waren, verloren sie.', correct: false }], hint: 'erschöpft sein → die Erschöpfung', explanation: '<strong>erschöpft sein</strong> → <strong>die Erschöpfung</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Version ist am elegantesten?', original: 'Obwohl das Team gut vorbereitet war, schied es früh aus.', options: [{ text: 'Trotz guter Vorbereitung schied das Team früh aus.', correct: true }, { text: 'Trotzdem das Team gut vorbereitet war, schied es früh aus.', correct: false }, { text: 'Obwohl der guten Vorbereitung schied das Team aus.', correct: false }, { text: 'Trotz dass gut vorbereitet, schied das Team aus.', correct: false }], hint: 'obwohl → trotz; vorbereitet → Vorbereitung', explanation: '<strong>obwohl</strong> → <strong>trotz</strong>; <strong>vorbereitet sein</strong> → <strong>Vorbereitung</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Umformung ist korrekt?', original: 'Bevor der Wettkampf beginnt, müssen alle Athleten getestet werden.', options: [{ text: 'Vor Wettkampfbeginn müssen alle Athleten getestet werden.', correct: true }, { text: 'Bevor des Wettkampfbeginns müssen alle getestet werden.', correct: false }, { text: 'Vor dem Beginnen des Wettkampfs müssen alle getestet werden.', correct: false }, { text: 'Vor dass der Wettkampf beginnt, werden alle getestet.', correct: false }], hint: 'bevor → vor; beginnen → Beginn', explanation: '<strong>bevor</strong> → <strong>vor</strong>; <strong>beginnen</strong> → <strong>Beginn</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Nominalisierung ist korrekt?', original: 'Weil der Trainer die Aufstellung änderte, gewann das Team.', options: [{ text: 'Dank der Aufstellungsänderung gewann das Team.', correct: true }, { text: 'Wegen der Aufstellungsänderung gewann das Team.', correct: false }, { text: 'Aufgrund dass der Trainer die Aufstellung änderte, gewann das Team.', correct: false }, { text: 'Durch das Ändern der Aufstellung gewann das Team.', correct: false }], hint: 'weil (positiv) → dank + Genitiv', explanation: '<strong>weil</strong> (positiv) → <strong>dank + Genitiv</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Umformung ist am besten?', original: 'Indem der Athlet die Technik verbesserte, steigerte er seine Leistung.', options: [{ text: 'Durch Verbesserung der Technik steigerte der Athlet seine Leistung.', correct: true }, { text: 'Mit der Verbesserung der Technik steigerte er seine Leistung.', correct: false }, { text: 'Indem der Technikverbesserung steigerte er seine Leistung.', correct: false }, { text: 'Bei Verbesserung der Technik steigerte er seine Leistung.', correct: false }], hint: 'indem → durch + Akkusativ', explanation: '<strong>indem</strong> → <strong>durch + Akkusativ</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Version ist korrekt?', original: 'Damit das Team gewinnt, muss jeder sein Bestes geben.', options: [{ text: 'Für den Sieg des Teams muss jeder sein Bestes geben.', correct: true }, { text: 'Zum erfolgreichen Gewinnen muss jeder sein Bestes geben.', correct: false }, { text: 'Damit des Teamsiegs muss jeder sein Bestes geben.', correct: false }, { text: 'Zur Gewinnheit des Teams muss jeder sein Bestes geben.', correct: false }], hint: 'damit gewinnen → für den Sieg', explanation: '<strong>damit gewinnen</strong> → <strong>für den Sieg</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Nominalisierung ist am besten?', original: 'Während der Athlet sprintete, stieg sein Puls auf 180.', options: [{ text: 'Während des Sprints stieg sein Puls auf 180.', correct: true }, { text: 'Während des Sprintens stieg sein Puls auf 180.', correct: false }, { text: 'Bei dem Sprint stieg sein Puls auf 180.', correct: false }, { text: 'Im Verlauf dass er sprintete, stieg sein Puls auf 180.', correct: false }], hint: 'während → während + Genitiv', explanation: '<strong>während</strong> → <strong>während + Genitiv</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Umformung ist korrekt?', original: 'Nachdem der Spieler gefoult wurde, bekam der Gegner die Rote Karte.', options: [{ text: 'Nach dem Foul am Spieler bekam der Gegner die Rote Karte.', correct: true }, { text: 'Nach dem Foulen des Spielers bekam der Gegner die Rote Karte.', correct: false }, { text: 'Nachdem des Fouls bekam der Gegner die Rote Karte.', correct: false }, { text: 'Nach dass der Spieler gefoult wurde, bekam der Gegner die Rote Karte.', correct: false }], hint: 'foulen → das Foul', explanation: '<strong>foulen</strong> → <strong>das Foul</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Version ist akademisch korrekt?', original: 'Obwohl die Mannschaft hart kämpfte, verlor sie das Finale.', options: [{ text: 'Trotz harten Kampfes verlor die Mannschaft das Finale.', correct: true }, { text: 'Trotz des harten Kämpfens verlor die Mannschaft das Finale.', correct: false }, { text: 'Obwohl harten Kampfes verlor die Mannschaft das Finale.', correct: false }, { text: 'Trotz dass sie hart kämpfte, verlor die Mannschaft das Finale.', correct: false }], hint: 'kämpfen → der Kampf', explanation: '<strong>kämpfen</strong> → <strong>der Kampf</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Nominalisierung ist korrekt?', original: 'Um den Rekord zu brechen, trainierte der Athlet täglich.', options: [{ text: 'Zum Brechen des Rekords trainierte der Athlet täglich.', correct: true }, { text: 'Um des Rekordbruchs trainierte der Athlet täglich.', correct: false }, { text: 'Für das Brechen des Rekords trainierte er täglich.', correct: false }, { text: 'Zur Rekordbreche trainierte der Athlet täglich.', correct: false }], hint: 'um...zu → zum + Nomen', explanation: '<strong>um...zu</strong> → <strong>zum + Nomen</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Umformung ist am besten?', original: 'Weil der Spieler nicht kooperierte, wurde er ausgewechselt.', options: [{ text: 'Aufgrund mangelnder Kooperation wurde der Spieler ausgewechselt.', correct: true }, { text: 'Wegen des Nicht-Kooperierens wurde der Spieler ausgewechselt.', correct: false }, { text: 'Aufgrund dass der Spieler nicht kooperierte, wurde er ausgewechselt.', correct: false }, { text: 'Durch die fehlende Kooperation wurde er ausgewechselt.', correct: false }], hint: 'nicht kooperieren → mangelnde Kooperation', explanation: '<strong>nicht kooperieren</strong> → <strong>mangelnde Kooperation</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Version ist korrekt?', original: 'Sobald der Startschuss fällt, beginnt das Rennen.', options: [{ text: 'Bei Ertönen des Startschusses beginnt das Rennen.', correct: true }, { text: 'Sobald des Startschusses beginnt das Rennen.', correct: false }, { text: 'Nach dem Startschuss beginnt das Rennen sofort.', correct: false }, { text: 'Im Falle des Startschusses beginnt das Rennen.', correct: false }], hint: 'sobald → bei + Dativ', explanation: '<strong>sobald</strong> → <strong>bei + Dativ</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Nominalisierung ist akademisch am besten?', original: 'Da der Athlet diszipliniert trainierte, gewann er die Meisterschaft.', options: [{ text: 'Aufgrund disziplinierten Trainings gewann der Athlet die Meisterschaft.', correct: true }, { text: 'Wegen diszipliniertem Training gewann der Athlet die Meisterschaft.', correct: false }, { text: 'Da der Trainingsdisziplin gewann der Athlet die Meisterschaft.', correct: false }, { text: 'Durch diszipliniertes Trainieren gewann er die Meisterschaft.', correct: false }], hint: 'diszipliniert trainieren → diszipliniertes Training', explanation: '<strong>diszipliniert trainieren</strong> → <strong>diszipliniertes Training</strong>', points: 25 }
+        ]
+    },
+    medizin: {
+        verb: [
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Der Arzt muss den Patienten <strong>diagnostizieren</strong>.', template: ['Die', {id: 'a', correct: ['Diagnose', 'Diagnostizierung'], width: 140}, 'des Patienten ist der erste Schritt.'], hint: 'diagnostizieren → die Diagnose', explanation: '<strong>diagnostizieren</strong> → <strong>die Diagnose</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Die Chirurgin muss den Tumor <strong>operieren</strong>.', template: ['Die', {id: 'a', correct: ['Operation'], width: 120}, 'des Tumors ist riskant.'], hint: 'operieren → die Operation', explanation: '<strong>operieren</strong> → <strong>die Operation</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Das Medikament soll die Symptome <strong>lindern</strong>.', template: ['Die', {id: 'a', correct: ['Linderung'], width: 110}, 'der Symptome ist das Ziel.'], hint: 'lindern → die Linderung', explanation: '<strong>lindern</strong> → <strong>die Linderung</strong>', points: 10 },
+            { type: 'mc', category: 'verb', instruction: 'Welches Nomen passt zu "therapieren"?', original: 'Man muss den Patienten intensiv <strong>therapieren</strong>.', options: [{ text: 'die Therapie', correct: true }, { text: 'das Therapieren', correct: false }, { text: 'die Therapierung', correct: false }, { text: 'die Therapieheit', correct: false }], hint: 'therapieren → die Therapie', explanation: '<strong>therapieren</strong> → <strong>die Therapie</strong>', points: 15 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Die Forscher müssen die Daten <strong>analysieren</strong>.', template: ['Die', {id: 'a', correct: ['Analyse'], width: 100}, 'der Daten dauert Wochen.'], hint: 'analysieren → die Analyse', explanation: '<strong>analysieren</strong> → <strong>die Analyse</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Das Labor muss die Probe <strong>untersuchen</strong>.', template: ['Die', {id: 'a', correct: ['Untersuchung'], width: 140}, 'der Probe ist abgeschlossen.'], hint: 'untersuchen → die Untersuchung', explanation: '<strong>untersuchen</strong> → <strong>die Untersuchung</strong>', points: 10 },
+            { type: 'mc', category: 'verb', instruction: 'Welches Nomen passt zu "immunisieren"?', original: 'Man muss die Bevölkerung <strong>immunisieren</strong>.', options: [{ text: 'die Immunisierung', correct: true }, { text: 'die Immunisation', correct: false }, { text: 'das Immunisieren', correct: false }, { text: 'die Immunität', correct: false }], hint: 'immunisieren → die Immunisierung', explanation: '<strong>immunisieren</strong> → <strong>die Immunisierung</strong>', points: 15 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Der Patient muss sich <strong>erholen</strong>.', template: ['Die', {id: 'a', correct: ['Erholung', 'Genesung'], width: 110}, 'des Patienten dauert an.'], hint: 'erholen → die Erholung', explanation: '<strong>erholen</strong> → <strong>die Erholung</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Der Arzt muss das Medikament <strong>verschreiben</strong>.', template: ['Die', {id: 'a', correct: ['Verschreibung', 'Verordnung'], width: 140}, 'des Medikaments erfolgte.'], hint: 'verschreiben → die Verschreibung', explanation: '<strong>verschreiben</strong> → <strong>die Verschreibung</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Die Klinik muss den Patienten <strong>aufnehmen</strong>.', template: ['Die', {id: 'a', correct: ['Aufnahme'], width: 110}, 'des Patienten ist für morgen geplant.'], hint: 'aufnehmen → die Aufnahme', explanation: '<strong>aufnehmen</strong> → <strong>die Aufnahme</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Der Körper muss das Medikament <strong>verstoffwechseln</strong>.', template: ['Die', {id: 'a', correct: ['Verstoffwechselung', 'Metabolisierung'], width: 170}, 'des Medikaments dauert Stunden.'], hint: 'verstoffwechseln → die Verstoffwechselung', explanation: '<strong>verstoffwechseln</strong> → <strong>die Verstoffwechselung</strong>', points: 10 },
+            { type: 'mc', category: 'verb', instruction: 'Welches Nomen passt zu "transplantieren"?', original: 'Der Chirurg muss das Organ <strong>transplantieren</strong>.', options: [{ text: 'die Transplantation', correct: true }, { text: 'die Transplantierung', correct: false }, { text: 'das Transplantieren', correct: false }, { text: 'die Transplantat', correct: false }], hint: 'transplantieren → die Transplantation', explanation: '<strong>transplantieren</strong> → <strong>die Transplantation</strong>', points: 15 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Die Studie muss die Wirksamkeit <strong>belegen</strong>.', template: ['Der', {id: 'a', correct: ['Beleg', 'Nachweis'], width: 100}, 'der Wirksamkeit ist erbracht.'], hint: 'belegen → der Beleg', explanation: '<strong>belegen</strong> → <strong>der Beleg/Nachweis</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Die Zellen müssen sich <strong>regenerieren</strong>.', template: ['Die', {id: 'a', correct: ['Regeneration'], width: 130}, 'der Zellen ist entscheidend.'], hint: 'regenerieren → die Regeneration', explanation: '<strong>regenerieren</strong> → <strong>die Regeneration</strong>', points: 10 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Der Arzt muss die Wunde <strong>desinfizieren</strong>.', template: ['Die', {id: 'a', correct: ['Desinfektion', 'Desinfizierung'], width: 140}, 'der Wunde ist wichtig.'], hint: 'desinfizieren → die Desinfektion', explanation: '<strong>desinfizieren</strong> → <strong>die Desinfektion</strong>', points: 10 },
+            { type: 'mc', category: 'verb', instruction: 'Welches Nomen passt zu "sedieren"?', original: 'Der Anästhesist muss den Patienten <strong>sedieren</strong>.', options: [{ text: 'die Sedierung', correct: true }, { text: 'die Sedation', correct: false }, { text: 'das Sedieren', correct: false }, { text: 'die Sedativität', correct: false }], hint: 'sedieren → die Sedierung', explanation: '<strong>sedieren</strong> → <strong>die Sedierung</strong>', points: 15 },
+            { type: 'fill', category: 'verb', instruction: 'Nominalisiere das Verb:', original: 'Die Forscher müssen die Hypothese <strong>verifizieren</strong>.', template: ['Die', {id: 'a', correct: ['Verifizierung', 'Verifikation'], width: 140}, 'der Hypothese steht aus.'], hint: 'verifizieren → die Verifizierung', explanation: '<strong>verifizieren</strong> → <strong>die Verifizierung</strong>', points: 10 }
+        ],
+        adjektiv: [
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Das Instrument muss <strong>steril</strong> sein.', template: ['Die', {id: 'a', correct: ['Sterilität'], width: 110}, 'des Instruments ist gewährleistet.'], hint: 'steril → die Sterilität', explanation: '<strong>steril</strong> → <strong>die Sterilität</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Die Therapie war sehr <strong>wirksam</strong>.', template: ['Die', {id: 'a', correct: ['Wirksamkeit'], width: 130}, 'der Therapie wurde bestätigt.'], hint: 'wirksam → die Wirksamkeit', explanation: '<strong>wirksam</strong> → <strong>die Wirksamkeit</strong>', points: 10 },
+            { type: 'mc', category: 'adjektiv', instruction: 'Welches Nomen passt zu "resistent"?', original: 'Die Bakterien sind <strong>resistent</strong> gegen Antibiotika.', options: [{ text: 'die Resistenz', correct: true }, { text: 'die Resistentheit', correct: false }, { text: 'die Resistierung', correct: false }, { text: 'das Resistente', correct: false }], hint: 'resistent → die Resistenz', explanation: '<strong>resistent</strong> → <strong>die Resistenz</strong>', points: 15 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Der Zustand des Patienten ist <strong>stabil</strong>.', template: ['Die', {id: 'a', correct: ['Stabilität'], width: 110}, 'des Zustands ist erreicht.'], hint: 'stabil → die Stabilität', explanation: '<strong>stabil</strong> → <strong>die Stabilität</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Das Medikament ist gut <strong>verträglich</strong>.', template: ['Die', {id: 'a', correct: ['Verträglichkeit'], width: 150}, 'des Medikaments ist hoch.'], hint: 'verträglich → die Verträglichkeit', explanation: '<strong>verträglich</strong> → <strong>die Verträglichkeit</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Die Behandlung war nicht <strong>erfolgreich</strong>.', template: ['Der', {id: 'a', correct: ['Erfolg'], width: 90}, 'der Behandlung blieb aus.'], hint: 'erfolgreich → der Erfolg', explanation: '<strong>erfolgreich</strong> → <strong>der Erfolg</strong>', points: 10 },
+            { type: 'mc', category: 'adjektiv', instruction: 'Welches Nomen passt zu "toxisch"?', original: 'Die Substanz ist hochgradig <strong>toxisch</strong>.', options: [{ text: 'die Toxizität', correct: true }, { text: 'die Toxischheit', correct: false }, { text: 'die Toxierung', correct: false }, { text: 'das Toxische', correct: false }], hint: 'toxisch → die Toxizität', explanation: '<strong>toxisch</strong> → <strong>die Toxizität</strong>', points: 15 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Das Ergebnis ist statistisch <strong>signifikant</strong>.', template: ['Die', {id: 'a', correct: ['Signifikanz'], width: 120}, 'des Ergebnisses wurde nachgewiesen.'], hint: 'signifikant → die Signifikanz', explanation: '<strong>signifikant</strong> → <strong>die Signifikanz</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Der Patient ist <strong>immun</strong> gegen die Krankheit.', template: ['Die', {id: 'a', correct: ['Immunität'], width: 120}, 'des Patienten ist gegeben.'], hint: 'immun → die Immunität', explanation: '<strong>immun</strong> → <strong>die Immunität</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Die Diagnose ist <strong>genau</strong>.', template: ['Die', {id: 'a', correct: ['Genauigkeit'], width: 130}, 'der Diagnose ist wichtig.'], hint: 'genau → die Genauigkeit', explanation: '<strong>genau</strong> → <strong>die Genauigkeit</strong>', points: 10 },
+            { type: 'mc', category: 'adjektiv', instruction: 'Welches Nomen passt zu "infektiös"?', original: 'Die Krankheit ist hochgradig <strong>infektiös</strong>.', options: [{ text: 'die Infektiosität', correct: true }, { text: 'die Infektiösheit', correct: false }, { text: 'die Infektion', correct: false }, { text: 'das Infektiöse', correct: false }], hint: 'infektiös → die Infektiosität', explanation: '<strong>infektiös</strong> → <strong>die Infektiosität</strong>', points: 15 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Die Methode ist sehr <strong>sensitiv</strong>.', template: ['Die', {id: 'a', correct: ['Sensitivität'], width: 130}, 'der Methode ist hoch.'], hint: 'sensitiv → die Sensitivität', explanation: '<strong>sensitiv</strong> → <strong>die Sensitivität</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Der Test ist sehr <strong>spezifisch</strong>.', template: ['Die', {id: 'a', correct: ['Spezifität'], width: 120}, 'des Tests beträgt 99%.'], hint: 'spezifisch → die Spezifität', explanation: '<strong>spezifisch</strong> → <strong>die Spezifität</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Die Prognose ist <strong>günstig</strong>.', template: ['Das', {id: 'a', correct: ['Günstigsein', 'Positive'], width: 120}, 'der Prognose stimmt optimistisch.'], hint: 'günstig sein → das Günstigsein', explanation: '<strong>günstig sein</strong> → Umschreibung nötig', points: 10 },
+            { type: 'mc', category: 'adjektiv', instruction: 'Welches Nomen passt zu "maligne"?', original: 'Der Tumor ist <strong>maligne</strong>.', options: [{ text: 'die Malignität', correct: true }, { text: 'die Maligneheit', correct: false }, { text: 'die Malignisierung', correct: false }, { text: 'das Maligne', correct: false }], hint: 'maligne → die Malignität', explanation: '<strong>maligne</strong> → <strong>die Malignität</strong>', points: 15 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Der Eingriff ist minimal <strong>invasiv</strong>.', template: ['Die', {id: 'a', correct: ['Invasivität'], width: 120}, 'des Eingriffs ist gering.'], hint: 'invasiv → die Invasivität', explanation: '<strong>invasiv</strong> → <strong>die Invasivität</strong>', points: 10 },
+            { type: 'fill', category: 'adjektiv', instruction: 'Nominalisiere das Adjektiv:', original: 'Die Daten sind <strong>reliabel</strong>.', template: ['Die', {id: 'a', correct: ['Reliabilität', 'Zuverlässigkeit'], width: 140}, 'der Daten wurde überprüft.'], hint: 'reliabel → die Reliabilität', explanation: '<strong>reliabel</strong> → <strong>die Reliabilität</strong>', points: 10 }
+        ],
+        nebensatz: [
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>weil</strong>-Satz um:', original: '<strong>Weil</strong> die Infektion schwer war, wurde der Patient stationär aufgenommen.', template: [{id: 'a', correct: ['Wegen', 'Aufgrund'], width: 100}, 'der schweren Infektion wurde der Patient stationär aufgenommen.'], hint: 'weil → wegen + Genitiv', explanation: '<strong>weil</strong> → <strong>wegen + Genitiv</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>bevor</strong>-Satz um:', original: '<strong>Bevor</strong> die Operation beginnt, muss der Patient nüchtern sein.', template: [{id: 'a', correct: ['Vor'], width: 60}, 'Operationsbeginn muss der Patient nüchtern sein.'], hint: 'bevor → vor + Dativ', explanation: '<strong>bevor</strong> → <strong>vor + Dativ</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>wenn</strong>-Satz um:', original: '<strong>Wenn</strong> man das Medikament richtig dosiert, treten keine Nebenwirkungen auf.', template: [{id: 'a', correct: ['Bei'], width: 60}, 'richtiger Dosierung treten keine Nebenwirkungen auf.'], hint: 'wenn → bei + Dativ', explanation: '<strong>wenn</strong> → <strong>bei + Dativ</strong>', points: 15 },
+            { type: 'mc', category: 'nebensatz', instruction: 'Welche Umformung ist korrekt?', original: '<strong>Nachdem</strong> die Diagnose gestellt wurde, begann die Behandlung.', options: [{ text: 'Nach Diagnosestellung begann die Behandlung.', correct: true }, { text: 'Nach dem Stellen der Diagnose begann die Behandlung.', correct: false }, { text: 'Nachdem der Diagnose begann die Behandlung.', correct: false }, { text: 'Nach dass die Diagnose gestellt wurde, begann die Behandlung.', correct: false }], hint: 'nachdem → nach + Dativ', explanation: '<strong>nachdem</strong> → <strong>nach + Dativ</strong>', points: 20 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>damit</strong>-Satz um:', original: 'Das Antibiotikum wird verabreicht, <strong>damit</strong> die Infektion bekämpft wird.', template: ['Das Antibiotikum wird', {id: 'a', correct: ['zur'], width: 60}, 'Bekämpfung der Infektion verabreicht.'], hint: 'damit → zur + Nomen', explanation: '<strong>damit</strong> → <strong>zur + Nomen</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>obwohl</strong>-Satz um:', original: '<strong>Obwohl</strong> die Behandlung intensiv war, erholte sich der Patient schnell.', template: [{id: 'a', correct: ['Trotz'], width: 80}, 'intensiver Behandlung erholte sich der Patient schnell.'], hint: 'obwohl → trotz + Genitiv', explanation: '<strong>obwohl</strong> → <strong>trotz + Genitiv</strong>', points: 15 },
+            { type: 'mc', category: 'nebensatz', instruction: 'Welche Umformung ist korrekt?', original: '<strong>Indem</strong> man die Dosis erhöht, verstärkt sich die Wirkung.', options: [{ text: 'Durch Erhöhung der Dosis verstärkt sich die Wirkung.', correct: true }, { text: 'Mit der Dosiserhöhung verstärkt sich die Wirkung.', correct: false }, { text: 'Indem der Dosiserhöhung verstärkt sich die Wirkung.', correct: false }, { text: 'Bei Erhöhung der Dosis verstärkt sich die Wirkung.', correct: false }], hint: 'indem → durch + Akkusativ', explanation: '<strong>indem</strong> → <strong>durch + Akkusativ</strong>', points: 20 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>während</strong>-Satz um:', original: '<strong>Während</strong> der Patient operiert wurde, überwachte der Anästhesist die Vitalwerte.', template: [{id: 'a', correct: ['Während'], width: 100}, 'der Operation überwachte der Anästhesist die Vitalwerte.'], hint: 'während → während + Genitiv', explanation: '<strong>während</strong> (Konj.) → <strong>während + Genitiv</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>um...zu</strong>-Satz um:', original: 'Der Arzt führt Tests durch, <strong>um</strong> die Diagnose <strong>zu</strong> bestätigen.', template: ['Der Arzt führt Tests', {id: 'a', correct: ['zur'], width: 60}, 'Bestätigung der Diagnose durch.'], hint: 'um...zu → zur + Nomen', explanation: '<strong>um...zu</strong> → <strong>zur + Nomen</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>da</strong>-Satz um:', original: '<strong>Da</strong> der Blutdruck erhöht war, wurde ein Medikament verschrieben.', template: [{id: 'a', correct: ['Aufgrund', 'Wegen'], width: 110}, 'des erhöhten Blutdrucks wurde ein Medikament verschrieben.'], hint: 'da → aufgrund + Genitiv', explanation: '<strong>da</strong> → <strong>aufgrund + Genitiv</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>falls</strong>-Satz um:', original: '<strong>Falls</strong> Komplikationen auftreten, muss sofort eingegriffen werden.', template: [{id: 'a', correct: ['Bei', 'Im Falle von'], width: 110}, 'Komplikationen muss sofort eingegriffen werden.'], hint: 'falls → bei/im Falle + Genitiv', explanation: '<strong>falls</strong> → <strong>bei/im Falle + Genitiv</strong>', points: 15 },
+            { type: 'mc', category: 'nebensatz', instruction: 'Welche Umformung ist korrekt?', original: '<strong>Sobald</strong> die Ergebnisse vorliegen, informieren wir Sie.', options: [{ text: 'Bei Vorliegen der Ergebnisse informieren wir Sie.', correct: true }, { text: 'Sobald des Vorliegens der Ergebnisse informieren wir Sie.', correct: false }, { text: 'Nach Vorliegen der Ergebnisse informieren wir Sie sofort.', correct: false }, { text: 'Wegen des Vorliegens der Ergebnisse informieren wir Sie.', correct: false }], hint: 'sobald → bei + Dativ', explanation: '<strong>sobald</strong> → <strong>bei + Dativ</strong>', points: 20 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>ohne dass</strong>-Satz um:', original: 'Die Operation wurde durchgeführt, <strong>ohne dass</strong> Komplikationen auftraten.', template: ['Die Operation wurde', {id: 'a', correct: ['ohne'], width: 70}, 'Komplikationen durchgeführt.'], hint: 'ohne dass → ohne + Akkusativ', explanation: '<strong>ohne dass</strong> → <strong>ohne + Akkusativ</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>seitdem</strong>-Satz um:', original: '<strong>Seitdem</strong> das Medikament eingenommen wird, bessern sich die Symptome.', template: [{id: 'a', correct: ['Seit'], width: 70}, 'Einnahme des Medikaments bessern sich die Symptome.'], hint: 'seitdem → seit + Dativ', explanation: '<strong>seitdem</strong> → <strong>seit + Dativ</strong>', points: 15 },
+            { type: 'mc', category: 'nebensatz', instruction: 'Welche Umformung ist korrekt?', original: '<strong>Obgleich</strong> die Studie vielversprechend war, wurde sie abgebrochen.', options: [{ text: 'Trotz vielversprechender Ergebnisse wurde die Studie abgebrochen.', correct: true }, { text: 'Wegen vielversprechender Ergebnisse wurde die Studie abgebrochen.', correct: false }, { text: 'Obgleich der vielversprechenden Studie wurde sie abgebrochen.', correct: false }, { text: 'Bei vielversprechender Studie wurde sie abgebrochen.', correct: false }], hint: 'obgleich → trotz + Genitiv', explanation: '<strong>obgleich</strong> → <strong>trotz + Genitiv</strong>', points: 20 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>nachdem</strong>-Satz um:', original: '<strong>Nachdem</strong> die Blutprobe entnommen wurde, ging sie ins Labor.', template: [{id: 'a', correct: ['Nach'], width: 70}, 'Entnahme der Blutprobe ging sie ins Labor.'], hint: 'nachdem → nach + Dativ', explanation: '<strong>nachdem</strong> → <strong>nach + Dativ</strong>', points: 15 },
+            { type: 'fill', category: 'nebensatz', instruction: 'Forme den <strong>damit</strong>-Satz um:', original: 'Patienten werden überwacht, <strong>damit</strong> Komplikationen früh erkannt werden.', template: ['Patienten werden', {id: 'a', correct: ['zur'], width: 60}, 'Früherkennung von Komplikationen überwacht.'], hint: 'damit → zur + Nomen', explanation: '<strong>damit</strong> → <strong>zur + Nomen</strong>', points: 15 }
+        ],
+        modal: [
+            { type: 'fill', category: 'modal', instruction: 'Nominalisiere <strong>können</strong>:', original: 'Der Patient <strong>kann</strong> wieder laufen.', template: ['Die', {id: 'a', correct: ['Fähigkeit'], width: 120}, 'zu laufen ist zurückgekehrt.'], hint: 'können → die Fähigkeit', explanation: '<strong>können</strong> → <strong>die Fähigkeit</strong>', points: 15 },
+            { type: 'fill', category: 'modal', instruction: 'Nominalisiere <strong>müssen</strong>:', original: 'Ärzte <strong>müssen</strong> die Schweigepflicht beachten.', template: ['Die', {id: 'a', correct: ['Pflicht', 'Verpflichtung'], width: 130}, 'zur Schweigepflicht ist gesetzlich geregelt.'], hint: 'müssen → die Pflicht', explanation: '<strong>müssen</strong> → <strong>die Pflicht</strong>', points: 15 },
+            { type: 'mc', category: 'modal', instruction: 'Welche Nominalisierung passt zu "wollen"?', original: 'Der Patient <strong>will</strong> eine zweite Meinung einholen.', options: [{ text: 'Der Wille zur Einholung einer zweiten Meinung', correct: true }, { text: 'Das Wollen einer zweiten Meinung', correct: false }, { text: 'Die Willigkeit zur zweiten Meinung', correct: false }, { text: 'Das Gewollte der Meinung', correct: false }], hint: 'wollen → der Wille', explanation: '<strong>wollen</strong> → <strong>der Wille</strong>', points: 20 },
+            { type: 'fill', category: 'modal', instruction: 'Nominalisiere <strong>dürfen</strong>:', original: 'Nur Fachärzte <strong>dürfen</strong> diese Operation durchführen.', template: ['Die', {id: 'a', correct: ['Berechtigung', 'Erlaubnis'], width: 140}, 'zur Durchführung haben nur Fachärzte.'], hint: 'dürfen → die Berechtigung', explanation: '<strong>dürfen</strong> → <strong>die Berechtigung</strong>', points: 15 },
+            { type: 'fill', category: 'pronomen', instruction: 'Wandle das Pronomen um:', original: '<strong>Der Chirurg</strong> führte die Operation durch.', template: ['Die Durchführung der Operation durch', {id: 'a', correct: ['den Chirurgen'], width: 140}, 'war erfolgreich.'], hint: 'Der Chirurg → den Chirurgen', explanation: 'Subjekt → durch + Akkusativ', points: 10 },
+            { type: 'fill', category: 'pronomen', instruction: 'Wandle das Pronomen um:', original: '<strong>Sie</strong> stellte die Diagnose.', template: [{id: 'a', correct: ['Ihre'], width: 70}, 'Diagnosestellung war korrekt.'], hint: 'sie → ihre', explanation: '<strong>sie</strong> → <strong>ihre</strong>', points: 10 },
+            { type: 'mc', category: 'modal', instruction: 'Wie nominalisiert man "sollen"?', original: 'Patienten <strong>sollen</strong> die Medikamente regelmäßig nehmen.', options: [{ text: 'Die Pflicht zur regelmäßigen Medikamenteneinnahme', correct: true }, { text: 'Das Sollen der Medikamenteneinnahme', correct: false }, { text: 'Die Sollheit der Einnahme', correct: false }, { text: 'Das Gesollte der Medikamente', correct: false }], hint: 'sollen → die Pflicht', explanation: '<strong>sollen</strong> → <strong>die Pflicht</strong>', points: 20 },
+            { type: 'fill', category: 'pronomen', instruction: 'Wandle das Pronomen um:', original: '<strong>Wir</strong> empfehlen eine weitere Untersuchung.', template: [{id: 'a', correct: ['Unsere'], width: 100}, 'Empfehlung lautet: weitere Untersuchung.'], hint: 'wir → unsere', explanation: '<strong>wir</strong> → <strong>unsere</strong>', points: 10 },
+            { type: 'fill', category: 'modal', instruction: 'Nominalisiere <strong>können</strong> (Möglichkeit):', original: 'Man <strong>kann</strong> die Krankheit heilen.', template: ['Die', {id: 'a', correct: ['Möglichkeit'], width: 130}, 'der Heilung besteht.'], hint: 'können (extern) → die Möglichkeit', explanation: '<strong>können</strong> → <strong>die Möglichkeit</strong>', points: 15 },
+            { type: 'fill', category: 'pronomen', instruction: 'Wandle das Subjekt um:', original: '<strong>Das Forscherteam</strong> veröffentlichte die Studie.', template: ['Die Veröffentlichung der Studie durch', {id: 'a', correct: ['das Forscherteam'], width: 160}, 'erfolgte gestern.'], hint: 'Subjekt → durch + Akkusativ', explanation: 'Subjekt → durch + Akkusativ', points: 10 },
+            { type: 'fill', category: 'modal', instruction: 'Nominalisiere <strong>müssen</strong>:', original: 'Die Wunde <strong>muss</strong> desinfiziert werden.', template: ['Die', {id: 'a', correct: ['Notwendigkeit'], width: 140}, 'der Desinfektion ist gegeben.'], hint: 'müssen → die Notwendigkeit', explanation: '<strong>müssen</strong> → <strong>die Notwendigkeit</strong>', points: 15 },
+            { type: 'mc', category: 'modal', instruction: 'Welche Nominalisierung passt zu "nicht dürfen"?', original: 'Man <strong>darf</strong> Medikamente nicht eigenmächtig absetzen.', options: [{ text: 'das Verbot des eigenmächtigen Absetzens', correct: true }, { text: 'das Nichtdürfen des Absetzens', correct: false }, { text: 'die Unerlaubtheit des Absetzens', correct: false }, { text: 'die Absetzungsunerlaubnis', correct: false }], hint: 'nicht dürfen → das Verbot', explanation: '<strong>nicht dürfen</strong> → <strong>das Verbot</strong>', points: 20 },
+            { type: 'fill', category: 'pronomen', instruction: 'Wandle das Pronomen um:', original: '<strong>Er</strong> verschrieb das Medikament.', template: [{id: 'a', correct: ['Seine'], width: 80}, 'Verschreibung war korrekt.'], hint: 'er → seine', explanation: '<strong>er</strong> → <strong>seine</strong>', points: 10 },
+            { type: 'fill', category: 'modal', instruction: 'Nominalisiere <strong>wollen</strong>:', original: 'Der Patient <strong>will</strong> gesund werden.', template: ['Der', {id: 'a', correct: ['Wille', 'Wunsch'], width: 100}, 'zur Genesung ist stark.'], hint: 'wollen → der Wille', explanation: '<strong>wollen</strong> → <strong>der Wille</strong>', points: 15 },
+            { type: 'fill', category: 'pronomen', instruction: 'Wandle das Subjekt um:', original: '<strong>Die Pflegekräfte</strong> betreuten den Patienten.', template: ['Die Betreuung', {id: 'a', correct: ['durch die Pflegekräfte'], width: 180}, 'war vorbildlich.'], hint: 'Die Pflegekräfte → durch die Pflegekräfte', explanation: 'Subjekt → durch + Akkusativ', points: 10 },
+            { type: 'mc', category: 'modal', instruction: 'Welche Nominalisierung passt?', original: 'Das Labor <strong>kann</strong> 1000 Tests pro Tag durchführen.', options: [{ text: 'Die Kapazität zur Durchführung von 1000 Tests', correct: true }, { text: 'Das Können der 1000 Tests', correct: false }, { text: 'Die Könnlichkeit von 1000 Tests', correct: false }, { text: 'Das Gekonnte der Tests', correct: false }], hint: 'können → die Kapazität', explanation: '<strong>können</strong> → <strong>die Kapazität/Fähigkeit</strong>', points: 20 }
+        ],
+        fvg: [
+            { type: 'mc', category: 'fvg', instruction: 'Welches FVG entspricht "entscheiden"?', original: 'Das Ärzteteam muss schnell <strong>entscheiden</strong>.', options: [{ text: 'eine Entscheidung treffen', correct: true }, { text: 'eine Entscheidung machen', correct: false }, { text: 'eine Entscheidung geben', correct: false }, { text: 'Entscheidung nehmen', correct: false }], hint: 'entscheiden → eine Entscheidung treffen', explanation: '<strong>entscheiden</strong> → <strong>eine Entscheidung treffen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Die Kommission <strong>berücksichtigt</strong> die Nebenwirkungen.', template: ['Die Kommission zieht die Nebenwirkungen in', {id: 'a', correct: ['Betracht'], width: 100}, '.'], hint: 'berücksichtigen → in Betracht ziehen', explanation: '<strong>berücksichtigen</strong> → <strong>in Betracht ziehen</strong>', points: 15 },
+            { type: 'mc', category: 'fvg', instruction: 'Welches FVG passt zu "operieren"?', original: 'Der Chirurg <strong>operiert</strong> den Patienten.', options: [{ text: 'eine Operation durchführen', correct: true }, { text: 'eine Operation machen', correct: false }, { text: 'Operation nehmen', correct: false }, { text: 'in Operation gehen', correct: false }], hint: 'operieren → eine Operation durchführen', explanation: '<strong>operieren</strong> → <strong>eine Operation durchführen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Das Medikament <strong>wirkt</strong> entzündungshemmend.', template: ['Das Medikament entfaltet entzündungshemmende', {id: 'a', correct: ['Wirkung'], width: 100}, '.'], hint: 'wirken → Wirkung entfalten', explanation: '<strong>wirken</strong> → <strong>Wirkung entfalten</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Die Therapie <strong>beeinflusst</strong> den Krankheitsverlauf.', template: ['Die Therapie nimmt', {id: 'a', correct: ['Einfluss'], width: 100}, 'auf den Krankheitsverlauf.'], hint: 'beeinflussen → Einfluss nehmen auf', explanation: '<strong>beeinflussen</strong> → <strong>Einfluss nehmen auf</strong>', points: 15 },
+            { type: 'mc', category: 'fvg', instruction: 'Welches FVG passt zu "anwenden"?', original: 'Die Ärzte <strong>wenden</strong> neue Methoden <strong>an</strong>.', options: [{ text: 'zur Anwendung bringen', correct: true }, { text: 'eine Anwendung machen', correct: false }, { text: 'Anwendung geben', correct: false }, { text: 'in Anwendung setzen', correct: false }], hint: 'anwenden → zur Anwendung bringen', explanation: '<strong>anwenden</strong> → <strong>zur Anwendung bringen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Der Patient <strong>fragt</strong> nach seiner Prognose.', template: ['Der Patient stellt die', {id: 'a', correct: ['Frage'], width: 80}, 'nach seiner Prognose.'], hint: 'fragen → eine Frage stellen', explanation: '<strong>fragen</strong> → <strong>eine Frage stellen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Die neue Behandlung <strong>bewährt sich</strong>.', template: ['Die neue Behandlung findet', {id: 'a', correct: ['Bestätigung', 'Bewährung'], width: 130}, '.'], hint: 'sich bewähren → Bestätigung finden', explanation: '<strong>sich bewähren</strong> → <strong>Bestätigung finden</strong>', points: 15 },
+            { type: 'mc', category: 'fvg', instruction: 'Welches FVG entspricht "diagnostizieren"?', original: 'Der Arzt <strong>diagnostiziert</strong> eine seltene Krankheit.', options: [{ text: 'eine Diagnose stellen', correct: true }, { text: 'eine Diagnose machen', correct: false }, { text: 'Diagnose geben', correct: false }, { text: 'zur Diagnose kommen', correct: false }], hint: 'diagnostizieren → eine Diagnose stellen', explanation: '<strong>diagnostizieren</strong> → <strong>eine Diagnose stellen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Die Studie <strong>beweist</strong> die Wirksamkeit.', template: ['Die Studie liefert den', {id: 'a', correct: ['Beweis', 'Nachweis'], width: 110}, 'der Wirksamkeit.'], hint: 'beweisen → den Beweis liefern', explanation: '<strong>beweisen</strong> → <strong>den Beweis liefern</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Der Arzt <strong>untersucht</strong> den Patienten.', template: ['Der Arzt führt eine', {id: 'a', correct: ['Untersuchung'], width: 130}, 'durch.'], hint: 'untersuchen → eine Untersuchung durchführen', explanation: '<strong>untersuchen</strong> → <strong>eine Untersuchung durchführen</strong>', points: 15 },
+            { type: 'mc', category: 'fvg', instruction: 'Welches FVG passt zu "schaden"?', original: 'Das Medikament <strong>schadet</strong> der Leber.', options: [{ text: 'Schaden zufügen', correct: true }, { text: 'Schaden machen', correct: false }, { text: 'einen Schaden geben', correct: false }, { text: 'in Schaden bringen', correct: false }], hint: 'schaden → Schaden zufügen', explanation: '<strong>schaden</strong> → <strong>Schaden zufügen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Der Forscher <strong>zweifelt</strong> an den Ergebnissen.', template: ['Der Forscher hegt', {id: 'a', correct: ['Zweifel'], width: 90}, 'an den Ergebnissen.'], hint: 'zweifeln → Zweifel hegen', explanation: '<strong>zweifeln</strong> → <strong>Zweifel hegen an</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Die Ärztin <strong>rät</strong> zur Operation.', template: ['Die Ärztin gibt den', {id: 'a', correct: ['Rat', 'Ratschlag'], width: 100}, 'zur Operation.'], hint: 'raten → einen Rat geben', explanation: '<strong>raten</strong> → <strong>einen Rat geben</strong>', points: 15 },
+            { type: 'mc', category: 'fvg', instruction: 'Welches FVG passt zu "transplantieren"?', original: 'Der Chirurg <strong>transplantiert</strong> die Niere.', options: [{ text: 'eine Transplantation durchführen', correct: true }, { text: 'eine Transplantation machen', correct: false }, { text: 'Transplantation geben', correct: false }, { text: 'zur Transplantation kommen', correct: false }], hint: 'transplantieren → eine Transplantation durchführen', explanation: '<strong>transplantieren</strong> → <strong>eine Transplantation durchführen</strong>', points: 15 },
+            { type: 'fill', category: 'fvg', instruction: 'Bilde das FVG:', original: 'Die Pharmafirma <strong>produziert</strong> das Vakzin.', template: ['Die Pharmafirma nimmt die', {id: 'a', correct: ['Produktion'], width: 120}, 'des Vakzins auf.'], hint: 'produzieren → die Produktion aufnehmen', explanation: '<strong>produzieren</strong> → <strong>die Produktion aufnehmen</strong>', points: 15 }
+        ],
+        komplex: [
+            { type: 'mc', category: 'komplex', instruction: 'Welche Nominalisierung ist korrekt?', original: 'Obwohl die Therapie intensiv war, zeigte der Patient keine Nebenwirkungen.', options: [{ text: 'Trotz intensiver Therapie zeigte der Patient keine Nebenwirkungen.', correct: true }, { text: 'Trotz dass die Therapie intensiv war, zeigte der Patient keine Nebenwirkungen.', correct: false }, { text: 'Trotz intensivem Therapieren zeigte er keine Nebenwirkungen.', correct: false }, { text: 'Obwohl der intensiven Therapie zeigte er keine Nebenwirkungen.', correct: false }], hint: 'obwohl → trotz + Genitiv', explanation: '<strong>obwohl</strong> → <strong>trotz + Genitiv</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Umformung ist stilistisch am besten?', original: 'Nachdem die Blutprobe analysiert wurde, lag das Ergebnis vor.', options: [{ text: 'Nach Analyse der Blutprobe lag das Ergebnis vor.', correct: true }, { text: 'Nach dem Analysieren der Blutprobe lag das Ergebnis vor.', correct: false }, { text: 'Nachdem der Blutprobenanalyse lag das Ergebnis vor.', correct: false }, { text: 'Nach dass die Blutprobe analysiert wurde, lag das Ergebnis vor.', correct: false }], hint: 'nachdem → nach; analysieren → Analyse', explanation: '<strong>nachdem</strong> → <strong>nach</strong>; <strong>analysieren</strong> → <strong>Analyse</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welcher Satz ist korrekt nominalisiert?', original: 'Wenn man das Medikament richtig dosiert, treten keine Nebenwirkungen auf.', options: [{ text: 'Bei richtiger Dosierung des Medikaments treten keine Nebenwirkungen auf.', correct: true }, { text: 'Bei richtigem Dosieren des Medikaments treten keine Nebenwirkungen auf.', correct: false }, { text: 'Wenn der Dosierung richtig treten keine Nebenwirkungen auf.', correct: false }, { text: 'Mit richtiger Dosierung treten keine Nebenwirkungen auf.', correct: false }], hint: 'wenn → bei + Dativ', explanation: '<strong>wenn</strong> → <strong>bei + Dativ</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche nominale Variante ist korrekt?', original: 'Da die Infektion nicht behandelt wurde, breitete sie sich aus.', options: [{ text: 'Aufgrund fehlender Behandlung der Infektion breitete sie sich aus.', correct: true }, { text: 'Wegen der nicht behandelten Infektion breitete sie sich aus.', correct: false }, { text: 'Da der Infektionsbehandlung fehlte, breitete sie sich aus.', correct: false }, { text: 'Aufgrund dass die Infektion nicht behandelt wurde, breitete sie sich aus.', correct: false }], hint: 'nicht behandeln → fehlende Behandlung', explanation: '<strong>nicht behandeln</strong> → <strong>fehlende Behandlung</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Version ist am elegantesten?', original: 'Obwohl die Operation riskant war, verlief sie erfolgreich.', options: [{ text: 'Trotz des Risikos verlief die Operation erfolgreich.', correct: true }, { text: 'Trotzdem die Operation riskant war, verlief sie erfolgreich.', correct: false }, { text: 'Obwohl des Risikos verlief die Operation erfolgreich.', correct: false }, { text: 'Trotz dass riskant, verlief die Operation erfolgreich.', correct: false }], hint: 'riskant sein → das Risiko', explanation: '<strong>riskant sein</strong> → <strong>das Risiko</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Umformung ist korrekt?', original: 'Bevor die Studie beginnt, müssen alle Probanden einwilligen.', options: [{ text: 'Vor Studienbeginn müssen alle Probanden einwilligen.', correct: true }, { text: 'Bevor des Studienbeginns müssen alle Probanden einwilligen.', correct: false }, { text: 'Vor dem Beginnen der Studie müssen alle einwilligen.', correct: false }, { text: 'Vor dass die Studie beginnt, müssen alle einwilligen.', correct: false }], hint: 'bevor → vor; beginnen → Beginn', explanation: '<strong>bevor</strong> → <strong>vor</strong>; <strong>beginnen</strong> → <strong>Beginn</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Nominalisierung ist korrekt?', original: 'Weil die Ärztin schnell reagierte, konnte der Patient gerettet werden.', options: [{ text: 'Dank der schnellen Reaktion der Ärztin konnte der Patient gerettet werden.', correct: true }, { text: 'Wegen der schnellen Reaktion wurde der Patient gerettet.', correct: false }, { text: 'Aufgrund dass die Ärztin schnell reagierte, wurde er gerettet.', correct: false }, { text: 'Durch das schnelle Reagieren der Ärztin wurde er gerettet.', correct: false }], hint: 'weil (positiv) → dank + Genitiv', explanation: '<strong>weil</strong> (positiv) → <strong>dank + Genitiv</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Umformung ist am besten?', original: 'Indem man die Hygiene verbessert, reduziert man Infektionen.', options: [{ text: 'Durch Verbesserung der Hygiene reduziert man Infektionen.', correct: true }, { text: 'Mit der Hygieneverbesserung reduziert man Infektionen.', correct: false }, { text: 'Indem der Hygieneverbesserung reduziert man Infektionen.', correct: false }, { text: 'Bei Verbesserung der Hygiene reduziert man Infektionen.', correct: false }], hint: 'indem → durch + Akkusativ', explanation: '<strong>indem</strong> → <strong>durch + Akkusativ</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Version ist korrekt?', original: 'Damit die Heilung gelingt, muss der Patient kooperieren.', options: [{ text: 'Für das Gelingen der Heilung muss der Patient kooperieren.', correct: true }, { text: 'Zum erfolgreichen Heilen muss der Patient kooperieren.', correct: false }, { text: 'Damit des Heilungsgelingens muss er kooperieren.', correct: false }, { text: 'Zur Heilungsgelingung muss der Patient kooperieren.', correct: false }], hint: 'damit gelingen → für das Gelingen', explanation: '<strong>damit gelingen</strong> → <strong>für das Gelingen</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Nominalisierung ist am besten?', original: 'Während der Arzt operierte, überwachte die Schwester die Vitalwerte.', options: [{ text: 'Während der Operation überwachte die Schwester die Vitalwerte.', correct: true }, { text: 'Während des Operierens überwachte die Schwester die Vitalwerte.', correct: false }, { text: 'Bei der Operation überwachte die Schwester die Vitalwerte.', correct: false }, { text: 'Im Verlauf dass der Arzt operierte, überwachte sie die Vitalwerte.', correct: false }], hint: 'operieren → die Operation', explanation: '<strong>operieren</strong> → <strong>die Operation</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Umformung ist korrekt?', original: 'Nachdem der Patient eingewilligt hatte, begann die Studie.', options: [{ text: 'Nach Einwilligung des Patienten begann die Studie.', correct: true }, { text: 'Nach dem Einwilligen des Patienten begann die Studie.', correct: false }, { text: 'Nachdem der Patienteneinwilligung begann die Studie.', correct: false }, { text: 'Nach dass der Patient eingewilligt hatte, begann die Studie.', correct: false }], hint: 'einwilligen → die Einwilligung', explanation: '<strong>einwilligen</strong> → <strong>die Einwilligung</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Version ist akademisch korrekt?', original: 'Obwohl die Nebenwirkungen stark waren, wurde die Therapie fortgesetzt.', options: [{ text: 'Trotz starker Nebenwirkungen wurde die Therapie fortgesetzt.', correct: true }, { text: 'Trotz der starken Nebenwirkungen wurde die Therapie fortgesetzt.', correct: false }, { text: 'Obwohl starker Nebenwirkungen wurde die Therapie fortgesetzt.', correct: false }, { text: 'Trotz dass die Nebenwirkungen stark waren, wurde sie fortgesetzt.', correct: false }], hint: 'obwohl → trotz + Genitiv', explanation: '<strong>obwohl</strong> → <strong>trotz + Genitiv</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Nominalisierung ist korrekt?', original: 'Um die Krankheit zu heilen, muss man die Ursache behandeln.', options: [{ text: 'Zur Heilung der Krankheit muss man die Ursache behandeln.', correct: true }, { text: 'Zum Heilen der Krankheit muss man die Ursache behandeln.', correct: false }, { text: 'Um der Krankheitsheilung muss man die Ursache behandeln.', correct: false }, { text: 'Für das Heilen der Krankheit muss die Ursache behandelt werden.', correct: false }], hint: 'um...zu → zur + Nomen', explanation: '<strong>um...zu</strong> → <strong>zur + Nomen</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Umformung ist am besten?', original: 'Weil die Symptome nicht erkannt wurden, verschlimmerte sich die Krankheit.', options: [{ text: 'Aufgrund fehlender Symptomerkennung verschlimmerte sich die Krankheit.', correct: true }, { text: 'Wegen des Nicht-Erkennens der Symptome verschlimmerte sich die Krankheit.', correct: false }, { text: 'Aufgrund dass die Symptome nicht erkannt wurden, verschlimmerte sich die Krankheit.', correct: false }, { text: 'Durch die fehlende Erkennung der Symptome verschlimmerte sich die Krankheit.', correct: false }], hint: 'nicht erkennen → fehlende Erkennung', explanation: '<strong>nicht erkennen</strong> → <strong>fehlende Erkennung</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Version ist korrekt?', original: 'Sobald die Diagnose feststeht, kann die Behandlung beginnen.', options: [{ text: 'Bei Feststehen der Diagnose kann die Behandlung beginnen.', correct: true }, { text: 'Sobald des Feststehens der Diagnose kann die Behandlung beginnen.', correct: false }, { text: 'Nach Feststehen der Diagnose kann die Behandlung beginnen.', correct: false }, { text: 'Im Falle des Feststehens der Diagnose beginnt die Behandlung.', correct: false }], hint: 'sobald → bei + Dativ', explanation: '<strong>sobald</strong> → <strong>bei + Dativ</strong>', points: 25 },
+            { type: 'mc', category: 'komplex', instruction: 'Welche Nominalisierung ist akademisch am besten?', original: 'Da die Studie methodisch einwandfrei war, wurden die Ergebnisse publiziert.', options: [{ text: 'Aufgrund der methodischen Einwandfreiheit der Studie wurden die Ergebnisse publiziert.', correct: true }, { text: 'Wegen der einwandfreien Methodik wurden die Ergebnisse publiziert.', correct: false }, { text: 'Da der methodischen Einwandfreiheit wurden die Ergebnisse publiziert.', correct: false }, { text: 'Durch die methodisch einwandfreie Studie wurden die Ergebnisse publiziert.', correct: false }], hint: 'methodisch einwandfrei → methodische Einwandfreiheit', explanation: '<strong>methodisch einwandfrei</strong> → <strong>methodische Einwandfreiheit</strong>', points: 25 }
+        ]
+    }
+};
+
+// =====================================================
+// GAME STATE & LOGIC
+// =====================================================
+
+let gameState = {
+    theme: 'sport',
+    mode: 'master',
+    currentExerciseIndex: 0,
+    exercises: [],
+    points: 0,
+    correct: 0,
+    incorrect: 0,
+    streak: 0,
+    bestStreak: 0,
+    totalExercises: 40,
+    soundEnabled: true,
+    categoryStats: {
+        verb: { correct: 0, total: 0 },
+        adjektiv: { correct: 0, total: 0 },
+        nebensatz: { correct: 0, total: 0 },
+        modal: { correct: 0, total: 0 },
+        pronomen: { correct: 0, total: 0 },
+        fvg: { correct: 0, total: 0 },
+        komplex: { correct: 0, total: 0 }
+    },
+    answered: false,
+    hintUsed: false
+};
+
+let audioContext = null;
+
+function init() {
+    createNeuralBackground();
+    updateMenuLeaderboard();
+    document.getElementById('backBtn').addEventListener('click', confirmExit);
+    document.getElementById('soundBtn').addEventListener('click', toggleSound);
+}
+
+function createNeuralBackground() {
+    const bg = document.getElementById('neuralBg');
+    for (let i = 0; i < 25; i++) {
+        const n = document.createElement('div');
+        n.className = 'neuron';
+        n.style.left = Math.random() * 100 + '%';
+        n.style.top = Math.random() * 100 + '%';
+        n.style.animationDelay = Math.random() * 3 + 's';
+        bg.appendChild(n);
+    }
+}
+
+function toggleSound() {
+    gameState.soundEnabled = !gameState.soundEnabled;
+    document.getElementById('soundBtn').textContent = gameState.soundEnabled ? '🔊' : '🔇';
+}
+
+function initAudio() {
+    if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+}
+
+function playSound(type) {
+    if (!gameState.soundEnabled) return;
+    initAudio();
+    const o = audioContext.createOscillator();
+    const g = audioContext.createGain();
+    o.connect(g);
+    g.connect(audioContext.destination);
+    
+    if (type === 'correct') {
+        o.frequency.setValueAtTime(523.25, audioContext.currentTime);
+        o.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1);
+        g.gain.setValueAtTime(0.15, audioContext.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.25);
+        o.start();
+        o.stop(audioContext.currentTime + 0.25);
+    } else if (type === 'incorrect') {
+        o.frequency.setValueAtTime(200, audioContext.currentTime);
+        g.gain.setValueAtTime(0.12, audioContext.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+        o.start();
+        o.stop(audioContext.currentTime + 0.2);
+    } else if (type === 'complete') {
+        [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
+            const os = audioContext.createOscillator();
+            const ga = audioContext.createGain();
+            os.connect(ga);
+            ga.connect(audioContext.destination);
+            os.frequency.setValueAtTime(f, audioContext.currentTime + i * 0.1);
+            ga.gain.setValueAtTime(0.15, audioContext.currentTime + i * 0.1);
+            ga.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.1 + 0.2);
+            os.start(audioContext.currentTime + i * 0.1);
+            os.stop(audioContext.currentTime + i * 0.1 + 0.2);
+        });
+    }
+}
+
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+function selectTheme(theme) {
+    gameState.theme = theme;
+    const badge = document.getElementById('selectedThemeBadge');
+    const icon = document.getElementById('themeIcon');
+    const name = document.getElementById('themeName');
+    
+    badge.className = 'selected-theme-badge ' + (theme === 'sport' ? 'sport' : 'medizin');
+    
+    if (theme === 'sport') {
+        icon.textContent = '🏃';
+        name.textContent = 'Sport';
+    } else {
+        icon.textContent = '🏥';
+        name.textContent = 'Medizin';
+    }
+    
+    showScreen('modeScreen');
+}
+
+function goToThemeSelect() {
+    document.getElementById('backBtn').style.display = 'none';
+    showScreen('themeScreen');
+    updateMenuLeaderboard();
+}
+
+function goToModeSelect() {
+    document.getElementById('backBtn').style.display = 'none';
+    showScreen('modeScreen');
+}
+
+function confirmExit() {
+    if (gameState.currentExerciseIndex > 0 && !gameState.answered) {
+        if (confirm('Möchtest du das Training wirklich beenden? Dein Fortschritt geht verloren.')) {
+            goToModeSelect();
+        }
+    } else {
+        goToModeSelect();
+    }
+}
+
+function showTheory() {
+    document.getElementById('theoryModal').classList.add('show');
+}
+
+function hideTheory() {
+    document.getElementById('theoryModal').classList.remove('show');
+}
+
+function startGame(mode) {
+    gameState = {
+        theme: gameState.theme,
+        mode: mode,
+        currentExerciseIndex: 0,
+        exercises: [],
+        points: 0,
+        correct: 0,
+        incorrect: 0,
+        streak: 0,
+        bestStreak: 0,
+        totalExercises: mode === 'master' ? 50 : 40,
+        soundEnabled: gameState.soundEnabled,
+        categoryStats: {
+            verb: { correct: 0, total: 0 },
+            adjektiv: { correct: 0, total: 0 },
+            nebensatz: { correct: 0, total: 0 },
+            modal: { correct: 0, total: 0 },
+            pronomen: { correct: 0, total: 0 },
+            fvg: { correct: 0, total: 0 },
+            komplex: { correct: 0, total: 0 }
+        },
+        answered: false,
+        hintUsed: false
+    };
+    
+    const themeExercises = exercises[gameState.theme];
+    let selectedExercises = [];
+    
+    if (mode === 'fokus-verb') {
+        selectedExercises = [...themeExercises.verb];
+    } else if (mode === 'fokus-adjektiv') {
+        selectedExercises = [...themeExercises.adjektiv];
+    } else if (mode === 'fokus-nebensatz') {
+        selectedExercises = [...themeExercises.nebensatz];
+    } else if (mode === 'fokus-modal') {
+        selectedExercises = [...themeExercises.modal];
+    } else if (mode === 'fokus-fvg') {
+        selectedExercises = [...themeExercises.fvg];
+    } else if (mode === 'fokus-komplex') {
+        selectedExercises = [...themeExercises.komplex];
+    } else if (mode === 'master') {
+        Object.values(themeExercises).forEach(catExercises => {
+            selectedExercises.push(...catExercises);
+        });
+    }
+    
+    gameState.exercises = selectedExercises
+        .sort(() => Math.random() - 0.5)
+        .slice(0, gameState.totalExercises);
+    
+    showScreen('gameScreen');
+    document.getElementById('backBtn').style.display = 'flex';
+    loadExercise();
+    updateStats();
+}
+
+function loadExercise() {
+    if (gameState.currentExerciseIndex >= gameState.exercises.length) {
+        endGame();
+        return;
+    }
+    
+    gameState.answered = false;
+    gameState.hintUsed = false;
+    
+    const ex = gameState.exercises[gameState.currentExerciseIndex];
+    const container = document.getElementById('exerciseContainer');
+    
+    document.getElementById('checkBtn').disabled = false;
+    document.getElementById('checkBtn').textContent = '✅ Überprüfen';
+    document.getElementById('hintBtn').disabled = false;
+    
+    const catNames = {
+        verb: '📝 Verb → Nomen',
+        adjektiv: '🎨 Adjektiv → Nomen',
+        nebensatz: '🔄 Nebensatz',
+        modal: '💭 Modalverb',
+        pronomen: '👤 Pronomen',
+        fvg: '⚡ FVG',
+        komplex: '🧩 Komplex'
+    };
+    
+    let html = `
+        <div class="exercise-card">
+            <span class="exercise-type" style="background: var(--cat-${ex.category});">
+                ${catNames[ex.category] || ex.category}
+            </span>
+            <p class="exercise-instruction">${ex.instruction}</p>
+            <div class="original-sentence">
+                <div class="original-label">Originalsatz:</div>
+                <div class="original-text">${ex.original}</div>
+            </div>
+            <div class="transform-section">
+                <div class="transform-label">✨ Deine Umformung:</div>
+    `;
+    
+    if (ex.type === 'fill') {
+        html += '<div class="transform-input-container">';
+        ex.template.forEach(p => {
+            if (typeof p === 'string') {
+                html += `<span class="static-text">${p}</span>`;
+            } else {
+                html += `<input type="text" class="input-slot" data-correct='${JSON.stringify(p.correct)}' style="width:${p.width}px" placeholder="..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">`;
+            }
+        });
+        html += '</div>';
+    } else if (ex.type === 'mc') {
+        html += '<div class="mc-options">';
+        ex.options.forEach((o, i) => {
+            html += `
+                <div class="mc-option" data-correct="${o.correct}" onclick="selectMC(this)">
+                    <span class="mc-letter">${String.fromCharCode(65 + i)}</span>
+                    <span class="mc-text">${o.text}</span>
+                </div>
+            `;
+        });
+        html += '</div>';
+    }
+    
+    html += `
+            </div>
+            <div class="explanation-box" id="explanation">
+                <div class="explanation-title">💡 Erklärung</div>
+                <div class="explanation-text">${ex.explanation}</div>
+            </div>
+        </div>
+    `;
+    
+    container.innerHTML = html;
+    
+    if (ex.type === 'fill') {
+        const firstInput = container.querySelector('.input-slot');
+        if (firstInput) setTimeout(() => firstInput.focus(), 100);
+    }
+    
+    updateStats();
+}
+
+function selectMC(el) {
+    if (gameState.answered) return;
+    document.querySelectorAll('.mc-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+}
+
+function showHint() {
+    const ex = gameState.exercises[gameState.currentExerciseIndex];
+    const existingHint = document.querySelector('.hint-box');
+    if (existingHint) existingHint.remove();
+    
+    const h = document.createElement('div');
+    h.className = 'hint-box';
+    h.innerHTML = `<strong>💡 Tipp:</strong> ${ex.hint}`;
+    
+    const transformSection = document.querySelector('.transform-section');
+    transformSection.parentNode.insertBefore(h, transformSection);
+    
+    gameState.hintUsed = true;
+    document.getElementById('hintBtn').disabled = true;
+}
+
+function checkAnswer() {
+    if (gameState.answered) {
+        gameState.currentExerciseIndex++;
+        loadExercise();
+        return;
+    }
+    
+    const ex = gameState.exercises[gameState.currentExerciseIndex];
+    let isCorrect = false;
+    
+    if (ex.type === 'fill') {
+        isCorrect = checkFillAnswer();
+    } else if (ex.type === 'mc') {
+        isCorrect = checkMCAnswer();
+    }
+    
+    gameState.answered = true;
+    
+    const cat = ex.category;
+    gameState.categoryStats[cat].total++;
+    
+    if (isCorrect) {
+        gameState.correct++;
+        gameState.streak++;
+        gameState.categoryStats[cat].correct++;
+        
+        if (gameState.streak > gameState.bestStreak) {
+            gameState.bestStreak = gameState.streak;
+        }
+        
+        let pts = ex.points;
+        if (!gameState.hintUsed) pts += 5;
+        if (gameState.streak >= 3) pts += gameState.streak * 2;
+        
+        gameState.points += pts;
+        showPointsPopup(pts);
+        playSound('correct');
+    } else {
+        gameState.incorrect++;
+        gameState.streak = 0;
+        playSound('incorrect');
+    }
+    
+    document.getElementById('explanation').classList.add('show');
+    document.getElementById('checkBtn').textContent = '➡️ Weiter';
+    updateStats();
+}
+
+function checkFillAnswer() {
+    const inputs = document.querySelectorAll('.input-slot');
+    let allCorrect = true;
+    
+    inputs.forEach(inp => {
+        const correctAnswers = JSON.parse(inp.dataset.correct);
+        const userAnswer = inp.value.trim();
+        const isCorrect = correctAnswers.some(c => 
+            userAnswer.toLowerCase() === c.toLowerCase()
+        );
+        
+        if (isCorrect) {
+            inp.classList.add('correct');
+        } else {
+            inp.classList.add('incorrect');
+            allCorrect = false;
+            
+            const hint = document.createElement('span');
+            hint.style.cssText = 'color: var(--success); margin-left: 8px; font-size: 0.9rem;';
+            hint.textContent = '→ ' + correctAnswers[0];
+            inp.parentNode.insertBefore(hint, inp.nextSibling);
+        }
+        inp.disabled = true;
+    });
+    
+    return allCorrect;
+}
+
+function checkMCAnswer() {
+    const selected = document.querySelector('.mc-option.selected');
+    
+    if (!selected) {
+        alert('Bitte wähle eine Option aus!');
+        gameState.answered = false;
+        return false;
+    }
+    
+    const isCorrect = selected.dataset.correct === 'true';
+    
+    document.querySelectorAll('.mc-option').forEach(option => {
+        if (option.dataset.correct === 'true') {
+            option.classList.add('correct');
+        } else if (option.classList.contains('selected')) {
+            option.classList.add('incorrect');
+        }
+    });
+    
+    return isCorrect;
+}
+
+function skipExercise() {
+    const ex = gameState.exercises[gameState.currentExerciseIndex];
+    gameState.categoryStats[ex.category].total++;
+    gameState.incorrect++;
+    gameState.streak = 0;
+    gameState.currentExerciseIndex++;
+    loadExercise();
+    updateStats();
+}
+
+function showPointsPopup(pts) {
+    const p = document.createElement('div');
+    p.className = 'points-popup';
+    p.textContent = '+' + pts;
+    p.style.left = '50%';
+    p.style.top = '35%';
+    p.style.transform = 'translateX(-50%)';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 1000);
+}
+
+function updateStats() {
+    document.getElementById('points').textContent = gameState.points;
+    document.getElementById('streak').textContent = gameState.streak;
+    document.getElementById('correct').textContent = gameState.correct;
+    document.getElementById('total').textContent = gameState.correct + gameState.incorrect;
+    
+    document.getElementById('streakFire').style.display = 
+        gameState.streak >= 3 ? 'inline-block' : 'none';
+    
+    const progress = (gameState.currentExerciseIndex / gameState.totalExercises) * 100;
+    document.getElementById('progressFill').style.width = progress + '%';
+    document.getElementById('exerciseCounter').textContent = 
+        `Übung ${gameState.currentExerciseIndex + 1}/${gameState.totalExercises}`;
+}
+
+function endGame() {
+    playSound('complete');
+    createConfetti();
+    
+    const total = gameState.correct + gameState.incorrect;
+    const accuracy = total > 0 ? Math.round((gameState.correct / total) * 100) : 0;
+    
+    document.getElementById('finalPoints').textContent = gameState.points;
+    document.getElementById('finalCorrect').textContent = `${gameState.correct}/${total}`;
+    document.getElementById('finalStreak').textContent = gameState.bestStreak;
+    
+    const circle = document.getElementById('accuracyCircle');
+    const circumference = 2 * Math.PI * 55;
+    setTimeout(() => {
+        circle.style.strokeDashoffset = circumference - (accuracy / 100) * circumference;
+        document.getElementById('accuracyText').textContent = accuracy + '%';
+    }, 100);
+    
+    const catColors = {
+        verb: 'var(--cat-verb)',
+        adjektiv: 'var(--cat-adj)',
+        nebensatz: 'var(--cat-nebensatz)',
+        modal: 'var(--cat-modal)',
+        pronomen: 'var(--cat-pronomen)',
+        fvg: 'var(--cat-fvg)',
+        komplex: 'var(--cat-komplex)'
+    };
+    
+    const catNames = {
+        verb: 'Verb → Nomen',
+        adjektiv: 'Adjektiv → Nomen',
+        nebensatz: 'Nebensatz',
+        modal: 'Modalverben',
+        pronomen: 'Pronomen',
+        fvg: 'FVG',
+        komplex: 'Komplex'
+    };
+    
+    let catHtml = '';
+    for (const [cat, stats] of Object.entries(gameState.categoryStats)) {
+        if (stats.total > 0) {
+            catHtml += `
+                <div class="cat-stat">
+                    <div class="cat-stat-name">
+                        <div class="cat-stat-dot" style="background: ${catColors[cat]}"></div>
+                        <span>${catNames[cat]}</span>
+                    </div>
+                    <span class="cat-stat-score">${stats.correct}/${stats.total}</span>
+                </div>
+            `;
+        }
+    }
+    document.getElementById('categoryStats').innerHTML = catHtml;
+    
+    showScreen('resultScreen');
+    document.getElementById('backBtn').style.display = 'none';
+    updateResultLeaderboard();
+}
+
+function createConfetti() {
+    const colors = ['#2ecc71', '#58d68d', '#ffd700', '#e67e22', '#1abc9c', '#3498db'];
+    for (let i = 0; i < 50; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.left = Math.random() * 100 + 'vw';
+        c.style.top = '-10px';
+        c.style.background = colors[Math.floor(Math.random() * colors.length)];
+        c.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+        c.style.width = c.style.height = (Math.random() * 8 + 4) + 'px';
+        document.body.appendChild(c);
+        
+        const anim = c.animate([
+            { transform: 'translateY(0) rotate(0)', opacity: 1 },
+            { transform: `translateY(100vh) rotate(${Math.random() * 720}deg)`, opacity: 0 }
+        ], {
+            duration: Math.random() * 2000 + 2000,
+            easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+        });
+        anim.onfinish = () => c.remove();
+    }
+}
+
+function loadLeaderboard() {
+    const saved = localStorage.getItem('nominalisierungLeaderboard2b');
+    return saved ? JSON.parse(saved) : [];
+}
+
+function saveLeaderboard(lb) {
+    localStorage.setItem('nominalisierungLeaderboard2b', JSON.stringify(lb));
+}
+
+function saveScore() {
+    const nameInput = document.getElementById('playerName');
+    const name = nameInput.value.trim() || 'Anonym';
+    const total = gameState.correct + gameState.incorrect;
+    const accuracy = total > 0 ? Math.round((gameState.correct / total) * 100) : 0;
+    
+    const themeNames = {
+        sport: '🏃 Sport',
+        medizin: '🏥 Medizin'
+    };
+    
+    const entry = {
+        name: name,
+        points: gameState.points,
+        accuracy: accuracy,
+        theme: themeNames[gameState.theme],
+        mode: gameState.mode,
+        date: new Date().toLocaleDateString('de-DE')
+    };
+    
+    const lb = loadLeaderboard();
+    lb.push(entry);
+    lb.sort((a, b) => b.points - a.points);
+    saveLeaderboard(lb.slice(0, 15));
+    
+    updateResultLeaderboard();
+    updateMenuLeaderboard();
+    
+    nameInput.disabled = true;
+    event.target.disabled = true;
+    event.target.textContent = '✓ Gespeichert!';
+}
+
+function updateMenuLeaderboard() {
+    const container = document.getElementById('menuLeaderboard');
+    const lb = loadLeaderboard();
+    
+    if (!lb.length) {
+        container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Noch keine Einträge. Sei die Erste!</p>';
+        return;
+    }
+    
+    container.innerHTML = lb.slice(0, 5).map((e, i) => `
+        <div class="leaderboard-entry">
+            <span class="leaderboard-rank">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1) + '.'}</span>
+            <span class="leaderboard-name">${e.name}</span>
+            <span class="leaderboard-score">${e.points} Pkt</span>
+        </div>
+    `).join('');
+}
+
+function updateResultLeaderboard() {
+    const container = document.getElementById('resultLeaderboard');
+    const lb = loadLeaderboard();
+    
+    container.innerHTML = `
+        <h3 style="font-family: 'Fredoka', sans-serif; color: var(--accent-glow); margin-bottom: 12px; font-size: 1.1rem;">🏅 Bestenliste</h3>
+        ${lb.slice(0, 5).map((e, i) => `
+            <div class="leaderboard-entry">
+                <span class="leaderboard-rank">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1) + '.'}</span>
+                <span class="leaderboard-name">${e.name}</span>
+                <span class="leaderboard-score">${e.points} Pkt</span>
+            </div>
+        `).join('')}
+    `;
+}
+
+function playAgain() {
+    const nameInput = document.getElementById('playerName');
+    nameInput.disabled = false;
+    nameInput.value = '';
+    
+    const saveBtn = document.querySelector('#resultScreen .control-btn.primary');
+    if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = '💾 Speichern';
+    }
+    
+    startGame(gameState.mode);
+}
+
+document.addEventListener('DOMContentLoaded', init);
+
+document.getElementById('theoryModal').addEventListener('click', function(e) {
+    if (e.target === this) hideTheory();
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && document.getElementById('gameScreen').classList.contains('active')) {
+        checkAnswer();
+    }
+});
+</script>
+</body>
+</html>
