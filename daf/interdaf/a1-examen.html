@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>A1 Grammatik-Trainer</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#1a2744;--accent:#f5c518;--accent-glow:#ffd84d;--success:#4ade80;--error:#f87171;--bg:#0f1729;--text:#fff;--muted:#94a3b8}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Quicksand',sans-serif;background:linear-gradient(135deg,var(--bg),var(--primary),var(--bg));min-height:100vh;color:var(--text)}
+.container{max-width:900px;margin:0 auto;padding:20px}header{text-align:center;margin-bottom:30px}
+h1{font-family:'Fredoka',sans-serif;font-size:2.5rem;background:linear-gradient(135deg,var(--accent),var(--accent-glow));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px}
+.badge{display:inline-block;background:var(--accent);padding:5px 15px;border-radius:20px;font-size:0.85rem;font-weight:700;color:var(--primary);margin-top:10px}
+.screen{display:none;animation:fadeIn 0.5s}.screen.active{display:block}@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.card{background:var(--primary);border-radius:20px;padding:25px;margin-bottom:20px;border:2px solid #2a3a5c}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:20px}
+.cat-card{background:var(--primary);border-radius:12px;padding:18px;text-align:center;cursor:pointer;border:2px solid var(--accent);transition:all 0.3s}
+.cat-card:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(245,197,24,0.2)}
+.cat-icon{font-size:2rem;margin-bottom:8px;display:block}.cat-title{font-family:'Fredoka',sans-serif;color:var(--accent-glow);margin-bottom:5px}.cat-count{font-size:0.8rem;color:var(--muted)}
+.master{grid-column:span 2;border:3px solid var(--accent);padding:22px}
+.stats{display:flex;gap:15px;justify-content:center;flex-wrap:wrap;margin-bottom:15px}
+.stat{background:var(--primary);padding:10px 18px;border-radius:10px;text-align:center;border:1px solid #2a3a5c}
+.stat-val{font-size:1.4rem;font-weight:700;color:var(--accent-glow)}.stat-lbl{font-size:0.7rem;color:var(--muted);text-transform:uppercase}
+.progress-bar{width:100%;background:#2a3a5c;border-radius:8px;height:10px;margin-bottom:8px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-glow));border-radius:8px;transition:width 0.5s;width:0}
+.counter{text-align:center;color:var(--muted);font-size:0.85rem;margin-bottom:15px}
+.ex-card{background:var(--primary);border-radius:16px;padding:25px;border:2px solid #2a3a5c;margin-bottom:15px}
+.ex-type{display:inline-block;padding:5px 12px;border-radius:15px;font-size:0.8rem;font-weight:700;color:var(--primary);background:var(--accent);margin-bottom:12px}
+.ex-instr{font-size:1rem;margin-bottom:15px;color:var(--accent-glow)}
+.sentence{background:linear-gradient(135deg,#2a3a5c,var(--primary));padding:15px;border-radius:10px;margin-bottom:15px;border-left:3px solid var(--accent)}
+.answer{background:rgba(245,197,24,0.1);padding:15px;border-radius:10px;border:2px dashed var(--accent)}
+.answer-wrap{display:flex;flex-wrap:wrap;align-items:center;gap:6px;line-height:2}
+.input-slot{background:var(--primary);border:2px solid var(--accent);border-radius:6px;padding:6px 10px;color:var(--text);font-size:0.95rem;font-family:inherit}
+.input-slot:focus{outline:none;border-color:var(--accent-glow);box-shadow:0 0 10px rgba(245,197,24,0.4)}
+.input-slot.correct{border-color:var(--success);background:rgba(74,222,128,0.2)}.input-slot.incorrect{border-color:var(--error);background:rgba(248,113,113,0.2)}
+.mc-opts{display:grid;gap:10px}.mc-opt{display:flex;align-items:center;gap:12px;background:#2a3a5c;padding:12px 15px;border-radius:10px;cursor:pointer;border:2px solid transparent;transition:all 0.3s}
+.mc-opt:hover{border-color:var(--accent)}.mc-opt.selected{border-color:var(--accent);background:rgba(245,197,24,0.15)}
+.mc-opt.correct{border-color:var(--success);background:rgba(74,222,128,0.2)}.mc-opt.incorrect{border-color:var(--error);background:rgba(248,113,113,0.2)}
+.mc-letter{width:30px;height:30px;background:var(--accent);color:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
+.hint{background:rgba(245,197,24,0.15);border:1px solid var(--accent);padding:12px;border-radius:8px;margin-bottom:12px;font-size:0.9rem;display:none}
+.explain{background:rgba(74,222,128,0.1);border:2px solid var(--success);padding:15px;border-radius:10px;margin-top:15px;display:none}
+.explain.show{display:block}.explain-title{font-weight:700;color:var(--success);margin-bottom:8px}
+.btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:15px}
+.btn{padding:10px 20px;border-radius:10px;font-size:0.95rem;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all 0.3s}
+.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent-glow));color:var(--primary)}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(245,197,24,0.4)}
+.btn.secondary{background:#2a3a5c;color:var(--text);border:2px solid #2a3a5c}.btn.secondary:hover{border-color:var(--accent)}
+.result{text-align:center}.result-title{font-family:'Fredoka',sans-serif;font-size:2rem;color:var(--accent-glow);margin-bottom:20px}
+.final-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:25px}
+.final-stat{background:#2a3a5c;padding:15px;border-radius:12px}.final-val{font-size:1.8rem;font-weight:700;color:var(--accent-glow)}.final-lbl{font-size:0.8rem;color:var(--muted);margin-top:5px}
+.hdr-btns{position:fixed;top:15px;right:15px;display:flex;gap:8px;z-index:100}
+.hdr-btn{width:40px;height:40px;border-radius:50%;background:var(--primary);border:2px solid #2a3a5c;color:var(--text);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.hdr-btn:hover{border-color:var(--accent)}
+@media(max-width:600px){h1{font-size:1.8rem}.cat-grid{grid-template-columns:1fr}.master{grid-column:span 1}.final-stats{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="hdr-btns"><button class="hdr-btn" id="backBtn" onclick="confirmExit()" style="display:none">✕</button></div>
+<div class="container">
+<header><h1>A1 Grammatik-Trainer</h1><p style="color:var(--muted)">Deutsch lernen mit Spaß! 🇩🇪</p><span class="badge">✨ 200+ Übungen • A1-A2</span></header>
+<div class="screen active" id="menuScreen">
+<div class="card">
+<h2 style="text-align:center;font-family:'Fredoka',sans-serif;color:var(--accent-glow);margin-bottom:15px">Wähle dein Training</h2>
+<div class="cat-grid">
+<div class="cat-card" onclick="startGame('konjugation')"><span class="cat-icon">📝</span><div class="cat-title">Konjugation</div><span class="cat-count">30 Übungen</span></div>
+<div class="cat-card" onclick="startGame('pronomen')"><span class="cat-icon">👤</span><div class="cat-title">Pronomen</div><span class="cat-count">25 Übungen</span></div>
+<div class="cat-card" onclick="startGame('trennbar')"><span class="cat-icon">✂️</span><div class="cat-title">Trennbare Verben</div><span class="cat-count">25 Übungen</span></div>
+<div class="cat-card" onclick="startGame('imperativ')"><span class="cat-icon">📢</span><div class="cat-title">Imperativ</div><span class="cat-count">25 Übungen</span></div>
+<div class="cat-card" onclick="startGame('wfragen')"><span class="cat-icon">❓</span><div class="cat-title">W-Fragen</div><span class="cat-count">25 Übungen</span></div>
+<div class="cat-card" onclick="startGame('modal')"><span class="cat-icon">💭</span><div class="cat-title">Modalverben</div><span class="cat-count">25 Übungen</span></div>
+<div class="cat-card" onclick="startGame('seinhaben')"><span class="cat-icon">🔄</span><div class="cat-title">sein & haben</div><span class="cat-count">25 Übungen</span></div>
+<div class="cat-card" onclick="startGame('wortstellung')"><span class="cat-icon">📊</span><div class="cat-title">Wortstellung</div><span class="cat-count">20 Übungen</span></div>
+<div class="cat-card master" onclick="startGame('master')"><span class="cat-icon">🏆</span><div class="cat-title">MASTER-MODUS</div><span class="cat-count">Alle Übungen gemischt!</span></div>
+</div></div></div>
+<div class="screen" id="gameScreen">
+<div class="stats"><div class="stat"><div class="stat-val" id="points">0</div><div class="stat-lbl">Punkte</div></div><div class="stat"><div class="stat-val" id="streak">0</div><div class="stat-lbl">Serie</div></div><div class="stat"><div class="stat-val"><span id="correct">0</span>/<span id="total">0</span></div><div class="stat-lbl">Richtig</div></div></div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+<div class="counter" id="counter">Übung 1/20</div>
+<div id="exContainer"></div>
+<div class="btns"><button class="btn secondary" id="hintBtn" onclick="showHint()">💡 Tipp</button><button class="btn primary" id="checkBtn" onclick="checkAnswer()">✅ Prüfen</button><button class="btn secondary" onclick="skipEx()">⏭️ Weiter</button></div>
+</div>
+<div class="screen" id="resultScreen">
+<div class="card result">
+<h2 class="result-title">🎉 Super gemacht!</h2>
+<div class="final-stats"><div class="final-stat"><div class="final-val" id="finalPts">0</div><div class="final-lbl">Punkte</div></div><div class="final-stat"><div class="final-val" id="finalCorr">0/0</div><div class="final-lbl">Richtig</div></div><div class="final-stat"><div class="final-val" id="finalStreak">0</div><div class="final-lbl">Beste Serie</div></div></div>
+<div class="btns"><button class="btn secondary" onclick="goMenu()">🔄 Menü</button><button class="btn primary" onclick="playAgain()">🔁 Nochmal</button></div>
+</div></div></div>
+<script>
+const E={konjugation:[
+{t:'fill',c:'konjugation',i:'Konjugiere:',s:'Ich ___ (lernen) Deutsch.',tp:['Ich',{id:'a',cr:['lerne'],w:90},'Deutsch.'],h:'ich → -e',ex:'ich lerne',p:10},
+{t:'fill',c:'konjugation',i:'Konjugiere:',s:'Du ___ (spielen) Fußball.',tp:['Du',{id:'a',cr:['spielst'],w:90},'Fußball.'],h:'du → -st',ex:'du spielst',p:10},
+{t:'fill',c:'konjugation',i:'Konjugiere:',s:'Er ___ (wohnen) in Berlin.',tp:['Er',{id:'a',cr:['wohnt'],w:90},'in Berlin.'],h:'er → -t',ex:'er wohnt',p:10},
+{t:'fill',c:'konjugation',i:'Konjugiere:',s:'Wir ___ (kochen) zusammen.',tp:['Wir',{id:'a',cr:['kochen'],w:90},'zusammen.'],h:'wir → -en',ex:'wir kochen',p:10},
+{t:'fill',c:'konjugation',i:'Konjugiere:',s:'Ihr ___ (tanzen) gut.',tp:['Ihr',{id:'a',cr:['tanzt'],w:90},'gut.'],h:'ihr → -t',ex:'ihr tanzt',p:10},
+{t:'mc',c:'konjugation',i:'Welche Form ist richtig?',s:'Maria ___ (trinken) Kaffee.',o:[{x:'trinkt',cr:true},{x:'trinkst',cr:false},{x:'trinke',cr:false},{x:'trinken',cr:false}],h:'sie trinkt',ex:'sie trinkt',p:15},
+{t:'fill',c:'konjugation',i:'Konjugiere:',s:'Er ___ (lesen) ein Buch.',tp:['Er',{id:'a',cr:['liest'],w:90},'ein Buch.'],h:'e→ie',ex:'er liest',p:10},
+{t:'fill',c:'konjugation',i:'Konjugiere:',s:'Sie ___ (fahren) Auto.',tp:['Sie',{id:'a',cr:['fährt'],w:90},'Auto.'],h:'a→ä',ex:'sie fährt',p:10},
+{t:'mc',c:'konjugation',i:'Welche Form?',s:'Du ___ (sprechen) Deutsch.',o:[{x:'sprichst',cr:true},{x:'sprecht',cr:false},{x:'spreche',cr:false},{x:'sprichest',cr:false}],h:'e→i',ex:'du sprichst',p:15},
+{t:'fill',c:'konjugation',i:'Konjugiere:',s:'Er ___ (geben) mir das.',tp:['Er',{id:'a',cr:['gibt'],w:90},'mir das.'],h:'e→i',ex:'er gibt',p:10},
+{t:'mc',c:'konjugation',i:'Welche Form?',s:'Er ___ (nehmen) den Bus.',o:[{x:'nimmt',cr:true},{x:'nehmt',cr:false},{x:'nehmst',cr:false},{x:'nehme',cr:false}],h:'e→i',ex:'er nimmt',p:15},
+{t:'fill',c:'konjugation',i:'Konjugiere:',s:'Du ___ (sehen) den Film.',tp:['Du',{id:'a',cr:['siehst'],w:90},'den Film.'],h:'e→ie',ex:'du siehst',p:10},
+{t:'fill',c:'konjugation',i:'Konjugiere:',s:'Du ___ (warten) auf mich.',tp:['Du',{id:'a',cr:['wartest'],w:90},'auf mich.'],h:'-t→-est',ex:'du wartest',p:10},
+{t:'fill',c:'konjugation',i:'Konjugiere:',s:'Er ___ (arbeiten) viel.',tp:['Er',{id:'a',cr:['arbeitet'],w:90},'viel.'],h:'-t→-et',ex:'er arbeitet',p:10},
+{t:'mc',c:'konjugation',i:'Welche Form?',s:'Es ___ (regnen) heute.',o:[{x:'regnet',cr:true},{x:'regnt',cr:false},{x:'regne',cr:false},{x:'regnest',cr:false}],h:'-n→-et',ex:'es regnet',p:15},
+{t:'fill',c:'konjugation',i:'Konjugiere:',s:'Er ___ (waschen) das Auto.',tp:['Er',{id:'a',cr:['wäscht'],w:90},'das Auto.'],h:'a→ä',ex:'er wäscht',p:10},
+{t:'mc',c:'konjugation',i:'Welche Form?',s:'Du ___ (laufen) schnell.',o:[{x:'läufst',cr:true},{x:'laufst',cr:false},{x:'läuft',cr:false},{x:'laufe',cr:false}],h:'au→äu',ex:'du läufst',p:15},
+{t:'fill',c:'konjugation',i:'Konjugiere:',s:'Du ___ (helfen) mir.',tp:['Du',{id:'a',cr:['hilfst'],w:90},'mir.'],h:'e→i',ex:'du hilfst',p:10},
+{t:'fill',c:'konjugation',i:'Konjugiere:',s:'Sie ___ (tragen) eine Brille.',tp:['Sie',{id:'a',cr:['trägt'],w:90},'eine Brille.'],h:'a→ä',ex:'sie trägt',p:10},
+{t:'fill',c:'konjugation',i:'Konjugiere:',s:'Du ___ (werfen) den Ball.',tp:['Du',{id:'a',cr:['wirfst'],w:90},'den Ball.'],h:'e→i',ex:'du wirfst',p:10},
+{t:'fill',c:'konjugation',i:'Konjugiere:',s:'Wir ___ (gehen) ins Kino.',tp:['Wir',{id:'a',cr:['gehen'],w:90},'ins Kino.'],h:'wir→-en',ex:'wir gehen',p:10},
+{t:'fill',c:'konjugation',i:'Konjugiere:',s:'Ich ___ (kaufen) Brot.',tp:['Ich',{id:'a',cr:['kaufe'],w:90},'Brot.'],h:'ich→-e',ex:'ich kaufe',p:10},
+{t:'fill',c:'konjugation',i:'Konjugiere:',s:'Ihr ___ (schreiben) einen Brief.',tp:['Ihr',{id:'a',cr:['schreibt'],w:90},'einen Brief.'],h:'ihr→-t',ex:'ihr schreibt',p:10},
+{t:'mc',c:'konjugation',i:'Welche Form?',s:'Er ___ (empfehlen) das.',o:[{x:'empfiehlt',cr:true},{x:'empfehlt',cr:false},{x:'empfehlst',cr:false},{x:'empfehle',cr:false}],h:'e→ie',ex:'er empfiehlt',p:15},
+{t:'fill',c:'konjugation',i:'Konjugiere:',s:'Du ___ (kennen) ihn.',tp:['Du',{id:'a',cr:['kennst'],w:90},'ihn.'],h:'du→-st',ex:'du kennst',p:10},
+{t:'fill',c:'konjugation',i:'Konjugiere:',s:'Wir ___ (denken) an dich.',tp:['Wir',{id:'a',cr:['denken'],w:90},'an dich.'],h:'wir→-en',ex:'wir denken',p:10},
+{t:'fill',c:'konjugation',i:'Konjugiere:',s:'Ihr ___ (essen) Pizza.',tp:['Ihr',{id:'a',cr:['esst'],w:90},'Pizza.'],h:'ihr→-t',ex:'ihr esst',p:10},
+{t:'mc',c:'konjugation',i:'Welche Form?',s:'Das Kind ___ (schlafen).',o:[{x:'schläft',cr:true},{x:'schlafen',cr:false},{x:'schlaft',cr:false},{x:'schläfst',cr:false}],h:'a→ä',ex:'es schläft',p:15},
+{t:'fill',c:'konjugation',i:'Konjugiere:',s:'Er ___ (treffen) Freunde.',tp:['Er',{id:'a',cr:['trifft'],w:90},'Freunde.'],h:'e→i',ex:'er trifft',p:10},
+{t:'fill',c:'konjugation',i:'Konjugiere:',s:'Ich ___ (machen) Hausaufgaben.',tp:['Ich',{id:'a',cr:['mache'],w:90},'Hausaufgaben.'],h:'ich→-e',ex:'ich mache',p:10}
+],pronomen:[
+{t:'mc',c:'pronomen',i:'Nominativ:',s:'___ bin Student.',o:[{x:'Ich',cr:true},{x:'Mich',cr:false},{x:'Mir',cr:false},{x:'Du',cr:false}],h:'Wer?',ex:'Ich bin Student.',p:10},
+{t:'mc',c:'pronomen',i:'Akkusativ:',s:'Ich sehe ___.',o:[{x:'dich',cr:true},{x:'du',cr:false},{x:'dir',cr:false},{x:'ich',cr:false}],h:'Wen?',ex:'Ich sehe dich.',p:10},
+{t:'mc',c:'pronomen',i:'Dativ:',s:'Ich helfe ___.',o:[{x:'dir',cr:true},{x:'dich',cr:false},{x:'du',cr:false},{x:'mich',cr:false}],h:'Wem?',ex:'Ich helfe dir.',p:10},
+{t:'fill',c:'pronomen',i:'Ersetze:',s:'Der Mann ist nett. → ___ ist nett.',tp:[{id:'a',cr:['Er'],w:70},'ist nett.'],h:'der Mann=er',ex:'Er',p:10},
+{t:'fill',c:'pronomen',i:'Ersetze:',s:'Die Frau singt. → ___ singt.',tp:[{id:'a',cr:['Sie'],w:70},'singt.'],h:'die Frau=sie',ex:'Sie',p:10},
+{t:'fill',c:'pronomen',i:'Ersetze:',s:'Das Kind spielt. → ___ spielt.',tp:[{id:'a',cr:['Es'],w:70},'spielt.'],h:'das Kind=es',ex:'Es',p:10},
+{t:'mc',c:'pronomen',i:'Pronomen?',s:'Ich liebe ___ (das Buch).',o:[{x:'es',cr:true},{x:'er',cr:false},{x:'ihm',cr:false},{x:'sie',cr:false}],h:'das Buch=es',ex:'es',p:10},
+{t:'fill',c:'pronomen',i:'Akkusativ:',s:'Ich esse den Apfel. → Ich esse ___.',tp:['Ich esse',{id:'a',cr:['ihn'],w:70},'.'],h:'den Apfel→ihn',ex:'ihn',p:10},
+{t:'fill',c:'pronomen',i:'Akkusativ:',s:'Ich koche die Suppe. → Ich koche ___.',tp:['Ich koche',{id:'a',cr:['sie'],w:70},'.'],h:'die Suppe→sie',ex:'sie',p:10},
+{t:'mc',c:'pronomen',i:'Pronomen?',s:'___ sind Studenten. (Peter und ich)',o:[{x:'Wir',cr:true},{x:'Sie',cr:false},{x:'Ihr',cr:false},{x:'Uns',cr:false}],h:'wir',ex:'Wir',p:10},
+{t:'fill',c:'pronomen',i:'Dativ:',s:'Ich gebe dem Kind einen Ball. → Ich gebe ___ einen Ball.',tp:['Ich gebe',{id:'a',cr:['ihm'],w:70},'einen Ball.'],h:'dem Kind→ihm',ex:'ihm',p:10},
+{t:'mc',c:'pronomen',i:'Pronomen?',s:'Ich treffe ___ morgen. (er)',o:[{x:'ihn',cr:true},{x:'ihm',cr:false},{x:'er',cr:false},{x:'ihr',cr:false}],h:'Akkusativ',ex:'ihn',p:10},
+{t:'fill',c:'pronomen',i:'Dativ:',s:'Das gefällt ___. (wir)',tp:['Das gefällt',{id:'a',cr:['uns'],w:70},'.'],h:'wir→uns',ex:'uns',p:10},
+{t:'fill',c:'pronomen',i:'Akkusativ:',s:'Ich rufe ___ an. (du)',tp:['Ich rufe',{id:'a',cr:['dich'],w:70},'an.'],h:'du→dich',ex:'dich',p:10},
+{t:'mc',c:'pronomen',i:'Pronomen?',s:'Das Buch gehört ___. (ich)',o:[{x:'mir',cr:true},{x:'mich',cr:false},{x:'ich',cr:false},{x:'mein',cr:false}],h:'Dativ',ex:'mir',p:10},
+{t:'fill',c:'pronomen',i:'Akkusativ:',s:'Ich besuche meinen Bruder. → Ich besuche ___.',tp:['Ich besuche',{id:'a',cr:['ihn'],w:70},'.'],h:'ihn',ex:'ihn',p:10},
+{t:'fill',c:'pronomen',i:'Dativ:',s:'Ich helfe meiner Schwester. → Ich helfe ___.',tp:['Ich helfe',{id:'a',cr:['ihr'],w:70},'.'],h:'ihr',ex:'ihr',p:10},
+{t:'mc',c:'pronomen',i:'Formal:',s:'Herr Müller, kommen ___ bitte!',o:[{x:'Sie',cr:true},{x:'sie',cr:false},{x:'du',cr:false},{x:'ihr',cr:false}],h:'formal=Sie',ex:'Sie',p:10},
+{t:'fill',c:'pronomen',i:'Dativ:',s:'Ich danke meinem Vater. → Ich danke ___.',tp:['Ich danke',{id:'a',cr:['ihm'],w:70},'.'],h:'ihm',ex:'ihm',p:10},
+{t:'fill',c:'pronomen',i:'Unpersönlich:',s:'___ regnet.',tp:[{id:'a',cr:['Es'],w:70},'regnet.'],h:'Wetter=es',ex:'Es',p:10},
+{t:'mc',c:'pronomen',i:'Pronomen?',s:'Der Film? ___ ist langweilig.',o:[{x:'Er',cr:true},{x:'Sie',cr:false},{x:'Es',cr:false},{x:'Ihn',cr:false}],h:'der Film=er',ex:'Er',p:10},
+{t:'fill',c:'pronomen',i:'Akkusativ:',s:'Ich wasche das Auto. → Ich wasche ___.',tp:['Ich wasche',{id:'a',cr:['es'],w:70},'.'],h:'es',ex:'es',p:10},
+{t:'mc',c:'pronomen',i:'Dativ:',s:'Die Tasche gehört ___. (er)',o:[{x:'ihm',cr:true},{x:'ihn',cr:false},{x:'er',cr:false},{x:'ihr',cr:false}],h:'Dativ',ex:'ihm',p:10},
+{t:'fill',c:'pronomen',i:'Dativ:',s:'Ich kaufe ___ ein Eis. (du)',tp:['Ich kaufe',{id:'a',cr:['dir'],w:70},'ein Eis.'],h:'du→dir',ex:'dir',p:10},
+{t:'fill',c:'pronomen',i:'Dativ:',s:'Das Essen schmeckt ___. (ich)',tp:['Das Essen schmeckt',{id:'a',cr:['mir'],w:70},'.'],h:'mir',ex:'mir',p:10}
+],trennbar:[
+{t:'fill',c:'trennbar',i:'Trenne:',s:'Ich ___ um 7 Uhr ___. (aufstehen)',tp:['Ich',{id:'a',cr:['stehe'],w:80},'um 7 Uhr',{id:'b',cr:['auf'],w:60},'.'],h:'stehe...auf',ex:'stehe...auf',p:15},
+{t:'fill',c:'trennbar',i:'Trenne:',s:'Er ___ im Supermarkt ___. (einkaufen)',tp:['Er',{id:'a',cr:['kauft'],w:80},'im Supermarkt',{id:'b',cr:['ein'],w:60},'.'],h:'kauft...ein',ex:'kauft...ein',p:15},
+{t:'fill',c:'trennbar',i:'Trenne:',s:'Wir ___ heute Abend ___. (fernsehen)',tp:['Wir',{id:'a',cr:['sehen'],w:80},'heute Abend',{id:'b',cr:['fern'],w:60},'.'],h:'sehen...fern',ex:'sehen...fern',p:15},
+{t:'mc',c:'trennbar',i:'Richtig?',s:'anrufen',o:[{x:'Ich rufe dich später an.',cr:true},{x:'Ich anrufe dich später.',cr:false},{x:'Ich rufe an dich.',cr:false},{x:'An rufe ich dich.',cr:false}],h:'Präfix am Ende',ex:'rufe...an',p:15},
+{t:'fill',c:'trennbar',i:'Trenne:',s:'Sie ___ das Fenster ___. (aufmachen)',tp:['Sie',{id:'a',cr:['macht'],w:80},'das Fenster',{id:'b',cr:['auf'],w:60},'.'],h:'macht...auf',ex:'macht...auf',p:15},
+{t:'fill',c:'trennbar',i:'Trenne:',s:'Du ___ die Tür ___. (zumachen)',tp:['Du',{id:'a',cr:['machst'],w:80},'die Tür',{id:'b',cr:['zu'],w:60},'.'],h:'machst...zu',ex:'machst...zu',p:15},
+{t:'mc',c:'trennbar',i:'Richtig?',s:'mitbringen',o:[{x:'Bringst du Kuchen mit?',cr:true},{x:'Mitbringst du Kuchen?',cr:false},{x:'Bringst mit du Kuchen?',cr:false},{x:'Du mitbringst Kuchen.',cr:false}],h:'Präfix am Ende',ex:'bringst...mit',p:15},
+{t:'fill',c:'trennbar',i:'Trenne:',s:'Ihr ___ eure Jacken ___. (anziehen)',tp:['Ihr',{id:'a',cr:['zieht'],w:80},'eure Jacken',{id:'b',cr:['an'],w:60},'.'],h:'zieht...an',ex:'zieht...an',p:15},
+{t:'fill',c:'trennbar',i:'Trenne:',s:'Er ___ den Mantel ___. (ausziehen)',tp:['Er',{id:'a',cr:['zieht'],w:80},'den Mantel',{id:'b',cr:['aus'],w:60},'.'],h:'zieht...aus',ex:'zieht...aus',p:15},
+{t:'fill',c:'trennbar',i:'Trenne:',s:'Wir ___ um 8 Uhr ___. (anfangen)',tp:['Wir',{id:'a',cr:['fangen'],w:80},'um 8 Uhr',{id:'b',cr:['an'],w:60},'.'],h:'fangen...an',ex:'fangen...an',p:15},
+{t:'mc',c:'trennbar',i:'Richtig?',s:'aufhören',o:[{x:'Der Film hört um 10 Uhr auf.',cr:true},{x:'Der Film aufhört um 10 Uhr.',cr:false},{x:'Der Film hört auf um 10.',cr:false},{x:'Auf hört der Film.',cr:false}],h:'Präfix am Ende',ex:'hört...auf',p:15},
+{t:'fill',c:'trennbar',i:'Trenne:',s:'Sie ___ ihre Freundin ___. (abholen)',tp:['Sie',{id:'a',cr:['holt'],w:80},'ihre Freundin',{id:'b',cr:['ab'],w:60},'.'],h:'holt...ab',ex:'holt...ab',p:15},
+{t:'fill',c:'trennbar',i:'Trenne:',s:'Ich ___ das Licht ___. (anmachen)',tp:['Ich',{id:'a',cr:['mache'],w:80},'das Licht',{id:'b',cr:['an'],w:60},'.'],h:'mache...an',ex:'mache...an',p:15},
+{t:'mc',c:'trennbar',i:'Richtig?',s:'einladen',o:[{x:'Ich lade dich zur Party ein.',cr:true},{x:'Ich einlade dich.',cr:false},{x:'Ich lade ein dich.',cr:false},{x:'Ein lade ich dich.',cr:false}],h:'Präfix am Ende',ex:'lade...ein',p:15},
+{t:'fill',c:'trennbar',i:'Trenne:',s:'Er ___ früh ___. (einschlafen)',tp:['Er',{id:'a',cr:['schläft'],w:80},'früh',{id:'b',cr:['ein'],w:60},'.'],h:'schläft...ein',ex:'schläft...ein',p:15},
+{t:'fill',c:'trennbar',i:'Trenne:',s:'Sie ___ spät ___. (aufwachen)',tp:['Sie',{id:'a',cr:['wacht'],w:80},'spät',{id:'b',cr:['auf'],w:60},'.'],h:'wacht...auf',ex:'wacht...auf',p:15},
+{t:'mc',c:'trennbar',i:'Richtig?',s:'zurückkommen',o:[{x:'Wann kommst du zurück?',cr:true},{x:'Wann zurückkommst du?',cr:false},{x:'Wann kommst zurück du?',cr:false},{x:'Zurück kommst du wann?',cr:false}],h:'Präfix am Ende',ex:'kommst...zurück',p:15},
+{t:'fill',c:'trennbar',i:'Trenne:',s:'Ich ___ dich morgen ___. (anrufen)',tp:['Ich',{id:'a',cr:['rufe'],w:80},'dich morgen',{id:'b',cr:['an'],w:60},'.'],h:'rufe...an',ex:'rufe...an',p:15},
+{t:'mc',c:'trennbar',i:'Richtig?',s:'vorstellen',o:[{x:'Ich stelle mich vor.',cr:true},{x:'Ich vorstelle mich.',cr:false},{x:'Ich stelle vor mich.',cr:false},{x:'Vor stelle ich mich.',cr:false}],h:'Präfix am Ende',ex:'stelle...vor',p:15},
+{t:'fill',c:'trennbar',i:'Trenne:',s:'Du ___ das Formular ___. (ausfüllen)',tp:['Du',{id:'a',cr:['füllst'],w:80},'das Formular',{id:'b',cr:['aus'],w:60},'.'],h:'füllst...aus',ex:'füllst...aus',p:15},
+{t:'mc',c:'trennbar',i:'Richtig?',s:'aufräumen',o:[{x:'Ich räume mein Zimmer auf.',cr:true},{x:'Ich aufräume mein Zimmer.',cr:false},{x:'Ich räume auf mein Zimmer.',cr:false},{x:'Auf räume ich.',cr:false}],h:'Präfix am Ende',ex:'räume...auf',p:15},
+{t:'fill',c:'trennbar',i:'Trenne:',s:'Der Zug ___ pünktlich ___. (abfahren)',tp:['Der Zug',{id:'a',cr:['fährt'],w:80},'pünktlich',{id:'b',cr:['ab'],w:60},'.'],h:'fährt...ab',ex:'fährt...ab',p:15},
+{t:'mc',c:'trennbar',i:'Richtig?',s:'ankommen',o:[{x:'Der Zug kommt um 9 Uhr an.',cr:true},{x:'Der Zug ankommt um 9.',cr:false},{x:'Der Zug kommt an um 9.',cr:false},{x:'An kommt der Zug.',cr:false}],h:'Präfix am Ende',ex:'kommt...an',p:15},
+{t:'fill',c:'trennbar',i:'Trenne:',s:'Er ___ gut ___. (aussehen)',tp:['Er',{id:'a',cr:['sieht'],w:80},'gut',{id:'b',cr:['aus'],w:60},'.'],h:'sieht...aus',ex:'sieht...aus',p:15},
+{t:'fill',c:'trennbar',i:'Trenne:',s:'Wir ___ um 6 Uhr ___. (losfahren)',tp:['Wir',{id:'a',cr:['fahren'],w:80},'um 6 Uhr',{id:'b',cr:['los'],w:60},'.'],h:'fahren...los',ex:'fahren...los',p:15}
+],imperativ:[
+{t:'fill',c:'imperativ',i:'Imperativ (du):',s:'kommen → ___ bitte!',tp:[{id:'a',cr:['Komm'],w:90},'bitte!'],h:'du-Form ohne -st',ex:'Komm!',p:10},
+{t:'fill',c:'imperativ',i:'Imperativ (du):',s:'gehen → ___ nach Hause!',tp:[{id:'a',cr:['Geh'],w:90},'nach Hause!'],h:'du-Form ohne -st',ex:'Geh!',p:10},
+{t:'fill',c:'imperativ',i:'Imperativ (ihr):',s:'kommen → ___ bitte!',tp:[{id:'a',cr:['Kommt'],w:90},'bitte!'],h:'ihr-Form ohne ihr',ex:'Kommt!',p:10},
+{t:'mc',c:'imperativ',i:'Imperativ (Sie)?',s:'kommen',o:[{x:'Kommen Sie bitte!',cr:true},{x:'Komm Sie bitte!',cr:false},{x:'Kommt Sie bitte!',cr:false},{x:'Sie kommen bitte!',cr:false}],h:'Sie-Form+Sie',ex:'Kommen Sie!',p:15},
+{t:'fill',c:'imperativ',i:'Imperativ (du):',s:'lesen → ___ das Buch!',tp:[{id:'a',cr:['Lies'],w:90},'das Buch!'],h:'e→ie',ex:'Lies!',p:10},
+{t:'fill',c:'imperativ',i:'Imperativ (du):',s:'nehmen → ___ das!',tp:[{id:'a',cr:['Nimm'],w:90},'das!'],h:'e→i',ex:'Nimm!',p:10},
+{t:'fill',c:'imperativ',i:'Imperativ (du):',s:'essen → ___ dein Gemüse!',tp:[{id:'a',cr:['Iss'],w:90},'dein Gemüse!'],h:'e→i',ex:'Iss!',p:10},
+{t:'mc',c:'imperativ',i:'Imperativ (du)?',s:'sprechen',o:[{x:'Sprich lauter!',cr:true},{x:'Sprech lauter!',cr:false},{x:'Sprecht lauter!',cr:false},{x:'Sprichst lauter!',cr:false}],h:'e→i',ex:'Sprich!',p:15},
+{t:'fill',c:'imperativ',i:'Imperativ (du):',s:'sein → ___ ruhig!',tp:[{id:'a',cr:['Sei'],w:90},'ruhig!'],h:'unregelmäßig',ex:'Sei!',p:10},
+{t:'fill',c:'imperativ',i:'Imperativ (ihr):',s:'sein → ___ ruhig!',tp:[{id:'a',cr:['Seid'],w:90},'ruhig!'],h:'unregelmäßig',ex:'Seid!',p:10},
+{t:'mc',c:'imperativ',i:'Imperativ (Sie)?',s:'sein',o:[{x:'Seien Sie ruhig!',cr:true},{x:'Sein Sie ruhig!',cr:false},{x:'Sei Sie ruhig!',cr:false},{x:'Seid Sie ruhig!',cr:false}],h:'Seien Sie!',ex:'Seien Sie!',p:15},
+{t:'fill',c:'imperativ',i:'Imperativ (du):',s:'warten → ___ auf mich!',tp:[{id:'a',cr:['Warte','Wart'],w:90},'auf mich!'],h:'-t→-e',ex:'Warte!',p:10},
+{t:'fill',c:'imperativ',i:'Imperativ (du):',s:'arbeiten → ___ mehr!',tp:[{id:'a',cr:['Arbeite'],w:90},'mehr!'],h:'-t→-e',ex:'Arbeite!',p:10},
+{t:'mc',c:'imperativ',i:'Imperativ (du)?',s:'fahren',o:[{x:'Fahr langsamer!',cr:true},{x:'Fähr langsamer!',cr:false},{x:'Fährst langsamer!',cr:false},{x:'Fahre langsamer!',cr:false}],h:'kein Umlaut',ex:'Fahr!',p:15},
+{t:'fill',c:'imperativ',i:'Imperativ (du):',s:'schlafen → ___ gut!',tp:[{id:'a',cr:['Schlaf'],w:90},'gut!'],h:'kein Umlaut',ex:'Schlaf!',p:10},
+{t:'mc',c:'imperativ',i:'Imperativ (du)?',s:'geben',o:[{x:'Gib mir das Buch!',cr:true},{x:'Geb mir das Buch!',cr:false},{x:'Gebe mir das Buch!',cr:false},{x:'Gibst mir das Buch!',cr:false}],h:'e→i',ex:'Gib!',p:15},
+{t:'fill',c:'imperativ',i:'Imperativ (du):',s:'helfen → ___ mir!',tp:[{id:'a',cr:['Hilf'],w:90},'mir!'],h:'e→i',ex:'Hilf!',p:10},
+{t:'fill',c:'imperativ',i:'Imperativ (du):',s:'sehen → ___ mal!',tp:[{id:'a',cr:['Sieh'],w:90},'mal!'],h:'e→ie',ex:'Sieh!',p:10},
+{t:'fill',c:'imperativ',i:'Imperativ (du):',s:'vergessen → ___ das nicht!',tp:[{id:'a',cr:['Vergiss'],w:90},'das nicht!'],h:'e→i',ex:'Vergiss!',p:10},
+{t:'mc',c:'imperativ',i:'Imperativ (Sie)?',s:'nehmen',o:[{x:'Nehmen Sie Platz!',cr:true},{x:'Nimm Sie Platz!',cr:false},{x:'Nehmt Sie Platz!',cr:false},{x:'Nimmen Sie Platz!',cr:false}],h:'Sie-Form+Sie',ex:'Nehmen Sie!',p:15},
+{t:'fill',c:'imperativ',i:'Imperativ (ihr):',s:'trinken → ___ mehr Wasser!',tp:[{id:'a',cr:['Trinkt'],w:90},'mehr Wasser!'],h:'ihr-Form',ex:'Trinkt!',p:10},
+{t:'fill',c:'imperativ',i:'Imperativ (du):',s:'hören → ___ zu!',tp:[{id:'a',cr:['Hör'],w:90},'zu!'],h:'du-Form',ex:'Hör!',p:10},
+{t:'mc',c:'imperativ',i:'Imperativ (du)?',s:'aufstehen',o:[{x:'Steh auf!',cr:true},{x:'Aufsteh!',cr:false},{x:'Stehst auf!',cr:false},{x:'Auf steh!',cr:false}],h:'trennbar',ex:'Steh auf!',p:15},
+{t:'fill',c:'imperativ',i:'Imperativ (du):',s:'anrufen → ___ mich ___!',tp:[{id:'a',cr:['Ruf'],w:80},'mich',{id:'b',cr:['an'],w:60},'!'],h:'trennbar',ex:'Ruf...an!',p:15},
+{t:'fill',c:'imperativ',i:'Imperativ (du):',s:'haben → ___ keine Angst!',tp:[{id:'a',cr:['Hab'],w:90},'keine Angst!'],h:'haben→Hab!',ex:'Hab!',p:10}
+],wfragen:[
+{t:'mc',c:'wfragen',i:'Fragewort?',s:'___ heißt du?',o:[{x:'Wie',cr:true},{x:'Was',cr:false},{x:'Wer',cr:false},{x:'Wo',cr:false}],h:'Name=wie',ex:'Wie heißt du?',p:10},
+{t:'mc',c:'wfragen',i:'Fragewort?',s:'___ wohnst du?',o:[{x:'Wo',cr:true},{x:'Was',cr:false},{x:'Wer',cr:false},{x:'Wann',cr:false}],h:'Ort=wo',ex:'Wo wohnst du?',p:10},
+{t:'mc',c:'wfragen',i:'Fragewort?',s:'___ kommst du?',o:[{x:'Woher',cr:true},{x:'Wo',cr:false},{x:'Wohin',cr:false},{x:'Was',cr:false}],h:'Herkunft=woher',ex:'Woher kommst du?',p:10},
+{t:'fill',c:'wfragen',i:'Ergänze:',s:'___ alt bist du?',tp:[{id:'a',cr:['Wie'],w:90},'alt bist du?'],h:'Alter=wie alt',ex:'Wie alt',p:10},
+{t:'fill',c:'wfragen',i:'Ergänze:',s:'___ ist das?',tp:[{id:'a',cr:['Wer'],w:90},'ist das?'],h:'Person=wer',ex:'Wer',p:10},
+{t:'fill',c:'wfragen',i:'Ergänze:',s:'___ machst du heute?',tp:[{id:'a',cr:['Was'],w:90},'machst du heute?'],h:'Aktivität=was',ex:'Was',p:10},
+{t:'mc',c:'wfragen',i:'Fragewort?',s:'___ beginnt der Film?',o:[{x:'Wann',cr:true},{x:'Was',cr:false},{x:'Wo',cr:false},{x:'Wie',cr:false}],h:'Zeit=wann',ex:'Wann',p:10},
+{t:'mc',c:'wfragen',i:'Fragewort?',s:'___ fährst du in den Urlaub?',o:[{x:'Wohin',cr:true},{x:'Wo',cr:false},{x:'Woher',cr:false},{x:'Wann',cr:false}],h:'Ziel=wohin',ex:'Wohin',p:10},
+{t:'fill',c:'wfragen',i:'Ergänze:',s:'___ kostet das?',tp:[{id:'a',cr:['Was','Wie viel','Wieviel'],w:100},'kostet das?'],h:'Preis=was/wie viel',ex:'Was/Wie viel',p:10},
+{t:'mc',c:'wfragen',i:'Fragewort?',s:'___ ist dein Lieblingsessen?',o:[{x:'Was',cr:true},{x:'Wer',cr:false},{x:'Wie',cr:false},{x:'Wo',cr:false}],h:'Sache=was',ex:'Was',p:10},
+{t:'fill',c:'wfragen',i:'Ergänze:',s:'___ spät ist es?',tp:[{id:'a',cr:['Wie'],w:90},'spät ist es?'],h:'Uhrzeit=wie spät',ex:'Wie spät',p:10},
+{t:'mc',c:'wfragen',i:'Fragewort?',s:'___ geht es dir?',o:[{x:'Wie',cr:true},{x:'Was',cr:false},{x:'Wer',cr:false},{x:'Wo',cr:false}],h:'Befinden=wie',ex:'Wie',p:10},
+{t:'fill',c:'wfragen',i:'Ergänze:',s:'___ lange dauert der Film?',tp:[{id:'a',cr:['Wie'],w:90},'lange dauert der Film?'],h:'Dauer=wie lange',ex:'Wie lange',p:10},
+{t:'mc',c:'wfragen',i:'Fragewort?',s:'___ arbeitest du?',o:[{x:'Wo',cr:true},{x:'Was',cr:false},{x:'Wer',cr:false},{x:'Wie',cr:false}],h:'Ort=wo',ex:'Wo',p:10},
+{t:'fill',c:'wfragen',i:'Ergänze:',s:'___ gehst du heute Abend?',tp:[{id:'a',cr:['Wohin'],w:90},'gehst du heute Abend?'],h:'Ziel=wohin',ex:'Wohin',p:10},
+{t:'fill',c:'wfragen',i:'Ergänze:',s:'Von ___ ist das Geschenk?',tp:['Von',{id:'a',cr:['wem'],w:90},'ist das Geschenk?'],h:'von wem',ex:'wem',p:10},
+{t:'mc',c:'wfragen',i:'Fragewort?',s:'Mit ___ gehst du ins Kino?',o:[{x:'wem',cr:true},{x:'wer',cr:false},{x:'wen',cr:false},{x:'was',cr:false}],h:'mit+Dativ=wem',ex:'wem',p:15},
+{t:'fill',c:'wfragen',i:'Ergänze:',s:'___ siehst du? (Person)',tp:[{id:'a',cr:['Wen'],w:90},'siehst du?'],h:'Person+Akk=wen',ex:'Wen',p:10},
+{t:'fill',c:'wfragen',i:'Ergänze:',s:'___ gehört das Buch?',tp:[{id:'a',cr:['Wem'],w:90},'gehört das Buch?'],h:'gehören+Dat=wem',ex:'Wem',p:10},
+{t:'mc',c:'wfragen',i:'Fragewort?',s:'___ hast du das gekauft?',o:[{x:'Warum',cr:true},{x:'Was',cr:false},{x:'Wann',cr:false},{x:'Wo',cr:false}],h:'Grund=warum',ex:'Warum',p:10},
+{t:'fill',c:'wfragen',i:'Ergänze:',s:'___ lernst du Deutsch?',tp:[{id:'a',cr:['Warum','Weshalb','Wieso'],w:90},'lernst du Deutsch?'],h:'Grund=warum',ex:'Warum',p:10},
+{t:'fill',c:'wfragen',i:'Ergänze:',s:'___ Buch liest du?',tp:[{id:'a',cr:['Welches'],w:90},'Buch liest du?'],h:'Auswahl=welch-',ex:'Welches',p:10},
+{t:'mc',c:'wfragen',i:'Fragewort?',s:'___ Farbe magst du?',o:[{x:'Welche',cr:true},{x:'Was',cr:false},{x:'Wie',cr:false},{x:'Wer',cr:false}],h:'Auswahl=welche',ex:'Welche',p:10},
+{t:'mc',c:'wfragen',i:'Fragewort?',s:'Für ___ ist das Geschenk?',o:[{x:'wen',cr:true},{x:'wem',cr:false},{x:'wer',cr:false},{x:'was',cr:false}],h:'für+Akk=wen',ex:'wen',p:15},
+{t:'fill',c:'wfragen',i:'Ergänze:',s:'___ hast du Geburtstag?',tp:[{id:'a',cr:['Wann'],w:90},'hast du Geburtstag?'],h:'Datum=wann',ex:'Wann',p:10}
+],modal:[
+{t:'fill',c:'modal',i:'Modalverb (können):',s:'Ich ___ gut schwimmen.',tp:['Ich',{id:'a',cr:['kann'],w:90},'gut schwimmen.'],h:'ich kann',ex:'kann',p:10},
+{t:'fill',c:'modal',i:'Modalverb (müssen):',s:'Du ___ jetzt gehen.',tp:['Du',{id:'a',cr:['musst'],w:90},'jetzt gehen.'],h:'du musst',ex:'musst',p:10},
+{t:'fill',c:'modal',i:'Modalverb (wollen):',s:'Er ___ Arzt werden.',tp:['Er',{id:'a',cr:['will'],w:90},'Arzt werden.'],h:'er will',ex:'will',p:10},
+{t:'mc',c:'modal',i:'Modalverb?',s:'___ ich hier rauchen? (Erlaubnis)',o:[{x:'Darf',cr:true},{x:'Muss',cr:false},{x:'Will',cr:false},{x:'Soll',cr:false}],h:'Erlaubnis=dürfen',ex:'Darf',p:15},
+{t:'fill',c:'modal',i:'Modalverb (sollen):',s:'Was ___ ich tun?',tp:['Was',{id:'a',cr:['soll'],w:90},'ich tun?'],h:'ich soll',ex:'soll',p:10},
+{t:'fill',c:'modal',i:'Modalverb (mögen):',s:'Sie ___ Schokolade.',tp:['Sie',{id:'a',cr:['mag'],w:90},'Schokolade.'],h:'sie mag',ex:'mag',p:10},
+{t:'fill',c:'modal',i:'Modalverb (können):',s:'Wir ___ morgen kommen.',tp:['Wir',{id:'a',cr:['können'],w:90},'morgen kommen.'],h:'wir können',ex:'können',p:10},
+{t:'mc',c:'modal',i:'Modalverb?',s:'Du ___ mehr Gemüse essen. (Rat)',o:[{x:'solltest',cr:true},{x:'darfst',cr:false},{x:'kannst',cr:false},{x:'willst',cr:false}],h:'Rat=sollen',ex:'solltest',p:15},
+{t:'fill',c:'modal',i:'Modalverb (müssen):',s:'Ihr ___ die Hausaufgaben machen.',tp:['Ihr',{id:'a',cr:['müsst'],w:90},'die Hausaufgaben machen.'],h:'ihr müsst',ex:'müsst',p:10},
+{t:'fill',c:'modal',i:'Modalverb (dürfen):',s:'Kinder ___ hier nicht spielen.',tp:['Kinder',{id:'a',cr:['dürfen'],w:90},'hier nicht spielen.'],h:'sie dürfen',ex:'dürfen',p:10},
+{t:'fill',c:'modal',i:'Modalverb (wollen):',s:'___ du ins Kino gehen?',tp:[{id:'a',cr:['Willst'],w:90},'du ins Kino gehen?'],h:'du willst',ex:'Willst',p:10},
+{t:'mc',c:'modal',i:'Modalverb?',s:'Ich ___ Klavier spielen. (Fähigkeit)',o:[{x:'kann',cr:true},{x:'darf',cr:false},{x:'muss',cr:false},{x:'soll',cr:false}],h:'Fähigkeit=können',ex:'kann',p:15},
+{t:'fill',c:'modal',i:'Modalverb (möchten):',s:'Ich ___ einen Kaffee, bitte.',tp:['Ich',{id:'a',cr:['möchte'],w:90},'einen Kaffee, bitte.'],h:'ich möchte',ex:'möchte',p:10},
+{t:'fill',c:'modal',i:'Modalverb (können):',s:'___ Sie mir helfen?',tp:[{id:'a',cr:['Können'],w:90},'Sie mir helfen?'],h:'Sie können',ex:'Können',p:10},
+{t:'mc',c:'modal',i:'Modalverb?',s:'Hier ___ man nicht parken! (Verbot)',o:[{x:'darf',cr:true},{x:'kann',cr:false},{x:'will',cr:false},{x:'soll',cr:false}],h:'Verbot=dürfen',ex:'darf',p:15},
+{t:'fill',c:'modal',i:'Modalverb (sollen):',s:'Der Arzt sagt, ich ___ mehr Sport machen.',tp:['Der Arzt sagt, ich',{id:'a',cr:['soll'],w:90},'mehr Sport machen.'],h:'ich soll',ex:'soll',p:10},
+{t:'fill',c:'modal',i:'Modalverb (wollen):',s:'Die Kinder ___ Eis essen.',tp:['Die Kinder',{id:'a',cr:['wollen'],w:90},'Eis essen.'],h:'sie wollen',ex:'wollen',p:10},
+{t:'fill',c:'modal',i:'Modalverb (dürfen):',s:'___ ich dein Handy benutzen?',tp:[{id:'a',cr:['Darf'],w:90},'ich dein Handy benutzen?'],h:'ich darf',ex:'Darf',p:10},
+{t:'mc',c:'modal',i:'Modalverb?',s:'Ich ___ heute nicht kommen, ich bin krank.',o:[{x:'kann',cr:true},{x:'darf',cr:false},{x:'will',cr:false},{x:'muss',cr:false}],h:'Möglichkeit=können',ex:'kann',p:15},
+{t:'fill',c:'modal',i:'Modalverb (mögen):',s:'___ du Fisch?',tp:[{id:'a',cr:['Magst'],w:90},'du Fisch?'],h:'du magst',ex:'Magst',p:10},
+{t:'fill',c:'modal',i:'Modalverb (können):',s:'Das Kind ___ schon lesen.',tp:['Das Kind',{id:'a',cr:['kann'],w:90},'schon lesen.'],h:'es kann',ex:'kann',p:10},
+{t:'fill',c:'modal',i:'Modalverb (müssen):',s:'Wir ___ pünktlich sein.',tp:['Wir',{id:'a',cr:['müssen'],w:90},'pünktlich sein.'],h:'wir müssen',ex:'müssen',p:10},
+{t:'mc',c:'modal',i:'Modalverb?',s:'Was ___ du später werden? (Wunsch)',o:[{x:'willst',cr:true},{x:'darfst',cr:false},{x:'musst',cr:false},{x:'sollst',cr:false}],h:'Wunsch=wollen',ex:'willst',p:15},
+{t:'fill',c:'modal',i:'Modalverb (sollen):',s:'___ ich das Fenster öffnen?',tp:[{id:'a',cr:['Soll'],w:90},'ich das Fenster öffnen?'],h:'ich soll',ex:'Soll',p:10},
+{t:'fill',c:'modal',i:'Modalverb (dürfen):',s:'Er ___ nicht Auto fahren.',tp:['Er',{id:'a',cr:['darf'],w:90},'nicht Auto fahren.'],h:'er darf',ex:'darf',p:10}
+],seinhaben:[
+{t:'fill',c:'seinhaben',i:'sein:',s:'Ich ___ Student.',tp:['Ich',{id:'a',cr:['bin'],w:90},'Student.'],h:'ich bin',ex:'bin',p:10},
+{t:'fill',c:'seinhaben',i:'sein:',s:'Du ___ nett.',tp:['Du',{id:'a',cr:['bist'],w:90},'nett.'],h:'du bist',ex:'bist',p:10},
+{t:'fill',c:'seinhaben',i:'sein:',s:'Er ___ aus Deutschland.',tp:['Er',{id:'a',cr:['ist'],w:90},'aus Deutschland.'],h:'er ist',ex:'ist',p:10},
+{t:'fill',c:'seinhaben',i:'sein:',s:'Wir ___ müde.',tp:['Wir',{id:'a',cr:['sind'],w:90},'müde.'],h:'wir sind',ex:'sind',p:10},
+{t:'fill',c:'seinhaben',i:'sein:',s:'Ihr ___ zu spät.',tp:['Ihr',{id:'a',cr:['seid'],w:90},'zu spät.'],h:'ihr seid',ex:'seid',p:10},
+{t:'mc',c:'seinhaben',i:'sein oder haben?',s:'Ich ___ Hunger.',o:[{x:'habe',cr:true},{x:'bin',cr:false},{x:'hat',cr:false},{x:'ist',cr:false}],h:'Hunger haben',ex:'habe',p:15},
+{t:'fill',c:'seinhaben',i:'haben:',s:'Ich ___ ein Auto.',tp:['Ich',{id:'a',cr:['habe'],w:90},'ein Auto.'],h:'ich habe',ex:'habe',p:10},
+{t:'fill',c:'seinhaben',i:'haben:',s:'Du ___ eine Schwester.',tp:['Du',{id:'a',cr:['hast'],w:90},'eine Schwester.'],h:'du hast',ex:'hast',p:10},
+{t:'fill',c:'seinhaben',i:'haben:',s:'Er ___ keine Zeit.',tp:['Er',{id:'a',cr:['hat'],w:90},'keine Zeit.'],h:'er hat',ex:'hat',p:10},
+{t:'fill',c:'seinhaben',i:'haben:',s:'Wir ___ zwei Kinder.',tp:['Wir',{id:'a',cr:['haben'],w:90},'zwei Kinder.'],h:'wir haben',ex:'haben',p:10},
+{t:'fill',c:'seinhaben',i:'haben:',s:'Ihr ___ Glück!',tp:['Ihr',{id:'a',cr:['habt'],w:90},'Glück!'],h:'ihr habt',ex:'habt',p:10},
+{t:'mc',c:'seinhaben',i:'sein oder haben?',s:'Das Wetter ___ schön.',o:[{x:'ist',cr:true},{x:'hat',cr:false},{x:'sind',cr:false},{x:'haben',cr:false}],h:'Wetter=sein',ex:'ist',p:15},
+{t:'fill',c:'seinhaben',i:'sein:',s:'Das ___ mein Bruder.',tp:['Das',{id:'a',cr:['ist'],w:90},'mein Bruder.'],h:'das ist',ex:'ist',p:10},
+{t:'fill',c:'seinhaben',i:'sein:',s:'___ du fertig?',tp:[{id:'a',cr:['Bist'],w:90},'du fertig?'],h:'du bist',ex:'Bist',p:10},
+{t:'fill',c:'seinhaben',i:'haben:',s:'___ Sie Fragen?',tp:[{id:'a',cr:['Haben'],w:90},'Sie Fragen?'],h:'Sie haben',ex:'Haben',p:10},
+{t:'mc',c:'seinhaben',i:'sein oder haben?',s:'Ich ___ 25 Jahre alt.',o:[{x:'bin',cr:true},{x:'habe',cr:false},{x:'ist',cr:false},{x:'hat',cr:false}],h:'Alter=sein',ex:'bin',p:15},
+{t:'fill',c:'seinhaben',i:'sein:',s:'Wie alt ___ du?',tp:['Wie alt',{id:'a',cr:['bist'],w:90},'du?'],h:'du bist',ex:'bist',p:10},
+{t:'fill',c:'seinhaben',i:'haben:',s:'___ du Geschwister?',tp:[{id:'a',cr:['Hast'],w:90},'du Geschwister?'],h:'du hast',ex:'Hast',p:10},
+{t:'mc',c:'seinhaben',i:'sein oder haben?',s:'Wir ___ Durst.',o:[{x:'haben',cr:true},{x:'sind',cr:false},{x:'hat',cr:false},{x:'ist',cr:false}],h:'Durst haben',ex:'haben',p:15},
+{t:'fill',c:'seinhaben',i:'sein:',s:'Wo ___ die Toilette?',tp:['Wo',{id:'a',cr:['ist'],w:90},'die Toilette?'],h:'Ort=sein',ex:'ist',p:10},
+{t:'fill',c:'seinhaben',i:'haben:',s:'Das Kind ___ Fieber.',tp:['Das Kind',{id:'a',cr:['hat'],w:90},'Fieber.'],h:'es hat',ex:'hat',p:10},
+{t:'mc',c:'seinhaben',i:'sein oder haben?',s:'Ich ___ krank.',o:[{x:'bin',cr:true},{x:'habe',cr:false},{x:'ist',cr:false},{x:'hat',cr:false}],h:'Zustand=sein',ex:'bin',p:15},
+{t:'fill',c:'seinhaben',i:'haben:',s:'Die Wohnung ___ drei Zimmer.',tp:['Die Wohnung',{id:'a',cr:['hat'],w:90},'drei Zimmer.'],h:'sie hat',ex:'hat',p:10},
+{t:'mc',c:'seinhaben',i:'sein oder haben?',s:'___ du Lust auf Kino?',o:[{x:'Hast',cr:true},{x:'Bist',cr:false},{x:'Ist',cr:false},{x:'Hat',cr:false}],h:'Lust haben',ex:'Hast',p:15},
+{t:'fill',c:'seinhaben',i:'sein:',s:'Wir ___ zu Hause.',tp:['Wir',{id:'a',cr:['sind'],w:90},'zu Hause.'],h:'wir sind',ex:'sind',p:10}
+],wortstellung:[
+{t:'mc',c:'wortstellung',i:'Richtig?',s:'Ich / heute / lerne / Deutsch',o:[{x:'Ich lerne heute Deutsch.',cr:true},{x:'Ich heute lerne Deutsch.',cr:false},{x:'Heute ich lerne Deutsch.',cr:false},{x:'Lerne ich heute Deutsch.',cr:false}],h:'Verb Position 2',ex:'Ich lerne heute Deutsch.',p:15},
+{t:'mc',c:'wortstellung',i:'Richtig?',s:'Heute / ich / lerne / Deutsch',o:[{x:'Heute lerne ich Deutsch.',cr:true},{x:'Heute ich lerne Deutsch.',cr:false},{x:'Ich heute lerne Deutsch.',cr:false},{x:'Lerne heute ich Deutsch.',cr:false}],h:'Verb Position 2',ex:'Heute lerne ich Deutsch.',p:15},
+{t:'mc',c:'wortstellung',i:'Richtig?',s:'er / Fußball / spielt / gern',o:[{x:'Er spielt gern Fußball.',cr:true},{x:'Er gern spielt Fußball.',cr:false},{x:'Spielt er gern Fußball.',cr:false},{x:'Gern er spielt Fußball.',cr:false}],h:'Verb Position 2',ex:'Er spielt gern Fußball.',p:15},
+{t:'mc',c:'wortstellung',i:'Richtig?',s:'Morgen / wir / fahren / nach Berlin',o:[{x:'Morgen fahren wir nach Berlin.',cr:true},{x:'Morgen wir fahren nach Berlin.',cr:false},{x:'Wir morgen fahren nach Berlin.',cr:false},{x:'Fahren morgen wir nach Berlin.',cr:false}],h:'Verb Position 2',ex:'Morgen fahren wir nach Berlin.',p:15},
+{t:'mc',c:'wortstellung',i:'Richtig? (Modalverb)',s:'Ich / kann / gut / schwimmen',o:[{x:'Ich kann gut schwimmen.',cr:true},{x:'Ich kann schwimmen gut.',cr:false},{x:'Ich schwimmen kann gut.',cr:false},{x:'Kann ich gut schwimmen.',cr:false}],h:'Infinitiv am Ende',ex:'Ich kann gut schwimmen.',p:15},
+{t:'mc',c:'wortstellung',i:'Richtig? (Modalverb)',s:'Du / musst / heute / arbeiten',o:[{x:'Du musst heute arbeiten.',cr:true},{x:'Du heute musst arbeiten.',cr:false},{x:'Du musst arbeiten heute.',cr:false},{x:'Arbeiten du musst heute.',cr:false}],h:'Infinitiv am Ende',ex:'Du musst heute arbeiten.',p:15},
+{t:'mc',c:'wortstellung',i:'Richtig?',s:'In Berlin / wohnt / meine Schwester',o:[{x:'In Berlin wohnt meine Schwester.',cr:true},{x:'In Berlin meine Schwester wohnt.',cr:false},{x:'Meine Schwester in Berlin wohnt.',cr:false},{x:'Wohnt in Berlin meine Schwester.',cr:false}],h:'Verb Position 2',ex:'In Berlin wohnt meine Schwester.',p:15},
+{t:'mc',c:'wortstellung',i:'Richtig? (Trennbar)',s:'Ich / stehe / um 7 Uhr / auf',o:[{x:'Ich stehe um 7 Uhr auf.',cr:true},{x:'Ich aufstehe um 7 Uhr.',cr:false},{x:'Ich stehe auf um 7 Uhr.',cr:false},{x:'Aufstehe ich um 7 Uhr.',cr:false}],h:'Präfix am Ende',ex:'Ich stehe um 7 Uhr auf.',p:15},
+{t:'mc',c:'wortstellung',i:'Richtig?',s:'Jeden Tag / trinkt / er / Kaffee',o:[{x:'Jeden Tag trinkt er Kaffee.',cr:true},{x:'Jeden Tag er trinkt Kaffee.',cr:false},{x:'Er jeden Tag trinkt Kaffee.',cr:false},{x:'Trinkt jeden Tag er Kaffee.',cr:false}],h:'Verb Position 2',ex:'Jeden Tag trinkt er Kaffee.',p:15},
+{t:'mc',c:'wortstellung',i:'Richtig? (Modalverb)',s:'Sie / möchte / nach Italien / fahren',o:[{x:'Sie möchte nach Italien fahren.',cr:true},{x:'Sie möchte fahren nach Italien.',cr:false},{x:'Sie nach Italien möchte fahren.',cr:false},{x:'Möchte sie nach Italien fahren.',cr:false}],h:'Infinitiv am Ende',ex:'Sie möchte nach Italien fahren.',p:15},
+{t:'mc',c:'wortstellung',i:'Richtig?',s:'Am Wochenende / besuche / ich / meine Eltern',o:[{x:'Am Wochenende besuche ich meine Eltern.',cr:true},{x:'Am Wochenende ich besuche meine Eltern.',cr:false},{x:'Ich am Wochenende besuche meine Eltern.',cr:false},{x:'Besuche ich am Wochenende meine Eltern.',cr:false}],h:'Verb Position 2',ex:'Am Wochenende besuche ich meine Eltern.',p:15},
+{t:'mc',c:'wortstellung',i:'Richtig?',s:'Leider / kann / ich / nicht / kommen',o:[{x:'Leider kann ich nicht kommen.',cr:true},{x:'Leider ich kann nicht kommen.',cr:false},{x:'Ich leider kann nicht kommen.',cr:false},{x:'Kann ich leider nicht kommen.',cr:false}],h:'Verb Position 2',ex:'Leider kann ich nicht kommen.',p:15},
+{t:'mc',c:'wortstellung',i:'Richtig? (Trennbar)',s:'Der Zug / fährt / um 10 Uhr / ab',o:[{x:'Der Zug fährt um 10 Uhr ab.',cr:true},{x:'Der Zug abfährt um 10 Uhr.',cr:false},{x:'Der Zug fährt ab um 10 Uhr.',cr:false},{x:'Abfährt der Zug um 10 Uhr.',cr:false}],h:'Präfix am Ende',ex:'Der Zug fährt um 10 Uhr ab.',p:15},
+{t:'mc',c:'wortstellung',i:'Richtig?',s:'Im Sommer / fahren / wir / ans Meer',o:[{x:'Im Sommer fahren wir ans Meer.',cr:true},{x:'Im Sommer wir fahren ans Meer.',cr:false},{x:'Wir im Sommer fahren ans Meer.',cr:false},{x:'Fahren wir im Sommer ans Meer.',cr:false}],h:'Verb Position 2',ex:'Im Sommer fahren wir ans Meer.',p:15},
+{t:'mc',c:'wortstellung',i:'Richtig? (Modalverb)',s:'Man / darf / hier / nicht / rauchen',o:[{x:'Man darf hier nicht rauchen.',cr:true},{x:'Man hier darf nicht rauchen.',cr:false},{x:'Man darf nicht rauchen hier.',cr:false},{x:'Hier man darf nicht rauchen.',cr:false}],h:'Infinitiv am Ende',ex:'Man darf hier nicht rauchen.',p:15},
+{t:'mc',c:'wortstellung',i:'Richtig?',s:'Heute / muss / ich / viel / lernen',o:[{x:'Heute muss ich viel lernen.',cr:true},{x:'Heute ich muss viel lernen.',cr:false},{x:'Ich heute muss viel lernen.',cr:false},{x:'Muss ich heute viel lernen.',cr:false}],h:'Verb Position 2',ex:'Heute muss ich viel lernen.',p:15},
+{t:'mc',c:'wortstellung',i:'Richtig? (Trennbar)',s:'Sie / ruft / ihre Mutter / an',o:[{x:'Sie ruft ihre Mutter an.',cr:true},{x:'Sie anruft ihre Mutter.',cr:false},{x:'Sie ruft an ihre Mutter.',cr:false},{x:'Anruft sie ihre Mutter.',cr:false}],h:'Präfix am Ende',ex:'Sie ruft ihre Mutter an.',p:15},
+{t:'mc',c:'wortstellung',i:'Richtig?',s:'Nächste Woche / habe / ich / Urlaub',o:[{x:'Nächste Woche habe ich Urlaub.',cr:true},{x:'Nächste Woche ich habe Urlaub.',cr:false},{x:'Ich nächste Woche habe Urlaub.',cr:false},{x:'Habe ich nächste Woche Urlaub.',cr:false}],h:'Verb Position 2',ex:'Nächste Woche habe ich Urlaub.',p:15},
+{t:'mc',c:'wortstellung',i:'Richtig?',s:'Gestern / war / das Wetter / schön',o:[{x:'Gestern war das Wetter schön.',cr:true},{x:'Gestern das Wetter war schön.',cr:false},{x:'Das Wetter gestern war schön.',cr:false},{x:'War gestern das Wetter schön.',cr:false}],h:'Verb Position 2',ex:'Gestern war das Wetter schön.',p:15},
+{t:'mc',c:'wortstellung',i:'Richtig?',s:'Manchmal / esse / ich / im Restaurant',o:[{x:'Manchmal esse ich im Restaurant.',cr:true},{x:'Manchmal ich esse im Restaurant.',cr:false},{x:'Ich manchmal esse im Restaurant.',cr:false},{x:'Esse manchmal ich im Restaurant.',cr:false}],h:'Verb Position 2',ex:'Manchmal esse ich im Restaurant.',p:15}
+]};
+let G={mode:'master',idx:0,ex:[],pts:0,corr:0,incorr:0,streak:0,best:0,total:20,ans:false,hint:false};
+function shuffle(a){let b=[...a];for(let i=b.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+function startGame(mode){G.mode=mode;G.idx=0;G.pts=0;G.corr=0;G.incorr=0;G.streak=0;G.best=0;G.ans=false;G.hint=false;G.total=mode==='master'?30:20;
+if(mode==='master'){let all=[];Object.values(E).forEach(e=>{all=all.concat(e);});G.ex=shuffle(all).slice(0,G.total);}else{G.ex=shuffle([...E[mode]]).slice(0,G.total);}
+document.getElementById('menuScreen').classList.remove('active');document.getElementById('gameScreen').classList.add('active');document.getElementById('backBtn').style.display='flex';
+updateStats();showEx();}
+function showEx(){const ex=G.ex[G.idx];const c=document.getElementById('exContainer');G.ans=false;G.hint=false;document.getElementById('hintBtn').disabled=false;document.getElementById('checkBtn').disabled=false;document.getElementById('checkBtn').textContent='✅ Prüfen';
+const cn={konjugation:'Konjugation',pronomen:'Pronomen',trennbar:'Trennbar',imperativ:'Imperativ',wfragen:'W-Fragen',modal:'Modalverben',seinhaben:'sein/haben',wortstellung:'Wortstellung'};
+let h='<div class="ex-card"><span class="ex-type">'+cn[ex.c]+'</span><p class="ex-instr">'+ex.i+'</p>';
+if(ex.s){h+='<div class="sentence"><strong>Satz:</strong> '+ex.s+'</div>';}
+if(ex.t==='fill'){h+='<div class="answer"><div class="answer-wrap">';ex.tp.forEach(p=>{if(typeof p==='string'){h+='<span>'+p+'</span>';}else{h+='<input type="text" class="input-slot" id="in-'+p.id+'" style="width:'+p.w+'px" autocomplete="off">';}});h+='</div></div>';}
+else if(ex.t==='mc'){h+='<div class="mc-opts">';const lt=['A','B','C','D'];const opts=shuffle(ex.o.map((o,i)=>({...o,oi:i})));opts.forEach((o,i)=>{h+='<div class="mc-opt" data-cr="'+o.cr+'" onclick="selOpt(this)"><span class="mc-letter">'+lt[i]+'</span><span>'+o.x+'</span></div>';});h+='</div>';}
+h+='<div class="hint" id="hintBox"></div><div class="explain" id="expBox"></div></div>';c.innerHTML=h;
+if(ex.t==='fill'){const inp=c.querySelector('input');if(inp)setTimeout(()=>inp.focus(),100);}updateProg();}
+function selOpt(el){if(G.ans)return;document.querySelectorAll('.mc-opt').forEach(o=>o.classList.remove('selected'));el.classList.add('selected');}
+function showHint(){const ex=G.ex[G.idx];document.getElementById('hintBox').innerHTML='💡 '+ex.h;document.getElementById('hintBox').style.display='block';G.hint=true;}
+function checkAnswer(){if(G.ans){nextEx();return;}const ex=G.ex[G.idx];let ok=false;
+if(ex.t==='fill'){ok=true;ex.tp.forEach(p=>{if(typeof p==='object'){const inp=document.getElementById('in-'+p.id);const ans=inp.value.trim().toLowerCase();const cr=p.cr.map(a=>a.toLowerCase());if(cr.includes(ans)){inp.classList.add('correct');}else{inp.classList.add('incorrect');ok=false;}}});}
+else if(ex.t==='mc'){const sel=document.querySelector('.mc-opt.selected');if(!sel){alert('Bitte wähle eine Antwort!');return;}document.querySelectorAll('.mc-opt').forEach(o=>{if(o.dataset.cr==='true')o.classList.add('correct');else if(o.classList.contains('selected'))o.classList.add('incorrect');});ok=sel.dataset.cr==='true';}
+if(ok){G.corr++;G.streak++;if(G.streak>G.best)G.best=G.streak;let pts=ex.p;if(G.hint)pts=Math.floor(pts*0.5);if(G.streak>=3)pts=Math.floor(pts*1.5);G.pts+=pts;}else{G.incorr++;G.streak=0;}
+const expBox=document.getElementById('expBox');expBox.innerHTML='<div class="explain-title">'+(ok?'✅ Richtig!':'❌ Nicht ganz...')+'</div><div>'+ex.ex+'</div>';expBox.classList.add('show');G.ans=true;updateStats();document.getElementById('checkBtn').textContent='➡️ Weiter';}
+function nextEx(){G.idx++;if(G.idx>=G.total)showResults();else showEx();}
+function skipEx(){if(!G.ans){G.incorr++;G.streak=0;}nextEx();}
+function updateStats(){document.getElementById('points').textContent=G.pts;document.getElementById('streak').textContent=G.streak;document.getElementById('correct').textContent=G.corr;document.getElementById('total').textContent=G.corr+G.incorr;}
+function updateProg(){const p=(G.idx/G.total)*100;document.getElementById('progressFill').style.width=p+'%';document.getElementById('counter').textContent='Übung '+(G.idx+1)+'/'+G.total;}
+function showResults(){document.getElementById('gameScreen').classList.remove('active');document.getElementById('resultScreen').classList.add('active');document.getElementById('backBtn').style.display='none';const tot=G.corr+G.incorr;const acc=tot>0?Math.round((G.corr/tot)*100):0;document.getElementById('finalPts').textContent=G.pts;document.getElementById('finalCorr').textContent=G.corr+'/'+tot+' ('+acc+'%)';document.getElementById('finalStreak').textContent=G.best;}
+function goMenu(){document.getElementById('resultScreen').classList.remove('active');document.getElementById('menuScreen').classList.add('active');}
+function playAgain(){startGame(G.mode);}
+function confirmExit(){if(confirm('Möchtest du das Training wirklich beenden?')){document.getElementById('gameScreen').classList.remove('active');document.getElementById('menuScreen').classList.add('active');document.getElementById('backBtn').style.display='none';}}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('gameScreen').classList.contains('active'))checkAnswer();});
+</script></body></html>
