@@ -384,10 +384,21 @@ function showEx(){
   h+='<div class="explain" id="explain"><div class="explain-title">✓ Richtig:</div>'+e.ex+'</div>';
   h+='</div>';
   c.innerHTML=h;
-  document.getElementById('btnRow').innerHTML='<button class="btn secondary" onclick="showHint()">💡 Tipp</button><button class="btn primary" onclick="checkAnswer()">✅ Prüfen</button>';
+  // Bei MC und Wortstellung kein Prüfen-Button nötig (automatisch)
+  if(e.t==='m'||e.t==='jnd'||e.t==='w'){
+    document.getElementById('btnRow').innerHTML='<button class="btn secondary" onclick="showHint()">💡 Tipp</button>';
+  }else{
+    document.getElementById('btnRow').innerHTML='<button class="btn secondary" onclick="showHint()">💡 Tipp</button><button class="btn primary" onclick="checkAnswer()">↵ Prüfen</button>';
+  }
   updateStats();updateProg();
   const inp=document.querySelector('.input-slot');
-  if(inp)inp.focus();
+  if(inp){
+    inp.focus();
+    // Enter-Taste direkt am Input-Feld
+    inp.addEventListener('keydown',ev=>{
+      if(ev.key==='Enter'&&!G.ans)checkAnswer();
+    });
+  }
 }
 
 function getType(t){
@@ -476,6 +487,12 @@ function placeWord(el){
   span.textContent=w;
   span.onclick=function(){removeWord(this,el);};
   slots.appendChild(span);
+  
+  // Automatisch prüfen wenn alle Wörter platziert sind
+  const e=G.ex[G.idx];
+  if(e.t==='w' && G.placed.length===e.w.length){
+    setTimeout(()=>checkAnswer(),300);
+  }
 }
 
 function removeWord(span,chip){
@@ -526,14 +543,20 @@ function checkAnswer(){
     if(G.hint)pts=5;
     if(G.streak>=3)pts=Math.floor(pts*1.5);
     G.pts+=pts;
+    updateStats();
+    // Automatisch weiter nach kurzer Pause
+    setTimeout(()=>{
+      G.idx++;
+      if(G.idx>=G.total)showResults();
+      else showEx();
+    },800);
   }else{
     G.incorr++;G.streak=0;
-    // Nur bei falsch die Erklärung zeigen
+    updateStats();
+    // Nur bei falsch die Erklärung und Weiter-Button zeigen
     document.getElementById('explain').classList.add('show');
+    document.getElementById('btnRow').innerHTML='<button class="btn primary" onclick="nextEx()">➡️ Weiter</button>';
   }
-
-  document.getElementById('btnRow').innerHTML='<button class="btn primary" onclick="nextEx()">➡️ Weiter</button>';
-  updateStats();
 }
 
 function nextEx(){
@@ -582,8 +605,10 @@ function playAgain(){startGame(G.mode);}
 document.addEventListener('keydown',e=>{
   if(e.key==='Enter'){
     if(document.getElementById('gameScreen').classList.contains('active')){
-      if(G.ans)nextEx();
-      else checkAnswer();
+      if(!G.ans){
+        checkAnswer();
+      }
+      // Bei G.ans=true nichts tun - automatisch weiter bei richtig, oder Weiter-Button bei falsch
     }
   }
 });
