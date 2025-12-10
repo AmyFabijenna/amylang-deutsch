@@ -963,8 +963,31 @@ function loadExercise() {
 
 function selectMC(el) {
     if (gameState.answered) return;
-    document.querySelectorAll('.mc-option').forEach(o => o.classList.remove('selected'));
-    el.classList.add('selected');
+    const ex = gameState.exercises[gameState.currentExerciseIndex];
+    const isCorrect = el.dataset.correct === 'true';
+    
+    if (isCorrect) {
+        el.classList.add('correct');
+        gameState.answered = true;
+        const cat = ex.category;
+        gameState.categoryStats[cat].total++;
+        gameState.correct++;
+        gameState.streak++;
+        gameState.categoryStats[cat].correct++;
+        if (gameState.streak > gameState.bestStreak) gameState.bestStreak = gameState.streak;
+        let pts = ex.points;
+        if (!gameState.hintUsed) pts += 5;
+        if (gameState.streak >= 3) pts += gameState.streak * 2;
+        gameState.points += pts;
+        showPointsPopup(pts);
+        playSound('correct');
+        updateStats();
+        setTimeout(() => { gameState.currentExerciseIndex++; loadExercise(); }, 800);
+    } else {
+        el.classList.add('incorrect');
+        el.style.pointerEvents = 'none';
+        playSound('incorrect');
+    }
 }
 
 function showHint() {
@@ -996,7 +1019,7 @@ function checkAnswer() {
     if (ex.type === 'fill') {
         isCorrect = checkFillAnswer();
     } else if (ex.type === 'mc') {
-        isCorrect = checkMCAnswer();
+        return; // MC wird in selectMC behandelt
     }
     
     gameState.answered = true;
@@ -1020,15 +1043,18 @@ function checkAnswer() {
         gameState.points += pts;
         showPointsPopup(pts);
         playSound('correct');
+        updateStats();
+        // Automatisch weiter bei richtig
+        setTimeout(() => { gameState.currentExerciseIndex++; loadExercise(); }, 800);
     } else {
         gameState.incorrect++;
         gameState.streak = 0;
         playSound('incorrect');
+        updateStats();
+        // Nur bei falsch: Erklärung und Weiter-Button
+        document.getElementById('explanation').classList.add('show');
+        document.getElementById('checkBtn').textContent = '➡️ Weiter';
     }
-    
-    document.getElementById('explanation').classList.add('show');
-    document.getElementById('checkBtn').textContent = '➡️ Weiter';
-    updateStats();
 }
 
 function checkFillAnswer() {
