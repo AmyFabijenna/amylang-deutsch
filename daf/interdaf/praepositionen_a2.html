@@ -461,7 +461,28 @@ if(ex.t==='fill'){const inp=container.querySelector('.input-slot');if(inp)setTim
 updateStats();
 }
 
-function selectMC(el){if(G.answered)return;document.querySelectorAll('.mc-option').forEach(o=>o.classList.remove('selected'));el.classList.add('selected');}
+function selectMC(el){
+if(G.answered)return;
+const ex=G.ex[G.idx];
+const ok=el.dataset.cor==='1';
+
+if(ok){
+  // Richtig - sofort grün und weiter
+  el.classList.add('correct');
+  G.answered=true;
+  G.stats[ex.c].t++;
+  G.cor++;G.streak++;G.stats[ex.c].c++;
+  if(G.streak>G.best)G.best=G.streak;
+  let pts=ex.pt;if(!G.hintUsed)pts+=5;if(G.streak>=3)pts+=G.streak*2;
+  G.pts+=pts;showPts(pts);playSound('correct');updateStats();
+  setTimeout(()=>{G.idx++;loadEx();},800);
+}else{
+  // Falsch - rot markieren, nochmal versuchen
+  el.classList.add('incorrect');
+  el.style.pointerEvents='none';
+  playSound('incorrect');
+}
+}
 
 function showHint(){
 const ex=G.ex[G.idx];const existing=document.querySelector('.hint-box');if(existing)existing.remove();
@@ -473,11 +494,24 @@ G.hintUsed=true;document.getElementById('hintBtn').disabled=true;
 function checkAnswer(){
 if(G.answered){G.idx++;loadEx();return;}
 const ex=G.ex[G.idx];let isCorrect=false;
-if(ex.t==='fill')isCorrect=checkFill();else if(ex.t==='mc')isCorrect=checkMC();
+if(ex.t==='fill')isCorrect=checkFill();
+// MC wird jetzt direkt in selectMC geprüft
+if(ex.t==='mc')return;
+
 G.answered=true;G.stats[ex.c].t++;
-if(isCorrect){G.cor++;G.streak++;G.stats[ex.c].c++;if(G.streak>G.best)G.best=G.streak;let pts=ex.pt;if(!G.hintUsed)pts+=5;if(G.streak>=3)pts+=G.streak*2;G.pts+=pts;showPts(pts);playSound('correct');}
-else{G.inc++;G.streak=0;playSound('incorrect');}
-document.getElementById('explanation').classList.add('show');document.getElementById('checkBtn').textContent='→ Weiter';updateStats();
+if(isCorrect){
+  G.cor++;G.streak++;G.stats[ex.c].c++;
+  if(G.streak>G.best)G.best=G.streak;
+  let pts=ex.pt;if(!G.hintUsed)pts+=5;if(G.streak>=3)pts+=G.streak*2;
+  G.pts+=pts;showPts(pts);playSound('correct');updateStats();
+  // Automatisch weiter nach kurzer Pause
+  setTimeout(()=>{G.idx++;loadEx();},800);
+}else{
+  G.inc++;G.streak=0;playSound('incorrect');updateStats();
+  // Nur bei falsch: Erklärung und Weiter-Button zeigen
+  document.getElementById('explanation').classList.add('show');
+  document.getElementById('checkBtn').textContent='→ Weiter';
+}
 }
 
 function checkFill(){
