@@ -127,6 +127,7 @@
         .pronoun-btn.dat { border-left: 4px solid var(--dat-color); }
         .pronoun-btn.akk { border-left: 4px solid var(--akk-color); }
         .pronoun-btn.used { opacity: 0.3; cursor: not-allowed; transform: scale(0.95); }
+        .pronoun-btn .case-hint { font-size: 0.65rem; opacity: 0.7; display: block; margin-top: 2px; }
         .control-buttons { display: flex; gap: 15px; justify-content: center; margin-top: 25px; flex-wrap: wrap; }
         .control-btn { background: var(--bg-card); border: 2px solid var(--primary-light); border-radius: 12px; padding: 12px 25px; color: var(--text); font-family: 'Quicksand', sans-serif; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 8px; }
         .control-btn:hover { border-color: var(--accent); background: var(--primary); }
@@ -639,7 +640,13 @@ function loadNext() {
     G.selected = [];
     const [subj, verb, dat, akk, sG, dG, aG] = G.current;
     const sp = pronouns.nom[sG], dp = pronouns.dat[dG], ap = pronouns.akk[aG];
-    G.expected = [sp.charAt(0).toUpperCase() + sp.slice(1), verb, ap, dp];
+    // expected: [NomPronomen, Verb, AkkPronomen, DatPronomen] mit Kasus-Info
+    G.expected = [
+        {t: sp.charAt(0).toUpperCase() + sp.slice(1), case: 'nom'},
+        verb,
+        {t: ap, case: 'akk'},
+        {t: dp, case: 'dat'}
+    ];
     displaySentence();
     displaySlots();
     displayButtons();
@@ -665,23 +672,55 @@ function displayButtons() {
     const [,,,, sG, dG, aG] = G.current;
     const sp = pronouns.nom[sG], dp = pronouns.dat[dG], ap = pronouns.akk[aG];
     const spCap = sp.charAt(0).toUpperCase() + sp.slice(1);
+    
+    // Die drei richtigen Antworten mit Kasus-Label für eindeutige Identifikation
     let btns = [
-        {t: spCap, c: 'nom'}, {t: dp, c: 'dat'}, {t: ap, c: 'akk'}
+        {t: spCap, c: 'nom', case: 'nom'},
+        {t: dp, c: 'dat', case: 'dat'},
+        {t: ap, c: 'akk', case: 'akk'}
     ];
-    const all = [{t:'Er',c:'nom'},{t:'Sie',c:'nom'},{t:'Es',c:'nom'},{t:'ihm',c:'dat'},{t:'ihr',c:'dat'},{t:'ihnen',c:'dat'},{t:'ihn',c:'akk'},{t:'sie',c:'akk'},{t:'es',c:'akk'}];
-    const dist = all.filter(p => !btns.some(b => b.t.toLowerCase() === p.t.toLowerCase()));
-    btns = btns.concat(shuffle(dist).slice(0, 3));
+    
+    // Alle möglichen Pronomen mit korrekten Farben
+    const allPronouns = [
+        {t:'Er', c:'nom', case:'nom'},
+        {t:'Sie', c:'nom', case:'nom'},
+        {t:'Es', c:'nom', case:'nom'},
+        {t:'ihm', c:'dat', case:'dat'},
+        {t:'ihr', c:'dat', case:'dat'},
+        {t:'ihnen', c:'dat', case:'dat'},
+        {t:'ihn', c:'akk', case:'akk'},
+        {t:'sie', c:'akk', case:'akk'},
+        {t:'es', c:'akk', case:'akk'}
+    ];
+    
+    // Distraktoren sammeln - Pronomen die NICHT in den richtigen Antworten sind
+    let distractors = allPronouns.filter(p => {
+        // Prüfe ob dieses Pronomen bereits in btns ist (gleicher Text UND gleicher Kasus)
+        return !btns.some(b => b.t.toLowerCase() === p.t.toLowerCase() && b.case === p.case);
+    });
+    
+    // Shuffle und 5 Distraktoren auswählen (insgesamt 8 Buttons)
+    distractors = shuffle(distractors);
+    btns = btns.concat(distractors.slice(0, 5));
+    
+    // Alle Buttons mischen
     btns = shuffle(btns);
-    document.getElementById('pronounButtons').innerHTML = btns.map((b, i) => `<button class="pronoun-btn ${b.c}" id="btn${i}" onclick="selectPronoun(${i},'${b.t}')">${b.t}</button>`).join('');
+    
+    // Bei mehrdeutigen Pronomen (sie/Sie) den Kasus als kleine Hilfe anzeigen
+    document.getElementById('pronounButtons').innerHTML = btns.map((b, i) => {
+        const needsLabel = (b.t.toLowerCase() === 'sie' || b.t.toLowerCase() === 'es');
+        const label = needsLabel ? ` <small class="case-hint">(${b.case === 'nom' ? 'Subj' : b.case === 'akk' ? 'Akk' : 'Dat'})</small>` : '';
+        return `<button class="pronoun-btn ${b.c}" id="btn${i}" data-case="${b.case}" onclick="selectPronoun(${i},'${b.t}','${b.case}')">${b.t}${label}</button>`;
+    }).join('');
 }
 
-function selectPronoun(idx, txt) {
+function selectPronoun(idx, txt, caseType) {
     const btn = document.getElementById(`btn${idx}`);
     if (btn.classList.contains('used')) return;
     let slot = -1;
     for (let i = 0; i < 3; i++) if (!G.selected[i]) { slot = i; break; }
     if (slot === -1) return;
-    G.selected[slot] = {t: txt, i: idx};
+    G.selected[slot] = {t: txt, i: idx, case: caseType};
     btn.classList.add('used');
     const el = document.getElementById(`slot${slot}`);
     el.textContent = txt;
@@ -703,10 +742,16 @@ function resetAnswer() { for (let i = 0; i < 3; i++) removeSlot(i); }
 
 function checkAnswer() {
     G.attempts++;
-    const user = [G.selected[0]?.t || '', G.selected[1]?.t || '', G.selected[2]?.t || ''];
-    const ok = user[0].toLowerCase() === G.expected[0].toLowerCase() &&
-               user[1].toLowerCase() === G.expected[2].toLowerCase() &&
-               user[2].toLowerCase() === G.expected[3].toLowerCase();
+    // Slot 0 = Nominativ, Slot 1 = Akkusativ, Slot 2 = Dativ
+    const user = [G.selected[0], G.selected[1], G.selected[2]];
+    
+    // Prüfe: richtiger Text UND richtiger Kasus
+    const slot0ok = user[0] && user[0].t.toLowerCase() === G.expected[0].t.toLowerCase() && user[0].case === 'nom';
+    const slot1ok = user[1] && user[1].t.toLowerCase() === G.expected[2].t.toLowerCase() && user[1].case === 'akk';
+    const slot2ok = user[2] && user[2].t.toLowerCase() === G.expected[3].t.toLowerCase() && user[2].case === 'dat';
+    
+    const ok = slot0ok && slot1ok && slot2ok;
+    
     if (ok) {
         G.correct++; G.streak++;
         if (G.streak > G.bestStreak) G.bestStreak = G.streak;
@@ -723,11 +768,9 @@ function checkAnswer() {
         }, 800);
     } else {
         G.streak = 0;
-        for (let i = 0; i < 3; i++) {
-            const el = document.getElementById(`slot${i}`);
-            const exp = i === 0 ? G.expected[0] : i === 1 ? G.expected[2] : G.expected[3];
-            if (el.textContent.toLowerCase() !== exp.toLowerCase()) el.classList.add('wrong');
-        }
+        if (!slot0ok) document.getElementById('slot0').classList.add('wrong');
+        if (!slot1ok) document.getElementById('slot1').classList.add('wrong');
+        if (!slot2ok) document.getElementById('slot2').classList.add('wrong');
         playSound('wrong');
         updateStats();
         setTimeout(() => showHint(), 500);
@@ -738,7 +781,7 @@ function showHint() {
     document.querySelectorAll('.hint-box').forEach(h => h.remove());
     const hint = document.createElement('div');
     hint.className = 'hint-box';
-    hint.innerHTML = `<strong>💡 Richtig:</strong> ${G.expected[0]} ${G.expected[1]} ${G.expected[2]} ${G.expected[3]}.<br><small>(Akkusativ vor Dativ!)</small>`;
+    hint.innerHTML = `<strong>💡 Richtig:</strong> ${G.expected[0].t} ${G.expected[1]} ${G.expected[2].t} ${G.expected[3].t}.<br><small>(Akkusativ vor Dativ!)</small>`;
     document.querySelector('.answer-section').appendChild(hint);
 }
 
