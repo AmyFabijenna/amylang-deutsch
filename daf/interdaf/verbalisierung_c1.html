@@ -363,20 +363,25 @@ function loadEx(){
 function selectMC(el){
     if(G.answered)return;
     const ex=G.ex[G.idx];
+    if(!ex)return;
     const isCorrect=el.dataset.correct==='true';
     
     if(isCorrect){
         el.classList.add('correct');
         G.answered=true;
-        G.stats[ex.c].t++;G.cor++;G.streak++;G.stats[ex.c].c++;
+        if(G.stats[ex.c])G.stats[ex.c].t++;
+        G.cor++;G.streak++;
+        if(G.stats[ex.c])G.stats[ex.c].c++;
         if(G.streak>G.best)G.best=G.streak;
-        let pts=ex.pt;if(!G.hintUsed)pts+=5;if(G.streak>=3)pts+=G.streak*2;
+        let pts=ex.pt||10;if(!G.hintUsed)pts+=5;if(G.streak>=3)pts+=G.streak*2;
         G.pts+=pts;showPts(pts);playSound('correct');updateStats();
         setTimeout(()=>{G.idx++;loadEx();},800);
     }else{
         el.classList.add('incorrect');
         el.style.pointerEvents='none';
+        G.streak=0;
         playSound('incorrect');
+        updateStats();
     }
 }
 
@@ -389,13 +394,18 @@ function showHint(){
 }
 
 function checkAnswer(){
-    if(G.answered){G.idx++;loadEx();return;}
+    if(G.answered){
+        G.idx++;
+        loadEx();
+        return;
+    }
     const ex=G.ex[G.idx];
+    if(!ex)return;
     if(ex.t==='mc')return;
     
     let allCorrect=true;
     document.querySelectorAll('.input-slot').forEach(inp=>{
-        const cors=JSON.parse(inp.dataset.cor);
+        const cors=JSON.parse(inp.dataset.cor||'[]');
         const val=inp.value.trim();
         const ok=cors.some(c=>val.toLowerCase()===c.toLowerCase());
         if(ok){inp.classList.add('correct')}
@@ -408,16 +418,19 @@ function checkAnswer(){
         inp.disabled=true;
     });
     
-    G.answered=true;G.stats[ex.c].t++;
+    G.answered=true;
+    if(G.stats[ex.c])G.stats[ex.c].t++;
     if(allCorrect){
-        G.cor++;G.streak++;G.stats[ex.c].c++;
+        G.cor++;G.streak++;
+        if(G.stats[ex.c])G.stats[ex.c].c++;
         if(G.streak>G.best)G.best=G.streak;
-        let pts=ex.pt;if(!G.hintUsed)pts+=5;if(G.streak>=3)pts+=G.streak*2;
+        let pts=ex.pt||10;if(!G.hintUsed)pts+=5;if(G.streak>=3)pts+=G.streak*2;
         G.pts+=pts;showPts(pts);playSound('correct');updateStats();
         setTimeout(()=>{G.idx++;loadEx();},800);
     }else{
         G.inc++;G.streak=0;playSound('incorrect');updateStats();
-        document.getElementById('explanation').classList.add('show');
+        const expl=document.getElementById('explanation');
+        if(expl)expl.classList.add('show');
         document.getElementById('checkBtn').textContent='➡️ Weiter';
     }
 }
