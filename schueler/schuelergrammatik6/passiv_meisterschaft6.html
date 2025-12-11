@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passiv-Meister 🔧 Anleitungen</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a3a2e;
+            --primary-light: #2d5a4a;
+            --accent: #10b981;
+            --accent-glow: #34d399;
+            --gold: #fbbf24;
+            --gold-glow: #fcd34d;
+            --success: #10b981;
+            --error: #ef4444;
+            --bg-dark: #0f1f1a;
+            --bg-card: #1a2e28;
+            --text: #f0fdf4;
+            --text-muted: #86efac;
+            --cat-praesens: #3b82f6;
+            --cat-praeteritum: #f59e0b;
+            --cat-perfekt: #8b5cf6;
+            --cat-modal: #ec4899;
+            --cat-zustand: #06b6d4;
+            --cat-gemischt: #ef4444;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Quicksand', sans-serif; 
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a2e28 50%, var(--bg-dark) 100%); 
+            min-height: 100vh; 
+            color: var(--text); 
+        }
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        
+        header { text-align: center; margin-bottom: 30px; }
+        h1 { 
+            font-family: 'Fredoka', sans-serif; 
+            font-size: 2.5rem; 
+            background: linear-gradient(135deg, var(--accent-glow), var(--gold)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            margin-bottom: 10px; 
+        }
+        .subtitle { color: var(--text-muted); font-size: 1.1rem; }
+        .level-badge { 
+            display: inline-block; 
+            background: linear-gradient(135deg, var(--accent), var(--gold)); 
+            padding: 8px 20px; 
+            border-radius: 20px; 
+            font-weight: 700; 
+            margin-top: 10px; 
+            color: var(--bg-dark);
+        }
+        
+        .screen { display: none; animation: fadeIn 0.4s; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .menu-card { 
+            background: var(--bg-card); 
+            border-radius: 20px; 
+            padding: 25px; 
+            margin-bottom: 20px; 
+            border: 2px solid var(--primary-light);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        .section-title { 
+            font-family: 'Fredoka', sans-serif; 
+            font-size: 1.4rem; 
+            color: var(--gold); 
+            margin-bottom: 15px; 
+        }
+        
+        /* Reference Cards */
+        .ref-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 12px; 
+            margin-bottom: 20px; 
+        }
+        .ref-card { 
+            background: var(--primary); 
+            border-radius: 12px; 
+            padding: 15px; 
+            border-left: 4px solid var(--card-color); 
+        }
+        .ref-card.praesens { --card-color: var(--cat-praesens); }
+        .ref-card.praeteritum { --card-color: var(--cat-praeteritum); }
+        .ref-card.perfekt { --card-color: var(--cat-perfekt); }
+        .ref-card.modal { --card-color: var(--cat-modal); }
+        .ref-title { font-weight: 700; color: var(--card-color); margin-bottom: 8px; font-size: 0.95rem; }
+        .ref-table { font-size: 0.85rem; color: var(--text-muted); line-height: 1.8; }
+        .ref-table strong { color: var(--text); }
+        
+        /* Category Grid */
+        .category-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+            gap: 15px; 
+            margin-top: 15px; 
+        }
+        .category-card { 
+            background: var(--bg-card); 
+            border-radius: 16px; 
+            padding: 20px; 
+            text-align: center; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+            border: 3px solid var(--cat-color);
+            position: relative;
+            overflow: hidden;
+        }
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--cat-color);
+        }
+        .category-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(135deg, var(--bg-card), var(--primary));
+        }
+        .category-card.praesens { --cat-color: var(--cat-praesens); }
+        .category-card.praeteritum { --cat-color: var(--cat-praeteritum); }
+        .category-card.perfekt { --cat-color: var(--cat-perfekt); }
+        .category-card.modal { --cat-color: var(--cat-modal); }
+        .category-card.zustand { --cat-color: var(--cat-zustand); }
+        .category-card.gemischt { --cat-color: var(--cat-gemischt); }
+        .category-card.master { --cat-color: var(--gold); background: linear-gradient(135deg, var(--primary), var(--primary-light)); }
+        .cat-icon { font-size: 2rem; margin-bottom: 8px; display: block; }
+        .cat-title { 
+            font-family: 'Fredoka', sans-serif; 
+            font-size: 1rem; 
+            color: var(--cat-color); 
+            margin-bottom: 5px; 
+        }
+        .cat-count { 
+            font-size: 0.75rem; 
+            color: var(--text-muted); 
+            background: var(--primary);
+            padding: 3px 10px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 8px;
+        }
+        
+        /* Game Header */
+        .game-header { 
+            background: var(--bg-card); 
+            border-radius: 16px; 
+            padding: 15px 20px; 
+            margin-bottom: 15px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            flex-wrap: wrap; 
+            gap: 10px; 
+        }
+        .control-btn { 
+            background: var(--primary-light); 
+            border: none; 
+            color: var(--text); 
+            padding: 10px 16px; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-size: 0.95rem; 
+            font-weight: 600; 
+            transition: all 0.3s; 
+            font-family: inherit; 
+        }
+        .control-btn:hover { background: var(--accent); }
+        .control-btn.primary { background: linear-gradient(135deg, var(--accent), var(--gold)); color: var(--bg-dark); }
+        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .stats-bar { display: flex; gap: 20px; flex-wrap: wrap; }
+        .stat { text-align: center; }
+        .stat-value { 
+            font-family: 'Fredoka', sans-serif; 
+            font-size: 1.3rem; 
+            color: var(--gold); 
+            font-weight: 700; 
+        }
+        .stat-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
+        .streak-fire { display: none; animation: pulse 0.5s ease infinite alternate; }
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.2); } }
+        
+        .progress-container { 
+            background: var(--primary-light); 
+            border-radius: 10px; 
+            height: 10px; 
+            margin-bottom: 12px; 
+            overflow: hidden; 
+        }
+        .progress-fill { 
+            height: 100%; 
+            background: linear-gradient(90deg, var(--accent), var(--gold)); 
+            border-radius: 10px; 
+            transition: width 0.5s; 
+            width: 0; 
+        }
+        .exercise-counter { text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px; }
+        
+        /* Exercise Card */
+        .exercise-card { 
+            background: var(--bg-card); 
+            border-radius: 20px; 
+            padding: 25px; 
+            border: 2px solid var(--primary-light); 
+        }
+        .exercise-type { 
+            display: inline-block; 
+            padding: 5px 12px; 
+            border-radius: 15px; 
+            font-size: 0.8rem; 
+            font-weight: 700; 
+            margin-bottom: 12px; 
+            background: var(--cat-color); 
+            color: white;
+        }
+        .exercise-type.praesens { --cat-color: var(--cat-praesens); }
+        .exercise-type.praeteritum { --cat-color: var(--cat-praeteritum); }
+        .exercise-type.perfekt { --cat-color: var(--cat-perfekt); }
+        .exercise-type.modal { --cat-color: var(--cat-modal); }
+        .exercise-type.zustand { --cat-color: var(--cat-zustand); }
+        .exercise-type.gemischt { --cat-color: var(--cat-gemischt); }
+        
+        .instruction { font-size: 1rem; color: var(--text-muted); margin-bottom: 15px; font-style: italic; }
+        
+        .source-section { 
+            background: var(--primary); 
+            border-radius: 12px; 
+            padding: 18px; 
+            margin-bottom: 15px; 
+            border-left: 4px solid var(--accent); 
+        }
+        .source-label { font-size: 0.75rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .source-text { font-size: 1.15rem; line-height: 1.7; }
+        .source-text .highlight { 
+            background: linear-gradient(135deg, var(--accent), var(--gold)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            font-weight: 700; 
+        }
+        
+        .answer-section { 
+            background: rgba(16, 185, 129, 0.1); 
+            border: 2px dashed var(--accent); 
+            border-radius: 12px; 
+            padding: 18px; 
+            margin-bottom: 15px; 
+        }
+        .answer-label { font-size: 0.75rem; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .input-line { 
+            display: flex; 
+            flex-wrap: wrap; 
+            align-items: baseline; 
+            gap: 8px; 
+            line-height: 2.2; 
+            font-size: 1.1rem; 
+        }
+        .input-slot { 
+            background: var(--bg-dark); 
+            border: 2px solid var(--primary-light); 
+            border-radius: 8px; 
+            padding: 8px 12px; 
+            color: var(--text); 
+            font-size: 1rem; 
+            font-family: inherit; 
+            transition: all 0.3s; 
+            min-width: 100px;
+        }
+        .input-slot:focus { 
+            outline: none; 
+            border-color: var(--accent); 
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.3); 
+        }
+        .input-slot.correct { border-color: var(--success); background: rgba(16, 185, 129, 0.2); }
+        .input-slot.incorrect { border-color: var(--error); background: rgba(239, 68, 68, 0.2); }
+        .input-slot.wide { min-width: 180px; }
+        .input-slot.extra-wide { min-width: 250px; }
+        
+        /* MC Options */
+        .mc-options { display: grid; gap: 10px; margin-top: 12px; }
+        .mc-option { 
+            background: var(--primary-light); 
+            border: 2px solid var(--primary-light); 
+            border-radius: 12px; 
+            padding: 14px 18px; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+        }
+        .mc-option:hover { border-color: var(--accent); background: rgba(16, 185, 129, 0.1); }
+        .mc-option.correct { border-color: var(--success); background: rgba(16, 185, 129, 0.2); }
+        .mc-option.incorrect { border-color: var(--error); background: rgba(239, 68, 68, 0.2); }
+        .mc-letter { 
+            background: var(--bg-dark); 
+            width: 30px; 
+            height: 30px; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: 700; 
+            font-size: 0.9rem; 
+            color: var(--accent); 
+        }
+        
+        .hint-box { 
+            background: rgba(251, 191, 36, 0.15); 
+            border: 2px solid var(--gold); 
+            border-radius: 10px; 
+            padding: 12px; 
+            margin-bottom: 12px; 
+            color: var(--gold); 
+        }
+        
+        .explanation-box { 
+            background: rgba(16, 185, 129, 0.1); 
+            border: 2px solid var(--success); 
+            border-radius: 12px; 
+            padding: 18px; 
+            margin-top: 15px; 
+            display: none; 
+        }
+        .explanation-box.show { display: block; }
+        .explanation-title { font-weight: 700; color: var(--success); margin-bottom: 8px; }
+        .explanation-text { color: var(--text); line-height: 1.6; }
+        .explanation-text strong { color: var(--accent); }
+        
+        .action-buttons { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        
+        /* Results */
+        .result-card { background: var(--bg-card); border-radius: 24px; padding: 35px; text-align: center; }
+        .result-title { 
+            font-family: 'Fredoka', sans-serif; 
+            font-size: 2rem; 
+            background: linear-gradient(135deg, var(--accent), var(--gold)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            margin-bottom: 10px; 
+        }
+        .result-emoji { font-size: 4rem; margin-bottom: 15px; }
+        .result-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
+        .result-stat { background: var(--primary-light); border-radius: 16px; padding: 15px; }
+        .result-stat-value { font-family: 'Fredoka', sans-serif; font-size: 1.6rem; color: var(--accent); }
+        .result-stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: 5px; }
+        
+        .accuracy-ring { width: 130px; height: 130px; margin: 0 auto 25px; position: relative; }
+        .accuracy-ring svg { transform: rotate(-90deg); }
+        .accuracy-ring circle { fill: none; stroke-width: 10; }
+        .accuracy-ring .bg { stroke: var(--primary-light); }
+        .accuracy-ring .progress { stroke: var(--accent); stroke-linecap: round; stroke-dasharray: 377; stroke-dashoffset: 377; transition: stroke-dashoffset 1.5s ease; }
+        .accuracy-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Fredoka', sans-serif; font-size: 1.6rem; color: var(--accent); }
+        
+        .category-results { background: var(--primary-light); border-radius: 16px; padding: 20px; margin-bottom: 20px; text-align: left; }
+        .category-results h4 { color: var(--accent); margin-bottom: 12px; font-family: 'Fredoka', sans-serif; }
+        .cat-result-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--bg-dark); }
+        .cat-result-item:last-child { border-bottom: none; }
+        .cat-result-name { display: flex; align-items: center; gap: 8px; }
+        .cat-result-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .cat-result-score { font-weight: 700; color: var(--accent); }
+        
+        .points-popup { 
+            position: fixed; 
+            font-family: 'Fredoka', sans-serif; 
+            font-size: 1.6rem; 
+            font-weight: 700; 
+            color: var(--gold); 
+            pointer-events: none; 
+            animation: floatUp 1s ease forwards; 
+            z-index: 1000; 
+        }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-60px) scale(1.3); } }
+        
+        /* Theory Modal */
+        .modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            bottom: 0; 
+            background: rgba(0, 0, 0, 0.8); 
+            z-index: 100; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 20px; 
+        }
+        .modal.show { display: flex; }
+        .modal-content { 
+            background: var(--bg-card); 
+            border-radius: 20px; 
+            padding: 30px; 
+            max-width: 800px; 
+            max-height: 80vh; 
+            overflow-y: auto; 
+            border: 2px solid var(--accent); 
+        }
+        .modal-title { 
+            font-family: 'Fredoka', sans-serif; 
+            font-size: 1.8rem; 
+            color: var(--accent); 
+            margin-bottom: 20px; 
+            text-align: center; 
+        }
+        .theory-section { margin-bottom: 20px; }
+        .theory-section h3 { color: var(--gold); margin-bottom: 10px; font-size: 1.1rem; }
+        .theory-section p, .theory-section ul { color: var(--text-muted); line-height: 1.7; }
+        .theory-section ul { padding-left: 20px; }
+        .theory-section li { margin-bottom: 5px; }
+        .theory-section strong { color: var(--text); }
+        .example-box { 
+            background: var(--primary); 
+            border-radius: 10px; 
+            padding: 12px; 
+            margin: 10px 0; 
+            border-left: 3px solid var(--accent); 
+        }
+        .example-box .aktiv { color: var(--cat-praeteritum); }
+        .example-box .passiv { color: var(--accent); }
+        
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8rem; }
+            .category-grid { grid-template-columns: 1fr 1fr; }
+            .game-header { flex-direction: column; }
+            .stats-bar { justify-content: center; }
+            .result-stats { grid-template-columns: 1fr; }
+            .ref-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>🔧 Passiv-Meister</h1>
+        <p class="subtitle">Das Passiv in Anleitungen – alle Formen üben</p>
+        <span class="level-badge">📚 6. Schulstufe</span>
+    </header>
+    
+    <!-- MENU SCREEN -->
+    <div id="menuScreen" class="screen active">
+        <div class="menu-card">
+            <h2 class="section-title">📖 Das Passiv auf einen Blick</h2>
+            <div class="ref-grid">
+                <div class="ref-card praesens">
+                    <div class="ref-title">🔵 Vorgangspassiv Präsens</div>
+                    <div class="ref-table">
+                        <strong>werden</strong> + Partizip II<br>
+                        Der Teig <strong>wird gerührt</strong>.<br>
+                        Die Zutaten <strong>werden gemischt</strong>.
+                    </div>
+                </div>
+                <div class="ref-card praeteritum">
+                    <div class="ref-title">🟠 Vorgangspassiv Präteritum</div>
+                    <div class="ref-table">
+                        <strong>wurde/wurden</strong> + Partizip II<br>
+                        Der Teig <strong>wurde gerührt</strong>.<br>
+                        Die Zutaten <strong>wurden gemischt</strong>.
+                    </div>
+                </div>
+                <div class="ref-card perfekt">
+                    <div class="ref-title">🟣 Vorgangspassiv Perfekt</div>
+                    <div class="ref-table">
+                        <strong>sein</strong> + Partizip II + <strong>worden</strong><br>
+                        Der Teig <strong>ist gerührt worden</strong>.<br>
+                        Die Zutaten <strong>sind gemischt worden</strong>.
+                    </div>
+                </div>
+                <div class="ref-card modal">
+                    <div class="ref-title">🩷 Passiv mit Modalverb</div>
+                    <div class="ref-table">
+                        Modalverb + Partizip II + <strong>werden</strong><br>
+                        Der Teig <strong>muss gerührt werden</strong>.<br>
+                        Die Zutaten <strong>können gemischt werden</strong>.
+                    </div>
+                </div>
+            </div>
+            <button class="control-btn primary" onclick="showTheory()">📚 Theorie anzeigen</button>
+        </div>
+        
+        <div class="menu-card">
+            <h2 class="section-title">🎯 Wähle deinen Übungsmodus</h2>
+            <div class="category-grid">
+                <div class="category-card praesens" onclick="startGame('praesens')">
+                    <span class="cat-icon">🔵</span>
+                    <div class="cat-title">Präsens</div>
+                    <span class="cat-count">wird gemacht</span>
+                </div>
+                <div class="category-card praeteritum" onclick="startGame('praeteritum')">
+                    <span class="cat-icon">🟠</span>
+                    <div class="cat-title">Präteritum</div>
+                    <span class="cat-count">wurde gemacht</span>
+                </div>
+                <div class="category-card perfekt" onclick="startGame('perfekt')">
+                    <span class="cat-icon">🟣</span>
+                    <div class="cat-title">Perfekt</div>
+                    <span class="cat-count">ist gemacht worden</span>
+                </div>
+                <div class="category-card modal" onclick="startGame('modal')">
+                    <span class="cat-icon">🩷</span>
+                    <div class="cat-title">mit Modalverb</div>
+                    <span class="cat-count">muss gemacht werden</span>
+                </div>
+                <div class="category-card zustand" onclick="startGame('zustand')">
+                    <span class="cat-icon">🩵</span>
+                    <div class="cat-title">Zustandspassiv</div>
+                    <span class="cat-count">ist gemacht</span>
+                </div>
+                <div class="category-card master" onclick="startGame('alle')">
+                    <span class="cat-icon">⭐</span>
+                    <div class="cat-title">ALLES MISCHEN</div>
+                    <span class="cat-count">Meister-Modus</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- GAME SCREEN -->
+    <div id="gameScreen" class="screen">
+        <div class="game-header">
+            <button class="control-btn" onclick="confirmExit()">← Zurück</button>
+            <div class="stats-bar">
+                <div class="stat">
+                    <div class="stat-value" id="points">0</div>
+                    <div class="stat-label">Punkte</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value"><span id="streak">0</span><span id="streakFire" class="streak-fire">🔥</span></div>
+                    <div class="stat-label">Serie</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value"><span id="correct">0</span>/<span id="total">0</span></div>
+                    <div class="stat-label">Richtig</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="exercise-counter" id="exerciseCounter">Übung 1/15</div>
+        
+        <div class="exercise-card">
+            <div id="exerciseArea"></div>
+            <div class="action-buttons">
+                <button class="control-btn" id="hintBtn" onclick="showHint()">💡 Tipp</button>
+                <button class="control-btn primary" id="checkBtn" onclick="checkAnswer()">✓ Prüfen</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- RESULT SCREEN -->
+    <div id="resultScreen" class="screen">
+        <div class="result-card">
+            <div class="result-emoji" id="resultEmoji">🏆</div>
+            <h2 class="result-title">Training abgeschlossen!</h2>
+            
+            <div class="accuracy-ring">
+                <svg width="130" height="130">
+                    <circle class="bg" cx="65" cy="65" r="60"></circle>
+                    <circle class="progress" id="accuracyCircle" cx="65" cy="65" r="60"></circle>
+                </svg>
+                <div class="accuracy-text" id="accuracyText">0%</div>
+            </div>
+            
+            <div class="result-stats">
+                <div class="result-stat">
+                    <div class="result-stat-value" id="finalPoints">0</div>
+                    <div class="result-stat-label">Punkte</div>
+                </div>
+                <div class="result-stat">
+                    <div class="result-stat-value" id="finalCorrect">0/0</div>
+                    <div class="result-stat-label">Richtig</div>
+                </div>
+                <div class="result-stat">
+                    <div class="result-stat-value" id="finalStreak">0</div>
+                    <div class="result-stat-label">Beste Serie</div>
+                </div>
+            </div>
+            
+            <div class="category-results" id="categoryResults"></div>
+            
+            <div class="action-buttons" style="justify-content: center;">
+                <button class="control-btn" onclick="goToMenu()">🏠 Zurück zum Menü</button>
+                <button class="control-btn primary" onclick="playAgain()">🔄 Nochmal spielen</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- THEORY MODAL -->
+    <div id="theoryModal" class="modal" onclick="if(event.target===this)hideTheory()">
+        <div class="modal-content">
+            <h2 class="modal-title">📖 Das Passiv in Anleitungen</h2>
+            
+            <div class="theory-section">
+                <h3>🎯 Warum Passiv in Anleitungen?</h3>
+                <p>In Anleitungen (Kochrezepte, Spielanleitungen, Bastelanleitungen) verwendet man oft das <strong>Passiv</strong>, weil es nicht wichtig ist, <strong>wer</strong> etwas tut – wichtig ist nur, <strong>was</strong> getan wird.</p>
+                <div class="example-box">
+                    <span class="aktiv">Aktiv: Man rührt den Teig.</span> → <span class="passiv">Passiv: Der Teig wird gerührt.</span>
+                </div>
+            </div>
+            
+            <div class="theory-section">
+                <h3>🔵 Vorgangspassiv Präsens</h3>
+                <p>Bildung: <strong>werden</strong> (konjugiert) + <strong>Partizip II</strong></p>
+                <div class="example-box">
+                    Zuerst <strong>wird</strong> das Mehl in die Schüssel <strong>gegeben</strong>.<br>
+                    Danach <strong>werden</strong> die Eier <strong>hinzugefügt</strong>.
+                </div>
+            </div>
+            
+            <div class="theory-section">
+                <h3>🟠 Vorgangspassiv Präteritum</h3>
+                <p>Bildung: <strong>wurde/wurden</strong> + <strong>Partizip II</strong></p>
+                <div class="example-box">
+                    Das Spielfeld <strong>wurde</strong> in zwei Hälften <strong>geteilt</strong>.<br>
+                    Die Mannschaften <strong>wurden</strong> <strong>gebildet</strong>.
+                </div>
+            </div>
+            
+            <div class="theory-section">
+                <h3>🟣 Vorgangspassiv Perfekt</h3>
+                <p>Bildung: <strong>sein</strong> (konjugiert) + Partizip II + <strong>worden</strong></p>
+                <div class="example-box">
+                    Die Palatschinke <strong>ist</strong> <strong>gewendet worden</strong>.<br>
+                    Alle Zutaten <strong>sind</strong> <strong>vermischt worden</strong>.
+                </div>
+            </div>
+            
+            <div class="theory-section">
+                <h3>🩷 Passiv mit Modalverben</h3>
+                <p>Bildung: <strong>Modalverb</strong> (konjugiert) + Partizip II + <strong>werden</strong> (Infinitiv)</p>
+                <div class="example-box">
+                    Der Teig <strong>muss</strong> gut <strong>durchgeknetet werden</strong>.<br>
+                    Die Spielsteine <strong>können</strong> beliebig <strong>platziert werden</strong>.<br>
+                    Es <strong>darf</strong> nur auf den Körper <strong>gezielt werden</strong>.
+                </div>
+            </div>
+            
+            <div class="theory-section">
+                <h3>🩵 Zustandspassiv</h3>
+                <p>Bildung: <strong>sein</strong> (konjugiert) + <strong>Partizip II</strong></p>
+                <p>Zeigt einen <strong>Zustand</strong> als Ergebnis einer Handlung.</p>
+                <div class="example-box">
+                    <span class="aktiv">Vorgang: Die Tür wird geschlossen.</span><br>
+                    <span class="passiv">Zustand: Die Tür ist geschlossen.</span>
+                </div>
+            </div>
+            
+            <button class="control-btn primary" onclick="hideTheory()" style="width: 100%; margin-top: 20px;">✓ Verstanden!</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Exercise database
+const exercises = {
+    praesens: [
+        { t: 'fill', c: 'praesens', q: 'Forme ins Passiv Präsens um:', aktiv: 'Man mischt die Zutaten.', pre: 'Die Zutaten', ans: [['werden gemischt', 'werden vermischt']], suf: '.', hint: 'werden + Partizip II', expl: 'Im Passiv Präsens: <strong>werden</strong> + Partizip II → Die Zutaten <strong>werden gemischt</strong>.' },
+        { t: 'fill', c: 'praesens', q: 'Forme ins Passiv Präsens um:', aktiv: 'Man rührt den Teig.', pre: 'Der Teig', ans: [['wird gerührt']], suf: '.', hint: 'wird + Partizip II (Singular)', expl: 'Singular: <strong>wird</strong> + Partizip II → Der Teig <strong>wird gerührt</strong>.' },
+        { t: 'fill', c: 'praesens', q: 'Forme ins Passiv Präsens um:', aktiv: 'Man schneidet die Zwiebeln.', pre: 'Die Zwiebeln', ans: [['werden geschnitten']], suf: '.', hint: 'Plural → werden', expl: 'Plural: <strong>werden</strong> + Partizip II → Die Zwiebeln <strong>werden geschnitten</strong>.' },
+        { t: 'fill', c: 'praesens', q: 'Ergänze das Passiv Präsens:', aktiv: '', pre: 'Zuerst', ans: [['wird']], mid: 'das Spielfeld aufgebaut.', hint: 'Hilfsverb für Singular?', expl: 'Singular Passiv Präsens: <strong>wird</strong> + Partizip II.' },
+        { t: 'fill', c: 'praesens', q: 'Ergänze das Passiv Präsens:', aktiv: '', pre: 'Danach', ans: [['werden']], mid: 'die Spielsteine verteilt.', hint: 'Hilfsverb für Plural?', expl: 'Plural Passiv Präsens: <strong>werden</strong> + Partizip II.' },
+        { t: 'mc', c: 'praesens', q: 'Welcher Satz ist Passiv Präsens?', opts: ['Die Eier werden geschlagen.', 'Die Eier wurden geschlagen.', 'Die Eier sind geschlagen worden.', 'Die Eier müssen geschlagen werden.'], cor: 0, hint: 'Präsens = werden + Partizip II', expl: '<strong>werden + Partizip II</strong> = Passiv Präsens. "wurden" ist Präteritum, "sind...worden" ist Perfekt.' },
+        { t: 'fill', c: 'praesens', q: 'Forme ins Passiv Präsens um:', aktiv: 'Man erhitzt die Pfanne.', pre: 'Die Pfanne', ans: [['wird erhitzt']], suf: '.', hint: 'Singular → wird', expl: 'Die Pfanne <strong>wird erhitzt</strong>. (Singular Passiv Präsens)' },
+        { t: 'fill', c: 'praesens', q: 'Forme ins Passiv Präsens um:', aktiv: 'Man würfelt mit zwei Würfeln.', pre: 'Es', ans: [['wird gewürfelt']], suf: 'mit zwei Würfeln.', hint: 'unpersönliches Passiv mit "es"', expl: 'Bei intransitiven Verben: <strong>Es wird gewürfelt</strong>. (unpersönliches Passiv)' },
+        { t: 'fill', c: 'praesens', q: 'Ergänze die Passivform:', aktiv: '', pre: 'Die Palatschinke', ans: [['wird gewendet']], suf: ', sobald sie goldbraun ist.', hint: 'Singular Passiv Präsens', expl: 'Die Palatschinke <strong>wird gewendet</strong>. (Passiv Präsens Singular)' },
+        { t: 'mc', c: 'praesens', q: 'Was ist die richtige Passivform von "Man verteilt die Karten"?', opts: ['Die Karten werden verteilt.', 'Die Karten wurden verteilt.', 'Die Karten sind verteilt.', 'Die Karten verteilen sich.'], cor: 0, hint: 'Passiv Präsens = werden + Partizip II', expl: 'Aktiv Präsens → Passiv Präsens: <strong>werden + Partizip II</strong>.' },
+        // 20 komplexere Sätze
+        { t: 'fill', c: 'praesens', q: 'Forme ins Passiv Präsens um:', aktiv: 'Man schlägt die Eier vorsichtig in eine Schüssel.', pre: 'Die Eier', ans: [['werden vorsichtig in eine Schüssel geschlagen']], suf: '.', hint: 'Adverbien bleiben erhalten!', expl: 'Die Eier <strong>werden vorsichtig in eine Schüssel geschlagen</strong>. Adverbien bleiben im Passiv erhalten.' },
+        { t: 'fill', c: 'praesens', q: 'Forme ins Passiv Präsens um:', aktiv: 'Der Koch bereitet das Essen zu.', pre: 'Das Essen', ans: [['wird vom Koch zubereitet', 'wird zubereitet']], suf: '.', hint: 'zubereiten ist trennbar!', expl: 'Das Essen <strong>wird (vom Koch) zubereitet</strong>. Trennbare Verben: Partizip II ist zusammen.' },
+        { t: 'fill', c: 'praesens', q: 'Forme ins Passiv Präsens um:', aktiv: 'Die Spieler werfen abwechselnd den Würfel.', pre: 'Der Würfel', ans: [['wird abwechselnd von den Spielern geworfen', 'wird abwechselnd geworfen']], suf: '.', hint: 'werfen → geworfen (starkes Verb)', expl: 'Der Würfel <strong>wird abwechselnd geworfen</strong>. Starkes Verb: werfen-warf-geworfen.' },
+        { t: 'fill', c: 'praesens', q: 'Ergänze die komplette Passivform:', aktiv: '', pre: 'Die fertige Masse', ans: [['wird gleichmäßig auf dem Blech verteilt']], suf: '.', hint: 'wird + Adverb + Präpositionalphrase + Partizip II', expl: 'Komplexe Passivstruktur: Die Masse <strong>wird gleichmäßig auf dem Blech verteilt</strong>.' },
+        { t: 'mc', c: 'praesens', q: 'Welcher Satz ist grammatisch korrekt?', opts: ['Die Suppe wird mit Salz und Pfeffer abgeschmeckt.', 'Die Suppe wird mit Salz und Pfeffer abschmecken.', 'Die Suppe werden mit Salz und Pfeffer abgeschmeckt.', 'Die Suppe ist mit Salz und Pfeffer abschmecken.'], cor: 0, hint: 'Singular + werden + Partizip II', expl: '<strong>wird abgeschmeckt</strong> ist korrekt. Singular braucht "wird", nicht "werden".' },
+        { t: 'fill', c: 'praesens', q: 'Forme ins Passiv Präsens um:', aktiv: 'Man gibt die Butter erst am Ende dazu.', pre: 'Die Butter', ans: [['wird erst am Ende dazugegeben', 'wird erst am Ende hinzugegeben']], suf: '.', hint: 'Zeitangabe bleibt, dazugeben ist trennbar', expl: 'Die Butter <strong>wird erst am Ende dazugegeben</strong>. Zeitangaben bleiben im Passiv erhalten.' },
+        { t: 'fill', c: 'praesens', q: 'Forme ins Passiv Präsens um:', aktiv: 'Man lässt den Teig eine Stunde ruhen.', pre: 'Der Teig', ans: [['wird eine Stunde ruhen gelassen']], suf: '.', hint: 'lassen + Infinitiv im Passiv', expl: 'Der Teig <strong>wird eine Stunde ruhen gelassen</strong>. Konstruktion mit "lassen" im Passiv.' },
+        { t: 'fill', c: 'praesens', q: 'Ergänze das Passiv:', aktiv: '', pre: 'Während des Spiels', ans: [['werden']], mid: 'die Regeln streng eingehalten.', hint: 'einhalten ist trennbar', expl: 'Die Regeln <strong>werden</strong> streng eingehalten. Trennbares Verb: ein|halten → eingehalten.' },
+        { t: 'fill', c: 'praesens', q: 'Forme ins Passiv Präsens um:', aktiv: 'Man trägt die Creme vorsichtig auf die Torte auf.', pre: 'Die Creme', ans: [['wird vorsichtig auf die Torte aufgetragen']], suf: '.', hint: 'auftragen → aufgetragen', expl: 'Die Creme <strong>wird vorsichtig auf die Torte aufgetragen</strong>. Trennbares Verb: auf|tragen.' },
+        { t: 'mc', c: 'praesens', q: '"Die Teilnehmer werden vom Schiedsrichter kontrolliert." – Wer handelt?', opts: ['Der Schiedsrichter kontrolliert.', 'Die Teilnehmer kontrollieren.', 'Niemand kontrolliert.', 'Beide kontrollieren.'], cor: 0, hint: 'von + Dativ = Täter im Passiv', expl: 'Im Passiv steht der Täter mit <strong>von + Dativ</strong>. Der Schiedsrichter ist der Handelnde!' },
+        { t: 'fill', c: 'praesens', q: 'Forme ins Passiv Präsens um:', aktiv: 'Man hebt das Eiweiß vorsichtig unter die Masse.', pre: 'Das Eiweiß', ans: [['wird vorsichtig unter die Masse gehoben']], suf: '.', hint: 'unterheben → unter...gehoben', expl: 'Das Eiweiß <strong>wird vorsichtig unter die Masse gehoben</strong>. (heben-hob-gehoben)' },
+        { t: 'fill', c: 'praesens', q: 'Forme ins Passiv Präsens um:', aktiv: 'Die Mannschaft wählt einen Kapitän.', pre: 'Ein Kapitän', ans: [['wird von der Mannschaft gewählt', 'wird gewählt']], suf: '.', hint: 'Täter mit "von" möglich', expl: 'Ein Kapitän <strong>wird (von der Mannschaft) gewählt</strong>.' },
+        { t: 'fill', c: 'praesens', q: 'Ergänze die Passivform:', aktiv: '', pre: 'Die Zutaten', ans: [['werden der Reihe nach hinzugefügt']], suf: ', bis ein glatter Teig entsteht.', hint: 'Plural + der Reihe nach + hinzufügen', expl: 'Die Zutaten <strong>werden der Reihe nach hinzugefügt</strong>.' },
+        { t: 'fill', c: 'praesens', q: 'Forme ins Passiv Präsens um:', aktiv: 'Man sticht die Kekse mit Förmchen aus.', pre: 'Die Kekse', ans: [['werden mit Förmchen ausgestochen']], suf: '.', hint: 'ausstechen → ausgestochen', expl: 'Die Kekse <strong>werden mit Förmchen ausgestochen</strong>. (stechen-stach-gestochen)' },
+        { t: 'mc', c: 'praesens', q: 'Welches Verb steht NICHT im Passiv Präsens?', opts: ['Das Brot ist geschnitten.', 'Der Kuchen wird gebacken.', 'Die Spieler werden aufgestellt.', 'Die Nudeln werden gekocht.'], cor: 0, hint: 'Achte auf das Hilfsverb!', expl: '"ist geschnitten" ist <strong>Zustandspassiv</strong>, nicht Vorgangspassiv Präsens!' },
+        { t: 'fill', c: 'praesens', q: 'Forme ins Passiv Präsens um:', aktiv: 'Man schiebt das Blech in den vorgeheizten Ofen.', pre: 'Das Blech', ans: [['wird in den vorgeheizten Ofen geschoben']], suf: '.', hint: 'schieben → geschoben', expl: 'Das Blech <strong>wird in den vorgeheizten Ofen geschoben</strong>. (schieben-schob-geschoben)' },
+        { t: 'fill', c: 'praesens', q: 'Forme ins Passiv Präsens um:', aktiv: 'Man nimmt den Kuchen nach 30 Minuten heraus.', pre: 'Der Kuchen', ans: [['wird nach 30 Minuten herausgenommen', 'wird nach dreißig Minuten herausgenommen']], suf: '.', hint: 'herausnehmen → herausgenommen', expl: 'Der Kuchen <strong>wird nach 30 Minuten herausgenommen</strong>. (nehmen-nahm-genommen)' },
+        { t: 'fill', c: 'praesens', q: 'Ergänze das Passiv mit Täterangabe:', aktiv: '', pre: 'Das Spielfeld', ans: [['wird vom jüngsten Spieler aufgebaut']], suf: '.', hint: 'von + Dativ für den Täter', expl: 'Das Spielfeld <strong>wird vom jüngsten Spieler aufgebaut</strong>. Täter: von + Dativ.' },
+        { t: 'fill', c: 'praesens', q: 'Forme ins Passiv Präsens um:', aktiv: 'Man verrührt alle trockenen Zutaten gründlich miteinander.', pre: 'Alle trockenen Zutaten', ans: [['werden gründlich miteinander verrührt']], suf: '.', hint: 'Plural + Adverb bleibt', expl: 'Alle trockenen Zutaten <strong>werden gründlich miteinander verrührt</strong>.' },
+        { t: 'mc', c: 'praesens', q: '"Die Spielsteine werden aufgestellt, bevor gewürfelt wird." – Wie viele Passivformen?', opts: ['Zwei Passivformen', 'Eine Passivform', 'Drei Passivformen', 'Keine Passivform'], cor: 0, hint: 'Suche alle "werden + Partizip II"', expl: 'Zwei Passivformen: <strong>werden aufgestellt</strong> und <strong>gewürfelt wird</strong> (unpersönliches Passiv).' },
+    ],
+    praeteritum: [
+        { t: 'fill', c: 'praeteritum', q: 'Forme ins Passiv Präteritum um:', aktiv: 'Man teilte das Spielfeld.', pre: 'Das Spielfeld', ans: [['wurde geteilt']], suf: '.', hint: 'wurde + Partizip II', expl: 'Passiv Präteritum: <strong>wurde</strong> + Partizip II → Das Spielfeld <strong>wurde geteilt</strong>.' },
+        { t: 'fill', c: 'praeteritum', q: 'Forme ins Passiv Präteritum um:', aktiv: 'Man bildete zwei Mannschaften.', pre: 'Zwei Mannschaften', ans: [['wurden gebildet']], suf: '.', hint: 'Plural → wurden', expl: 'Plural Passiv Präteritum: <strong>wurden</strong> + Partizip II.' },
+        { t: 'fill', c: 'praeteritum', q: 'Ergänze das Passiv Präteritum:', aktiv: '', pre: 'Zuerst', ans: [['wurde']], mid: 'das Mehl in die Schüssel gegeben.', hint: 'Hilfsverb Präteritum Singular?', expl: 'Singular Passiv Präteritum: <strong>wurde</strong> + Partizip II.' },
+        { t: 'fill', c: 'praeteritum', q: 'Ergänze das Passiv Präteritum:', aktiv: '', pre: 'Anschließend', ans: [['wurden']], mid: 'alle Zutaten vermischt.', hint: 'Hilfsverb Präteritum Plural?', expl: 'Plural Passiv Präteritum: <strong>wurden</strong> + Partizip II.' },
+        { t: 'mc', c: 'praeteritum', q: 'Welcher Satz ist Passiv Präteritum?', opts: ['Das Spiel wurde begonnen.', 'Das Spiel wird begonnen.', 'Das Spiel ist begonnen worden.', 'Das Spiel muss begonnen werden.'], cor: 0, hint: 'Präteritum = wurde/wurden', expl: '<strong>wurde/wurden + Partizip II</strong> = Passiv Präteritum.' },
+        { t: 'fill', c: 'praeteritum', q: 'Forme ins Passiv Präteritum um:', aktiv: 'Man warf den Ball.', pre: 'Der Ball', ans: [['wurde geworfen']], suf: '.', hint: 'werfen → geworfen', expl: 'Der Ball <strong>wurde geworfen</strong>. (werfen ist ein starkes Verb: werfen-warf-geworfen)' },
+        { t: 'fill', c: 'praeteritum', q: 'Forme ins Passiv Präteritum um:', aktiv: 'Man bestimmte einen König.', pre: 'Ein König', ans: [['wurde bestimmt']], suf: '.', hint: 'bestimmen → bestimmt', expl: 'Ein König <strong>wurde bestimmt</strong>. (Passiv Präteritum Singular)' },
+        { t: 'fill', c: 'praeteritum', q: 'Ergänze die Passivform:', aktiv: '', pre: 'Die Spielregeln', ans: [['wurden erklärt']], suf: ', bevor es losging.', hint: 'Plural + Präteritum', expl: 'Die Spielregeln <strong>wurden erklärt</strong>. (Passiv Präteritum Plural)' },
+        { t: 'mc', c: 'praeteritum', q: 'Was ist die richtige Passivform von "Man kochte die Nudeln"?', opts: ['Die Nudeln wurden gekocht.', 'Die Nudeln werden gekocht.', 'Die Nudeln sind gekocht worden.', 'Die Nudeln sind gekocht.'], cor: 0, hint: 'Aktiv Präteritum → Passiv Präteritum', expl: 'Aktiv Präteritum (kochte) → Passiv Präteritum: <strong>wurden gekocht</strong>.' },
+        { t: 'fill', c: 'praeteritum', q: 'Forme ins Passiv Präteritum um:', aktiv: 'Man backte die Kekse.', pre: 'Die Kekse', ans: [['wurden gebacken']], suf: '.', hint: 'backen → gebacken (starkes Verb)', expl: 'Die Kekse <strong>wurden gebacken</strong>. (backen-buk/backte-gebacken)' },
+        // 20 komplexere Sätze
+        { t: 'fill', c: 'praeteritum', q: 'Forme ins Passiv Präteritum um:', aktiv: 'Der Bäcker knetete den Teig mit kräftigen Händen.', pre: 'Der Teig', ans: [['wurde vom Bäcker mit kräftigen Händen geknetet', 'wurde mit kräftigen Händen geknetet']], suf: '.', hint: 'Täter + Instrument bleiben', expl: 'Der Teig <strong>wurde mit kräftigen Händen geknetet</strong>. Adverbiale Bestimmungen bleiben erhalten.' },
+        { t: 'fill', c: 'praeteritum', q: 'Forme ins Passiv Präteritum um:', aktiv: 'Man schnitt das Gemüse in feine Streifen.', pre: 'Das Gemüse', ans: [['wurde in feine Streifen geschnitten']], suf: '.', hint: 'schneiden → geschnitten', expl: 'Das Gemüse <strong>wurde in feine Streifen geschnitten</strong>. (schneiden-schnitt-geschnitten)' },
+        { t: 'fill', c: 'praeteritum', q: 'Forme ins Passiv Präteritum um:', aktiv: 'Die Schüler räumten das Klassenzimmer nach dem Basteln auf.', pre: 'Das Klassenzimmer', ans: [['wurde nach dem Basteln von den Schülern aufgeräumt', 'wurde nach dem Basteln aufgeräumt']], suf: '.', hint: 'aufräumen ist trennbar', expl: 'Das Klassenzimmer <strong>wurde nach dem Basteln aufgeräumt</strong>. Trennbares Verb: auf|räumen.' },
+        { t: 'mc', c: 'praeteritum', q: 'Welcher Satz enthält einen Fehler?', opts: ['Die Torten wurden sorgfältig verziert worden.', 'Die Torten wurden sorgfältig verziert.', 'Die Torten sind sorgfältig verziert worden.', 'Die Torten werden sorgfältig verziert.'], cor: 0, hint: 'Präteritum braucht kein "worden"', expl: '"wurden...worden" ist falsch! Präteritum: <strong>wurden verziert</strong>. Perfekt: <strong>sind...worden</strong>.' },
+        { t: 'fill', c: 'praeteritum', q: 'Forme ins Passiv Präteritum um:', aktiv: 'Man trug das Dessert auf silbernen Tellern auf.', pre: 'Das Dessert', ans: [['wurde auf silbernen Tellern aufgetragen']], suf: '.', hint: 'auftragen → aufgetragen', expl: 'Das Dessert <strong>wurde auf silbernen Tellern aufgetragen</strong>.' },
+        { t: 'fill', c: 'praeteritum', q: 'Forme ins Passiv Präteritum um:', aktiv: 'Man las die Anleitung dreimal durch.', pre: 'Die Anleitung', ans: [['wurde dreimal durchgelesen']], suf: '.', hint: 'durchlesen → durchgelesen', expl: 'Die Anleitung <strong>wurde dreimal durchgelesen</strong>. (lesen-las-gelesen)' },
+        { t: 'fill', c: 'praeteritum', q: 'Ergänze die Passivform:', aktiv: '', pre: 'Nachdem alle Vorbereitungen abgeschlossen waren,', ans: [['wurde']], mid: 'das Spiel feierlich', ans2: [['eröffnet']], suf: '.', hint: 'Singular Präteritum', expl: 'Das Spiel <strong>wurde</strong> feierlich <strong>eröffnet</strong>.' },
+        { t: 'fill', c: 'praeteritum', q: 'Forme ins Passiv Präteritum um:', aktiv: 'Man hielt die Regeln während des gesamten Spiels ein.', pre: 'Die Regeln', ans: [['wurden während des gesamten Spiels eingehalten']], suf: '.', hint: 'einhalten ist trennbar', expl: 'Die Regeln <strong>wurden während des gesamten Spiels eingehalten</strong>.' },
+        { t: 'mc', c: 'praeteritum', q: '"Das Brot wurde von der Großmutter nach altem Rezept gebacken." – Welche Informationen enthält der Satz?', opts: ['Täter, Art und Weise, Handlung', 'Nur die Handlung', 'Täter und Zeit', 'Ort und Handlung'], cor: 0, hint: 'Analysiere alle Satzteile', expl: '<strong>von der Großmutter</strong> = Täter, <strong>nach altem Rezept</strong> = Art und Weise, <strong>gebacken</strong> = Handlung.' },
+        { t: 'fill', c: 'praeteritum', q: 'Forme ins Passiv Präteritum um:', aktiv: 'Man goss den Teig langsam in die gefettete Form.', pre: 'Der Teig', ans: [['wurde langsam in die gefettete Form gegossen']], suf: '.', hint: 'gießen → gegossen', expl: 'Der Teig <strong>wurde langsam in die gefettete Form gegossen</strong>. (gießen-goss-gegossen)' },
+        { t: 'fill', c: 'praeteritum', q: 'Forme ins Passiv Präteritum um:', aktiv: 'Die Jury bewertete alle Teilnehmer nach strengen Kriterien.', pre: 'Alle Teilnehmer', ans: [['wurden von der Jury nach strengen Kriterien bewertet', 'wurden nach strengen Kriterien bewertet']], suf: '.', hint: 'Plural + Täter mit "von"', expl: 'Alle Teilnehmer <strong>wurden nach strengen Kriterien bewertet</strong>.' },
+        { t: 'fill', c: 'praeteritum', q: 'Forme ins Passiv Präteritum um:', aktiv: 'Man briet das Fleisch bei mittlerer Hitze an.', pre: 'Das Fleisch', ans: [['wurde bei mittlerer Hitze angebraten']], suf: '.', hint: 'anbraten → angebraten', expl: 'Das Fleisch <strong>wurde bei mittlerer Hitze angebraten</strong>. (braten-briet-gebraten)' },
+        { t: 'fill', c: 'praeteritum', q: 'Ergänze die Passivform:', aktiv: '', pre: 'Vor Spielbeginn', ans: [['wurden die Karten gründlich gemischt']], suf: 'und an alle Spieler verteilt.', hint: 'Plural + zwei Handlungen', expl: 'Die Karten <strong>wurden gründlich gemischt</strong> und verteilt.' },
+        { t: 'fill', c: 'praeteritum', q: 'Forme ins Passiv Präteritum um:', aktiv: 'Man zog den heißen Topf vom Herd.', pre: 'Der heiße Topf', ans: [['wurde vom Herd gezogen']], suf: '.', hint: 'ziehen → gezogen', expl: 'Der heiße Topf <strong>wurde vom Herd gezogen</strong>. (ziehen-zog-gezogen)' },
+        { t: 'mc', c: 'praeteritum', q: 'Welcher Satz ist im Passiv Präteritum?', opts: ['Die Gewürze wurden sparsam verwendet.', 'Die Gewürze werden sparsam verwendet.', 'Die Gewürze sind sparsam verwendet worden.', 'Die Gewürze müssen sparsam verwendet werden.'], cor: 0, hint: 'wurden = Präteritum', expl: '<strong>wurden verwendet</strong> = Passiv Präteritum. Die anderen Formen sind Präsens, Perfekt oder mit Modalverb.' },
+        { t: 'fill', c: 'praeteritum', q: 'Forme ins Passiv Präteritum um:', aktiv: 'Man schlug die Sahne steif.', pre: 'Die Sahne', ans: [['wurde steif geschlagen']], suf: '.', hint: 'schlagen → geschlagen', expl: 'Die Sahne <strong>wurde steif geschlagen</strong>. (schlagen-schlug-geschlagen)' },
+        { t: 'fill', c: 'praeteritum', q: 'Forme ins Passiv Präteritum um:', aktiv: 'Man rieb den Käse fein.', pre: 'Der Käse', ans: [['wurde fein gerieben']], suf: '.', hint: 'reiben → gerieben', expl: 'Der Käse <strong>wurde fein gerieben</strong>. (reiben-rieb-gerieben)' },
+        { t: 'fill', c: 'praeteritum', q: 'Ergänze das Passiv:', aktiv: '', pre: 'Die Spielfiguren', ans: [['wurden nacheinander ins Ziel gebracht']], suf: ', bis ein Gewinner feststand.', hint: 'Plural + Adverb + Präpositionalphrase', expl: 'Die Spielfiguren <strong>wurden nacheinander ins Ziel gebracht</strong>.' },
+        { t: 'fill', c: 'praeteritum', q: 'Forme ins Passiv Präteritum um:', aktiv: 'Man faltete die Servietten kunstvoll zu Schwänen.', pre: 'Die Servietten', ans: [['wurden kunstvoll zu Schwänen gefaltet']], suf: '.', hint: 'falten → gefaltet', expl: 'Die Servietten <strong>wurden kunstvoll zu Schwänen gefaltet</strong>.' },
+        { t: 'mc', c: 'praeteritum', q: 'Setze den Satz korrekt ins Passiv Präteritum: "Die Köchin bereitete das Festmahl vor."', opts: ['Das Festmahl wurde von der Köchin vorbereitet.', 'Das Festmahl wird von der Köchin vorbereitet.', 'Das Festmahl ist von der Köchin vorbereitet worden.', 'Das Festmahl wurde von der Köchin vorbereiten.'], cor: 0, hint: 'Präteritum + trennbares Verb', expl: '<strong>wurde vorbereitet</strong> ist die korrekte Passiv-Präteritum-Form von "vorbereitete".' },
+    ],
+    perfekt: [
+        { t: 'fill', c: 'perfekt', q: 'Forme ins Passiv Perfekt um:', aktiv: 'Man hat den Teig gerührt.', pre: 'Der Teig', ans: [['ist gerührt worden']], suf: '.', hint: 'sein + Partizip II + worden', expl: 'Passiv Perfekt: <strong>sein + Partizip II + worden</strong>.' },
+        { t: 'fill', c: 'perfekt', q: 'Forme ins Passiv Perfekt um:', aktiv: 'Man hat die Zutaten gemischt.', pre: 'Die Zutaten', ans: [['sind gemischt worden', 'sind vermischt worden']], suf: '.', hint: 'Plural → sind', expl: 'Plural Passiv Perfekt: <strong>sind</strong> + Partizip II + <strong>worden</strong>.' },
+        { t: 'fill', c: 'perfekt', q: 'Ergänze das Passiv Perfekt:', aktiv: '', pre: 'Das Spiel', ans: [['ist']], mid: 'beendet worden.', hint: 'Hilfsverb sein (Singular)', expl: 'Singular Passiv Perfekt: <strong>ist</strong> + Partizip II + worden.' },
+        { t: 'fill', c: 'perfekt', q: 'Ergänze das Passiv Perfekt:', aktiv: '', pre: 'Alle Spieler', ans: [['sind']], mid: 'informiert worden.', hint: 'Hilfsverb sein (Plural)', expl: 'Plural Passiv Perfekt: <strong>sind</strong> + Partizip II + worden.' },
+        { t: 'mc', c: 'perfekt', q: 'Welcher Satz ist Passiv Perfekt?', opts: ['Die Tür ist geöffnet worden.', 'Die Tür wurde geöffnet.', 'Die Tür wird geöffnet.', 'Die Tür ist geöffnet.'], cor: 0, hint: 'Perfekt = sein + Partizip II + worden', expl: '<strong>sein + Partizip II + worden</strong> = Passiv Perfekt. "ist geöffnet" (ohne worden) ist Zustandspassiv!' },
+        { t: 'fill', c: 'perfekt', q: 'Forme ins Passiv Perfekt um:', aktiv: 'Man hat die Karten ausgeteilt.', pre: 'Die Karten', ans: [['sind ausgeteilt worden']], suf: '.', hint: 'Plural + sein...worden', expl: 'Die Karten <strong>sind ausgeteilt worden</strong>. (Passiv Perfekt Plural)' },
+        { t: 'fill', c: 'perfekt', q: 'Ergänze die fehlenden Wörter:', aktiv: '', pre: 'Die Palatschinke', ans: [['ist']], mid: 'goldbraun', ans2: [['gebacken worden']], suf: '.', hint: 'Passiv Perfekt = sein...Partizip II...worden', expl: 'Die Palatschinke <strong>ist</strong> goldbraun <strong>gebacken worden</strong>.' },
+        { t: 'mc', c: 'perfekt', q: 'Was ist der Unterschied zwischen "ist gemacht" und "ist gemacht worden"?', opts: ['"ist gemacht" = Zustand, "ist gemacht worden" = Vorgang', 'Kein Unterschied', '"ist gemacht" = Perfekt, "ist gemacht worden" = Präteritum', '"ist gemacht worden" = Zustand, "ist gemacht" = Vorgang'], cor: 0, hint: 'Zustandspassiv vs. Vorgangspassiv', expl: '<strong>ist gemacht</strong> = Zustandspassiv (Ergebnis). <strong>ist gemacht worden</strong> = Vorgangspassiv Perfekt (Handlung).' },
+        { t: 'fill', c: 'perfekt', q: 'Forme ins Passiv Perfekt um:', aktiv: 'Man hat das Brett aufgestellt.', pre: 'Das Brett', ans: [['ist aufgestellt worden']], suf: '.', hint: 'Singular + sein...worden', expl: 'Das Brett <strong>ist aufgestellt worden</strong>. (Passiv Perfekt Singular)' },
+        { t: 'fill', c: 'perfekt', q: 'Forme ins Passiv Perfekt um:', aktiv: 'Man hat die Regeln festgelegt.', pre: 'Die Regeln', ans: [['sind festgelegt worden']], suf: '.', hint: 'Plural → sind', expl: 'Die Regeln <strong>sind festgelegt worden</strong>. (Passiv Perfekt Plural)' },
+        // 20 komplexere Sätze
+        { t: 'fill', c: 'perfekt', q: 'Forme ins Passiv Perfekt um:', aktiv: 'Der Chefkoch hat das Menü persönlich zusammengestellt.', pre: 'Das Menü', ans: [['ist vom Chefkoch persönlich zusammengestellt worden', 'ist persönlich zusammengestellt worden']], suf: '.', hint: 'Täter + Adverb bleiben', expl: 'Das Menü <strong>ist persönlich zusammengestellt worden</strong>. Täter mit "von", Adverb bleibt.' },
+        { t: 'fill', c: 'perfekt', q: 'Forme ins Passiv Perfekt um:', aktiv: 'Man hat alle Zutaten sorgfältig abgewogen.', pre: 'Alle Zutaten', ans: [['sind sorgfältig abgewogen worden']], suf: '.', hint: 'abwiegen → abgewogen', expl: 'Alle Zutaten <strong>sind sorgfältig abgewogen worden</strong>. (wiegen-wog-gewogen)' },
+        { t: 'mc', c: 'perfekt', q: 'Welche Satzstruktur ist korrekt?', opts: ['Die Torte ist kunstvoll verziert worden.', 'Die Torte ist worden kunstvoll verziert.', 'Die Torte worden ist kunstvoll verziert.', 'Die Torte ist kunstvoll worden verziert.'], cor: 0, hint: 'Satzklammer: ist...worden', expl: 'Im Passiv Perfekt: <strong>ist + Partizip II + worden</strong>. "worden" steht am Ende!' },
+        { t: 'fill', c: 'perfekt', q: 'Forme ins Passiv Perfekt um:', aktiv: 'Man hat die Gäste höflich begrüßt und an ihre Plätze geführt.', pre: 'Die Gäste', ans: [['sind höflich begrüßt und an ihre Plätze geführt worden']], suf: '.', hint: 'Zwei Handlungen, ein "worden"', expl: 'Bei zwei parallelen Handlungen: <strong>sind begrüßt und geführt worden</strong>. Nur ein "worden" am Ende!' },
+        { t: 'fill', c: 'perfekt', q: 'Forme ins Passiv Perfekt um:', aktiv: 'Man hat das Spielbrett vor dem Spiel gründlich gereinigt.', pre: 'Das Spielbrett', ans: [['ist vor dem Spiel gründlich gereinigt worden']], suf: '.', hint: 'Zeitangabe + Adverb bleiben', expl: 'Das Spielbrett <strong>ist vor dem Spiel gründlich gereinigt worden</strong>.' },
+        { t: 'fill', c: 'perfekt', q: 'Ergänze die Passivform:', aktiv: '', pre: 'Bevor das Essen serviert wurde,', ans: [['ist der Tisch festlich gedeckt worden']], suf: '.', hint: 'Singular Perfekt + Adverb', expl: 'Der Tisch <strong>ist festlich gedeckt worden</strong>. (Passiv Perfekt mit Adverb)' },
+        { t: 'fill', c: 'perfekt', q: 'Forme ins Passiv Perfekt um:', aktiv: 'Die Kinder haben alle Bastelutensilien weggeräumt.', pre: 'Alle Bastelutensilien', ans: [['sind von den Kindern weggeräumt worden', 'sind weggeräumt worden']], suf: '.', hint: 'Plural + trennbares Verb', expl: 'Alle Bastelutensilien <strong>sind weggeräumt worden</strong>. Trennbar: weg|räumen → weggeräumt.' },
+        { t: 'mc', c: 'perfekt', q: '"Das Rezept ist von Generation zu Generation weitergegeben worden." – Was drückt dieser Satz aus?', opts: ['Eine abgeschlossene Handlung in der Vergangenheit mit Bezug zur Gegenwart', 'Eine Handlung, die gerade passiert', 'Eine zukünftige Handlung', 'Ein dauerhafter Zustand'], cor: 0, hint: 'Perfekt = Vergangenheit mit Gegenwartsbezug', expl: 'Passiv Perfekt drückt eine <strong>abgeschlossene Handlung</strong> aus, deren Ergebnis jetzt relevant ist.' },
+        { t: 'fill', c: 'perfekt', q: 'Forme ins Passiv Perfekt um:', aktiv: 'Man hat die Soße bei niedriger Temperatur eingekocht.', pre: 'Die Soße', ans: [['ist bei niedriger Temperatur eingekocht worden']], suf: '.', hint: 'einkochen → eingekocht', expl: 'Die Soße <strong>ist bei niedriger Temperatur eingekocht worden</strong>.' },
+        { t: 'fill', c: 'perfekt', q: 'Forme ins Passiv Perfekt um:', aktiv: 'Man hat alle Teilnehmer rechtzeitig benachrichtigt.', pre: 'Alle Teilnehmer', ans: [['sind rechtzeitig benachrichtigt worden']], suf: '.', hint: 'Plural + Adverb', expl: 'Alle Teilnehmer <strong>sind rechtzeitig benachrichtigt worden</strong>.' },
+        { t: 'fill', c: 'perfekt', q: 'Ergänze die Passivform:', aktiv: '', pre: 'Der Sieger', ans: [['ist']], mid: 'mit einer Goldmedaille', ans2: [['ausgezeichnet worden']], suf: '.', hint: 'sein + Präpositionalphrase + Partizip II + worden', expl: 'Der Sieger <strong>ist</strong> mit einer Goldmedaille <strong>ausgezeichnet worden</strong>.' },
+        { t: 'fill', c: 'perfekt', q: 'Forme ins Passiv Perfekt um:', aktiv: 'Die Schiedsrichter haben jeden Spielzug genau überwacht.', pre: 'Jeder Spielzug', ans: [['ist von den Schiedsrichtern genau überwacht worden', 'ist genau überwacht worden']], suf: '.', hint: 'Singular + Täter möglich', expl: 'Jeder Spielzug <strong>ist genau überwacht worden</strong>.' },
+        { t: 'fill', c: 'perfekt', q: 'Forme ins Passiv Perfekt um:', aktiv: 'Man hat das Fleisch über Nacht mariniert.', pre: 'Das Fleisch', ans: [['ist über Nacht mariniert worden']], suf: '.', hint: 'Zeitangabe bleibt', expl: 'Das Fleisch <strong>ist über Nacht mariniert worden</strong>.' },
+        { t: 'mc', c: 'perfekt', q: 'Welcher Satz ist KEIN Passiv Perfekt?', opts: ['Die Blumen sind verblüht.', 'Die Blumen sind gepflückt worden.', 'Die Blumen sind vom Gärtner geschnitten worden.', 'Die Blumen sind in die Vase gestellt worden.'], cor: 0, hint: 'Achte auf "worden"', expl: '"sind verblüht" ist <strong>Zustandspassiv oder Perfekt Aktiv</strong> (verblühen ist intransitiv!), kein Vorgangspassiv Perfekt.' },
+        { t: 'fill', c: 'perfekt', q: 'Forme ins Passiv Perfekt um:', aktiv: 'Man hat die Gewinner unter großem Applaus bekannt gegeben.', pre: 'Die Gewinner', ans: [['sind unter großem Applaus bekannt gegeben worden', 'sind unter großem Applaus bekanntgegeben worden']], suf: '.', hint: 'Plural + bekanntgeben', expl: 'Die Gewinner <strong>sind unter großem Applaus bekannt gegeben worden</strong>.' },
+        { t: 'fill', c: 'perfekt', q: 'Forme ins Passiv Perfekt um:', aktiv: 'Man hat das Dessert mit frischen Beeren garniert.', pre: 'Das Dessert', ans: [['ist mit frischen Beeren garniert worden']], suf: '.', hint: 'Singular + Instrument', expl: 'Das Dessert <strong>ist mit frischen Beeren garniert worden</strong>.' },
+        { t: 'fill', c: 'perfekt', q: 'Ergänze das Passiv Perfekt:', aktiv: '', pre: 'Nachdem die Spielregeln', ans: [['erklärt worden sind', 'erklärt worden waren']], suf: ', konnte das Turnier beginnen.', hint: 'Nebensatz: Partizip II + worden + sein', expl: 'Im Nebensatz: <strong>erklärt worden sind</strong>. Das Verb steht am Ende!' },
+        { t: 'fill', c: 'perfekt', q: 'Forme ins Passiv Perfekt um:', aktiv: 'Man hat alle Fragen der Teilnehmer ausführlich beantwortet.', pre: 'Alle Fragen der Teilnehmer', ans: [['sind ausführlich beantwortet worden']], suf: '.', hint: 'Plural + Adverb', expl: 'Alle Fragen <strong>sind ausführlich beantwortet worden</strong>.' },
+        { t: 'fill', c: 'perfekt', q: 'Forme ins Passiv Perfekt um:', aktiv: 'Man hat das Gemüse schonend im Dampf gegart.', pre: 'Das Gemüse', ans: [['ist schonend im Dampf gegart worden']], suf: '.', hint: 'Adverb + Präpositionalphrase', expl: 'Das Gemüse <strong>ist schonend im Dampf gegart worden</strong>.' },
+        { t: 'mc', c: 'perfekt', q: '"Die Aufgaben sind von allen Schülern gelöst worden." – Analysiere die Passivform.', opts: ['Passiv Perfekt, Plural, Täterangabe vorhanden', 'Passiv Präsens, Singular, keine Täterangabe', 'Passiv Präteritum, Plural, Täterangabe vorhanden', 'Zustandspassiv, Plural, keine Täterangabe'], cor: 0, hint: 'sind + Partizip II + worden = ?', expl: '<strong>sind...worden</strong> = Passiv Perfekt, <strong>Aufgaben</strong> = Plural, <strong>von allen Schülern</strong> = Täterangabe.' },
+    ],
+    modal: [
+        { t: 'fill', c: 'modal', q: 'Forme ins Passiv mit Modalverb um:', aktiv: 'Man muss den Teig kneten.', pre: 'Der Teig', ans: [['muss geknetet werden']], suf: '.', hint: 'Modalverb + Partizip II + werden', expl: 'Passiv mit Modalverb: <strong>Modalverb + Partizip II + werden</strong>.' },
+        { t: 'fill', c: 'modal', q: 'Forme ins Passiv mit Modalverb um:', aktiv: 'Man kann die Zutaten variieren.', pre: 'Die Zutaten', ans: [['können variiert werden']], suf: '.', hint: 'können + Partizip II + werden', expl: 'Die Zutaten <strong>können variiert werden</strong>. (Plural: können)' },
+        { t: 'fill', c: 'modal', q: 'Forme ins Passiv mit Modalverb um:', aktiv: 'Man darf nicht auf den Kopf zielen.', pre: 'Es', ans: [['darf nicht auf den Kopf gezielt werden']], suf: '.', hint: 'unpersönliches Passiv + dürfen', expl: 'Es <strong>darf nicht auf den Kopf gezielt werden</strong>. (Verbot im Passiv)' },
+        { t: 'fill', c: 'modal', q: 'Ergänze das Passiv mit Modalverb:', aktiv: '', pre: 'Die Spielsteine', ans: [['müssen']], mid: 'auf das Startfeld gestellt werden.', hint: 'Welches Modalverb für Pflicht?', expl: 'Pflicht/Notwendigkeit: <strong>müssen</strong> + Partizip II + werden.' },
+        { t: 'mc', c: 'modal', q: 'Welcher Satz ist Passiv mit Modalverb?', opts: ['Die Suppe soll gewürzt werden.', 'Die Suppe wird gewürzt.', 'Die Suppe wurde gewürzt.', 'Die Suppe ist gewürzt worden.'], cor: 0, hint: 'Modalverb + Partizip II + werden', expl: '<strong>soll gewürzt werden</strong> enthält das Modalverb "soll".' },
+        { t: 'fill', c: 'modal', q: 'Forme ins Passiv mit Modalverb um:', aktiv: 'Man soll die Anleitung lesen.', pre: 'Die Anleitung', ans: [['soll gelesen werden']], suf: '.', hint: 'sollen + Partizip II + werden', expl: 'Die Anleitung <strong>soll gelesen werden</strong>. (Empfehlung im Passiv)' },
+        { t: 'fill', c: 'modal', q: 'Forme ins Passiv mit Modalverb um:', aktiv: 'Man will das Spiel beenden.', pre: 'Das Spiel', ans: [['will beendet werden']], suf: '.', hint: 'wollen + Partizip II + werden', expl: 'Das Spiel <strong>will beendet werden</strong>. (Wunsch im Passiv)' },
+        { t: 'fill', c: 'modal', q: 'Ergänze die Passivform:', aktiv: '', pre: 'Die Eier', ans: [['können']], mid: 'auch weggelassen', ans2: [['werden']], suf: '.', hint: 'Möglichkeit: können...werden', expl: 'Die Eier <strong>können</strong> auch weggelassen <strong>werden</strong>.' },
+        { t: 'mc', c: 'modal', q: 'Was bedeutet "Das Feld darf nicht betreten werden"?', opts: ['Es ist verboten, das Feld zu betreten.', 'Es ist möglich, das Feld zu betreten.', 'Es ist notwendig, das Feld zu betreten.', 'Es wurde das Feld betreten.'], cor: 0, hint: 'dürfen + Verneinung = Verbot', expl: '<strong>dürfen + nicht + Passiv</strong> = Verbot. Es ist verboten!' },
+        { t: 'fill', c: 'modal', q: 'Forme ins Passiv mit Modalverb um:', aktiv: 'Man muss die Butter schmelzen.', pre: 'Die Butter', ans: [['muss geschmolzen werden']], suf: '.', hint: 'schmelzen → geschmolzen', expl: 'Die Butter <strong>muss geschmolzen werden</strong>. (schmelzen-schmolz-geschmolzen)' },
+        // 20 komplexere Sätze
+        { t: 'fill', c: 'modal', q: 'Forme ins Passiv mit Modalverb um:', aktiv: 'Man muss die Zutaten vor dem Kochen gründlich waschen.', pre: 'Die Zutaten', ans: [['müssen vor dem Kochen gründlich gewaschen werden']], suf: '.', hint: 'Zeitangabe + Adverb bleiben', expl: 'Die Zutaten <strong>müssen vor dem Kochen gründlich gewaschen werden</strong>.' },
+        { t: 'fill', c: 'modal', q: 'Forme ins Passiv mit Modalverb um:', aktiv: 'Der Schiedsrichter kann das Spiel jederzeit unterbrechen.', pre: 'Das Spiel', ans: [['kann vom Schiedsrichter jederzeit unterbrochen werden', 'kann jederzeit unterbrochen werden']], suf: '.', hint: 'Täter mit "von" möglich', expl: 'Das Spiel <strong>kann jederzeit unterbrochen werden</strong>.' },
+        { t: 'mc', c: 'modal', q: 'Welcher Satz drückt eine Empfehlung aus?', opts: ['Die Soße sollte noch abgeschmeckt werden.', 'Die Soße muss noch abgeschmeckt werden.', 'Die Soße kann noch abgeschmeckt werden.', 'Die Soße darf noch abgeschmeckt werden.'], cor: 0, hint: 'sollen = Empfehlung/Ratschlag', expl: '<strong>sollte...werden</strong> drückt eine Empfehlung aus. "muss" = Pflicht, "kann" = Möglichkeit.' },
+        { t: 'fill', c: 'modal', q: 'Forme ins Passiv mit Modalverb um:', aktiv: 'Man darf die Spielfiguren nicht vom Brett nehmen.', pre: 'Die Spielfiguren', ans: [['dürfen nicht vom Brett genommen werden']], suf: '.', hint: 'Plural + Verbot', expl: 'Die Spielfiguren <strong>dürfen nicht vom Brett genommen werden</strong>.' },
+        { t: 'fill', c: 'modal', q: 'Forme ins Passiv mit Modalverb um:', aktiv: 'Man sollte das Fleisch vor dem Braten marinieren.', pre: 'Das Fleisch', ans: [['sollte vor dem Braten mariniert werden']], suf: '.', hint: 'sollte = Konjunktiv II', expl: 'Das Fleisch <strong>sollte vor dem Braten mariniert werden</strong>. (Empfehlung)' },
+        { t: 'fill', c: 'modal', q: 'Ergänze das Passiv mit Modalverb:', aktiv: '', pre: 'Bei diesem Spiel', ans: [['darf']], mid: 'nicht geschummelt', ans2: [['werden']], suf: '!', hint: 'Verbot mit dürfen', expl: 'Bei diesem Spiel <strong>darf</strong> nicht geschummelt <strong>werden</strong>!' },
+        { t: 'fill', c: 'modal', q: 'Forme ins Passiv mit Modalverb um:', aktiv: 'Man muss die Kekse nach dem Backen auskühlen lassen.', pre: 'Die Kekse', ans: [['müssen nach dem Backen ausgekühlt werden', 'müssen nach dem Backen auskühlen gelassen werden']], suf: '.', hint: 'Komplexe Konstruktion', expl: 'Die Kekse <strong>müssen nach dem Backen ausgekühlt werden</strong>.' },
+        { t: 'mc', c: 'modal', q: '"Das Gemüse kann gedünstet oder gebraten werden." – Was drückt dieser Satz aus?', opts: ['Zwei Möglichkeiten der Zubereitung', 'Eine Pflicht', 'Ein Verbot', 'Eine Empfehlung'], cor: 0, hint: 'können = Möglichkeit', expl: '<strong>kann...werden</strong> drückt eine Möglichkeit aus. Hier gibt es zwei Optionen.' },
+        { t: 'fill', c: 'modal', q: 'Forme ins Passiv mit Modalverb um:', aktiv: 'Man soll die Gäste freundlich begrüßen.', pre: 'Die Gäste', ans: [['sollen freundlich begrüßt werden']], suf: '.', hint: 'Plural + sollen', expl: 'Die Gäste <strong>sollen freundlich begrüßt werden</strong>.' },
+        { t: 'fill', c: 'modal', q: 'Forme ins Passiv mit Modalverb um:', aktiv: 'Man muss die Arbeitsschritte genau befolgen.', pre: 'Die Arbeitsschritte', ans: [['müssen genau befolgt werden']], suf: '.', hint: 'Plural + Adverb', expl: 'Die Arbeitsschritte <strong>müssen genau befolgt werden</strong>.' },
+        { t: 'fill', c: 'modal', q: 'Ergänze die Passivform:', aktiv: '', pre: 'Die Sahne', ans: [['muss steif geschlagen werden']], suf: ', bevor sie verwendet wird.', hint: 'müssen + Ergebnis + Partizip II + werden', expl: 'Die Sahne <strong>muss steif geschlagen werden</strong>.' },
+        { t: 'mc', c: 'modal', q: 'Welcher Satz ist grammatisch FALSCH?', opts: ['Das Spiel kann gewonnen worden.', 'Das Spiel kann gewonnen werden.', 'Das Spiel muss gewonnen werden.', 'Das Spiel soll gewonnen werden.'], cor: 0, hint: 'Modalverb + Partizip II + werden', expl: '"kann gewonnen worden" ist falsch! Richtig: <strong>kann gewonnen werden</strong>. "worden" gehört zum Perfekt!' },
+        { t: 'fill', c: 'modal', q: 'Forme ins Passiv mit Modalverb um:', aktiv: 'Man will die Regeln vereinfachen.', pre: 'Die Regeln', ans: [['wollen vereinfacht werden']], suf: '.', hint: 'wollen + Partizip II + werden', expl: 'Die Regeln <strong>wollen vereinfacht werden</strong>.' },
+        { t: 'fill', c: 'modal', q: 'Forme ins Passiv mit Modalverb um:', aktiv: 'Der Trainer muss die Mannschaft motivieren.', pre: 'Die Mannschaft', ans: [['muss vom Trainer motiviert werden', 'muss motiviert werden']], suf: '.', hint: 'Täter mit "von" möglich', expl: 'Die Mannschaft <strong>muss (vom Trainer) motiviert werden</strong>.' },
+        { t: 'fill', c: 'modal', q: 'Ergänze das Passiv:', aktiv: '', pre: 'Die fertigen Palatschinken', ans: [['können']], mid: 'mit Marmelade oder Nutella', ans2: [['gefüllt werden']], suf: '.', hint: 'können + Partizip II + werden', expl: 'Die Palatschinken <strong>können</strong> mit Marmelade <strong>gefüllt werden</strong>.' },
+        { t: 'fill', c: 'modal', q: 'Forme ins Passiv mit Modalverb um:', aktiv: 'Man darf den Gegner nicht festhalten.', pre: 'Der Gegner', ans: [['darf nicht festgehalten werden']], suf: '.', hint: 'festhalten → festgehalten', expl: 'Der Gegner <strong>darf nicht festgehalten werden</strong>. (Spielregel)' },
+        { t: 'mc', c: 'modal', q: 'Setze den Satz ins Passiv mit Modalverb: "Man sollte die Reste einfrieren."', opts: ['Die Reste sollten eingefroren werden.', 'Die Reste werden eingefroren.', 'Die Reste wurden eingefroren.', 'Die Reste sind eingefroren worden.'], cor: 0, hint: 'sollte → sollten (Plural)', expl: 'Plural + Konjunktiv II: <strong>sollten eingefroren werden</strong>.' },
+        { t: 'fill', c: 'modal', q: 'Forme ins Passiv mit Modalverb um:', aktiv: 'Man muss den Ofen auf 180 Grad vorheizen.', pre: 'Der Ofen', ans: [['muss auf 180 Grad vorgeheizt werden']], suf: '.', hint: 'vorheizen → vorgeheizt', expl: 'Der Ofen <strong>muss auf 180 Grad vorgeheizt werden</strong>.' },
+        { t: 'fill', c: 'modal', q: 'Forme ins Passiv mit Modalverb um:', aktiv: 'Man kann die Gewürze nach Geschmack variieren.', pre: 'Die Gewürze', ans: [['können nach Geschmack variiert werden']], suf: '.', hint: 'Plural + können', expl: 'Die Gewürze <strong>können nach Geschmack variiert werden</strong>.' },
+        { t: 'fill', c: 'modal', q: 'Ergänze die komplette Passivform:', aktiv: '', pre: 'Vor dem Servieren', ans: [['muss die Suppe noch einmal abgeschmeckt werden']], suf: '.', hint: 'müssen + Partizip II + werden', expl: 'Vor dem Servieren <strong>muss die Suppe noch einmal abgeschmeckt werden</strong>.' },
+    ],
+    zustand: [
+        { t: 'fill', c: 'zustand', q: 'Bilde das Zustandspassiv:', aktiv: 'Vorgang: Die Tür wird geschlossen.', pre: 'Zustand: Die Tür', ans: [['ist geschlossen']], suf: '.', hint: 'sein + Partizip II', expl: 'Zustandspassiv: <strong>sein + Partizip II</strong>. Es zeigt das Ergebnis einer Handlung.' },
+        { t: 'fill', c: 'zustand', q: 'Bilde das Zustandspassiv:', aktiv: 'Vorgang: Der Tisch wird gedeckt.', pre: 'Zustand: Der Tisch', ans: [['ist gedeckt']], suf: '.', hint: 'sein + Partizip II', expl: 'Der Tisch <strong>ist gedeckt</strong>. (= Der Tisch ist fertig, bereit.)' },
+        { t: 'mc', c: 'zustand', q: 'Welcher Satz ist Zustandspassiv?', opts: ['Das Fenster ist geöffnet.', 'Das Fenster wird geöffnet.', 'Das Fenster wurde geöffnet.', 'Das Fenster ist geöffnet worden.'], cor: 0, hint: 'Zustand = sein + Partizip II (ohne worden)', expl: '<strong>sein + Partizip II</strong> (ohne "worden"!) = Zustandspassiv.' },
+        { t: 'fill', c: 'zustand', q: 'Bilde das Zustandspassiv:', aktiv: 'Vorgang: Das Spiel wird vorbereitet.', pre: 'Zustand: Das Spiel', ans: [['ist vorbereitet']], suf: '.', hint: 'sein + Partizip II', expl: 'Das Spiel <strong>ist vorbereitet</strong>. (= Es kann losgehen!)' },
+        { t: 'fill', c: 'zustand', q: 'Ergänze das Zustandspassiv:', aktiv: '', pre: 'Die Zutaten', ans: [['sind']], mid: 'bereits vorbereitet.', hint: 'sein (Plural)', expl: 'Plural Zustandspassiv: <strong>sind</strong> + Partizip II.' },
+        { t: 'mc', c: 'zustand', q: 'Was ist der Unterschied zwischen Vorgangspassiv und Zustandspassiv?', opts: ['Vorgangspassiv = Handlung, Zustandspassiv = Ergebnis', 'Kein Unterschied', 'Zustandspassiv = Handlung, Vorgangspassiv = Ergebnis', 'Vorgangspassiv nur in der Vergangenheit'], cor: 0, hint: 'Vorgang vs. Zustand', expl: '<strong>Vorgangspassiv</strong> (werden/wurde): beschreibt eine Handlung. <strong>Zustandspassiv</strong> (sein): beschreibt das Ergebnis.' },
+        { t: 'fill', c: 'zustand', q: 'Bilde das Zustandspassiv:', aktiv: 'Vorgang: Die Kerzen werden angezündet.', pre: 'Zustand: Die Kerzen', ans: [['sind angezündet']], suf: '.', hint: 'Plural → sind', expl: 'Die Kerzen <strong>sind angezündet</strong>. (Sie brennen bereits.)' },
+        { t: 'fill', c: 'zustand', q: 'Bilde das Zustandspassiv:', aktiv: 'Vorgang: Das Rezept wird aufgeschrieben.', pre: 'Zustand: Das Rezept', ans: [['ist aufgeschrieben']], suf: '.', hint: 'Singular → ist', expl: 'Das Rezept <strong>ist aufgeschrieben</strong>. (Es steht auf dem Papier.)' },
+        { t: 'mc', c: 'zustand', q: '"Die Hausaufgaben sind gemacht." – Was bedeutet das?', opts: ['Die Hausaufgaben sind fertig/erledigt.', 'Jemand macht gerade die Hausaufgaben.', 'Die Hausaufgaben wurden gestern gemacht.', 'Die Hausaufgaben müssen gemacht werden.'], cor: 0, hint: 'Zustandspassiv = fertiger Zustand', expl: 'Zustandspassiv zeigt das <strong>Ergebnis</strong>: Die Hausaufgaben sind fertig!' },
+        { t: 'fill', c: 'zustand', q: 'Ergänze das Zustandspassiv:', aktiv: '', pre: 'Endlich! Der Kuchen', ans: [['ist fertig gebacken', 'ist gebacken']], suf: '!', hint: 'sein + Partizip II', expl: 'Der Kuchen <strong>ist (fertig) gebacken</strong>. (Er ist bereit zum Essen!)' },
+        // 20 komplexere Sätze
+        { t: 'fill', c: 'zustand', q: 'Bilde das Zustandspassiv:', aktiv: 'Vorgang: Das Spielfeld wird in zwei Hälften geteilt.', pre: 'Zustand: Das Spielfeld', ans: [['ist in zwei Hälften geteilt']], suf: '.', hint: 'Präpositionalphrase bleibt', expl: 'Das Spielfeld <strong>ist in zwei Hälften geteilt</strong>. Die Präpositionalphrase bleibt erhalten.' },
+        { t: 'fill', c: 'zustand', q: 'Bilde das Zustandspassiv:', aktiv: 'Vorgang: Die Butter wird im Kühlschrank aufbewahrt.', pre: 'Zustand: Die Butter', ans: [['ist im Kühlschrank aufbewahrt']], suf: '.', hint: 'Ortsangabe bleibt', expl: 'Die Butter <strong>ist im Kühlschrank aufbewahrt</strong>.' },
+        { t: 'mc', c: 'zustand', q: 'Welcher Satz beschreibt einen ZUSTAND?', opts: ['Der Brief ist schon abgeschickt.', 'Der Brief wird gerade abgeschickt.', 'Der Brief wurde gestern abgeschickt.', 'Der Brief ist gestern abgeschickt worden.'], cor: 0, hint: 'sein + Partizip II = Ergebnis', expl: '<strong>ist abgeschickt</strong> = Zustandspassiv. Es beschreibt das Ergebnis: Der Brief ist weg!' },
+        { t: 'fill', c: 'zustand', q: 'Bilde das Zustandspassiv:', aktiv: 'Vorgang: Die Geschenke werden schön verpackt.', pre: 'Zustand: Die Geschenke', ans: [['sind schön verpackt']], suf: '.', hint: 'Adverb bleibt', expl: 'Die Geschenke <strong>sind schön verpackt</strong>. Das Adverb "schön" bleibt erhalten.' },
+        { t: 'fill', c: 'zustand', q: 'Bilde das Zustandspassiv:', aktiv: 'Vorgang: Der Computer wird eingeschaltet.', pre: 'Zustand: Der Computer', ans: [['ist eingeschaltet']], suf: '.', hint: 'einschalten → eingeschaltet', expl: 'Der Computer <strong>ist eingeschaltet</strong>. (Er läuft bereits.)' },
+        { t: 'fill', c: 'zustand', q: 'Ergänze das Zustandspassiv:', aktiv: '', pre: 'Alle Vorbereitungen', ans: [['sind']], mid: 'abgeschlossen. Das Turnier kann beginnen!', hint: 'Plural → sind', expl: 'Alle Vorbereitungen <strong>sind</strong> abgeschlossen.' },
+        { t: 'mc', c: 'zustand', q: '"Das Restaurant ist heute geschlossen." – Welche Form ist das?', opts: ['Zustandspassiv', 'Vorgangspassiv Präsens', 'Vorgangspassiv Perfekt', 'Aktiv'], cor: 0, hint: 'sein + Partizip II ohne "worden"', expl: '<strong>ist geschlossen</strong> = Zustandspassiv. Es beschreibt den aktuellen Zustand.' },
+        { t: 'fill', c: 'zustand', q: 'Bilde das Zustandspassiv:', aktiv: 'Vorgang: Die Mannschaften werden aufgestellt.', pre: 'Zustand: Die Mannschaften', ans: [['sind aufgestellt']], suf: '.', hint: 'Plural + aufstellen', expl: 'Die Mannschaften <strong>sind aufgestellt</strong>. (Sie stehen bereit.)' },
+        { t: 'fill', c: 'zustand', q: 'Bilde das Zustandspassiv:', aktiv: 'Vorgang: Das Essen wird warm gehalten.', pre: 'Zustand: Das Essen', ans: [['ist warm gehalten']], suf: '.', hint: 'Ergebnis beschreiben', expl: 'Das Essen <strong>ist warm gehalten</strong>. (Es ist noch warm.)' },
+        { t: 'fill', c: 'zustand', q: 'Ergänze das Zustandspassiv:', aktiv: '', pre: 'Die Tische', ans: [['sind festlich gedeckt']], suf: 'und warten auf die Gäste.', hint: 'Plural + Adverb', expl: 'Die Tische <strong>sind festlich gedeckt</strong>.' },
+        { t: 'mc', c: 'zustand', q: 'Was passt? "Der Ofen ___ auf 200 Grad vorgeheizt."', opts: ['ist', 'wird', 'wurde', 'hat'], cor: 0, hint: 'Zustand = sein', expl: '<strong>ist vorgeheizt</strong> = Zustandspassiv. Der Ofen hat die richtige Temperatur erreicht.' },
+        { t: 'fill', c: 'zustand', q: 'Bilde das Zustandspassiv:', aktiv: 'Vorgang: Die Spielregeln werden erklärt.', pre: 'Zustand: Die Spielregeln', ans: [['sind erklärt']], suf: '. Jetzt können wir spielen!', hint: 'Ergebnis: Alle verstehen die Regeln', expl: 'Die Spielregeln <strong>sind erklärt</strong>. (Alle haben verstanden.)' },
+        { t: 'fill', c: 'zustand', q: 'Bilde das Zustandspassiv:', aktiv: 'Vorgang: Der Teig wird im Kühlschrank gekühlt.', pre: 'Zustand: Der Teig', ans: [['ist im Kühlschrank gekühlt']], suf: '.', hint: 'Ortsangabe + Partizip II', expl: 'Der Teig <strong>ist im Kühlschrank gekühlt</strong>.' },
+        { t: 'fill', c: 'zustand', q: 'Ergänze das Zustandspassiv:', aktiv: '', pre: 'Gute Nachricht: Die Arbeit', ans: [['ist erledigt']], suf: '!', hint: 'sein + Partizip II', expl: 'Die Arbeit <strong>ist erledigt</strong>! (Fertig!)' },
+        { t: 'mc', c: 'zustand', q: 'Welcher Satz ist KEIN Zustandspassiv?', opts: ['Das Buch wird gelesen.', 'Das Buch ist gelesen.', 'Die Tür ist geschlossen.', 'Der Tisch ist gedeckt.'], cor: 0, hint: 'werden = Vorgangspassiv', expl: '<strong>wird gelesen</strong> = Vorgangspassiv! Es beschreibt eine aktuelle Handlung, keinen Zustand.' },
+        { t: 'fill', c: 'zustand', q: 'Bilde das Zustandspassiv:', aktiv: 'Vorgang: Die Fenster werden geputzt.', pre: 'Zustand: Die Fenster', ans: [['sind geputzt']], suf: '. Sie glänzen!', hint: 'Ergebnis: saubere Fenster', expl: 'Die Fenster <strong>sind geputzt</strong>. (Sie sind jetzt sauber.)' },
+        { t: 'fill', c: 'zustand', q: 'Bilde das Zustandspassiv:', aktiv: 'Vorgang: Der Salat wird angerichtet.', pre: 'Zustand: Der Salat', ans: [['ist angerichtet']], suf: '.', hint: 'anrichten → angerichtet', expl: 'Der Salat <strong>ist angerichtet</strong>. (Er ist servierfertig.)' },
+        { t: 'fill', c: 'zustand', q: 'Ergänze das Zustandspassiv:', aktiv: '', pre: 'Die Karten', ans: [['sind']], mid: 'gemischt und', ans2: [['verteilt']], suf: '.', hint: 'Zwei Partizipien', expl: 'Die Karten <strong>sind</strong> gemischt und <strong>verteilt</strong>. (Beides ist erledigt.)' },
+        { t: 'mc', c: 'zustand', q: '"Die Suppe ist versalzen." – Was bedeutet das?', opts: ['Die Suppe enthält zu viel Salz (Ergebnis).', 'Jemand salzt die Suppe gerade.', 'Die Suppe wurde früher versalzen.', 'Die Suppe muss versalzen werden.'], cor: 0, hint: 'Zustand = aktuelles Ergebnis', expl: '<strong>ist versalzen</strong> = Zustandspassiv. Die Suppe ist jetzt zu salzig!' },
+        { t: 'fill', c: 'zustand', q: 'Bilde das Zustandspassiv:', aktiv: 'Vorgang: Das Zimmer wird aufgeräumt.', pre: 'Zustand: Das Zimmer', ans: [['ist aufgeräumt']], suf: '.', hint: 'aufräumen → aufgeräumt', expl: 'Das Zimmer <strong>ist aufgeräumt</strong>. (Es ist jetzt ordentlich.)' },
+    ]
+};
+
+// Game state
+let G = {
+    mode: '',
+    ex: [],
+    idx: 0,
+    total: 0,
+    pts: 0,
+    cor: 0,
+    inc: 0,
+    streak: 0,
+    best: 0,
+    answered: false,
+    hintUsed: false,
+    stats: {}
+};
+
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+function showTheory() {
+    document.getElementById('theoryModal').classList.add('show');
+}
+
+function hideTheory() {
+    document.getElementById('theoryModal').classList.remove('show');
+}
+
+function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+function startGame(mode) {
+    G = {
+        mode: mode,
+        ex: [],
+        idx: 0,
+        total: 0,
+        pts: 0,
+        cor: 0,
+        inc: 0,
+        streak: 0,
+        best: 0,
+        answered: false,
+        hintUsed: false,
+        stats: { praesens: {c:0,t:0}, praeteritum: {c:0,t:0}, perfekt: {c:0,t:0}, modal: {c:0,t:0}, zustand: {c:0,t:0} }
+    };
+    
+    if (mode === 'alle') {
+        // Mix all categories
+        let all = [];
+        for (let cat in exercises) {
+            all = all.concat(exercises[cat]);
+        }
+        G.ex = shuffle(all).slice(0, 30);
+    } else {
+        G.ex = shuffle(exercises[mode]).slice(0, 20);
+    }
+    
+    G.total = G.ex.length;
+    showScreen('gameScreen');
+    loadEx();
+}
+
+function loadEx() {
+    if (G.idx >= G.total) {
+        endGame();
+        return;
+    }
+    
+    G.answered = false;
+    G.hintUsed = false;
+    document.getElementById('hintBtn').disabled = false;
+    document.getElementById('checkBtn').textContent = '✓ Prüfen';
+    
+    const ex = G.ex[G.idx];
+    let html = '';
+    
+    // Category badge
+    const catNames = { praesens: 'Präsens', praeteritum: 'Präteritum', perfekt: 'Perfekt', modal: 'Modalverb', zustand: 'Zustandspassiv' };
+    html += `<span class="exercise-type ${ex.c}">${catNames[ex.c]}</span>`;
+    
+    // Instruction
+    html += `<p class="instruction">${ex.q}</p>`;
+    
+    // Source sentence (if exists)
+    if (ex.aktiv) {
+        html += `<div class="source-section">
+            <div class="source-label">Ausgangssatz (Aktiv)</div>
+            <div class="source-text">${ex.aktiv}</div>
+        </div>`;
+    }
+    
+    if (ex.t === 'fill') {
+        html += `<div class="answer-section">
+            <div class="answer-label">Deine Antwort (Passiv)</div>
+            <div class="input-line">`;
+        
+        if (ex.pre) html += `<span>${ex.pre}</span>`;
+        
+        // First answer slot
+        const width = ex.ans[0][0].length > 20 ? 'extra-wide' : (ex.ans[0][0].length > 12 ? 'wide' : '');
+        html += `<input type="text" class="input-slot ${width}" id="answer0" data-cor='${JSON.stringify(ex.ans[0])}' autocomplete="off" spellcheck="false">`;
+        
+        if (ex.mid) html += `<span>${ex.mid}</span>`;
+        
+        // Second answer slot (if exists)
+        if (ex.ans2) {
+            const width2 = ex.ans2[0][0].length > 20 ? 'extra-wide' : (ex.ans2[0][0].length > 12 ? 'wide' : '');
+            html += `<input type="text" class="input-slot ${width2}" id="answer1" data-cor='${JSON.stringify(ex.ans2[0])}' autocomplete="off" spellcheck="false">`;
+        }
+        
+        if (ex.suf) html += `<span>${ex.suf}</span>`;
+        
+        html += `</div></div>`;
+    } else if (ex.t === 'mc') {
+        html += `<div class="answer-section">
+            <div class="answer-label">Wähle die richtige Antwort</div>
+            <div class="mc-options">`;
+        
+        const letters = ['A', 'B', 'C', 'D'];
+        ex.opts.forEach((opt, i) => {
+            html += `<div class="mc-option" data-idx="${i}" onclick="selectMC(this, ${i}, ${ex.cor})">
+                <span class="mc-letter">${letters[i]}</span>
+                <span>${opt}</span>
+            </div>`;
+        });
+        
+        html += `</div></div>`;
+    }
+    
+    html += `<div class="explanation-box" id="explanation">
+        <div class="explanation-title">💡 Erklärung</div>
+        <div class="explanation-text">${ex.expl}</div>
+    </div>`;
+    
+    document.getElementById('exerciseArea').innerHTML = html;
+    
+    if (ex.t === 'fill') {
+        setTimeout(() => document.getElementById('answer0')?.focus(), 100);
+    }
+    
+    updateStats();
+}
+
+function selectMC(el, idx, correct) {
+    if (G.answered) return;
+    
+    G.answered = true;
+    const ex = G.ex[G.idx];
+    if (G.stats[ex.c]) G.stats[ex.c].t++;
+    
+    document.querySelectorAll('.mc-option').forEach(opt => {
+        const optIdx = parseInt(opt.dataset.idx);
+        if (optIdx === correct) {
+            opt.classList.add('correct');
+        } else if (optIdx === idx) {
+            opt.classList.add('incorrect');
+        }
+    });
+    
+    if (idx === correct) {
+        G.cor++;
+        G.streak++;
+        if (G.stats[ex.c]) G.stats[ex.c].c++;
+        if (G.streak > G.best) G.best = G.streak;
+        let pts = 10;
+        if (!G.hintUsed) pts += 5;
+        if (G.streak >= 3) pts += G.streak * 2;
+        G.pts += pts;
+        showPts(pts);
+        playSound('correct');
+        updateStats();
+        setTimeout(() => { G.idx++; loadEx(); }, 1000);
+    } else {
+        G.inc++;
+        G.streak = 0;
+        playSound('incorrect');
+        updateStats();
+        document.getElementById('explanation').classList.add('show');
+        document.getElementById('checkBtn').textContent = '➡️ Weiter';
+    }
+}
+
+function showHint() {
+    const ex = G.ex[G.idx];
+    if (!ex || G.hintUsed) return;
+    
+    const hintDiv = document.createElement('div');
+    hintDiv.className = 'hint-box';
+    hintDiv.innerHTML = `💡 <strong>Tipp:</strong> ${ex.hint}`;
+    document.querySelector('.answer-section')?.before(hintDiv);
+    
+    G.hintUsed = true;
+    document.getElementById('hintBtn').disabled = true;
+}
+
+function checkAnswer() {
+    if (G.answered) {
+        G.idx++;
+        loadEx();
+        return;
+    }
+    
+    const ex = G.ex[G.idx];
+    if (!ex || ex.t === 'mc') return;
+    
+    if (G.stats[ex.c]) G.stats[ex.c].t++;
+    
+    let allCorrect = true;
+    document.querySelectorAll('.input-slot').forEach(inp => {
+        const cors = JSON.parse(inp.dataset.cor || '[]');
+        const val = inp.value.trim();
+        const ok = cors.some(c => val.toLowerCase() === c.toLowerCase());
+        if (ok) {
+            inp.classList.add('correct');
+        } else {
+            inp.classList.add('incorrect');
+            allCorrect = false;
+            const hint = document.createElement('span');
+            hint.style.cssText = 'color: var(--success); margin-left: 8px; font-weight: 700;';
+            hint.textContent = '→ ' + cors[0];
+            inp.parentNode.insertBefore(hint, inp.nextSibling);
+        }
+        inp.disabled = true;
+    });
+    
+    G.answered = true;
+    
+    if (allCorrect) {
+        G.cor++;
+        G.streak++;
+        if (G.stats[ex.c]) G.stats[ex.c].c++;
+        if (G.streak > G.best) G.best = G.streak;
+        let pts = 10;
+        if (!G.hintUsed) pts += 5;
+        if (G.streak >= 3) pts += G.streak * 2;
+        G.pts += pts;
+        showPts(pts);
+        playSound('correct');
+        updateStats();
+        setTimeout(() => { G.idx++; loadEx(); }, 800);
+    } else {
+        G.inc++;
+        G.streak = 0;
+        playSound('incorrect');
+        updateStats();
+        document.getElementById('explanation').classList.add('show');
+        document.getElementById('checkBtn').textContent = '➡️ Weiter';
+    }
+}
+
+function showPts(pts) {
+    const p = document.createElement('div');
+    p.className = 'points-popup';
+    p.textContent = '+' + pts;
+    p.style.cssText = 'left: 50%; top: 40%; transform: translateX(-50%)';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 1000);
+}
+
+function updateStats() {
+    document.getElementById('points').textContent = G.pts;
+    document.getElementById('streak').textContent = G.streak;
+    document.getElementById('correct').textContent = G.cor;
+    document.getElementById('total').textContent = G.cor + G.inc;
+    document.getElementById('streakFire').style.display = G.streak >= 3 ? 'inline-block' : 'none';
+    document.getElementById('progressFill').style.width = (G.idx / G.total * 100) + '%';
+    document.getElementById('exerciseCounter').textContent = `Übung ${G.idx + 1}/${G.total}`;
+}
+
+function endGame() {
+    showScreen('resultScreen');
+    playSound('complete');
+    
+    const total = G.cor + G.inc;
+    const acc = total > 0 ? Math.round(G.cor / total * 100) : 0;
+    
+    // Set emoji based on accuracy
+    let emoji = '🏆';
+    if (acc >= 90) emoji = '🌟';
+    else if (acc >= 70) emoji = '👍';
+    else if (acc >= 50) emoji = '💪';
+    else emoji = '📚';
+    document.getElementById('resultEmoji').textContent = emoji;
+    
+    document.getElementById('finalPoints').textContent = G.pts;
+    document.getElementById('finalCorrect').textContent = G.cor + '/' + total;
+    document.getElementById('finalStreak').textContent = G.best;
+    document.getElementById('accuracyText').textContent = acc + '%';
+    
+    const circle = document.getElementById('accuracyCircle');
+    setTimeout(() => { circle.style.strokeDashoffset = 377 - (377 * acc / 100); }, 100);
+    
+    const catColors = { praesens: '#3b82f6', praeteritum: '#f59e0b', perfekt: '#8b5cf6', modal: '#ec4899', zustand: '#06b6d4' };
+    const catNames = { praesens: 'Präsens', praeteritum: 'Präteritum', perfekt: 'Perfekt', modal: 'Modalverb', zustand: 'Zustandspassiv' };
+    
+    let catHtml = '<h4>📊 Ergebnisse nach Kategorie</h4>';
+    for (let cat in G.stats) {
+        if (G.stats[cat].t > 0) {
+            catHtml += `<div class="cat-result-item">
+                <span class="cat-result-name">
+                    <span class="cat-result-dot" style="background: ${catColors[cat]}"></span>
+                    ${catNames[cat]}
+                </span>
+                <span class="cat-result-score">${G.stats[cat].c}/${G.stats[cat].t}</span>
+            </div>`;
+        }
+    }
+    document.getElementById('categoryResults').innerHTML = catHtml;
+}
+
+function playSound(type) {
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.connect(g);
+        g.connect(ctx.destination);
+        g.gain.value = 0.1;
+        
+        if (type === 'correct') {
+            o.frequency.value = 880;
+            o.start();
+            o.stop(ctx.currentTime + 0.1);
+        } else if (type === 'incorrect') {
+            o.frequency.value = 220;
+            o.start();
+            o.stop(ctx.currentTime + 0.2);
+        } else if (type === 'complete') {
+            o.frequency.value = 523;
+            o.start();
+            setTimeout(() => o.frequency.value = 659, 100);
+            setTimeout(() => o.frequency.value = 784, 200);
+            o.stop(ctx.currentTime + 0.4);
+        }
+    } catch (e) {}
+}
+
+function confirmExit() {
+    if (confirm('Training wirklich beenden?')) goToMenu();
+}
+
+function goToMenu() {
+    showScreen('menuScreen');
+}
+
+function playAgain() {
+    startGame(G.mode);
+}
+
+// Enter key to check answer
+document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && document.getElementById('gameScreen').classList.contains('active') && !G.answered) {
+        checkAnswer();
+    }
+});
+</script>
+</body>
+</html>
