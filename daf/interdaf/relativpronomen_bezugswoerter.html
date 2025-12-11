@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relativpronomen-Meister 🔗</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a2a4a;
+            --primary-light: #2d4a7a;
+            --accent: #3b82f6;
+            --accent-glow: #60a5fa;
+            --gold: #fbbf24;
+            --gold-glow: #fcd34d;
+            --success: #10b981;
+            --error: #ef4444;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --cat-nom: #3b82f6;
+            --cat-akk: #f59e0b;
+            --cat-dat: #10b981;
+            --cat-gen: #8b5cf6;
+            --cat-mixed: #ec4899;
+            --cat-advanced: #ef4444;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Quicksand', sans-serif; 
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1e293b 50%, var(--bg-dark) 100%); 
+            min-height: 100vh; 
+            color: var(--text); 
+        }
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        
+        header { text-align: center; margin-bottom: 30px; }
+        h1 { 
+            font-family: 'Fredoka', sans-serif; 
+            font-size: 2.5rem; 
+            background: linear-gradient(135deg, var(--accent-glow), var(--gold)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            margin-bottom: 10px; 
+        }
+        .subtitle { color: var(--text-muted); font-size: 1.1rem; }
+        .level-badge { 
+            display: inline-block; 
+            background: linear-gradient(135deg, var(--accent), var(--gold)); 
+            padding: 8px 20px; 
+            border-radius: 20px; 
+            font-weight: 700; 
+            margin-top: 10px; 
+            color: var(--bg-dark);
+        }
+        
+        .screen { display: none; animation: fadeIn 0.4s; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .menu-card { 
+            background: var(--bg-card); 
+            border-radius: 20px; 
+            padding: 25px; 
+            margin-bottom: 20px; 
+            border: 2px solid var(--primary-light);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        .section-title { 
+            font-family: 'Fredoka', sans-serif; 
+            font-size: 1.4rem; 
+            color: var(--gold); 
+            margin-bottom: 15px; 
+        }
+        
+        /* Reference Cards */
+        .ref-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+            gap: 12px; 
+            margin-bottom: 20px; 
+        }
+        .ref-card { 
+            background: var(--primary); 
+            border-radius: 12px; 
+            padding: 15px; 
+            border-left: 4px solid var(--card-color); 
+        }
+        .ref-card.nom { --card-color: var(--cat-nom); }
+        .ref-card.akk { --card-color: var(--cat-akk); }
+        .ref-card.dat { --card-color: var(--cat-dat); }
+        .ref-card.gen { --card-color: var(--cat-gen); }
+        .ref-title { font-weight: 700; color: var(--card-color); margin-bottom: 8px; font-size: 0.95rem; }
+        .ref-table { font-size: 0.85rem; color: var(--text-muted); line-height: 1.8; }
+        .ref-table strong { color: var(--text); }
+        
+        /* Category Grid */
+        .category-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+            gap: 15px; 
+            margin-top: 15px; 
+        }
+        .category-card { 
+            background: var(--bg-card); 
+            border-radius: 16px; 
+            padding: 20px; 
+            text-align: center; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+            border: 3px solid var(--cat-color);
+            position: relative;
+            overflow: hidden;
+        }
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--cat-color);
+        }
+        .category-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(135deg, var(--bg-card), var(--primary));
+        }
+        .category-card.nom { --cat-color: var(--cat-nom); }
+        .category-card.akk { --cat-color: var(--cat-akk); }
+        .category-card.dat { --cat-color: var(--cat-dat); }
+        .category-card.gen { --cat-color: var(--cat-gen); }
+        .category-card.mixed { --cat-color: var(--cat-mixed); }
+        .category-card.advanced { --cat-color: var(--cat-advanced); }
+        .category-card.master { --cat-color: var(--gold); background: linear-gradient(135deg, var(--primary), var(--primary-light)); }
+        .cat-icon { font-size: 2rem; margin-bottom: 8px; display: block; }
+        .cat-title { 
+            font-family: 'Fredoka', sans-serif; 
+            font-size: 1rem; 
+            color: var(--cat-color); 
+            margin-bottom: 5px; 
+        }
+        .cat-count { 
+            font-size: 0.75rem; 
+            color: var(--text-muted); 
+            background: var(--primary);
+            padding: 3px 10px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 8px;
+        }
+        
+        /* Game Header */
+        .game-header { 
+            background: var(--bg-card); 
+            border-radius: 16px; 
+            padding: 15px 20px; 
+            margin-bottom: 15px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            flex-wrap: wrap; 
+            gap: 10px; 
+        }
+        .control-btn { 
+            background: var(--primary-light); 
+            border: none; 
+            color: var(--text); 
+            padding: 10px 16px; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-size: 0.95rem; 
+            font-weight: 600; 
+            transition: all 0.3s; 
+            font-family: inherit; 
+        }
+        .control-btn:hover { background: var(--accent); }
+        .control-btn.primary { background: linear-gradient(135deg, var(--accent), var(--gold)); color: var(--bg-dark); }
+        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .stats-bar { display: flex; gap: 20px; flex-wrap: wrap; }
+        .stat { text-align: center; }
+        .stat-value { 
+            font-family: 'Fredoka', sans-serif; 
+            font-size: 1.3rem; 
+            color: var(--gold); 
+            font-weight: 700; 
+        }
+        .stat-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
+        .streak-fire { display: none; animation: pulse 0.5s ease infinite alternate; }
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.2); } }
+        
+        .progress-container { 
+            background: var(--primary-light); 
+            border-radius: 10px; 
+            height: 10px; 
+            margin-bottom: 12px; 
+            overflow: hidden; 
+        }
+        .progress-fill { 
+            height: 100%; 
+            background: linear-gradient(90deg, var(--accent), var(--gold)); 
+            border-radius: 10px; 
+            transition: width 0.5s; 
+            width: 0; 
+        }
+        .exercise-counter { text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px; }
+        
+        /* Exercise Card */
+        .exercise-card { 
+            background: var(--bg-card); 
+            border-radius: 20px; 
+            padding: 25px; 
+            border: 2px solid var(--primary-light); 
+        }
+        .exercise-type { 
+            display: inline-block; 
+            padding: 5px 12px; 
+            border-radius: 15px; 
+            font-size: 0.8rem; 
+            font-weight: 700; 
+            margin-bottom: 12px; 
+            background: var(--cat-color); 
+            color: white;
+        }
+        .exercise-type.nom { --cat-color: var(--cat-nom); }
+        .exercise-type.akk { --cat-color: var(--cat-akk); }
+        .exercise-type.dat { --cat-color: var(--cat-dat); }
+        .exercise-type.gen { --cat-color: var(--cat-gen); }
+        .exercise-type.mixed { --cat-color: var(--cat-mixed); }
+        .exercise-type.advanced { --cat-color: var(--cat-advanced); }
+        
+        .instruction { font-size: 1rem; color: var(--text-muted); margin-bottom: 15px; }
+        
+        .sentence-section { 
+            background: var(--primary); 
+            border-radius: 12px; 
+            padding: 18px; 
+            margin-bottom: 15px; 
+            border-left: 4px solid var(--accent); 
+        }
+        .sentence-label { 
+            font-size: 0.75rem; 
+            color: var(--gold); 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            margin-bottom: 8px; 
+        }
+        .sentence-text { font-size: 1.15rem; line-height: 1.7; }
+        .sentence-text .highlight { 
+            background: linear-gradient(135deg, var(--gold), var(--gold-glow)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            font-weight: 700; 
+        }
+        .sentence-text .bezugswort {
+            background: var(--accent);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+        
+        .answer-section { 
+            background: rgba(59, 130, 246, 0.1); 
+            border: 2px dashed var(--accent); 
+            border-radius: 12px; 
+            padding: 18px; 
+            margin-bottom: 15px; 
+        }
+        .answer-label { 
+            font-size: 0.75rem; 
+            color: var(--accent-glow); 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            margin-bottom: 10px; 
+        }
+        .input-container { 
+            display: flex; 
+            flex-wrap: wrap; 
+            align-items: baseline; 
+            gap: 6px; 
+            line-height: 2.2; 
+            font-size: 1.1rem; 
+        }
+        .input-slot { 
+            background: var(--bg-dark); 
+            border: 2px solid var(--primary-light); 
+            border-radius: 8px; 
+            padding: 8px 12px; 
+            color: var(--text); 
+            font-size: 1rem; 
+            font-family: inherit; 
+            transition: all 0.3s; 
+            min-width: 80px; 
+            text-align: center;
+        }
+        .input-slot:focus { 
+            outline: none; 
+            border-color: var(--gold); 
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.3); 
+        }
+        .input-slot.correct { border-color: var(--success); background: rgba(16, 185, 129, 0.2); }
+        .input-slot.incorrect { border-color: var(--error); background: rgba(239, 68, 68, 0.2); }
+        
+        /* Multiple Choice */
+        .mc-options { display: grid; gap: 10px; margin-top: 12px; }
+        .mc-option { 
+            background: var(--primary); 
+            border: 2px solid var(--primary-light); 
+            border-radius: 12px; 
+            padding: 14px 18px; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+        }
+        .mc-option:hover { border-color: var(--gold); background: rgba(251, 191, 36, 0.1); }
+        .mc-option.correct { border-color: var(--success); background: rgba(16, 185, 129, 0.2); }
+        .mc-option.incorrect { border-color: var(--error); background: rgba(239, 68, 68, 0.2); }
+        .mc-letter { 
+            background: var(--bg-dark); 
+            width: 30px; 
+            height: 30px; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: 700; 
+            font-size: 0.9rem; 
+            color: var(--gold); 
+        }
+        
+        .hint-box { 
+            background: rgba(251, 191, 36, 0.15); 
+            border: 2px solid var(--gold); 
+            border-radius: 10px; 
+            padding: 12px; 
+            margin-bottom: 12px; 
+            color: var(--gold); 
+        }
+        .explanation-box { 
+            background: rgba(16, 185, 129, 0.1); 
+            border: 2px solid var(--success); 
+            border-radius: 12px; 
+            padding: 18px; 
+            margin-top: 15px; 
+            display: none; 
+        }
+        .explanation-box.show { display: block; }
+        .explanation-title { font-weight: 700; color: var(--success); margin-bottom: 8px; }
+        .explanation-text { color: var(--text); line-height: 1.6; }
+        .explanation-text strong { color: var(--gold); }
+        
+        .action-buttons { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        
+        /* Results */
+        .result-card { background: var(--bg-card); border-radius: 24px; padding: 35px; text-align: center; }
+        .result-title { 
+            font-family: 'Fredoka', sans-serif; 
+            font-size: 2rem; 
+            background: linear-gradient(135deg, var(--accent), var(--gold)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            margin-bottom: 10px; 
+        }
+        .result-stats { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 15px; 
+            margin-bottom: 25px; 
+        }
+        .result-stat { background: var(--primary-light); border-radius: 16px; padding: 15px; }
+        .result-stat-value { 
+            font-family: 'Fredoka', sans-serif; 
+            font-size: 1.6rem; 
+            color: var(--gold); 
+        }
+        .result-stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: 5px; }
+        
+        .accuracy-ring { width: 130px; height: 130px; margin: 0 auto 25px; position: relative; }
+        .accuracy-ring svg { transform: rotate(-90deg); }
+        .accuracy-ring circle { fill: none; stroke-width: 10; }
+        .accuracy-ring .bg { stroke: var(--primary-light); }
+        .accuracy-ring .progress { 
+            stroke: var(--gold); 
+            stroke-linecap: round; 
+            stroke-dasharray: 377; 
+            stroke-dashoffset: 377; 
+            transition: stroke-dashoffset 1.5s ease; 
+        }
+        .accuracy-text { 
+            position: absolute; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            font-family: 'Fredoka', sans-serif; 
+            font-size: 1.6rem; 
+            color: var(--gold); 
+        }
+        
+        .category-results { 
+            background: var(--primary-light); 
+            border-radius: 16px; 
+            padding: 20px; 
+            margin-bottom: 20px; 
+            text-align: left; 
+        }
+        .category-results h4 { 
+            color: var(--gold); 
+            margin-bottom: 12px; 
+            font-family: 'Fredoka', sans-serif; 
+        }
+        .cat-result-item { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 8px 0; 
+            border-bottom: 1px solid var(--bg-dark); 
+        }
+        .cat-result-item:last-child { border-bottom: none; }
+        .cat-result-name { display: flex; align-items: center; gap: 8px; }
+        .cat-result-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .cat-result-score { font-weight: 700; color: var(--gold); }
+        
+        .points-popup { 
+            position: fixed; 
+            font-family: 'Fredoka', sans-serif; 
+            font-size: 1.6rem; 
+            font-weight: 700; 
+            color: var(--gold); 
+            pointer-events: none; 
+            animation: floatUp 1s ease forwards; 
+            z-index: 1000; 
+        }
+        @keyframes floatUp { 
+            0% { opacity: 1; transform: translateY(0) scale(1); } 
+            100% { opacity: 0; transform: translateY(-60px) scale(1.3); } 
+        }
+        
+        /* Theory Modal */
+        .modal-overlay { 
+            position: fixed; 
+            top: 0; left: 0; right: 0; bottom: 0; 
+            background: rgba(0, 0, 0, 0.85); 
+            display: none; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 1000; 
+            padding: 20px; 
+            overflow-y: auto; 
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-content { 
+            background: var(--bg-card); 
+            border-radius: 20px; 
+            padding: 30px; 
+            max-width: 800px; 
+            width: 100%; 
+            max-height: 90vh; 
+            overflow-y: auto; 
+        }
+        .modal-title { 
+            font-family: 'Fredoka', sans-serif; 
+            font-size: 1.6rem; 
+            color: var(--gold); 
+            margin-bottom: 20px; 
+            text-align: center; 
+        }
+        .theory-section { margin-bottom: 25px; }
+        .theory-section h3 { 
+            color: var(--accent-glow); 
+            font-family: 'Fredoka', sans-serif; 
+            margin-bottom: 12px; 
+            font-size: 1.1rem; 
+        }
+        .theory-section p { color: var(--text-muted); line-height: 1.7; margin-bottom: 10px; }
+        .theory-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin: 15px 0; 
+            font-size: 0.9rem; 
+        }
+        .theory-table th, .theory-table td { 
+            padding: 10px 12px; 
+            text-align: center; 
+            border: 1px solid var(--primary-light); 
+        }
+        .theory-table th { background: var(--primary); color: var(--gold); font-weight: 700; }
+        .theory-table td { background: var(--bg-dark); }
+        .example-box {
+            background: var(--primary);
+            border-left: 4px solid var(--gold);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .example-box strong { color: var(--gold); }
+        
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8rem; }
+            .category-grid { grid-template-columns: 1fr 1fr; }
+            .game-header { flex-direction: column; }
+            .stats-bar { justify-content: center; }
+            .result-stats { grid-template-columns: 1fr; }
+            .ref-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>🔗 Relativpronomen-Meister</h1>
+        <p class="subtitle">Bezugswörter erkennen & Relativpronomen richtig verwenden</p>
+        <span class="level-badge">📚 B1–B2 Grammatik</span>
+    </header>
+
+    <!-- MENU SCREEN -->
+    <div id="menuScreen" class="screen active">
+        <div class="menu-card">
+            <h2 class="section-title">📋 Relativpronomen-Übersicht</h2>
+            <div class="ref-grid">
+                <div class="ref-card nom">
+                    <div class="ref-title">Nominativ (Subjekt)</div>
+                    <div class="ref-table">
+                        <strong>der</strong> (m) · <strong>die</strong> (f) · <strong>das</strong> (n) · <strong>die</strong> (Pl.)<br>
+                        <em>Der Mann, <strong>der</strong> dort steht...</em>
+                    </div>
+                </div>
+                <div class="ref-card akk">
+                    <div class="ref-title">Akkusativ (direktes Objekt)</div>
+                    <div class="ref-table">
+                        <strong>den</strong> (m) · <strong>die</strong> (f) · <strong>das</strong> (n) · <strong>die</strong> (Pl.)<br>
+                        <em>Der Film, <strong>den</strong> ich sah...</em>
+                    </div>
+                </div>
+                <div class="ref-card dat">
+                    <div class="ref-title">Dativ (indirektes Objekt)</div>
+                    <div class="ref-table">
+                        <strong>dem</strong> (m) · <strong>der</strong> (f) · <strong>dem</strong> (n) · <strong>denen</strong> (Pl.)<br>
+                        <em>Die Frau, <strong>der</strong> ich half...</em>
+                    </div>
+                </div>
+                <div class="ref-card gen">
+                    <div class="ref-title">Genitiv (Besitz)</div>
+                    <div class="ref-table">
+                        <strong>dessen</strong> (m/n) · <strong>deren</strong> (f/Pl.)<br>
+                        <em>Der Autor, <strong>dessen</strong> Buch...</em>
+                    </div>
+                </div>
+            </div>
+            <button class="control-btn primary" onclick="showTheory()">📖 Ausführliche Theorie</button>
+        </div>
+
+        <div class="menu-card">
+            <h2 class="section-title">🎯 Übungsmodus wählen</h2>
+            <div class="category-grid">
+                <div class="category-card nom" onclick="startGame('nom')">
+                    <span class="cat-icon">📘</span>
+                    <div class="cat-title">Nominativ</div>
+                    <span class="cat-count">15 Übungen</span>
+                </div>
+                <div class="category-card akk" onclick="startGame('akk')">
+                    <span class="cat-icon">📙</span>
+                    <div class="cat-title">Akkusativ</div>
+                    <span class="cat-count">15 Übungen</span>
+                </div>
+                <div class="category-card dat" onclick="startGame('dat')">
+                    <span class="cat-icon">📗</span>
+                    <div class="cat-title">Dativ</div>
+                    <span class="cat-count">15 Übungen</span>
+                </div>
+                <div class="category-card gen" onclick="startGame('gen')">
+                    <span class="cat-icon">📕</span>
+                    <div class="cat-title">Genitiv</div>
+                    <span class="cat-count">12 Übungen</span>
+                </div>
+                <div class="category-card mixed" onclick="startGame('mixed')">
+                    <span class="cat-icon">🔀</span>
+                    <div class="cat-title">Gemischt</div>
+                    <span class="cat-count">20 Übungen</span>
+                </div>
+                <div class="category-card master" onclick="startGame('master')">
+                    <span class="cat-icon">🏆</span>
+                    <div class="cat-title">Meister</div>
+                    <span class="cat-count">Alle Übungen</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="menu-card">
+            <h2 class="section-title">💡 Wichtig: Das Bezugswort</h2>
+            <p style="color: var(--text-muted); line-height: 1.7; margin-bottom: 15px;">
+                Das <strong style="color: var(--gold);">Bezugswort</strong> ist das Nomen im Hauptsatz, auf das sich das Relativpronomen bezieht. 
+                Es bestimmt <strong style="color: var(--accent);">Genus</strong> (maskulin/feminin/neutrum) und <strong style="color: var(--accent);">Numerus</strong> (Singular/Plural) des Relativpronomens.
+            </p>
+            <div class="example-box">
+                <strong>Beispiel:</strong> <em>Die <span style="color: var(--gold);">Schülerin</span>, <span style="color: var(--accent);">die</span> fleißig lernt, besteht die Prüfung.</em><br>
+                <span style="color: var(--text-muted); font-size: 0.9rem;">→ Bezugswort: "Schülerin" (feminin, Singular) → Relativpronomen: "die"</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="gameScreen" class="screen">
+        <div class="game-header">
+            <div style="display: flex; gap: 10px;">
+                <button class="control-btn" onclick="confirmExit()">← Zurück</button>
+                <button class="control-btn" id="hintBtn" onclick="showHint()">💡 Tipp</button>
+            </div>
+            <div class="stats-bar">
+                <div class="stat">
+                    <div class="stat-value" id="points">0</div>
+                    <div class="stat-label">Punkte</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value"><span id="streak">0</span><span class="streak-fire" id="streakFire">🔥</span></div>
+                    <div class="stat-label">Serie</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value"><span id="correct">0</span>/<span id="total">0</span></div>
+                    <div class="stat-label">Richtig</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="exercise-counter" id="exerciseCounter">Übung 1/10</div>
+        
+        <div class="exercise-card" id="exerciseArea">
+            <!-- Exercise content loaded dynamically -->
+        </div>
+        
+        <div class="action-buttons">
+            <button class="control-btn primary" id="checkBtn" onclick="checkAnswer()">✓ Überprüfen</button>
+        </div>
+    </div>
+
+    <!-- RESULT SCREEN -->
+    <div id="resultScreen" class="screen">
+        <div class="result-card">
+            <h2 class="result-title">🎉 Training beendet!</h2>
+            
+            <div class="accuracy-ring">
+                <svg width="130" height="130">
+                    <circle class="bg" cx="65" cy="65" r="60"/>
+                    <circle class="progress" id="accuracyCircle" cx="65" cy="65" r="60"/>
+                </svg>
+                <div class="accuracy-text" id="accuracyText">0%</div>
+            </div>
+            
+            <div class="result-stats">
+                <div class="result-stat">
+                    <div class="result-stat-value" id="finalPoints">0</div>
+                    <div class="result-stat-label">Punkte</div>
+                </div>
+                <div class="result-stat">
+                    <div class="result-stat-value" id="finalCorrect">0/0</div>
+                    <div class="result-stat-label">Richtig</div>
+                </div>
+                <div class="result-stat">
+                    <div class="result-stat-value" id="finalStreak">0</div>
+                    <div class="result-stat-label">Beste Serie</div>
+                </div>
+            </div>
+            
+            <div class="category-results" id="categoryResults"></div>
+            
+            <div class="action-buttons" style="justify-content: center;">
+                <button class="control-btn primary" onclick="playAgain()">🔄 Nochmal</button>
+                <button class="control-btn" onclick="goToMenu()">📋 Menü</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- THEORY MODAL -->
+<div class="modal-overlay" id="theoryModal">
+    <div class="modal-content">
+        <h2 class="modal-title">📖 Relativpronomen & Bezugswörter</h2>
+        
+        <div class="theory-section">
+            <h3>🔹 Was ist ein Relativsatz?</h3>
+            <p>Ein Relativsatz ist ein Nebensatz, der ein Nomen (das <strong>Bezugswort</strong>) näher beschreibt. Er wird durch ein <strong>Relativpronomen</strong> eingeleitet.</p>
+            <div class="example-box">
+                <strong>Hauptsatz:</strong> Der Lehrer ist streng.<br>
+                <strong>Relativsatz:</strong> Der Lehrer, <strong>der</strong> uns Mathe unterrichtet, ist streng.
+            </div>
+        </div>
+
+        <div class="theory-section">
+            <h3>🔹 Wie finde ich das Bezugswort?</h3>
+            <p>Das Bezugswort steht <strong>direkt vor dem Komma</strong>, das den Relativsatz einleitet. Es bestimmt:</p>
+            <p>1. <strong>Genus & Numerus</strong> des Relativpronomens (der/die/das/die)<br>
+            2. <strong>Nicht aber den Kasus!</strong> Der Kasus hängt von der Funktion im Relativsatz ab.</p>
+        </div>
+
+        <div class="theory-section">
+            <h3>🔹 Vollständige Deklination</h3>
+            <table class="theory-table">
+                <tr>
+                    <th>Kasus</th>
+                    <th>Maskulin</th>
+                    <th>Feminin</th>
+                    <th>Neutrum</th>
+                    <th>Plural</th>
+                </tr>
+                <tr>
+                    <td><strong>Nominativ</strong></td>
+                    <td>der</td>
+                    <td>die</td>
+                    <td>das</td>
+                    <td>die</td>
+                </tr>
+                <tr>
+                    <td><strong>Akkusativ</strong></td>
+                    <td>den</td>
+                    <td>die</td>
+                    <td>das</td>
+                    <td>die</td>
+                </tr>
+                <tr>
+                    <td><strong>Dativ</strong></td>
+                    <td>dem</td>
+                    <td>der</td>
+                    <td>dem</td>
+                    <td>denen</td>
+                </tr>
+                <tr>
+                    <td><strong>Genitiv</strong></td>
+                    <td>dessen</td>
+                    <td>deren</td>
+                    <td>dessen</td>
+                    <td>deren</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="theory-section">
+            <h3>🔹 Wie bestimme ich den Kasus?</h3>
+            <p>Frage dich: <strong>Welche Rolle spielt das Relativpronomen im Relativsatz?</strong></p>
+            <div class="example-box">
+                <strong>Nominativ:</strong> Der Mann, <strong>der</strong> dort steht... (Wer steht? → der Mann)<br><br>
+                <strong>Akkusativ:</strong> Der Film, <strong>den</strong> ich gesehen habe... (Wen/Was habe ich gesehen? → den Film)<br><br>
+                <strong>Dativ:</strong> Die Frau, <strong>der</strong> ich geholfen habe... (Wem habe ich geholfen? → der Frau)<br><br>
+                <strong>Genitiv:</strong> Der Autor, <strong>dessen</strong> Buch ich lese... (Wessen Buch? → des Autors)
+            </div>
+        </div>
+
+        <div class="theory-section">
+            <h3>🔹 Typische Fehler vermeiden</h3>
+            <p><strong>Fehler 1:</strong> Genus vom Bezugswort ignorieren<br>
+            ❌ "Die Zeitung, <em>der</em> ich lese..." → ✅ "Die Zeitung, <em>die</em> ich lese..."</p>
+            <p style="margin-top: 10px;"><strong>Fehler 2:</strong> Kasus falsch bestimmen<br>
+            ❌ "Der Mann, <em>der</em> ich sehe..." → ✅ "Der Mann, <em>den</em> ich sehe..."</p>
+            <p style="margin-top: 10px;"><strong>Fehler 3:</strong> "dessen/deren" mit Artikel verwechseln<br>
+            ❌ "Der Mann, <em>dessen sein</em> Auto..." → ✅ "Der Mann, <em>dessen</em> Auto..."</p>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <button class="control-btn primary" onclick="hideTheory()">✓ Verstanden!</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Game State
+const G = {
+    mode: '',
+    ex: [],
+    idx: 0,
+    total: 0,
+    pts: 0,
+    cor: 0,
+    inc: 0,
+    streak: 0,
+    best: 0,
+    answered: false,
+    hintUsed: false,
+    stats: {}
+};
+
+// Exercise Database
+const exercises = {
+    nom: [
+        { t: 'fill', sentence: 'Der Hund, ___ im Garten spielt, gehört meinem Nachbarn.', answer: ['der'], bezug: 'Hund', genus: 'm', hint: 'Wer spielt im Garten? → Nominativ maskulin', expl: 'Das Bezugswort "Hund" ist maskulin. Im Relativsatz ist das Pronomen Subjekt (wer spielt?) → Nominativ: <strong>der</strong>' },
+        { t: 'fill', sentence: 'Die Lehrerin, ___ uns Deutsch unterrichtet, ist sehr geduldig.', answer: ['die'], bezug: 'Lehrerin', genus: 'f', hint: 'Wer unterrichtet? → Nominativ feminin', expl: 'Das Bezugswort "Lehrerin" ist feminin. Das Pronomen ist Subjekt → Nominativ: <strong>die</strong>' },
+        { t: 'fill', sentence: 'Das Kind, ___ dort sitzt, wartet auf seine Mutter.', answer: ['das'], bezug: 'Kind', genus: 'n', hint: 'Wer sitzt dort? → Nominativ neutrum', expl: 'Das Bezugswort "Kind" ist neutrum. Das Pronomen ist Subjekt → Nominativ: <strong>das</strong>' },
+        { t: 'fill', sentence: 'Die Schüler, ___ fleißig lernen, bestehen die Prüfung.', answer: ['die'], bezug: 'Schüler', genus: 'pl', hint: 'Wer lernt fleißig? → Nominativ Plural', expl: 'Das Bezugswort "Schüler" ist Plural. Das Pronomen ist Subjekt → Nominativ Plural: <strong>die</strong>' },
+        { t: 'mc', sentence: 'Der Computer, ___ nicht mehr funktioniert, muss repariert werden.', options: ['der', 'den', 'dem', 'dessen'], correct: 0, bezug: 'Computer', hint: 'Wer funktioniert nicht mehr?', expl: '"Computer" ist maskulin. Das Pronomen ist Subjekt im Relativsatz → <strong>der</strong>' },
+        { t: 'fill', sentence: 'Die Blumen, ___ im Garten blühen, duften wunderbar.', answer: ['die'], bezug: 'Blumen', genus: 'pl', hint: 'Was blüht im Garten? → Nominativ Plural', expl: '"Blumen" ist Plural. Das Pronomen ist Subjekt → <strong>die</strong>' },
+        { t: 'fill', sentence: 'Der Arzt, ___ mich behandelt hat, war sehr freundlich.', answer: ['der'], bezug: 'Arzt', genus: 'm', hint: 'Wer hat behandelt? → Nominativ maskulin', expl: '"Arzt" ist maskulin. Das Pronomen ist Subjekt → <strong>der</strong>' },
+        { t: 'mc', sentence: 'Das Buch, ___ auf dem Tisch liegt, gehört mir.', options: ['das', 'dem', 'dessen', 'die'], correct: 0, bezug: 'Buch', hint: 'Was liegt auf dem Tisch?', expl: '"Buch" ist neutrum. Das Pronomen ist Subjekt → <strong>das</strong>' },
+        { t: 'fill', sentence: 'Die Katze, ___ auf dem Sofa schläft, heißt Luna.', answer: ['die'], bezug: 'Katze', genus: 'f', hint: 'Wer schläft auf dem Sofa? → Nominativ feminin', expl: '"Katze" ist feminin. Das Pronomen ist Subjekt → <strong>die</strong>' },
+        { t: 'fill', sentence: 'Der Film, ___ gestern im Kino lief, war spannend.', answer: ['der'], bezug: 'Film', genus: 'm', hint: 'Was lief im Kino? → Nominativ maskulin', expl: '"Film" ist maskulin. Das Pronomen ist Subjekt → <strong>der</strong>' },
+        { t: 'mc', sentence: 'Die Frau, ___ dort wartet, ist meine Tante.', options: ['die', 'der', 'deren', 'denen'], correct: 0, bezug: 'Frau', hint: 'Wer wartet dort?', expl: '"Frau" ist feminin. Das Pronomen ist Subjekt → <strong>die</strong>' },
+        { t: 'fill', sentence: 'Das Restaurant, ___ erst letzte Woche eröffnet hat, ist schon sehr beliebt.', answer: ['das'], bezug: 'Restaurant', genus: 'n', hint: 'Was hat eröffnet? → Nominativ neutrum', expl: '"Restaurant" ist neutrum. Das Pronomen ist Subjekt → <strong>das</strong>' },
+        { t: 'fill', sentence: 'Die Kinder, ___ im Park spielen, lachen laut.', answer: ['die'], bezug: 'Kinder', genus: 'pl', hint: 'Wer spielt im Park? → Nominativ Plural', expl: '"Kinder" ist Plural. Das Pronomen ist Subjekt → <strong>die</strong>' },
+        { t: 'mc', sentence: 'Der Student, ___ die Prüfung bestanden hat, feiert heute.', options: ['der', 'den', 'dem', 'dessen'], correct: 0, bezug: 'Student', hint: 'Wer hat bestanden?', expl: '"Student" ist maskulin. Das Pronomen ist Subjekt → <strong>der</strong>' },
+        { t: 'fill', sentence: 'Die Stadt, ___ am Meer liegt, ist ein beliebtes Reiseziel.', answer: ['die'], bezug: 'Stadt', genus: 'f', hint: 'Was liegt am Meer? → Nominativ feminin', expl: '"Stadt" ist feminin. Das Pronomen ist Subjekt → <strong>die</strong>' }
+    ],
+    akk: [
+        { t: 'fill', sentence: 'Der Film, ___ ich gestern gesehen habe, war langweilig.', answer: ['den'], bezug: 'Film', genus: 'm', hint: 'Wen/Was habe ich gesehen? → Akkusativ maskulin', expl: '"Film" ist maskulin. Das Pronomen ist direktes Objekt (Wen/Was?) → Akkusativ: <strong>den</strong>' },
+        { t: 'fill', sentence: 'Die Pizza, ___ wir bestellt haben, schmeckt ausgezeichnet.', answer: ['die'], bezug: 'Pizza', genus: 'f', hint: 'Wen/Was haben wir bestellt? → Akkusativ feminin', expl: '"Pizza" ist feminin. Im Akkusativ feminin: <strong>die</strong>' },
+        { t: 'fill', sentence: 'Das Geschenk, ___ ich bekommen habe, gefällt mir sehr.', answer: ['das'], bezug: 'Geschenk', genus: 'n', hint: 'Wen/Was habe ich bekommen? → Akkusativ neutrum', expl: '"Geschenk" ist neutrum. Im Akkusativ neutrum: <strong>das</strong>' },
+        { t: 'fill', sentence: 'Die Bücher, ___ sie liest, sind sehr interessant.', answer: ['die'], bezug: 'Bücher', genus: 'pl', hint: 'Wen/Was liest sie? → Akkusativ Plural', expl: '"Bücher" ist Plural. Im Akkusativ Plural: <strong>die</strong>' },
+        { t: 'mc', sentence: 'Der Mann, ___ ich auf der Straße getroffen habe, war mein alter Lehrer.', options: ['den', 'der', 'dem', 'dessen'], correct: 0, bezug: 'Mann', hint: 'Wen habe ich getroffen?', expl: '"Mann" ist maskulin. Das Pronomen ist direktes Objekt → <strong>den</strong>' },
+        { t: 'fill', sentence: 'Die Jacke, ___ du trägst, steht dir gut.', answer: ['die'], bezug: 'Jacke', genus: 'f', hint: 'Wen/Was trägst du? → Akkusativ feminin', expl: '"Jacke" ist feminin. Im Akkusativ feminin: <strong>die</strong>' },
+        { t: 'fill', sentence: 'Das Auto, ___ er sich gekauft hat, ist rot.', answer: ['das'], bezug: 'Auto', genus: 'n', hint: 'Wen/Was hat er gekauft? → Akkusativ neutrum', expl: '"Auto" ist neutrum. Im Akkusativ neutrum: <strong>das</strong>' },
+        { t: 'mc', sentence: 'Die Nachricht, ___ ich erhalten habe, war überraschend.', options: ['die', 'der', 'deren', 'denen'], correct: 0, bezug: 'Nachricht', hint: 'Wen/Was habe ich erhalten?', expl: '"Nachricht" ist feminin. Im Akkusativ feminin: <strong>die</strong>' },
+        { t: 'fill', sentence: 'Der Kuchen, ___ meine Mutter gebacken hat, ist köstlich.', answer: ['den'], bezug: 'Kuchen', genus: 'm', hint: 'Wen/Was hat sie gebacken? → Akkusativ maskulin', expl: '"Kuchen" ist maskulin. Im Akkusativ maskulin: <strong>den</strong>' },
+        { t: 'fill', sentence: 'Die Fotos, ___ wir gemacht haben, sind wunderschön.', answer: ['die'], bezug: 'Fotos', genus: 'pl', hint: 'Wen/Was haben wir gemacht? → Akkusativ Plural', expl: '"Fotos" ist Plural. Im Akkusativ Plural: <strong>die</strong>' },
+        { t: 'mc', sentence: 'Das Lied, ___ sie singt, kenne ich nicht.', options: ['das', 'dem', 'dessen', 'der'], correct: 0, bezug: 'Lied', hint: 'Wen/Was singt sie?', expl: '"Lied" ist neutrum. Im Akkusativ neutrum: <strong>das</strong>' },
+        { t: 'fill', sentence: 'Der Brief, ___ ich geschrieben habe, ist sehr lang.', answer: ['den'], bezug: 'Brief', genus: 'm', hint: 'Wen/Was habe ich geschrieben? → Akkusativ maskulin', expl: '"Brief" ist maskulin. Im Akkusativ maskulin: <strong>den</strong>' },
+        { t: 'fill', sentence: 'Die Aufgabe, ___ der Lehrer uns gegeben hat, ist schwierig.', answer: ['die'], bezug: 'Aufgabe', genus: 'f', hint: 'Wen/Was hat er gegeben? → Akkusativ feminin', expl: '"Aufgabe" ist feminin. Im Akkusativ feminin: <strong>die</strong>' },
+        { t: 'mc', sentence: 'Die Freunde, ___ ich eingeladen habe, kommen um acht.', options: ['die', 'denen', 'deren', 'der'], correct: 0, bezug: 'Freunde', hint: 'Wen habe ich eingeladen?', expl: '"Freunde" ist Plural. Im Akkusativ Plural: <strong>die</strong>' },
+        { t: 'fill', sentence: 'Das Handy, ___ ich verloren habe, war neu.', answer: ['das'], bezug: 'Handy', genus: 'n', hint: 'Wen/Was habe ich verloren? → Akkusativ neutrum', expl: '"Handy" ist neutrum. Im Akkusativ neutrum: <strong>das</strong>' }
+    ],
+    dat: [
+        { t: 'fill', sentence: 'Der Kollege, ___ ich geholfen habe, bedankte sich.', answer: ['dem'], bezug: 'Kollege', genus: 'm', hint: 'Wem habe ich geholfen? → Dativ maskulin', expl: '"Kollege" ist maskulin. "helfen" + Dativ → <strong>dem</strong>' },
+        { t: 'fill', sentence: 'Die Nachbarin, ___ ich das Paket gegeben habe, war sehr dankbar.', answer: ['der'], bezug: 'Nachbarin', genus: 'f', hint: 'Wem habe ich gegeben? → Dativ feminin', expl: '"Nachbarin" ist feminin. Indirektes Objekt → Dativ: <strong>der</strong>' },
+        { t: 'fill', sentence: 'Das Kind, ___ ich die Geschichte erzählt habe, hörte aufmerksam zu.', answer: ['dem'], bezug: 'Kind', genus: 'n', hint: 'Wem habe ich erzählt? → Dativ neutrum', expl: '"Kind" ist neutrum. Indirektes Objekt → Dativ: <strong>dem</strong>' },
+        { t: 'fill', sentence: 'Die Schüler, ___ der Lehrer die Aufgabe erklärt hat, verstanden alles.', answer: ['denen'], bezug: 'Schüler', genus: 'pl', hint: 'Wem hat er erklärt? → Dativ Plural', expl: '"Schüler" ist Plural. Indirektes Objekt → Dativ Plural: <strong>denen</strong>' },
+        { t: 'mc', sentence: 'Der Patient, ___ der Arzt das Medikament verschrieben hat, wurde schnell gesund.', options: ['dem', 'den', 'der', 'dessen'], correct: 0, bezug: 'Patient', hint: 'Wem hat der Arzt verschrieben?', expl: '"Patient" ist maskulin. Indirektes Objekt → <strong>dem</strong>' },
+        { t: 'fill', sentence: 'Die Freundin, ___ ich zum Geburtstag gratuliert habe, freute sich.', answer: ['der'], bezug: 'Freundin', genus: 'f', hint: 'Wem habe ich gratuliert? → Dativ feminin', expl: '"gratulieren" + Dativ. "Freundin" ist feminin → <strong>der</strong>' },
+        { t: 'fill', sentence: 'Das Mädchen, ___ ich Blumen geschenkt habe, war überrascht.', answer: ['dem'], bezug: 'Mädchen', genus: 'n', hint: 'Wem habe ich geschenkt? → Dativ neutrum', expl: '"Mädchen" ist neutrum. Indirektes Objekt → <strong>dem</strong>' },
+        { t: 'mc', sentence: 'Die Kunden, ___ wir den Rabatt angeboten haben, waren zufrieden.', options: ['denen', 'die', 'deren', 'dem'], correct: 0, bezug: 'Kunden', hint: 'Wem haben wir angeboten?', expl: '"Kunden" ist Plural. Indirektes Objekt → Dativ Plural: <strong>denen</strong>' },
+        { t: 'fill', sentence: 'Der Junge, ___ ich bei den Hausaufgaben geholfen habe, ist mein Neffe.', answer: ['dem'], bezug: 'Junge', genus: 'm', hint: 'Wem habe ich geholfen? → Dativ maskulin', expl: '"helfen" + Dativ. "Junge" ist maskulin → <strong>dem</strong>' },
+        { t: 'fill', sentence: 'Die Firma, ___ wir den Auftrag erteilt haben, arbeitet zuverlässig.', answer: ['der'], bezug: 'Firma', genus: 'f', hint: 'Wem haben wir erteilt? → Dativ feminin', expl: '"Firma" ist feminin. Indirektes Objekt → <strong>der</strong>' },
+        { t: 'mc', sentence: 'Das Team, ___ der Trainer neue Strategien beigebracht hat, gewann das Spiel.', options: ['dem', 'das', 'dessen', 'den'], correct: 0, bezug: 'Team', hint: 'Wem hat er beigebracht?', expl: '"Team" ist neutrum. Indirektes Objekt → <strong>dem</strong>' },
+        { t: 'fill', sentence: 'Der Künstler, ___ das Museum eine Ausstellung gewidmet hat, ist weltbekannt.', answer: ['dem'], bezug: 'Künstler', genus: 'm', hint: 'Wem hat das Museum gewidmet? → Dativ maskulin', expl: '"widmen" + Dativ. "Künstler" ist maskulin → <strong>dem</strong>' },
+        { t: 'fill', sentence: 'Die Studentin, ___ ich mein Fahrrad geliehen habe, bringt es morgen zurück.', answer: ['der'], bezug: 'Studentin', genus: 'f', hint: 'Wem habe ich geliehen? → Dativ feminin', expl: '"leihen" + Dativ. "Studentin" ist feminin → <strong>der</strong>' },
+        { t: 'mc', sentence: 'Die Gäste, ___ wir das Essen serviert haben, waren begeistert.', options: ['denen', 'die', 'deren', 'der'], correct: 0, bezug: 'Gäste', hint: 'Wem haben wir serviert?', expl: '"Gäste" ist Plural. Indirektes Objekt → <strong>denen</strong>' },
+        { t: 'fill', sentence: 'Das Baby, ___ die Mutter ein Lied vorsingt, schläft friedlich ein.', answer: ['dem'], bezug: 'Baby', genus: 'n', hint: 'Wem singt sie vor? → Dativ neutrum', expl: '"vorsingen" + Dativ. "Baby" ist neutrum → <strong>dem</strong>' }
+    ],
+    gen: [
+        { t: 'fill', sentence: 'Der Autor, ___ Bücher Bestseller sind, lebt in Berlin.', answer: ['dessen'], bezug: 'Autor', genus: 'm', hint: 'Wessen Bücher? → Genitiv maskulin', expl: '"Autor" ist maskulin. Besitzverhältnis → Genitiv: <strong>dessen</strong>' },
+        { t: 'fill', sentence: 'Die Schauspielerin, ___ Filme ich liebe, hat einen Oscar gewonnen.', answer: ['deren'], bezug: 'Schauspielerin', genus: 'f', hint: 'Wessen Filme? → Genitiv feminin', expl: '"Schauspielerin" ist feminin. Besitzverhältnis → Genitiv: <strong>deren</strong>' },
+        { t: 'fill', sentence: 'Das Unternehmen, ___ Produkte weltweit bekannt sind, expandiert.', answer: ['dessen'], bezug: 'Unternehmen', genus: 'n', hint: 'Wessen Produkte? → Genitiv neutrum', expl: '"Unternehmen" ist neutrum. Besitzverhältnis → Genitiv: <strong>dessen</strong>' },
+        { t: 'fill', sentence: 'Die Wissenschaftler, ___ Forschung bahnbrechend ist, erhielten den Nobelpreis.', answer: ['deren'], bezug: 'Wissenschaftler', genus: 'pl', hint: 'Wessen Forschung? → Genitiv Plural', expl: '"Wissenschaftler" ist Plural. Besitzverhältnis → Genitiv Plural: <strong>deren</strong>' },
+        { t: 'mc', sentence: 'Der Mann, ___ Auto gestohlen wurde, rief die Polizei.', options: ['dessen', 'dem', 'den', 'der'], correct: 0, bezug: 'Mann', hint: 'Wessen Auto wurde gestohlen?', expl: '"Mann" ist maskulin. Besitzverhältnis → <strong>dessen</strong>' },
+        { t: 'fill', sentence: 'Die Band, ___ neues Album ein Hit ist, geht auf Tournee.', answer: ['deren'], bezug: 'Band', genus: 'f', hint: 'Wessen Album? → Genitiv feminin', expl: '"Band" ist feminin. Besitzverhältnis → <strong>deren</strong>' },
+        { t: 'fill', sentence: 'Das Hotel, ___ Service ausgezeichnet ist, liegt am Strand.', answer: ['dessen'], bezug: 'Hotel', genus: 'n', hint: 'Wessen Service? → Genitiv neutrum', expl: '"Hotel" ist neutrum. Besitzverhältnis → <strong>dessen</strong>' },
+        { t: 'mc', sentence: 'Die Studenten, ___ Arbeiten noch nicht korrigiert sind, müssen warten.', options: ['deren', 'denen', 'dessen', 'die'], correct: 0, bezug: 'Studenten', hint: 'Wessen Arbeiten?', expl: '"Studenten" ist Plural. Besitzverhältnis → <strong>deren</strong>' },
+        { t: 'fill', sentence: 'Der Politiker, ___ Rede kontrovers war, trat zurück.', answer: ['dessen'], bezug: 'Politiker', genus: 'm', hint: 'Wessen Rede? → Genitiv maskulin', expl: '"Politiker" ist maskulin. Besitzverhältnis → <strong>dessen</strong>' },
+        { t: 'fill', sentence: 'Die Stadt, ___ Altstadt unter Denkmalschutz steht, ist sehr sehenswert.', answer: ['deren'], bezug: 'Stadt', genus: 'f', hint: 'Wessen Altstadt? → Genitiv feminin', expl: '"Stadt" ist feminin. Besitzverhältnis → <strong>deren</strong>' },
+        { t: 'mc', sentence: 'Das Kind, ___ Eltern verreist sind, bleibt bei den Großeltern.', options: ['dessen', 'dem', 'das', 'deren'], correct: 0, bezug: 'Kind', hint: 'Wessen Eltern?', expl: '"Kind" ist neutrum. Besitzverhältnis → <strong>dessen</strong>' },
+        { t: 'fill', sentence: 'Die Länder, ___ Wirtschaft wächst, investieren in Bildung.', answer: ['deren'], bezug: 'Länder', genus: 'pl', hint: 'Wessen Wirtschaft? → Genitiv Plural', expl: '"Länder" ist Plural. Besitzverhältnis → <strong>deren</strong>' }
+    ]
+};
+
+// Generate mixed exercises
+function getMixedExercises() {
+    const all = [...exercises.nom, ...exercises.akk, ...exercises.dat, ...exercises.gen];
+    return shuffleArray(all).slice(0, 20);
+}
+
+// Generate master exercises
+function getMasterExercises() {
+    const all = [...exercises.nom, ...exercises.akk, ...exercises.dat, ...exercises.gen];
+    return shuffleArray(all);
+}
+
+function shuffleArray(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+function showTheory() {
+    document.getElementById('theoryModal').classList.add('show');
+}
+
+function hideTheory() {
+    document.getElementById('theoryModal').classList.remove('show');
+}
+
+function startGame(mode) {
+    G.mode = mode;
+    G.idx = 0;
+    G.pts = 0;
+    G.cor = 0;
+    G.inc = 0;
+    G.streak = 0;
+    G.best = 0;
+    G.answered = false;
+    G.hintUsed = false;
+    G.stats = { nom: { c: 0, t: 0 }, akk: { c: 0, t: 0 }, dat: { c: 0, t: 0 }, gen: { c: 0, t: 0 } };
+
+    if (mode === 'mixed') {
+        G.ex = getMixedExercises();
+    } else if (mode === 'master') {
+        G.ex = getMasterExercises();
+    } else {
+        G.ex = shuffleArray([...exercises[mode]]);
+    }
+    
+    G.total = G.ex.length;
+    showScreen('gameScreen');
+    updateStats();
+    loadEx();
+}
+
+function getCategoryFromExercise(ex) {
+    if (exercises.nom.includes(ex)) return 'nom';
+    if (exercises.akk.includes(ex)) return 'akk';
+    if (exercises.dat.includes(ex)) return 'dat';
+    if (exercises.gen.includes(ex)) return 'gen';
+    // For mixed/master mode, determine by answer
+    if (ex.answer) {
+        const ans = ex.answer[0].toLowerCase();
+        if (['dessen', 'deren'].includes(ans)) return 'gen';
+        if (['dem', 'denen'].includes(ans) || (ans === 'der' && ex.genus === 'f')) return 'dat';
+        if (ans === 'den') return 'akk';
+    }
+    return 'nom';
+}
+
+function loadEx() {
+    if (G.idx >= G.ex.length) {
+        endGame();
+        return;
+    }
+
+    G.answered = false;
+    G.hintUsed = false;
+    document.getElementById('hintBtn').disabled = false;
+    document.getElementById('checkBtn').textContent = '✓ Überprüfen';
+
+    const ex = G.ex[G.idx];
+    const cat = getCategoryFromExercise(ex);
+    const catNames = { nom: 'Nominativ', akk: 'Akkusativ', dat: 'Dativ', gen: 'Genitiv' };
+    
+    let html = `<span class="exercise-type ${cat}">${catNames[cat]}</span>`;
+    
+    if (ex.t === 'fill') {
+        const parts = ex.sentence.split('___');
+        html += `
+            <p class="instruction">Setze das richtige Relativpronomen ein:</p>
+            <div class="sentence-section">
+                <div class="sentence-label">Satz mit Lücke</div>
+                <div class="sentence-text">Bezugswort: <span class="bezugswort">${ex.bezug}</span></div>
+            </div>
+            <div class="answer-section">
+                <div class="answer-label">Deine Antwort</div>
+                <div class="input-container">
+                    <span>${parts[0]}</span>
+                    <input type="text" class="input-slot" id="answer0" data-cor='${JSON.stringify(ex.answer)}' autocomplete="off" placeholder="?">
+                    <span>${parts[1]}</span>
+                </div>
+            </div>
+            <div class="explanation-box" id="explanation">
+                <div class="explanation-title">💡 Erklärung</div>
+                <div class="explanation-text">${ex.expl}</div>
+            </div>
+        `;
+    } else if (ex.t === 'mc') {
+        html += `
+            <p class="instruction">Wähle das richtige Relativpronomen:</p>
+            <div class="sentence-section">
+                <div class="sentence-label">Satz</div>
+                <div class="sentence-text">Bezugswort: <span class="bezugswort">${ex.bezug}</span></div>
+                <div class="sentence-text" style="margin-top: 10px;">${ex.sentence.replace('___', '<span class="highlight">______</span>')}</div>
+            </div>
+            <div class="mc-options">
+                ${ex.options.map((opt, i) => `
+                    <div class="mc-option" data-idx="${i}" onclick="selectMC(this, ${i}, ${ex.correct})">
+                        <span class="mc-letter">${String.fromCharCode(65 + i)}</span>
+                        <span>${opt}</span>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="explanation-box" id="explanation">
+                <div class="explanation-title">💡 Erklärung</div>
+                <div class="explanation-text">${ex.expl}</div>
+            </div>
+        `;
+    }
+
+    document.getElementById('exerciseArea').innerHTML = html;
+    
+    // Focus on input if fill type
+    if (ex.t === 'fill') {
+        setTimeout(() => document.getElementById('answer0')?.focus(), 100);
+    }
+    
+    updateStats();
+}
+
+function selectMC(el, idx, correct) {
+    if (G.answered) return;
+    
+    G.answered = true;
+    const ex = G.ex[G.idx];
+    const cat = getCategoryFromExercise(ex);
+    if (G.stats[cat]) G.stats[cat].t++;
+    
+    document.querySelectorAll('.mc-option').forEach(opt => {
+        const optIdx = parseInt(opt.dataset.idx);
+        if (optIdx === correct) {
+            opt.classList.add('correct');
+        } else if (optIdx === idx) {
+            opt.classList.add('incorrect');
+        }
+    });
+    
+    if (idx === correct) {
+        G.cor++;
+        G.streak++;
+        if (G.stats[cat]) G.stats[cat].c++;
+        if (G.streak > G.best) G.best = G.streak;
+        let pts = 10;
+        if (!G.hintUsed) pts += 5;
+        if (G.streak >= 3) pts += G.streak * 2;
+        G.pts += pts;
+        showPts(pts);
+        playSound('correct');
+        updateStats();
+        setTimeout(() => { G.idx++; loadEx(); }, 1000);
+    } else {
+        G.inc++;
+        G.streak = 0;
+        playSound('incorrect');
+        updateStats();
+        document.getElementById('explanation').classList.add('show');
+        document.getElementById('checkBtn').textContent = '➡️ Weiter';
+    }
+}
+
+function showHint() {
+    const ex = G.ex[G.idx];
+    if (!ex || G.hintUsed) return;
+    
+    const hintDiv = document.createElement('div');
+    hintDiv.className = 'hint-box';
+    hintDiv.innerHTML = `💡 <strong>Tipp:</strong> ${ex.hint}`;
+    document.querySelector('.answer-section')?.before(hintDiv);
+    
+    G.hintUsed = true;
+    document.getElementById('hintBtn').disabled = true;
+}
+
+function checkAnswer() {
+    if (G.answered) {
+        G.idx++;
+        loadEx();
+        return;
+    }
+    
+    const ex = G.ex[G.idx];
+    if (!ex || ex.t === 'mc') return;
+    
+    const cat = getCategoryFromExercise(ex);
+    if (G.stats[cat]) G.stats[cat].t++;
+    
+    let allCorrect = true;
+    document.querySelectorAll('.input-slot').forEach(inp => {
+        const cors = JSON.parse(inp.dataset.cor || '[]');
+        const val = inp.value.trim();
+        const ok = cors.some(c => val.toLowerCase() === c.toLowerCase());
+        if (ok) {
+            inp.classList.add('correct');
+        } else {
+            inp.classList.add('incorrect');
+            allCorrect = false;
+            const hint = document.createElement('span');
+            hint.style.cssText = 'color: var(--success); margin-left: 8px; font-weight: 700;';
+            hint.textContent = '→ ' + cors[0];
+            inp.parentNode.insertBefore(hint, inp.nextSibling);
+        }
+        inp.disabled = true;
+    });
+    
+    G.answered = true;
+    
+    if (allCorrect) {
+        G.cor++;
+        G.streak++;
+        if (G.stats[cat]) G.stats[cat].c++;
+        if (G.streak > G.best) G.best = G.streak;
+        let pts = 10;
+        if (!G.hintUsed) pts += 5;
+        if (G.streak >= 3) pts += G.streak * 2;
+        G.pts += pts;
+        showPts(pts);
+        playSound('correct');
+        updateStats();
+        setTimeout(() => { G.idx++; loadEx(); }, 800);
+    } else {
+        G.inc++;
+        G.streak = 0;
+        playSound('incorrect');
+        updateStats();
+        document.getElementById('explanation').classList.add('show');
+        document.getElementById('checkBtn').textContent = '➡️ Weiter';
+    }
+}
+
+function showPts(pts) {
+    const p = document.createElement('div');
+    p.className = 'points-popup';
+    p.textContent = '+' + pts;
+    p.style.cssText = 'left: 50%; top: 40%; transform: translateX(-50%)';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 1000);
+}
+
+function updateStats() {
+    document.getElementById('points').textContent = G.pts;
+    document.getElementById('streak').textContent = G.streak;
+    document.getElementById('correct').textContent = G.cor;
+    document.getElementById('total').textContent = G.cor + G.inc;
+    document.getElementById('streakFire').style.display = G.streak >= 3 ? 'inline-block' : 'none';
+    document.getElementById('progressFill').style.width = (G.idx / G.total * 100) + '%';
+    document.getElementById('exerciseCounter').textContent = `Übung ${G.idx + 1}/${G.total}`;
+}
+
+function endGame() {
+    showScreen('resultScreen');
+    playSound('complete');
+    
+    const total = G.cor + G.inc;
+    const acc = total > 0 ? Math.round(G.cor / total * 100) : 0;
+    
+    document.getElementById('finalPoints').textContent = G.pts;
+    document.getElementById('finalCorrect').textContent = G.cor + '/' + total;
+    document.getElementById('finalStreak').textContent = G.best;
+    document.getElementById('accuracyText').textContent = acc + '%';
+    
+    const circle = document.getElementById('accuracyCircle');
+    setTimeout(() => { circle.style.strokeDashoffset = 377 - (377 * acc / 100); }, 100);
+    
+    const catColors = { nom: '#3b82f6', akk: '#f59e0b', dat: '#10b981', gen: '#8b5cf6' };
+    const catNames = { nom: 'Nominativ', akk: 'Akkusativ', dat: 'Dativ', gen: 'Genitiv' };
+    
+    let catHtml = '<h4>📊 Ergebnisse nach Kasus</h4>';
+    for (let cat in G.stats) {
+        if (G.stats[cat].t > 0) {
+            catHtml += `<div class="cat-result-item">
+                <span class="cat-result-name">
+                    <span class="cat-result-dot" style="background: ${catColors[cat]}"></span>
+                    ${catNames[cat]}
+                </span>
+                <span class="cat-result-score">${G.stats[cat].c}/${G.stats[cat].t}</span>
+            </div>`;
+        }
+    }
+    document.getElementById('categoryResults').innerHTML = catHtml;
+}
+
+function playSound(type) {
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.connect(g);
+        g.connect(ctx.destination);
+        g.gain.value = 0.1;
+        
+        if (type === 'correct') {
+            o.frequency.value = 880;
+            o.start();
+            o.stop(ctx.currentTime + 0.1);
+        } else if (type === 'incorrect') {
+            o.frequency.value = 220;
+            o.start();
+            o.stop(ctx.currentTime + 0.2);
+        } else if (type === 'complete') {
+            o.frequency.value = 523;
+            o.start();
+            setTimeout(() => o.frequency.value = 659, 100);
+            setTimeout(() => o.frequency.value = 784, 200);
+            o.stop(ctx.currentTime + 0.4);
+        }
+    } catch (e) {}
+}
+
+function confirmExit() {
+    if (confirm('Training wirklich beenden?')) goToMenu();
+}
+
+function goToMenu() {
+    showScreen('menuScreen');
+}
+
+function playAgain() {
+    startGame(G.mode);
+}
+
+// Event Listeners
+document.getElementById('theoryModal').addEventListener('click', function(e) {
+    if (e.target === this) hideTheory();
+});
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && document.getElementById('gameScreen').classList.contains('active') && !G.answered) {
+        checkAnswer();
+    }
+});
+</script>
+</body>
+</html>
