@@ -124,6 +124,27 @@
             color: var(--accent3);
         }
         
+        /* Aktuelle Schritt-Anweisung */
+        .current-step-instruction {
+            background: rgba(46, 204, 113, 0.2);
+            border: 3px solid var(--success);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            animation: stepPulse 2s infinite;
+        }
+        .current-step-instruction.nom { border-color: var(--nom-color); background: rgba(52, 152, 219, 0.2); color: var(--nom-color); }
+        .current-step-instruction.dat { border-color: var(--dat-color); background: rgba(155, 89, 182, 0.2); color: var(--dat-color); }
+        .current-step-instruction.akk { border-color: var(--akk-color); background: rgba(231, 76, 60, 0.2); color: var(--akk-color); }
+        
+        @keyframes stepPulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(46, 204, 113, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(46, 204, 113, 0.6); }
+        }
+        
         .answer-section { margin-top: 25px; }
         .answer-label { font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; text-align: center; }
         .answer-slots { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; min-height: 60px; background: var(--primary); border-radius: 15px; padding: 20px; border: 2px dashed var(--primary-light); }
@@ -131,6 +152,10 @@
         .answer-slot.filled { border-color: var(--accent3); background: rgba(52, 152, 219, 0.2); }
         .answer-slot.correct { border-color: var(--success); background: rgba(39, 174, 96, 0.3); animation: correctPulse 0.5s; }
         .answer-slot.wrong { border-color: var(--error); background: rgba(231, 76, 60, 0.3); animation: shake 0.5s; }
+        .answer-slot.active-slot { border-color: var(--success); border-width: 3px; box-shadow: 0 0 15px rgba(46, 204, 113, 0.5); }
+        .answer-slot.active-slot.nom { border-color: var(--nom-color); box-shadow: 0 0 15px rgba(52, 152, 219, 0.5); }
+        .answer-slot.active-slot.dat { border-color: var(--dat-color); box-shadow: 0 0 15px rgba(155, 89, 182, 0.5); }
+        .answer-slot.active-slot.akk { border-color: var(--akk-color); box-shadow: 0 0 15px rgba(231, 76, 60, 0.5); }
         @keyframes correctPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
         .static-word { font-size: 1.1rem; color: var(--text); padding: 8px 5px; }
@@ -150,7 +175,7 @@
             min-width: 70px;
         }
         
-        .pronoun-btn:hover:not(.used) {
+        .pronoun-btn:hover:not(.used):not(.disabled) {
             border-color: var(--hover-color);
             background: #d4edda;
             transform: translateY(-3px);
@@ -167,6 +192,25 @@
             transform: scale(0.95);
             background: #adb5bd;
         }
+        
+        .pronoun-btn.disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            background: #6c757d;
+            color: #adb5bd;
+            transform: scale(0.95);
+        }
+        
+        .pronoun-btn.active-case {
+            box-shadow: 0 0 15px rgba(46, 204, 113, 0.6);
+            animation: buttonGlow 1.5s infinite;
+        }
+        
+        @keyframes buttonGlow {
+            0%, 100% { box-shadow: 0 0 10px rgba(46, 204, 113, 0.4); }
+            50% { box-shadow: 0 0 20px rgba(46, 204, 113, 0.8); }
+        }
+        
         .pronoun-btn .case-hint { 
             font-size: 0.65rem; 
             opacity: 0.7; 
@@ -207,6 +251,20 @@
         .milestone-text { font-size: 1.5rem; color: var(--text); margin-top: 10px; }
         .hint-box { background: rgba(241, 196, 15, 0.1); border: 2px solid var(--gold); border-radius: 12px; padding: 15px; margin-top: 15px; text-align: center; color: var(--gold); }
         .order-hint { background: rgba(155, 89, 182, 0.15); border: 2px solid var(--accent2); color: var(--accent2); }
+        
+        /* Fehler-Feedback */
+        .error-feedback {
+            background: rgba(231, 76, 60, 0.15);
+            border: 2px solid var(--error);
+            border-radius: 12px;
+            padding: 12px 20px;
+            margin-top: 15px;
+            text-align: center;
+            color: var(--error);
+            font-weight: 600;
+            animation: fadeIn 0.3s ease;
+        }
+        
         @media (max-width: 600px) { h1 { font-size: 2rem; } .sentence-text { font-size: 1rem; } .pronoun-btn { padding: 10px 15px; font-size: 0.9rem; } }
     </style>
 </head>
@@ -265,15 +323,15 @@
                     <span class="mode-icon">🌳</span>Profi
                     <span class="mode-desc">Komplexe Sätze</span>
                 </button>
-                <button class="mode-btn" onclick="startGame('all')">
-                    <span class="mode-icon">⭐</span>Meister-Mix
-                    <span class="mode-desc">Alle Sätze gemischt</span>
+                <button class="mode-btn" onclick="startGame('mixed')">
+                    <span class="mode-icon">🎲</span>Gemischt
+                    <span class="mode-desc">Alle Schwierigkeiten</span>
                 </button>
             </div>
         </div>
-        
-        <div class="menu-card leaderboard">
-            <h3 class="leaderboard-title">🏅 Bestenliste</h3>
+
+        <div class="menu-card">
+            <h2 class="mode-title">🏆 Bestenliste</h2>
             <div id="menuLeaderboard"></div>
         </div>
     </div>
@@ -304,9 +362,11 @@
                 </div>
             </div>
             <div class="task-instruction" id="taskInstruction"></div>
+            <div class="current-step-instruction" id="currentStepInstruction"></div>
             <div class="answer-section">
                 <div class="answer-label">Bilde den neuen Satz (achte auf die Wortstellung!)</div>
                 <div class="answer-slots" id="answerSlots"></div>
+                <div id="feedbackArea"></div>
             </div>
             <div class="pronoun-buttons" id="pronounButtons"></div>
             <div class="control-buttons">
@@ -398,104 +458,104 @@ medium: [
 ["Der Lehrer", "gibt", "dem Schüler", "eine Note", "m", "m", "f"],
 ["Die Professorin", "zeigt", "den Studenten", "das Experiment", "f", "p", "n"],
 ["Der Professor", "empfiehlt", "der Studentin", "ein Buch", "m", "f", "n"],
-["Die Direktorin", "überreicht", "dem Absolventen", "das Zeugnis", "f", "m", "n"],
-["Die Sekretärin", "gibt", "dem Besucher", "die Unterlagen", "f", "m", "p"],
-["Der Hausmeister", "zeigt", "den Besuchern", "das Gebäude", "m", "p", "n"],
-["Die Bibliothekarin", "leiht", "dem Studenten", "die Bücher", "f", "m", "p"],
-["Der Trainer", "erklärt", "dem Spieler", "die Taktik", "m", "m", "f"],
-["Die Trainerin", "gibt", "der Mannschaft", "Anweisungen", "f", "f", "p"],
-["Der Arzt", "verschreibt", "dem Patienten", "ein Medikament", "m", "m", "n"],
-["Die Ärztin", "erklärt", "der Patientin", "die Diagnose", "f", "f", "f"],
-["Der Apotheker", "gibt", "dem Kunden", "die Tabletten", "m", "m", "p"],
-["Die Krankenschwester", "bringt", "dem Kranken", "das Essen", "f", "m", "n"],
-["Der Pfleger", "reicht", "der Seniorin", "die Medizin", "m", "f", "f"],
-["Die Therapeutin", "zeigt", "dem Patienten", "die Übungen", "f", "m", "p"],
-["Der Verkäufer", "empfiehlt", "der Kundin", "ein Produkt", "m", "f", "n"],
+["Die Sekretärin", "schickt", "dem Chef", "die Dokumente", "f", "m", "p"],
+["Der Manager", "präsentiert", "den Mitarbeitern", "das Projekt", "m", "p", "n"],
+["Die Ärztin", "verschreibt", "dem Patienten", "ein Medikament", "f", "m", "n"],
+["Der Arzt", "erklärt", "der Patientin", "die Diagnose", "m", "f", "f"],
+["Die Krankenschwester", "bringt", "dem Kranken", "das Frühstück", "f", "m", "n"],
+["Der Pfleger", "reicht", "der Seniorin", "die Tabletten", "m", "f", "p"],
 ["Die Verkäuferin", "zeigt", "dem Kunden", "die Ware", "f", "m", "f"],
-["Der Kellner", "serviert", "den Gästen", "das Menü", "m", "p", "n"],
-["Die Kellnerin", "bringt", "dem Gast", "die Rechnung", "f", "m", "f"],
-["Der Bäcker", "verkauft", "der Kundin", "das Brot", "m", "f", "n"],
-["Die Bäckerin", "gibt", "dem Kind", "ein Brötchen", "f", "n", "n"],
-["Der Metzger", "schneidet", "dem Kunden", "das Fleisch", "m", "m", "n"],
-["Die Floristin", "bindet", "der Braut", "den Strauß", "f", "f", "m"],
-["Der Friseur", "schneidet", "dem Kunden", "die Haare", "m", "m", "p"],
-["Die Friseurin", "färbt", "der Kundin", "die Haare", "f", "f", "p"],
-["Der Optiker", "passt", "dem Kunden", "die Brille", "m", "m", "f"],
-["Die Schneiderin", "näht", "der Kundin", "das Kleid", "f", "f", "n"],
-["Der Schneider", "misst", "dem Herrn", "den Anzug", "m", "m", "m"],
-["Die Kosmetikerin", "macht", "der Kundin", "das Make-up", "f", "f", "n"],
-["Der Mechaniker", "erklärt", "dem Autofahrer", "das Problem", "m", "m", "n"],
-["Die Fahrerin", "zeigt", "dem Fahrgast", "den Weg", "f", "m", "m"],
-["Der Pilot", "wünscht", "den Passagieren", "einen guten Flug", "m", "p", "m"],
-["Die Flugbegleiterin", "reicht", "dem Passagier", "ein Getränk", "f", "m", "n"],
-["Der Kapitän", "erklärt", "den Matrosen", "den Kurs", "m", "p", "m"],
-["Die Stewardess", "bringt", "dem Reisenden", "eine Decke", "f", "m", "f"],
-["Der Schaffner", "zeigt", "dem Fahrgast", "den Platz", "m", "m", "m"],
-["Die Rezeptionistin", "gibt", "dem Gast", "den Zimmerschlüssel", "f", "m", "m"],
-["Der Portier", "trägt", "den Gästen", "das Gepäck", "m", "p", "n"],
-["Die Zimmermädchen", "bringen", "den Gästen", "frische Handtücher", "p", "p", "p"],
-["Der Concierge", "empfiehlt", "dem Touristen", "ein Restaurant", "m", "m", "n"],
-["Die Reiseführerin", "zeigt", "der Gruppe", "die Sehenswürdigkeiten", "f", "f", "p"],
-["Der Guide", "erklärt", "den Besuchern", "die Geschichte", "m", "p", "f"],
-["Die Dolmetscherin", "übersetzt", "dem Geschäftsmann", "den Vertrag", "f", "m", "m"],
-["Der Übersetzer", "erklärt", "der Delegation", "die Dokumente", "m", "f", "p"],
+["Der Verkäufer", "empfiehlt", "der Kundin", "ein Produkt", "m", "f", "n"],
+["Die Kellnerin", "serviert", "den Gästen", "das Menü", "f", "p", "n"],
+["Der Kellner", "bringt", "der Familie", "die Rechnung", "m", "f", "f"],
+["Die Bibliothekarin", "gibt", "dem Studenten", "das Buch", "f", "m", "n"],
+["Der Bibliothekar", "empfiehlt", "der Leserin", "einen Roman", "m", "f", "m"],
+["Die Trainerin", "erklärt", "dem Team", "die Strategie", "f", "n", "f"],
+["Der Trainer", "zeigt", "den Spielern", "die Taktik", "m", "p", "f"],
+["Die Anwältin", "präsentiert", "dem Richter", "die Beweise", "f", "m", "p"],
+["Der Anwalt", "erklärt", "der Mandantin", "das Urteil", "m", "f", "n"],
+["Die Architektin", "zeigt", "dem Bauherrn", "den Plan", "f", "m", "m"],
+["Der Architekt", "präsentiert", "der Bauherrin", "das Modell", "m", "f", "n"],
+["Die Designerin", "schickt", "dem Kunden", "die Entwürfe", "f", "m", "p"],
+["Der Designer", "zeigt", "der Kundin", "die Kollektion", "m", "f", "f"],
+["Die Ingenieurin", "erklärt", "dem Team", "das System", "f", "n", "n"],
+["Der Ingenieur", "präsentiert", "den Kollegen", "die Lösung", "m", "p", "f"],
 ["Die Journalistin", "stellt", "dem Politiker", "eine Frage", "f", "m", "f"],
-["Der Reporter", "zeigt", "den Zuschauern", "die Bilder", "m", "p", "p"],
-["Die Moderatorin", "präsentiert", "dem Publikum", "die Show", "f", "n", "f"],
-["Der Regisseur", "erklärt", "den Schauspielern", "die Szene", "m", "p", "f"],
-["Die Produzentin", "gibt", "dem Team", "das Budget", "f", "n", "n"]
+["Der Journalist", "zeigt", "der Öffentlichkeit", "die Wahrheit", "m", "f", "f"],
+["Die Moderatorin", "gibt", "dem Gewinner", "den Preis", "f", "m", "m"],
+["Der Moderator", "stellt", "den Zuschauern", "die Kandidaten", "m", "p", "p"],
+["Die Pilotin", "erklärt", "den Passagieren", "die Situation", "f", "p", "f"],
+["Der Pilot", "wünscht", "den Fluggästen", "einen guten Flug", "m", "p", "m"],
+["Die Stewardess", "bringt", "dem Passagier", "ein Getränk", "f", "m", "n"],
+["Der Steward", "reicht", "der Passagierin", "eine Decke", "m", "f", "f"],
+["Die Reiseleiterin", "zeigt", "der Gruppe", "die Sehenswürdigkeit", "f", "f", "f"],
+["Der Reiseleiter", "erklärt", "den Touristen", "die Geschichte", "m", "p", "f"],
+["Die Fotografin", "schickt", "dem Brautpaar", "die Bilder", "f", "n", "p"],
+["Der Fotograf", "zeigt", "der Familie", "das Album", "m", "f", "n"],
+["Die Floristin", "bindet", "dem Kunden", "einen Strauß", "f", "m", "m"],
+["Der Florist", "liefert", "der Kundin", "die Blumen", "m", "f", "p"],
+["Die Bäckerin", "verkauft", "dem Kind", "ein Brötchen", "f", "n", "n"],
+["Der Bäcker", "gibt", "der Kundin", "das Brot", "m", "f", "n"],
+["Die Metzgerin", "schneidet", "dem Kunden", "das Fleisch", "f", "m", "n"],
+["Der Metzger", "empfiehlt", "der Kundin", "die Wurst", "m", "f", "f"],
+["Die Friseurin", "schneidet", "dem Kunden", "die Haare", "f", "m", "p"],
+["Der Friseur", "empfiehlt", "der Kundin", "eine Frisur", "m", "f", "f"],
+["Die Kosmetikerin", "zeigt", "der Kundin", "die Produkte", "f", "f", "p"],
+["Der Masseur", "erklärt", "dem Kunden", "die Behandlung", "m", "m", "f"],
+["Die Therapeutin", "gibt", "dem Patienten", "Übungen", "f", "m", "p"],
+["Der Therapeut", "empfiehlt", "der Patientin", "eine Methode", "m", "f", "f"]
 ],
 hard: [
-["Der Anwalt", "überreicht", "dem Richter", "die Beweismittel", "m", "m", "p"],
-["Die Richterin", "verkündet", "dem Angeklagten", "das Urteil", "f", "m", "n"],
-["Der Staatsanwalt", "präsentiert", "der Jury", "den Fall", "m", "f", "m"],
-["Die Verteidigerin", "erklärt", "dem Mandanten", "die Strategie", "f", "m", "f"],
-["Der Notar", "übergibt", "den Erben", "das Testament", "m", "p", "n"],
-["Die Maklerin", "zeigt", "dem Interessenten", "die Immobilie", "f", "m", "f"],
-["Der Finanzberater", "empfiehlt", "der Kundin", "eine Anlage", "m", "f", "f"],
-["Die Steuerberaterin", "erklärt", "dem Unternehmer", "die Abgaben", "f", "m", "p"],
-["Der Architekt", "präsentiert", "den Investoren", "den Entwurf", "m", "p", "m"],
-["Die Ingenieurin", "erklärt", "dem Bauherrn", "die Statik", "f", "m", "f"],
-["Der Projektleiter", "übergibt", "dem Team", "die Aufgaben", "m", "n", "p"],
-["Die Managerin", "teilt", "den Mitarbeitern", "die Neuigkeiten", "f", "p", "p"],
-["Der CEO", "verkündet", "den Aktionären", "die Quartalszahlen", "m", "p", "p"],
-["Die Personalchefin", "überreicht", "dem Bewerber", "den Vertrag", "f", "m", "m"],
-["Der Headhunter", "vermittelt", "dem Unternehmen", "einen Kandidaten", "m", "n", "m"],
-["Die Unternehmensberaterin", "präsentiert", "dem Vorstand", "die Analyse", "f", "m", "f"],
-["Der Wirtschaftsprüfer", "übergibt", "der Geschäftsführung", "den Bericht", "m", "f", "m"],
-["Die Wissenschaftlerin", "erklärt", "dem Komitee", "die Forschungsergebnisse", "f", "n", "p"],
-["Der Forscher", "präsentiert", "den Kollegen", "die Studie", "m", "p", "f"],
-["Die Laborantin", "zeigt", "dem Praktikanten", "die Geräte", "f", "m", "p"],
-["Der Chirurg", "erklärt", "den Angehörigen", "den Eingriff", "m", "p", "m"],
-["Die Spezialistin", "empfiehlt", "dem Patienten", "eine Therapie", "f", "m", "f"],
-["Der Chefarzt", "übergibt", "der Assistenzärztin", "den Fall", "m", "f", "m"],
-["Die Psychologin", "erklärt", "dem Klienten", "die Methode", "f", "m", "f"],
-["Der Psychiater", "verschreibt", "der Patientin", "ein Medikament", "m", "f", "n"],
-["Die Ernährungsberaterin", "erstellt", "dem Sportler", "einen Plan", "f", "m", "m"],
-["Der Physiotherapeut", "zeigt", "der Patientin", "die Übung", "m", "f", "f"],
-["Die Logopädin", "erklärt", "dem Kind", "die Artikulation", "f", "n", "f"],
-["Der Ergotherapeut", "gibt", "dem Patienten", "Hilfsmittel", "m", "m", "p"],
-["Die Hebamme", "erklärt", "den Eltern", "die Geburt", "f", "p", "f"],
-["Der Geburtshelfer", "übergibt", "der Mutter", "das Neugeborene", "m", "f", "n"],
-["Die Kinderärztin", "gibt", "den Eltern", "Ratschläge", "f", "p", "p"],
-["Der Pädagoge", "erklärt", "den Erziehern", "die Methodik", "m", "p", "f"],
-["Die Schulpsychologin", "empfiehlt", "den Lehrern", "Maßnahmen", "f", "p", "p"],
-["Der Bildungsberater", "zeigt", "dem Schüler", "die Optionen", "m", "m", "p"],
-["Die Studienberaterin", "erklärt", "der Abiturientin", "die Möglichkeiten", "f", "f", "p"],
-["Der Karrierecoach", "gibt", "dem Absolventen", "Tipps", "m", "m", "p"],
-["Die Mentorin", "vermittelt", "dem Mentee", "Kontakte", "f", "m", "p"],
-["Der Supervisor", "gibt", "dem Praktikanten", "Feedback", "m", "m", "n"],
-["Die Ausbilderin", "erklärt", "dem Azubi", "die Aufgabe", "f", "m", "f"],
-["Der Meister", "zeigt", "dem Lehrling", "die Technik", "m", "m", "f"],
-["Die Gesellin", "gibt", "dem Anfänger", "Ratschläge", "f", "m", "p"],
-["Der Handwerker", "erklärt", "dem Kunden", "die Reparatur", "m", "m", "f"],
-["Die Technikerin", "zeigt", "dem Benutzer", "die Funktionen", "f", "m", "p"],
-["Der Informatiker", "erklärt", "der Anwenderin", "das Programm", "m", "f", "n"],
-["Die Programmiererin", "präsentiert", "dem Chef", "die Software", "f", "m", "f"],
-["Der Designer", "zeigt", "der Kundin", "den Prototyp", "m", "f", "m"],
-["Die Grafikerin", "übergibt", "dem Auftraggeber", "die Entwürfe", "f", "m", "p"],
-["Der Künstler", "erklärt", "den Besuchern", "das Werk", "m", "p", "n"],
-["Die Kuratorin", "präsentiert", "dem Publikum", "die Ausstellung", "f", "n", "f"]
+["Die Vorstandsvorsitzende", "präsentiert", "den Aktionären", "den Jahresbericht", "f", "p", "m"],
+["Der Geschäftsführer", "erklärt", "dem Aufsichtsrat", "die Strategie", "m", "m", "f"],
+["Die Personalchefin", "überreicht", "dem neuen Mitarbeiter", "den Arbeitsvertrag", "f", "m", "m"],
+["Der Finanzvorstand", "legt", "den Investoren", "die Zahlen", "m", "p", "p"],
+["Die Marketingdirektorin", "zeigt", "dem Vorstand", "die Kampagne", "f", "m", "f"],
+["Der Vertriebsleiter", "präsentiert", "den Kunden", "das neue Produkt", "m", "p", "n"],
+["Die Forschungsleiterin", "erklärt", "dem Gremium", "die Ergebnisse", "f", "n", "p"],
+["Der Entwicklungsleiter", "demonstriert", "den Partnern", "den Prototyp", "m", "p", "m"],
+["Die Qualitätsmanagerin", "übergibt", "dem Prüfer", "die Dokumentation", "f", "m", "f"],
+["Der Produktionsleiter", "zeigt", "den Inspektoren", "die Anlage", "m", "p", "f"],
+["Die Chefredakteurin", "überreicht", "dem Autor", "den Vertrag", "f", "m", "m"],
+["Der Herausgeber", "empfiehlt", "der Autorin", "einen Titel", "m", "f", "m"],
+["Die Kuratorin", "präsentiert", "den Besuchern", "die Ausstellung", "f", "p", "f"],
+["Der Museumsdirektor", "zeigt", "der Delegation", "die Sammlung", "m", "f", "f"],
+["Die Dekanin", "überreicht", "dem Absolventen", "das Diplom", "f", "m", "n"],
+["Der Rektor", "verleiht", "der Wissenschaftlerin", "den Ehrendoktor", "m", "f", "m"],
+["Die Ministerpräsidentin", "übergibt", "dem Bürgermeister", "die Fördermittel", "f", "m", "p"],
+["Der Bundeskanzler", "präsentiert", "den Ministern", "den Entwurf", "m", "p", "m"],
+["Die Botschafterin", "überreicht", "dem Staatsoberhaupt", "das Beglaubigungsschreiben", "f", "n", "n"],
+["Der Konsul", "erklärt", "den Antragstellern", "das Verfahren", "m", "p", "n"],
+["Die Generalstaatsanwältin", "legt", "dem Gericht", "die Anklage", "f", "n", "f"],
+["Der Oberstaatsanwalt", "präsentiert", "den Geschworenen", "die Beweise", "m", "p", "p"],
+["Die Verfassungsrichterin", "erklärt", "den Klägern", "das Urteil", "f", "p", "n"],
+["Der Bundesrichter", "verliest", "den Parteien", "die Entscheidung", "m", "p", "f"],
+["Die Polizeipräsidentin", "übergibt", "dem Beamten", "die Auszeichnung", "f", "m", "f"],
+["Der Feuerwehrchef", "verleiht", "den Rettern", "die Medaille", "m", "p", "f"],
+["Die Klinikdirektorin", "präsentiert", "dem Gesundheitsminister", "das Konzept", "f", "m", "n"],
+["Der Chefarzt", "erklärt", "den Angehörigen", "die Prognose", "m", "p", "f"],
+["Die Pflegedienstleiterin", "übergibt", "dem neuen Personal", "die Dienstpläne", "f", "n", "p"],
+["Der Stationsarzt", "empfiehlt", "den Kollegen", "eine Therapie", "m", "p", "f"],
+["Die Orchesterleiterin", "präsentiert", "dem Publikum", "das Programm", "f", "n", "n"],
+["Der Dirigent", "erklärt", "den Musikern", "die Interpretation", "m", "p", "f"],
+["Die Theaterintendantin", "zeigt", "den Kritikern", "die Inszenierung", "f", "p", "f"],
+["Der Regisseur", "erklärt", "dem Ensemble", "seine Vision", "m", "n", "f"],
+["Die Ballettdirektorin", "übergibt", "der Primaballerina", "die Hauptrolle", "f", "f", "f"],
+["Der Choreograf", "zeigt", "den Tänzern", "die Choreografie", "m", "p", "f"],
+["Die Sportdirektorin", "präsentiert", "den Medien", "den Neuzugang", "f", "p", "m"],
+["Der Vereinspräsident", "überreicht", "dem Kapitän", "den Pokal", "m", "m", "m"],
+["Die Nationaltrainerin", "erklärt", "den Athleten", "den Trainingsplan", "f", "p", "m"],
+["Der Bundestrainer", "zeigt", "der Mannschaft", "die Taktik", "m", "f", "f"],
+["Die Expeditionsleiterin", "erklärt", "dem Team", "die Route", "f", "n", "f"],
+["Der Bergführer", "zeigt", "den Wanderern", "den Weg", "m", "p", "m"],
+["Die Kreuzfahrtdirektorin", "präsentiert", "den Passagieren", "das Programm", "f", "p", "n"],
+["Der Kapitän", "wünscht", "den Gästen", "eine gute Reise", "m", "p", "f"],
+["Die Sternekochöchin", "serviert", "den Gästen", "das Degustationsmenü", "f", "p", "n"],
+["Der Sommelier", "empfiehlt", "dem Gast", "einen Wein", "m", "m", "m"],
+["Die Hotelmanagerin", "überreicht", "dem VIP-Gast", "den Zimmerschlüssel", "f", "m", "m"],
+["Der Concierge", "organisiert", "der Reisegruppe", "den Transfer", "m", "f", "m"],
+["Die Flughafendirektorin", "präsentiert", "den Investoren", "die Ausbaupläne", "f", "p", "p"],
+["Der Bahnhofsvorsteher", "erklärt", "den Reisenden", "die Verspätung", "m", "p", "f"]
 ]
 };
 
@@ -506,35 +566,27 @@ const pronouns = {
 };
 
 const allPronounButtons = [
-    {t: 'er', c: 'nom', case: 'nom'},
-    {t: 'sie', c: 'nom', case: 'nom'},
-    {t: 'es', c: 'nom', case: 'nom'},
-    {t: 'ihm', c: 'dat', case: 'dat'},
-    {t: 'ihr', c: 'dat', case: 'dat'},
-    {t: 'ihnen', c: 'dat', case: 'dat'},
-    {t: 'ihn', c: 'akk', case: 'akk'},
-    {t: 'sie', c: 'akk', case: 'akk'},
-    {t: 'es', c: 'akk', case: 'akk'}
+    {t: 'er', c: 'nom', case: 'nom'}, {t: 'sie', c: 'nom', case: 'nom'}, {t: 'es', c: 'nom', case: 'nom'},
+    {t: 'ihm', c: 'dat', case: 'dat'}, {t: 'ihr', c: 'dat', case: 'dat'}, {t: 'ihnen', c: 'dat', case: 'dat'},
+    {t: 'ihn', c: 'akk', case: 'akk'}, {t: 'sie', c: 'akk', case: 'akk'}, {t: 'es', c: 'akk', case: 'akk'}
 ];
 
 let G = {};
 
-function shuffle(a) { 
-    for (let i = a.length - 1; i > 0; i--) { 
+function shuffle(arr) { 
+    for (let i = arr.length - 1; i > 0; i--) { 
         const j = Math.floor(Math.random() * (i + 1)); 
-        [a[i], a[j]] = [a[j], a[i]]; 
+        [arr[i], arr[j]] = [arr[j], arr[i]]; 
     } 
-    return a; 
+    return arr; 
 }
 
-function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
+function showScreen(id) { 
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
+    document.getElementById(id).classList.add('active'); 
 }
 
-function init() {
-    updateMenuLeaderboard();
-}
+function init() { updateMenuLeaderboard(); }
 
 function startGame(mode) {
     G = {
@@ -553,21 +605,19 @@ function startGame(mode) {
         convertNom: false,
         convertDat: false,
         convertAkk: false,
-        startTime: Date.now(),
-        timer: null
+        currentSlotIndex: 0, // NEU: Aktueller Slot-Index
+        expectedSlotCases: [], // NEU: Erwartete Fälle pro Slot
+        startTime: Date.now()
     };
     
-    let pool = [];
-    if (mode === 'all') {
-        pool = [...sentences.easy, ...sentences.medium, ...sentences.hard];
+    if (mode === 'mixed') {
+        G.remaining = shuffle([...sentences.easy, ...sentences.medium, ...sentences.hard]);
     } else {
-        pool = [...sentences[mode]];
+        G.remaining = shuffle([...sentences[mode]]);
     }
-    G.remaining = shuffle(pool);
     
     showScreen('gameScreen');
     document.getElementById('backBtn').style.display = 'block';
-    
     G.timer = setInterval(() => {
         const s = Math.floor((Date.now() - G.startTime) / 1000);
         document.getElementById('timer').textContent = `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
@@ -579,24 +629,14 @@ function startGame(mode) {
     loadNext();
 }
 
-// WICHTIG: Entscheidung, was umgewandelt wird - mit Fokus auf Akkusativ-Umwandlung
 function decideWhatToConvert() {
-    // Verschiedene Kombinationen mit höherer Gewichtung für Akkusativ-Umwandlung
-    // um die Regel "Akk-Pronomen vor Dativ" zu üben
     const combinations = [
-        // NUR Akkusativ umwandeln (Reihenfolge ändert sich!) - WICHTIG!
-        {nom: false, dat: false, akk: true},
-        {nom: false, dat: false, akk: true},
-        {nom: false, dat: false, akk: true},
-        {nom: true, dat: false, akk: true},
-        {nom: true, dat: false, akk: true},
-        // NUR Dativ umwandeln (Reihenfolge bleibt)
+        {nom: true, dat: false, akk: false},
         {nom: false, dat: true, akk: false},
-        {nom: false, dat: true, akk: false},
+        {nom: false, dat: false, akk: true},
         {nom: true, dat: true, akk: false},
-        // Beide umwandeln (Reihenfolge ändert sich!)
+        {nom: true, dat: false, akk: true},
         {nom: false, dat: true, akk: true},
-        {nom: true, dat: true, akk: true},
         {nom: true, dat: true, akk: true},
     ];
     const choice = combinations[Math.floor(Math.random() * combinations.length)];
@@ -609,6 +649,11 @@ function loadNext() {
     if (G.remaining.length === 0) { endGame(); return; }
     G.current = G.remaining.shift();
     G.selected = [];
+    G.currentSlotIndex = 0;
+    G.expectedSlotCases = [];
+    
+    // Feedback-Bereich leeren
+    document.getElementById('feedbackArea').innerHTML = '';
     
     decideWhatToConvert();
     
@@ -617,8 +662,6 @@ function loadNext() {
     const datPronoun = pronouns.dat[dG];
     const akkPronoun = pronouns.akk[aG];
     
-    // WICHTIG: Korrekte Erwartung basierend auf der Regel
-    // Wenn Akkusativ ein Pronomen wird → Akkusativ VOR Dativ
     G.expected = [];
     
     // Subjekt
@@ -632,9 +675,7 @@ function loadNext() {
     G.expected.push({t: verb, type: 'text', role: 'verb'});
     
     // KERNLOGIK: Wortstellung der Objekte
-    // Regel: Wenn das Akkusativobjekt ein Pronomen ist → Akkusativ VOR Dativ
     if (G.convertAkk) {
-        // Akkusativ wird Pronomen → Akkusativ kommt ZUERST
         G.expected.push({t: akkPronoun, type: 'pronoun', case: 'akk', role: 'akkObj'});
         
         if (G.convertDat) {
@@ -643,7 +684,6 @@ function loadNext() {
             G.expected.push({t: dat, type: 'text', role: 'datObj'});
         }
     } else {
-        // Akkusativ bleibt Nomen → normale Reihenfolge: Dativ vor Akkusativ
         if (G.convertDat) {
             G.expected.push({t: datPronoun, type: 'pronoun', case: 'dat', role: 'datObj'});
         } else {
@@ -652,19 +692,21 @@ function loadNext() {
         G.expected.push({t: akk, type: 'text', role: 'akkObj'});
     }
     
-    G.slotCount = G.expected.filter(e => e.type === 'pronoun').length;
+    // Ermittle die erwarteten Fälle pro Slot (in Reihenfolge)
+    G.expectedSlotCases = G.expected.filter(e => e.type === 'pronoun').map(e => e.case);
+    G.slotCount = G.expectedSlotCases.length;
     
     displaySentence();
     displayTaskInstruction();
     displaySlots();
     displayButtons();
+    updateCurrentStepInstruction();
     updateProgress();
 }
 
 function displaySentence() {
     const [subj, verb, dat, akk] = G.current;
     
-    // Farbige Markierung zeigt nur, WAS umgewandelt werden soll - nicht die Reihenfolge!
     const subjHtml = G.convertNom 
         ? `<span class="subject">${subj}</span>` 
         : `<span class="keep">${subj}</span>`;
@@ -675,7 +717,6 @@ function displaySentence() {
         ? `<span class="akkusativ">${akk}</span>` 
         : `<span class="keep">${akk}</span>`;
     
-    // Original-Satz zeigt IMMER: Subjekt + Verb + Dativ + Akkusativ
     document.getElementById('sentenceText').innerHTML = `${subjHtml} ${verb} ${datHtml} ${akkHtml}.`;
 }
 
@@ -685,11 +726,44 @@ function displayTaskInstruction() {
     if (G.convertDat) parts.push('<span style="color: var(--dat-color)">Dativobjekt</span>');
     if (G.convertAkk) parts.push('<span style="color: var(--akk-color)">Akkusativobjekt</span>');
     
-    // KEIN Hinweis mehr zur Wortstellung! Der Schüler muss selbst entscheiden.
     let instruction = '🎯 Wandle um: ' + parts.join(' + ');
     instruction += '<br><small>Achte auf die richtige Wortstellung!</small>';
     
     document.getElementById('taskInstruction').innerHTML = instruction;
+}
+
+function updateCurrentStepInstruction() {
+    const stepEl = document.getElementById('currentStepInstruction');
+    
+    if (G.currentSlotIndex >= G.slotCount) {
+        stepEl.style.display = 'none';
+        return;
+    }
+    
+    stepEl.style.display = 'block';
+    const currentCase = G.expectedSlotCases[G.currentSlotIndex];
+    
+    // Entferne alte Klassen
+    stepEl.classList.remove('nom', 'dat', 'akk');
+    stepEl.classList.add(currentCase);
+    
+    let caseLabel, emoji;
+    switch (currentCase) {
+        case 'nom':
+            caseLabel = 'das Subjekt-Pronomen';
+            emoji = '👤';
+            break;
+        case 'dat':
+            caseLabel = 'das Dativ-Pronomen';
+            emoji = '🎁';
+            break;
+        case 'akk':
+            caseLabel = 'das Akkusativ-Pronomen';
+            emoji = '🎯';
+            break;
+    }
+    
+    stepEl.innerHTML = `${emoji} Wähle jetzt <strong>${caseLabel}</strong>!`;
 }
 
 function displaySlots() {
@@ -699,7 +773,9 @@ function displaySlots() {
     for (let i = 0; i < G.expected.length; i++) {
         const part = G.expected[i];
         if (part.type === 'pronoun') {
-            html += `<div class="answer-slot" id="slot${slotIndex}" data-expected-case="${part.case}" data-expected-text="${part.t}" onclick="removeSlot(${slotIndex})"></div>`;
+            const isActive = slotIndex === G.currentSlotIndex;
+            const activeClass = isActive ? `active-slot ${part.case}` : '';
+            html += `<div class="answer-slot ${activeClass}" id="slot${slotIndex}" data-slot-index="${slotIndex}" data-expected-case="${part.case}" data-expected-text="${part.t}" onclick="removeSlot(${slotIndex})"></div>`;
             slotIndex++;
         } else {
             html += `<span class="static-word">${part.t}</span>`;
@@ -712,133 +788,176 @@ function displaySlots() {
 
 function displayButtons() {
     let btns = shuffle([...allPronounButtons]);
+    const currentCase = G.expectedSlotCases[G.currentSlotIndex];
     
     document.getElementById('pronounButtons').innerHTML = btns.map((b, i) => {
         const needsLabel = (b.t.toLowerCase() === 'sie' || b.t.toLowerCase() === 'es');
         const label = needsLabel ? `<span class="case-hint">(${b.case === 'nom' ? 'Subj' : b.case === 'akk' ? 'Akk' : 'Dat'})</span>` : '';
-        return `<button class="pronoun-btn ${b.c}" id="btn${i}" data-case="${b.case}" onclick="selectPronoun(${i},'${b.t}','${b.case}')">${b.t}${label}</button>`;
+        
+        // Button ist deaktiviert, wenn er nicht zum aktuellen Fall gehört
+        const isCorrectCase = b.case === currentCase;
+        const disabledClass = !isCorrectCase ? 'disabled' : '';
+        const activeClass = isCorrectCase ? 'active-case' : '';
+        
+        return `<button class="pronoun-btn ${b.c} ${disabledClass} ${activeClass}" id="btn${i}" data-case="${b.case}" data-btn-index="${i}" onclick="selectPronoun(${i},'${b.t}','${b.case}')">${b.t}${label}</button>`;
     }).join('');
 }
 
 function selectPronoun(idx, txt, caseType) {
     const btn = document.getElementById(`btn${idx}`);
-    if (btn.classList.contains('used')) return;
+    if (btn.classList.contains('used') || btn.classList.contains('disabled')) return;
     
-    let slot = -1;
+    // Prüfe, ob der richtige Fall ausgewählt wurde
+    const expectedCase = G.expectedSlotCases[G.currentSlotIndex];
+    const expectedPronouns = G.expected.filter(e => e.type === 'pronoun');
+    const expectedPronoun = expectedPronouns[G.currentSlotIndex];
+    
+    const slot = G.currentSlotIndex;
+    const slotEl = document.getElementById(`slot${slot}`);
+    
+    // Feedback-Bereich leeren
+    document.getElementById('feedbackArea').innerHTML = '';
+    
+    // Prüfe, ob das gewählte Pronomen korrekt ist
+    const textMatch = txt.toLowerCase() === expectedPronoun.t.toLowerCase();
+    const caseMatch = caseType === expectedPronoun.case;
+    
+    if (textMatch && caseMatch) {
+        // RICHTIG!
+        G.selected[slot] = {t: txt, i: idx, case: caseType};
+        btn.classList.add('used');
+        slotEl.textContent = txt;
+        slotEl.classList.add('filled', 'correct');
+        slotEl.classList.remove('active-slot', 'nom', 'dat', 'akk', 'wrong');
+        
+        playSound('correct');
+        
+        // Nächster Slot
+        G.currentSlotIndex++;
+        
+        if (G.currentSlotIndex >= G.slotCount) {
+            // Alle Slots gefüllt - Erfolg!
+            setTimeout(() => finishSentence(), 500);
+        } else {
+            // Nächsten Slot aktivieren
+            updateCurrentStepInstruction();
+            updateSlotHighlights();
+            displayButtons(); // Buttons aktualisieren für neuen Fall
+        }
+    } else {
+        // FALSCH - Rot markieren, aber nicht die Lösung zeigen
+        G.attempts++;
+        slotEl.textContent = txt;
+        slotEl.classList.add('filled', 'wrong');
+        
+        playSound('wrong');
+        
+        // Fehlermeldung anzeigen
+        showErrorFeedback();
+        
+        // Nach kurzer Zeit: rotes Feld leeren, Schüler kann erneut probieren
+        setTimeout(() => {
+            slotEl.textContent = '';
+            slotEl.classList.remove('filled', 'wrong');
+        }, 800);
+    }
+}
+
+function showErrorFeedback() {
+    const feedbackEl = document.getElementById('feedbackArea');
+    feedbackEl.innerHTML = `<div class="error-feedback">❌ Das ist leider nicht richtig. Probiere es noch einmal!</div>`;
+}
+
+function updateSlotHighlights() {
+    // Alle Slots durchgehen und Highlights aktualisieren
     for (let i = 0; i < G.slotCount; i++) {
-        if (!G.selected[i]) { slot = i; break; }
+        const slotEl = document.getElementById(`slot${i}`);
+        if (!slotEl) continue;
+        
+        slotEl.classList.remove('active-slot', 'nom', 'dat', 'akk');
+        
+        if (i === G.currentSlotIndex && !G.selected[i]) {
+            const expectedCase = G.expectedSlotCases[i];
+            slotEl.classList.add('active-slot', expectedCase);
+        }
     }
-    if (slot === -1) return;
+}
+
+function finishSentence() {
+    G.correct++;
+    G.attempts++;
+    G.streak++;
+    if (G.streak > G.bestStreak) G.bestStreak = G.streak;
     
-    G.selected[slot] = {t: txt, i: idx, case: caseType};
-    btn.classList.add('used');
-    const el = document.getElementById(`slot${slot}`);
-    el.textContent = txt;
-    el.classList.add('filled');
+    let pts = 10 + (G.streak >= 3 ? G.streak * 2 : 0) + (G.mode === 'hard' ? 5 : 0);
+    pts += (G.slotCount - 1) * 3;
+    if (G.convertAkk) pts += 5;
     
-    if (G.selected.filter(x => x).length === G.slotCount) {
-        checkAnswer();
-    }
+    G.points += pts;
+    showPopup(pts);
+    updateStats();
+    G.solved.push(G.current);
+    
+    setTimeout(() => {
+        if (G.solved.length % 10 === 0) showMilestone(G.solved.length);
+        else loadNext();
+    }, 800);
 }
 
 function removeSlot(slot) {
+    // Nur den aktuellen Slot kann man leeren (und nur wenn er gefüllt ist)
     const p = G.selected[slot];
     if (!p) return;
+    
+    // Nur erlauben, wenn es der letzte gefüllte Slot ist
+    if (slot !== G.currentSlotIndex - 1) return;
+    
     document.getElementById(`btn${p.i}`).classList.remove('used');
     const el = document.getElementById(`slot${slot}`);
     el.textContent = '';
-    el.classList.remove('filled');
+    el.classList.remove('filled', 'correct', 'wrong');
     G.selected[slot] = null;
+    
+    // Zurück zum vorherigen Slot
+    G.currentSlotIndex = slot;
+    updateCurrentStepInstruction();
+    updateSlotHighlights();
+    displayButtons();
+    
+    // Feedback leeren
+    document.getElementById('feedbackArea').innerHTML = '';
 }
 
 function resetAnswer() { 
-    for (let i = 0; i < G.slotCount; i++) removeSlot(i); 
-}
-
-// WICHTIG: Strikte Prüfung - Reihenfolge UND Pronomen müssen stimmen!
-function checkAnswer() {
-    G.attempts++;
-    
-    const expectedPronouns = G.expected.filter(e => e.type === 'pronoun');
-    
-    let allCorrect = true;
-    let orderError = false;
-    let pronounError = false;
-    
-    for (let i = 0; i < G.slotCount; i++) {
-        const userAnswer = G.selected[i];
-        const expectedAnswer = expectedPronouns[i];
-        
-        const textMatch = userAnswer && userAnswer.t.toLowerCase() === expectedAnswer.t.toLowerCase();
-        const caseMatch = userAnswer && userAnswer.case === expectedAnswer.case;
-        
-        if (!textMatch || !caseMatch) {
-            document.getElementById(`slot${i}`).classList.add('wrong');
-            allCorrect = false;
-            
-            // Prüfen, ob es ein Reihenfolgefehler ist
-            if (userAnswer) {
-                // Ist das eingegebene Pronomen irgendwo in der erwarteten Liste?
-                const foundElsewhere = expectedPronouns.some((exp, j) => 
-                    j !== i && 
-                    userAnswer.t.toLowerCase() === exp.t.toLowerCase() && 
-                    userAnswer.case === exp.case
-                );
-                if (foundElsewhere) {
-                    orderError = true;
-                } else {
-                    pronounError = true;
-                }
-            }
-        } else {
-            document.getElementById(`slot${i}`).classList.add('correct');
+    // Alle gefüllten Slots leeren
+    for (let i = G.slotCount - 1; i >= 0; i--) {
+        if (G.selected[i]) {
+            document.getElementById(`btn${G.selected[i].i}`).classList.remove('used');
+            const el = document.getElementById(`slot${i}`);
+            el.textContent = '';
+            el.classList.remove('filled', 'correct', 'wrong');
+            G.selected[i] = null;
         }
     }
     
-    if (allCorrect) {
-        G.correct++;
-        G.streak++;
-        if (G.streak > G.bestStreak) G.bestStreak = G.streak;
-        let pts = 10 + (G.streak >= 3 ? G.streak * 2 : 0) + (G.mode === 'hard' ? 5 : 0);
-        pts += (G.slotCount - 1) * 3;
-        
-        // Bonus für korrekte Wortstellung bei Akkusativ-Umwandlung
-        if (G.convertAkk) pts += 5;
-        
-        G.points += pts;
-        showPopup(pts);
-        playSound('correct');
-        updateStats();
-        G.solved.push(G.current);
-        setTimeout(() => {
-            if (G.solved.length % 10 === 0) showMilestone(G.solved.length);
-            else loadNext();
-        }, 800);
-    } else {
-        G.streak = 0;
-        playSound('wrong');
-        updateStats();
-        setTimeout(() => showHint(orderError, pronounError), 500);
-    }
+    G.currentSlotIndex = 0;
+    updateCurrentStepInstruction();
+    updateSlotHighlights();
+    displayButtons();
+    
+    // Feedback leeren
+    document.getElementById('feedbackArea').innerHTML = '';
 }
 
-function showHint(orderError = false, pronounError = false) {
+function showHint() {
     document.querySelectorAll('.hint-box').forEach(h => h.remove());
+    document.getElementById('feedbackArea').innerHTML = '';
     
     let correctAnswer = G.expected.map(e => e.t).join(' ') + '.';
     
-    let extraHint = '';
-    
-    // Spezifischer Hinweis je nach Fehlerart
-    if (orderError && G.convertAkk) {
-        extraHint = '<br><span class="order-hint-text" style="color: #9b59b6;">💡 <strong>Tipp zur Wortstellung:</strong> Wenn das Akkusativobjekt ein Pronomen ist, steht es VOR dem Dativ!</span>';
-    } else if (pronounError) {
-        extraHint = '<br><small>💡 Achte auf das Genus (maskulin/feminin/neutral) und den Kasus!</small>';
-    }
-    
     const hint = document.createElement('div');
-    hint.className = 'hint-box' + (orderError ? ' order-hint' : '');
-    hint.innerHTML = `<strong>💡 Richtig:</strong> ${correctAnswer}${extraHint}`;
+    hint.className = 'hint-box';
+    hint.innerHTML = `<strong>💡 Lösung:</strong> ${correctAnswer}`;
     document.querySelector('.answer-section').appendChild(hint);
 }
 
