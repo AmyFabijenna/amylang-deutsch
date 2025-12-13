@@ -364,24 +364,37 @@ $('counter').textContent=`${idx+1}/${exs.length}`;$('progFill').style.width=`${(
 }
 
 function render(){
-cur=exs[idx];checked=false;$('hintBtn').disabled=false;$('checkBtn').disabled=false;
+cur=exs[idx];checked=false;$('hintBtn').disabled=false;
+$('checkBtn').textContent='✅ Prüfen';$('checkBtn').onclick=check;$('checkBtn').disabled=false;
 const con=$('exCon');
 const colors={p1:'#3498db',p2:'#e74c3c',wahl:'#9b59b6',transform:'#27ae60',komplex:'#f39c12'};
 let html=`<div class="exercise"><span class="ex-type" style="background:${colors[cur.c]}">${cur.c.toUpperCase()}</span>`;
 html+=`<p class="ex-instr">${cur.i}</p><div class="ex-task">${cur.o}</div>`;
 html+=`<div id="hintBox"></div><div class="answer-area">`;
+
 if(cur.t==='f'){
-cur.a.forEach((p,i)=>{
-if(Array.isArray(p)){html+=`<input type="text" class="input-slot" data-idx="${i}" style="width:${p[1]}px" autocomplete="off">`}
-else{html+=`<span>${p} </span>`}
-})
-}else if(cur.t==='mc'){
-html+=`<div class="mc-options">`;
-cur.opts.forEach((o,i)=>{html+=`<div class="mc-opt" data-idx="${i}" onclick="selectMC(this)">${o}</div>`});
-html+=`</div>`
+  cur.a.forEach((p,i)=>{
+    if(Array.isArray(p)){html+=`<input type="text" class="input-slot" data-idx="${i}" style="width:${p[1]}px" autocomplete="off">`}
+    else{html+=`<span>${p} </span>`}
+  })
+}else if(cur.t==='m'){
+  html+=`<div class="mc-options">`;
+  cur.op.forEach((o,i)=>{html+=`<div class="mc-opt" data-idx="${i}">${o}</div>`});
+  html+=`</div>`
 }
 html+=`</div><div class="expl" id="explBox">${cur.x}</div></div>`;
 con.innerHTML=html;
+
+// Event-Listener für Eingabefelder (Enter-Taste)
+con.querySelectorAll('.input-slot').forEach(inp=>{
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();check()}})
+});
+
+// Event-Listener für Multiple-Choice
+con.querySelectorAll('.mc-opt').forEach(opt=>{
+  opt.addEventListener('click',function(){selectMC(this)})
+});
+
 const first=con.querySelector('input');if(first)first.focus()
 }
 
@@ -399,38 +412,49 @@ $('hintBtn').disabled=true
 function check(){
 if(checked)return;checked=true;
 let correct=true;
+
 if(cur.t==='f'){
-document.querySelectorAll('.input-slot').forEach(inp=>{
-const i=parseInt(inp.dataset.idx);
-const ans=cur.a[i];
-const val=inp.value.trim();
-const acceptable=ans[0].split('|').map(s=>s.trim().toLowerCase());
-if(acceptable.includes(val.toLowerCase())){inp.classList.add('correct')}
-else{inp.classList.add('incorrect');inp.value=ans[0].split('|')[0];correct=false}
-})
-}else if(cur.t==='mc'){
-const sel=document.querySelector('.mc-opt.selected');
-const corIdx=cur.correct;
-document.querySelectorAll('.mc-opt').forEach((o,i)=>{
-if(i===corIdx)o.classList.add('correct');
-else if(o.classList.contains('selected'))o.classList.add('incorrect')
-});
-if(!sel||parseInt(sel.dataset.idx)!==corIdx)correct=false
+  document.querySelectorAll('.input-slot').forEach(inp=>{
+    const i=parseInt(inp.dataset.idx);
+    const ans=cur.a[i];
+    // ans ist ein Array wie ['abfahrender', 150]
+    if(!Array.isArray(ans))return;
+    const val=inp.value.trim();
+    const acceptable=ans[0].split('|').map(s=>s.trim().toLowerCase());
+    if(acceptable.includes(val.toLowerCase())){inp.classList.add('correct')}
+    else{inp.classList.add('incorrect');inp.value=ans[0].split('|')[0];correct=false}
+  })
+}else if(cur.t==='m'){
+  const sel=document.querySelector('.mc-opt.selected');
+  const corIdx=cur.cor;
+  document.querySelectorAll('.mc-opt').forEach((o,i)=>{
+    if(i===corIdx)o.classList.add('correct');
+    else if(o.classList.contains('selected'))o.classList.add('incorrect')
+  });
+  if(!sel||parseInt(sel.dataset.idx)!==corIdx)correct=false
 }
-$('explBox').classList.add('show');
-if(correct){ok++;streak++;if(streak>maxStreak)maxStreak=streak;const p=10+streak*2;pts+=p;showPts(p);playSound('correct')}
-else{streak=0;playSound('wrong')}
-update();
-$('checkBtn').textContent='➡️ Weiter';$('checkBtn').onclick=next
+
+if(correct){
+  ok++;streak++;if(streak>maxStreak)maxStreak=streak;
+  const p=10+streak*2;pts+=p;showPts(p);playSound('correct');
+  update();
+  // Auto-weiter nach 800ms bei richtiger Antwort
+  setTimeout(()=>{next()},800)
+}else{
+  streak=0;playSound('wrong');
+  $('explBox').classList.add('show');
+  update();
+  $('checkBtn').textContent='➡️ Weiter';$('checkBtn').onclick=next
+}
 }
 
 function next(){
 idx++;
 if(idx>=exs.length){finish()}
-else{$('checkBtn').textContent='✅ Prüfen';$('checkBtn').onclick=check;render();update()}
+else{render();update()}
 }
 
-function skip(){if(!checked){idx++;if(idx>=exs.length)finish();else{render();update()}}}
+function skip(){idx++;if(idx>=exs.length)finish();else{render();update()}}
 
 function finish(){
 $('fPts').textContent=pts;$('fOk').textContent=ok;$('fStreak').textContent=maxStreak;
