@@ -1552,7 +1552,7 @@
             }
             
             grid.innerHTML = articles.map(a => {
-                const displayText = a.empty ? '(kein)' : a.text;
+                const displayText = a.empty ? '—' : a.text;
                 const valueText = a.empty ? '' : a.text;
                 return `<button class="article-btn type-${a.type}${a.empty ? ' empty-article' : ''}" onclick="selectArticle('${valueText}', '${a.type}')">${displayText}</button>`;
             }).join('');
@@ -1604,15 +1604,25 @@
             
             if (gameState.mode === 'indefinite' || gameState.mode === 'negation') {
                 // Randomly decide article types
-                const types = gameState.mode === 'negation' 
+                // Bei Plural keine Negation (kein "keinen Kindern" - unnatürlich, es heißt "keinem Kind")
+                let dativTypes = gameState.mode === 'negation' 
                     ? ['definite', 'indefinite', 'negation']
                     : ['definite', 'indefinite'];
-                dativType = types[Math.floor(Math.random() * types.length)];
+                if (dativGender === 'p') {
+                    dativTypes = dativTypes.filter(t => t !== 'negation');
+                }
+                dativType = dativTypes[Math.floor(Math.random() * dativTypes.length)];
                 
                 // Für den zweiten Slot: wenn der erste Verneinung ist, keine Verneinung erlauben
-                let accTypes = types;
+                // Bei Plural auch keine Negation
+                let accTypes = gameState.mode === 'negation' 
+                    ? ['definite', 'indefinite', 'negation']
+                    : ['definite', 'indefinite'];
                 if (dativType === 'negation') {
-                    accTypes = types.filter(t => t !== 'negation');
+                    accTypes = accTypes.filter(t => t !== 'negation');
+                }
+                if (accGender === 'p') {
+                    accTypes = accTypes.filter(t => t !== 'negation');
                 }
                 accType = accTypes[Math.floor(Math.random() * accTypes.length)];
             }
@@ -1665,7 +1675,7 @@
             if (article === correctAnswer) {
                 // Correct!
                 playSound('correct');
-                slot.textContent = article === '' ? '(kein)' : article;
+                slot.textContent = article === '' ? '—' : article;
                 slot.classList.remove('selected');
                 slot.classList.add('correct', `type-${correctType}`);
                 if (article === '') {
