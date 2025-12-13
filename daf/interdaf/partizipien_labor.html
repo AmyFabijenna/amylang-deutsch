@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Partizipien-Labor</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#1a1a2e;--primary-light:#2d2d4a;--accent:#e67e22;--accent-glow:#f39c12;--success:#2ecc71;--error:#e74c3c;--bg:#0f0f1a;--text:#fff;--muted:#a0a0c0;--gold:#ffd700}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Quicksand',sans-serif;background:linear-gradient(135deg,var(--bg),#1a1a2e,var(--bg));min-height:100vh;color:var(--text)}
+.container{max-width:1000px;margin:0 auto;padding:20px}
+h1{font-family:'Fredoka',sans-serif;font-size:2.5rem;background:linear-gradient(135deg,var(--accent-glow),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;margin-bottom:10px}
+.subtitle{text-align:center;color:var(--muted);margin-bottom:20px}
+.badge{display:inline-block;background:var(--accent);padding:5px 15px;border-radius:20px;font-size:0.8rem;font-weight:700}
+.screen{display:none}.screen.active{display:block}
+.card{background:var(--primary);border-radius:20px;padding:25px;margin-bottom:20px;border:2px solid var(--primary-light)}
+.mode-btn{width:100%;background:var(--primary);border:2px solid var(--accent);border-radius:15px;padding:15px 20px;color:var(--text);font-size:1rem;cursor:pointer;margin-bottom:10px;text-align:left;transition:all 0.3s}
+.mode-btn:hover{transform:translateX(10px);box-shadow:0 5px 20px rgba(230,126,34,0.3)}
+.mode-btn span{font-size:1.3rem;margin-right:10px}
+.stats{display:flex;gap:15px;margin-bottom:20px;flex-wrap:wrap}
+.stat{background:var(--primary);padding:10px 20px;border-radius:12px;text-align:center;min-width:80px}
+.stat-label{font-size:0.7rem;color:var(--muted);text-transform:uppercase}
+.stat-value{font-family:'Fredoka',sans-serif;font-size:1.3rem;color:var(--accent-glow)}
+.progress{background:var(--primary);border-radius:10px;height:14px;margin-bottom:20px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-glow));transition:width 0.4s}
+.exercise{background:var(--primary);border-radius:20px;padding:25px;border:2px solid var(--primary-light)}
+.ex-type{display:inline-block;padding:5px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;color:#fff;margin-bottom:15px}
+.ex-instr{color:var(--muted);margin-bottom:15px}
+.ex-task{background:rgba(0,0,0,0.3);padding:15px;border-radius:12px;margin-bottom:15px;border-left:4px solid var(--muted)}
+.answer-area{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:1.05rem;line-height:2}
+.input-slot{min-width:120px;padding:8px 12px;background:var(--primary-light);border:2px dashed var(--accent);border-radius:8px;color:var(--text);font-family:'Quicksand',sans-serif;font-size:1rem}
+.input-slot:focus{outline:none;border-style:solid;box-shadow:0 0 10px rgba(230,126,34,0.4)}
+.input-slot.correct{border-color:var(--success);background:rgba(46,204,113,0.2);border-style:solid}
+.input-slot.incorrect{border-color:var(--error);background:rgba(231,76,60,0.2);border-style:solid}
+.mc-opt{background:var(--primary-light);border:2px solid var(--primary-light);border-radius:12px;padding:12px 15px;cursor:pointer;margin-bottom:8px;transition:all 0.2s}
+.mc-opt:hover{border-color:var(--accent)}
+.mc-opt.selected{border-color:var(--accent-glow);background:rgba(230,126,34,0.2)}
+.mc-opt.correct{border-color:var(--success);background:rgba(46,204,113,0.2)}
+.mc-opt.incorrect{border-color:var(--error);background:rgba(231,76,60,0.2)}
+.hint{background:rgba(230,126,34,0.15);border:1px solid var(--accent);border-radius:12px;padding:12px;margin-bottom:15px;font-size:0.9rem}
+.expl{background:rgba(46,204,113,0.1);border:1px solid var(--success);border-radius:12px;padding:15px;margin-top:15px;display:none}
+.expl.show{display:block}
+.btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px}
+.btn{background:var(--primary);border:2px solid var(--primary-light);border-radius:12px;padding:10px 20px;color:var(--text);font-family:'Quicksand',sans-serif;font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent-glow));border-color:var(--accent-glow)}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
+.result{text-align:center}
+.result h2{font-family:'Fredoka',sans-serif;font-size:2rem;color:var(--accent-glow);margin-bottom:20px}
+.result-stats{display:flex;justify-content:center;gap:30px;margin-bottom:20px;flex-wrap:wrap}
+.result-stat{text-align:center}
+.result-stat-val{font-family:'Fredoka',sans-serif;font-size:2.5rem;color:var(--accent-glow)}
+.result-stat-lbl{color:var(--muted);font-size:0.85rem}
+.nav-btn{position:fixed;top:15px;width:40px;height:40px;border-radius:50%;background:var(--primary);border:2px solid var(--primary-light);color:var(--text);font-size:1.1rem;cursor:pointer;z-index:100;display:flex;align-items:center;justify-content:center}
+.nav-btn:hover{border-color:var(--accent)}
+#backBtn{left:15px}#soundBtn{right:15px}
+.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+.modal.show{display:flex}
+.modal-content{background:var(--primary);border-radius:20px;padding:25px;max-width:800px;width:100%;max-height:85vh;overflow-y:auto;border:2px solid var(--accent)}
+.th-section{margin-bottom:20px}
+.th-section h3{color:var(--accent-glow);margin-bottom:8px}
+.th-section p{color:var(--muted);line-height:1.6;font-size:0.9rem}
+.th-ex{background:rgba(0,0,0,0.3);padding:12px;border-radius:10px;margin:8px 0;border-left:3px solid var(--accent);font-size:0.9rem}
+.lb-entry{display:flex;align-items:center;padding:8px 12px;background:rgba(0,0,0,0.2);border-radius:8px;margin-bottom:5px;font-size:0.9rem}
+.lb-rank{width:30px;font-family:'Fredoka',sans-serif}
+.lb-name{flex:1}
+.lb-score{font-family:'Fredoka',sans-serif;color:var(--accent-glow)}
+.pts-popup{position:fixed;font-family:'Fredoka',sans-serif;font-size:1.5rem;color:var(--gold);pointer-events:none;animation:floatUp 1s forwards;z-index:1000}
+@keyframes floatUp{from{opacity:1}to{opacity:0;transform:translateY(-50px)}}
+.counter{background:rgba(0,0,0,0.3);padding:6px 12px;border-radius:15px;font-size:0.8rem;color:var(--muted)}
+@media(max-width:600px){h1{font-size:1.8rem}.container{padding:15px}.input-slot{min-width:100px}}
+</style>
+</head>
+<body>
+<button class="nav-btn" id="backBtn" style="display:none">←</button>
+<button class="nav-btn" id="soundBtn">🔊</button>
+<div class="container">
+<header><h1>Partizipien-Labor 🔬</h1><p class="subtitle">Meistere die deutschen Partizipien</p><p style="text-align:center"><span class="badge">C1/C2 · 250+ Übungen</span></p></header>
+<div class="screen active" id="menuScreen">
+<div class="card">
+<h2 style="color:var(--accent-glow);margin-bottom:15px;font-family:'Fredoka'">🎮 Übungsmodus wählen:</h2>
+<button class="mode-btn" onclick="start('p1')"><span>🔵</span>Partizip I (50+ Übungen)</button>
+<button class="mode-btn" onclick="start('p2')"><span>🔴</span>Partizip II (50+ Übungen)</button>
+<button class="mode-btn" onclick="start('wahl')"><span>⚖️</span>Aktiv/Passiv & Zeitbezug (60+ Übungen)</button>
+<button class="mode-btn" onclick="start('transform')"><span>🔄</span>Transformation (50+ Übungen)</button>
+<button class="mode-btn" onclick="start('komplex')"><span>🧩</span>Erweiterte Partizipien (40+ Übungen)</button>
+<button class="mode-btn" onclick="start('master')" style="border-color:var(--gold)"><span>🏆</span>Master-Modus (50 gemischt)</button>
+<div style="text-align:center;margin-top:15px"><button class="btn" onclick="showTheory()">📖 Theorie</button></div>
+</div>
+<div class="card"><h2 style="color:var(--accent-glow);margin-bottom:15px;font-family:'Fredoka'">🏅 Bestenliste</h2><div id="menuLB"><p style="color:var(--muted);text-align:center">Noch keine Einträge</p></div></div>
+</div>
+<div class="screen" id="gameScreen">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:10px">
+<div class="stats">
+<div class="stat"><div class="stat-label">Punkte</div><div class="stat-value" id="pts">0</div></div>
+<div class="stat"><div class="stat-label">Serie</div><div class="stat-value" id="streak">0</div></div>
+<div class="stat"><div class="stat-label">Richtig</div><div class="stat-value"><span id="ok">0</span>/<span id="tot">0</span></div></div>
+</div>
+<div class="counter" id="counter">1/30</div>
+</div>
+<div class="progress"><div class="progress-fill" id="progFill"></div></div>
+<div id="exCon"></div>
+<div class="btns">
+<button class="btn" id="hintBtn" onclick="showHint()">💡 Tipp</button>
+<button class="btn" onclick="skip()">⏭️ Skip</button>
+<button class="btn primary" id="checkBtn" onclick="check()">✅ Prüfen</button>
+</div>
+</div>
+<div class="screen" id="resultScreen">
+<div class="card result">
+<h2>🎉 Geschafft!</h2>
+<div class="result-stats">
+<div class="result-stat"><div class="result-stat-val" id="fPts">0</div><div class="result-stat-lbl">Punkte</div></div>
+<div class="result-stat"><div class="result-stat-val" id="fOk">0</div><div class="result-stat-lbl">Richtig</div></div>
+<div class="result-stat"><div class="result-stat-val" id="fStreak">0</div><div class="result-stat-lbl">Beste Serie</div></div>
+</div>
+<input type="text" class="input-slot" id="pName" placeholder="Dein Name" maxlength="20" style="width:200px;text-align:center;margin-bottom:10px">
+<button class="btn primary" onclick="saveScore()">💾 Speichern</button>
+<div id="resLB" style="margin-top:20px"></div>
+<div class="btns" style="margin-top:20px">
+<button class="btn primary" onclick="again()">🔄 Nochmal</button>
+<button class="btn" onclick="goMenu()">🏠 Menü</button>
+</div>
+</div>
+</div>
+</div>
+<div class="modal" id="theoryModal">
+<div class="modal-content">
+<h2 style="color:var(--accent-glow);font-family:'Fredoka';margin-bottom:20px">📖 Partizipien - Theorie</h2>
+<div class="th-section"><h3>1. Partizip I</h3><p><b>Bildung:</b> Infinitiv + d + Adjektivendung</p><div class="th-ex">lachen → lachend → der lachende Mann</div><p><b>Bedeutung:</b> Aktiv, gleichzeitig</p></div>
+<div class="th-section"><h3>2. Partizip II</h3><p><b>Regelmäßig:</b> ge- + Stamm + t | <b>Unregelmäßig:</b> ge- + Stamm + en</p><div class="th-ex">kochen → gekocht → das gekochte Essen</div><p><b>Bedeutung:</b> Meist passiv, vorzeitig</p></div>
+<div class="th-section"><h3>3. Entscheidungshilfe</h3><p>Tut das Nomen selbst etwas → <b>P1</b><br>Wird etwas mit dem Nomen gemacht → <b>P2</b></p></div>
+<div style="text-align:center;margin-top:20px"><button class="btn primary" onclick="hideTheory()">Verstanden ✓</button></div>
+</div>
+</div>
+<script>
+const E={
+p1:[
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Der Zug, der abfährt',a:['ein',['abfahrender',150],'Zug'],h:'abfahren+d+er',x:'<b>abfahrender</b> Zug'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Ein Student, der lernt',a:['ein',['lernender',140],'Student'],h:'lernen+d+er',x:'<b>lernender</b> Student'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Kinder, die lachen',a:[['lachende',130],'Kinder'],h:'lachen+d+e',x:'<b>lachende</b> Kinder'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Ein Telefon, das klingelt',a:['ein',['klingelndes',150],'Telefon'],h:'klingeln+d+es',x:'<b>klingelndes</b> Telefon'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Wolken, die ziehen',a:[['ziehende',130],'Wolken'],h:'ziehen+d+e',x:'<b>ziehende</b> Wolken'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Eine Pflanze, die wächst',a:['eine',['wachsende',150],'Pflanze'],h:'wachsen+d+e',x:'<b>wachsende</b> Pflanze'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Ein Berg, der raucht',a:['ein',['rauchender',150],'Berg'],h:'rauchen+d+er',x:'<b>rauchender</b> Berg'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Tränen, die fließen',a:[['fließende',130],'Tränen'],h:'fließen+d+e',x:'<b>fließende</b> Tränen'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Ein Gedanke, der quält',a:['ein',['quälender',140],'Gedanke'],h:'quälen+d+er',x:'<b>quälender</b> Gedanke'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Eine Flamme, die lodert',a:['eine',['lodernde',140],'Flamme'],h:'lodern+d+e',x:'<b>lodernde</b> Flamme'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Schatten, die wandern',a:[['wandernde',140],'Schatten'],h:'wandern+d+e',x:'<b>wandernde</b> Schatten'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Ein Herz, das pocht',a:['ein',['pochendes',140],'Herz'],h:'pochen+d+es',x:'<b>pochendes</b> Herz'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Eine Erinnerung, die verblasst',a:['eine',['verblassende',160],'Erinnerung'],h:'verblassen+d+e',x:'<b>verblassende</b> Erinnerung'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Ein Geheimnis, das lockt',a:['ein',['lockendes',140],'Geheimnis'],h:'locken+d+es',x:'<b>lockendes</b> Geheimnis'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Zweifel, die nagen',a:[['nagende',130],'Zweifel'],h:'nagen+d+e',x:'<b>nagende</b> Zweifel'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Eine Sehnsucht, die brennt',a:['eine',['brennende',150],'Sehnsucht'],h:'brennen+d+e',x:'<b>brennende</b> Sehnsucht'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Eine Melodie, die verzaubert',a:['eine',['verzaubernde',160],'Melodie'],h:'verzaubern+d+e',x:'<b>verzaubernde</b> Melodie'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Ein Wind, der heult',a:['ein',['heulender',140],'Wind'],h:'heulen+d+er',x:'<b>heulender</b> Wind'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Wellen, die rauschen',a:[['rauschende',140],'Wellen'],h:'rauschen+d+e',x:'<b>rauschende</b> Wellen'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Ein Feuer, das knistert',a:['ein',['knisterndes',150],'Feuer'],h:'knistern+d+es',x:'<b>knisterndes</b> Feuer'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Eine Stimme, die flüstert',a:['eine',['flüsternde',150],'Stimme'],h:'flüstern+d+e',x:'<b>flüsternde</b> Stimme'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Ein Blick, der durchdringt',a:['ein',['durchdringender',180],'Blick'],h:'durchdringen+d+er',x:'<b>durchdringender</b> Blick'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Worte, die verletzen',a:[['verletzende',150],'Worte'],h:'verletzen+d+e',x:'<b>verletzende</b> Worte'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Eine Zeit, die heilt',a:['eine',['heilende',130],'Zeit'],h:'heilen+d+e',x:'<b>heilende</b> Zeit'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Sterne, die funkeln',a:[['funkelnde',140],'Sterne'],h:'funkeln+d+e',x:'<b>funkelnde</b> Sterne'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Ein Bach, der murmelt',a:['ein',['murmelnder',150],'Bach'],h:'murmeln+d+er',x:'<b>murmelnder</b> Bach'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Gedanken, die kreisen',a:[['kreisende',140],'Gedanken'],h:'kreisen+d+e',x:'<b>kreisende</b> Gedanken'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Ein Motor, der brummt',a:['ein',['brummender',150],'Motor'],h:'brummen+d+er',x:'<b>brummender</b> Motor'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Eine Glocke, die läutet',a:['eine',['läutende',140],'Glocke'],h:'läuten+d+e',x:'<b>läutende</b> Glocke'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Eine Maschine, die rattert',a:['eine',['ratternde',140],'Maschine'],h:'rattern+d+e',x:'<b>ratternde</b> Maschine'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Ein weinendes Kind',a:['ein',['weinendes',140],'Kind'],h:'weinen+d+es',x:'<b>weinendes</b> Kind'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Eine sinkende Sonne',a:['eine',['sinkende',130],'Sonne'],h:'sinken+d+e',x:'<b>sinkende</b> Sonne'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Ein leuchtender Stern',a:['ein',['leuchtender',150],'Stern'],h:'leuchten+d+er',x:'<b>leuchtender</b> Stern'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Ein singender Vogel',a:['ein',['singender',140],'Vogel'],h:'singen+d+er',x:'<b>singender</b> Vogel'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Eine strahlende Braut',a:['eine',['strahlende',140],'Braut'],h:'strahlen+d+e',x:'<b>strahlende</b> Braut'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Ein hoffender Mensch',a:['ein',['hoffender',140],'Mensch'],h:'hoffen+d+er',x:'<b>hoffender</b> Mensch'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Ein liebender Vater',a:['ein',['liebender',140],'Vater'],h:'lieben+d+er',x:'<b>liebender</b> Vater'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Ein lachender Clown',a:['ein',['lachender',140],'Clown'],h:'lachen+d+er',x:'<b>lachender</b> Clown'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Ein zweifelnder Geist',a:['ein',['zweifelnder',150],'Geist'],h:'zweifeln+d+er',x:'<b>zweifelnder</b> Geist'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Eine wachsende Angst',a:['eine',['wachsende',150],'Angst'],h:'wachsen+d+e',x:'<b>wachsende</b> Angst'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Ein brennender Ehrgeiz',a:['ein',['brennender',150],'Ehrgeiz'],h:'brennen+d+er',x:'<b>brennender</b> Ehrgeiz'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Ein erwachender Mut',a:['ein',['erwachender',150],'Mut'],h:'erwachen+d+er',x:'<b>erwachender</b> Mut'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Eine schwindende Macht',a:['eine',['schwindende',160],'Macht'],h:'schwinden+d+e',x:'<b>schwindende</b> Macht'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Ein suchender Blick',a:['ein',['suchender',140],'Blick'],h:'suchen+d+er',x:'<b>suchender</b> Blick'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Eine wachsende Erkenntnis',a:['eine',['wachsende',150],'Erkenntnis'],h:'wachsen+d+e',x:'<b>wachsende</b> Erkenntnis'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Ein vergehender Moment',a:['ein',['vergehender',150],'Moment'],h:'vergehen+d+er',x:'<b>vergehender</b> Moment'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Ein schmelzender Schneemann',a:['ein',['schmelzender',160],'Schneemann'],h:'schmelzen+d+er',x:'<b>schmelzender</b> Schneemann'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Regentropfen, die prasseln',a:[['prasselnde',150],'Regentropfen'],h:'prasseln+d+e',x:'<b>prasselnde</b> Regentropfen'},
+{t:'f',c:'p1',i:'Partizip I bilden:',o:'Ein ringender Kämpfer',a:['ein',['ringender',140],'Kämpfer'],h:'ringen+d+er',x:'<b>ringender</b> Kämpfer'}
+],
+p2:[
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein Dokument, das unterschrieben wurde',a:['ein',['unterschriebenes',180],'Dokument'],h:'unterschreiben→unterschrieben',x:'<b>unterschriebenes</b> Dokument'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Wäsche, die gewaschen wurde',a:[['gewaschene',150],'Wäsche'],h:'waschen→gewaschen',x:'<b>gewaschene</b> Wäsche'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein Gericht, das serviert wurde',a:['ein',['serviertes',140],'Gericht'],h:'servieren→serviert',x:'<b>serviertes</b> Gericht'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Straßen, die blockiert wurden',a:[['blockierte',140],'Straßen'],h:'blockieren→blockiert',x:'<b>blockierte</b> Straßen'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein Problem, das gelöst wurde',a:['ein',['gelöstes',130],'Problem'],h:'lösen→gelöst',x:'<b>gelöstes</b> Problem'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Eine Nachricht, die empfangen wurde',a:['eine',['empfangene',160],'Nachricht'],h:'empfangen→empfangen',x:'<b>empfangene</b> Nachricht'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein Patient, der behandelt wurde',a:['ein',['behandelter',150],'Patient'],h:'behandeln→behandelt',x:'<b>behandelter</b> Patient'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Blumen, die gepflanzt wurden',a:[['gepflanzte',140],'Blumen'],h:'pflanzen→gepflanzt',x:'<b>gepflanzte</b> Blumen'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein Traum, der zerplatzt ist',a:['ein',['zerplatzter',140],'Traum'],h:'zerplatzen→zerplatzt',x:'<b>zerplatzter</b> Traum'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Hoffnungen, die enttäuscht wurden',a:[['enttäuschte',150],'Hoffnungen'],h:'enttäuschen→enttäuscht',x:'<b>enttäuschte</b> Hoffnungen'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein Vorhang, der gelüftet wurde',a:['ein',['gelüfteter',140],'Vorhang'],h:'lüften→gelüftet',x:'<b>gelüfteter</b> Vorhang'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Geheimnisse, die preisgegeben wurden',a:[['preisgegebene',170],'Geheimnisse'],h:'preisgeben→preisgegeben',x:'<b>preisgegebene</b> Geheimnisse'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein Ritual, das vollzogen wurde',a:['ein',['vollzogenes',150],'Ritual'],h:'vollziehen→vollzogen',x:'<b>vollzogenes</b> Ritual'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Vorurteile, die überwunden wurden',a:[['überwundene',160],'Vorurteile'],h:'überwinden→überwunden',x:'<b>überwundene</b> Vorurteile'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein Kompromiss, der geschlossen wurde',a:['ein',['geschlossener',170],'Kompromiss'],h:'schließen→geschlossen',x:'<b>geschlossener</b> Kompromiss'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Illusionen, die zerstört wurden',a:[['zerstörte',140],'Illusionen'],h:'zerstören→zerstört',x:'<b>zerstörte</b> Illusionen'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein Schweigen, das gebrochen wurde',a:['ein',['gebrochenes',160],'Schweigen'],h:'brechen→gebrochen',x:'<b>gebrochenes</b> Schweigen'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Wunden, die geheilt wurden',a:[['geheilte',130],'Wunden'],h:'heilen→geheilt',x:'<b>geheilte</b> Wunden'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Grenzen, die überschritten wurden',a:[['überschrittene',170],'Grenzen'],h:'überschreiten→überschritten',x:'<b>überschrittene</b> Grenzen'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein Rätsel, das entschlüsselt wurde',a:['ein',['entschlüsseltes',170],'Rätsel'],h:'entschlüsseln→entschlüsselt',x:'<b>entschlüsseltes</b> Rätsel'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Traditionen, die bewahrt wurden',a:[['bewahrte',130],'Traditionen'],h:'bewahren→bewahrt',x:'<b>bewahrte</b> Traditionen'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein Weg, der eingeschlagen wurde',a:['ein',['eingeschlagener',180],'Weg'],h:'einschlagen→eingeschlagen',x:'<b>eingeschlagener</b> Weg'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein Buch, das gelesen wurde',a:['ein',['gelesenes',140],'Buch'],h:'lesen→gelesen',x:'<b>gelesenes</b> Buch'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Worte, die gesprochen wurden',a:[['gesprochene',160],'Worte'],h:'sprechen→gesprochen',x:'<b>gesprochene</b> Worte'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein Brief, der geschrieben wurde',a:['ein',['geschriebener',160],'Brief'],h:'schreiben→geschrieben',x:'<b>geschriebener</b> Brief'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Gefühle, die verdrängt wurden',a:[['verdrängte',140],'Gefühle'],h:'verdrängen→verdrängt',x:'<b>verdrängte</b> Gefühle'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein Haus, das erbaut wurde',a:['ein',['erbautes',130],'Haus'],h:'erbauen→erbaut',x:'<b>erbautes</b> Haus'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein Vertrag, der unterschrieben wurde',a:['ein',['unterschriebener',180],'Vertrag'],h:'unterschreiben→unterschrieben',x:'<b>unterschriebener</b> Vertrag'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein Kuchen, der gebacken wurde',a:['ein',['gebackener',150],'Kuchen'],h:'backen→gebacken',x:'<b>gebackener</b> Kuchen'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ziele, die erreicht wurden',a:[['erreichte',130],'Ziele'],h:'erreichen→erreicht',x:'<b>erreichte</b> Ziele'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein bestandener Test',a:['ein',['bestandener',150],'Test'],h:'bestehen→bestanden',x:'<b>bestandener</b> Test'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Gebrochenes Glas',a:[['gebrochenes',150],'Glas'],h:'brechen→gebrochen',x:'<b>gebrochenes</b> Glas'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein verschlossener Raum',a:['ein',['verschlossener',160],'Raum'],h:'verschließen→verschlossen',x:'<b>verschlossener</b> Raum'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Verdorbenes Essen',a:[['verdorbenes',150],'Essen'],h:'verderben→verdorben',x:'<b>verdorbenes</b> Essen'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein gefasster Entschluss',a:['ein',['gefasster',140],'Entschluss'],h:'fassen→gefasst',x:'<b>gefasster</b> Entschluss'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein gebrochenes Versprechen',a:['ein',['gebrochenes',160],'Versprechen'],h:'brechen→gebrochen',x:'<b>gebrochenes</b> Versprechen'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein verletzter Stolz',a:['ein',['verletzter',140],'Stolz'],h:'verletzen→verletzt',x:'<b>verletzter</b> Stolz'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Eine erworbene Weisheit',a:['eine',['erworbene',150],'Weisheit'],h:'erwerben→erworben',x:'<b>erworbene</b> Weisheit'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein erfülltes Leben',a:['ein',['erfülltes',140],'Leben'],h:'erfüllen→erfüllt',x:'<b>erfülltes</b> Leben'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein getröstetes Kind',a:['ein',['getröstetes',150],'Kind'],h:'trösten→getröstet',x:'<b>getröstetes</b> Kind'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein enttäuschter Schüler',a:['ein',['enttäuschter',160],'Schüler'],h:'enttäuschen→enttäuscht',x:'<b>enttäuschter</b> Schüler'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Eine zerbrochene Freundschaft',a:['eine',['zerbrochene',160],'Freundschaft'],h:'zerbrechen→zerbrochen',x:'<b>zerbrochene</b> Freundschaft'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ketten, die gesprengt wurden',a:[['gesprengte',140],'Ketten'],h:'sprengen→gesprengt',x:'<b>gesprengte</b> Ketten'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein gelesenes Buch',a:['ein',['gelesenes',140],'Buch'],h:'lesen→gelesen',x:'<b>gelesenes</b> Buch'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Eine geheilte Wunde',a:['eine',['geheilte',130],'Wunde'],h:'heilen→geheilt',x:'<b>geheilte</b> Wunde'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein gerettetes Opfer',a:['ein',['gerettetes',140],'Opfer'],h:'retten→gerettet',x:'<b>gerettetes</b> Opfer'},
+{t:'f',c:'p2',i:'Partizip II bilden:',o:'Ein befreites Volk',a:['ein',['befreites',140],'Volk'],h:'befreien→befreit',x:'<b>befreites</b> Volk'}
+],
+wahl:[
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'die aufgeräumte Wohnung',op:['Aktiv - räumt selbst auf','Passiv - wurde aufgeräumt'],cor:1,h:'Kann eine Wohnung aufräumen?',x:'Wurde aufgeräumt → <b>Passiv</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'der schlafende Hund',op:['Aktiv - schläft selbst','Passiv - wird geschlafen'],cor:0,h:'Schläft der Hund selbst?',x:'Schläft selbst → <b>Aktiv</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'das geschlossene Geschäft',op:['Aktiv','Passiv - wurde geschlossen'],cor:1,h:'Schließt sich das Geschäft selbst?',x:'Wurde geschlossen → <b>Passiv</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'die lernenden Studenten',op:['Aktiv - lernen selbst','Passiv'],cor:0,h:'Lernen sie selbst?',x:'Lernen selbst → <b>Aktiv</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'der verlorene Schlüssel',op:['Aktiv','Passiv - wurde verloren'],cor:1,h:'Verliert sich ein Schlüssel selbst?',x:'Wurde verloren → <b>Passiv</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'die blühenden Blumen',op:['Aktiv - blühen selbst','Passiv'],cor:0,h:'Blühen sie von selbst?',x:'Blühen selbst → <b>Aktiv</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'das zerstörte Gebäude',op:['Aktiv','Passiv - wurde zerstört'],cor:1,h:'Zerstört sich ein Gebäude selbst?',x:'Wurde zerstört → <b>Passiv</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'die ankommenden Gäste',op:['Aktiv - kommen selbst an','Passiv'],cor:0,h:'Kommen sie selbst?',x:'Kommen selbst → <b>Aktiv</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'das verfallende Schloss',op:['Aktiv - verfällt selbst','Passiv'],cor:0,h:'Verfällt es von selbst?',x:'Verfällt selbst → <b>Aktiv</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'der verschlossene Charakter',op:['Aktiv','Passiv - ist verschlossen'],cor:1,h:'Verschließt er sich selbst?',x:'Ist verschlossen → <b>Passiv</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'die wachsende Ungeduld',op:['Aktiv - wächst selbst','Passiv'],cor:0,h:'Wächst sie von selbst?',x:'Wächst selbst → <b>Aktiv</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'das vollendete Kunstwerk',op:['Aktiv','Passiv - wurde vollendet'],cor:1,h:'Vollendet sich ein Werk selbst?',x:'Wurde vollendet → <b>Passiv</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'der schwankende Politiker',op:['Aktiv - schwankt selbst','Passiv'],cor:0,h:'Schwankt er selbst?',x:'Schwankt selbst → <b>Aktiv</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'die erloschene Hoffnung',op:['Aktiv','Passiv - ist erloschen'],cor:1,h:'Erlischt die Hoffnung?',x:'Ist erloschen → <b>Passiv/Zustand</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'der nachdenkende Philosoph',op:['Aktiv - denkt selbst nach','Passiv'],cor:0,h:'Denkt er selbst?',x:'Denkt selbst → <b>Aktiv</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'das zerbrochene Vertrauen',op:['Aktiv','Passiv - wurde zerbrochen'],cor:1,h:'Zerbricht Vertrauen von selbst?',x:'Wurde zerbrochen → <b>Passiv</b>'},
+{t:'m',c:'wahl',i:'Zeitbezug?',o:'der sinkende Dampfer',op:['Gleichzeitig - sinkt gerade','Vorzeitig - bereits gesunken'],cor:0,h:'P1 = gleichzeitig',x:'Sinkt gerade → <b>Gleichzeitig</b>'},
+{t:'m',c:'wahl',i:'Zeitbezug?',o:'die versunkene Stadt',op:['Gleichzeitig','Vorzeitig - bereits versunken'],cor:1,h:'P2 = vorzeitig',x:'Bereits versunken → <b>Vorzeitig</b>'},
+{t:'m',c:'wahl',i:'Zeitbezug?',o:'das brennende Gebäude',op:['Gleichzeitig - brennt gerade','Vorzeitig'],cor:0,h:'P1 = gleichzeitig',x:'Brennt gerade → <b>Gleichzeitig</b>'},
+{t:'m',c:'wahl',i:'Zeitbezug?',o:'der verbrannte Wald',op:['Gleichzeitig','Vorzeitig - bereits verbrannt'],cor:1,h:'P2 = vorzeitig',x:'Bereits verbrannt → <b>Vorzeitig</b>'},
+{t:'m',c:'wahl',i:'Zeitbezug?',o:'die steigenden Preise',op:['Gleichzeitig - steigen gerade','Vorzeitig'],cor:0,h:'P1 = gleichzeitig',x:'Steigen gerade → <b>Gleichzeitig</b>'},
+{t:'m',c:'wahl',i:'Zeitbezug?',o:'die gestiegenen Kosten',op:['Gleichzeitig','Vorzeitig - bereits gestiegen'],cor:1,h:'P2 = vorzeitig',x:'Bereits gestiegen → <b>Vorzeitig</b>'},
+{t:'m',c:'wahl',i:'Zeitbezug?',o:'der wachsende Baum',op:['Gleichzeitig - wächst gerade','Vorzeitig'],cor:0,h:'P1 = gleichzeitig',x:'Wächst gerade → <b>Gleichzeitig</b>'},
+{t:'m',c:'wahl',i:'Zeitbezug?',o:'die gewachsene Pflanze',op:['Gleichzeitig','Vorzeitig - bereits gewachsen'],cor:1,h:'P2 = vorzeitig',x:'Bereits gewachsen → <b>Vorzeitig</b>'},
+{t:'m',c:'wahl',i:'Bedeutung?',o:'"brennendes Haus" vs. "verbranntes Haus"',op:['brennend = im Feuer; verbrannt = abgebrannt','Gleiche Bedeutung'],cor:0,h:'P1 = Prozess, P2 = Resultat',x:'<b>brennend</b> = im Feuer, <b>verbrannt</b> = abgebrannt'},
+{t:'m',c:'wahl',i:'Bedeutung?',o:'"liebender Mensch" vs. "geliebter Mensch"',op:['liebend = er liebt; geliebt = er wird geliebt','Gleiche Bedeutung'],cor:0,h:'P1 = aktiv, P2 = passiv',x:'<b>liebend</b> = liebt selbst, <b>geliebt</b> = wird geliebt'},
+{t:'m',c:'wahl',i:'Bedeutung?',o:'"sterbende Kultur" vs. "gestorbene Kultur"',op:['sterbend = Prozess; gestorben = bereits tot','Beide = nicht existent'],cor:0,h:'P1 = Prozess, P2 = abgeschlossen',x:'<b>sterbend</b> = noch am Leben, <b>gestorben</b> = tot'},
+{t:'m',c:'wahl',i:'Bedeutung?',o:'"schreibender Dichter" vs. "geschriebenes Gedicht"',op:['Dichter schreibt aktiv; Gedicht wurde geschrieben','Beide = Schreiben'],cor:0,h:'Wer handelt?',x:'<b>schreibend</b> = aktiv, <b>geschrieben</b> = Resultat'},
+{t:'m',c:'wahl',i:'Bedeutung?',o:'"blühende Blume" vs. "verblühte Blume"',op:['blühend = gerade; verblüht = aufgehört','Gleiche Bedeutung'],cor:0,h:'P1 = Prozess',x:'<b>blühend</b> = gerade, <b>verblüht</b> = vorbei'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'der fallende Schnee',op:['Aktiv - fällt selbst','Passiv'],cor:0,h:'Fällt er von selbst?',x:'Fällt selbst → <b>Aktiv</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'die geöffnete Tür',op:['Aktiv','Passiv - wurde geöffnet'],cor:1,h:'Öffnet sie sich selbst?',x:'Wurde geöffnet → <b>Passiv</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'das klingende Telefon',op:['Aktiv - klingelt selbst','Passiv'],cor:0,h:'Klingelt es selbst?',x:'Klingelt selbst → <b>Aktiv</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'der geschriebene Text',op:['Aktiv','Passiv - wurde geschrieben'],cor:1,h:'Schreibt sich ein Text selbst?',x:'Wurde geschrieben → <b>Passiv</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'die lachenden Kinder',op:['Aktiv - lachen selbst','Passiv'],cor:0,h:'Lachen sie selbst?',x:'Lachen selbst → <b>Aktiv</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'das gekochte Essen',op:['Aktiv','Passiv - wurde gekocht'],cor:1,h:'Kocht sich Essen selbst?',x:'Wurde gekocht → <b>Passiv</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'der singende Vogel',op:['Aktiv - singt selbst','Passiv'],cor:0,h:'Singt er selbst?',x:'Singt selbst → <b>Aktiv</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'die gereinigte Luft',op:['Aktiv','Passiv - wurde gereinigt'],cor:1,h:'Reinigt sich Luft selbst?',x:'Wurde gereinigt → <b>Passiv</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'das schwindende Vertrauen',op:['Aktiv - schwindet selbst','Passiv'],cor:0,h:'Intransitiv?',x:'Schwindet selbst → <b>Aktiv</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'der gebrochene Schwur',op:['Aktiv','Passiv - wurde gebrochen'],cor:1,h:'Wer bricht?',x:'Wurde gebrochen → <b>Passiv</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'die flackernde Kerze',op:['Aktiv - flackert selbst','Passiv'],cor:0,h:'Flackert sie selbst?',x:'Flackert selbst → <b>Aktiv</b>'},
+{t:'m',c:'wahl',i:'Aktiv oder Passiv?',o:'das vollbrachte Werk',op:['Aktiv','Passiv - wurde vollbracht'],cor:1,h:'Vollbringt sich ein Werk selbst?',x:'Wurde vollbracht → <b>Passiv</b>'},
+{t:'m',c:'wahl',i:'Bedeutung?',o:'"fließender Übergang" vs. "geflossener Strom"',op:['fließend = läuft gerade; geflossen = bereits','Gleiche Bedeutung'],cor:0,h:'P1 = gleichzeitig, P2 = vorzeitig',x:'<b>fließend</b> = aktiv, <b>geflossen</b> = bereits'},
+{t:'m',c:'wahl',i:'Bedeutung?',o:'"lebende Tradition" vs. "gelebtes Leben"',op:['lebend = lebt noch; gelebt = wurde gelebt','Gleiche Bedeutung'],cor:0,h:'P1 = aktiv, P2 = passiv',x:'<b>lebend</b> = aktiv, <b>gelebt</b> = passiv'}
+],
+transform:[
+{t:'f',c:'transform',i:'Partizip → Relativsatz:',o:'ein weinendes Kind',a:['ein Kind,',['das weint',140]],h:'P1 → aktives Präsens',x:'weinend → <b>das weint</b>'},
+{t:'f',c:'transform',i:'Partizip → Relativsatz:',o:'ein bestandener Test',a:['ein Test,',['der bestanden wurde',180]],h:'P2 → Passiv',x:'bestanden → <b>der bestanden wurde</b>'},
+{t:'f',c:'transform',i:'Partizip → Relativsatz:',o:'ein geschriebener Brief',a:['ein Brief,',['der geschrieben wurde',200]],h:'P2 → Passiv',x:'geschrieben → <b>der geschrieben wurde</b>'},
+{t:'f',c:'transform',i:'Partizip → Relativsatz:',o:'eine sinkende Sonne',a:['eine Sonne,',['die sinkt',130]],h:'P1 → aktives Präsens',x:'sinkend → <b>die sinkt</b>'},
+{t:'f',c:'transform',i:'Partizip → Relativsatz:',o:'ein verschlossener Raum',a:['ein Raum,',['der verschlossen wurde|der verschlossen ist',200]],h:'P2 → Passiv',x:'verschlossen → <b>der verschlossen wurde</b>'},
+{t:'f',c:'transform',i:'Partizip → Relativsatz:',o:'ein leuchtender Stern',a:['ein Stern,',['der leuchtet',140]],h:'P1 → aktives Präsens',x:'leuchtend → <b>der leuchtet</b>'},
+{t:'f',c:'transform',i:'Partizip → Relativsatz:',o:'ein zweifelnder Geist',a:['ein Geist,',['der zweifelt',140]],h:'P1 → aktives Präsens',x:'zweifelnd → <b>der zweifelt</b>'},
+{t:'f',c:'transform',i:'Partizip → Relativsatz:',o:'ein gefasster Entschluss',a:['ein Entschluss,',['der gefasst wurde',180]],h:'P2 → Passiv',x:'gefasst → <b>der gefasst wurde</b>'},
+{t:'f',c:'transform',i:'Partizip → Relativsatz:',o:'eine schwindende Macht',a:['eine Macht,',['die schwindet',150]],h:'P1 → aktives Präsens',x:'schwindend → <b>die schwindet</b>'},
+{t:'f',c:'transform',i:'Partizip → Relativsatz:',o:'ein gebrochenes Versprechen',a:['ein Versprechen,',['das gebrochen wurde',200]],h:'P2 → Passiv',x:'gebrochen → <b>das gebrochen wurde</b>'},
+{t:'f',c:'transform',i:'Partizip → Relativsatz:',o:'eine wachsende Erkenntnis',a:['eine Erkenntnis,',['die wächst',140]],h:'P1 → aktives Präsens',x:'wachsend → <b>die wächst</b>'},
+{t:'f',c:'transform',i:'Partizip → Relativsatz:',o:'ein ringender Kämpfer',a:['ein Kämpfer,',['der ringt',130]],h:'P1 → aktives Präsens',x:'ringend → <b>der ringt</b>'},
+{t:'f',c:'transform',i:'Partizip → Relativsatz:',o:'ein gesprochenes Wort',a:['ein Wort,',['das gesprochen wurde',200]],h:'P2 → Passiv',x:'gesprochen → <b>das gesprochen wurde</b>'},
+{t:'f',c:'transform',i:'Partizip → Relativsatz:',o:'eine sterbende Sprache',a:['eine Sprache,',['die stirbt',130]],h:'P1 → aktives Präsens',x:'sterbend → <b>die stirbt</b>'},
+{t:'f',c:'transform',i:'Relativsatz → Partizip:',o:'Der Junge, der weint',a:['der',['weinende',140],'Junge'],h:'Aktiv → P1',x:'der weint → <b>weinende</b>'},
+{t:'f',c:'transform',i:'Relativsatz → Partizip:',o:'Das Auto, das repariert wurde',a:['das',['reparierte',150],'Auto'],h:'Passiv → P2',x:'das repariert wurde → <b>reparierte</b>'},
+{t:'f',c:'transform',i:'Relativsatz → Partizip:',o:'Die Katze, die schläft',a:['die',['schlafende',150],'Katze'],h:'Aktiv → P1',x:'die schläft → <b>schlafende</b>'},
+{t:'f',c:'transform',i:'Relativsatz → Partizip:',o:'Die Tür, die geöffnet wurde',a:['die',['geöffnete',140],'Tür'],h:'Passiv → P2',x:'die geöffnet wurde → <b>geöffnete</b>'},
+{t:'f',c:'transform',i:'Relativsatz → Partizip:',o:'Das Kind, das spielt',a:['das',['spielende',140],'Kind'],h:'Aktiv → P1',x:'das spielt → <b>spielende</b>'},
+{t:'f',c:'transform',i:'Relativsatz → Partizip:',o:'Das Herz, das schmilzt',a:['das',['schmelzende',150],'Herz'],h:'Aktiv → P1',x:'das schmilzt → <b>schmelzende</b>'},
+{t:'f',c:'transform',i:'Relativsatz → Partizip:',o:'Der Mann, der besiegt wurde',a:['der',['besiegte',130],'Mann'],h:'Passiv → P2',x:'der besiegt wurde → <b>besiegte</b>'},
+{t:'f',c:'transform',i:'Relativsatz → Partizip:',o:'Die Sterne, die leuchten',a:['die',['leuchtenden',150],'Sterne'],h:'Aktiv → P1',x:'die leuchten → <b>leuchtenden</b>'},
+{t:'f',c:'transform',i:'Relativsatz → Partizip:',o:'Die Zeit, die gestohlen wurde',a:['die',['gestohlene',150],'Zeit'],h:'Passiv → P2',x:'die gestohlen wurde → <b>gestohlene</b>'},
+{t:'f',c:'transform',i:'Relativsatz → Partizip:',o:'Das Tier, das jagt',a:['das',['jagende',130],'Tier'],h:'Aktiv → P1',x:'das jagt → <b>jagende</b>'},
+{t:'f',c:'transform',i:'Relativsatz → Partizip:',o:'Die Vase, die zerbrochen wurde',a:['die',['zerbrochene',160],'Vase'],h:'Passiv → P2',x:'die zerbrochen wurde → <b>zerbrochene</b>'},
+{t:'f',c:'transform',i:'Relativsatz → Partizip:',o:'Der Mensch, der hofft',a:['der',['hoffende',140],'Mensch'],h:'Aktiv → P1',x:'der hofft → <b>hoffende</b>'},
+{t:'f',c:'transform',i:'Relativsatz → Partizip:',o:'Der Regen, der fällt',a:['der',['fallende',130],'Regen'],h:'Aktiv → P1',x:'der fällt → <b>fallende</b>'},
+{t:'f',c:'transform',i:'Relativsatz → Partizip:',o:'Die Aufgabe, die gelöst wurde',a:['die',['gelöste',130],'Aufgabe'],h:'Passiv → P2',x:'die gelöst wurde → <b>gelöste</b>'},
+{t:'f',c:'transform',i:'Relativsatz → Partizip:',o:'Das Auto, das parkt',a:['das',['parkende',140],'Auto'],h:'Aktiv → P1',x:'das parkt → <b>parkende</b>'},
+{t:'f',c:'transform',i:'Relativsatz → Partizip:',o:'Die Menschen, die warten',a:['die',['wartenden',140],'Menschen'],h:'Aktiv → P1',x:'die warten → <b>wartenden</b>'},
+{t:'f',c:'transform',i:'Relativsatz → Partizip:',o:'Das Buch, das empfohlen wurde',a:['das',['empfohlene',150],'Buch'],h:'Passiv → P2',x:'das empfohlen wurde → <b>empfohlene</b>'}
+],
+komplex:[
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Ein Kind, das konzentriert Hausaufgaben macht',a:['ein',['konzentriert Hausaufgaben machendes',280],'Kind'],h:'Adverb + Objekt + P1',x:'<b>konzentriert Hausaufgaben machendes</b> Kind'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Ein Film, der oft gezeigt wurde',a:['ein',['oft gezeigter',160],'Film'],h:'Adverb + P2',x:'<b>oft gezeigter</b> Film'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Eine Straße, die neu gebaut wurde',a:['eine',['neu gebaute',150],'Straße'],h:'Adverb + P2',x:'<b>neu gebaute</b> Straße'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Ein Motor, der laut läuft',a:['ein',['laut laufender',160],'Motor'],h:'Adverb + P1',x:'<b>laut laufender</b> Motor'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Sportler, die hart trainieren',a:[['hart trainierende',180],'Sportler'],h:'Adverb + P1',x:'<b>hart trainierende</b> Sportler'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Eine Frage, die interessant gestellt wird',a:['eine',['interessant gestellte',200],'Frage'],h:'Adverb + P2',x:'<b>interessant gestellte</b> Frage'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Ein Dokument, das illegal kopiert wurde',a:['ein',['illegal kopiertes',180],'Dokument'],h:'Adverb + P2',x:'<b>illegal kopiertes</b> Dokument'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Ein Politiker, der Versprechen eilig bricht',a:['ein',['eilig Versprechen brechender',280],'Politiker'],h:'Adverb + Objekt + P1',x:'<b>eilig Versprechen brechender</b> Politiker'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Eine Wahrheit, die schmerzlich erkannt wurde',a:['eine',['schmerzlich erkannte',200],'Wahrheit'],h:'Adverb + P2',x:'<b>schmerzlich erkannte</b> Wahrheit'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Ein Künstler, der Inspiration leidenschaftlich sucht',a:['ein',['leidenschaftlich Inspiration suchender',300],'Künstler'],h:'Adverb + Objekt + P1',x:'<b>leidenschaftlich Inspiration suchender</b> Künstler'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Ein Geheimnis, das sorgfältig gehütet wird',a:['ein',['sorgfältig gehütetes',200],'Geheimnis'],h:'Adverb + P2',x:'<b>sorgfältig gehütetes</b> Geheimnis'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Ein Mensch, der Vorurteile mühsam überwindet',a:['ein',['mühsam Vorurteile überwindender',280],'Mensch'],h:'Adverb + Objekt + P1',x:'<b>mühsam Vorurteile überwindender</b> Mensch'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Eine Tradition, die allmählich verschwindet',a:['eine',['allmählich verschwindende',220],'Tradition'],h:'Adverb + P1',x:'<b>allmählich verschwindende</b> Tradition'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Philosophen, die Wahrheit unermüdlich ergründen',a:[['unermüdlich Wahrheit ergründende',280],'Philosophen'],h:'Adverb + Objekt + P1',x:'<b>unermüdlich Wahrheit ergründende</b> Philosophen'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Eine Gesellschaft, die tief gespalten wurde',a:['eine',['tief gespaltene',180],'Gesellschaft'],h:'Adverb + P2',x:'<b>tief gespaltene</b> Gesellschaft'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Ein Autor, der Geschichten leidenschaftlich erzählt',a:['ein',['leidenschaftlich Geschichten erzählender',300],'Autor'],h:'Adverb + Objekt + P1',x:'<b>leidenschaftlich Geschichten erzählender</b> Autor'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Eine Waffe, die heimlich geschmiedet wurde',a:['eine',['heimlich geschmiedete',200],'Waffe'],h:'Adverb + P2',x:'<b>heimlich geschmiedete</b> Waffe'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Ein Lehrer, der Wissen geduldig vermittelt',a:['ein',['geduldig Wissen vermittelnder',260],'Lehrer'],h:'Adverb + Objekt + P1',x:'<b>geduldig Wissen vermittelnder</b> Lehrer'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Ein Brief, der niemals abgeschickt wurde',a:['ein',['niemals abgeschickter',200],'Brief'],h:'Adverb + P2',x:'<b>niemals abgeschickter</b> Brief'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Eine Theorie, die wissenschaftlich bewiesen wurde',a:['eine',['wissenschaftlich bewiesene',220],'Theorie'],h:'Adverb + P2',x:'<b>wissenschaftlich bewiesene</b> Theorie'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Ein Unternehmen, das Gewinne kontinuierlich steigert',a:['ein',['kontinuierlich Gewinne steigerndes',280],'Unternehmen'],h:'Adverb + Objekt + P1',x:'<b>kontinuierlich Gewinne steigerndes</b> Unternehmen'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Ein Medikament, das erfolgreich getestet wurde',a:['ein',['erfolgreich getestetes',200],'Medikament'],h:'Adverb + P2',x:'<b>erfolgreich getestetes</b> Medikament'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Eine Nachricht, die sofort weitergeleitet wurde',a:['eine',['sofort weitergeleitete',200],'Nachricht'],h:'Adverb + P2',x:'<b>sofort weitergeleitete</b> Nachricht'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Ein Charakter, der sich ständig entwickelt',a:['ein',['sich ständig entwickelnder',230],'Charakter'],h:'Adverb + P1',x:'<b>sich ständig entwickelnder</b> Charakter'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Menschen, die nach Sinn suchen',a:[['nach Sinn suchende',200],'Menschen'],h:'Objekt + P1',x:'<b>nach Sinn suchende</b> Menschen'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Eine Gesellschaft, die von Werten geprägt wird',a:['eine',['von Werten geprägte',200],'Gesellschaft'],h:'Objekt + P2',x:'<b>von Werten geprägte</b> Gesellschaft'},
+{t:'f',c:'komplex',i:'Erweitertes Partizip:',o:'Ein Geist, der frei denkt',a:['ein',['frei denkender',160],'Geist'],h:'Adverb + P1',x:'<b>frei denkender</b> Geist'}
+]
+};
