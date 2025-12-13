@@ -125,6 +125,19 @@
         .pronoun-btn.akk { border-left: 5px solid var(--akk-color); }
         .pronoun-btn.used { opacity: 0.3; cursor: not-allowed; transform: scale(0.95); background: #eee; }
         .pronoun-btn .case-hint { font-size: 0.65rem; opacity: 0.7; display: block; margin-top: 2px; color: var(--text-muted); }
+        
+        /* Gruppierte Pronomen-Buttons */
+        .pronoun-groups { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; margin-top: 25px; }
+        .pronoun-group { background: #f8f9fc; border-radius: 20px; padding: 15px 20px; border: 3px solid var(--lavender); }
+        .group-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 12px; text-align: center; padding: 5px 10px; border-radius: 10px; }
+        .nom-group { border-color: var(--nom-color); }
+        .nom-label { background: rgba(116, 185, 255, 0.2); color: #2980b9; }
+        .dat-group { border-color: var(--dat-color); }
+        .dat-label { background: rgba(162, 155, 254, 0.2); color: #6c5ce7; }
+        .akk-group { border-color: var(--akk-color); }
+        .akk-label { background: rgba(253, 121, 168, 0.2); color: #e84393; }
+        .group-buttons { display: flex; gap: 10px; justify-content: center; }
+        
         .control-buttons { display: flex; gap: 15px; justify-content: center; margin-top: 25px; flex-wrap: wrap; }
         .control-btn { background: white; border: 3px solid var(--lavender); border-radius: 12px; padding: 12px 25px; color: var(--text-dark); font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 8px; }
         .control-btn:hover { border-color: var(--primary); background: #f0ebff; }
@@ -419,6 +432,8 @@ function decideWhatToConvert() {
 }
 
 function loadNext() {
+    // Bug fix: Hint-Box vom vorherigen Satz entfernen
+    document.querySelectorAll('.hint-box').forEach(h => h.remove());
     if (G.remaining.length === 0) { endGame(); return; }
     G.current = G.remaining.shift();
     G.selected = [];
@@ -465,12 +480,60 @@ function displaySlots() {
 }
 
 function displayButtons() {
-    let btns = shuffle([...allPronounButtons]);
-    document.getElementById('pronounButtons').innerHTML = btns.map((b, i) => {
-        const needsLabel = (b.t === 'sie' || b.t === 'es');
-        const label = needsLabel ? `<span class="case-hint">(${b.case === 'nom' ? 'Subj' : b.case === 'akk' ? 'Wen?' : 'Wem?'})</span>` : '';
-        return `<button class="pronoun-btn ${b.c}" id="btn${i}" onclick="selectPronoun(${i},'${b.t}','${b.case}')">${b.t}${label}</button>`;
-    }).join('');
+    // Nur die Pronomen anzeigen, die für die aktuelle Aufgabe benötigt werden
+    let btns = [];
+    
+    if (G.convertNom) {
+        btns.push({t: 'er', c: 'nom', case: 'nom'});
+        btns.push({t: 'sie', c: 'nom', case: 'nom'});
+        btns.push({t: 'es', c: 'nom', case: 'nom'});
+    }
+    if (G.convertDat) {
+        btns.push({t: 'ihm', c: 'dat', case: 'dat'});
+        btns.push({t: 'ihr', c: 'dat', case: 'dat'});
+        btns.push({t: 'ihnen', c: 'dat', case: 'dat'});
+    }
+    if (G.convertAkk) {
+        btns.push({t: 'ihn', c: 'akk', case: 'akk'});
+        btns.push({t: 'sie', c: 'akk', case: 'akk'});
+        btns.push({t: 'es', c: 'akk', case: 'akk'});
+    }
+    
+    // HTML für gruppierte Buttons erstellen
+    let html = '<div class="pronoun-groups">';
+    
+    if (G.convertNom) {
+        html += '<div class="pronoun-group nom-group"><div class="group-label nom-label">Subjekt (Wer?)</div><div class="group-buttons">';
+        btns.filter(b => b.case === 'nom').forEach((b, i) => {
+            const idx = btns.indexOf(b);
+            html += `<button class="pronoun-btn ${b.c}" id="btn${idx}" onclick="selectPronoun(${idx},'${b.t}','${b.case}')">${b.t}</button>`;
+        });
+        html += '</div></div>';
+    }
+    
+    if (G.convertDat) {
+        html += '<div class="pronoun-group dat-group"><div class="group-label dat-label">Dativ (Wem?)</div><div class="group-buttons">';
+        btns.filter(b => b.case === 'dat').forEach((b, i) => {
+            const idx = btns.indexOf(b);
+            html += `<button class="pronoun-btn ${b.c}" id="btn${idx}" onclick="selectPronoun(${idx},'${b.t}','${b.case}')">${b.t}</button>`;
+        });
+        html += '</div></div>';
+    }
+    
+    if (G.convertAkk) {
+        html += '<div class="pronoun-group akk-group"><div class="group-label akk-label">Akkusativ (Wen?)</div><div class="group-buttons">';
+        btns.filter(b => b.case === 'akk').forEach((b, i) => {
+            const idx = btns.indexOf(b);
+            html += `<button class="pronoun-btn ${b.c}" id="btn${idx}" onclick="selectPronoun(${idx},'${b.t}','${b.case}')">${b.t}</button>`;
+        });
+        html += '</div></div>';
+    }
+    
+    html += '</div>';
+    document.getElementById('pronounButtons').innerHTML = html;
+    
+    // Button-Array global speichern für selectPronoun
+    G.currentButtons = btns;
 }
 
 function selectPronoun(idx, txt, caseType) {
