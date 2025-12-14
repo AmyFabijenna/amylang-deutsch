@@ -374,7 +374,10 @@ html+=`<div id="hintBox"></div><div class="answer-area">`;
 
 if(cur.t==='f'){
   cur.a.forEach((p,i)=>{
-    if(Array.isArray(p)){html+=`<input type="text" class="input-slot" data-idx="${i}" style="width:${p[1]}px" autocomplete="off">`}
+    if(Array.isArray(p)){
+      const width = Math.max(p[1], 150); // Mindestens 150px
+      html+=`<input type="text" class="input-slot" data-idx="${i}" style="width:${width}px;max-width:90vw" autocomplete="off">`
+    }
     else{html+=`<span>${p} </span>`}
   })
 }else if(cur.t==='m'){
@@ -421,8 +424,9 @@ if(cur.t==='f'){
     const ans=cur.a[i];
     // ans ist ein Array wie ['abfahrender', 150]
     if(!Array.isArray(ans))return;
-    const val=inp.value.trim();
-    const acceptable=ans[0].split('|').map(s=>s.trim().toLowerCase());
+    // Whitespace normalisieren (mehrfache Leerzeichen zu einem)
+    const val=inp.value.trim().replace(/\s+/g,' ');
+    const acceptable=ans[0].split('|').map(s=>s.trim().toLowerCase().replace(/\s+/g,' '));
     if(acceptable.includes(val.toLowerCase())){inp.classList.add('correct')}
     else{inp.classList.add('incorrect');inp.value=ans[0].split('|')[0];correct=false}
   })
