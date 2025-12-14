@@ -419,15 +419,17 @@ if(checked)return;checked=true;
 let correct=true;
 
 if(cur.t==='f'){
-  document.querySelectorAll('.input-slot').forEach(inp=>{
+  // Nur Eingabefelder im aktuellen Exercise prüfen
+  $('exCon').querySelectorAll('.input-slot').forEach(inp=>{
     const i=parseInt(inp.dataset.idx);
     const ans=cur.a[i];
     // ans ist ein Array wie ['abfahrender', 150]
     if(!Array.isArray(ans))return;
-    // Whitespace normalisieren (mehrfache Leerzeichen zu einem)
-    const val=inp.value.trim().replace(/\s+/g,' ');
-    const acceptable=ans[0].split('|').map(s=>s.trim().toLowerCase().replace(/\s+/g,' '));
-    if(acceptable.includes(val.toLowerCase())){inp.classList.add('correct')}
+    // Whitespace normalisieren und Sonderzeichen entfernen
+    const normalize = s => s.trim().toLowerCase().replace(/\s+/g,' ').normalize('NFC');
+    const val = normalize(inp.value);
+    const acceptable = ans[0].split('|').map(s => normalize(s));
+    if(acceptable.includes(val)){inp.classList.add('correct')}
     else{inp.classList.add('incorrect');inp.value=ans[0].split('|')[0];correct=false}
   })
 }else if(cur.t==='m'){
