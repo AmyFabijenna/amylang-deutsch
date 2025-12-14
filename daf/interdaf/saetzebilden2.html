@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sätze Bilden 2 - Natur & Tiere</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(180deg, #c8e6c9 0%, #81c784 50%, #4caf50 100%);
+            min-height: 100vh;
+            color: #1b5e20;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; padding: 20px; margin-bottom: 20px; }
+        .header h1 { font-size: 2rem; font-weight: 700; color: #1b5e20; }
+        .header-emoji { font-size: 2rem; display: block; margin-bottom: 10px; }
+        .header-subtitle { font-size: 1rem; color: #2e7d32; margin-top: 5px; }
+        .welcome-screen {
+            background: #fff; border-radius: 16px; padding: 35px; max-width: 450px;
+            margin: 0 auto; box-shadow: 0 8px 30px rgba(27,94,32,0.2); text-align: center;
+        }
+        .welcome-screen h2 { color: #1b5e20; font-size: 1.5rem; margin-bottom: 18px; }
+        .welcome-screen p { color: #388e3c; margin-bottom: 20px; font-size: 1.1rem; }
+        .name-input {
+            width: 100%; padding: 14px 18px; font-size: 1.15rem; font-family: Arial;
+            border: 2px solid #4caf50; border-radius: 10px; outline: none; text-align: center;
+        }
+        .name-input:focus { border-color: #2e7d32; box-shadow: 0 0 0 3px rgba(76,175,80,0.2); }
+        .start-btn {
+            margin-top: 22px; padding: 14px 45px; font-size: 1.15rem; font-family: Arial;
+            font-weight: 700; background: #4caf50; color: white; border: none;
+            border-radius: 25px; cursor: pointer; transition: all 0.2s;
+        }
+        .start-btn:hover:not(:disabled) { background: #388e3c; transform: translateY(-2px); }
+        .start-btn:disabled { background: #a5d6a7; cursor: not-allowed; }
+        .game-area { display: none; }
+        .game-area.active { display: block; }
+        .score-bar {
+            background: #fff; border-radius: 12px; padding: 14px 22px; margin-bottom: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(27,94,32,0.15);
+        }
+        .player-info { display: flex; align-items: center; gap: 10px; }
+        .player-avatar {
+            width: 42px; height: 42px; background: linear-gradient(135deg, #81c784, #4caf50);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+        }
+        .player-name { font-weight: 700; font-size: 1.05rem; color: #1b5e20; }
+        .score-display {
+            display: flex; align-items: center; gap: 6px;
+            background: linear-gradient(135deg, #ffeb3b, #ffc107);
+            padding: 9px 18px; border-radius: 20px; font-weight: 700; color: #1b5e20;
+        }
+        .game-panel { background: #fff; border-radius: 16px; padding: 25px; box-shadow: 0 8px 30px rgba(27,94,32,0.2); }
+        .game-title { font-size: 1.4rem; font-weight: 700; color: #1b5e20; text-align: center; margin-bottom: 8px; }
+        .game-description { text-align: center; color: #388e3c; margin-bottom: 20px; font-size: 1rem; }
+        .sentence-builder { display: flex; flex-direction: column; gap: 15px; }
+        .step-indicator { display: flex; justify-content: center; gap: 8px; margin-bottom: 12px; }
+        .step { width: 34px; height: 34px; border-radius: 50%; background: #c8e6c9; color: #66bb6a; display: flex; align-items: center; justify-content: center; font-weight: 700; transition: all 0.3s; }
+        .step.active { background: #4caf50; color: white; transform: scale(1.1); }
+        .step.completed { background: #2e7d32; color: white; }
+        .sentence-display { background: #e8f5e9; border: 2px dashed #4caf50; border-radius: 12px; padding: 18px; min-height: 70px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; font-size: 1.2rem; font-weight: 700; }
+        .sentence-part { padding: 10px 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(27,94,32,0.15); }
+        .sentence-part.subject { background: linear-gradient(135deg, #ffeb3b, #ffc107); color: #1b5e20; }
+        .sentence-part.verb { background: linear-gradient(135deg, #4caf50, #2e7d32); color: white; }
+        .sentence-part.ending { background: linear-gradient(135deg, #9c27b0, #7b1fa2); color: white; }
+        .sentence-part.placeholder { background: #c8e6c9; color: #66bb6a; border: 2px dashed #4caf50; }
+        .selection-area { background: #e8f5e9; border-radius: 12px; padding: 15px; }
+        .selection-label { font-weight: 700; color: #1b5e20; margin-bottom: 10px; font-size: 1rem; }
+        .selection-options { display: flex; flex-wrap: wrap; gap: 8px; max-height: 320px; overflow-y: auto; padding: 5px; }
+        .select-btn { padding: 10px 14px; font-size: 0.95rem; font-family: Arial; font-weight: 600; background: #fff; color: #1b5e20; border: 2px solid #4caf50; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .select-btn:hover { background: #4caf50; color: white; transform: translateY(-2px); }
+        .select-btn.correct { background: #2e7d32 !important; border-color: #1b5e20 !important; color: white !important; }
+        .select-btn.wrong { background: #e74c3c !important; border-color: #c0392b !important; color: white !important; animation: shake 0.4s ease; }
+        .select-btn.pronoun-highlight { background: linear-gradient(135deg, #ff9800, #f57c00); border-color: #e65100; color: white; font-weight: 700; box-shadow: 0 3px 10px rgba(255,152,0,0.4); }
+        .select-btn.pronoun-highlight:hover { background: linear-gradient(135deg, #f57c00, #e65100); transform: translateY(-2px) scale(1.02); }
+        @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);} }
+        .action-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 15px; }
+        .game-btn { padding: 10px 22px; font-size: 0.95rem; font-family: Arial; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background: #4caf50; color: white; }
+        .btn-primary:hover { background: #388e3c; }
+        .btn-secondary { background: #fff; color: #1b5e20; border: 2px solid #4caf50; }
+        .btn-secondary:hover { background: #e8f5e9; }
+        .btn-success { background: #2e7d32; color: white; }
+        .btn-success:hover { background: #1b5e20; }
+        .sentence-collection { margin-top: 25px; background: linear-gradient(135deg, #fff8e1, #ffecb3); border: 3px solid #ffc107; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(255,193,7,0.3); }
+        .collection-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px dashed #ffc107; }
+        .collection-title { font-weight: 700; color: #1b5e20; font-size: 1.1rem; }
+        .collection-count { background: linear-gradient(135deg, #ffeb3b, #ffc107); color: #1b5e20; padding: 6px 16px; border-radius: 20px; font-weight: 700; font-size: 1rem; }
+        .sentence-list { max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 5px; }
+        .collected-sentence { background: #fff; padding: 12px 16px; border-radius: 10px; border-left: 5px solid #4caf50; font-size: 1.05rem; color: #1b5e20; box-shadow: 0 2px 8px rgba(0,0,0,0.08); animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+        .collected-sentence:nth-child(even) { border-left-color: #81c784; }
+        .collected-sentence:nth-child(3n) { border-left-color: #9c27b0; }
+        .collected-sentence:nth-child(4n) { border-left-color: #ff9800; }
+        .no-sentences { color: #689f38; font-style: italic; text-align: center; padding: 30px; font-size: 1rem; }
+        .save-section { margin-top: 15px; padding-top: 15px; border-top: 2px dashed #ffc107; text-align: center; }
+        .help-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+        .help-modal.active { display: flex; }
+        .help-content { background: #fff; border-radius: 16px; padding: 25px; max-width: 600px; max-height: 80vh; overflow-y: auto; position: relative; }
+        .help-close { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; background: #e74c3c; color: white; border: none; border-radius: 50%; font-size: 1.1rem; cursor: pointer; }
+        .help-title { font-size: 1.2rem; font-weight: 700; color: #1b5e20; margin-bottom: 15px; }
+        .conj-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.85rem; }
+        .conj-table th, .conj-table td { padding: 8px; text-align: left; border-bottom: 1px solid #c8e6c9; }
+        .conj-table th { background: #e8f5e9; color: #1b5e20; font-weight: 700; }
+        .pronoun-info { background: #fff3e0; padding: 12px; border-radius: 8px; margin-top: 15px; border-left: 4px solid #ff9800; }
+        .pronoun-info strong { color: #e65100; }
+        .success-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(76,175,80,0.95); z-index: 1000; align-items: center; justify-content: center; flex-direction: column; }
+        .success-overlay.active { display: flex; }
+        .success-emoji { font-size: 4rem; }
+        .success-text { font-size: 1.8rem; font-weight: 700; color: white; margin-top: 15px; }
+        .success-points { font-size: 1.2rem; font-weight: 700; color: white; margin-top: 8px; }
+        .confetti { position: fixed; width: 10px; height: 10px; top: -10px; z-index: 1001; pointer-events: none; animation: confettiFall 2s ease-out forwards; }
+        @keyframes confettiFall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+        .save-all-section { margin-top: 25px; background: linear-gradient(135deg, #4caf50, #2e7d32); border-radius: 16px; padding: 25px; text-align: center; box-shadow: 0 6px 20px rgba(76,175,80,0.3); }
+        .save-all-section h3 { color: white; font-size: 1.2rem; margin-bottom: 15px; }
+        .save-all-btn { padding: 16px 40px; font-size: 1.2rem; font-family: Arial; font-weight: 700; background: white; color: #2e7d32; border: none; border-radius: 30px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .save-all-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
+        .lesson-info { background: linear-gradient(135deg, #e3f2fd, #bbdefb); border: 2px solid #2196f3; border-radius: 12px; padding: 15px; margin-bottom: 20px; text-align: center; }
+        .lesson-info h3 { color: #1565c0; margin-bottom: 8px; }
+        .lesson-info p { color: #1976d2; font-size: 0.95rem; }
+        @media (max-width: 768px) { .container { padding: 12px; } .game-panel { padding: 18px; } .step { width: 28px; height: 28px; font-size: 0.85rem; } .selection-options { max-height: 250px; } .select-btn { padding: 8px 10px; font-size: 0.85rem; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <span class="header-emoji">🌳🦋🌻🌙⭐</span>
+            <h1>Sätze Bilden - Lektion 2</h1>
+            <p class="header-subtitle">Natur, Tiere & mehr!</p>
+        </header>
+        <div class="welcome-screen" id="welcomeScreen">
+            <h2>Willkommen! 🌿</h2>
+            <p>Wie heißt du?</p>
+            <input type="text" class="name-input" id="playerName" placeholder="Dein Name..." maxlength="20">
+            <button class="start-btn" id="startBtn" disabled>Los geht's! 🚀</button>
+        </div>
+        <div class="game-area" id="gameArea">
+            <div class="score-bar">
+                <div class="player-info">
+                    <div class="player-avatar">🌱</div>
+                    <span class="player-name" id="displayName">Spieler</span>
+                </div>
+                <div class="score-display">
+                    <span>⭐</span>
+                    <span id="scoreValue">0</span> Punkte
+                </div>
+            </div>
+            <div class="lesson-info">
+                <h3>🎯 Lektion 2: Bilde schöne Sätze!</h3>
+                <p>Wähle ein Subjekt → finde das passende Verb → konjugiere richtig → wähle ein schönes Ende!</p>
+            </div>
+            <div class="game-panel" id="mainGame">
+                <h2 class="game-title">🌳 Sätze aus der Natur</h2>
+                <p class="game-description">Bilde wunderschöne Sätze über Natur und Tiere!</p>
+                <div class="sentence-builder">
+                    <div class="step-indicator" id="mainSteps">
+                        <div class="step active">1</div>
+                        <div class="step">2</div>
+                        <div class="step">3</div>
+                        <div class="step">4</div>
+                    </div>
+                    <div class="sentence-display" id="mainSentence"></div>
+                    <div class="selection-area" id="mainSelection"></div>
+                    <div class="action-btns">
+                        <button class="game-btn btn-secondary" id="helpBtn">📖 Hilfe</button>
+                        <button class="game-btn btn-primary" id="newRound">🔄 Neuer Satz</button>
+                    </div>
+                </div>
+                <div class="sentence-collection">
+                    <div class="collection-header">
+                        <span class="collection-title">📝 Deine Natursätze:</span>
+                        <span class="collection-count" id="sentenceCount">0 Sätze</span>
+                    </div>
+                    <div class="sentence-list" id="sentenceList">
+                        <div class="no-sentences">Noch keine Sätze gebildet... Wähle ein Subjekt! 🌿</div>
+                    </div>
+                    <div class="save-section">
+                        <button class="game-btn btn-success" id="saveSentences">💾 Sätze speichern</button>
+                    </div>
+                </div>
+            </div>
+            <div class="save-all-section">
+                <h3>🏆 Fertig mit Spielen?</h3>
+                <button class="save-all-btn" id="saveAll">💾 ALLE MEINE SÄTZE SPEICHERN</button>
+            </div>
+        </div>
+    </div>
+    <div class="help-modal" id="helpModal"><div class="help-content" id="helpContent"></div></div>
+    <div class="success-overlay" id="successOverlay">
+        <span class="success-emoji">🎉</span>
+        <span class="success-text">Wunderschön!</span>
+        <span class="success-points" id="successPoints">+20 Punkte</span>
+    </div>
+    <script>
+    (function() {
+        var subjects = [
+            {text:"Ich", type:"ich", emoji:"👆", isPronoun:true},
+            {text:"Du", type:"du", emoji:"👉", isPronoun:true},
+            {text:"Wir", type:"wir", emoji:"👥", isPronoun:true},
+            {text:"Ihr", type:"ihr", emoji:"👫", isPronoun:true},
+            {text:"Die Sonne", type:"er", emoji:"☀️", isPronoun:false},
+            {text:"Der Mond", type:"er", emoji:"🌙", isPronoun:false},
+            {text:"Die Sterne", type:"sie", emoji:"⭐", isPronoun:false},
+            {text:"Der Stern", type:"er", emoji:"⭐", isPronoun:false},
+            {text:"Die Wolken", type:"sie", emoji:"☁️", isPronoun:false},
+            {text:"Der Regenbogen", type:"er", emoji:"🌈", isPronoun:false},
+            {text:"Der Baum", type:"er", emoji:"🌳", isPronoun:false},
+            {text:"Die Bäume", type:"sie", emoji:"🌳", isPronoun:false},
+            {text:"Die Blume", type:"er", emoji:"🌸", isPronoun:false},
+            {text:"Die Blumen", type:"sie", emoji:"🌸", isPronoun:false},
+            {text:"Die Rose", type:"er", emoji:"🌹", isPronoun:false},
+            {text:"Die Rosen", type:"sie", emoji:"🌹", isPronoun:false},
+            {text:"Das Gras", type:"er", emoji:"🌿", isPronoun:false},
+            {text:"Die Pflanzen", type:"sie", emoji:"🌱", isPronoun:false},
+            {text:"Der Pilz", type:"er", emoji:"🍄", isPronoun:false},
+            {text:"Die Pilze", type:"sie", emoji:"🍄", isPronoun:false},
+            {text:"Der Wald", type:"er", emoji:"🌲", isPronoun:false},
+            {text:"Der See", type:"er", emoji:"💧", isPronoun:false},
+            {text:"Der Fluss", type:"er", emoji:"🏞️", isPronoun:false},
+            {text:"Die Flüsse", type:"sie", emoji:"🏞️", isPronoun:false},
+            {text:"Der Berg", type:"er", emoji:"⛰️", isPronoun:false},
+            {text:"Die Berge", type:"sie", emoji:"⛰️", isPronoun:false},
+            {text:"Die Wiese", type:"er", emoji:"🌾", isPronoun:false},
+            {text:"Das Meer", type:"er", emoji:"🌊", isPronoun:false},
+            {text:"Der Wind", type:"er", emoji:"💨", isPronoun:false},
+            {text:"Der Regen", type:"er", emoji:"🌧️", isPronoun:false},
+            {text:"Der Schnee", type:"er", emoji:"❄️", isPronoun:false},
+            {text:"Der Vogel", type:"er", emoji:"🐦", isPronoun:false},
+            {text:"Die Vögel", type:"sie", emoji:"🐦", isPronoun:false},
+            {text:"Die Eule", type:"er", emoji:"🦉", isPronoun:false},
+            {text:"Die Eulen", type:"sie", emoji:"🦉", isPronoun:false},
+            {text:"Der Adler", type:"er", emoji:"🦅", isPronoun:false},
+            {text:"Die Schwalbe", type:"er", emoji:"🐦", isPronoun:false},
+            {text:"Die Schwalben", type:"sie", emoji:"🐦", isPronoun:false},
+            {text:"Der Spatz", type:"er", emoji:"🐦", isPronoun:false},
+            {text:"Die Spatzen", type:"sie", emoji:"🐦", isPronoun:false},
+            {text:"Die Ente", type:"er", emoji:"🦆", isPronoun:false},
+            {text:"Die Enten", type:"sie", emoji:"🦆", isPronoun:false},
+            {text:"Der Schwan", type:"er", emoji:"🦢", isPronoun:false},
+            {text:"Die Schwäne", type:"sie", emoji:"🦢", isPronoun:false},
+            {text:"Der Schmetterling", type:"er", emoji:"🦋", isPronoun:false},
+            {text:"Die Schmetterlinge", type:"sie", emoji:"🦋", isPronoun:false},
+            {text:"Die Biene", type:"er", emoji:"🐝", isPronoun:false},
+            {text:"Die Bienen", type:"sie", emoji:"🐝", isPronoun:false},
+            {text:"Die Ameise", type:"er", emoji:"🐜", isPronoun:false},
+            {text:"Die Ameisen", type:"sie", emoji:"🐜", isPronoun:false},
+            {text:"Der Käfer", type:"er", emoji:"🐞", isPronoun:false},
+            {text:"Die Libelle", type:"er", emoji:"🪰", isPronoun:false},
+            {text:"Die Grille", type:"er", emoji:"🦗", isPronoun:false},
+            {text:"Die Grillen", type:"sie", emoji:"🦗", isPronoun:false},
+            {text:"Der Fuchs", type:"er", emoji:"🦊", isPronoun:false},
+            {text:"Die Füchse", type:"sie", emoji:"🦊", isPronoun:false},
+            {text:"Der Hase", type:"er", emoji:"🐰", isPronoun:false},
+            {text:"Die Hasen", type:"sie", emoji:"🐰", isPronoun:false},
+            {text:"Das Reh", type:"er", emoji:"🦌", isPronoun:false},
+            {text:"Die Rehe", type:"sie", emoji:"🦌", isPronoun:false},
+            {text:"Der Hirsch", type:"er", emoji:"🦌", isPronoun:false},
+            {text:"Das Eichhörnchen", type:"er", emoji:"🐿️", isPronoun:false},
+            {text:"Die Eichhörnchen", type:"sie", emoji:"🐿️", isPronoun:false},
+            {text:"Der Igel", type:"er", emoji:"🦔", isPronoun:false},
+            {text:"Die Igel", type:"sie", emoji:"🦔", isPronoun:false},
+            {text:"Der Wolf", type:"er", emoji:"🐺", isPronoun:false},
+            {text:"Die Wölfe", type:"sie", emoji:"🐺", isPronoun:false},
+            {text:"Der Bär", type:"er", emoji:"🐻", isPronoun:false},
+            {text:"Die Bären", type:"sie", emoji:"🐻", isPronoun:false},
+            {text:"Der Fisch", type:"er", emoji:"🐟", isPronoun:false},
+            {text:"Die Fische", type:"sie", emoji:"🐟", isPronoun:false},
+            {text:"Der Frosch", type:"er", emoji:"🐸", isPronoun:false},
+            {text:"Die Frösche", type:"sie", emoji:"🐸", isPronoun:false},
+            {text:"Die Schildkröte", type:"er", emoji:"🐢", isPronoun:false},
+            {text:"Der Wal", type:"er", emoji:"🐋", isPronoun:false},
+            {text:"Der Delfin", type:"er", emoji:"🐬", isPronoun:false},
+            {text:"Die Delfine", type:"sie", emoji:"🐬", isPronoun:false},
+            {text:"Der Hund", type:"er", emoji:"🐕", isPronoun:false},
+            {text:"Die Hunde", type:"sie", emoji:"🐕", isPronoun:false},
+            {text:"Die Katze", type:"er", emoji:"🐱", isPronoun:false},
+            {text:"Die Katzen", type:"sie", emoji:"🐱", isPronoun:false},
+            {text:"Das Pferd", type:"er", emoji:"🐴", isPronoun:false},
+            {text:"Die Pferde", type:"sie", emoji:"🐴", isPronoun:false},
+            {text:"Die Kuh", type:"er", emoji:"🐄", isPronoun:false},
+            {text:"Die Kühe", type:"sie", emoji:"🐄", isPronoun:false},
+            {text:"Das Schaf", type:"er", emoji:"🐑", isPronoun:false},
+            {text:"Die Schafe", type:"sie", emoji:"🐑", isPronoun:false},
+            {text:"Der Hahn", type:"er", emoji:"🐓", isPronoun:false},
+            {text:"Das Kind", type:"er", emoji:"👶", isPronoun:false},
+            {text:"Die Kinder", type:"sie", emoji:"👧👦", isPronoun:false},
+            {text:"Der Junge", type:"er", emoji:"👦", isPronoun:false},
+            {text:"Das Mädchen", type:"er", emoji:"👧", isPronoun:false},
+            {text:"Der Apfel", type:"er", emoji:"🍎", isPronoun:false},
+            {text:"Die Äpfel", type:"sie", emoji:"🍎", isPronoun:false},
+            {text:"Die Erdbeere", type:"er", emoji:"🍓", isPronoun:false},
+            {text:"Die Erdbeeren", type:"sie", emoji:"🍓", isPronoun:false}
+        ];
+        
+        var verbs = {
+            "scheinen": {inf:"scheinen", ich:"scheine", du:"scheinst", er:"scheint", wir:"scheinen", ihr:"scheint", sie:"scheinen", endings: [{text:"hell",emoji:"✨"},{text:"warm",emoji:"🔥"},{text:"am Himmel",emoji:"🌤️"},{text:"auf die Erde",emoji:"🌍"},{text:"durch die Wolken",emoji:"☁️"},{text:"den ganzen Tag",emoji:"📅"},{text:"wunderschön",emoji:"🌟"}]},
+            "glitzern": {inf:"glitzern", ich:"glitzere", du:"glitzerst", er:"glitzert", wir:"glitzern", ihr:"glitzert", sie:"glitzern", endings: [{text:"am Himmel",emoji:"🌌"},{text:"in der Nacht",emoji:"🌙"},{text:"wunderschön",emoji:"✨"},{text:"hell",emoji:"💫"},{text:"wie Diamanten",emoji:"💎"},{text:"im Dunkeln",emoji:"🌑"}]},
+            "funkeln": {inf:"funkeln", ich:"funkele", du:"funkelst", er:"funkelt", wir:"funkeln", ihr:"funkelt", sie:"funkeln", endings: [{text:"in der Nacht",emoji:"🌙"},{text:"am Himmel",emoji:"🌌"},{text:"hell",emoji:"✨"},{text:"wunderschön",emoji:"🌟"},{text:"geheimnisvoll",emoji:"🔮"},{text:"wie Edelsteine",emoji:"💎"}]},
+            "leuchten": {inf:"leuchten", ich:"leuchte", du:"leuchtest", er:"leuchtet", wir:"leuchten", ihr:"leuchtet", sie:"leuchten", endings: [{text:"hell",emoji:"💡"},{text:"in der Nacht",emoji:"🌙"},{text:"am Himmel",emoji:"🌌"},{text:"wunderschön",emoji:"✨"},{text:"silbern",emoji:"🥈"},{text:"golden",emoji:"🥇"}]},
+            "wachsen": {inf:"wachsen", ich:"wachse", du:"wächst", er:"wächst", wir:"wachsen", ihr:"wachst", sie:"wachsen", endings: [{text:"schnell",emoji:"⚡"},{text:"langsam",emoji:"🐢"},{text:"im Garten",emoji:"🌻"},{text:"im Wald",emoji:"🌲"},{text:"auf der Wiese",emoji:"🌾"},{text:"in die Höhe",emoji:"📈"},{text:"jeden Tag",emoji:"📅"}]},
+            "blühen": {inf:"blühen", ich:"blühe", du:"blühst", er:"blüht", wir:"blühen", ihr:"blüht", sie:"blühen", endings: [{text:"wunderschön",emoji:"✨"},{text:"im Frühling",emoji:"🌸"},{text:"im Sommer",emoji:"☀️"},{text:"im Garten",emoji:"🌻"},{text:"auf der Wiese",emoji:"🌾"},{text:"bunt",emoji:"🎨"},{text:"rot und gelb",emoji:"🌹"},{text:"prächtig",emoji:"👑"}]},
+            "duften": {inf:"duften", ich:"dufte", du:"duftest", er:"duftet", wir:"duften", ihr:"duftet", sie:"duften", endings: [{text:"wunderbar",emoji:"✨"},{text:"süß",emoji:"🍬"},{text:"herrlich",emoji:"😊"},{text:"nach Honig",emoji:"🍯"},{text:"im Garten",emoji:"🌻"},{text:"nach Sommer",emoji:"☀️"}]},
+            "fliegen": {inf:"fliegen", ich:"fliege", du:"fliegst", er:"fliegt", wir:"fliegen", ihr:"fliegt", sie:"fliegen", endings: [{text:"hoch am Himmel",emoji:"🌤️"},{text:"über den Wald",emoji:"🌲"},{text:"nach Süden",emoji:"🧭"},{text:"von Blume zu Blume",emoji:"🌸"},{text:"schnell",emoji:"⚡"},{text:"elegant",emoji:"✨"},{text:"durch die Luft",emoji:"💨"}]},
+            "flattern": {inf:"flattern", ich:"flattere", du:"flatterst", er:"flattert", wir:"flattern", ihr:"flattert", sie:"flattern", endings: [{text:"durch die Luft",emoji:"💨"},{text:"von Blume zu Blume",emoji:"🌸"},{text:"im Wind",emoji:"🍃"},{text:"über die Wiese",emoji:"🌾"},{text:"wunderschön",emoji:"✨"},{text:"leicht wie eine Feder",emoji:"🪶"}]},
+            "schweben": {inf:"schweben", ich:"schwebe", du:"schwebst", er:"schwebt", wir:"schweben", ihr:"schwebt", sie:"schweben", endings: [{text:"am Himmel",emoji:"🌤️"},{text:"über dem See",emoji:"💧"},{text:"leicht dahin",emoji:"🪶"},{text:"durch die Luft",emoji:"💨"},{text:"sanft",emoji:"😌"},{text:"wie ein Traum",emoji:"💭"}]},
+            "singen": {inf:"singen", ich:"singe", du:"singst", er:"singt", wir:"singen", ihr:"singt", sie:"singen", endings: [{text:"ein schönes Lied",emoji:"🎵"},{text:"am Morgen",emoji:"🌅"},{text:"im Baum",emoji:"🌳"},{text:"fröhlich",emoji:"😊"},{text:"wunderschön",emoji:"✨"},{text:"laut und klar",emoji:"📢"},{text:"den ganzen Tag",emoji:"📅"}]},
+            "zwitschern": {inf:"zwitschern", ich:"zwitschere", du:"zwitscherst", er:"zwitschert", wir:"zwitschern", ihr:"zwitschert", sie:"zwitschern", endings: [{text:"fröhlich",emoji:"😊"},{text:"am Morgen",emoji:"🌅"},{text:"im Garten",emoji:"🌻"},{text:"laut",emoji:"📢"},{text:"im Baum",emoji:"🌳"},{text:"ein Lied",emoji:"🎵"}]},
+            "rufen": {inf:"rufen", ich:"rufe", du:"rufst", er:"ruft", wir:"rufen", ihr:"ruft", sie:"rufen", endings: [{text:"in der Nacht",emoji:"🌙"},{text:"laut",emoji:"📢"},{text:"im Wald",emoji:"🌲"},{text:"geheimnisvoll",emoji:"🔮"},{text:"nach ihren Freunden",emoji:"👫"}]},
+            "quaken": {inf:"quaken", ich:"quake", du:"quakst", er:"quakt", wir:"quaken", ihr:"quakt", sie:"quaken", endings: [{text:"am Teich",emoji:"💧"},{text:"laut",emoji:"📢"},{text:"fröhlich",emoji:"😊"},{text:"in der Nacht",emoji:"🌙"},{text:"im Wasser",emoji:"💦"}]},
+            "summen": {inf:"summen", ich:"summe", du:"summst", er:"summt", wir:"summen", ihr:"summt", sie:"summen", endings: [{text:"fleißig",emoji:"💪"},{text:"von Blume zu Blume",emoji:"🌸"},{text:"im Garten",emoji:"🌻"},{text:"ein Lied",emoji:"🎵"},{text:"den ganzen Tag",emoji:"📅"},{text:"leise",emoji:"🤫"}]},
+            "zirpen": {inf:"zirpen", ich:"zirpe", du:"zirpst", er:"zirpt", wir:"zirpen", ihr:"zirpt", sie:"zirpen", endings: [{text:"in der Nacht",emoji:"🌙"},{text:"auf der Wiese",emoji:"🌾"},{text:"laut",emoji:"📢"},{text:"im Sommer",emoji:"☀️"},{text:"fröhlich",emoji:"😊"}]},
+            "schwimmen": {inf:"schwimmen", ich:"schwimme", du:"schwimmst", er:"schwimmt", wir:"schwimmen", ihr:"schwimmt", sie:"schwimmen", endings: [{text:"im See",emoji:"💧"},{text:"im Meer",emoji:"🌊"},{text:"im Fluss",emoji:"🏞️"},{text:"schnell",emoji:"⚡"},{text:"elegant",emoji:"✨"},{text:"den ganzen Tag",emoji:"📅"},{text:"im Wasser",emoji:"💦"}]},
+            "tauchen": {inf:"tauchen", ich:"tauche", du:"tauchst", er:"taucht", wir:"tauchen", ihr:"taucht", sie:"tauchen", endings: [{text:"tief ins Wasser",emoji:"💦"},{text:"im See",emoji:"💧"},{text:"nach Futter",emoji:"🍴"},{text:"elegant",emoji:"✨"},{text:"unter die Oberfläche",emoji:"🌊"}]},
+            "planschen": {inf:"planschen", ich:"plansche", du:"planschst", er:"planscht", wir:"planschen", ihr:"planscht", sie:"planschen", endings: [{text:"im Wasser",emoji:"💦"},{text:"im Teich",emoji:"💧"},{text:"fröhlich",emoji:"😊"},{text:"laut",emoji:"📢"},{text:"den ganzen Tag",emoji:"📅"}]},
+            "fließen": {inf:"fließen", ich:"fließe", du:"fließt", er:"fließt", wir:"fließen", ihr:"fließt", sie:"fließen", endings: [{text:"zum Meer",emoji:"🌊"},{text:"durch den Wald",emoji:"🌲"},{text:"ruhig dahin",emoji:"😌"},{text:"schnell",emoji:"⚡"},{text:"über die Steine",emoji:"🪨"},{text:"Tag und Nacht",emoji:"🌙"}]},
+            "laufen": {inf:"laufen", ich:"laufe", du:"läufst", er:"läuft", wir:"laufen", ihr:"lauft", sie:"laufen", endings: [{text:"schnell",emoji:"⚡"},{text:"durch den Wald",emoji:"🌲"},{text:"über die Wiese",emoji:"🌾"},{text:"nach Hause",emoji:"🏠"},{text:"fröhlich",emoji:"😊"},{text:"davon",emoji:"🏃"},{text:"zur Schule",emoji:"🏫"}]},
+            "springen": {inf:"springen", ich:"springe", du:"springst", er:"springt", wir:"springen", ihr:"springt", sie:"springen", endings: [{text:"hoch",emoji:"⬆️"},{text:"ins Wasser",emoji:"💦"},{text:"über den Bach",emoji:"🏞️"},{text:"fröhlich",emoji:"😊"},{text:"von Ast zu Ast",emoji:"🌳"},{text:"weit",emoji:"📏"}]},
+            "hüpfen": {inf:"hüpfen", ich:"hüpfe", du:"hüpfst", er:"hüpft", wir:"hüpfen", ihr:"hüpft", sie:"hüpfen", endings: [{text:"fröhlich",emoji:"😊"},{text:"über die Wiese",emoji:"🌾"},{text:"durch den Garten",emoji:"🌻"},{text:"ins Wasser",emoji:"💦"},{text:"hin und her",emoji:"↔️"},{text:"auf und ab",emoji:"↕️"}]},
+            "rennen": {inf:"rennen", ich:"renne", du:"rennst", er:"rennt", wir:"rennen", ihr:"rennt", sie:"rennen", endings: [{text:"schnell",emoji:"⚡"},{text:"durch den Wald",emoji:"🌲"},{text:"nach Hause",emoji:"🏠"},{text:"davon",emoji:"🏃"},{text:"um die Wette",emoji:"🏆"},{text:"freudig",emoji:"😊"}]},
+            "klettern": {inf:"klettern", ich:"klettere", du:"kletterst", er:"klettert", wir:"klettern", ihr:"klettert", sie:"klettern", endings: [{text:"auf den Baum",emoji:"🌳"},{text:"hoch hinauf",emoji:"⬆️"},{text:"geschickt",emoji:"👍"},{text:"schnell",emoji:"⚡"},{text:"von Ast zu Ast",emoji:"🌿"},{text:"den Berg hinauf",emoji:"⛰️"}]},
+            "schleichen": {inf:"schleichen", ich:"schleiche", du:"schleichst", er:"schleicht", wir:"schleichen", ihr:"schleicht", sie:"schleichen", endings: [{text:"durch den Wald",emoji:"🌲"},{text:"leise",emoji:"🤫"},{text:"in der Nacht",emoji:"🌙"},{text:"vorsichtig",emoji:"👀"},{text:"durch das Gras",emoji:"🌿"}]},
+            "sammeln": {inf:"sammeln", ich:"sammele", du:"sammelst", er:"sammelt", wir:"sammeln", ihr:"sammelt", sie:"sammeln", endings: [{text:"Nüsse",emoji:"🥜"},{text:"Beeren",emoji:"🫐"},{text:"Honig",emoji:"🍯"},{text:"Nektar",emoji:"🌸"},{text:"fleißig",emoji:"💪"},{text:"für den Winter",emoji:"❄️"}]},
+            "suchen": {inf:"suchen", ich:"suche", du:"suchst", er:"sucht", wir:"suchen", ihr:"sucht", sie:"suchen", endings: [{text:"Futter",emoji:"🍴"},{text:"Nüsse",emoji:"🥜"},{text:"einen Platz",emoji:"📍"},{text:"im Wald",emoji:"🌲"},{text:"überall",emoji:"👀"},{text:"fleißig",emoji:"💪"}]},
+            "leben": {inf:"leben", ich:"lebe", du:"lebst", er:"lebt", wir:"leben", ihr:"lebt", sie:"leben", endings: [{text:"im Wald",emoji:"🌲"},{text:"am See",emoji:"💧"},{text:"auf der Wiese",emoji:"🌾"},{text:"im Wasser",emoji:"💦"},{text:"glücklich",emoji:"😊"},{text:"zusammen",emoji:"👫"},{text:"in der Natur",emoji:"🌿"}]},
+            "schlafen": {inf:"schlafen", ich:"schlafe", du:"schläfst", er:"schläft", wir:"schlafen", ihr:"schlaft", sie:"schlafen", endings: [{text:"im Nest",emoji:"🪹"},{text:"in der Höhle",emoji:"🕳️"},{text:"im Winter",emoji:"❄️"},{text:"den ganzen Tag",emoji:"📅"},{text:"tief und fest",emoji:"💤"},{text:"friedlich",emoji:"😌"}]},
+            "wehen": {inf:"wehen", ich:"wehe", du:"wehst", er:"weht", wir:"wehen", ihr:"weht", sie:"wehen", endings: [{text:"stark",emoji:"💨"},{text:"sanft",emoji:"🍃"},{text:"durch die Bäume",emoji:"🌳"},{text:"über die Wiese",emoji:"🌾"},{text:"kalt",emoji:"❄️"},{text:"warm",emoji:"🔥"}]},
+            "fallen": {inf:"fallen", ich:"falle", du:"fällst", er:"fällt", wir:"fallen", ihr:"fallt", sie:"fallen", endings: [{text:"vom Himmel",emoji:"🌤️"},{text:"auf die Erde",emoji:"🌍"},{text:"leise",emoji:"🤫"},{text:"sanft",emoji:"😌"},{text:"vom Baum",emoji:"🌳"},{text:"den ganzen Tag",emoji:"📅"}]},
+            "rauschen": {inf:"rauschen", ich:"rausche", du:"rauschst", er:"rauscht", wir:"rauschen", ihr:"rauscht", sie:"rauschen", endings: [{text:"im Wind",emoji:"💨"},{text:"laut",emoji:"📢"},{text:"sanft",emoji:"😌"},{text:"geheimnisvoll",emoji:"🔮"},{text:"den ganzen Tag",emoji:"📅"}]},
+            "glänzen": {inf:"glänzen", ich:"glänze", du:"glänzt", er:"glänzt", wir:"glänzen", ihr:"glänzt", sie:"glänzen", endings: [{text:"in der Sonne",emoji:"☀️"},{text:"wunderschön",emoji:"✨"},{text:"golden",emoji:"🥇"},{text:"silbern",emoji:"🥈"},{text:"wie ein Spiegel",emoji:"🪞"}]},
+            "kosten": {inf:"kosten", ich:"koste", du:"kostest", er:"kostet", wir:"kosten", ihr:"kostet", sie:"kosten", endings: [{text:"5 Cent",emoji:"💰"},{text:"10 Cent",emoji:"💰"},{text:"1 Euro",emoji:"💶"},{text:"nicht viel",emoji:"👍"},{text:"wenig Geld",emoji:"💵"}]},
+            "schmecken": {inf:"schmecken", ich:"schmecke", du:"schmeckst", er:"schmeckt", wir:"schmecken", ihr:"schmeckt", sie:"schmecken", endings: [{text:"süß",emoji:"🍬"},{text:"lecker",emoji:"😋"},{text:"sauer",emoji:"🍋"},{text:"wunderbar",emoji:"✨"},{text:"frisch",emoji:"🌿"},{text:"sehr gut",emoji:"👍"}]},
+            "reifen": {inf:"reifen", ich:"reife", du:"reifst", er:"reift", wir:"reifen", ihr:"reift", sie:"reifen", endings: [{text:"im Sommer",emoji:"☀️"},{text:"am Baum",emoji:"🌳"},{text:"langsam",emoji:"🐢"},{text:"in der Sonne",emoji:"☀️"},{text:"wunderschön",emoji:"✨"}]},
+            "kommen": {inf:"kommen", ich:"komme", du:"kommst", er:"kommt", wir:"kommen", ihr:"kommt", sie:"kommen", endings: [{text:"nach Hause",emoji:"🏠"},{text:"zur Schule",emoji:"🏫"},{text:"zu spät",emoji:"⏰"},{text:"bald",emoji:"🕐"},{text:"jeden Tag",emoji:"📅"},{text:"fröhlich",emoji:"😊"},{text:"aus dem Wald",emoji:"🌲"}]},
+            "gehen": {inf:"gehen", ich:"gehe", du:"gehst", er:"geht", wir:"gehen", ihr:"geht", sie:"gehen", endings: [{text:"nach Hause",emoji:"🏠"},{text:"in den Wald",emoji:"🌲"},{text:"zur Schule",emoji:"🏫"},{text:"spazieren",emoji:"🚶"},{text:"langsam",emoji:"🐢"},{text:"schnell",emoji:"⚡"}]},
+            "spielen": {inf:"spielen", ich:"spiele", du:"spielst", er:"spielt", wir:"spielen", ihr:"spielt", sie:"spielen", endings: [{text:"im Garten",emoji:"🌻"},{text:"auf der Wiese",emoji:"🌾"},{text:"fröhlich",emoji:"😊"},{text:"zusammen",emoji:"👫"},{text:"den ganzen Tag",emoji:"📅"},{text:"miteinander",emoji:"🤝"}]},
+            "tanzen": {inf:"tanzen", ich:"tanze", du:"tanzt", er:"tanzt", wir:"tanzen", ihr:"tanzt", sie:"tanzen", endings: [{text:"im Wind",emoji:"💨"},{text:"fröhlich",emoji:"😊"},{text:"wunderschön",emoji:"✨"},{text:"hin und her",emoji:"↔️"},{text:"im Kreis",emoji:"⭕"},{text:"zusammen",emoji:"👫"}]},
+            "arbeiten": {inf:"arbeiten", ich:"arbeite", du:"arbeitest", er:"arbeitet", wir:"arbeiten", ihr:"arbeitet", sie:"arbeiten", endings: [{text:"fleißig",emoji:"💪"},{text:"den ganzen Tag",emoji:"📅"},{text:"zusammen",emoji:"👫"},{text:"hart",emoji:"💪"},{text:"im Team",emoji:"🤝"}]},
+            "bauen": {inf:"bauen", ich:"baue", du:"baust", er:"baut", wir:"bauen", ihr:"baut", sie:"bauen", endings: [{text:"ein Nest",emoji:"🪹"},{text:"einen Damm",emoji:"🦫"},{text:"eine Höhle",emoji:"🕳️"},{text:"fleißig",emoji:"💪"},{text:"gemeinsam",emoji:"👫"}]},
+            "krähen": {inf:"krähen", ich:"krähe", du:"krähst", er:"kräht", wir:"krähen", ihr:"kräht", sie:"krähen", endings: [{text:"am Morgen",emoji:"🌅"},{text:"laut",emoji:"📢"},{text:"stolz",emoji:"👑"},{text:"früh",emoji:"⏰"}]},
+            "grasen": {inf:"grasen", ich:"grase", du:"grast", er:"grast", wir:"grasen", ihr:"grast", sie:"grasen", endings: [{text:"auf der Wiese",emoji:"🌾"},{text:"friedlich",emoji:"😌"},{text:"den ganzen Tag",emoji:"📅"},{text:"ruhig",emoji:"🧘"}]},
+            "galoppieren": {inf:"galoppieren", ich:"galoppiere", du:"galoppierst", er:"galoppiert", wir:"galoppieren", ihr:"galoppiert", sie:"galoppieren", endings: [{text:"über die Wiese",emoji:"🌾"},{text:"schnell",emoji:"⚡"},{text:"frei",emoji:"🆓"},{text:"elegant",emoji:"✨"}]}
+        };
+        
+        var subjectVerbMapping = {
+            "Ich": ["singen","tanzen","spielen","laufen","springen","schwimmen","klettern","hüpfen","rennen","kommen","gehen","suchen","sammeln"],
+            "Du": ["singen","tanzen","spielen","laufen","springen","schwimmen","klettern","hüpfen","rennen","kommen","gehen","suchen","sammeln"],
+            "Wir": ["singen","tanzen","spielen","laufen","springen","schwimmen","klettern","hüpfen","rennen","kommen","gehen","suchen","sammeln","arbeiten"],
+            "Ihr": ["singen","tanzen","spielen","laufen","springen","schwimmen","klettern","hüpfen","rennen","kommen","gehen","suchen","sammeln","arbeiten"],
+            "Die Sonne": ["scheinen","leuchten","glänzen"],
+            "Der Mond": ["scheinen","leuchten","funkeln","glänzen"],
+            "Die Sterne": ["glitzern","funkeln","leuchten","scheinen"],
+            "Der Stern": ["glitzern","funkeln","leuchten","scheinen"],
+            "Die Wolken": ["schweben","tanzen"],
+            "Der Regenbogen": ["leuchten","glänzen","scheinen"],
+            "Der Baum": ["wachsen","rauschen","leben"],
+            "Die Bäume": ["wachsen","rauschen","leben"],
+            "Die Blume": ["blühen","duften","wachsen","glänzen"],
+            "Die Blumen": ["blühen","duften","wachsen","glänzen"],
+            "Die Rose": ["blühen","duften","wachsen"],
+            "Die Rosen": ["blühen","duften","wachsen"],
+            "Das Gras": ["wachsen","glänzen","rauschen"],
+            "Die Pflanzen": ["wachsen","blühen","leben"],
+            "Der Pilz": ["wachsen","leben"],
+            "Die Pilze": ["wachsen","leben"],
+            "Der Wald": ["rauschen","leben","glänzen"],
+            "Der See": ["glänzen","glitzern","rauschen"],
+            "Der Fluss": ["fließen","rauschen","glänzen","glitzern"],
+            "Die Flüsse": ["fließen","rauschen","glänzen","glitzern"],
+            "Der Berg": ["glänzen","leuchten"],
+            "Die Berge": ["glänzen","leuchten"],
+            "Die Wiese": ["blühen","glänzen","duften"],
+            "Das Meer": ["rauschen","glänzen","glitzern"],
+            "Der Wind": ["wehen","rauschen","tanzen"],
+            "Der Regen": ["fallen","rauschen"],
+            "Der Schnee": ["fallen","glitzern","glänzen","tanzen"],
+            "Der Vogel": ["singen","fliegen","zwitschern","flattern","leben","suchen"],
+            "Die Vögel": ["singen","fliegen","zwitschern","flattern","leben","suchen"],
+            "Die Eule": ["rufen","fliegen","leben"],
+            "Die Eulen": ["rufen","fliegen","leben"],
+            "Der Adler": ["fliegen","schweben","leben"],
+            "Die Schwalbe": ["fliegen","flattern","zwitschern"],
+            "Die Schwalben": ["fliegen","flattern","zwitschern"],
+            "Der Spatz": ["zwitschern","hüpfen","fliegen","suchen"],
+            "Die Spatzen": ["zwitschern","hüpfen","fliegen","suchen"],
+            "Die Ente": ["schwimmen","planschen","quaken","fliegen"],
+            "Die Enten": ["schwimmen","planschen","quaken","fliegen"],
+            "Der Schwan": ["schwimmen","schweben"],
+            "Die Schwäne": ["schwimmen","schweben"],
+            "Der Schmetterling": ["flattern","fliegen","tanzen","leben"],
+            "Die Schmetterlinge": ["flattern","fliegen","tanzen","leben"],
+            "Die Biene": ["summen","fliegen","sammeln","arbeiten"],
+            "Die Bienen": ["summen","fliegen","sammeln","arbeiten"],
+            "Die Ameise": ["arbeiten","sammeln","laufen","bauen"],
+            "Die Ameisen": ["arbeiten","sammeln","laufen","bauen"],
+            "Der Käfer": ["fliegen","leben","suchen"],
+            "Die Libelle": ["fliegen","schweben","glitzern","flattern"],
+            "Die Grille": ["zirpen","hüpfen","leben","singen"],
+            "Die Grillen": ["zirpen","hüpfen","leben","singen"],
+            "Der Fuchs": ["schleichen","laufen","leben","suchen"],
+            "Die Füchse": ["schleichen","laufen","leben","suchen"],
+            "Der Hase": ["hüpfen","laufen","leben","springen"],
+            "Die Hasen": ["hüpfen","laufen","leben","springen"],
+            "Das Reh": ["laufen","springen","leben","schleichen"],
+            "Die Rehe": ["laufen","springen","leben","schleichen"],
+            "Der Hirsch": ["laufen","leben","rufen","springen"],
+            "Das Eichhörnchen": ["klettern","springen","sammeln","leben"],
+            "Die Eichhörnchen": ["klettern","springen","sammeln","leben"],
+            "Der Igel": ["schlafen","suchen","leben"],
+            "Die Igel": ["schlafen","suchen","leben"],
+            "Der Wolf": ["laufen","leben","rufen"],
+            "Die Wölfe": ["laufen","leben","rufen"],
+            "Der Bär": ["schlafen","leben","schwimmen","laufen"],
+            "Die Bären": ["schlafen","leben","schwimmen","laufen"],
+            "Der Fisch": ["schwimmen","leben","glitzern","tauchen"],
+            "Die Fische": ["schwimmen","leben","glitzern","tauchen"],
+            "Der Frosch": ["quaken","hüpfen","schwimmen","springen","leben"],
+            "Die Frösche": ["quaken","hüpfen","schwimmen","springen","leben"],
+            "Die Schildkröte": ["schwimmen","leben","schlafen"],
+            "Der Wal": ["schwimmen","tauchen","leben","singen"],
+            "Der Delfin": ["schwimmen","springen","spielen","leben"],
+            "Die Delfine": ["schwimmen","springen","spielen","leben"],
+            "Der Hund": ["laufen","spielen","schwimmen","schlafen","leben"],
+            "Die Hunde": ["laufen","spielen","schwimmen","schlafen","leben"],
+            "Die Katze": ["schleichen","springen","schlafen","spielen","leben"],
+            "Die Katzen": ["schleichen","springen","schlafen","spielen","leben"],
+            "Das Pferd": ["laufen","springen","galoppieren","leben"],
+            "Die Pferde": ["laufen","springen","galoppieren","leben"],
+            "Die Kuh": ["leben","grasen"],
+            "Die Kühe": ["leben","grasen"],
+            "Das Schaf": ["leben","grasen"],
+            "Die Schafe": ["leben","grasen"],
+            "Der Hahn": ["rufen","krähen","leben"],
+            "Das Kind": ["spielen","laufen","springen","singen","tanzen","kommen","gehen"],
+            "Die Kinder": ["spielen","laufen","springen","singen","tanzen","kommen","gehen"],
+            "Der Junge": ["spielen","laufen","springen","klettern","schwimmen","kommen","gehen"],
+            "Das Mädchen": ["spielen","tanzen","singen","laufen","springen","kommen","gehen"],
+            "Der Apfel": ["kosten","schmecken","reifen","wachsen","fallen"],
+            "Die Äpfel": ["kosten","schmecken","reifen","wachsen","fallen"],
+            "Die Erdbeere": ["kosten","schmecken","reifen","wachsen","duften"],
+            "Die Erdbeeren": ["kosten","schmecken","reifen","wachsen","duften"]
+        };
+
+        var playerName = "";
+        var score = 0;
+        var currentStep = 1;
+        var currentSubject = null;
+        var currentVerb = null;
+        var currentVerbConjugated = null;
+        var currentEnding = null;
+        var sentences = [];
+
+        function $(id) { return document.getElementById(id); }
+        function shuffle(arr) {
+            var a = arr.slice();
+            for (var i = a.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var t = a[i]; a[i] = a[j]; a[j] = t;
+            }
+            return a;
+        }
+        
+        function addPoints(p) {
+            score += p;
+            var el = $("scoreValue");
+            if (el) el.textContent = score;
+            var sp = $("successPoints");
+            if (sp) sp.textContent = "+" + p + " Punkte";
+        }
+        
+        function showSuccess() {
+            var ov = $("successOverlay");
+            if (ov) {
+                ov.classList.add("active");
+                createConfetti();
+                setTimeout(function() { ov.classList.remove("active"); }, 1000);
+            }
+        }
+        
+        function createConfetti() {
+            var colors = ["#4caf50","#81c784","#ffeb3b","#ff9800","#9c27b0","#2196f3"];
+            for (var i = 0; i < 30; i++) {
+                var c = document.createElement("div");
+                c.className = "confetti";
+                c.style.left = Math.random() * 100 + "vw";
+                c.style.background = colors[Math.floor(Math.random() * colors.length)];
+                c.style.width = c.style.height = (Math.random() * 8 + 4) + "px";
+                c.style.borderRadius = Math.random() > 0.5 ? "50%" : "0";
+                c.style.animationDuration = (Math.random() * 1.5 + 1) + "s";
+                c.style.animationDelay = Math.random() * 0.3 + "s";
+                document.body.appendChild(c);
+                setTimeout(function(el) { el.remove(); }, 2500, c);
+            }
+        }
+
+        function updateSentenceList() {
+            var list = $("sentenceList");
+            var count = $("sentenceCount");
+            if (count) count.textContent = sentences.length + " Sätze";
+            if (list) {
+                if (sentences.length === 0) {
+                    list.innerHTML = '<div class="no-sentences">Noch keine Sätze gebildet... Wähle ein Subjekt! 🌿</div>';
+                } else {
+                    list.innerHTML = sentences.map(function(s, i) {
+                        return '<div class="collected-sentence">' + (i+1) + '. ' + s + '</div>';
+                    }).join('');
+                    list.scrollTop = list.scrollHeight;
+                }
+            }
+        }
+
+        function saveToTxt(filename, sents) {
+            if (sents.length === 0) {
+                alert("Du hast noch keine Sätze gebildet! Spiele erst ein bisschen. 😊");
+                return;
+            }
+            var text = "═══════════════════════════════════════════════════\n";
+            text += "  🌳 SÄTZE BILDEN - LEKTION 2: NATUR & TIERE 🌳\n";
+            text += "═══════════════════════════════════════════════════\n";
+            text += "  👤 Name: " + playerName + "\n";
+            text += "  📅 Datum: " + new Date().toLocaleDateString('de-DE') + "\n";
+            text += "  ⭐ Punkte: " + score + "\n";
+            text += "═══════════════════════════════════════════════════\n\n";
+            text += "📝 MEINE NATURSÄTZE:\n";
+            text += "─────────────────────────────────────────\n";
+            sents.forEach(function(s, i) { text += (i + 1) + ". " + s + "\n"; });
+            text += "\n─────────────────────────────────────────\n";
+            text += "🏆 Insgesamt: " + sents.length + " wunderschöne Sätze!\n";
+            text += "═══════════════════════════════════════════════════\n";
+            text += "\nSuper gemacht, " + playerName + "! 🌟🌿\n";
+            
+            var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            alert("Gespeichert! 🎉 Die Datei wurde heruntergeladen.");
+        }
+
+        function startGame() {
+            var nameEl = $("playerName");
+            if (!nameEl) return;
+            playerName = nameEl.value.trim();
+            var dn = $("displayName");
+            if (dn) dn.textContent = playerName;
+            var ws = $("welcomeScreen");
+            if (ws) ws.style.display = "none";
+            var ga = $("gameArea");
+            if (ga) ga.classList.add("active");
+            newRound();
+        }
+
+        function updateSteps() {
+            var steps = document.querySelectorAll("#mainSteps .step");
+            steps.forEach(function(s, i) {
+                s.classList.remove("active", "completed");
+                if (i + 1 < currentStep) s.classList.add("completed");
+                else if (i + 1 === currentStep) s.classList.add("active");
+            });
+        }
+
+        function updateSentenceDisplay() {
+            var display = $("mainSentence");
+            if (!display) return;
+            var html = "";
+            if (currentSubject) {
+                html += '<span class="sentence-part subject">' + currentSubject.emoji + ' ' + currentSubject.text + '</span>';
+            } else {
+                html += '<span class="sentence-part placeholder">❓ Subjekt</span>';
+            }
+            if (currentVerbConjugated) {
+                html += '<span class="sentence-part verb">' + currentVerbConjugated + '</span>';
+            } else if (currentStep >= 2) {
+                html += '<span class="sentence-part placeholder">❓ Verb</span>';
+            }
+            if (currentEnding) {
+                html += '<span class="sentence-part ending">' + currentEnding.emoji + ' ' + currentEnding.text + '</span>';
+            } else if (currentStep >= 4) {
+                html += '<span class="sentence-part placeholder">❓ Ende</span>';
+            }
+            display.innerHTML = html;
+        }
+
+        function updateSelection() {
+            var sel = $("mainSelection");
+            if (!sel) return;
+            
+            if (currentStep === 1) {
+                sel.innerHTML = '<div class="selection-label">👆 Wähle ein Subjekt (scroll für mehr!):</div><div class="selection-options" id="selOpts"></div>';
+                var opts = document.getElementById("selOpts");
+                shuffle(subjects).forEach(function(subj) {
+                    var b = document.createElement("button");
+                    b.className = "select-btn";
+                    if (subj.isPronoun) b.className += " pronoun-highlight";
+                    b.textContent = subj.emoji + " " + subj.text;
+                    b.onclick = function() {
+                        currentSubject = subj;
+                        currentStep = 2;
+                        updateSteps();
+                        updateSentenceDisplay();
+                        updateSelection();
+                    };
+                    opts.appendChild(b);
+                });
+                
+            } else if (currentStep === 2) {
+                var availableVerbs = subjectVerbMapping[currentSubject.text] || ["leben","spielen","laufen"];
+                var verbOptions = availableVerbs.filter(function(v) { return verbs[v]; });
+                
+                sel.innerHTML = '<div class="selection-label">🎯 Wähle ein passendes Verb für "' + currentSubject.text + '":</div><div class="selection-options" id="selOpts"></div>';
+                var opts = document.getElementById("selOpts");
+                
+                shuffle(verbOptions).forEach(function(verbKey) {
+                    var verb = verbs[verbKey];
+                    if (!verb) return;
+                    var b = document.createElement("button");
+                    b.className = "select-btn";
+                    b.textContent = verb.inf;
+                    b.onclick = function() {
+                        currentVerb = verb;
+                        currentStep = 3;
+                        updateSteps();
+                        updateSentenceDisplay();
+                        updateSelection();
+                    };
+                    opts.appendChild(b);
+                });
+                
+            } else if (currentStep === 3) {
+                var correctForm;
+                if (currentSubject.type === "ich") correctForm = currentVerb.ich;
+                else if (currentSubject.type === "du") correctForm = currentVerb.du;
+                else if (currentSubject.type === "er") correctForm = currentVerb.er;
+                else if (currentSubject.type === "wir") correctForm = currentVerb.wir;
+                else if (currentSubject.type === "ihr") correctForm = currentVerb.ihr;
+                else if (currentSubject.type === "sie") correctForm = currentVerb.sie;
+                
+                var allForms = [currentVerb.ich, currentVerb.du, currentVerb.er, currentVerb.wir, currentVerb.ihr, currentVerb.sie];
+                var uniqueForms = allForms.filter(function(v, i, a) { return a.indexOf(v) === i; });
+                
+                sel.innerHTML = '<div class="selection-label">🔤 Konjugiere "' + currentVerb.inf + '" für "' + currentSubject.text + '":</div><div class="selection-options" id="selOpts"></div>';
+                var opts = document.getElementById("selOpts");
+                
+                shuffle(uniqueForms).forEach(function(form) {
+                    var b = document.createElement("button");
+                    b.className = "select-btn";
+                    b.textContent = form;
+                    b.onclick = function() {
+                        if (form === correctForm) {
+                            this.classList.add("correct");
+                            currentVerbConjugated = form;
+                            addPoints(10);
+                            setTimeout(function() {
+                                currentStep = 4;
+                                updateSteps();
+                                updateSentenceDisplay();
+                                updateSelection();
+                            }, 400);
+                        } else {
+                            this.classList.add("wrong");
+                            var self = this;
+                            setTimeout(function() { self.classList.remove("wrong"); }, 400);
+                        }
+                    };
+                    opts.appendChild(b);
+                });
+                
+            } else if (currentStep === 4) {
+                sel.innerHTML = '<div class="selection-label">✨ Wähle ein passendes Ende für deinen Satz:</div><div class="selection-options" id="selOpts"></div>';
+                var opts = document.getElementById("selOpts");
+                var endings = currentVerb.endings || [{text:"schön", emoji:"✨"}];
+                
+                shuffle(endings).forEach(function(ending) {
+                    var b = document.createElement("button");
+                    b.className = "select-btn";
+                    b.textContent = ending.emoji + " " + ending.text;
+                    b.onclick = function() {
+                        currentEnding = ending;
+                        updateSentenceDisplay();
+                        var sentence = currentSubject.text + " " + currentVerbConjugated + " " + currentEnding.text + ".";
+                        sentences.push(sentence);
+                        updateSentenceList();
+                        addPoints(10);
+                        showSuccess();
+                        setTimeout(newRound, 1200);
+                    };
+                    opts.appendChild(b);
+                });
+            }
+        }
+
+        function newRound() {
+            currentStep = 1;
+            currentSubject = null;
+            currentVerb = null;
+            currentVerbConjugated = null;
+            currentEnding = null;
+            updateSteps();
+            updateSentenceDisplay();
+            updateSelection();
+        }
+
+        function showHelp() {
+            var hc = $("helpContent");
+            if (!hc) return;
+            var html = '<button class="help-close" id="helpClose2">✕</button>';
+            html += '<h3 class="help-title">📖 So funktioniert das Spiel</h3>';
+            html += '<p><strong>Schritt 1:</strong> Wähle ein Subjekt (Wer oder Was?)</p>';
+            html += '<p><strong>Schritt 2:</strong> Wähle ein passendes Verb</p>';
+            html += '<p><strong>Schritt 3:</strong> Konjugiere das Verb richtig</p>';
+            html += '<p><strong>Schritt 4:</strong> Wähle ein schönes Satzende</p>';
+            html += '<div class="pronoun-info"><strong>🧡 Orange markiert:</strong> Die Pronomen ich, du, wir, ihr sind besonders hervorgehoben, weil es für sie keine anderen Subjekte gibt!</div>';
+            html += '<h3 class="help-title" style="margin-top:20px;">📖 Konjugation</h3>';
+            html += '<table class="conj-table">';
+            html += '<tr><th>Pronomen</th><th>Endung</th><th>spielen</th><th>laufen</th></tr>';
+            html += '<tr><td>ich</td><td>-e</td><td>spiele</td><td>laufe</td></tr>';
+            html += '<tr><td>du</td><td>-st</td><td>spielst</td><td><b>läufst</b></td></tr>';
+            html += '<tr><td>er/sie/es</td><td>-t</td><td>spielt</td><td><b>läuft</b></td></tr>';
+            html += '<tr><td>wir</td><td>-en</td><td>spielen</td><td>laufen</td></tr>';
+            html += '<tr><td>ihr</td><td>-t</td><td>spielt</td><td>lauft</td></tr>';
+            html += '<tr><td>sie (Plural)</td><td>-en</td><td>spielen</td><td>laufen</td></tr>';
+            html += '</table>';
+            html += '<p style="margin-top:12px">⚠️ Manche Verben ändern sich: laufen → du <b>läufst</b>, wachsen → du <b>wächst</b></p>';
+            hc.innerHTML = html;
+            var hm = $("helpModal");
+            if (hm) hm.classList.add("active");
+            var hc2 = document.getElementById("helpClose2");
+            if (hc2) hc2.onclick = closeHelp;
+        }
+
+        function closeHelp() {
+            var hm = $("helpModal");
+            if (hm) hm.classList.remove("active");
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            var nameEl = $("playerName");
+            var startBtn = $("startBtn");
+            if (nameEl && startBtn) {
+                nameEl.oninput = function() { startBtn.disabled = this.value.trim().length < 1; };
+                nameEl.onkeypress = function(e) { if (e.key === "Enter" && this.value.trim().length >= 1) startGame(); };
+                startBtn.onclick = startGame;
+            }
+            var nb = $("newRound"); if (nb) nb.onclick = newRound;
+            var hb = $("helpBtn"); if (hb) hb.onclick = showHelp;
+            var hm = $("helpModal");
+            if (hm) hm.onclick = function(e) { if (e.target === hm) closeHelp(); };
+            var ss = $("saveSentences");
+            if (ss) ss.onclick = function() { saveToTxt("natursaetze-" + playerName.toLowerCase().replace(/\s+/g, '-') + ".txt", sentences); };
+            var sa = $("saveAll");
+            if (sa) sa.onclick = function() { saveToTxt("natursaetze-" + playerName.toLowerCase().replace(/\s+/g, '-') + ".txt", sentences); };
+        });
+    })();
+    </script>
+</body>
+</html>
