@@ -92,6 +92,7 @@
         .mode-indicator.preposition { background: linear-gradient(135deg, #2196f3, #64b5f6); }
         .mode-indicator.definite { background: linear-gradient(135deg, var(--accent), var(--accent-glow)); }
         .mode-indicator.indefinite { background: linear-gradient(135deg, var(--indefinite), var(--indefinite-glow)); color: #1a1a2e; }
+        .mode-indicator.negation { background: linear-gradient(135deg, #e53e3e, #fc8181); }
         .sentence-card {
             background: var(--bg-card);
             border-radius: 25px;
@@ -142,6 +143,11 @@
             transition: all 0.2s ease;
         }
         .article-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(156, 39, 176, 0.4); border-color: var(--possessive-glow); background: linear-gradient(135deg, var(--primary-light) 0%, var(--possessive) 100%); }
+        .article-btn.type-indefinite { border-color: var(--indefinite); box-shadow: 0 0 10px rgba(245, 200, 66, 0.3); }
+        .article-btn.type-indefinite:hover { border-color: var(--indefinite-glow); box-shadow: 0 8px 25px rgba(245, 200, 66, 0.5); background: linear-gradient(135deg, var(--primary-light) 0%, var(--indefinite) 100%); }
+        .article-btn.type-negation { border-color: #fc8181; box-shadow: 0 0 10px rgba(252, 129, 129, 0.3); }
+        .article-btn.type-negation:hover { border-color: #feb2b2; box-shadow: 0 8px 25px rgba(252, 129, 129, 0.5); background: linear-gradient(135deg, var(--primary-light) 0%, #e53e3e 100%); }
+        .possessive-base { font-size: 1.3rem; font-weight: 700; color: var(--possessive-glow); margin-right: 5px; }
         .control-buttons { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
         .control-btn { background: var(--bg-card); border: 2px solid var(--primary-light); border-radius: 12px; padding: 12px 25px; color: var(--text); font-family: 'Quicksand', sans-serif; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
         .control-btn:hover { border-color: var(--possessive); background: var(--primary); }
@@ -208,10 +214,16 @@
                         <span class="mode-icon">📚</span>
                     </button>
                     <button class="mode-btn" onclick="startGame('indefinite')">
-                        📙 Unbestimmte Artikel & kein
-                        <span class="mode-badge">75 Sätze</span>
-                        <div class="mode-desc">ein, eine, einen... + kein, keine, keinen...</div>
+                        📙 Unbestimmte Artikel
+                        <span class="mode-badge">40 Sätze</span>
+                        <div class="mode-desc">ein, eine, einen, einem, einer, eines (+ — für Plural)</div>
                         <span class="mode-icon">✨</span>
+                    </button>
+                    <button class="mode-btn" onclick="startGame('negation')">
+                        🚫 Verneinung mit "kein"
+                        <span class="mode-badge">35 Sätze</span>
+                        <div class="mode-desc">kein, keine, keinen, keinem, keiner, keines</div>
+                        <span class="mode-icon">❌</span>
                     </button>
                     <button class="mode-btn" onclick="startGame('possessive')">
                         💜 Possessivpronomen
@@ -424,83 +436,87 @@
             ["Sie liebt", "Musik", "klassisch.", "f", "akkusativ"],
         ];
 
-        // UNBESTIMMTE ARTIKEL + KEIN (75 Sätze) - [before, noun, after, gender, case, type]
+        // UNBESTIMMTE ARTIKEL (40 Sätze) - [before, noun, after, gender, case]
         const indefiniteSentences = [
-            ["Dort steht", "Baum", "im Park.", "m", "nominativ", "indefinite"],
-            ["Das ist", "Blume", "aus dem Garten.", "f", "nominativ", "indefinite"],
-            ["Hier liegt", "Buch", "auf dem Tisch.", "n", "nominativ", "indefinite"],
-            ["Da kommen", "Kinder", "aus der Schule.", "p", "nominativ", "indefinite"],
-            ["", "Vogel", "singt im Baum.", "m", "nominativ", "indefinite"],
-            ["", "Frau", "wartet an der Haltestelle.", "f", "nominativ", "indefinite"],
-            ["", "Mädchen", "spielt im Garten.", "n", "nominativ", "indefinite"],
-            ["Das sind", "Äpfel", "vom Markt.", "p", "nominativ", "indefinite"],
-            ["", "Junge", "läuft über die Straße.", "m", "nominativ", "indefinite"],
-            ["", "Katze", "sitzt auf dem Dach.", "f", "nominativ", "indefinite"],
-            ["Ich kaufe", "Apfel", "im Supermarkt.", "m", "akkusativ", "indefinite"],
-            ["Sie sucht", "Wohnung", "in der Stadt.", "f", "akkusativ", "indefinite"],
-            ["Er braucht", "Auto", "für die Arbeit.", "n", "akkusativ", "indefinite"],
-            ["Wir essen", "Brötchen", "zum Frühstück.", "p", "akkusativ", "indefinite"],
-            ["Ich schreibe", "Brief", "an meine Oma.", "m", "akkusativ", "indefinite"],
-            ["Sie liest", "Zeitung", "jeden Morgen.", "f", "akkusativ", "indefinite"],
-            ["Er hat", "Fahrrad", "bekommen.", "n", "akkusativ", "indefinite"],
-            ["Wir sehen", "Filme", "am Wochenende.", "p", "akkusativ", "indefinite"],
-            ["Ich trinke", "Kaffee", "zum Frühstück.", "m", "akkusativ", "indefinite"],
-            ["Sie bestellt", "Pizza", "im Restaurant.", "f", "akkusativ", "indefinite"],
-            ["Ich helfe", "Freund", "bei der Arbeit.", "m", "dativ", "indefinite"],
-            ["Sie gibt", "Frau", "den Weg an.", "f", "dativ", "indefinite"],
-            ["Er schenkt", "Kind", "einen Ball.", "n", "dativ", "indefinite"],
-            ["Wir danken", "Leuten", "für die Hilfe.", "p", "dativ", "indefinite"],
-            ["Ich begegne", "Mann", "im Park.", "m", "dativ", "indefinite"],
-            ["Sie antwortet", "Kollegin", "freundlich.", "f", "dativ", "indefinite"],
-            ["Er vertraut", "Mädchen", "sein Geheimnis an.", "n", "dativ", "indefinite"],
-            ["Das Buch gehört", "Studenten", "aus meiner Klasse.", "p", "dativ", "indefinite"],
-            ["Ich erzähle", "Freund", "eine Geschichte.", "m", "dativ", "indefinite"],
-            ["Sie zeigt", "Touristin", "den Weg.", "f", "dativ", "indefinite"],
-            ["Das ist", "Hund", ", das ist eine Katze.", "m", "nominativ", "negation"],
-            ["Das ist", "Rose", ", das ist eine Tulpe.", "f", "nominativ", "negation"],
-            ["Das ist", "Problem", "für mich.", "n", "nominativ", "negation"],
-            ["Hier steht", "Auto", "auf dem Parkplatz.", "m", "nominativ", "negation"],
-            ["Das ist", "gute Idee", "meiner Meinung nach.", "f", "nominativ", "negation"],
-            ["Das ist", "Spielzeug", ", das ist echt.", "n", "nominativ", "negation"],
-            ["Hier wohnt", "Arzt", "mehr.", "m", "nominativ", "negation"],
-            ["Das ist", "Lösung", "des Problems.", "f", "nominativ", "negation"],
-            ["Das ist", "Geheimnis", "für mich.", "n", "nominativ", "negation"],
-            ["Hier ist", "Fehler", "im Text.", "m", "nominativ", "negation"],
-            ["Ich habe", "Bruder", ", nur eine Schwester.", "m", "akkusativ", "negation"],
-            ["Sie hat", "Zeit", "für das Treffen.", "f", "akkusativ", "negation"],
-            ["Er hat", "Geld", "dabei.", "n", "akkusativ", "negation"],
-            ["Ich kaufe", "Kuchen", "heute.", "m", "akkusativ", "negation"],
-            ["Sie braucht", "Hilfe", "bei der Aufgabe.", "f", "akkusativ", "negation"],
-            ["Er hat", "Handy", "mehr.", "n", "akkusativ", "negation"],
-            ["Ich trinke", "Alkohol", "nie.", "m", "akkusativ", "negation"],
-            ["Sie isst", "Schokolade", "mehr.", "f", "akkusativ", "negation"],
-            ["Er macht", "Sport", "diese Woche.", "m", "akkusativ", "negation"],
-            ["Ich habe", "Hunger", "jetzt.", "m", "akkusativ", "negation"],
-            ["Ich helfe", "Fremden", "auf der Straße.", "m", "dativ", "negation"],
-            ["Sie vertraut", "Person", "ihr Geheimnis an.", "f", "dativ", "negation"],
-            ["Er gibt", "Kind", "Süßigkeiten.", "n", "dativ", "negation"],
-            ["Ich glaube", "Politiker", "mehr.", "m", "dativ", "negation"],
-            ["Sie antwortet", "Journalistin", "auf die Frage.", "f", "dativ", "negation"],
-            ["Er gehört", "Verein", "an.", "m", "dativ", "negation"],
-            ["Das Buch gefällt", "Leser", "wirklich.", "m", "dativ", "negation"],
-            ["Sie dankt", "Kollegen", "für nichts.", "m", "dativ", "negation"],
-            ["Er folgt", "Regel", "blindlings.", "f", "dativ", "negation"],
-            ["Das Essen schmeckt", "Gast", "gut.", "m", "dativ", "negation"],
-            ["Er kauft", "Geschenk", "für seine Frau.", "n", "akkusativ", "indefinite"],
-            ["Sie hat", "Ahnung", "von Mathe.", "f", "akkusativ", "negation"],
-            ["Das ist", "Witz", ", das ist ernst.", "m", "nominativ", "negation"],
-            ["Ich brauche", "Regenschirm", "heute.", "m", "akkusativ", "indefinite"],
-            ["Sie macht", "Fehler", "bei der Prüfung.", "m", "akkusativ", "negation"],
-            ["Er hat", "Haustier", "zu Hause.", "n", "akkusativ", "indefinite"],
-            ["Das ist", "Computer", ", das ist ein Tablet.", "m", "nominativ", "negation"],
-            ["Sie kauft", "Geschenk", "für die Party.", "n", "akkusativ", "indefinite"],
-            ["Ich sehe", "Unterschied", "zwischen beiden.", "m", "akkusativ", "negation"],
-            ["Er braucht", "Rat", "von niemandem.", "m", "akkusativ", "negation"],
-            ["Das ist", "Zufall", ", das ist geplant.", "m", "nominativ", "negation"],
-            ["Sie findet", "Lösung", "für das Problem.", "f", "akkusativ", "indefinite"],
-            ["Er kennt", "Ausweg", "aus der Situation.", "m", "akkusativ", "negation"],
-            ["Ich habe", "Idee", "für das Projekt.", "f", "akkusativ", "indefinite"],
-            ["Das gibt es", "Grund", "zur Sorge.", "m", "akkusativ", "negation"],
+            ["Dort steht", "Baum", "im Park.", "m", "nominativ"],
+            ["Das ist", "Blume", "aus dem Garten.", "f", "nominativ"],
+            ["Hier liegt", "Buch", "auf dem Tisch.", "n", "nominativ"],
+            ["Da kommen", "Kinder", "aus der Schule.", "p", "nominativ"],
+            ["", "Vogel", "singt im Baum.", "m", "nominativ"],
+            ["", "Frau", "wartet an der Haltestelle.", "f", "nominativ"],
+            ["", "Mädchen", "spielt im Garten.", "n", "nominativ"],
+            ["Das sind", "Äpfel", "vom Markt.", "p", "nominativ"],
+            ["", "Junge", "läuft über die Straße.", "m", "nominativ"],
+            ["", "Katze", "sitzt auf dem Dach.", "f", "nominativ"],
+            ["Ich kaufe", "Apfel", "im Supermarkt.", "m", "akkusativ"],
+            ["Sie sucht", "Wohnung", "in der Stadt.", "f", "akkusativ"],
+            ["Er braucht", "Auto", "für die Arbeit.", "n", "akkusativ"],
+            ["Wir essen", "Brötchen", "zum Frühstück.", "p", "akkusativ"],
+            ["Ich schreibe", "Brief", "an meine Oma.", "m", "akkusativ"],
+            ["Sie liest", "Zeitung", "jeden Morgen.", "f", "akkusativ"],
+            ["Er hat", "Fahrrad", "bekommen.", "n", "akkusativ"],
+            ["Wir sehen", "Filme", "am Wochenende.", "p", "akkusativ"],
+            ["Ich trinke", "Kaffee", "zum Frühstück.", "m", "akkusativ"],
+            ["Sie bestellt", "Pizza", "im Restaurant.", "f", "akkusativ"],
+            ["Ich helfe", "Freund", "bei der Arbeit.", "m", "dativ"],
+            ["Sie gibt", "Frau", "den Weg an.", "f", "dativ"],
+            ["Er schenkt", "Kind", "einen Ball.", "n", "dativ"],
+            ["Wir danken", "Leuten", "für die Hilfe.", "p", "dativ"],
+            ["Ich begegne", "Mann", "im Park.", "m", "dativ"],
+            ["Sie antwortet", "Kollegin", "freundlich.", "f", "dativ"],
+            ["Er vertraut", "Mädchen", "sein Geheimnis an.", "n", "dativ"],
+            ["Das Buch gehört", "Studenten", "aus meiner Klasse.", "p", "dativ"],
+            ["Ich erzähle", "Freund", "eine Geschichte.", "m", "dativ"],
+            ["Sie zeigt", "Touristin", "den Weg.", "f", "dativ"],
+            ["Er kauft", "Geschenk", "für seine Frau.", "n", "akkusativ"],
+            ["Ich brauche", "Regenschirm", "heute.", "m", "akkusativ"],
+            ["Er hat", "Haustier", "zu Hause.", "n", "akkusativ"],
+            ["Sie kauft", "Geschenk", "für die Party.", "n", "akkusativ"],
+            ["Sie findet", "Lösung", "für das Problem.", "f", "akkusativ"],
+            ["Ich habe", "Idee", "für das Projekt.", "f", "akkusativ"],
+            ["Das ist", "Haus", "mit großem Garten.", "n", "nominativ"],
+            ["Er sucht", "Job", "in der Stadt.", "m", "akkusativ"],
+            ["Sie braucht", "Tasche", "für die Reise.", "f", "akkusativ"],
+            ["Wir haben", "Hund", "seit letztem Jahr.", "m", "akkusativ"],
+        ];
+
+        // VERNEINUNG MIT KEIN (35 Sätze) - [before, noun, after, gender, case]
+        const negationSentences = [
+            ["Das ist", "Hund", ", das ist eine Katze.", "m", "nominativ"],
+            ["Das ist", "Rose", ", das ist eine Tulpe.", "f", "nominativ"],
+            ["Das ist", "Problem", "für mich.", "n", "nominativ"],
+            ["Hier steht", "Auto", "auf dem Parkplatz.", "m", "nominativ"],
+            ["Das ist", "gute Idee", "meiner Meinung nach.", "f", "nominativ"],
+            ["Das ist", "Spielzeug", ", das ist echt.", "n", "nominativ"],
+            ["Hier wohnt", "Arzt", "mehr.", "m", "nominativ"],
+            ["Das ist", "Lösung", "des Problems.", "f", "nominativ"],
+            ["Das ist", "Geheimnis", "für mich.", "n", "nominativ"],
+            ["Hier ist", "Fehler", "im Text.", "m", "nominativ"],
+            ["Ich habe", "Bruder", ", nur eine Schwester.", "m", "akkusativ"],
+            ["Sie hat", "Zeit", "für das Treffen.", "f", "akkusativ"],
+            ["Er hat", "Geld", "dabei.", "n", "akkusativ"],
+            ["Ich kaufe", "Kuchen", "heute.", "m", "akkusativ"],
+            ["Sie braucht", "Hilfe", "bei der Aufgabe.", "f", "akkusativ"],
+            ["Er hat", "Handy", "mehr.", "n", "akkusativ"],
+            ["Ich trinke", "Alkohol", "nie.", "m", "akkusativ"],
+            ["Sie isst", "Schokolade", "mehr.", "f", "akkusativ"],
+            ["Er macht", "Sport", "diese Woche.", "m", "akkusativ"],
+            ["Ich habe", "Hunger", "jetzt.", "m", "akkusativ"],
+            ["Ich helfe", "Fremden", "auf der Straße.", "m", "dativ"],
+            ["Sie vertraut", "Person", "ihr Geheimnis an.", "f", "dativ"],
+            ["Er gibt", "Kind", "Süßigkeiten.", "n", "dativ"],
+            ["Ich glaube", "Politiker", "mehr.", "m", "dativ"],
+            ["Sie antwortet", "Journalistin", "auf die Frage.", "f", "dativ"],
+            ["Er gehört", "Verein", "an.", "m", "dativ"],
+            ["Das Buch gefällt", "Leser", "wirklich.", "m", "dativ"],
+            ["Er folgt", "Regel", "blindlings.", "f", "dativ"],
+            ["Das Essen schmeckt", "Gast", "gut.", "m", "dativ"],
+            ["Sie hat", "Ahnung", "von Mathe.", "f", "akkusativ"],
+            ["Das ist", "Witz", ", das ist ernst.", "m", "nominativ"],
+            ["Sie macht", "Fehler", "bei der Prüfung.", "m", "akkusativ"],
+            ["Das ist", "Computer", ", das ist ein Tablet.", "m", "nominativ"],
+            ["Ich sehe", "Unterschied", "zwischen beiden.", "m", "akkusativ"],
+            ["Das gibt es", "Grund", "zur Sorge.", "m", "akkusativ"],
         ];
 
         // POSSESSIVPRONOMEN (75 Sätze) - [before, possessor, noun, after, nounGender, case]
@@ -643,9 +659,10 @@
             let pool, text, cls;
             if (mode === 'preposition') { pool = [...prepSentences]; text = '🔗 Präpositionen'; cls = 'preposition'; }
             else if (mode === 'definite') { pool = [...definiteSentences]; text = '📘 Bestimmte Artikel'; cls = 'definite'; }
-            else if (mode === 'indefinite') { pool = [...indefiniteSentences]; text = '📙 Unbestimmt & Kein'; cls = 'indefinite'; }
+            else if (mode === 'indefinite') { pool = [...indefiniteSentences]; text = '📙 Unbestimmte Artikel'; cls = 'indefinite'; }
+            else if (mode === 'negation') { pool = [...negationSentences]; text = '🚫 Verneinung mit kein'; cls = 'negation'; }
             else { pool = [...possessiveSentences]; text = '💜 Possessivpronomen'; cls = 'possessive'; }
-            gameState = { mode, currentSentence: null, solvedSentences: [], remainingSentences: pool.sort(() => Math.random()-0.5), selectedSlot: null, points: 0, streak: 0, bestStreak: 0, startTime: Date.now(), timerInterval: null, correctAnswers: 0, totalAttempts: 0, soundEnabled: gameState.soundEnabled };
+            gameState = { mode, currentSentence: null, solvedSentences: [], remainingSentences: pool.sort(() => Math.random()-0.5), selectedSlot: null, points: 0, streak: 0, bestStreak: 0, startTime: Date.now(), timerInterval: null, correctAnswers: 0, totalAttempts: 0, soundEnabled: gameState.soundEnabled, currentPossBase: '' };
             document.getElementById('modeIndicator').textContent = text;
             document.getElementById('modeIndicator').className = 'mode-indicator ' + cls;
             setupArticleButtons();
@@ -658,10 +675,30 @@
         function setupArticleButtons() {
             const g = document.getElementById('articleGrid');
             let btns = [];
-            if (gameState.mode === 'preposition' || gameState.mode === 'definite') btns = ['der','die','das','den','dem','des'];
-            else if (gameState.mode === 'indefinite') btns = ['ein','eine','einen','einem','einer','eines','—','kein','keine','keinen','keinem','keiner','keines'];
-            else btns = ['mein','meine','meinen','meinem','meiner','meines','dein','deine','deinen','deinem','deiner','deines','sein','seine','seinen','seinem','seiner','seines','ihr','ihre','ihren','ihrem','ihrer','ihres','unser','unsere','unseren','unserem','unserer','unseres','euer','eure','euren','eurem','eurer','eures','Ihr','Ihre','Ihren','Ihrem','Ihrer','Ihres'];
-            g.innerHTML = btns.map(b => `<button class="article-btn" onclick="selectArticle('${b}')">${b}</button>`).join('');
+            if (gameState.mode === 'preposition' || gameState.mode === 'definite') {
+                btns = ['der','die','das','den','dem','des'].map(b => ({text: b, type: 'definite'}));
+            } else if (gameState.mode === 'indefinite') {
+                btns = ['ein','eine','einen','einem','einer','eines','—'].map(b => ({text: b, type: 'indefinite'}));
+            } else if (gameState.mode === 'negation') {
+                btns = ['kein','keine','keinen','keinem','keiner','keines'].map(b => ({text: b, type: 'negation'}));
+            } else if (gameState.mode === 'possessive') {
+                // Nur Endungen für Possessivpronomen
+                btns = [
+                    {text: '—', ending: '', type: 'possessive'},
+                    {text: '-e', ending: 'e', type: 'possessive'},
+                    {text: '-en', ending: 'en', type: 'possessive'},
+                    {text: '-em', ending: 'em', type: 'possessive'},
+                    {text: '-er', ending: 'er', type: 'possessive'},
+                    {text: '-es', ending: 'es', type: 'possessive'}
+                ];
+            }
+            g.innerHTML = btns.map(b => {
+                const cls = 'article-btn type-' + b.type;
+                if (gameState.mode === 'possessive') {
+                    return `<button class="${cls}" onclick="selectArticle('${b.ending}')">${b.text}</button>`;
+                }
+                return `<button class="${cls}" onclick="selectArticle('${b.text}')">${b.text}</button>`;
+            }).join('');
         }
 
         function updateTimer() { const e = Math.floor((Date.now()-gameState.startTime)/1000); document.getElementById('timer').textContent = `${Math.floor(e/60)}:${(e%60).toString().padStart(2,'0')}`; }
@@ -673,6 +710,7 @@
             const el = document.getElementById('sentence');
             const hint = document.getElementById('caseHint');
             let html = '', answer = '', hintText = '';
+            
             if (gameState.mode === 'preposition') {
                 const [bef, prep, noun, aft, gen, cas, pType] = gameState.currentSentence;
                 answer = articles.definite[cas][gen];
@@ -686,19 +724,42 @@
                 hintText = hints[cas];
                 html = `<span class="word">${bef}</span> <span class="article-slot" data-answer="${answer}" onclick="selectSlot(this)">?</span> <span class="word">${noun}</span> <span class="word">${aft}</span>`;
             } else if (gameState.mode === 'indefinite') {
-                const [bef, noun, aft, gen, cas, typ] = gameState.currentSentence;
-                answer = typ === 'indefinite' ? articles.indefinite[cas][gen] : articles.negation[cas][gen];
+                const [bef, noun, aft, gen, cas] = gameState.currentSentence;
+                answer = articles.indefinite[cas][gen];
                 const hints = {'nominativ':'NOMINATIV (wer/was?)','akkusativ':'AKKUSATIV (wen/was?)','dativ':'DATIV (wem?)','genitiv':'GENITIV (wessen?)'};
-                hintText = hints[cas] + (typ === 'negation' ? ' - VERNEINUNG' : '');
+                hintText = hints[cas];
                 html = `<span class="word">${bef}</span> <span class="article-slot" data-answer="${answer}" onclick="selectSlot(this)">?</span> <span class="word">${noun}</span> <span class="word">${aft}</span>`;
-            } else {
+            } else if (gameState.mode === 'negation') {
+                const [bef, noun, aft, gen, cas] = gameState.currentSentence;
+                answer = articles.negation[cas][gen];
+                const hints = {'nominativ':'NOMINATIV (wer/was?)','akkusativ':'AKKUSATIV (wen/was?)','dativ':'DATIV (wem?)','genitiv':'GENITIV (wessen?)'};
+                hintText = hints[cas] + ' – VERNEINUNG';
+                html = `<span class="word">${bef}</span> <span class="article-slot" data-answer="${answer}" onclick="selectSlot(this)">?</span> <span class="word">${noun}</span> <span class="word">${aft}</span>`;
+            } else if (gameState.mode === 'possessive') {
                 const [bef, poss, noun, aft, gen, cas] = gameState.currentSentence;
-                answer = getPossessiveForm(poss, gen, cas);
-                const possNames = {'ich':'ICH → mein...','du':'DU → dein...','er':'ER → sein...','sie':'SIE (sing.) → ihr...','es':'ES → sein...','wir':'WIR → unser...','ihr':'IHR → euer...','sie-pl':'SIE (plural) → ihr...','Sie':'SIE (höflich) → Ihr...'};
+                const fullAnswer = getPossessiveForm(poss, gen, cas);
+                const base = articles.possessive[poss];
+                // Bei "euer" spezielle Behandlung
+                let ending = '';
+                if (poss === 'ihr') {
+                    // euer -> eure, euren, eurem, eurer, eures
+                    if (fullAnswer === 'euer') ending = '';
+                    else ending = fullAnswer.slice(2); // eu + rest
+                    if (ending.startsWith('r')) ending = ending.slice(1); // "eure" -> "e"
+                } else {
+                    ending = fullAnswer.slice(base.length);
+                }
+                answer = ending;
+                gameState.currentPossBase = base;
+                
+                const possNames = {'ich':'ICH','du':'DU','er':'ER','sie':'SIE (sie)','es':'ES','wir':'WIR','ihr':'IHR (ihr)','sie-pl':'SIE (sie Plural)','Sie':'SIE (Sie höflich)'};
                 const caseH = {'nominativ':'NOMINATIV','akkusativ':'AKKUSATIV','dativ':'DATIV','genitiv':'GENITIV'};
                 hintText = possNames[poss] + ' + ' + caseH[cas];
-                html = `<span class="word">${bef}</span> <span class="article-slot" data-answer="${answer}" onclick="selectSlot(this)">?</span> <span class="word">${noun}</span> <span class="word">${aft}</span>`;
+                
+                // Zeige den Stamm + Lücke für die Endung
+                html = `<span class="word">${bef}</span> <span class="possessive-base">${base}</span><span class="article-slot" data-answer="${answer}" data-full="${fullAnswer}" onclick="selectSlot(this)">?</span> <span class="word">${noun}</span> <span class="word">${aft}</span>`;
             }
+            
             el.innerHTML = html;
             hint.textContent = hintText;
             hint.style.display = hintText ? 'block' : 'none';
@@ -713,7 +774,12 @@
             const correct = slot.dataset.answer;
             if (art === correct) {
                 playSound('correct');
-                slot.textContent = art;
+                // Für Possessivpronomen: Zeige die volle Form
+                if (gameState.mode === 'possessive') {
+                    slot.textContent = art === '' ? '—' : '-' + art;
+                } else {
+                    slot.textContent = art;
+                }
                 slot.classList.remove('selected');
                 slot.classList.add('correct');
                 gameState.streak++;
@@ -745,7 +811,7 @@
         function endGame() { clearInterval(gameState.timerInterval); const e = Math.floor((Date.now()-gameState.startTime)/1000); document.getElementById('finalPoints').textContent = gameState.points; document.getElementById('finalTime').textContent = `${Math.floor(e/60)}:${(e%60).toString().padStart(2,'0')}`; document.getElementById('bestStreak').textContent = gameState.bestStreak; document.getElementById('accuracy').textContent = Math.round((gameState.correctAnswers/gameState.totalAttempts)*100)+'%'; showScreen('resultScreen'); document.getElementById('backBtn').style.display = 'none'; updateResultLeaderboard(); playSound('milestone'); createConfetti(); }
         function loadLeaderboard() { const s = localStorage.getItem('artikelFaelleChampionLeaderboard'); return s ? JSON.parse(s) : []; }
         function saveLeaderboard(l) { localStorage.setItem('artikelFaelleChampionLeaderboard', JSON.stringify(l)); }
-        function saveScore() { const n = document.getElementById('playerName').value.trim() || 'Anonym'; const e = Math.floor((Date.now()-gameState.startTime)/1000); const modes = {preposition:'Präpositionen',definite:'Bestimmte Artikel',indefinite:'Unbestimmt & Kein',possessive:'Possessivpronomen'}; const entry = {name:n,points:gameState.points,time:e,mode:modes[gameState.mode],date:new Date().toLocaleDateString('de-DE')}; const l = loadLeaderboard(); l.push(entry); l.sort((a,b) => b.points-a.points); saveLeaderboard(l.slice(0,10)); updateResultLeaderboard(); updateMenuLeaderboard(); document.getElementById('playerName').disabled = true; event.target.disabled = true; event.target.textContent = '✓ Gespeichert!'; }
+        function saveScore() { const n = document.getElementById('playerName').value.trim() || 'Anonym'; const e = Math.floor((Date.now()-gameState.startTime)/1000); const modes = {preposition:'Präpositionen',definite:'Bestimmte Artikel',indefinite:'Unbestimmte Artikel',negation:'Verneinung (kein)',possessive:'Possessivpronomen'}; const entry = {name:n,points:gameState.points,time:e,mode:modes[gameState.mode],date:new Date().toLocaleDateString('de-DE')}; const l = loadLeaderboard(); l.push(entry); l.sort((a,b) => b.points-a.points); saveLeaderboard(l.slice(0,10)); updateResultLeaderboard(); updateMenuLeaderboard(); document.getElementById('playerName').disabled = true; event.target.disabled = true; event.target.textContent = '✓ Gespeichert!'; }
         function formatTime(s) { return `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`; }
         function updateMenuLeaderboard() { const c = document.getElementById('menuLeaderboard'); const l = loadLeaderboard(); if (l.length === 0) { c.innerHTML = '<p style="color:var(--text-muted);text-align:center;">Noch keine Einträge. Sei der Erste!</p>'; return; } c.innerHTML = l.slice(0,5).map((e,i) => `<div class="leaderboard-entry"><span class="leaderboard-rank">${i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.'}</span><span class="leaderboard-name">${e.name}</span><span class="leaderboard-score">${e.points} Pkt</span><span class="leaderboard-time">${formatTime(e.time)}</span></div>`).join(''); }
         function updateResultLeaderboard() { const c = document.getElementById('resultLeaderboard'); const l = loadLeaderboard(); c.innerHTML = `<h3 class="leaderboard-title">🏅 Bestenliste</h3>${l.slice(0,5).map((e,i) => `<div class="leaderboard-entry"><span class="leaderboard-rank">${i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.'}</span><span class="leaderboard-name">${e.name}</span><span class="leaderboard-score">${e.points} Pkt</span><span class="leaderboard-time">${formatTime(e.time)}</span></div>`).join('')}`; }
