@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unregelmäßige Verben - Konjugationsspiel</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(180deg, #e1bee7 0%, #ce93d8 50%, #ab47bc 100%);
+            min-height: 100vh;
+            color: #4a148c;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; padding: 20px; margin-bottom: 20px; }
+        .header h1 { font-size: 2rem; font-weight: 700; color: #4a148c; }
+        .header-emoji { font-size: 2.5rem; display: block; margin-bottom: 10px; }
+        .header-subtitle { font-size: 1rem; color: #6a1b9a; margin-top: 5px; }
+
+        .welcome-screen {
+            background: #fff; border-radius: 16px; padding: 35px; max-width: 450px;
+            margin: 0 auto; box-shadow: 0 8px 30px rgba(74,20,140,0.25); text-align: center;
+        }
+        .welcome-screen h2 { color: #4a148c; font-size: 1.5rem; margin-bottom: 18px; }
+        .welcome-screen p { color: #7b1fa2; margin-bottom: 20px; font-size: 1.1rem; }
+        .name-input {
+            width: 100%; padding: 14px 18px; font-size: 1.15rem; font-family: Arial;
+            border: 2px solid #ab47bc; border-radius: 10px; outline: none; text-align: center;
+        }
+        .name-input:focus { border-color: #7b1fa2; box-shadow: 0 0 0 3px rgba(171,71,188,0.25); }
+        .start-btn {
+            margin-top: 22px; padding: 14px 45px; font-size: 1.15rem; font-family: Arial;
+            font-weight: 700; background: linear-gradient(135deg, #ab47bc, #8e24aa); color: white; border: none;
+            border-radius: 25px; cursor: pointer; transition: all 0.2s;
+        }
+        .start-btn:hover:not(:disabled) { background: linear-gradient(135deg, #8e24aa, #6a1b9a); transform: translateY(-2px); }
+        .start-btn:disabled { background: #ce93d8; cursor: not-allowed; }
+
+        .game-area { display: none; }
+        .game-area.active { display: block; }
+
+        .score-bar {
+            background: #fff; border-radius: 12px; padding: 14px 22px; margin-bottom: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(74,20,140,0.2);
+        }
+        .player-info { display: flex; align-items: center; gap: 10px; }
+        .player-avatar {
+            width: 42px; height: 42px; background: linear-gradient(135deg, #ba68c8, #ab47bc);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+        }
+        .player-name { font-weight: 700; font-size: 1.05rem; color: #4a148c; }
+        .stats-container { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .score-display {
+            display: flex; align-items: center; gap: 6px;
+            background: linear-gradient(135deg, #ffeb3b, #ffc107);
+            padding: 9px 18px; border-radius: 20px; font-weight: 700; color: #4a148c;
+        }
+        .streak-display {
+            display: flex; align-items: center; gap: 6px;
+            background: linear-gradient(135deg, #ff7043, #f4511e);
+            padding: 9px 18px; border-radius: 20px; font-weight: 700; color: white;
+        }
+
+        .game-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
+        .tab-btn {
+            padding: 11px 16px; font-family: Arial; font-weight: 700; font-size: 0.9rem;
+            background: #fff; color: #4a148c; border: 2px solid #ab47bc;
+            border-radius: 10px; cursor: pointer; transition: all 0.2s;
+        }
+        .tab-btn:hover { background: #f3e5f5; }
+        .tab-btn.active { background: linear-gradient(135deg, #ab47bc, #8e24aa); color: white; border-color: #7b1fa2; }
+
+        .game-panel {
+            display: none; background: #fff; border-radius: 16px; padding: 25px;
+            box-shadow: 0 8px 30px rgba(74,20,140,0.2);
+        }
+        .game-panel.active { display: block; }
+        .game-title { font-size: 1.4rem; font-weight: 700; color: #4a148c; text-align: center; margin-bottom: 8px; }
+        .game-description { text-align: center; color: #7b1fa2; margin-bottom: 20px; font-size: 1rem; }
+
+        .challenge-box {
+            background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+            border-radius: 16px; padding: 25px; text-align: center; margin-bottom: 20px;
+        }
+        .verb-infinitive {
+            font-size: 2rem; font-weight: 700; color: #4a148c;
+            background: linear-gradient(135deg, #ba68c8, #ab47bc);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+        }
+        .pronoun-display {
+            display: inline-block; padding: 12px 30px; font-size: 1.5rem; font-weight: 700;
+            background: linear-gradient(135deg, #ff7043, #f4511e);
+            color: white; border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(244,81,30,0.3);
+        }
+        .challenge-prompt {
+            margin-top: 15px; font-size: 1.1rem; color: #6a1b9a;
+        }
+
+        .options-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px; margin: 20px 0;
+        }
+        .option-btn {
+            padding: 14px 20px; font-size: 1.1rem; font-family: Arial; font-weight: 700;
+            background: #fff; color: #4a148c; border: 3px solid #ce93d8;
+            border-radius: 12px; cursor: pointer; transition: all 0.2s;
+        }
+        .option-btn:hover { background: #f3e5f5; border-color: #ab47bc; transform: translateY(-2px); }
+        .option-btn.correct {
+            background: linear-gradient(135deg, #66bb6a, #43a047) !important;
+            border-color: #2e7d32 !important; color: white !important;
+            animation: pulse 0.5s ease;
+        }
+        .option-btn.wrong {
+            background: linear-gradient(135deg, #ef5350, #e53935) !important;
+            border-color: #c62828 !important; color: white !important;
+            animation: shake 0.4s ease;
+        }
+        @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-8px);} 75%{transform:translateX(8px);} }
+        @keyframes pulse { 0%{transform:scale(1);} 50%{transform:scale(1.05);} 100%{transform:scale(1);} }
+
+        .action-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+        .game-btn {
+            padding: 12px 24px; font-size: 1rem; font-family: Arial; font-weight: 700;
+            border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-primary { background: linear-gradient(135deg, #ab47bc, #8e24aa); color: white; }
+        .btn-primary:hover { background: linear-gradient(135deg, #8e24aa, #6a1b9a); transform: translateY(-2px); }
+        .btn-secondary { background: #fff; color: #4a148c; border: 2px solid #ab47bc; }
+        .btn-secondary:hover { background: #f3e5f5; }
+
+        .progress-section {
+            margin-top: 25px; background: linear-gradient(135deg, #fff8e1, #ffecb3);
+            border: 3px solid #ffc107; border-radius: 16px; padding: 20px;
+        }
+        .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .progress-title { font-weight: 700; color: #4a148c; font-size: 1.1rem; }
+        .progress-stats { display: flex; gap: 15px; }
+        .stat-item { text-align: center; }
+        .stat-value { font-size: 1.3rem; font-weight: 700; color: #4a148c; }
+        .stat-label { font-size: 0.8rem; color: #7b1fa2; }
+        .progress-bar-container { background: #e1bee7; border-radius: 10px; height: 20px; overflow: hidden; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, #ab47bc, #8e24aa); border-radius: 10px; transition: width 0.5s ease; }
+
+        .help-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(74,20,140,0.7); z-index: 1000;
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .help-modal.active { display: flex; }
+        .help-content {
+            background: #fff; border-radius: 16px; padding: 25px; max-width: 650px;
+            max-height: 85vh; overflow-y: auto; position: relative;
+        }
+        .help-close {
+            position: absolute; top: 12px; right: 12px; width: 36px; height: 36px;
+            background: linear-gradient(135deg, #ef5350, #e53935); color: white;
+            border: none; border-radius: 50%; font-size: 1.2rem; cursor: pointer;
+        }
+        .help-title { font-size: 1.3rem; font-weight: 700; color: #4a148c; margin-bottom: 15px; }
+        .conj-table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 0.9rem; }
+        .conj-table th, .conj-table td { padding: 10px; text-align: center; border-bottom: 2px solid #e1bee7; }
+        .conj-table th { background: #f3e5f5; color: #4a148c; font-weight: 700; }
+        .conj-table tr:hover { background: #fce4ec; }
+        .conj-table td:first-child { font-weight: 700; color: #7b1fa2; }
+
+        .success-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(102,187,106,0.95); z-index: 1000;
+            align-items: center; justify-content: center; flex-direction: column;
+        }
+        .success-overlay.active { display: flex; }
+        .success-emoji { font-size: 5rem; animation: bounce 0.6s ease; }
+        .success-text { font-size: 2rem; font-weight: 700; color: white; margin-top: 15px; }
+        .success-points { font-size: 1.3rem; color: white; margin-top: 8px; }
+        @keyframes bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-20px);} }
+
+        .verb-hint {
+            margin-top: 15px; padding: 12px 20px; background: #fff3e0;
+            border-left: 4px solid #ff9800; border-radius: 8px;
+            font-size: 0.95rem; color: #e65100; display: none;
+        }
+        .verb-hint.active { display: block; }
+
+        .category-badge {
+            display: inline-block; padding: 4px 12px; border-radius: 15px;
+            font-size: 0.8rem; font-weight: 700; margin-bottom: 10px;
+        }
+        .badge-modal { background: #e3f2fd; color: #1565c0; }
+        .badge-sein { background: #e8f5e9; color: #2e7d32; }
+        .badge-haben { background: #fff3e0; color: #e65100; }
+        .badge-vokal { background: #fce4ec; color: #c2185b; }
+        .badge-andere { background: #f3e5f5; color: #7b1fa2; }
+
+        .sentence-collection {
+            margin-top: 25px; background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+            border: 3px solid #ab47bc; border-radius: 16px; padding: 20px;
+        }
+        .collection-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px dashed #ab47bc;
+        }
+        .collection-title { font-weight: 700; color: #4a148c; font-size: 1.1rem; }
+        .collection-count {
+            background: linear-gradient(135deg, #ffeb3b, #ffc107);
+            color: #4a148c; padding: 6px 16px; border-radius: 20px; font-weight: 700;
+        }
+        .sentence-list {
+            max-height: 250px; overflow-y: auto; display: flex;
+            flex-direction: column; gap: 8px; padding: 5px;
+        }
+        .collected-sentence {
+            background: #fff; padding: 10px 14px; border-radius: 8px;
+            border-left: 4px solid #ab47bc; font-size: 1rem; color: #4a148c;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn { from{opacity:0;transform:translateX(-20px);} to{opacity:1;transform:translateX(0);} }
+        .no-sentences { color: #9575cd; font-style: italic; text-align: center; padding: 20px; }
+        .save-section { margin-top: 15px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <span class="header-emoji">🔮✨</span>
+            <h1>Unregelmäßige Verben</h1>
+            <p class="header-subtitle">Lerne die besonderen Verben im Deutschen!</p>
+        </div>
+
+        <div class="welcome-screen" id="welcomeScreen">
+            <h2>🌟 Willkommen!</h2>
+            <p>Lerne Modalverben, sein, haben und andere besondere Verben richtig zu konjugieren!</p>
+            <input type="text" class="name-input" id="playerName" placeholder="Dein Name..." maxlength="20">
+            <button class="start-btn" id="startBtn" disabled>Los geht's! 🚀</button>
+        </div>
+
+        <div class="game-area" id="gameArea">
+            <div class="score-bar">
+                <div class="player-info">
+                    <div class="player-avatar">🧙</div>
+                    <span class="player-name" id="displayName"></span>
+                </div>
+                <div class="stats-container">
+                    <div class="streak-display">
+                        <span>🔥</span>
+                        <span id="streak">0</span>
+                    </div>
+                    <div class="score-display">
+                        <span>⭐</span>
+                        <span id="score">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-tabs">
+                <button class="tab-btn active" data-game="modal">🎭 Modalverben</button>
+                <button class="tab-btn" data-game="sein">🌈 sein</button>
+                <button class="tab-btn" data-game="haben">🎁 haben</button>
+                <button class="tab-btn" data-game="vokal">🔄 Vokalwechsel</button>
+                <button class="tab-btn" data-game="andere">⚡ Andere</button>
+                <button class="tab-btn" data-game="mix">🎲 Mix</button>
+            </div>
+
+            <!-- MODALVERBEN -->
+            <div class="game-panel active" id="panelModal">
+                <div class="game-title">🎭 Modalverben</div>
+                <div class="game-description">können, müssen, wollen, dürfen, sollen, mögen</div>
+                
+                <div class="challenge-box">
+                    <span class="category-badge badge-modal">Modalverb</span>
+                    <div class="verb-infinitive" id="modalVerb">können</div>
+                    <div class="pronoun-display" id="modalPronoun">ich</div>
+                    <div class="challenge-prompt">Wie lautet die richtige Form?</div>
+                </div>
+
+                <div class="options-grid" id="modalOptions"></div>
+
+                <div class="verb-hint" id="modalHint"></div>
+
+                <div class="action-btns">
+                    <button class="game-btn btn-secondary" id="hintModal">💡 Tipp</button>
+                    <button class="game-btn btn-primary" id="newModal">▶️ Nächstes Verb</button>
+                    <button class="game-btn btn-secondary" id="helpModal">📖 Hilfe</button>
+                </div>
+
+                <div class="progress-section">
+                    <div class="progress-header">
+                        <span class="progress-title">📊 Dein Fortschritt</span>
+                        <div class="progress-stats">
+                            <div class="stat-item">
+                                <div class="stat-value" id="modalCorrect">0</div>
+                                <div class="stat-label">Richtig</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="modalTotal">0</div>
+                                <div class="stat-label">Gesamt</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="modalProgress" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="sentence-collection">
+                    <div class="collection-header">
+                        <span class="collection-title">📝 Deine Sätze</span>
+                        <span class="collection-count" id="modalCount">0</span>
+                    </div>
+                    <div class="sentence-list" id="modalList">
+                        <div class="no-sentences">Noch keine Sätze gesammelt...</div>
+                    </div>
+                    <div class="save-section">
+                        <button class="game-btn btn-secondary" id="saveModal">💾 Speichern</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEIN -->
+            <div class="game-panel" id="panelSein">
+                <div class="game-title">🌈 Das Verb "sein"</div>
+                <div class="game-description">Das wichtigste unregelmäßige Verb!</div>
+                
+                <div class="challenge-box">
+                    <span class="category-badge badge-sein">sein</span>
+                    <div class="verb-infinitive">sein</div>
+                    <div class="pronoun-display" id="seinPronoun">ich</div>
+                    <div class="challenge-prompt">Wie lautet die richtige Form?</div>
+                </div>
+
+                <div class="options-grid" id="seinOptions"></div>
+
+                <div class="action-btns">
+                    <button class="game-btn btn-primary" id="newSein">▶️ Nächstes</button>
+                    <button class="game-btn btn-secondary" id="helpSein">📖 Hilfe</button>
+                </div>
+
+                <div class="progress-section">
+                    <div class="progress-header">
+                        <span class="progress-title">📊 Dein Fortschritt</span>
+                        <div class="progress-stats">
+                            <div class="stat-item">
+                                <div class="stat-value" id="seinCorrect">0</div>
+                                <div class="stat-label">Richtig</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="seinTotal">0</div>
+                                <div class="stat-label">Gesamt</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="seinProgress" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="sentence-collection">
+                    <div class="collection-header">
+                        <span class="collection-title">📝 Deine Sätze</span>
+                        <span class="collection-count" id="seinCount">0</span>
+                    </div>
+                    <div class="sentence-list" id="seinList">
+                        <div class="no-sentences">Noch keine Sätze gesammelt...</div>
+                    </div>
+                    <div class="save-section">
+                        <button class="game-btn btn-secondary" id="saveSein">💾 Speichern</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HABEN -->
+            <div class="game-panel" id="panelHaben">
+                <div class="game-title">🎁 Das Verb "haben"</div>
+                <div class="game-description">Noch ein super wichtiges Verb!</div>
+                
+                <div class="challenge-box">
+                    <span class="category-badge badge-haben">haben</span>
+                    <div class="verb-infinitive">haben</div>
+                    <div class="pronoun-display" id="habenPronoun">ich</div>
+                    <div class="challenge-prompt">Wie lautet die richtige Form?</div>
+                </div>
+
+                <div class="options-grid" id="habenOptions"></div>
+
+                <div class="action-btns">
+                    <button class="game-btn btn-primary" id="newHaben">▶️ Nächstes</button>
+                    <button class="game-btn btn-secondary" id="helpHaben">📖 Hilfe</button>
+                </div>
+
+                <div class="progress-section">
+                    <div class="progress-header">
+                        <span class="progress-title">📊 Dein Fortschritt</span>
+                        <div class="progress-stats">
+                            <div class="stat-item">
+                                <div class="stat-value" id="habenCorrect">0</div>
+                                <div class="stat-label">Richtig</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="habenTotal">0</div>
+                                <div class="stat-label">Gesamt</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="habenProgress" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="sentence-collection">
+                    <div class="collection-header">
+                        <span class="collection-title">📝 Deine Sätze</span>
+                        <span class="collection-count" id="habenCount">0</span>
+                    </div>
+                    <div class="sentence-list" id="habenList">
+                        <div class="no-sentences">Noch keine Sätze gesammelt...</div>
+                    </div>
+                    <div class="save-section">
+                        <button class="game-btn btn-secondary" id="saveHaben">💾 Speichern</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VOKALWECHSEL -->
+            <div class="game-panel" id="panelVokal">
+                <div class="game-title">🔄 Verben mit Vokalwechsel</div>
+                <div class="game-description">e→i, e→ie, a→ä, au→äu</div>
+                
+                <div class="challenge-box">
+                    <span class="category-badge badge-vokal">Vokalwechsel</span>
+                    <div class="verb-infinitive" id="vokalVerb">lesen</div>
+                    <div class="pronoun-display" id="vokalPronoun">du</div>
+                    <div class="challenge-prompt">Wie lautet die richtige Form?</div>
+                </div>
+
+                <div class="options-grid" id="vokalOptions"></div>
+
+                <div class="verb-hint" id="vokalHint"></div>
+
+                <div class="action-btns">
+                    <button class="game-btn btn-secondary" id="hintVokal">💡 Tipp</button>
+                    <button class="game-btn btn-primary" id="newVokal">▶️ Nächstes Verb</button>
+                    <button class="game-btn btn-secondary" id="helpVokal">📖 Hilfe</button>
+                </div>
+
+                <div class="progress-section">
+                    <div class="progress-header">
+                        <span class="progress-title">📊 Dein Fortschritt</span>
+                        <div class="progress-stats">
+                            <div class="stat-item">
+                                <div class="stat-value" id="vokalCorrect">0</div>
+                                <div class="stat-label">Richtig</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="vokalTotal">0</div>
+                                <div class="stat-label">Gesamt</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="vokalProgress" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="sentence-collection">
+                    <div class="collection-header">
+                        <span class="collection-title">📝 Deine Sätze</span>
+                        <span class="collection-count" id="vokalCount">0</span>
+                    </div>
+                    <div class="sentence-list" id="vokalList">
+                        <div class="no-sentences">Noch keine Sätze gesammelt...</div>
+                    </div>
+                    <div class="save-section">
+                        <button class="game-btn btn-secondary" id="saveVokal">💾 Speichern</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ANDERE UNREGELMÄSSIGE -->
+            <div class="game-panel" id="panelAndere">
+                <div class="game-title">⚡ Andere unregelmäßige Verben</div>
+                <div class="game-description">wissen, tun, werden, nehmen...</div>
+                
+                <div class="challenge-box">
+                    <span class="category-badge badge-andere">Unregelmäßig</span>
+                    <div class="verb-infinitive" id="andereVerb">wissen</div>
+                    <div class="pronoun-display" id="anderePronoun">ich</div>
+                    <div class="challenge-prompt">Wie lautet die richtige Form?</div>
+                </div>
+
+                <div class="options-grid" id="andereOptions"></div>
+
+                <div class="verb-hint" id="andereHint"></div>
+
+                <div class="action-btns">
+                    <button class="game-btn btn-secondary" id="hintAndere">💡 Tipp</button>
+                    <button class="game-btn btn-primary" id="newAndere">▶️ Nächstes Verb</button>
+                    <button class="game-btn btn-secondary" id="helpAndere">📖 Hilfe</button>
+                </div>
+
+                <div class="progress-section">
+                    <div class="progress-header">
+                        <span class="progress-title">📊 Dein Fortschritt</span>
+                        <div class="progress-stats">
+                            <div class="stat-item">
+                                <div class="stat-value" id="andereCorrect">0</div>
+                                <div class="stat-label">Richtig</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="andereTotal">0</div>
+                                <div class="stat-label">Gesamt</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="andereProgress" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="sentence-collection">
+                    <div class="collection-header">
+                        <span class="collection-title">📝 Deine Sätze</span>
+                        <span class="collection-count" id="andereCount">0</span>
+                    </div>
+                    <div class="sentence-list" id="andereList">
+                        <div class="no-sentences">Noch keine Sätze gesammelt...</div>
+                    </div>
+                    <div class="save-section">
+                        <button class="game-btn btn-secondary" id="saveAndere">💾 Speichern</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MIX -->
+            <div class="game-panel" id="panelMix">
+                <div class="game-title">🎲 Alles gemischt!</div>
+                <div class="game-description">Teste dein Wissen über alle unregelmäßigen Verben</div>
+                
+                <div class="challenge-box">
+                    <span class="category-badge" id="mixBadge">Mix</span>
+                    <div class="verb-infinitive" id="mixVerb">???</div>
+                    <div class="pronoun-display" id="mixPronoun">???</div>
+                    <div class="challenge-prompt">Wie lautet die richtige Form?</div>
+                </div>
+
+                <div class="options-grid" id="mixOptions"></div>
+
+                <div class="action-btns">
+                    <button class="game-btn btn-primary" id="newMix">▶️ Nächstes Verb</button>
+                </div>
+
+                <div class="progress-section">
+                    <div class="progress-header">
+                        <span class="progress-title">📊 Dein Fortschritt</span>
+                        <div class="progress-stats">
+                            <div class="stat-item">
+                                <div class="stat-value" id="mixCorrect">0</div>
+                                <div class="stat-label">Richtig</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="mixTotal">0</div>
+                                <div class="stat-label">Gesamt</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="mixProgress" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="sentence-collection">
+                    <div class="collection-header">
+                        <span class="collection-title">📝 Deine Sätze</span>
+                        <span class="collection-count" id="mixCount">0</span>
+                    </div>
+                    <div class="sentence-list" id="mixList">
+                        <div class="no-sentences">Noch keine Sätze gesammelt...</div>
+                    </div>
+                    <div class="save-section">
+                        <button class="game-btn btn-secondary" id="saveMix">💾 Speichern</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="help-modal" id="helpModalOverlay">
+        <div class="help-content" id="helpContent"></div>
+    </div>
+
+    <!-- Success Overlay -->
+    <div class="success-overlay" id="successOverlay">
+        <div class="success-emoji">🎉</div>
+        <div class="success-text">Super gemacht!</div>
+        <div class="success-points" id="successPoints">+10 Punkte</div>
+    </div>
+
+    <script>
+    (function() {
+        function $(id) { return document.getElementById(id); }
+        function shuffle(arr) { 
+            var a = arr.slice(); 
+            for (var i = a.length - 1; i > 0; i--) { 
+                var j = Math.floor(Math.random() * (i + 1)); 
+                var t = a[i]; a[i] = a[j]; a[j] = t; 
+            } 
+            return a; 
+        }
+
+        var playerName = "";
+        var score = 0;
+        var streak = 0;
+
+        // Stats per category
+        var stats = {
+            modal: { correct: 0, total: 0, sentences: [] },
+            sein: { correct: 0, total: 0, sentences: [] },
+            haben: { correct: 0, total: 0, sentences: [] },
+            vokal: { correct: 0, total: 0, sentences: [] },
+            andere: { correct: 0, total: 0, sentences: [] },
+            mix: { correct: 0, total: 0, sentences: [] }
+        };
+
+        var pronouns = ["ich", "du", "er/sie/es", "wir", "ihr", "sie/Sie"];
+        var pronounKeys = ["ich", "du", "er", "wir", "ihr", "sie"];
+
+        // VERB DATA
+        var modalverben = [
+            { inf: "können", ich: "kann", du: "kannst", er: "kann", wir: "können", ihr: "könnt", sie: "können", hint: "ich/er ohne Umlaut, Singular ohne -en" },
+            { inf: "müssen", ich: "muss", du: "musst", er: "muss", wir: "müssen", ihr: "müsst", sie: "müssen", hint: "ich/er ohne Umlaut, Singular ohne -en" },
+            { inf: "wollen", ich: "will", du: "willst", er: "will", wir: "wollen", ihr: "wollt", sie: "wollen", hint: "ich/er = will (Stammänderung)" },
+            { inf: "dürfen", ich: "darf", du: "darfst", er: "darf", wir: "dürfen", ihr: "dürft", sie: "dürfen", hint: "ich/er ohne Umlaut = darf" },
+            { inf: "sollen", ich: "soll", du: "sollst", er: "soll", wir: "sollen", ihr: "sollt", sie: "sollen", hint: "Regelmäßiger als andere Modalverben" },
+            { inf: "mögen", ich: "mag", du: "magst", er: "mag", wir: "mögen", ihr: "mögt", sie: "mögen", hint: "ich/er = mag (ohne Umlaut)" },
+            { inf: "möchten", ich: "möchte", du: "möchtest", er: "möchte", wir: "möchten", ihr: "möchtet", sie: "möchten", hint: "Konjunktiv II von mögen - höfliche Form" }
+        ];
+
+        var verbSein = { 
+            inf: "sein", ich: "bin", du: "bist", er: "ist", wir: "sind", ihr: "seid", sie: "sind",
+            hint: "Komplett unregelmäßig - auswendig lernen!" 
+        };
+
+        var verbHaben = { 
+            inf: "haben", ich: "habe", du: "hast", er: "hat", wir: "haben", ihr: "habt", sie: "haben",
+            hint: "du/er verlieren das -b-" 
+        };
+
+        var vokalwechselVerben = [
+            { inf: "lesen", ich: "lese", du: "liest", er: "liest", wir: "lesen", ihr: "lest", sie: "lesen", hint: "e → ie bei du/er", type: "e→ie" },
+            { inf: "sehen", ich: "sehe", du: "siehst", er: "sieht", wir: "sehen", ihr: "seht", sie: "sehen", hint: "e → ie bei du/er", type: "e→ie" },
+            { inf: "empfehlen", ich: "empfehle", du: "empfiehlst", er: "empfiehlt", wir: "empfehlen", ihr: "empfehlt", sie: "empfehlen", hint: "e → ie bei du/er", type: "e→ie" },
+            { inf: "stehlen", ich: "stehle", du: "stiehlst", er: "stiehlt", wir: "stehlen", ihr: "stehlt", sie: "stehlen", hint: "e → ie bei du/er", type: "e→ie" },
+            { inf: "geben", ich: "gebe", du: "gibst", er: "gibt", wir: "geben", ihr: "gebt", sie: "geben", hint: "e → i bei du/er", type: "e→i" },
+            { inf: "nehmen", ich: "nehme", du: "nimmst", er: "nimmt", wir: "nehmen", ihr: "nehmt", sie: "nehmen", hint: "e → i + mm bei du/er", type: "e→i" },
+            { inf: "sprechen", ich: "spreche", du: "sprichst", er: "spricht", wir: "sprechen", ihr: "sprecht", sie: "sprechen", hint: "e → i bei du/er", type: "e→i" },
+            { inf: "helfen", ich: "helfe", du: "hilfst", er: "hilft", wir: "helfen", ihr: "helft", sie: "helfen", hint: "e → i bei du/er", type: "e→i" },
+            { inf: "treffen", ich: "treffe", du: "triffst", er: "trifft", wir: "treffen", ihr: "trefft", sie: "treffen", hint: "e → i bei du/er", type: "e→i" },
+            { inf: "werfen", ich: "werfe", du: "wirfst", er: "wirft", wir: "werfen", ihr: "werft", sie: "werfen", hint: "e → i bei du/er", type: "e→i" },
+            { inf: "essen", ich: "esse", du: "isst", er: "isst", wir: "essen", ihr: "esst", sie: "essen", hint: "e → i bei du/er", type: "e→i" },
+            { inf: "vergessen", ich: "vergesse", du: "vergisst", er: "vergisst", wir: "vergessen", ihr: "vergesst", sie: "vergessen", hint: "e → i bei du/er", type: "e→i" },
+            { inf: "messen", ich: "messe", du: "misst", er: "misst", wir: "messen", ihr: "messt", sie: "messen", hint: "e → i bei du/er", type: "e→i" },
+            { inf: "fahren", ich: "fahre", du: "fährst", er: "fährt", wir: "fahren", ihr: "fahrt", sie: "fahren", hint: "a → ä bei du/er", type: "a→ä" },
+            { inf: "schlafen", ich: "schlafe", du: "schläfst", er: "schläft", wir: "schlafen", ihr: "schlaft", sie: "schlafen", hint: "a → ä bei du/er", type: "a→ä" },
+            { inf: "tragen", ich: "trage", du: "trägst", er: "trägt", wir: "tragen", ihr: "tragt", sie: "tragen", hint: "a → ä bei du/er", type: "a→ä" },
+            { inf: "waschen", ich: "wasche", du: "wäschst", er: "wäscht", wir: "waschen", ihr: "wascht", sie: "waschen", hint: "a → ä bei du/er", type: "a→ä" },
+            { inf: "wachsen", ich: "wachse", du: "wächst", er: "wächst", wir: "wachsen", ihr: "wachst", sie: "wachsen", hint: "a → ä bei du/er", type: "a→ä" },
+            { inf: "fallen", ich: "falle", du: "fällst", er: "fällt", wir: "fallen", ihr: "fallt", sie: "fallen", hint: "a → ä bei du/er", type: "a→ä" },
+            { inf: "halten", ich: "halte", du: "hältst", er: "hält", wir: "halten", ihr: "haltet", sie: "halten", hint: "a → ä bei du/er", type: "a→ä" },
+            { inf: "lassen", ich: "lasse", du: "lässt", er: "lässt", wir: "lassen", ihr: "lasst", sie: "lassen", hint: "a → ä bei du/er", type: "a→ä" },
+            { inf: "fangen", ich: "fange", du: "fängst", er: "fängt", wir: "fangen", ihr: "fangt", sie: "fangen", hint: "a → ä bei du/er", type: "a→ä" },
+            { inf: "laufen", ich: "laufe", du: "läufst", er: "läuft", wir: "laufen", ihr: "lauft", sie: "laufen", hint: "au → äu bei du/er", type: "au→äu" },
+            { inf: "saufen", ich: "saufe", du: "säufst", er: "säuft", wir: "saufen", ihr: "sauft", sie: "saufen", hint: "au → äu bei du/er", type: "au→äu" },
+            { inf: "stoßen", ich: "stoße", du: "stößt", er: "stößt", wir: "stoßen", ihr: "stoßt", sie: "stoßen", hint: "o → ö bei du/er", type: "o→ö" }
+        ];
+
+        var andereVerben = [
+            { inf: "wissen", ich: "weiß", du: "weißt", er: "weiß", wir: "wissen", ihr: "wisst", sie: "wissen", hint: "Wie Modalverben: ich/er gleich, Stammwechsel" },
+            { inf: "werden", ich: "werde", du: "wirst", er: "wird", wir: "werden", ihr: "werdet", sie: "werden", hint: "e → i bei du/er, wichtiges Hilfsverb" },
+            { inf: "tun", ich: "tue", du: "tust", er: "tut", wir: "tun", ihr: "tut", sie: "tun", hint: "Kurzer Stamm, besondere Endungen" },
+            { inf: "gehen", ich: "gehe", du: "gehst", er: "geht", wir: "gehen", ihr: "geht", sie: "gehen", hint: "Regelmäßig im Präsens!" },
+            { inf: "stehen", ich: "stehe", du: "stehst", er: "steht", wir: "stehen", ihr: "steht", sie: "stehen", hint: "Regelmäßig im Präsens!" },
+            { inf: "kommen", ich: "komme", du: "kommst", er: "kommt", wir: "kommen", ihr: "kommt", sie: "kommen", hint: "Regelmäßig im Präsens!" },
+            { inf: "bringen", ich: "bringe", du: "bringst", er: "bringt", wir: "bringen", ihr: "bringt", sie: "bringen", hint: "Regelmäßig im Präsens!" },
+            { inf: "denken", ich: "denke", du: "denkst", er: "denkt", wir: "denken", ihr: "denkt", sie: "denken", hint: "Regelmäßig im Präsens!" },
+            { inf: "kennen", ich: "kenne", du: "kennst", er: "kennt", wir: "kennen", ihr: "kennt", sie: "kennen", hint: "Regelmäßig im Präsens!" },
+            { inf: "nennen", ich: "nenne", du: "nennst", er: "nennt", wir: "nennen", ihr: "nennt", sie: "nennen", hint: "Regelmäßig im Präsens!" },
+            { inf: "rennen", ich: "renne", du: "rennst", er: "rennt", wir: "rennen", ihr: "rennt", sie: "rennen", hint: "Regelmäßig im Präsens!" },
+            { inf: "brennen", ich: "brenne", du: "brennst", er: "brennt", wir: "brennen", ihr: "brennt", sie: "brennen", hint: "Regelmäßig im Präsens!" },
+            { inf: "senden", ich: "sende", du: "sendest", er: "sendet", wir: "senden", ihr: "sendet", sie: "senden", hint: "Regelmäßig im Präsens!" },
+            { inf: "wenden", ich: "wende", du: "wendest", er: "wendet", wir: "wenden", ihr: "wendet", sie: "wenden", hint: "Regelmäßig im Präsens!" }
+        ];
+
+        // Beispielsätze für gesammelte Antworten
+        var satzEnden = {
+            modal: {
+                "können": ["gut schwimmen", "Deutsch sprechen", "schnell laufen", "Klavier spielen"],
+                "müssen": ["zur Schule gehen", "die Hausaufgaben machen", "früh aufstehen", "lernen"],
+                "wollen": ["ein Eis essen", "ins Kino gehen", "spielen", "fernsehen"],
+                "dürfen": ["heute länger aufbleiben", "Schokolade essen", "draußen spielen", "fernsehen"],
+                "sollen": ["das Zimmer aufräumen", "leise sein", "die Oma besuchen", "helfen"],
+                "mögen": ["Pizza", "Schokolade", "Hunde", "Musik"],
+                "möchten": ["ein Eis haben", "ins Schwimmbad gehen", "einen Film sehen", "spielen"]
+            },
+            sein: ["müde", "glücklich", "zu Hause", "in der Schule", "hungrig", "traurig", "lustig", "nett"],
+            haben: ["Hunger", "Durst", "Zeit", "ein Haustier", "viele Freunde", "Glück", "eine Idee"],
+            vokal: ["gern", "jeden Tag", "schnell", "oft", "manchmal", "im Park", "zu Hause"],
+            andere: ["das schon", "es genau", "viel", "wenig", "etwas Neues", "die Antwort"]
+        };
+
+        // Current state
+        var currentGame = "modal";
+        var currentVerb = null;
+        var currentPronounIndex = 0;
+        var answered = false;
+
+        function startGame() {
+            playerName = $("playerName").value.trim();
+            if (!playerName) return;
+            $("displayName").textContent = playerName;
+            $("welcomeScreen").style.display = "none";
+            $("gameArea").classList.add("active");
+            newRound("modal");
+        }
+
+        function switchGame(game) {
+            currentGame = game;
+            document.querySelectorAll(".tab-btn").forEach(function(b) {
+                b.classList.toggle("active", b.getAttribute("data-game") === game);
+            });
+            document.querySelectorAll(".game-panel").forEach(function(p) {
+                p.classList.remove("active");
+            });
+            var panelId = "panel" + game.charAt(0).toUpperCase() + game.slice(1);
+            var panel = $(panelId);
+            if (panel) panel.classList.add("active");
+            newRound(game);
+        }
+
+        function addPoints(pts) {
+            score += pts;
+            $("score").textContent = score;
+        }
+
+        function updateStreak(correct) {
+            if (correct) {
+                streak++;
+            } else {
+                streak = 0;
+            }
+            $("streak").textContent = streak;
+        }
+
+        function showSuccess(pts) {
+            var overlay = $("successOverlay");
+            $("successPoints").textContent = "+" + pts + " Punkte";
+            var emojis = ["🎉", "⭐", "🌟", "✨", "🏆", "👏", "💪", "🔥"];
+            $("successOverlay").querySelector(".success-emoji").textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            overlay.classList.add("active");
+            setTimeout(function() { overlay.classList.remove("active"); }, 900);
+        }
+
+        function updateProgress(game) {
+            var s = stats[game];
+            var pct = s.total > 0 ? Math.round((s.correct / s.total) * 100) : 0;
+            $(game + "Correct").textContent = s.correct;
+            $(game + "Total").textContent = s.total;
+            $(game + "Progress").style.width = pct + "%";
+        }
+
+        function updateSentenceList(game) {
+            var list = $(game + "List");
+            var count = $(game + "Count");
+            var sentences = stats[game].sentences;
+            count.textContent = sentences.length;
+            if (sentences.length === 0) {
+                list.innerHTML = '<div class="no-sentences">Noch keine Sätze gesammelt...</div>';
+            } else {
+                list.innerHTML = sentences.map(function(s) {
+                    return '<div class="collected-sentence">' + s + '</div>';
+                }).join("");
+                list.scrollTop = list.scrollHeight;
+            }
+        }
+
+        function getRandomPronoun() {
+            currentPronounIndex = Math.floor(Math.random() * pronouns.length);
+            return { display: pronouns[currentPronounIndex], key: pronounKeys[currentPronounIndex] };
+        }
+
+        function generateOptions(verb, correctForm) {
+            var allForms = [verb.ich, verb.du, verb.er, verb.wir, verb.ihr, verb.sie];
+            var unique = allForms.filter(function(v, i, a) { return a.indexOf(v) === i; });
+            
+            // Add some wrong options if needed
+            if (unique.length < 4) {
+                var wrongOptions = [
+                    verb.inf, // Infinitiv als Ablenkung
+                    verb.inf.replace(/en$/, "e"),
+                    verb.inf.replace(/en$/, "st"),
+                    verb.inf.replace(/en$/, "t")
+                ];
+                wrongOptions.forEach(function(w) {
+                    if (unique.indexOf(w) === -1 && w !== correctForm) {
+                        unique.push(w);
+                    }
+                });
+            }
+            
+            return shuffle(unique).slice(0, Math.min(6, unique.length));
+        }
+
+        function createSentence(verb, pronoun, form, game) {
+            var ende = "";
+            if (game === "modal" && satzEnden.modal[verb.inf]) {
+                var opts = satzEnden.modal[verb.inf];
+                ende = " " + opts[Math.floor(Math.random() * opts.length)];
+            } else if (game === "sein") {
+                ende = " " + satzEnden.sein[Math.floor(Math.random() * satzEnden.sein.length)];
+            } else if (game === "haben") {
+                ende = " " + satzEnden.haben[Math.floor(Math.random() * satzEnden.haben.length)];
+            } else if (game === "vokal" || game === "andere" || game === "mix") {
+                var arr = game === "vokal" ? satzEnden.vokal : satzEnden.andere;
+                ende = " " + arr[Math.floor(Math.random() * arr.length)];
+            }
+            
+            var subject = pronoun === "er/sie/es" ? "Er" : pronoun.charAt(0).toUpperCase() + pronoun.slice(1);
+            return subject + " " + form + ende + ".";
+        }
+
+        // MODAL ROUND
+        function newModalRound() {
+            answered = false;
+            currentVerb = modalverben[Math.floor(Math.random() * modalverben.length)];
+            var pron = getRandomPronoun();
+            
+            $("modalVerb").textContent = currentVerb.inf;
+            $("modalPronoun").textContent = pron.display;
+            $("modalHint").classList.remove("active");
+            
+            var correctForm = currentVerb[pron.key];
+            var options = generateOptions(currentVerb, correctForm);
+            
+            var optContainer = $("modalOptions");
+            optContainer.innerHTML = "";
+            options.forEach(function(opt) {
+                var btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.textContent = opt;
+                btn.onclick = function() { handleAnswer("modal", opt, correctForm, pron.display, btn); };
+                optContainer.appendChild(btn);
+            });
+        }
+
+        // SEIN ROUND
+        function newSeinRound() {
+            answered = false;
+            currentVerb = verbSein;
+            var pron = getRandomPronoun();
+            
+            $("seinPronoun").textContent = pron.display;
+            
+            var correctForm = currentVerb[pron.key];
+            var options = generateOptions(currentVerb, correctForm);
+            
+            var optContainer = $("seinOptions");
+            optContainer.innerHTML = "";
+            options.forEach(function(opt) {
+                var btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.textContent = opt;
+                btn.onclick = function() { handleAnswer("sein", opt, correctForm, pron.display, btn); };
+                optContainer.appendChild(btn);
+            });
+        }
+
+        // HABEN ROUND
+        function newHabenRound() {
+            answered = false;
+            currentVerb = verbHaben;
+            var pron = getRandomPronoun();
+            
+            $("habenPronoun").textContent = pron.display;
+            
+            var correctForm = currentVerb[pron.key];
+            var options = generateOptions(currentVerb, correctForm);
+            
+            var optContainer = $("habenOptions");
+            optContainer.innerHTML = "";
+            options.forEach(function(opt) {
+                var btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.textContent = opt;
+                btn.onclick = function() { handleAnswer("haben", opt, correctForm, pron.display, btn); };
+                optContainer.appendChild(btn);
+            });
+        }
+
+        // VOKALWECHSEL ROUND
+        function newVokalRound() {
+            answered = false;
+            currentVerb = vokalwechselVerben[Math.floor(Math.random() * vokalwechselVerben.length)];
+            var pron = getRandomPronoun();
+            
+            $("vokalVerb").textContent = currentVerb.inf;
+            $("vokalPronoun").textContent = pron.display;
+            $("vokalHint").classList.remove("active");
+            
+            var correctForm = currentVerb[pron.key];
+            var options = generateOptions(currentVerb, correctForm);
+            
+            var optContainer = $("vokalOptions");
+            optContainer.innerHTML = "";
+            options.forEach(function(opt) {
+                var btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.textContent = opt;
+                btn.onclick = function() { handleAnswer("vokal", opt, correctForm, pron.display, btn); };
+                optContainer.appendChild(btn);
+            });
+        }
+
+        // ANDERE ROUND
+        function newAndereRound() {
+            answered = false;
+            currentVerb = andereVerben[Math.floor(Math.random() * andereVerben.length)];
+            var pron = getRandomPronoun();
+            
+            $("andereVerb").textContent = currentVerb.inf;
+            $("anderePronoun").textContent = pron.display;
+            $("andereHint").classList.remove("active");
+            
+            var correctForm = currentVerb[pron.key];
+            var options = generateOptions(currentVerb, correctForm);
+            
+            var optContainer = $("andereOptions");
+            optContainer.innerHTML = "";
+            options.forEach(function(opt) {
+                var btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.textContent = opt;
+                btn.onclick = function() { handleAnswer("andere", opt, correctForm, pron.display, btn); };
+                optContainer.appendChild(btn);
+            });
+        }
+
+        // MIX ROUND
+        function newMixRound() {
+            answered = false;
+            
+            // Pick random category
+            var categories = [
+                { verbs: modalverben, badge: "badge-modal", name: "Modalverb" },
+                { verbs: [verbSein], badge: "badge-sein", name: "sein" },
+                { verbs: [verbHaben], badge: "badge-haben", name: "haben" },
+                { verbs: vokalwechselVerben, badge: "badge-vokal", name: "Vokalwechsel" },
+                { verbs: andereVerben, badge: "badge-andere", name: "Unregelmäßig" }
+            ];
+            var cat = categories[Math.floor(Math.random() * categories.length)];
+            currentVerb = cat.verbs[Math.floor(Math.random() * cat.verbs.length)];
+            var pron = getRandomPronoun();
+            
+            $("mixVerb").textContent = currentVerb.inf;
+            $("mixPronoun").textContent = pron.display;
+            $("mixBadge").className = "category-badge " + cat.badge;
+            $("mixBadge").textContent = cat.name;
+            
+            var correctForm = currentVerb[pron.key];
+            var options = generateOptions(currentVerb, correctForm);
+            
+            var optContainer = $("mixOptions");
+            optContainer.innerHTML = "";
+            options.forEach(function(opt) {
+                var btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.textContent = opt;
+                btn.onclick = function() { handleAnswer("mix", opt, correctForm, pron.display, btn); };
+                optContainer.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(game, selected, correct, pronoun, btn) {
+            if (answered) return;
+            
+            stats[game].total++;
+            
+            if (selected === correct) {
+                answered = true;
+                btn.classList.add("correct");
+                stats[game].correct++;
+                updateStreak(true);
+                
+                var pts = 10 + Math.min(streak * 2, 20); // Bonus for streak
+                addPoints(pts);
+                showSuccess(pts);
+                
+                // Create and save sentence
+                var sentence = createSentence(currentVerb, pronoun, correct, game);
+                stats[game].sentences.push(sentence);
+                updateSentenceList(game);
+                updateProgress(game);
+                
+                // Auto next after delay
+                setTimeout(function() { newRound(game); }, 1200);
+            } else {
+                btn.classList.add("wrong");
+                updateStreak(false);
+                setTimeout(function() { btn.classList.remove("wrong"); }, 400);
+            }
+        }
+
+        function newRound(game) {
+            switch(game) {
+                case "modal": newModalRound(); break;
+                case "sein": newSeinRound(); break;
+                case "haben": newHabenRound(); break;
+                case "vokal": newVokalRound(); break;
+                case "andere": newAndereRound(); break;
+                case "mix": newMixRound(); break;
+            }
+        }
+
+        function showHint(game) {
+            var hintEl = $(game + "Hint");
+            if (hintEl && currentVerb && currentVerb.hint) {
+                hintEl.textContent = "💡 " + currentVerb.hint;
+                hintEl.classList.add("active");
+            }
+        }
+
+        function showHelp(type) {
+            var hc = $("helpContent");
+            var html = '<button class="help-close" id="helpClose">✕</button>';
+            
+            if (type === "modal") {
+                html += '<h3 class="help-title">🎭 Modalverben</h3>';
+                html += '<p style="margin-bottom:15px;">Modalverben sind besonders: ich und er/sie/es haben die gleiche Form!</p>';
+                html += '<table class="conj-table">';
+                html += '<tr><th></th><th>können</th><th>müssen</th><th>wollen</th><th>dürfen</th><th>sollen</th><th>mögen</th></tr>';
+                html += '<tr><td>ich</td><td>kann</td><td>muss</td><td>will</td><td>darf</td><td>soll</td><td>mag</td></tr>';
+                html += '<tr><td>du</td><td>kannst</td><td>musst</td><td>willst</td><td>darfst</td><td>sollst</td><td>magst</td></tr>';
+                html += '<tr><td>er/sie/es</td><td>kann</td><td>muss</td><td>will</td><td>darf</td><td>soll</td><td>mag</td></tr>';
+                html += '<tr><td>wir</td><td>können</td><td>müssen</td><td>wollen</td><td>dürfen</td><td>sollen</td><td>mögen</td></tr>';
+                html += '<tr><td>ihr</td><td>könnt</td><td>müsst</td><td>wollt</td><td>dürft</td><td>sollt</td><td>mögt</td></tr>';
+                html += '<tr><td>sie/Sie</td><td>können</td><td>müssen</td><td>wollen</td><td>dürfen</td><td>sollen</td><td>mögen</td></tr>';
+                html += '</table>';
+            } else if (type === "sein") {
+                html += '<h3 class="help-title">🌈 Das Verb "sein"</h3>';
+                html += '<p style="margin-bottom:15px;">Komplett unregelmäßig - jede Form ist anders!</p>';
+                html += '<table class="conj-table">';
+                html += '<tr><th>Pronomen</th><th>sein</th></tr>';
+                html += '<tr><td>ich</td><td><b>bin</b></td></tr>';
+                html += '<tr><td>du</td><td><b>bist</b></td></tr>';
+                html += '<tr><td>er/sie/es</td><td><b>ist</b></td></tr>';
+                html += '<tr><td>wir</td><td><b>sind</b></td></tr>';
+                html += '<tr><td>ihr</td><td><b>seid</b></td></tr>';
+                html += '<tr><td>sie/Sie</td><td><b>sind</b></td></tr>';
+                html += '</table>';
+            } else if (type === "haben") {
+                html += '<h3 class="help-title">🎁 Das Verb "haben"</h3>';
+                html += '<p style="margin-bottom:15px;">Bei du und er/sie/es fällt das -b- weg!</p>';
+                html += '<table class="conj-table">';
+                html += '<tr><th>Pronomen</th><th>haben</th></tr>';
+                html += '<tr><td>ich</td><td>habe</td></tr>';
+                html += '<tr><td>du</td><td><b>hast</b></td></tr>';
+                html += '<tr><td>er/sie/es</td><td><b>hat</b></td></tr>';
+                html += '<tr><td>wir</td><td>haben</td></tr>';
+                html += '<tr><td>ihr</td><td>habt</td></tr>';
+                html += '<tr><td>sie/Sie</td><td>haben</td></tr>';
+                html += '</table>';
+            } else if (type === "vokal") {
+                html += '<h3 class="help-title">🔄 Verben mit Vokalwechsel</h3>';
+                html += '<p style="margin-bottom:15px;">Bei du und er/sie/es ändert sich der Vokal!</p>';
+                html += '<table class="conj-table">';
+                html += '<tr><th>Typ</th><th>Beispiel</th><th>ich</th><th>du</th><th>er</th></tr>';
+                html += '<tr><td>e → ie</td><td>lesen</td><td>lese</td><td><b>liest</b></td><td><b>liest</b></td></tr>';
+                html += '<tr><td>e → i</td><td>sprechen</td><td>spreche</td><td><b>sprichst</b></td><td><b>spricht</b></td></tr>';
+                html += '<tr><td>a → ä</td><td>fahren</td><td>fahre</td><td><b>fährst</b></td><td><b>fährt</b></td></tr>';
+                html += '<tr><td>au → äu</td><td>laufen</td><td>laufe</td><td><b>läufst</b></td><td><b>läuft</b></td></tr>';
+                html += '</table>';
+                html += '<p style="margin-top:15px;"><b>Wichtig:</b> wir, ihr und sie haben KEINEN Vokalwechsel!</p>';
+            } else if (type === "andere") {
+                html += '<h3 class="help-title">⚡ Andere unregelmäßige Verben</h3>';
+                html += '<table class="conj-table">';
+                html += '<tr><th></th><th>wissen</th><th>werden</th><th>tun</th></tr>';
+                html += '<tr><td>ich</td><td><b>weiß</b></td><td>werde</td><td>tue</td></tr>';
+                html += '<tr><td>du</td><td><b>weißt</b></td><td><b>wirst</b></td><td>tust</td></tr>';
+                html += '<tr><td>er/sie/es</td><td><b>weiß</b></td><td><b>wird</b></td><td>tut</td></tr>';
+                html += '<tr><td>wir</td><td>wissen</td><td>werden</td><td>tun</td></tr>';
+                html += '<tr><td>ihr</td><td>wisst</td><td>werdet</td><td>tut</td></tr>';
+                html += '<tr><td>sie/Sie</td><td>wissen</td><td>werden</td><td>tun</td></tr>';
+                html += '</table>';
+                html += '<p style="margin-top:15px;"><b>Tipp:</b> "wissen" funktioniert wie ein Modalverb (ich = er)!</p>';
+            }
+            
+            hc.innerHTML = html;
+            $("helpModalOverlay").classList.add("active");
+            document.getElementById("helpClose").onclick = closeHelp;
+        }
+
+        function closeHelp() {
+            $("helpModalOverlay").classList.remove("active");
+        }
+
+        function saveToTxt(filename, title, sentences) {
+            if (sentences.length === 0) {
+                alert("Du hast noch keine Sätze gesammelt!");
+                return;
+            }
+            var text = title + "\n";
+            text += "Spieler: " + playerName + "\n";
+            text += "Datum: " + new Date().toLocaleDateString("de-DE") + "\n";
+            text += "========================\n\n";
+            sentences.forEach(function(s, i) {
+                text += (i + 1) + ". " + s + "\n";
+            });
+            text += "\n========================\n";
+            text += "Punkte: " + score + "\n";
+            
+            var blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+            var link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+        }
+
+        // Initialize
+        document.addEventListener("DOMContentLoaded", function() {
+            var nameEl = $("playerName");
+            var startBtn = $("startBtn");
+            
+            nameEl.oninput = function() { startBtn.disabled = this.value.trim().length < 1; };
+            nameEl.onkeypress = function(e) { if (e.key === "Enter" && !startBtn.disabled) startGame(); };
+            startBtn.onclick = startGame;
+
+            // Tab buttons
+            document.querySelectorAll(".tab-btn").forEach(function(btn) {
+                btn.onclick = function() { switchGame(this.getAttribute("data-game")); };
+            });
+
+            // Game buttons
+            $("newModal").onclick = function() { newRound("modal"); };
+            $("newSein").onclick = function() { newRound("sein"); };
+            $("newHaben").onclick = function() { newRound("haben"); };
+            $("newVokal").onclick = function() { newRound("vokal"); };
+            $("newAndere").onclick = function() { newRound("andere"); };
+            $("newMix").onclick = function() { newRound("mix"); };
+
+            // Hint buttons
+            $("hintModal").onclick = function() { showHint("modal"); };
+            $("hintVokal").onclick = function() { showHint("vokal"); };
+            $("hintAndere").onclick = function() { showHint("andere"); };
+
+            // Help buttons
+            $("helpModal").onclick = function() { showHelp("modal"); };
+            $("helpSein").onclick = function() { showHelp("sein"); };
+            $("helpHaben").onclick = function() { showHelp("haben"); };
+            $("helpVokal").onclick = function() { showHelp("vokal"); };
+            $("helpAndere").onclick = function() { showHelp("andere"); };
+
+            // Save buttons
+            $("saveModal").onclick = function() { saveToTxt("modalverben-" + playerName + ".txt", "🎭 MODALVERBEN", stats.modal.sentences); };
+            $("saveSein").onclick = function() { saveToTxt("sein-" + playerName + ".txt", "🌈 SEIN", stats.sein.sentences); };
+            $("saveHaben").onclick = function() { saveToTxt("haben-" + playerName + ".txt", "🎁 HABEN", stats.haben.sentences); };
+            $("saveVokal").onclick = function() { saveToTxt("vokalwechsel-" + playerName + ".txt", "🔄 VOKALWECHSEL", stats.vokal.sentences); };
+            $("saveAndere").onclick = function() { saveToTxt("unregelmaessig-" + playerName + ".txt", "⚡ UNREGELMÄSSIGE VERBEN", stats.andere.sentences); };
+            $("saveMix").onclick = function() { saveToTxt("mix-" + playerName + ".txt", "🎲 ALLE VERBEN MIX", stats.mix.sentences); };
+
+            // Help modal close
+            $("helpModalOverlay").onclick = function(e) { if (e.target === this) closeHelp(); };
+        });
+    })();
+    </script>
+</body>
+</html>
