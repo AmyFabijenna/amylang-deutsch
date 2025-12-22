@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Präpositionen Champion 🎯</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3d1a2e;
+            --primary-light: #5c2945;
+            --accent: #ff6b4a;
+            --accent-glow: #ffaa85;
+            --accent-dark: #e84a5f;
+            --success: #4ade80;
+            --error: #ff5252;
+            --warning: #fbbf24;
+            --bg-dark: #2d1320;
+            --bg-card: #3d1a2e;
+            --text: #ffffff;
+            --text-muted: #e8b4c8;
+            --gold: #ffd740;
+            --pink: #d63384;
+            --orange: #fd7e14;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(180deg, #2d1320 0%, #4a1942 40%, #7c2d5b 70%, #c45a3a 100%);
+            min-height: 100vh;
+            color: var(--text);
+            overflow-x: hidden;
+        }
+        
+        .glow-orbs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.4;
+            animation: float 15s ease-in-out infinite;
+        }
+        .orb:nth-child(1) { width: 300px; height: 300px; background: #ff6b4a; top: 10%; left: 10%; animation-delay: 0s; }
+        .orb:nth-child(2) { width: 400px; height: 400px; background: #d63384; top: 50%; right: 10%; animation-delay: -5s; }
+        .orb:nth-child(3) { width: 250px; height: 250px; background: #fd7e14; bottom: 20%; left: 30%; animation-delay: -10s; }
+        @keyframes float { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(30px, -30px); } }
+        
+        .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: hidden; }
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 170, 133, 0.6);
+            border-radius: 50%;
+            animation: rise 8s infinite;
+        }
+        @keyframes rise { 0% { transform: translateY(100vh) scale(0); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(-10vh) scale(1); opacity: 0; } }
+        
+        .container { position: relative; z-index: 2; max-width: 850px; margin: 0 auto; padding: 20px; }
+        header { text-align: center; margin-bottom: 30px; }
+        h1 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 2.6rem;
+            background: linear-gradient(135deg, #ff6b4a, #ffaa85, #ffd740);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 50px rgba(255, 107, 74, 0.4);
+            margin-bottom: 10px;
+        }
+        .subtitle { color: var(--text-muted); font-size: 1.1rem; }
+        
+        .screen { display: none; animation: fadeIn 0.5s ease; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .menu-card {
+            background: linear-gradient(135deg, rgba(61, 26, 46, 0.9), rgba(92, 41, 69, 0.9));
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border: 2px solid rgba(255, 107, 74, 0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(255, 107, 74, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .mode-title { font-family: 'Fredoka', sans-serif; font-size: 1.4rem; margin-bottom: 20px; color: var(--accent-glow); }
+        
+        .start-btn {
+            background: linear-gradient(135deg, var(--accent-dark), var(--accent));
+            border: none;
+            border-radius: 15px;
+            padding: 20px 50px;
+            color: white;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 20px auto;
+            box-shadow: 0 5px 25px rgba(255, 107, 74, 0.4);
+        }
+        .start-btn:hover { transform: translateY(-5px) scale(1.05); box-shadow: 0 10px 40px rgba(255, 107, 74, 0.6); }
+        
+        .name-input-container { text-align: center; margin-bottom: 20px; }
+        .name-input {
+            background: rgba(45, 19, 32, 0.8);
+            border: 2px solid var(--primary-light);
+            border-radius: 10px;
+            padding: 15px 25px;
+            color: var(--text);
+            font-family: 'Quicksand', sans-serif;
+            font-size: 1.2rem;
+            width: 100%;
+            max-width: 300px;
+            text-align: center;
+        }
+        .name-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 20px rgba(255, 107, 74, 0.3); }
+        .name-input::placeholder { color: var(--text-muted); }
+        
+        .game-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+        .stats-bar { display: flex; gap: 15px; flex-wrap: wrap; }
+        .stat-item { background: rgba(61, 26, 46, 0.9); padding: 12px 20px; border-radius: 12px; border: 1px solid rgba(255, 107, 74, 0.2); text-align: center; min-width: 90px; }
+        .stat-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .stat-value { font-family: 'Fredoka', sans-serif; font-size: 1.3rem; color: var(--accent-glow); }
+        .streak-fire { display: inline-block; animation: flame 0.5s ease infinite alternate; }
+        @keyframes flame { from { transform: scale(1); } to { transform: scale(1.3); } }
+        
+        .progress-bar { background: rgba(61, 26, 46, 0.8); border-radius: 10px; height: 12px; overflow: hidden; margin-bottom: 20px; border: 1px solid rgba(255, 107, 74, 0.2); }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent-dark), var(--accent), var(--accent-glow)); transition: width 0.5s ease; }
+        .progress-text { text-align: center; margin-top: 8px; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px; }
+        
+        .phrase-card {
+            background: linear-gradient(135deg, rgba(61, 26, 46, 0.95), rgba(92, 41, 69, 0.9));
+            border-radius: 25px;
+            padding: 40px;
+            margin-bottom: 25px;
+            border: 3px solid rgba(255, 107, 74, 0.3);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3), 0 0 40px rgba(255, 107, 74, 0.1);
+            text-align: center;
+        }
+        
+        .phrase-display {
+            font-size: 1.8rem;
+            line-height: 2;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .phrase-word { display: inline-block; }
+        
+        .prep-input {
+            background: rgba(45, 19, 32, 0.9);
+            border: 3px solid var(--accent);
+            border-radius: 12px;
+            padding: 12px 20px;
+            color: var(--text);
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 600;
+            text-align: center;
+            width: 140px;
+            transition: all 0.3s ease;
+            text-transform: lowercase;
+        }
+        .prep-input:focus { outline: none; border-color: var(--accent-glow); box-shadow: 0 0 25px rgba(255, 107, 74, 0.5); }
+        .prep-input.correct { border-color: var(--success); background: rgba(74, 222, 128, 0.15); animation: correctPulse 0.5s ease; }
+        .prep-input.wrong { border-color: var(--error); background: rgba(255, 82, 82, 0.15); animation: wrongShake 0.5s ease; }
+        .prep-input.revealed { border-color: var(--warning); background: rgba(251, 191, 36, 0.15); color: var(--warning); }
+        .prep-input:disabled { opacity: 1; cursor: default; }
+        
+        @keyframes correctPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+        @keyframes wrongShake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+        
+        .type-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .type-badge.verb { background: linear-gradient(135deg, #e84a5f, #ff6b4a); color: white; }
+        .type-badge.adjective { background: linear-gradient(135deg, #fd7e14, #fbbf24); color: #1a1a2e; }
+        .type-badge.noun { background: linear-gradient(135deg, #d63384, #e685b5); color: white; }
+        
+        .english-translation {
+            color: var(--accent-glow);
+            font-size: 1.1rem;
+            margin-top: 15px;
+            padding: 12px 24px;
+            background: rgba(255, 107, 74, 0.15);
+            border-radius: 12px;
+            display: inline-block;
+            border: 1px solid rgba(255, 107, 74, 0.3);
+            font-style: italic;
+        }
+        .english-translation::before {
+            content: '🇬🇧 ';
+        }
+        
+        .case-hint {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: rgba(255, 107, 74, 0.1);
+            border-radius: 10px;
+            display: inline-block;
+        }
+        
+        .hint-text { color: var(--text-muted); font-size: 0.9rem; margin-top: 15px; opacity: 0.7; }
+        
+        .control-buttons { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+        .control-btn {
+            background: rgba(61, 26, 46, 0.9);
+            border: 2px solid rgba(255, 107, 74, 0.3);
+            border-radius: 12px;
+            padding: 12px 25px;
+            color: var(--text);
+            font-family: 'Quicksand', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .control-btn:hover { border-color: var(--accent); background: rgba(92, 41, 69, 0.9); transform: translateY(-2px); }
+        .control-btn.primary { background: linear-gradient(135deg, var(--accent-dark), var(--accent)); border-color: var(--accent); color: white; font-weight: 700; }
+        .control-btn.primary:hover { box-shadow: 0 5px 25px rgba(255, 107, 74, 0.5); }
+        .control-btn.reveal { background: linear-gradient(135deg, #d63384, #fd7e14); border-color: var(--orange); color: white; }
+        
+        .points-popup { position: fixed; font-family: 'Fredoka', sans-serif; font-size: 1.8rem; color: var(--success); pointer-events: none; z-index: 1000; animation: floatUp 1s ease forwards; text-shadow: 0 0 15px rgba(74, 222, 128, 0.6); }
+        .points-popup.streak-bonus { color: var(--gold); font-size: 2.2rem; text-shadow: 0 0 20px rgba(255, 215, 64, 0.7); }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-60px) scale(1.2); } }
+        
+        .milestone-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(232, 74, 95, 0.95), rgba(255, 107, 74, 0.9)); display: flex; align-items: center; justify-content: center; z-index: 2000; }
+        .milestone-content { text-align: center; }
+        .milestone-number { font-family: 'Fredoka', sans-serif; font-size: 7rem; color: white; text-shadow: 0 0 50px rgba(255,255,255,0.5); }
+        .milestone-text { font-size: 2rem; color: white; margin-top: 10px; }
+        
+        .result-card { background: linear-gradient(135deg, rgba(61, 26, 46, 0.95), rgba(92, 41, 69, 0.9)); border-radius: 25px; padding: 40px; text-align: center; border: 3px solid var(--accent); box-shadow: 0 15px 50px rgba(255, 107, 74, 0.2); }
+        .result-title { font-family: 'Fredoka', sans-serif; font-size: 2.5rem; color: var(--accent-glow); margin-bottom: 30px; }
+        .result-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 30px; }
+        .result-stat { background: rgba(45, 19, 32, 0.6); padding: 20px; border-radius: 15px; border: 1px solid rgba(255, 107, 74, 0.2); }
+        .result-stat-value { font-family: 'Fredoka', sans-serif; font-size: 2.5rem; color: var(--accent-glow); }
+        .result-stat-label { color: var(--text-muted); font-size: 0.9rem; margin-top: 5px; }
+        
+        .leaderboard { margin-top: 30px; background: rgba(45, 19, 32, 0.6); border-radius: 15px; padding: 20px; }
+        .leaderboard-title { font-family: 'Fredoka', sans-serif; color: var(--accent-glow); margin-bottom: 15px; }
+        .leaderboard-entry { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid rgba(255, 107, 74, 0.1); }
+        .leaderboard-entry:last-child { border-bottom: none; }
+        .leaderboard-rank { font-size: 1.2rem; width: 40px; }
+        .leaderboard-name { flex: 1; font-weight: 600; }
+        .leaderboard-score { color: var(--accent-glow); font-weight: 700; margin-right: 15px; }
+        .leaderboard-time { color: var(--text-muted); font-size: 0.9rem; }
+        
+        .back-btn { position: fixed; top: 20px; left: 20px; background: rgba(61, 26, 46, 0.9); border: 2px solid rgba(255, 107, 74, 0.3); border-radius: 50%; width: 50px; height: 50px; display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 100; font-size: 1.5rem; color: var(--text); transition: all 0.3s ease; }
+        .back-btn:hover { border-color: var(--accent); background: rgba(92, 41, 69, 0.9); }
+        .sound-btn { position: fixed; top: 20px; right: 20px; background: rgba(61, 26, 46, 0.9); border: 2px solid rgba(255, 107, 74, 0.3); border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100; font-size: 1.5rem; transition: all 0.3s ease; }
+        .sound-btn:hover { border-color: var(--accent); }
+        .sound-btn.muted { opacity: 0.5; }
+        
+        .confetti { position: fixed; width: 10px; height: 10px; z-index: 9999; pointer-events: none; }
+        
+        .prep-tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 15px; }
+        .prep-tag { background: rgba(255, 107, 74, 0.2); padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; color: var(--accent-glow); border: 1px solid rgba(255, 107, 74, 0.3); }
+    </style>
+</head>
+<body>
+    <div class="glow-orbs">
+        <div class="orb"></div>
+        <div class="orb"></div>
+        <div class="orb"></div>
+    </div>
+    <div class="particles" id="particles"></div>
+    
+    <button class="back-btn" id="backBtn" onclick="goToMenu()">←</button>
+    <button class="sound-btn" id="soundBtn">🔊</button>
+
+    <div class="container">
+        <header>
+            <h1>🎯 Präpositionen Champion</h1>
+            <p class="subtitle">Welche Präposition passt zum Verb, Adjektiv oder Nomen?</p>
+        </header>
+
+        <div class="screen active" id="startScreen">
+            <div class="menu-card">
+                <h2 class="mode-title">🎮 Bereit für die Challenge?</h2>
+                <p style="color: var(--text-muted); margin-bottom: 15px; line-height: 1.6;">
+                    Fülle die richtige <strong style="color: var(--accent);">Präposition</strong> ein!<br>
+                    <span style="font-size: 0.9rem;">z.B. warten <strong>auf</strong> • träumen <strong>von</strong> • stolz <strong>auf</strong></span>
+                </p>
+                
+                <div class="prep-tags">
+                    <span class="prep-tag">an</span>
+                    <span class="prep-tag">auf</span>
+                    <span class="prep-tag">aus</span>
+                    <span class="prep-tag">bei</span>
+                    <span class="prep-tag">für</span>
+                    <span class="prep-tag">gegen</span>
+                    <span class="prep-tag">in</span>
+                    <span class="prep-tag">mit</span>
+                    <span class="prep-tag">nach</span>
+                    <span class="prep-tag">über</span>
+                    <span class="prep-tag">um</span>
+                    <span class="prep-tag">von</span>
+                    <span class="prep-tag">vor</span>
+                    <span class="prep-tag">zu</span>
+                </div>
+                
+                <p style="color: var(--accent); margin-top: 20px; font-weight: 600;">🎯 150 Phrasen – Verben, Adjektive & Nomen!</p>
+                
+                <div class="name-input-container" style="margin-top: 25px;">
+                    <input type="text" class="name-input" id="playerNameInput" placeholder="Dein Name" maxlength="20">
+                </div>
+                
+                <button class="start-btn" onclick="startGame()">🚀 Los geht's!</button>
+            </div>
+            
+            <div class="menu-card">
+                <h2 class="mode-title">🏆 Bestenliste</h2>
+                <div id="menuLeaderboard"><p style="color: var(--text-muted); text-align: center;">Noch keine Einträge. Sei der Erste!</p></div>
+            </div>
+        </div>
+
+        <div class="screen" id="gameScreen">
+            <div class="game-header">
+                <div class="stats-bar">
+                    <div class="stat-item"><div class="stat-label">Punkte</div><div class="stat-value" id="points">0</div></div>
+                    <div class="stat-item"><div class="stat-label">Serie</div><div class="stat-value" id="streak">0</div></div>
+                    <div class="stat-item"><div class="stat-label">Zeit</div><div class="stat-value" id="timer">0:00</div></div>
+                </div>
+            </div>
+            
+            <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
+            <div class="progress-text" id="progressText">0 / 150 Phrasen gemeistert</div>
+            
+            <div class="phrase-card">
+                <div class="type-badge" id="typeBadge">Verb</div>
+                <div class="phrase-display" id="phraseDisplay"></div>
+                <div class="english-translation" id="englishTranslation"></div>
+                <div class="case-hint" id="caseHint">+ Dativ</div>
+                <p class="hint-text">Drücke <strong>Enter</strong> zum Prüfen!</p>
+            </div>
+            
+            <div class="control-buttons">
+                <button class="control-btn reveal" id="revealBtn" onclick="revealAnswer()">👁️ Lösung zeigen</button>
+                <button class="control-btn" onclick="skipPhrase()">⏭️ Überspringen</button>
+            </div>
+        </div>
+
+        <div class="screen" id="resultScreen">
+            <div class="result-card">
+                <h2 class="result-title">🎉 Geschafft!</h2>
+                <div class="result-stats">
+                    <div class="result-stat"><div class="result-stat-value" id="finalPoints">0</div><div class="result-stat-label">Punkte</div></div>
+                    <div class="result-stat"><div class="result-stat-value" id="finalTime">0:00</div><div class="result-stat-label">Zeit</div></div>
+                    <div class="result-stat"><div class="result-stat-value" id="bestStreak">0</div><div class="result-stat-label">Beste Serie</div></div>
+                    <div class="result-stat"><div class="result-stat-value" id="accuracy">0%</div><div class="result-stat-label">Genauigkeit</div></div>
+                </div>
+                <button class="control-btn primary" onclick="saveScore()">💾 Speichern</button>
+                <div class="leaderboard" id="resultLeaderboard"></div>
+                <div style="margin-top: 30px;">
+                    <button class="control-btn primary" onclick="playAgain()">🔄 Nochmal!</button>
+                    <button class="control-btn" onclick="goToMenu()">🏠 Menü</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Präpositionen-Daten: [wort, präposition, typ, kasus, englisch]
+        const phrases = [
+            // AN + Dativ/Akkusativ
+            ['denken', 'an', 'verb', 'Akkusativ', 'to think of/about'],
+            ['erinnern', 'an', 'verb', 'Akkusativ', 'to remember'],
+            ['erkranken', 'an', 'verb', 'Dativ', 'to fall ill with'],
+            ['glauben', 'an', 'verb', 'Akkusativ', 'to believe in'],
+            ['leiden', 'an', 'verb', 'Dativ', 'to suffer from'],
+            ['liegen', 'an', 'verb', 'Dativ', 'to be due to'],
+            ['sterben', 'an', 'verb', 'Dativ', 'to die of'],
+            ['teilnehmen', 'an', 'verb', 'Dativ', 'to participate in'],
+            ['zweifeln', 'an', 'verb', 'Dativ', 'to doubt'],
+            ['schuldig', 'an', 'adjective', 'Dativ', 'guilty of'],
+            ['die Erinnerung', 'an', 'noun', 'Akkusativ', 'the memory of'],
+            ['der Glaube', 'an', 'noun', 'Akkusativ', 'the belief in'],
+            ['die Teilnahme', 'an', 'noun', 'Dativ', 'the participation in'],
+            ['sich gewöhnen', 'an', 'verb', 'Akkusativ', 'to get used to'],
+            ['gewöhnt', 'an', 'adjective', 'Akkusativ', 'used to'],
+            
+            // AUF + Dativ/Akkusativ
+            ['basieren', 'auf', 'verb', 'Dativ', 'to be based on'],
+            ['bestehen', 'auf', 'verb', 'Dativ', 'to insist on'],
+            ['achten', 'auf', 'verb', 'Akkusativ', 'to pay attention to'],
+            ['antworten', 'auf', 'verb', 'Akkusativ', 'to answer/reply to'],
+            ['aufpassen', 'auf', 'verb', 'Akkusativ', 'to watch out for'],
+            ['sich freuen', 'auf', 'verb', 'Akkusativ', 'to look forward to'],
+            ['hören', 'auf', 'verb', 'Akkusativ', 'to listen to'],
+            ['hoffen', 'auf', 'verb', 'Akkusativ', 'to hope for'],
+            ['sich konzentrieren', 'auf', 'verb', 'Akkusativ', 'to concentrate on'],
+            ['reagieren', 'auf', 'verb', 'Akkusativ', 'to react to'],
+            ['sich vorbereiten', 'auf', 'verb', 'Akkusativ', 'to prepare for'],
+            ['verzichten', 'auf', 'verb', 'Akkusativ', 'to do without'],
+            ['warten', 'auf', 'verb', 'Akkusativ', 'to wait for'],
+            ['eifersüchtig', 'auf', 'adjective', 'Akkusativ', 'jealous of'],
+            ['gespannt', 'auf', 'adjective', 'Akkusativ', 'curious about'],
+            ['neidisch', 'auf', 'adjective', 'Akkusativ', 'envious of'],
+            ['neugierig', 'auf', 'adjective', 'Akkusativ', 'curious about'],
+            ['stolz', 'auf', 'adjective', 'Akkusativ', 'proud of'],
+            ['die Antwort', 'auf', 'noun', 'Akkusativ', 'the answer to'],
+            ['die Hoffnung', 'auf', 'noun', 'Akkusativ', 'the hope for'],
+            ['die Reaktion', 'auf', 'noun', 'Akkusativ', 'the reaction to'],
+            ['die Vorbereitung', 'auf', 'noun', 'Akkusativ', 'the preparation for'],
+            
+            // AUS + Dativ
+            ['bestehen', 'aus', 'verb', 'Dativ', 'to consist of'],
+            ['entstehen', 'aus', 'verb', 'Dativ', 'to arise from'],
+            ['stammen', 'aus', 'verb', 'Dativ', 'to come from'],
+            
+            // BEI + Dativ
+            ['arbeiten', 'bei', 'verb', 'Dativ', 'to work at/for'],
+            ['sich bedanken', 'bei', 'verb', 'Dativ', 'to thank (someone)'],
+            ['sich beschweren', 'bei', 'verb', 'Dativ', 'to complain to'],
+            ['sich entschuldigen', 'bei', 'verb', 'Dativ', 'to apologize to'],
+            ['beliebt', 'bei', 'adjective', 'Dativ', 'popular with'],
+            
+            // FÜR + Akkusativ
+            ['danken', 'für', 'verb', 'Akkusativ', 'to thank for'],
+            ['sich bedanken', 'für', 'verb', 'Akkusativ', 'to thank for'],
+            ['sich einsetzen', 'für', 'verb', 'Akkusativ', 'to stand up for'],
+            ['sich entscheiden', 'für', 'verb', 'Akkusativ', 'to decide on'],
+            ['sich interessieren', 'für', 'verb', 'Akkusativ', 'to be interested in'],
+            ['sorgen', 'für', 'verb', 'Akkusativ', 'to take care of'],
+            ['stimmen', 'für', 'verb', 'Akkusativ', 'to vote for'],
+            ['dankbar', 'für', 'adjective', 'Akkusativ', 'grateful for'],
+            ['typisch', 'für', 'adjective', 'Akkusativ', 'typical of'],
+            ['verantwortlich', 'für', 'adjective', 'Akkusativ', 'responsible for'],
+            ['der Dank', 'für', 'noun', 'Akkusativ', 'the thanks for'],
+            ['die Entscheidung', 'für', 'noun', 'Akkusativ', 'the decision for'],
+            ['die Verantwortung', 'für', 'noun', 'Akkusativ', 'the responsibility for'],
+            
+            // GEGEN + Akkusativ
+            ['kämpfen', 'gegen', 'verb', 'Akkusativ', 'to fight against'],
+            ['protestieren', 'gegen', 'verb', 'Akkusativ', 'to protest against'],
+            ['sich wehren', 'gegen', 'verb', 'Akkusativ', 'to defend oneself against'],
+            ['stimmen', 'gegen', 'verb', 'Akkusativ', 'to vote against'],
+            ['immun', 'gegen', 'adjective', 'Akkusativ', 'immune to'],
+            ['der Kampf', 'gegen', 'noun', 'Akkusativ', 'the fight against'],
+            ['der Protest', 'gegen', 'noun', 'Akkusativ', 'the protest against'],
+            
+            // IN + Akkusativ
+            ['sich verlieben', 'in', 'verb', 'Akkusativ', 'to fall in love with'],
+            ['sich verwandeln', 'in', 'verb', 'Akkusativ', 'to transform into'],
+            ['teilen', 'in', 'verb', 'Akkusativ', 'to divide into'],
+            ['übersetzen', 'in', 'verb', 'Akkusativ', 'to translate into'],
+            ['das Vertrauen', 'in', 'noun', 'Akkusativ', 'the trust in'],
+            
+            // MIT + Dativ
+            ['anfangen', 'mit', 'verb', 'Dativ', 'to start with'],
+            ['aufhören', 'mit', 'verb', 'Dativ', 'to stop doing'],
+            ['beginnen', 'mit', 'verb', 'Dativ', 'to begin with'],
+            ['rechnen', 'mit', 'verb', 'Dativ', 'to expect'],
+            ['sich beschäftigen', 'mit', 'verb', 'Dativ', 'to deal with'],
+            ['sprechen', 'mit', 'verb', 'Dativ', 'to speak with'],
+            ['telefonieren', 'mit', 'verb', 'Dativ', 'to phone with'],
+            ['befreundet', 'mit', 'adjective', 'Dativ', 'friends with'],
+            ['fertig', 'mit', 'adjective', 'Dativ', 'finished with'],
+            ['verheiratet', 'mit', 'adjective', 'Dativ', 'married to'],
+            ['das Gespräch', 'mit', 'noun', 'Dativ', 'the conversation with'],
+            
+            // NACH + Dativ
+            ['fragen', 'nach', 'verb', 'Dativ', 'to ask about'],
+            ['riechen', 'nach', 'verb', 'Dativ', 'to smell of'],
+            ['schmecken', 'nach', 'verb', 'Dativ', 'to taste of'],
+            ['sich sehnen', 'nach', 'verb', 'Dativ', 'to long for'],
+            ['suchen', 'nach', 'verb', 'Dativ', 'to search for'],
+            ['süchtig', 'nach', 'adjective', 'Dativ', 'addicted to'],
+            ['verrückt', 'nach', 'adjective', 'Dativ', 'crazy about'],
+            ['die Frage', 'nach', 'noun', 'Dativ', 'the question about'],
+            ['die Sehnsucht', 'nach', 'noun', 'Dativ', 'the longing for'],
+            ['die Suche', 'nach', 'noun', 'Dativ', 'the search for'],
+            
+            // ÜBER + Akkusativ
+            ['sich ärgern', 'über', 'verb', 'Akkusativ', 'to be annoyed about'],
+            ['sich aufregen', 'über', 'verb', 'Akkusativ', 'to get upset about'],
+            ['sich freuen', 'über', 'verb', 'Akkusativ', 'to be happy about'],
+            ['sich wundern', 'über', 'verb', 'Akkusativ', 'to be surprised at'],
+            ['klagen', 'über', 'verb', 'Akkusativ', 'to complain about'],
+            ['lachen', 'über', 'verb', 'Akkusativ', 'to laugh about'],
+            ['nachdenken', 'über', 'verb', 'Akkusativ', 'to think about'],
+            ['reden', 'über', 'verb', 'Akkusativ', 'to talk about'],
+            ['sprechen', 'über', 'verb', 'Akkusativ', 'to speak about'],
+            ['streiten', 'über', 'verb', 'Akkusativ', 'to argue about'],
+            ['ärgerlich', 'über', 'adjective', 'Akkusativ', 'annoyed about'],
+            ['froh', 'über', 'adjective', 'Akkusativ', 'happy about'],
+            ['glücklich', 'über', 'adjective', 'Akkusativ', 'happy about'],
+            ['traurig', 'über', 'adjective', 'Akkusativ', 'sad about'],
+            ['wütend', 'über', 'adjective', 'Akkusativ', 'angry about'],
+            ['der Ärger', 'über', 'noun', 'Akkusativ', 'the annoyance about'],
+            
+            // UM + Akkusativ
+            ['bitten', 'um', 'verb', 'Akkusativ', 'to ask for'],
+            ['sich bemühen', 'um', 'verb', 'Akkusativ', 'to try hard for'],
+            ['sich kümmern', 'um', 'verb', 'Akkusativ', 'to take care of'],
+            ['sich sorgen', 'um', 'verb', 'Akkusativ', 'to worry about'],
+            ['kämpfen', 'um', 'verb', 'Akkusativ', 'to fight for'],
+            ['die Bitte', 'um', 'noun', 'Akkusativ', 'the request for'],
+            ['die Sorge', 'um', 'noun', 'Akkusativ', 'the worry about'],
+            
+            // VON + Dativ
+            ['abhängen', 'von', 'verb', 'Dativ', 'to depend on'],
+            ['abraten', 'von', 'verb', 'Dativ', 'to advise against'],
+            ['erzählen', 'von', 'verb', 'Dativ', 'to tell about'],
+            ['träumen', 'von', 'verb', 'Dativ', 'to dream of'],
+            ['abhängig', 'von', 'adjective', 'Dativ', 'dependent on'],
+            ['begeistert', 'von', 'adjective', 'Dativ', 'enthusiastic about'],
+            ['enttäuscht', 'von', 'adjective', 'Dativ', 'disappointed in'],
+            ['müde', 'von', 'adjective', 'Dativ', 'tired from'],
+            ['der Traum', 'von', 'noun', 'Dativ', 'the dream of'],
+            
+            // VOR + Dativ
+            ['sich fürchten', 'vor', 'verb', 'Dativ', 'to be afraid of'],
+            ['fliehen', 'vor', 'verb', 'Dativ', 'to flee from'],
+            ['sich schützen', 'vor', 'verb', 'Dativ', 'to protect oneself from'],
+            ['warnen', 'vor', 'verb', 'Dativ', 'to warn about'],
+            ['sicher', 'vor', 'adjective', 'Dativ', 'safe from'],
+            ['die Angst', 'vor', 'noun', 'Dativ', 'the fear of'],
+            ['die Flucht', 'vor', 'noun', 'Dativ', 'the escape from'],
+            ['der Schutz', 'vor', 'noun', 'Dativ', 'the protection from'],
+            ['die Warnung', 'vor', 'noun', 'Dativ', 'the warning about'],
+            
+            // ZU + Dativ
+            ['beitragen', 'zu', 'verb', 'Dativ', 'to contribute to'],
+            ['führen', 'zu', 'verb', 'Dativ', 'to lead to'],
+            ['gehören', 'zu', 'verb', 'Dativ', 'to belong to'],
+            ['gratulieren', 'zu', 'verb', 'Dativ', 'to congratulate on'],
+            ['passen', 'zu', 'verb', 'Dativ', 'to match/suit'],
+            ['raten', 'zu', 'verb', 'Dativ', 'to advise to'],
+            ['bereit', 'zu', 'adjective', 'Dativ', 'ready for'],
+            ['fähig', 'zu', 'adjective', 'Dativ', 'capable of'],
+            ['der Beitrag', 'zu', 'noun', 'Dativ', 'the contribution to'],
+            ['die Fähigkeit', 'zu', 'noun', 'Dativ', 'the ability to'],
+            ['die Gratulation', 'zu', 'noun', 'Dativ', 'the congratulations on'],
+        ];
+
+        let gameState = {
+            playerName: '',
+            currentPhrase: null,
+            solvedCount: 0,
+            totalRounds: 150,
+            remainingPhrases: [],
+            points: 0,
+            streak: 0,
+            bestStreak: 0,
+            startTime: null,
+            timerInterval: null,
+            correctAnswers: 0,
+            totalAttempts: 0,
+            soundEnabled: true,
+            revealed: false
+        };
+
+        function playSound(type) {
+            if (!gameState.soundEnabled) return;
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            
+            if (type === 'correct') {
+                osc.frequency.value = 587;
+                gain.gain.value = 0.25;
+                osc.start();
+                setTimeout(() => { osc.frequency.value = 740; setTimeout(() => { osc.frequency.value = 880; setTimeout(() => osc.stop(), 80); }, 80); }, 80);
+            } else if (type === 'wrong') {
+                osc.frequency.value = 220;
+                gain.gain.value = 0.2;
+                osc.start();
+                setTimeout(() => osc.stop(), 150);
+            } else if (type === 'type') {
+                osc.frequency.value = 900;
+                gain.gain.value = 0.04;
+                osc.start();
+                setTimeout(() => osc.stop(), 25);
+            }
+        }
+
+        function init() {
+            createParticles();
+            updateMenuLeaderboard();
+            
+            document.getElementById('soundBtn').addEventListener('click', () => {
+                gameState.soundEnabled = !gameState.soundEnabled;
+                document.getElementById('soundBtn').textContent = gameState.soundEnabled ? '🔊' : '🔇';
+                document.getElementById('soundBtn').classList.toggle('muted', !gameState.soundEnabled);
+            });
+            
+            document.getElementById('playerNameInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') startGame();
+            });
+        }
+
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDelay = Math.random() * 8 + 's';
+                p.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                container.appendChild(p);
+            }
+        }
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function startGame() {
+            gameState.playerName = document.getElementById('playerNameInput').value.trim() || 'Spieler';
+            gameState.solvedCount = 0;
+            gameState.remainingPhrases = [...phrases].sort(() => Math.random() - 0.5);
+            gameState.points = 0;
+            gameState.streak = 0;
+            gameState.bestStreak = 0;
+            gameState.correctAnswers = 0;
+            gameState.totalAttempts = 0;
+            gameState.startTime = Date.now();
+            
+            showScreen('gameScreen');
+            document.getElementById('backBtn').style.display = 'flex';
+            
+            updateStats();
+            updateProgress();
+            startTimer();
+            loadNextPhrase();
+        }
+
+        function startTimer() {
+            clearInterval(gameState.timerInterval);
+            gameState.timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+                document.getElementById('timer').textContent = `${Math.floor(elapsed / 60)}:${(elapsed % 60).toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function loadNextPhrase() {
+            if (gameState.solvedCount >= gameState.totalRounds || gameState.remainingPhrases.length === 0) {
+                endGame();
+                return;
+            }
+            
+            if (gameState.solvedCount > 0 && gameState.solvedCount % 25 === 0) {
+                showMilestone(gameState.solvedCount);
+                return;
+            }
+            
+            gameState.currentPhrase = gameState.remainingPhrases.shift();
+            gameState.revealed = false;
+            
+            const [word, prep, type, kasus, english] = gameState.currentPhrase;
+            
+            // Type badge
+            const typeBadge = document.getElementById('typeBadge');
+            typeBadge.className = 'type-badge ' + type;
+            typeBadge.textContent = type === 'verb' ? '🔵 Verb' : type === 'adjective' ? '🟡 Adjektiv' : '🟣 Nomen';
+            
+            // Phrase display
+            const display = document.getElementById('phraseDisplay');
+            display.innerHTML = `<span class="phrase-word">${word}</span> <input type="text" class="prep-input" id="prepInput" autocomplete="off" spellcheck="false">`;
+            
+            // English translation
+            document.getElementById('englishTranslation').textContent = english;
+            
+            // Case hint
+            document.getElementById('caseHint').textContent = `+ ${kasus}`;
+            
+            // Input handling
+            const input = document.getElementById('prepInput');
+            input.focus();
+            
+            input.addEventListener('input', () => {
+                playSound('type');
+            });
+            
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') checkAnswer();
+            });
+            
+            // Reset reveal button
+            document.getElementById('revealBtn').disabled = false;
+            document.getElementById('revealBtn').style.opacity = '1';
+        }
+
+        function checkAnswer() {
+            if (gameState.revealed) return;
+            
+            const input = document.getElementById('prepInput');
+            const answer = input.value.trim().toLowerCase();
+            const correct = gameState.currentPhrase[1].toLowerCase();
+            
+            gameState.totalAttempts++;
+            
+            if (answer === correct) {
+                input.classList.add('correct');
+                input.disabled = true;
+                playSound('correct');
+                
+                gameState.streak++;
+                if (gameState.streak > gameState.bestStreak) gameState.bestStreak = gameState.streak;
+                gameState.correctAnswers++;
+                
+                let pts = 10;
+                let bonus = false;
+                if (gameState.streak >= 5) { pts = 25; bonus = true; }
+                else if (gameState.streak >= 3) { pts = 15; bonus = true; }
+                
+                gameState.points += pts;
+                showPointsPopup(pts, bonus);
+                updateStats();
+                
+                setTimeout(() => {
+                    gameState.solvedCount++;
+                    updateProgress();
+                    loadNextPhrase();
+                }, 800);
+            } else {
+                input.classList.add('wrong');
+                playSound('wrong');
+                gameState.streak = 0;
+                updateStats();
+                
+                setTimeout(() => {
+                    input.classList.remove('wrong');
+                    input.value = '';
+                    input.focus();
+                }, 500);
+            }
+        }
+
+        function revealAnswer() {
+            if (gameState.revealed) return;
+            gameState.revealed = true;
+            gameState.streak = 0;
+            
+            const input = document.getElementById('prepInput');
+            input.value = gameState.currentPhrase[1];
+            input.classList.add('revealed');
+            input.disabled = true;
+            
+            document.getElementById('revealBtn').disabled = true;
+            document.getElementById('revealBtn').style.opacity = '0.5';
+            
+            updateStats();
+            
+            setTimeout(() => {
+                gameState.solvedCount++;
+                updateProgress();
+                loadNextPhrase();
+            }, 1200);
+        }
+
+        function skipPhrase() {
+            gameState.remainingPhrases.push(gameState.currentPhrase);
+            gameState.streak = 0;
+            updateStats();
+            loadNextPhrase();
+        }
+
+        function showPointsPopup(pts, bonus) {
+            const popup = document.createElement('div');
+            popup.className = 'points-popup' + (bonus ? ' streak-bonus' : '');
+            popup.textContent = `+${pts}`;
+            popup.style.left = '50%';
+            popup.style.top = '35%';
+            popup.style.transform = 'translateX(-50%)';
+            document.body.appendChild(popup);
+            setTimeout(() => popup.remove(), 1000);
+        }
+
+        function updateStats() {
+            document.getElementById('points').textContent = gameState.points;
+            document.getElementById('streak').innerHTML = gameState.streak + (gameState.streak >= 3 ? ' <span class="streak-fire">🔥</span>' : '');
+        }
+
+        function updateProgress() {
+            const progress = (gameState.solvedCount / gameState.totalRounds) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressText').textContent = `${gameState.solvedCount} / ${gameState.totalRounds} Phrasen gemeistert`;
+        }
+
+        function showMilestone(count) {
+            playSound('correct');
+            createConfetti();
+            const overlay = document.createElement('div');
+            overlay.className = 'milestone-overlay';
+            overlay.innerHTML = `<div class="milestone-content"><div class="milestone-number">${count}</div><div class="milestone-text">Phrasen geschafft! 🔥</div></div>`;
+            document.body.appendChild(overlay);
+            setTimeout(() => { overlay.remove(); loadNextPhrase(); }, 2000);
+        }
+
+        function createConfetti() {
+            const colors = ['#ff6b4a', '#ffaa85', '#d63384', '#fd7e14', '#ffd740', '#e84a5f'];
+            for (let i = 0; i < 70; i++) {
+                const c = document.createElement('div');
+                c.className = 'confetti';
+                c.style.left = Math.random() * 100 + 'vw';
+                c.style.top = '-10px';
+                c.style.background = colors[Math.floor(Math.random() * colors.length)];
+                c.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                c.style.width = (Math.random() * 10 + 5) + 'px';
+                c.style.height = c.style.width;
+                document.body.appendChild(c);
+                const a = c.animate([
+                    { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+                    { transform: `translateY(100vh) rotate(${Math.random() * 720}deg)`, opacity: 0 }
+                ], { duration: Math.random() * 2000 + 2000, easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)' });
+                a.onfinish = () => c.remove();
+            }
+        }
+
+        function endGame() {
+            clearInterval(gameState.timerInterval);
+            const e = Math.floor((Date.now() - gameState.startTime) / 1000);
+            
+            document.getElementById('finalPoints').textContent = gameState.points;
+            document.getElementById('finalTime').textContent = `${Math.floor(e/60)}:${(e%60).toString().padStart(2,'0')}`;
+            document.getElementById('bestStreak').textContent = gameState.bestStreak;
+            const accuracy = gameState.totalAttempts > 0 ? Math.round((gameState.correctAnswers / gameState.totalAttempts) * 100) : 0;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+            
+            showScreen('resultScreen');
+            document.getElementById('backBtn').style.display = 'none';
+            updateResultLeaderboard();
+            
+            playSound('correct');
+            createConfetti();
+        }
+
+        function loadLeaderboard() {
+            const s = localStorage.getItem('praepChampionLeaderboard');
+            return s ? JSON.parse(s) : [];
+        }
+
+        function saveLeaderboard(l) {
+            localStorage.setItem('praepChampionLeaderboard', JSON.stringify(l));
+        }
+
+        function saveScore() {
+            const e = Math.floor((Date.now() - gameState.startTime) / 1000);
+            const entry = { name: gameState.playerName, points: gameState.points, time: e, date: new Date().toLocaleDateString('de-DE') };
+            const l = loadLeaderboard();
+            l.push(entry);
+            l.sort((a, b) => b.points - a.points);
+            saveLeaderboard(l.slice(0, 10));
+            updateResultLeaderboard();
+            updateMenuLeaderboard();
+            event.target.disabled = true;
+            event.target.textContent = '✓ Gespeichert!';
+        }
+
+        function formatTime(s) { return `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`; }
+
+        function updateMenuLeaderboard() {
+            const c = document.getElementById('menuLeaderboard');
+            const l = loadLeaderboard();
+            if (l.length === 0) { c.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Noch keine Einträge. Sei der Erste!</p>'; return; }
+            c.innerHTML = l.slice(0, 5).map((e, i) => `
+                <div class="leaderboard-entry">
+                    <span class="leaderboard-rank">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1) + '.'}</span>
+                    <span class="leaderboard-name">${e.name}</span>
+                    <span class="leaderboard-score">${e.points} Pkt</span>
+                    <span class="leaderboard-time">${formatTime(e.time)}</span>
+                </div>
+            `).join('');
+        }
+
+        function updateResultLeaderboard() {
+            const c = document.getElementById('resultLeaderboard');
+            const l = loadLeaderboard();
+            c.innerHTML = `
+                <h3 class="leaderboard-title">🏆 Bestenliste</h3>
+                ${l.slice(0, 5).map((e, i) => `
+                    <div class="leaderboard-entry">
+                        <span class="leaderboard-rank">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1) + '.'}</span>
+                        <span class="leaderboard-name">${e.name}</span>
+                        <span class="leaderboard-score">${e.points} Pkt</span>
+                        <span class="leaderboard-time">${formatTime(e.time)}</span>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        function playAgain() {
+            const saveBtn = document.querySelector('#resultScreen .control-btn.primary');
+            if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '💾 Speichern'; }
+            startGame();
+        }
+
+        function goToMenu() {
+            clearInterval(gameState.timerInterval);
+            document.getElementById('backBtn').style.display = 'none';
+            const saveBtn = document.querySelector('#resultScreen .control-btn.primary');
+            if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '💾 Speichern'; }
+            showScreen('startScreen');
+            updateMenuLeaderboard();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
