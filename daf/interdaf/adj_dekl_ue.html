@@ -3,1108 +3,612 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adjektiv-Meister 🎯</title>
+    <title>Adjektivdeklination Meister 🎯</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #1e3a5f;
-            --primary-light: #2d5a8a;
-            --accent: #C71585;
-            --accent-glow: #E91E9E;
-            --accent2: #8B1538;
-            --accent3: #B8860B;
-            --success: #27ae60;
-            --error: #e74c3c;
-            --bg-dark: #2C1810;
-            --bg-card: #3D2317;
-            --text: #FFF8DC;
-            --text-muted: #D4C4A8;
-            --gold: #FFD700;
-            --gold-light: #FFEB99;
-            --silver: #bdc3c7;
-            --bronze: #cd6133;
-            --nom-color: #3498db;
-            --akk-color: #e74c3c;
-            --dat-color: #9b59b6;
-            --gen-color: #27ae60;
-            --hover-color: #FFD700;
-        }
+        :root { --primary: #1a1a2e; --primary-light: #2d2d4a; --accent: #4a9eff; --accent-glow: #7ab8ff; --definite: #4a9eff; --definite-glow: #7ab8ff; --indefinite: #f5c842; --indefinite-glow: #ffe066; --possessive: #9c27b0; --possessive-glow: #ce93d8; --negation: #e53e3e; --negation-glow: #fc8181; --nullartikel: #38a169; --nullartikel-glow: #68d391; --mixed: #ed8936; --mixed-glow: #fbd38d; --success: #4ecdc4; --error: #ff6b6b; --bg-dark: #0f0f1a; --bg-card: #1a1a2e; --text: #ffffff; --text-muted: #a0a0c0; --gold: #ffd700; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Quicksand', sans-serif;
-            background: linear-gradient(135deg, var(--bg-dark) 0%, #4A2C20 50%, var(--bg-dark) 100%);
-            min-height: 100vh;
-            color: var(--text);
-        }
-        .container { max-width: 950px; margin: 0 auto; padding: 20px; }
+        body { font-family: 'Quicksand', sans-serif; background: linear-gradient(135deg, var(--bg-dark) 0%, #1a0a2e 50%, var(--bg-dark) 100%); min-height: 100vh; color: var(--text); overflow-x: hidden; }
+        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .star { position: absolute; background: #a0a0c0; border-radius: 50%; animation: twinkle 2s infinite; }
+        @keyframes twinkle { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+        .container { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; padding: 20px; }
         header { text-align: center; margin-bottom: 30px; }
-        h1 {
-            font-family: 'Fredoka', sans-serif;
-            font-size: 2.8rem;
-            background: linear-gradient(135deg, var(--gold), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 10px;
-        }
+        h1 { font-family: 'Fredoka', sans-serif; font-size: 2.5rem; background: linear-gradient(135deg, var(--accent-glow), var(--possessive-glow), var(--indefinite-glow)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px; }
         .subtitle { color: var(--text-muted); font-size: 1.1rem; }
         .screen { display: none; animation: fadeIn 0.5s ease; }
         .screen.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .menu-card {
-            background: linear-gradient(135deg, var(--bg-card) 0%, #4D3327 100%);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 20px;
-            border: 2px solid var(--gold);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,215,0,0.1);
-        }
-        .mode-title { font-family: 'Fredoka', sans-serif; font-size: 1.4rem; margin-bottom: 20px; color: var(--gold); }
-        
-        .info-section { 
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); 
-            border-radius: 15px; 
-            padding: 20px; 
-            margin-bottom: 20px; 
-            border: 2px solid var(--accent);
-        }
-        .info-section h3 { color: var(--gold); margin-bottom: 15px; font-family: 'Fredoka', sans-serif; }
-        
-        .declension-table { 
-            display: grid; 
-            grid-template-columns: auto repeat(4, 1fr); 
-            gap: 4px; 
-            font-size: 0.75rem; 
-            margin-bottom: 15px;
-        }
-        .declension-table .header { 
-            font-weight: 700; 
-            color: var(--text); 
-            padding: 6px 4px; 
-            text-align: center; 
-            border-radius: 6px; 
-            background: var(--accent2);
-        }
-        .declension-table .case-header { background: var(--primary); }
-        .declension-table .cell { 
-            background: rgba(255,255,255,0.1); 
-            padding: 4px; 
-            text-align: center; 
-            border-radius: 4px; 
-            color: var(--text-muted);
-            font-size: 0.7rem;
-        }
-        
-        .rule-box { 
-            background: rgba(255, 215, 0, 0.1); 
-            border: 2px solid var(--gold); 
-            border-radius: 12px; 
-            padding: 15px; 
-            margin-top: 15px; 
-        }
-        .rule-box strong { color: var(--gold); }
-        .rule-box ul { margin-left: 20px; margin-top: 10px; }
-        .rule-box li { margin-bottom: 5px; color: var(--text-muted); }
-        
-        .mode-buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .mode-btn {
-            background: linear-gradient(135deg, var(--accent2) 0%, var(--accent) 100%);
-            border: 3px solid var(--gold);
-            border-radius: 15px;
-            padding: 20px;
-            color: var(--text);
-            font-family: 'Quicksand', sans-serif;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-        .mode-btn:hover { 
-            transform: translateY(-5px); 
-            box-shadow: 0 10px 30px rgba(199, 21, 133, 0.4);
-            border-color: var(--gold-light);
-        }
-        .mode-btn .mode-icon { font-size: 2rem; display: block; margin-bottom: 10px; }
-        .mode-btn .mode-desc { font-size: 0.85rem; color: var(--text-muted); margin-top: 5px; font-weight: 400; }
-        
+        .menu-card { background: var(--bg-card); border-radius: 20px; padding: 30px; margin-bottom: 20px; border: 2px solid var(--primary-light); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); }
+        .mode-title { font-family: 'Fredoka', sans-serif; font-size: 1.4rem; margin-bottom: 20px; color: var(--accent-glow); }
+        .mode-buttons { display: flex; flex-direction: column; gap: 12px; }
+        .mode-btn { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); border: 2px solid var(--accent); border-radius: 15px; padding: 18px 25px; color: var(--text); font-family: 'Quicksand', sans-serif; font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-align: left; position: relative; }
+        .mode-btn:hover { transform: translateX(10px); box-shadow: 0 5px 20px rgba(74, 158, 255, 0.3); }
+        .mode-btn .mode-icon { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 1.5rem; }
+        .mode-btn .mode-desc { font-size: 0.8rem; color: var(--text-muted); margin-top: 5px; font-weight: 400; }
+        .mode-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; margin-left: 10px; }
+        .mode-btn.definite { border-color: var(--definite); } .mode-btn.definite:hover { box-shadow: 0 5px 20px rgba(74, 158, 255, 0.4); } .mode-btn.definite .mode-badge { background: var(--definite); color: white; }
+        .mode-btn.indefinite { border-color: var(--indefinite); } .mode-btn.indefinite:hover { box-shadow: 0 5px 20px rgba(245, 200, 66, 0.4); } .mode-btn.indefinite .mode-badge { background: var(--indefinite); color: #1a1a2e; }
+        .mode-btn.possessive { border-color: var(--possessive); } .mode-btn.possessive:hover { box-shadow: 0 5px 20px rgba(156, 39, 176, 0.4); } .mode-btn.possessive .mode-badge { background: var(--possessive); color: white; }
+        .mode-btn.negation { border-color: var(--negation); } .mode-btn.negation:hover { box-shadow: 0 5px 20px rgba(229, 62, 62, 0.4); } .mode-btn.negation .mode-badge { background: var(--negation); color: white; }
+        .mode-btn.nullartikel { border-color: var(--nullartikel); } .mode-btn.nullartikel:hover { box-shadow: 0 5px 20px rgba(56, 161, 105, 0.4); } .mode-btn.nullartikel .mode-badge { background: var(--nullartikel); color: white; }
+        .mode-btn.mixed { border-color: var(--mixed); } .mode-btn.mixed:hover { box-shadow: 0 5px 20px rgba(237, 137, 54, 0.4); } .mode-btn.mixed .mode-badge { background: var(--mixed); color: white; }
         .game-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
-        .stats-bar { display: flex; gap: 20px; flex-wrap: wrap; }
-        .stat { 
-            text-align: center; 
-            background: linear-gradient(135deg, var(--bg-card) 0%, #4D3327 100%);
-            padding: 10px 20px; 
-            border-radius: 12px; 
-            border: 2px solid var(--gold); 
-        }
-        .stat-value { font-family: 'Fredoka', sans-serif; font-size: 1.5rem; color: var(--gold); }
-        .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
-        .streak-fire { animation: pulse 0.5s infinite alternate; }
-        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.2); } }
-        
-        .progress-section { 
-            background: linear-gradient(135deg, var(--bg-card) 0%, #4D3327 100%);
-            border-radius: 15px; 
-            padding: 15px 20px; 
-            margin-bottom: 20px;
-            border: 2px solid var(--accent);
-        }
-        .progress-bar { height: 12px; background: var(--primary); border-radius: 6px; overflow: hidden; margin-bottom: 8px; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--gold)); border-radius: 6px; transition: width 0.5s; width: 0%; }
-        .progress-text { text-align: center; color: var(--text-muted); font-size: 0.9rem; }
-        
-        .game-card { 
-            background: linear-gradient(135deg, var(--bg-card) 0%, #4D3327 100%);
-            border-radius: 25px; 
-            padding: 30px; 
-            border: 3px solid var(--gold); 
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-        }
-        
-        .sentence-display { 
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-            border-radius: 15px; 
-            padding: 25px; 
-            margin-bottom: 25px; 
-            text-align: center;
-            border: 2px solid var(--accent);
-        }
-        .sentence-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
-        .sentence-text { font-size: 1.3rem; line-height: 1.8; }
-        .sentence-text .blank-art, .sentence-text .blank-adj { 
-            display: inline-block;
-            min-width: 80px;
-            min-height: 35px;
-            background: rgba(255,215,0,0.2);
-            border: 2px dashed var(--gold);
-            border-radius: 8px;
-            margin: 0 5px;
-            padding: 5px 10px;
-            vertical-align: middle;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .sentence-text .blank-art.filled, .sentence-text .blank-adj.filled {
-            background: rgba(199, 21, 133, 0.3);
-            border: 2px solid var(--accent);
-        }
-        .sentence-text .blank-art.correct, .sentence-text .blank-adj.correct {
-            background: rgba(39, 174, 96, 0.3);
-            border-color: var(--success);
-        }
-        .sentence-text .blank-art.wrong, .sentence-text .blank-adj.wrong {
-            background: rgba(231, 76, 60, 0.3);
-            border-color: var(--error);
-        }
-        .sentence-text .blank-art.active, .sentence-text .blank-adj.active {
-            border-color: var(--gold);
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
-            animation: slotPulse 1.5s infinite;
-        }
-        @keyframes slotPulse {
-            0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
-            50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
-        }
-        
-        .current-step-instruction {
-            background: rgba(255, 215, 0, 0.15);
-            border: 3px solid var(--gold);
-            border-radius: 12px;
-            padding: 15px 20px;
-            margin: 15px 0;
-            text-align: center;
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: var(--gold);
-            animation: stepPulse 2s infinite;
-        }
-        @keyframes stepPulse {
-            0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
-            50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
-        }
-        
-        .answer-section { margin-top: 25px; }
-        .answer-label { font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; text-align: center; }
-        
-        .button-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .option-btn {
-            background: #f8f9fa;
-            border: 3px solid #dee2e6;
-            border-radius: 12px;
-            padding: 12px 20px;
-            color: #1a1a2e;
-            font-family: 'Quicksand', sans-serif;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            min-width: 80px;
-        }
-        .option-btn:hover:not(.used):not(.disabled) {
-            border-color: var(--hover-color);
-            background: #FFF8DC;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
-        }
-        .option-btn.selected {
-            background: var(--gold-light);
-            border-color: var(--gold);
-        }
-        .option-btn.used { 
-            opacity: 0.3; 
-            cursor: not-allowed; 
-            transform: scale(0.95);
-            background: #adb5bd;
-        }
-        .option-btn.correct-btn {
-            background: #d4edda;
-            border-color: var(--success);
-        }
-        .option-btn.wrong-btn {
-            background: #f8d7da;
-            border-color: var(--error);
-        }
-        
-        .control-buttons { display: flex; gap: 15px; justify-content: center; margin-top: 25px; flex-wrap: wrap; }
-        .control-btn { 
-            background: linear-gradient(135deg, var(--bg-card) 0%, #4D3327 100%);
-            border: 2px solid var(--gold); 
-            border-radius: 12px; 
-            padding: 12px 25px; 
-            color: var(--text); 
-            font-family: 'Quicksand', sans-serif; 
-            font-size: 1rem; 
-            font-weight: 600; 
-            cursor: pointer; 
-            transition: all 0.3s; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-        }
-        .control-btn:hover { border-color: var(--gold-light); background: var(--primary); }
-        .control-btn.primary { 
-            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-glow) 100%); 
-            border-color: var(--accent-glow); 
-            color: white; 
-        }
-        .control-btn.primary:hover { box-shadow: 0 5px 20px rgba(199, 21, 133, 0.5); }
-        .back-btn { position: fixed; top: 20px; left: 20px; z-index: 100; }
-        
-        .result-card { 
-            background: linear-gradient(135deg, var(--bg-card) 0%, #4D3327 100%);
-            border-radius: 25px; 
-            padding: 40px; 
-            text-align: center; 
-            border: 3px solid var(--gold); 
-        }
-        .result-title { font-family: 'Fredoka', sans-serif; font-size: 2.5rem; color: var(--gold); margin-bottom: 30px; }
-        .result-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .result-stat { background: var(--primary); padding: 20px; border-radius: 15px; border: 2px solid var(--accent); }
-        .result-stat-value { font-family: 'Fredoka', sans-serif; font-size: 2rem; color: var(--gold); }
-        .result-stat-label { font-size: 0.9rem; color: var(--text-muted); margin-top: 5px; }
-        
-        .leaderboard { margin-top: 30px; text-align: left; }
-        .leaderboard-title { font-family: 'Fredoka', sans-serif; font-size: 1.5rem; color: var(--gold); margin-bottom: 20px; text-align: center; }
-        .leaderboard-entry { display: flex; align-items: center; gap: 15px; background: var(--primary); padding: 12px 20px; border-radius: 12px; margin-bottom: 10px; }
-        .leaderboard-rank { font-family: 'Fredoka', sans-serif; font-size: 1.3rem; width: 40px; }
-        .rank-1 { color: var(--gold); } .rank-2 { color: var(--silver); } .rank-3 { color: var(--bronze); }
-        .leaderboard-name { flex: 1; font-weight: 600; }
-        .leaderboard-score { font-family: 'Fredoka', sans-serif; color: var(--gold); }
-        .leaderboard-time { color: var(--text-muted); font-size: 0.9rem; }
-        
-        .name-input { 
-            background: var(--primary); 
-            border: 2px solid var(--gold); 
-            border-radius: 12px; 
-            padding: 15px 20px; 
-            color: var(--text); 
-            font-family: 'Quicksand', sans-serif; 
-            font-size: 1.1rem; 
-            width: 100%; 
-            max-width: 300px; 
-            margin: 20px auto; 
-            display: block; 
-            text-align: center; 
-        }
+        .stats-bar { display: flex; gap: 15px; flex-wrap: wrap; }
+        .stat-item { background: var(--bg-card); padding: 10px 18px; border-radius: 12px; border: 1px solid var(--primary-light); text-align: center; min-width: 90px; }
+        .stat-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .stat-value { font-family: 'Fredoka', sans-serif; font-size: 1.3rem; color: var(--accent-glow); }
+        .streak-fire { display: inline-block; animation: flame 0.5s ease infinite alternate; }
+        @keyframes flame { from { transform: scale(1); } to { transform: scale(1.2); } }
+        .progress-bar { background: var(--bg-card); border-radius: 10px; height: 18px; overflow: hidden; margin-bottom: 25px; border: 1px solid var(--primary-light); }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--possessive-glow)); transition: width 0.5s ease; }
+        .progress-text { text-align: center; margin-top: 8px; color: var(--text-muted); font-size: 0.85rem; }
+        .mode-indicator { padding: 8px 18px; border-radius: 20px; font-weight: 600; font-size: 0.85rem; color: white; }
+        .mode-indicator.definite { background: linear-gradient(135deg, var(--definite), var(--definite-glow)); }
+        .mode-indicator.indefinite { background: linear-gradient(135deg, var(--indefinite), var(--indefinite-glow)); color: #1a1a2e; }
+        .mode-indicator.possessive { background: linear-gradient(135deg, var(--possessive), var(--possessive-glow)); }
+        .mode-indicator.negation { background: linear-gradient(135deg, var(--negation), var(--negation-glow)); }
+        .mode-indicator.nullartikel { background: linear-gradient(135deg, var(--nullartikel), var(--nullartikel-glow)); }
+        .mode-indicator.mixed { background: linear-gradient(135deg, var(--mixed), var(--mixed-glow)); }
+        .sentence-card { background: var(--bg-card); border-radius: 25px; padding: 35px 30px; margin-bottom: 25px; border: 3px solid var(--primary-light); box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4); text-align: center; min-height: 100px; }
+        .sentence { font-size: 1.4rem; line-height: 2.4; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; }
+        .word { display: inline-block; }
+        .slot-group { display: inline-flex; align-items: center; gap: 2px; background: rgba(74, 158, 255, 0.1); padding: 4px 8px; border-radius: 10px; margin: 0 4px; }
+        .article-slot, .ending-slot { display: inline-flex; align-items: center; justify-content: center; min-width: 70px; height: 40px; background: var(--primary); border: 2px dashed var(--accent); border-radius: 8px; cursor: pointer; transition: all 0.3s ease; font-weight: 600; color: var(--text-muted); padding: 0 8px; font-size: 0.95rem; }
+        .ending-slot { min-width: 55px; border-color: var(--possessive); }
+        .article-slot:hover { border-color: var(--accent-glow); box-shadow: 0 0 15px rgba(74, 158, 255, 0.3); }
+        .ending-slot:hover { border-color: var(--possessive-glow); box-shadow: 0 0 15px rgba(156, 39, 176, 0.3); }
+        .article-slot.selected { border-style: solid; border-color: var(--accent); box-shadow: 0 0 20px rgba(74, 158, 255, 0.5); animation: pulse 1s ease infinite; }
+        .ending-slot.selected { border-style: solid; border-color: var(--possessive); box-shadow: 0 0 20px rgba(156, 39, 176, 0.5); animation: pulse 1s ease infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        .article-slot.correct, .ending-slot.correct { border-style: solid; color: white; animation: correctBounce 0.5s ease; background: var(--success); border-color: #3db8ad; }
+        @keyframes correctBounce { 0% { transform: scale(0.8); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+        .article-slot.wrong, .ending-slot.wrong { animation: wrongShake 0.5s ease; background: var(--error); border-color: var(--error); }
+        @keyframes wrongShake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+        .adjective-stem { font-weight: 700; color: var(--possessive-glow); }
+        .case-hint { background: linear-gradient(135deg, rgba(74, 158, 255, 0.15), rgba(156, 39, 176, 0.1)); border: 1px solid rgba(74, 158, 255, 0.3); border-radius: 12px; padding: 12px 18px; margin-bottom: 20px; font-size: 0.9rem; color: var(--accent-glow); text-align: center; }
+        .case-hint .article-type { display: inline-block; padding: 2px 10px; border-radius: 10px; font-weight: 700; margin-left: 8px; font-size: 0.8rem; }
+        .case-hint .article-type.definite { background: var(--definite); color: white; }
+        .case-hint .article-type.indefinite { background: var(--indefinite); color: #1a1a2e; }
+        .case-hint .article-type.possessive { background: var(--possessive); color: white; }
+        .case-hint .article-type.negation { background: var(--negation); color: white; }
+        .case-hint .article-type.nullartikel { background: var(--nullartikel); color: white; }
+        .buttons-section { margin-bottom: 20px; }
+        .buttons-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; text-align: center; }
+        .article-grid, .ending-grid { display: grid; gap: 8px; max-width: 800px; margin: 0 auto; }
+        .article-grid { grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); }
+        .ending-grid { grid-template-columns: repeat(5, 1fr); max-width: 400px; }
+        .article-btn, .ending-btn { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); border: 2px solid var(--primary-light); border-radius: 10px; padding: 10px 6px; color: var(--text); font-family: 'Fredoka', sans-serif; font-size: 0.95rem; cursor: pointer; transition: all 0.2s ease; }
+        .article-btn:hover, .ending-btn:hover { transform: translateY(-2px); }
+        .article-btn.type-definite { border-color: var(--definite); } .article-btn.type-definite:hover { box-shadow: 0 5px 15px rgba(74, 158, 255, 0.4); background: linear-gradient(135deg, var(--primary-light) 0%, var(--definite) 100%); }
+        .article-btn.type-indefinite { border-color: var(--indefinite); } .article-btn.type-indefinite:hover { box-shadow: 0 5px 15px rgba(245, 200, 66, 0.4); background: linear-gradient(135deg, var(--primary-light) 0%, var(--indefinite) 100%); }
+        .article-btn.type-possessive { border-color: var(--possessive); } .article-btn.type-possessive:hover { box-shadow: 0 5px 15px rgba(156, 39, 176, 0.4); background: linear-gradient(135deg, var(--primary-light) 0%, var(--possessive) 100%); }
+        .article-btn.type-negation { border-color: var(--negation); } .article-btn.type-negation:hover { box-shadow: 0 5px 15px rgba(229, 62, 62, 0.4); background: linear-gradient(135deg, var(--primary-light) 0%, var(--negation) 100%); }
+        .article-btn.type-nullartikel { border-color: var(--nullartikel); } .article-btn.type-nullartikel:hover { box-shadow: 0 5px 15px rgba(56, 161, 105, 0.4); background: linear-gradient(135deg, var(--primary-light) 0%, var(--nullartikel) 100%); }
+        .ending-btn { border-color: var(--possessive); } .ending-btn:hover { box-shadow: 0 5px 15px rgba(156, 39, 176, 0.4); background: linear-gradient(135deg, var(--primary-light) 0%, var(--possessive) 100%); }
+        .control-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+        .control-btn { background: var(--bg-card); border: 2px solid var(--primary-light); border-radius: 12px; padding: 10px 20px; color: var(--text); font-family: 'Quicksand', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
+        .control-btn:hover { border-color: var(--accent); background: var(--primary); }
+        .control-btn.primary { background: linear-gradient(135deg, var(--accent) 0%, var(--accent-glow) 100%); border-color: var(--accent-glow); color: white; }
+        .control-btn.primary:hover { box-shadow: 0 5px 20px rgba(74, 158, 255, 0.5); }
+        .points-popup { position: fixed; font-family: 'Fredoka', sans-serif; font-size: 1.5rem; color: var(--success); pointer-events: none; z-index: 1000; animation: floatUp 1s ease forwards; }
+        .points-popup.streak-bonus { color: var(--gold); font-size: 1.8rem; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-50px); } }
+        .milestone-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(74, 158, 255, 0.95); display: flex; align-items: center; justify-content: center; z-index: 2000; animation: fadeIn 0.3s ease; }
+        .milestone-content { text-align: center; }
+        .milestone-number { font-family: 'Fredoka', sans-serif; font-size: 5rem; color: white; text-shadow: 0 0 30px rgba(255,255,255,0.5); }
+        .milestone-text { font-size: 1.8rem; color: white; margin-top: 10px; }
+        .confetti { position: fixed; width: 10px; height: 10px; z-index: 9999; pointer-events: none; }
+        .result-card { background: var(--bg-card); border-radius: 25px; padding: 35px; text-align: center; border: 3px solid var(--accent); box-shadow: 0 15px 50px rgba(74, 158, 255, 0.3); }
+        .result-title { font-family: 'Fredoka', sans-serif; font-size: 2.2rem; color: var(--accent-glow); margin-bottom: 25px; }
+        .result-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
+        .result-stat { background: var(--primary); padding: 18px; border-radius: 15px; }
+        .result-stat-value { font-family: 'Fredoka', sans-serif; font-size: 2.2rem; color: var(--accent-glow); }
+        .result-stat-label { color: var(--text-muted); font-size: 0.85rem; margin-top: 5px; }
+        .name-input { background: var(--primary); border: 2px solid var(--primary-light); border-radius: 10px; padding: 12px 18px; color: var(--text); font-family: 'Quicksand', sans-serif; font-size: 1rem; width: 100%; max-width: 280px; margin-bottom: 12px; text-align: center; }
         .name-input:focus { outline: none; border-color: var(--accent); }
-        
-        .points-popup { position: fixed; font-family: 'Fredoka', sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--gold); pointer-events: none; animation: floatUp 1s forwards; z-index: 1000; }
-        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-80px) scale(1.5); } }
-        
-        .confetti { position: fixed; z-index: 9999; pointer-events: none; }
-        
-        .milestone-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .milestone-content { text-align: center; animation: scaleIn 0.5s ease; }
-        @keyframes scaleIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .milestone-number { font-family: 'Fredoka', sans-serif; font-size: 6rem; color: var(--gold); }
-        .milestone-text { font-size: 1.5rem; color: var(--text); margin-top: 10px; }
-        
-        .hint-box { 
-            background: rgba(255, 215, 0, 0.1); 
-            border: 2px solid var(--gold); 
-            border-radius: 12px; 
-            padding: 15px; 
-            margin-top: 15px; 
-            text-align: center; 
-            color: var(--gold); 
-        }
-        
-        .feedback-box {
-            background: rgba(39, 174, 96, 0.15);
-            border: 2px solid var(--success);
-            border-radius: 12px;
-            padding: 15px;
-            margin-top: 15px;
-            text-align: center;
-            color: var(--success);
-            font-weight: 600;
-        }
-        .feedback-box.error {
-            background: rgba(231, 76, 60, 0.15);
-            border-color: var(--error);
-            color: var(--error);
-        }
-        
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
-        @keyframes correctPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-
-        @media (max-width: 768px) {
-            h1 { font-size: 2rem; }
-            .sentence-text { font-size: 1.1rem; }
-            .option-btn { padding: 10px 15px; font-size: 0.9rem; min-width: 60px; }
-        }
+        .leaderboard { margin-top: 25px; background: var(--primary); border-radius: 15px; padding: 18px; }
+        .leaderboard-title { font-family: 'Fredoka', sans-serif; color: var(--accent-glow); margin-bottom: 12px; }
+        .leaderboard-entry { display: flex; align-items: center; padding: 8px; border-bottom: 1px solid var(--primary-light); font-size: 0.9rem; }
+        .leaderboard-entry:last-child { border-bottom: none; }
+        .leaderboard-rank { font-size: 1.1rem; width: 35px; }
+        .leaderboard-name { flex: 1; font-weight: 600; }
+        .leaderboard-score { color: var(--accent-glow); font-weight: 700; margin-right: 12px; }
+        .leaderboard-time { color: var(--text-muted); font-size: 0.85rem; }
+        .back-btn { position: fixed; top: 20px; left: 20px; background: var(--bg-card); border: 2px solid var(--primary-light); border-radius: 50%; width: 45px; height: 45px; display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 100; font-size: 1.3rem; color: var(--text); transition: all 0.3s ease; }
+        .back-btn:hover { border-color: var(--accent); background: var(--primary); }
+        .sound-btn { position: fixed; top: 20px; right: 20px; background: var(--bg-card); border: 2px solid var(--primary-light); border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100; font-size: 1.3rem; transition: all 0.3s ease; }
+        .sound-btn:hover { border-color: var(--accent); }
+        .sound-btn.muted { opacity: 0.5; }
+        @media (max-width: 600px) { h1 { font-size: 1.8rem; } .sentence { font-size: 1.15rem; } .article-slot, .ending-slot { min-width: 55px; height: 36px; font-size: 0.85rem; } .article-btn, .ending-btn { padding: 8px 4px; font-size: 0.85rem; } .stat-item { padding: 8px 12px; min-width: 70px; } }
     </style>
 </head>
 <body>
-
-<button class="control-btn back-btn" id="backBtn" onclick="goToMenu()" style="display:none;">← Zurück</button>
-
-<div class="container">
-    <!-- START SCREEN -->
-    <div class="screen active" id="startScreen">
-        <header>
-            <h1>🎯 Adjektiv-Meister</h1>
-            <p class="subtitle">Meistere die deutsche Adjektivdeklination!</p>
-        </header>
-
-        <div class="menu-card">
-            <h2 class="mode-title">📚 Kurzübersicht: Adjektivdeklination</h2>
-            <div class="info-section">
-                <h3>Die drei Deklinationstypen</h3>
-                <div class="rule-box">
-                    <strong>🔵 Schwache Deklination</strong> (nach bestimmtem Artikel: der, die, das...)
-                    <ul>
-                        <li>Nominativ Singular: <strong>-e</strong> (der große Mann, die kleine Frau, das schöne Kind)</li>
-                        <li>Alle anderen Fälle: <strong>-en</strong></li>
-                    </ul>
-                </div>
-                <div class="rule-box" style="margin-top: 10px;">
-                    <strong>🟡 Gemischte Deklination</strong> (nach ein, kein, mein, dein...)
-                    <ul>
-                        <li>Maskulin Nom.: <strong>-er</strong> (ein großer Mann)</li>
-                        <li>Neutrum Nom./Akk.: <strong>-es</strong> (ein schönes Kind)</li>
-                        <li>Sonst wie schwach: <strong>-e</strong> oder <strong>-en</strong></li>
-                    </ul>
-                </div>
-                <div class="rule-box" style="margin-top: 10px;">
-                    <strong>🔴 Starke Deklination</strong> (ohne Artikel)
-                    <ul>
-                        <li>Adjektiv übernimmt die Signalendung des fehlenden Artikels</li>
-                        <li>z.B. kalter Kaffee, frische Milch, warmes Wasser</li>
-                    </ul>
+    <div class="stars" id="stars"></div>
+    <button class="back-btn" id="backBtn" onclick="goToMenu()">←</button>
+    <button class="sound-btn" id="soundBtn">🔊</button>
+    <div class="container">
+        <header><h1>🎯 Adjektivdeklination Meister</h1><p class="subtitle">Artikel + Adjektivendung perfekt kombinieren!</p></header>
+        <div class="screen active" id="startScreen">
+            <div class="menu-card">
+                <h2 class="mode-title">🎮 Wähle einen Übungsmodus</h2>
+                <div class="mode-buttons">
+                    <button class="mode-btn definite" onclick="startGame('definite')">📘 Bestimmte Artikel + Adjektiv<span class="mode-badge">60 Sätze</span><div class="mode-desc">der/die/das + Adjektiv mit korrekter Endung</div><span class="mode-icon">📚</span></button>
+                    <button class="mode-btn indefinite" onclick="startGame('indefinite')">📙 Unbestimmte Artikel + Adjektiv<span class="mode-badge">60 Sätze</span><div class="mode-desc">ein/eine + Adjektiv mit korrekter Endung</div><span class="mode-icon">✨</span></button>
+                    <button class="mode-btn possessive" onclick="startGame('possessive')">💜 Possessiv + Adjektiv<span class="mode-badge">60 Sätze</span><div class="mode-desc">mein/dein/sein/ihr... + Adjektiv</div><span class="mode-icon">👑</span></button>
+                    <button class="mode-btn negation" onclick="startGame('negation')">🚫 Negation + Adjektiv<span class="mode-badge">40 Sätze</span><div class="mode-desc">kein/keine + Adjektiv mit Endung</div><span class="mode-icon">❌</span></button>
+                    <button class="mode-btn nullartikel" onclick="startGame('nullartikel')">🌿 Ohne Artikel (Plural/Stoffnamen)<span class="mode-badge">40 Sätze</span><div class="mode-desc">— + starke Adjektivdeklination</div><span class="mode-icon">🔮</span></button>
+                    <button class="mode-btn mixed" onclick="startGame('mixed')">🎲 GEMISCHT – Alles durcheinander!<span class="mode-badge">260 Sätze</span><div class="mode-desc">Alle Artikeltypen wild gemischt</div><span class="mode-icon">🌪️</span></button>
                 </div>
             </div>
+            <div class="menu-card"><h2 class="mode-title">🏅 Bestenliste</h2><div id="menuLeaderboard"><p style="color: var(--text-muted); text-align: center;">Noch keine Einträge. Sei der Erste!</p></div></div>
         </div>
-
-        <div class="menu-card">
-            <h2 class="mode-title">🎮 Wähle dein Level</h2>
-            <div class="mode-buttons">
-                <button class="mode-btn" onclick="startGame('a')">
-                    <span class="mode-icon">📘</span>
-                    A1-A2
-                    <span class="mode-desc">Grundlagen: Nom., Akk., Dat., Plural</span>
-                </button>
-                <button class="mode-btn" onclick="startGame('b')">
-                    <span class="mode-icon">📗</span>
-                    B1-B2
-                    <span class="mode-desc">Beruf, Genitiv, komplexe Sätze</span>
-                </button>
-                <button class="mode-btn" onclick="startGame('c')">
-                    <span class="mode-icon">📕</span>
-                    C1-C2
-                    <span class="mode-desc">Akademisch, Genitiv-Präpositionen</span>
-                </button>
-            </div>
-        </div>
-
-        <div class="menu-card">
-            <h2 class="mode-title">🏆 Bestenliste</h2>
-            <div id="menuLeaderboard"></div>
-        </div>
-    </div>
-
-    <!-- GAME SCREEN -->
-    <div class="screen" id="gameScreen">
-        <div class="game-header">
-            <div class="stats-bar">
-                <div class="stat">
-                    <div class="stat-value" id="points">0</div>
-                    <div class="stat-label">Punkte</div>
+        <div class="screen" id="gameScreen">
+            <div class="game-header">
+                <div class="stats-bar">
+                    <div class="stat-item"><div class="stat-label">Punkte</div><div class="stat-value" id="points">0</div></div>
+                    <div class="stat-item"><div class="stat-label">Serie</div><div class="stat-value" id="streak">0</div></div>
+                    <div class="stat-item"><div class="stat-label">Zeit</div><div class="stat-value" id="timer">0:00</div></div>
                 </div>
-                <div class="stat">
-                    <div class="stat-value" id="streak">0</div>
-                    <div class="stat-label">Serie</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value" id="timer">0:00</div>
-                    <div class="stat-label">Zeit</div>
-                </div>
+                <div class="mode-indicator" id="modeIndicator">Bestimmte Artikel</div>
             </div>
+            <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
+            <div class="progress-text" id="progressText">0 / 60 Sätze gelöst</div>
+            <div class="case-hint" id="caseHint"></div>
+            <div class="sentence-card"><div class="sentence" id="sentence"></div></div>
+            <div class="buttons-section"><div class="buttons-label">Artikel wählen:</div><div class="article-grid" id="articleGrid"></div></div>
+            <div class="buttons-section"><div class="buttons-label">Endung wählen:</div><div class="ending-grid" id="endingGrid"></div></div>
+            <div class="control-buttons"><button class="control-btn" onclick="skipSentence()">⏭️ Überspringen</button></div>
         </div>
-
-        <div class="progress-section">
-            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-            <div class="progress-text" id="progressText">0 / 0 Sätze</div>
-        </div>
-
-        <div class="game-card">
-            <div class="sentence-display">
-                <div class="sentence-label">Vervollständige den Satz</div>
-                <div class="sentence-text" id="sentenceText"></div>
-            </div>
-
-            <div class="current-step-instruction" id="stepInstruction">
-                Wähle zuerst den Artikel!
-            </div>
-
-            <div class="answer-section">
-                <div class="answer-label" id="optionsLabel">Artikel wählen:</div>
-                <div class="button-grid" id="optionsGrid"></div>
-            </div>
-
-            <div id="feedbackArea"></div>
-
-            <div class="control-buttons">
-                <button class="control-btn" onclick="showHint()">💡 Tipp</button>
-                <button class="control-btn" onclick="skipSentence()">⏭️ Überspringen</button>
-                <button class="control-btn primary" onclick="checkAnswer()" id="checkBtn" style="display:none;">✓ Prüfen</button>
+        <div class="screen" id="resultScreen">
+            <div class="result-card">
+                <h2 class="result-title">🎉 Fantastisch!</h2>
+                <div class="result-stats">
+                    <div class="result-stat"><div class="result-stat-value" id="finalPoints">0</div><div class="result-stat-label">Punkte</div></div>
+                    <div class="result-stat"><div class="result-stat-value" id="finalTime">0:00</div><div class="result-stat-label">Zeit</div></div>
+                    <div class="result-stat"><div class="result-stat-value" id="bestStreak">0</div><div class="result-stat-label">Beste Serie</div></div>
+                    <div class="result-stat"><div class="result-stat-value" id="accuracy">0%</div><div class="result-stat-label">Genauigkeit</div></div>
+                </div>
+                <input type="text" class="name-input" id="playerName" placeholder="Dein Name" maxlength="20">
+                <button class="control-btn primary" onclick="saveScore()">💾 Speichern</button>
+                <div class="leaderboard" id="resultLeaderboard"></div>
+                <div style="margin-top: 25px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                    <button class="control-btn primary" onclick="playAgain()">🔄 Nochmal spielen</button>
+                    <button class="control-btn" onclick="goToMenu()">🏠 Zum Menü</button>
+                </div>
             </div>
         </div>
     </div>
-
-    <!-- RESULT SCREEN -->
-    <div class="screen" id="resultScreen">
-        <div class="result-card">
-            <h2 class="result-title">🎉 Geschafft!</h2>
-            <div class="result-stats">
-                <div class="result-stat"><div class="result-stat-value" id="finalPoints">0</div><div class="result-stat-label">Punkte</div></div>
-                <div class="result-stat"><div class="result-stat-value" id="finalTime">0:00</div><div class="result-stat-label">Zeit</div></div>
-                <div class="result-stat"><div class="result-stat-value" id="bestStreak">0</div><div class="result-stat-label">Beste Serie</div></div>
-                <div class="result-stat"><div class="result-stat-value" id="accuracy">0%</div><div class="result-stat-label">Genauigkeit</div></div>
-            </div>
-            <input type="text" class="name-input" id="playerName" placeholder="Dein Name" maxlength="20">
-            <button class="control-btn primary" onclick="saveScore()">💾 Speichern</button>
-            <div class="leaderboard" id="resultLeaderboard"></div>
-            <div class="control-buttons" style="margin-top: 30px;">
-                <button class="control-btn" onclick="goToMenu()">🏠 Menü</button>
-                <button class="control-btn primary" onclick="playAgain()">🔄 Nochmal</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-// SENTENCES: [prefix, articleOptions, adjective, suffix, correctArt, correctAdj, explanation, case, gender]
-// articleOptions: Array of possible articles to show as buttons
-// Case: nom, akk, dat, gen | Gender: m, f, n, p (plural)
-
-const sentences = {
-a: [
-    // Block 1: Nominativ
-    ["Das ist", ["ein", "eine", "der", "das", "die"], "schön", "Haus.", "ein", "es", "Neutrum, Nominativ: 'ein' hat keine Endung → Adjektiv zeigt Genus (-es)", "nom", "n"],
-    ["Ich sehe", ["der", "die", "das"], "groß", "Auto.", "das", "e", "Neutrum, Akkusativ: bestimmter Artikel → schwache Deklination (-e)", "akk", "n"],
-    ["Das ist", ["der", "ein", "die"], "neu", "Computer.", "der", "e", "Maskulin, Nominativ: bestimmter Artikel → schwache Deklination (-e)", "nom", "m"],
-    ["Hier wohnt", ["eine", "die", "meine"], "nett", "Familie.", "eine", "e", "Feminin, Nominativ: 'eine' hat Endung → Adjektiv schwach (-e)", "nom", "f"],
-    ["Das ist", ["mein", "der", "ein"], "alt", "Fahrrad.", "mein", "es", "Neutrum, Nominativ: 'mein' hat keine Endung → Adjektiv stark (-es)", "nom", "n"],
-    ["Dort steht", ["der", "ein", "mein"], "freundlich", "Mann.", "der", "e", "Maskulin, Nominativ: bestimmter Artikel → schwache Deklination (-e)", "nom", "m"],
-    ["Sie hat", ["eine", "die", "keine"], "schön", "Stimme.", "eine", "e", "Feminin, Akkusativ: 'eine' hat Endung → Adjektiv schwach (-e)", "akk", "f"],
-    ["Er kauft", ["einen", "den", "meinen"], "rot", "Pullover.", "einen", "en", "Maskulin, Akkusativ: 'einen' hat Endung → Adjektiv schwach (-en)", "akk", "m"],
-    ["", ["", "das", "ein"], "Kalt", "Wasser ist gesund.", "", "es", "Neutrum, Nominativ: kein Artikel → starke Deklination (-es)", "nom", "n"],
-    ["Das ist", ["die", "eine", "meine"], "interessant", "Geschichte.", "die", "e", "Feminin, Nominativ: bestimmter Artikel → schwache Deklination (-e)", "nom", "f"],
-    
-    // Block 2: Akkusativ
-    ["Er trinkt", ["", "einen", "den"], "heiß", "Kaffee.", "", "en", "Maskulin, Akkusativ: kein Artikel → starke Deklination (-en)", "akk", "m"],
-    ["Sie liest", ["ein", "das", "mein"], "spannend", "Buch.", "ein", "es", "Neutrum, Akkusativ: 'ein' hat keine Endung → Adjektiv stark (-es)", "akk", "n"],
-    ["Wir essen", ["den", "einen", ""], "lecker", "Kuchen.", "den", "en", "Maskulin, Akkusativ: bestimmter Artikel → schwache Deklination (-en)", "akk", "m"],
-    ["Er kauft", ["eine", "die", "keine"], "rot", "Rose.", "eine", "e", "Feminin, Akkusativ: 'eine' hat Endung → Adjektiv schwach (-e)", "akk", "f"],
-    ["Ich brauche", ["einen", "den", "keinen"], "neu", "Stift.", "einen", "en", "Maskulin, Akkusativ: 'einen' hat Endung → Adjektiv schwach (-en)", "akk", "m"],
-    ["Sie sucht", ["die", "eine", "ihre"], "richtig", "Antwort.", "die", "e", "Feminin, Akkusativ: bestimmter Artikel → schwache Deklination (-e)", "akk", "f"],
-    ["Wir hören", ["", "die", "eine"], "schön", "Musik.", "", "e", "Feminin, Akkusativ: kein Artikel → starke Deklination (-e)", "akk", "f"],
-    ["Er trägt", ["einen", "den", "seinen"], "schwarz", "Anzug.", "einen", "en", "Maskulin, Akkusativ: 'einen' hat Endung → Adjektiv schwach (-en)", "akk", "m"],
-    ["Ich sehe", ["das", "ein", "mein"], "klein", "Kind.", "das", "e", "Neutrum, Akkusativ: bestimmter Artikel → schwache Deklination (-e)", "akk", "n"],
-    ["Sie trägt", ["eine", "die", "keine"], "elegant", "Bluse.", "eine", "e", "Feminin, Akkusativ: 'eine' hat Endung → Adjektiv schwach (-e)", "akk", "f"],
-    
-    // Block 3: Dativ
-    ["Ich helfe", ["einem", "dem", "meinem"], "alt", "Mann.", "einem", "en", "Maskulin, Dativ: 'einem' hat Endung → Adjektiv schwach (-en)", "dat", "m"],
-    ["Sie wohnt in", ["einer", "der", "meiner"], "klein", "Wohnung.", "einer", "en", "Feminin, Dativ: 'einer' hat Endung → Adjektiv schwach (-en)", "dat", "f"],
-    ["Er fährt mit", ["dem", "einem", "seinem"], "schnell", "Zug.", "dem", "en", "Maskulin, Dativ: bestimmter Artikel → schwache Deklination (-en)", "dat", "m"],
-    ["Wir spielen in", ["einer", "der", "unserer"], "groß", "Halle.", "einer", "en", "Feminin, Dativ: 'einer' hat Endung → Adjektiv schwach (-en)", "dat", "f"],
-    ["Das Buch liegt auf", ["dem", "einem", "meinem"], "rund", "Tisch.", "dem", "en", "Maskulin, Dativ: bestimmter Artikel → schwache Deklination (-en)", "dat", "m"],
-    ["Er arbeitet in", ["einem", "dem", "seinem"], "modern", "Büro.", "einem", "en", "Neutrum, Dativ: 'einem' hat Endung → Adjektiv schwach (-en)", "dat", "n"],
-    ["Sie kommt aus", ["einer", "der", "einer"], "reich", "Familie.", "einer", "en", "Feminin, Dativ: 'einer' hat Endung → Adjektiv schwach (-en)", "dat", "f"],
-    ["Das Kind spielt mit", ["dem", "einem", "seinem"], "neu", "Ball.", "dem", "en", "Maskulin, Dativ: bestimmter Artikel → schwache Deklination (-en)", "dat", "m"],
-    ["Wir essen in", ["einer", "der", "unserer"], "gemütlich", "Küche.", "einer", "en", "Feminin, Dativ: 'einer' hat Endung → Adjektiv schwach (-en)", "dat", "f"],
-    ["Er sitzt auf", ["dem", "einem", "seinem"], "bequem", "Stuhl.", "dem", "en", "Maskulin, Dativ: bestimmter Artikel → schwache Deklination (-en)", "dat", "m"],
-    
-    // Block 4: Plural
-    ["Das sind", ["die", "meine", "keine"], "schön", "Blumen.", "die", "en", "Plural, Nominativ: bestimmter Artikel → immer -en", "nom", "p"],
-    ["Er kauft", ["", "die", "keine"], "frisch", "Brötchen.", "", "e", "Plural, Akkusativ: kein Artikel → starke Deklination (-e)", "akk", "p"],
-    ["Ich spreche mit", ["den", "meinen", ""], "nett", "Nachbarn.", "den", "en", "Plural, Dativ: bestimmter Artikel → immer -en", "dat", "p"],
-    ["Hier wohnen", ["die", "meine", "unsere"], "jung", "Leute.", "die", "en", "Plural, Nominativ: bestimmter Artikel → immer -en", "nom", "p"],
-    ["Sie hat", ["keine", "die", "meine"], "schlecht", "Noten.", "keine", "en", "Plural, Akkusativ: 'keine' hat Endung → Adjektiv -en", "akk", "p"],
-    ["Wir kaufen", ["", "die", "unsere"], "frisch", "Äpfel.", "", "e", "Plural, Akkusativ: kein Artikel → starke Deklination (-e)", "akk", "p"],
-    ["", ["Die", "Meine", "Unsere"], "nett", "Freunde kommen heute.", "Die", "en", "Plural, Nominativ: bestimmter Artikel → immer -en", "nom", "p"],
-    ["Ich helfe", ["", "den", "meinen"], "arm", "Leuten.", "", "en", "Plural, Dativ: kein Artikel → starke Deklination (-en)", "dat", "p"],
-    ["Er mag", ["die", "meine", ""], "schnell", "Autos.", "die", "en", "Plural, Akkusativ: bestimmter Artikel → immer -en", "akk", "p"],
-    ["Das sind", ["seine", "die", "unsere"], "best", "Schuhe.", "seine", "en", "Plural, Nominativ: 'seine' hat Endung → Adjektiv -en", "nom", "p"],
-    
-    // Block 5: Gemischt
-    ["", ["Der", "Ein", "Mein"], "freundlich", "Verkäufer hilft mir.", "Der", "e", "Maskulin, Nominativ: bestimmter Artikel → schwache Deklination (-e)", "nom", "m"],
-    ["Ich schreibe", ["einen", "den", "meinen"], "lang", "Brief.", "einen", "en", "Maskulin, Akkusativ: 'einen' hat Endung → Adjektiv schwach (-en)", "akk", "m"],
-    ["Sie dankt", ["einer", "der", "ihrer"], "hilfsbereit", "Kollegin.", "einer", "en", "Feminin, Dativ: 'einer' hat Endung → Adjektiv schwach (-en)", "dat", "f"],
-    ["", ["Das", "Ein", "Mein"], "alt", "Gebäude ist schön.", "Das", "e", "Neutrum, Nominativ: bestimmter Artikel → schwache Deklination (-e)", "nom", "n"],
-    ["Er trinkt", ["", "einen", "den"], "kalt", "Saft.", "", "en", "Maskulin, Akkusativ: kein Artikel → starke Deklination (-en)", "akk", "m"],
-    ["Das Kind spielt mit", ["seinem", "dem", "einem"], "bunt", "Spielzeug.", "seinem", "en", "Neutrum, Dativ: 'seinem' hat Endung → Adjektiv schwach (-en)", "dat", "n"],
-    ["Sie kauft", ["die", "eine", "ihre"], "teuer", "Tasche.", "die", "e", "Feminin, Akkusativ: bestimmter Artikel → schwache Deklination (-e)", "akk", "f"],
-    ["Er sucht", ["eine", "die", "seine"], "passend", "Wohnung.", "eine", "e", "Feminin, Akkusativ: 'eine' hat Endung → Adjektiv schwach (-e)", "akk", "f"],
-    ["Das ist ein Foto von", ["meinem", "dem", "einem"], "lieb", "Opa.", "meinem", "en", "Maskulin, Dativ: 'meinem' hat Endung → Adjektiv schwach (-en)", "dat", "m"],
-    ["", ["", "Die", "Meine"], "Frisch", "Luft tut gut.", "", "e", "Feminin, Nominativ: kein Artikel → starke Deklination (-e)", "nom", "f"]
-],
-
-b: [
-    // Block 1: Berufswelt
-    ["", ["Der", "Ein", "Unser"], "neu", "Kollege beginnt heute.", "Der", "e", "Maskulin, Nominativ: bestimmter Artikel → schwache Deklination (-e)", "nom", "m"],
-    ["Die Firma sucht", ["eine", "die", "keine"], "erfahren", "Managerin.", "eine", "e", "Feminin, Akkusativ: 'eine' hat Endung → Adjektiv schwach (-e)", "akk", "f"],
-    ["Das Team braucht", ["", "die", "unsere"], "motiviert", "Fachkräfte.", "", "e", "Plural, Akkusativ: kein Artikel → starke Deklination (-e)", "akk", "p"],
-    ["Der Chef lobte", ["die", "unsere", "seine"], "engagiert", "Kollegen.", "die", "en", "Plural, Akkusativ: bestimmter Artikel → immer -en", "akk", "p"],
-    ["Wir brauchen", ["einen", "den", "unseren"], "qualifiziert", "Berater.", "einen", "en", "Maskulin, Akkusativ: 'einen' hat Endung → Adjektiv schwach (-en)", "akk", "m"],
-    ["", ["Das", "Ein", "Unser"], "innovativ", "Projekt wurde genehmigt.", "Das", "e", "Neutrum, Nominativ: bestimmter Artikel → schwache Deklination (-e)", "nom", "n"],
-    ["Sie hat", ["eine", "die", "keine"], "beeindruckend", "Karriere gemacht.", "eine", "e", "Feminin, Akkusativ: 'eine' hat Endung → Adjektiv schwach (-e)", "akk", "f"],
-    ["Man muss", ["", "die", "eine"], "praktisch", "Erfahrung haben.", "", "e", "Feminin, Akkusativ: kein Artikel → starke Deklination (-e)", "akk", "f"],
-    ["Er absolviert", ["ein", "das", "sein"], "anspruchsvoll", "Studium.", "ein", "es", "Neutrum, Akkusativ: 'ein' hat keine Endung → Adjektiv stark (-es)", "akk", "n"],
-    ["Die Firma bietet", ["", "die", "gute"], "attraktiv", "Konditionen.", "", "e", "Plural, Akkusativ: kein Artikel → starke Deklination (-e)", "akk", "p"],
-    
-    // Block 2: Dativ im Beruf
-    ["In", ["einer", "der", "unserer"], "erfolgreich", "Firma arbeiten viele.", "einer", "en", "Feminin, Dativ: 'einer' hat Endung → Adjektiv schwach (-en)", "dat", "f"],
-    ["Das entspricht", ["dem", "einem", "unserem"], "aktuell", "Stand.", "dem", "en", "Maskulin, Dativ: bestimmter Artikel → schwache Deklination (-en)", "dat", "m"],
-    ["Er arbeitet in", ["einem", "dem", "seinem"], "renommiert", "Institut.", "einem", "en", "Neutrum, Dativ: 'einem' hat Endung → Adjektiv schwach (-en)", "dat", "n"],
-    ["Wir helfen", ["", "den", "unseren"], "ausländisch", "Mitarbeitern.", "", "en", "Plural, Dativ: kein Artikel → starke Deklination (-en)", "dat", "p"],
-    ["Mit", ["", "dem", "seinem"], "stark", "Engagement erreicht man viel.", "", "em", "Neutrum, Dativ: kein Artikel → starke Deklination (-em)", "dat", "n"],
-    ["Sie kommt aus", ["der", "einer", "unserer"], "chemisch", "Industrie.", "der", "en", "Feminin, Dativ: bestimmter Artikel → schwache Deklination (-en)", "dat", "f"],
-    ["Er spricht mit", ["dem", "einem", "seinem"], "zukünftig", "Arbeitgeber.", "dem", "en", "Maskulin, Dativ: bestimmter Artikel → schwache Deklination (-en)", "dat", "m"],
-    ["Das Unternehmen handelt mit", ["", "den", "seinen"], "hochwertig", "Produkten.", "", "en", "Plural, Dativ: kein Artikel → starke Deklination (-en)", "dat", "p"],
-    ["Wir arbeiten an", ["dem", "einem", "unserem"], "spannend", "Projekt.", "dem", "en", "Neutrum, Dativ: bestimmter Artikel → schwache Deklination (-en)", "dat", "n"],
-    ["Seit", ["der", "einer", "seiner"], "letzt", "Beförderung ist er zufrieden.", "der", "en", "Feminin, Dativ: bestimmter Artikel → schwache Deklination (-en)", "dat", "f"],
-    
-    // Block 3: Genitiv
-    ["Die Qualität", ["der", "einer", "unserer"], "deutsch", "Produkte ist bekannt.", "der", "en", "Plural, Genitiv: bestimmter Artikel → immer -en", "gen", "p"],
-    ["Trotz", ["des", "eines", "seines"], "schlecht", "Wetters kamen viele.", "des", "en", "Neutrum, Genitiv: bestimmter Artikel → schwache Deklination (-en)", "gen", "n"],
-    ["Die Meinung", ["", "der", "seiner"], "kompetent", "Experten ist wichtig.", "", "er", "Plural, Genitiv: kein Artikel → starke Deklination (-er)", "gen", "p"],
-    ["Aufgrund", ["des", "eines", "seines"], "stark", "Regens blieben wir.", "des", "en", "Maskulin, Genitiv: bestimmter Artikel → schwache Deklination (-en)", "gen", "m"],
-    ["Die Arbeit", ["der", "einer", "seiner"], "fleißig", "Mitarbeiterin wurde gelobt.", "der", "en", "Feminin, Genitiv: bestimmter Artikel → schwache Deklination (-en)", "gen", "f"],
-    ["Wegen", ["des", "eines", "ihres"], "technisch", "Problems gab es Verzögerungen.", "des", "en", "Neutrum, Genitiv: bestimmter Artikel → schwache Deklination (-en)", "gen", "n"],
-    ["Der Erfolg", ["der", "seiner", "ihrer"], "neu", "Strategie war beeindruckend.", "der", "en", "Feminin, Genitiv: bestimmter Artikel → schwache Deklination (-en)", "gen", "f"],
-    ["Während", ["eines", "des", "seines"], "wichtig", "Meetings war er abwesend.", "eines", "en", "Neutrum, Genitiv: 'eines' hat Endung → Adjektiv schwach (-en)", "gen", "n"],
-    ["Die Leistungen", ["der", "seiner", "unserer"], "engagiert", "Auszubildenden sind gut.", "der", "en", "Plural, Genitiv: bestimmter Artikel → immer -en", "gen", "p"],
-    ["Anstatt", ["", "des", "eines"], "lang", "Vortrags gab es eine Diskussion.", "", "en", "Maskulin, Genitiv: kein Artikel → starke Deklination (-en)", "gen", "m"],
-    
-    // Block 4: Komplexere Strukturen
-    ["Es braucht", ["eine", "die", "keine"], "klar", "Strategie.", "eine", "e", "Feminin, Akkusativ: 'eine' hat Endung → Adjektiv schwach (-e)", "akk", "f"],
-    ["Das war", ["ein", "das", "sein"], "mutig", "Entscheidung.", "ein", "e", "Feminin, Nominativ: 'ein' (bei Fem.) = eine → -e", "nom", "f"],
-    ["Bei", ["", "der", "einer"], "schlecht", "Planung gibt es Probleme.", "", "er", "Feminin, Dativ: kein Artikel → starke Deklination (-er)", "dat", "f"],
-    ["Er zeigt", ["", "den", "seinen"], "groß", "Einsatz.", "", "en", "Maskulin, Akkusativ: kein Artikel → starke Deklination (-en)", "akk", "m"],
-    ["Sie arbeitet in", ["der", "einer", "seiner"], "öffentlich", "Verwaltung.", "der", "en", "Feminin, Dativ: bestimmter Artikel → schwache Deklination (-en)", "dat", "f"],
-    ["Es gibt", ["", "die", "keine"], "interessant", "Stellenangebote.", "", "e", "Plural, Akkusativ: kein Artikel → starke Deklination (-e)", "akk", "p"],
-    ["Dank", ["einer", "der", "seiner"], "gut", "Vorbereitung lief alles.", "einer", "en", "Feminin, Genitiv: 'einer' hat Endung → Adjektiv schwach (-en)", "gen", "f"],
-    ["", ["Das", "Ein", "Sein"], "zentral", "Thema ist die Digitalisierung.", "Das", "e", "Neutrum, Nominativ: bestimmter Artikel → schwache Deklination (-e)", "nom", "n"],
-    ["Die Firma produziert", ["", "die", "keine"], "hochwertig", "Maschinen.", "", "e", "Plural, Akkusativ: kein Artikel → starke Deklination (-e)", "akk", "p"],
-    ["Innerhalb", ["der", "einer", "seiner"], "gesetzt", "Frist muss geliefert werden.", "der", "en", "Feminin, Genitiv: bestimmter Artikel → schwache Deklination (-en)", "gen", "f"],
-    
-    // Block 5: Gemischt B-Level
-    ["Die Analyse", ["", "der", "einer"], "verfügbar", "Daten zeigt Trends.", "", "er", "Plural, Genitiv: kein Artikel → starke Deklination (-er)", "gen", "p"],
-    ["Sie entwickelt", ["", "die", "ihre"], "kreativ", "Lösungen.", "", "e", "Plural, Akkusativ: kein Artikel → starke Deklination (-e)", "akk", "p"],
-    ["Die Kosten", ["eines", "des", "seines"], "umfassend", "Umbaus sind hoch.", "eines", "en", "Maskulin, Genitiv: 'eines' hat Endung → Adjektiv schwach (-en)", "gen", "m"],
-    ["Mit", ["einem", "dem", "seinem"], "gut", "Konzept überzeugt man.", "einem", "en", "Neutrum, Dativ: 'einem' hat Endung → Adjektiv schwach (-en)", "dat", "n"],
-    ["Aufgrund", ["einer", "der", "seiner"], "akut", "Krise wurde reagiert.", "einer", "en", "Feminin, Genitiv: 'einer' hat Endung → Adjektiv schwach (-en)", "gen", "f"],
-    ["Bei", ["", "der", "einer"], "schlecht", "Kommunikation entstehen Fehler.", "", "er", "Feminin, Dativ: kein Artikel → starke Deklination (-er)", "dat", "f"],
-    ["Der Wert", ["der", "seiner", "unserer"], "verkauft", "Immobilien ist gestiegen.", "der", "en", "Plural, Genitiv: bestimmter Artikel → immer -en", "gen", "p"],
-    ["Das Niveau", ["der", "seiner", "ihrer"], "angeboten", "Kurse ist hoch.", "der", "en", "Plural, Genitiv: bestimmter Artikel → immer -en", "gen", "p"],
-    ["Er bestellte", ["", "die", "keine"], "dringend", "Ersatzteile.", "", "e", "Plural, Akkusativ: kein Artikel → starke Deklination (-e)", "akk", "p"],
-    ["Die Qualität", ["eines", "des", "seines"], "fertig", "Produkts wird geprüft.", "eines", "en", "Neutrum, Genitiv: 'eines' hat Endung → Adjektiv schwach (-en)", "gen", "n"]
-],
-
-c: [
-    // Block 1: Philosophie & abstrakte Konzepte (eindeutige Antworten)
-    ["Angesichts derart", ["", "der", "solcher"], "komplex", "Fragestellungen muss man differenziert argumentieren.", "", "er", "Plural, Genitiv: kein Artikel (nach 'derart') → starke Deklination (-er)", "gen", "p"],
-    ["Die Auseinandersetzung mit", ["", "den", "solchen"], "erkenntnistheoretisch", "Paradigmen erfordert kritisches Denken.", "", "en", "Plural, Dativ: kein Artikel → starke Deklination (-en)", "dat", "p"],
-    ["Im Kontext", ["eines", "des", "jenes"], "postmodern", "Diskurses werden traditionelle Werte hinterfragt.", "eines", "en", "Maskulin, Genitiv: 'eines' hat Endung → Adjektiv schwach (-en)", "gen", "m"],
-    ["", ["Die", "Eine", "Jene"], "existenziell", "Dimension menschlicher Erfahrung wurde analysiert.", "Die", "e", "Feminin, Nominativ: bestimmter Artikel → schwache Deklination (-e)", "nom", "f"],
-    ["Hinsichtlich", ["der", "jener", "solcher"], "metaphysisch", "Implikationen herrscht Uneinigkeit.", "der", "en", "Plural, Genitiv: bestimmter Artikel → schwache Deklination (-en)", "gen", "p"],
-    ["Unter Berücksichtigung", ["", "der", "jener"], "dialektisch", "Wechselbeziehungen entsteht ein komplexes Bild.", "", "er", "Plural, Genitiv: kein Artikel → starke Deklination (-er)", "gen", "p"],
-    ["Kraft", ["eines", "des", "jenes"], "kategorisch", "Imperativs handelt der Mensch moralisch.", "eines", "en", "Maskulin, Genitiv: 'eines' hat Endung → Adjektiv schwach (-en)", "gen", "m"],
-    ["In Anbetracht", ["der", "einer", "jener"], "paradigmatisch", "Wende müssen Theorien neu gedacht werden.", "der", "en", "Feminin, Genitiv: bestimmter Artikel → schwache Deklination (-en)", "gen", "f"],
-    ["Das Wesen", ["", "des", "eines"], "rein", "Vernunft bleibt umstritten.", "", "er", "Feminin, Genitiv: kein Artikel → starke Deklination (-er)", "gen", "f"],
-    ["Mittels", ["eines", "des", "jenes"], "hermeneutisch", "Ansatzes lassen sich Texte deuten.", "eines", "en", "Maskulin, Genitiv: 'eines' hat Endung → Adjektiv schwach (-en)", "gen", "m"],
-    
-    // Block 2: Politik und Gesellschaft
-    ["Unbeschadet", ["", "der", "jener"], "verfassungsrechtlich", "Bedenken wurde das Gesetz verabschiedet.", "", "er", "Plural, Genitiv: kein Artikel → starke Deklination (-er)", "gen", "p"],
-    ["Unter Vorbehalt", ["einer", "der", "jener"], "parlamentarisch", "Zustimmung tritt die Reform in Kraft.", "einer", "en", "Feminin, Genitiv: 'einer' hat Endung → Adjektiv schwach (-en)", "gen", "f"],
-    ["Infolge", ["", "der", "jener"], "geopolitisch", "Verschiebungen ändern sich die Machtverhältnisse.", "", "er", "Plural, Genitiv: kein Artikel → starke Deklination (-er)", "gen", "p"],
-    ["Mangels", ["", "einer", "der"], "hinreichend", "Mehrheit scheiterte der Antrag.", "", "er", "Feminin, Genitiv: kein Artikel → starke Deklination (-er)", "gen", "f"],
-    ["Laut", ["", "den", "jenen"], "jüngst", "Umfragen sinkt das Vertrauen in Institutionen.", "", "en", "Plural, Dativ: kein Artikel (nach 'laut' + Pl.) → starke Deklination (-en)", "dat", "p"],
-    ["Zwecks", ["einer", "der", "jener"], "nachhaltig", "Konfliktlösung sind Verhandlungen unerlässlich.", "einer", "en", "Feminin, Genitiv: 'einer' hat Endung → Adjektiv schwach (-en)", "gen", "f"],
-    ["Vorbehaltlich", ["", "der", "einer"], "endgültig", "Genehmigungen kann gebaut werden.", "", "er", "Plural, Genitiv: kein Artikel → starke Deklination (-er)", "gen", "p"],
-    ["Seitens", ["der", "einer", "jener"], "zuständig", "Behörde wurde massiv kritisiert.", "der", "en", "Feminin, Genitiv: bestimmter Artikel → schwache Deklination (-en)", "gen", "f"],
-    ["Eingedenk", ["der", "einer", "jener"], "historisch", "Verantwortung muss gehandelt werden.", "der", "en", "Feminin, Genitiv: bestimmter Artikel → schwache Deklination (-en)", "gen", "f"],
-    ["Ungeachtet", ["", "der", "jener"], "zahlreich", "Proteste wurde das Vorhaben umgesetzt.", "", "er", "Plural, Genitiv: kein Artikel → starke Deklination (-er)", "gen", "p"],
-    
-    // Block 3: Wissenschaft und Forschung
-    ["Anhand", ["", "der", "jener"], "vorliegend", "Daten lässt sich eine Tendenz erkennen.", "", "er", "Plural, Genitiv: kein Artikel → starke Deklination (-er)", "gen", "p"],
-    ["Im Rahmen", ["eines", "des", "jenes"], "interdisziplinär", "Projekts wurde geforscht.", "eines", "en", "Neutrum, Genitiv: 'eines' hat Endung → Adjektiv schwach (-en)", "gen", "n"],
-    ["Aufgrund", ["", "der", "jener"], "methodisch", "Schwierigkeiten verzögerte sich die Studie.", "", "er", "Plural, Genitiv: kein Artikel → starke Deklination (-er)", "gen", "p"],
-    ["Zugunsten", ["", "der", "einer"], "alternativ", "Hypothese sprachen die Ergebnisse.", "", "er", "Feminin, Genitiv: kein Artikel → starke Deklination (-er)", "gen", "f"],
-    ["Mit Hilfe", ["", "der", "einer"], "neuartig", "Methoden wurden Durchbrüche erzielt.", "", "er", "Plural, Genitiv: kein Artikel → starke Deklination (-er)", "gen", "p"],
-    ["Unter Zugrundelegung", ["der", "einer", "jener"], "klassisch", "Theorie wurde argumentiert.", "der", "en", "Feminin, Genitiv: bestimmter Artikel → schwache Deklination (-en)", "gen", "f"],
-    ["Vermöge", ["", "der", "einer"], "bahnbrechend", "Entdeckungen revolutionierte sich das Feld.", "", "er", "Plural, Genitiv: kein Artikel → starke Deklination (-er)", "gen", "p"],
-    ["Inmitten", ["", "der", "jener"], "kontrovers", "Debatten wahrte er Neutralität.", "", "er", "Plural, Genitiv: kein Artikel → starke Deklination (-er)", "gen", "p"],
-    ["Trotz", ["einer", "der", "jener"], "sorgfältig", "Planung gab es Komplikationen.", "einer", "en", "Feminin, Genitiv: 'einer' hat Endung → Adjektiv schwach (-en)", "gen", "f"],
-    ["Anstelle", ["", "der", "einer"], "traditionell", "Verfahren wurden neue eingesetzt.", "", "er", "Plural, Genitiv: kein Artikel → starke Deklination (-er)", "gen", "p"],
-    
-    // Block 4: Recht und Verwaltung
-    ["Gemäß", ["einer", "der", "jener"], "kürzlich", "Verordnung gelten neue Regeln.", "einer", "en", "Feminin, Dativ (nach 'gemäß'): 'einer' hat Endung → -en", "dat", "f"],
-    ["Zufolge", ["", "der", "einer"], "aktuell", "Rechtsprechung ist dies zulässig.", "", "er", "Feminin, Dativ/Genitiv: kein Artikel → starke Deklination (-er)", "gen", "f"],
-    ["Kraft", ["einer", "der", "jener"], "bindend", "Vereinbarung sind beide verpflichtet.", "einer", "en", "Feminin, Genitiv: 'einer' hat Endung → Adjektiv schwach (-en)", "gen", "f"],
-    ["Auf Basis", ["des", "eines", "jenes"], "geltend", "Rechts wurde entschieden.", "des", "en", "Neutrum, Genitiv: bestimmter Artikel → schwache Deklination (-en)", "gen", "n"],
-    ["Namens", ["", "der", "einer"], "betroffenen", "Parteien wurde Einspruch erhoben.", "", "er", "Plural, Genitiv: kein Artikel → starke Deklination (-er)", "gen", "p"],
-    ["Im Sinne", ["der", "einer", "jener"], "geltend", "Vorschriften ist zu handeln.", "der", "en", "Plural, Genitiv: bestimmter Artikel → immer -en", "gen", "p"],
-    ["Entgegen", ["", "der", "einer"], "bisherig", "Praxis wird nun anders verfahren.", "", "er", "Feminin, Dativ: kein Artikel → starke Deklination (-er)", "dat", "f"],
-    ["Im Zuge", ["des", "eines", "jenes"], "laufend", "Verfahrens ergaben sich Neuerungen.", "des", "en", "Neutrum, Genitiv: bestimmter Artikel → schwache Deklination (-en)", "gen", "n"],
-    ["Behufs", ["", "der", "einer"], "eindeutig", "Klärung wurde nachgefragt.", "", "er", "Feminin, Genitiv: kein Artikel → starke Deklination (-er)", "gen", "f"],
-    ["Anlässlich", ["einer", "der", "jener"], "feierlich", "Zeremonie wurde die Urkunde überreicht.", "einer", "en", "Feminin, Genitiv: 'einer' hat Endung → Adjektiv schwach (-en)", "gen", "f"],
-    
-    // Block 5: Wissenschaftliche Texte - komplex
-    ["Abseits", ["", "der", "jener"], "etabliert", "Theorien entstehen neue Ansätze.", "", "er", "Plural, Genitiv: kein Artikel → starke Deklination (-er)", "gen", "p"],
-    ["Jenseits", ["", "der", "einer"], "konventionell", "Forschung liegt Potenzial.", "", "er", "Feminin, Genitiv: kein Artikel → starke Deklination (-er)", "gen", "f"],
-    ["Diesseits", ["einer", "der", "jener"], "empirisch", "Überprüfung bleiben Hypothesen spekulativ.", "einer", "en", "Feminin, Genitiv: 'einer' hat Endung → Adjektiv schwach (-en)", "gen", "f"],
-    ["Ob", ["", "der", "einer"], "methodisch", "Herausforderungen wird diskutiert.", "", "er", "Plural, Genitiv (veraltet/gehoben): kein Artikel → -er", "gen", "p"],
-    ["Mithilfe", ["des", "eines", "jenes"], "weltweiten", "Netzwerks wurde kooperiert.", "des", "en", "Neutrum, Genitiv: bestimmter Artikel → schwache Deklination (-en)", "gen", "n"],
-    ["Im Lichte", ["der", "einer", "jener"], "neuest", "Erkenntnisse muss revidiert werden.", "der", "en", "Plural, Genitiv: bestimmter Artikel → immer -en", "gen", "p"],
-    ["Fern", ["", "der", "jener"], "ideologisch", "Festlegungen soll objektiv geforscht werden.", "", "er", "Plural, Genitiv: kein Artikel → starke Deklination (-er)", "gen", "p"],
-    ["Halber", ["", "der", "einer"], "vollständig", "Dokumentation wird alles archiviert.", "", "er", "Feminin, Genitiv: kein Artikel → starke Deklination (-er)", "gen", "f"],
-    ["Bar", ["", "jeder", "aller"], "wissenschaftlich", "Fundierung bleiben solche Thesen spekulativ.", "", "er", "Feminin, Genitiv: kein Artikel (nach 'bar') → starke Deklination (-er)", "gen", "f"],
-    ["Ausweislich", ["der", "einer", "jener"], "vorliegend", "Akten ist der Sachverhalt klar.", "der", "en", "Plural, Genitiv: bestimmter Artikel → immer -en", "gen", "p"]
-]
-};
-
-let G = {};
-
-function init() {
-    showScreen('startScreen');
-    updateMenuLeaderboard();
-}
-
-function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-}
-
-function startGame(mode) {
-    G = {
-        mode: mode,
-        sentences: [...sentences[mode]],
-        remaining: [],
-        solved: [],
-        current: null,
-        points: 0,
-        streak: 0,
-        bestStreak: 0,
-        attempts: 0,
-        correct: 0,
-        timer: null,
-        startTime: Date.now(),
-        step: 'art', // 'art' or 'adj'
-        selectedArt: null,
-        selectedAdj: null
-    };
-    
-    // Shuffle sentences
-    G.remaining = G.sentences.sort(() => Math.random() - 0.5).slice(0, 20);
-    
-    showScreen('gameScreen');
-    document.getElementById('backBtn').style.display = 'block';
-    
-    G.timer = setInterval(updateTimer, 1000);
-    updateStats();
-    loadNext();
-}
-
-function updateTimer() {
-    const s = Math.floor((Date.now() - G.startTime) / 1000);
-    document.getElementById('timer').textContent = `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
-}
-
-function loadNext() {
-    if (G.remaining.length === 0) {
-        endGame();
-        return;
-    }
-    
-    G.current = G.remaining.shift();
-    G.step = 'art';
-    G.selectedArt = null;
-    G.selectedAdj = null;
-    
-    renderSentence();
-    renderOptions();
-    updateProgress();
-    
-    document.getElementById('feedbackArea').innerHTML = '';
-    document.getElementById('checkBtn').style.display = 'none';
-}
-
-function renderSentence() {
-    const [prefix, artOptions, adj, suffix, correctArt, correctAdj, explanation, caseType, gender] = G.current;
-    
-    let artDisplay = G.selectedArt !== null ? G.selectedArt || '∅' : '?';
-    let adjDisplay = G.selectedAdj !== null ? adj + G.selectedAdj : adj + '___';
-    
-    let artClass = 'blank-art';
-    let adjClass = 'blank-adj';
-    
-    if (G.step === 'art' && G.selectedArt === null) artClass += ' active';
-    if (G.step === 'adj' && G.selectedAdj === null) adjClass += ' active';
-    if (G.selectedArt !== null) artClass += ' filled';
-    if (G.selectedAdj !== null) adjClass += ' filled';
-    
-    let html = '';
-    if (prefix) html += prefix + ' ';
-    html += `<span class="${artClass}" onclick="resetToStep('art')">${artDisplay}</span> `;
-    html += `<span class="${adjClass}" onclick="resetToStep('adj')">${adjDisplay}</span> `;
-    html += suffix;
-    
-    document.getElementById('sentenceText').innerHTML = html;
-    
-    // Update instruction
-    if (G.step === 'art') {
-        document.getElementById('stepInstruction').textContent = '👉 Wähle den passenden Artikel!';
-        document.getElementById('optionsLabel').textContent = 'Artikel wählen:';
-    } else {
-        document.getElementById('stepInstruction').textContent = '👉 Wähle die richtige Adjektivendung!';
-        document.getElementById('optionsLabel').textContent = 'Endung wählen:';
-    }
-}
-
-function renderOptions() {
-    const [prefix, artOptions, adj, suffix, correctArt, correctAdj, explanation, caseType, gender] = G.current;
-    const grid = document.getElementById('optionsGrid');
-    
-    if (G.step === 'art') {
-        // Show article options
-        const displayOptions = artOptions.map(a => a === '' ? ['∅', ''] : [a, a]);
-        grid.innerHTML = displayOptions.map(([display, value]) => 
-            `<button class="option-btn ${G.selectedArt === value ? 'selected' : ''}" onclick="selectArticle('${value}')">${display}</button>`
-        ).join('');
-    } else {
-        // Show adjective ending options
-        const endings = ['', 'e', 'er', 'es', 'en', 'em'];
-        grid.innerHTML = endings.map(e => 
-            `<button class="option-btn ${G.selectedAdj === e ? 'selected' : ''}" onclick="selectEnding('${e}')">${e === '' ? '∅' : '-' + e}</button>`
-        ).join('');
-    }
-}
-
-function selectArticle(art) {
-    G.selectedArt = art;
-    G.step = 'adj';
-    renderSentence();
-    renderOptions();
-}
-
-function selectEnding(ending) {
-    G.selectedAdj = ending;
-    renderSentence();
-    renderOptions();
-    document.getElementById('checkBtn').style.display = 'inline-flex';
-}
-
-function resetToStep(step) {
-    if (step === 'art') {
-        G.selectedArt = null;
-        G.selectedAdj = null;
-        G.step = 'art';
-    } else if (step === 'adj' && G.selectedArt !== null) {
-        G.selectedAdj = null;
-        G.step = 'adj';
-    }
-    renderSentence();
-    renderOptions();
-    document.getElementById('checkBtn').style.display = 'none';
-    document.getElementById('feedbackArea').innerHTML = '';
-}
-
-function checkAnswer() {
-    const [prefix, artOptions, adj, suffix, correctArt, correctAdj, explanation, caseType, gender] = G.current;
-    
-    G.attempts++;
-    const artCorrect = G.selectedArt === correctArt;
-    const adjCorrect = G.selectedAdj === correctAdj;
-    
-    // Update visual feedback
-    const blanks = document.querySelectorAll('.blank-art, .blank-adj');
-    blanks[0].classList.add(artCorrect ? 'correct' : 'wrong');
-    blanks[1].classList.add(adjCorrect ? 'correct' : 'wrong');
-    
-    // Highlight correct buttons
-    const buttons = document.querySelectorAll('.option-btn');
-    buttons.forEach(btn => {
-        const btnValue = btn.textContent === '∅' ? '' : btn.textContent.replace('-', '');
-        if (G.step === 'adj' || G.selectedAdj !== null) {
-            if (btnValue === correctAdj) btn.classList.add('correct-btn');
-            else if (btnValue === G.selectedAdj && !adjCorrect) btn.classList.add('wrong-btn');
+    <script>
+        const definiteSentences = [
+            ["", "def", "klein", "Hund", "bellt laut.", "m", "nominativ"],
+            ["", "def", "schwarz", "Katze", "schläft.", "f", "nominativ"],
+            ["", "def", "neu", "Auto", "ist teuer.", "n", "nominativ"],
+            ["", "def", "nett", "Kinder", "spielen draußen.", "p", "nominativ"],
+            ["", "def", "alt", "Mann", "liest Zeitung.", "m", "nominativ"],
+            ["", "def", "jung", "Frau", "arbeitet hier.", "f", "nominativ"],
+            ["", "def", "groß", "Haus", "steht am Berg.", "n", "nominativ"],
+            ["", "def", "fleißig", "Schüler", "lernen viel.", "p", "nominativ"],
+            ["Wo ist", "def", "rot", "Buch", "?", "n", "nominativ"],
+            ["", "def", "klug", "Lehrer", "erklärt gut.", "m", "nominativ"],
+            ["", "def", "schön", "Blume", "duftet herrlich.", "f", "nominativ"],
+            ["", "def", "süß", "Baby", "lacht.", "n", "nominativ"],
+            ["", "def", "laut", "Vögel", "singen.", "p", "nominativ"],
+            ["", "def", "freundlich", "Nachbar", "grüßt immer.", "m", "nominativ"],
+            ["", "def", "elegant", "Dame", "trägt Schwarz.", "f", "nominativ"],
+            ["Ich sehe", "def", "groß", "Baum", "im Park.", "m", "akkusativ"],
+            ["Er kauft", "def", "frisch", "Milch", ".", "f", "akkusativ"],
+            ["Sie liest", "def", "spannend", "Buch", ".", "n", "akkusativ"],
+            ["Wir besuchen", "def", "alt", "Freunde", ".", "p", "akkusativ"],
+            ["Ich trinke", "def", "kalt", "Kaffee", ".", "m", "akkusativ"],
+            ["Er liebt", "def", "klassisch", "Musik", ".", "f", "akkusativ"],
+            ["Sie öffnet", "def", "groß", "Fenster", ".", "n", "akkusativ"],
+            ["Wir kennen", "def", "berühmt", "Schauspieler", ".", "p", "akkusativ"],
+            ["Ich brauche", "def", "neu", "Computer", ".", "m", "akkusativ"],
+            ["Sie sucht", "def", "verloren", "Tasche", ".", "f", "akkusativ"],
+            ["Er repariert", "def", "kaputt", "Fahrrad", ".", "n", "akkusativ"],
+            ["Ich mag", "def", "bunt", "Blumen", ".", "p", "akkusativ"],
+            ["Sie trägt", "def", "blau", "Kleid", ".", "n", "akkusativ"],
+            ["Er fährt", "def", "schnell", "Zug", ".", "m", "akkusativ"],
+            ["Wir essen", "def", "lecker", "Kuchen", ".", "m", "akkusativ"],
+            ["Ich helfe", "def", "alt", "Mann", ".", "m", "dativ"],
+            ["Er gibt", "def", "klein", "Kind", "einen Ball.", "n", "dativ"],
+            ["Sie dankt", "def", "nett", "Frau", ".", "f", "dativ"],
+            ["Wir folgen", "def", "erfahren", "Lehrern", ".", "p", "dativ"],
+            ["Das Buch gehört", "def", "jung", "Student", ".", "m", "dativ"],
+            ["Ich gratuliere", "def", "glücklich", "Braut", ".", "f", "dativ"],
+            ["Er vertraut", "def", "ehrlich", "Mädchen", ".", "n", "dativ"],
+            ["Sie antwortet", "def", "neugierig", "Journalisten", ".", "p", "dativ"],
+            ["Das Essen schmeckt", "def", "hungrig", "Gästen", ".", "p", "dativ"],
+            ["Ich zeige", "def", "neu", "Kollegen", "das Büro.", "m", "dativ"],
+            ["Sie hilft", "def", "müde", "Mutter", ".", "f", "dativ"],
+            ["Er erklärt", "def", "klein", "Kind", "alles.", "n", "dativ"],
+            ["Das Auto gehört", "def", "reich", "Geschäftsmann", ".", "m", "dativ"],
+            ["Ich gebe", "def", "arm", "Familie", "Geld.", "f", "dativ"],
+            ["Er bringt", "def", "krank", "Patienten", "Medizin.", "p", "dativ"],
+            ["Das ist das Auto", "def", "reich", "Mann", ".", "m", "genitiv"],
+            ["Die Farbe", "def", "alt", "Haus", "gefällt mir.", "n", "genitiv"],
+            ["Der Hut", "def", "elegant", "Dame", "ist schön.", "f", "genitiv"],
+            ["Die Namen", "def", "neu", "Schüler", "stehen hier.", "p", "genitiv"],
+            ["Das Ende", "def", "lang", "Film", "war traurig.", "m", "genitiv"],
+            ["Die Arbeit", "def", "fleißig", "Studentin", "ist gut.", "f", "genitiv"],
+            ["Das Dach", "def", "alt", "Gebäude", "ist kaputt.", "n", "genitiv"],
+            ["Die Stimmen", "def", "laut", "Kinder", "hört man.", "p", "genitiv"],
+            ["Der Preis", "def", "schön", "Wohnung", "ist hoch.", "f", "genitiv"],
+            ["Das Fell", "def", "klein", "Hund", "ist weich.", "m", "genitiv"],
+            ["Die Seiten", "def", "dick", "Buch", "sind gelb.", "n", "genitiv"],
+            ["Der Geruch", "def", "frisch", "Brot", "ist toll.", "n", "genitiv"],
+            ["Die Stimme", "def", "bekannt", "Sänger", "ist einzigartig.", "m", "genitiv"],
+            ["Das Leben", "def", "einsam", "Frau", "ist hart.", "f", "genitiv"],
+            ["Der Klang", "def", "alt", "Glocke", "ist schön.", "f", "genitiv"],
+        ];
+        const indefiniteSentences = [
+            ["Das ist", "indef", "schön", "Tag", ".", "m", "nominativ"],
+            ["Hier steht", "indef", "alt", "Kirche", ".", "f", "nominativ"],
+            ["Das ist", "indef", "interessant", "Buch", ".", "n", "nominativ"],
+            ["", "indef", "klein", "Junge", "weint.", "m", "nominativ"],
+            ["", "indef", "jung", "Frau", "singt.", "f", "nominativ"],
+            ["", "indef", "süß", "Mädchen", "lacht.", "n", "nominativ"],
+            ["Das ist", "indef", "gut", "Idee", "!", "f", "nominativ"],
+            ["Dort steht", "indef", "groß", "Baum", ".", "m", "nominativ"],
+            ["Das ist", "indef", "teuer", "Hotel", ".", "n", "nominativ"],
+            ["", "indef", "freundlich", "Mann", "hilft mir.", "m", "nominativ"],
+            ["", "indef", "intelligent", "Studentin", "antwortet.", "f", "nominativ"],
+            ["", "indef", "niedlich", "Kind", "spielt.", "n", "nominativ"],
+            ["Hier ist", "indef", "wichtig", "Brief", ".", "m", "nominativ"],
+            ["Das ist", "indef", "toll", "Nachricht", "!", "f", "nominativ"],
+            ["", "indef", "modern", "Gebäude", "steht dort.", "n", "nominativ"],
+            ["Ich kaufe", "indef", "neu", "Wagen", ".", "m", "akkusativ"],
+            ["Er sucht", "indef", "billig", "Wohnung", ".", "f", "akkusativ"],
+            ["Sie braucht", "indef", "schnell", "Auto", ".", "n", "akkusativ"],
+            ["Ich schreibe", "indef", "lang", "Brief", ".", "m", "akkusativ"],
+            ["Er trinkt", "indef", "heiß", "Tee", ".", "m", "akkusativ"],
+            ["Sie liest", "indef", "spannend", "Roman", ".", "m", "akkusativ"],
+            ["Ich esse", "indef", "lecker", "Pizza", ".", "f", "akkusativ"],
+            ["Er hat", "indef", "gut", "Job", ".", "m", "akkusativ"],
+            ["Sie trägt", "indef", "elegant", "Kleid", ".", "n", "akkusativ"],
+            ["Ich sehe", "indef", "groß", "Vogel", ".", "m", "akkusativ"],
+            ["Er findet", "indef", "interessant", "Lösung", ".", "f", "akkusativ"],
+            ["Sie macht", "indef", "dumm", "Fehler", ".", "m", "akkusativ"],
+            ["Ich höre", "indef", "laut", "Geräusch", ".", "n", "akkusativ"],
+            ["Er bestellt", "indef", "kalt", "Getränk", ".", "n", "akkusativ"],
+            ["Sie bekommt", "indef", "schön", "Geschenk", ".", "n", "akkusativ"],
+            ["Ich helfe", "indef", "alt", "Frau", ".", "f", "dativ"],
+            ["Er gibt", "indef", "arm", "Mann", "Geld.", "m", "dativ"],
+            ["Sie schenkt", "indef", "klein", "Kind", "einen Ball.", "n", "dativ"],
+            ["Ich begegne", "indef", "freundlich", "Nachbar", ".", "m", "dativ"],
+            ["Er erzählt", "indef", "neugierig", "Mädchen", "eine Geschichte.", "n", "dativ"],
+            ["Sie antwortet", "indef", "jung", "Student", ".", "m", "dativ"],
+            ["Ich zeige", "indef", "neu", "Kollegin", "das Büro.", "f", "dativ"],
+            ["Er bringt", "indef", "krank", "Freund", "Suppe.", "m", "dativ"],
+            ["Sie gratuliert", "indef", "stolz", "Vater", ".", "m", "dativ"],
+            ["Ich gebe", "indef", "hungrig", "Hund", "Futter.", "m", "dativ"],
+            ["Er erklärt", "indef", "verwirrt", "Touristen", "den Weg.", "m", "dativ"],
+            ["Sie vertraut", "indef", "ehrlich", "Person", ".", "f", "dativ"],
+            ["Mit", "indef", "scharf", "Messer", "schneidet man besser.", "n", "dativ"],
+            ["In", "indef", "klein", "Dorf", "lebt sie.", "n", "dativ"],
+            ["Bei", "indef", "gut", "Arzt", "bin ich.", "m", "dativ"],
+            ["Das ist das Haus", "indef", "reich", "Geschäftsmann", ".", "m", "genitiv"],
+            ["Der Klang", "indef", "alt", "Glocke", "ist schön.", "f", "genitiv"],
+            ["Das Licht", "indef", "hell", "Stern", "leuchtet.", "m", "genitiv"],
+            ["Die Wärme", "indef", "klein", "Feuer", "hilft.", "n", "genitiv"],
+            ["Das Lächeln", "indef", "glücklich", "Kind", "ist süß.", "n", "genitiv"],
+            ["Die Hilfe", "indef", "gut", "Freund", "ist wichtig.", "m", "genitiv"],
+            ["Der Rat", "indef", "weise", "Frau", "ist wertvoll.", "f", "genitiv"],
+            ["Das Bellen", "indef", "groß", "Hund", "erschreckt mich.", "m", "genitiv"],
+            ["Die Schönheit", "indef", "exotisch", "Blume", "ist beeindruckend.", "f", "genitiv"],
+            ["Die Melodie", "indef", "alt", "Lied", "gefällt mir.", "n", "genitiv"],
+            ["Die Kraft", "indef", "stark", "Motor", "ist enorm.", "m", "genitiv"],
+            ["Der Duft", "indef", "frisch", "Rose", "ist herrlich.", "f", "genitiv"],
+            ["Das Rauschen", "indef", "wild", "Bach", "beruhigt mich.", "m", "genitiv"],
+            ["Die Stille", "indef", "leer", "Raum", "ist unheimlich.", "m", "genitiv"],
+            ["Der Glanz", "indef", "poliert", "Spiegel", "blendet.", "m", "genitiv"],
+        ];
+        const possessiveSentences = [
+            ["Das ist", "poss-mein", "alt", "Hund", ".", "m", "nominativ"],
+            ["", "poss-dein", "neu", "Tasche", "ist schön.", "f", "nominativ"],
+            ["", "poss-sein", "klein", "Kind", "schläft.", "n", "nominativ"],
+            ["Wo sind", "poss-unser", "lieb", "Kinder", "?", "p", "nominativ"],
+            ["", "poss-ihr", "groß", "Bruder", "kommt.", "m", "nominativ"],
+            ["Das ist", "poss-mein", "best", "Freundin", ".", "f", "nominativ"],
+            ["", "poss-sein", "erst", "Auto", "war rot.", "n", "nominativ"],
+            ["", "poss-ihr", "jung", "Schwester", "studiert.", "f", "nominativ"],
+            ["", "poss-euer", "neu", "Lehrer", "ist nett.", "m", "nominativ"],
+            ["Das ist", "poss-unser", "gemütlich", "Wohnung", ".", "f", "nominativ"],
+            ["Ich liebe", "poss-mein", "klein", "Katze", ".", "f", "akkusativ"],
+            ["Er sucht", "poss-sein", "verloren", "Schlüssel", ".", "m", "akkusativ"],
+            ["Sie ruft", "poss-ihr", "alt", "Freund", "an.", "m", "akkusativ"],
+            ["Wir besuchen", "poss-unser", "krank", "Oma", ".", "f", "akkusativ"],
+            ["Ihr tragt", "poss-euer", "neu", "Schuhe", ".", "p", "akkusativ"],
+            ["Ich brauche", "poss-mein", "alt", "Computer", ".", "m", "akkusativ"],
+            ["Du trinkst", "poss-dein", "kalt", "Kaffee", ".", "m", "akkusativ"],
+            ["Er fährt", "poss-sein", "schnell", "Motorrad", ".", "n", "akkusativ"],
+            ["Sie macht", "poss-ihr", "wichtig", "Arbeit", ".", "f", "akkusativ"],
+            ["Wir verkaufen", "poss-unser", "alt", "Haus", ".", "n", "akkusativ"],
+            ["Ihr liebt", "poss-euer", "klein", "Hund", ".", "m", "akkusativ"],
+            ["Ich höre", "poss-mein", "Lieblings", "Musik", ".", "f", "akkusativ"],
+            ["Er liest", "poss-sein", "spannend", "Buch", ".", "n", "akkusativ"],
+            ["Sie trägt", "poss-ihr", "rot", "Kleid", ".", "n", "akkusativ"],
+            ["Wir kennen", "poss-unser", "neu", "Nachbarn", ".", "p", "akkusativ"],
+            ["Ich helfe", "poss-mein", "alt", "Mutter", ".", "f", "dativ"],
+            ["Er gibt", "poss-sein", "klein", "Sohn", "Geld.", "m", "dativ"],
+            ["Sie vertraut", "poss-ihr", "best", "Freundin", ".", "f", "dativ"],
+            ["Wir danken", "poss-unser", "nett", "Nachbarn", ".", "p", "dativ"],
+            ["Ihr helft", "poss-euer", "jung", "Schwester", ".", "f", "dativ"],
+            ["Ich gratuliere", "poss-mein", "lieb", "Opa", ".", "m", "dativ"],
+            ["Du zeigst", "poss-dein", "neu", "Kollegen", "das Büro.", "m", "dativ"],
+            ["Er erklärt", "poss-sein", "verwirrt", "Kind", "alles.", "n", "dativ"],
+            ["Sie antwortet", "poss-ihr", "neugierig", "Chef", ".", "m", "dativ"],
+            ["Wir schenken", "poss-unser", "lieb", "Eltern", "Blumen.", "p", "dativ"],
+            ["Mit", "poss-mein", "gut", "Freund", "gehe ich ins Kino.", "m", "dativ"],
+            ["Bei", "poss-dein", "streng", "Lehrer", "musst du aufpassen.", "m", "dativ"],
+            ["Von", "poss-sein", "reich", "Onkel", "hat er geerbt.", "m", "dativ"],
+            ["Zu", "poss-ihr", "groß", "Überraschung", "kam er.", "f", "dativ"],
+            ["Mit", "poss-unser", "neu", "Auto", "fahren wir.", "n", "dativ"],
+            ["Das ist die Meinung", "poss-mein", "klug", "Vater", ".", "m", "genitiv"],
+            ["Die Farbe", "poss-dein", "neu", "Auto", "ist schön.", "n", "genitiv"],
+            ["Der Beruf", "poss-sein", "älter", "Bruder", "ist interessant.", "m", "genitiv"],
+            ["Die Stimme", "poss-ihr", "klein", "Schwester", "ist süß.", "f", "genitiv"],
+            ["Das Haus", "poss-unser", "reich", "Onkel", "ist riesig.", "m", "genitiv"],
+            ["Die Noten", "poss-euer", "fleißig", "Tochter", "sind gut.", "f", "genitiv"],
+            ["Der Name", "poss-mein", "erst", "Freundin", "war Anna.", "f", "genitiv"],
+            ["Die Arbeit", "poss-sein", "talentiert", "Schüler", "ist beeindruckend.", "m", "genitiv"],
+            ["Das Lächeln", "poss-ihr", "glücklich", "Kind", "ist bezaubernd.", "n", "genitiv"],
+            ["Die Größe", "poss-unser", "neu", "Wohnung", "ist perfekt.", "f", "genitiv"],
+            ["", "poss-mein", "treu", "Hund", "wartet auf mich.", "m", "nominativ"],
+            ["Sie vermisst", "poss-ihr", "verstorben", "Großmutter", ".", "f", "akkusativ"],
+            ["Ich vertraue", "poss-mein", "ehrlich", "Partner", ".", "m", "dativ"],
+            ["Die Intelligenz", "poss-dein", "begabt", "Tochter", "ist bemerkenswert.", "f", "genitiv"],
+            ["Er füttert", "poss-sein", "hungrig", "Katze", ".", "f", "akkusativ"],
+            ["", "poss-unser", "gemeinsam", "Projekt", "ist erfolgreich.", "n", "nominativ"],
+            ["Ihr besucht", "poss-euer", "alt", "Großeltern", ".", "p", "akkusativ"],
+            ["Das Zimmer", "poss-mein", "unordentlich", "Sohn", "ist chaotisch.", "m", "genitiv"],
+            ["Mit", "poss-dein", "hilfsbereit", "Nachbarin", "verstehe ich mich gut.", "f", "dativ"],
+            ["", "poss-sein", "streng", "Chef", "ist unbeliebt.", "m", "nominativ"],
+        ];
+        const negationSentences = [
+            ["Das ist", "neg", "gut", "Idee", ".", "f", "nominativ"],
+            ["Hier steht", "neg", "groß", "Baum", ".", "m", "nominativ"],
+            ["Das ist", "neg", "einfach", "Problem", ".", "n", "nominativ"],
+            ["", "neg", "freundlich", "Menschen", "wohnen hier.", "p", "nominativ"],
+            ["Das ist", "neg", "billig", "Hotel", ".", "n", "nominativ"],
+            ["Hier ist", "neg", "sauber", "Wasser", ".", "n", "nominativ"],
+            ["Das war", "neg", "schön", "Erlebnis", ".", "n", "nominativ"],
+            ["", "neg", "höflich", "Antwort", "kam.", "f", "nominativ"],
+            ["Das ist", "neg", "realistisch", "Plan", ".", "m", "nominativ"],
+            ["", "neg", "wichtig", "Informationen", "fehlen.", "p", "nominativ"],
+            ["Ich habe", "neg", "gut", "Lösung", ".", "f", "akkusativ"],
+            ["Er hat", "neg", "groß", "Appetit", ".", "m", "akkusativ"],
+            ["Sie findet", "neg", "passend", "Antwort", ".", "f", "akkusativ"],
+            ["Wir haben", "neg", "besonder", "Wünsche", ".", "p", "akkusativ"],
+            ["Ich trinke", "neg", "alkoholisch", "Getränke", ".", "p", "akkusativ"],
+            ["Er macht", "neg", "dumm", "Fehler", ".", "m", "akkusativ"],
+            ["Sie hat", "neg", "fest", "Job", ".", "m", "akkusativ"],
+            ["Ich esse", "neg", "süß", "Sachen", ".", "p", "akkusativ"],
+            ["Er braucht", "neg", "neu", "Computer", ".", "m", "akkusativ"],
+            ["Sie trägt", "neg", "warm", "Jacke", ".", "f", "akkusativ"],
+            ["Ich helfe", "neg", "faul", "Schüler", ".", "m", "dativ"],
+            ["Er vertraut", "neg", "fremd", "Person", ".", "f", "dativ"],
+            ["Sie gibt", "neg", "arm", "Kind", "Geld.", "n", "dativ"],
+            ["Wir folgen", "neg", "schlecht", "Ratschlägen", ".", "p", "dativ"],
+            ["Er antwortet", "neg", "unhöflich", "Leuten", ".", "p", "dativ"],
+            ["Ich glaube", "neg", "unehrlich", "Politiker", ".", "m", "dativ"],
+            ["Mit", "neg", "scharf", "Messer", "kann man nicht schneiden.", "n", "dativ"],
+            ["Bei", "neg", "gut", "Wetter", "bleiben wir drinnen.", "n", "dativ"],
+            ["Von", "neg", "bekannt", "Künstler", "ist das Bild.", "m", "dativ"],
+            ["Aus", "neg", "ersichtlich", "Grund", "fehlt er.", "m", "dativ"],
+            ["Das ist die Schuld", "neg", "unschuldig", "Mensch", ".", "m", "genitiv"],
+            ["Trotz", "neg", "schlecht", "Wetter", "gehen wir.", "n", "genitiv"],
+            ["Wegen", "neg", "wichtig", "Grund", "fehlt er.", "m", "genitiv"],
+            ["Die Arbeit", "neg", "fleißig", "Schüler", "ist das.", "m", "genitiv"],
+            ["Der Rat", "neg", "erfahren", "Experte", "ist das.", "m", "genitiv"],
+            ["Das Werk", "neg", "bekannt", "Autor", "ist das.", "m", "genitiv"],
+            ["Die Meinung", "neg", "kompetent", "Person", "zählt hier.", "f", "genitiv"],
+            ["Der Besitz", "neg", "reich", "Familie", "ist das.", "f", "genitiv"],
+            ["Das Eigentum", "neg", "ehrlich", "Bürger", "ist das.", "m", "genitiv"],
+            ["Die Verantwortung", "neg", "erwachsen", "Menschen", "ist das.", "p", "genitiv"],
+        ];
+        const nullartikelSentences = [
+            ["", "null", "frisch", "Obst", "ist gesund.", "n", "nominativ"],
+            ["", "null", "kalt", "Wasser", "erfrischt.", "n", "nominativ"],
+            ["", "null", "gut", "Freunde", "sind wichtig.", "p", "nominativ"],
+            ["", "null", "stark", "Kaffee", "hält wach.", "m", "nominativ"],
+            ["", "null", "deutsch", "Bier", "ist bekannt.", "n", "nominativ"],
+            ["", "null", "klassisch", "Musik", "beruhigt.", "f", "nominativ"],
+            ["", "null", "klein", "Kinder", "spielen gern.", "p", "nominativ"],
+            ["", "null", "alt", "Wein", "schmeckt besser.", "m", "nominativ"],
+            ["", "null", "heiß", "Tee", "wärmt.", "m", "nominativ"],
+            ["", "null", "neu", "Ideen", "sind willkommen.", "p", "nominativ"],
+            ["Ich trinke", "null", "kalt", "Milch", ".", "f", "akkusativ"],
+            ["Er isst", "null", "frisch", "Brot", ".", "n", "akkusativ"],
+            ["Sie kauft", "null", "rot", "Äpfel", ".", "p", "akkusativ"],
+            ["Wir brauchen", "null", "neu", "Möbel", ".", "p", "akkusativ"],
+            ["Ich esse", "null", "italienisch", "Pasta", ".", "f", "akkusativ"],
+            ["Er trinkt", "null", "deutsch", "Bier", ".", "n", "akkusativ"],
+            ["Sie liest", "null", "interessant", "Bücher", ".", "p", "akkusativ"],
+            ["Wir suchen", "null", "qualifiziert", "Mitarbeiter", ".", "p", "akkusativ"],
+            ["Ich höre", "null", "laut", "Musik", ".", "f", "akkusativ"],
+            ["Er lernt", "null", "fremd", "Sprachen", ".", "p", "akkusativ"],
+            ["Mit", "null", "frisch", "Gemüse", "kocht man besser.", "n", "dativ"],
+            ["Aus", "null", "echt", "Gold", "ist der Ring.", "n", "dativ"],
+            ["Mit", "null", "gut", "Freunden", "feiert man gern.", "p", "dativ"],
+            ["Von", "null", "tief", "Herzen", "danke ich.", "n", "dativ"],
+            ["Bei", "null", "schön", "Wetter", "gehen wir spazieren.", "n", "dativ"],
+            ["Mit", "null", "viel", "Geduld", "erreicht man alles.", "f", "dativ"],
+            ["Aus", "null", "rein", "Wolle", "ist der Pullover.", "f", "dativ"],
+            ["Mit", "null", "groß", "Interesse", "lese ich das.", "n", "dativ"],
+            ["Von", "null", "alt", "Zeiten", "erzählt er.", "p", "dativ"],
+            ["Bei", "null", "stark", "Regen", "bleiben wir drinnen.", "m", "dativ"],
+            ["Der Geschmack", "null", "frisch", "Obst", "ist herrlich.", "n", "genitiv"],
+            ["Trotz", "null", "schlecht", "Wetter", "gehen wir.", "n", "genitiv"],
+            ["Wegen", "null", "technisch", "Probleme", "warten wir.", "p", "genitiv"],
+            ["Die Kraft", "null", "rein", "Natur", "ist stark.", "f", "genitiv"],
+            ["Der Duft", "null", "frisch", "Blumen", "ist wunderbar.", "p", "genitiv"],
+            ["Die Qualität", "null", "deutsch", "Autos", "ist bekannt.", "p", "genitiv"],
+            ["Der Preis", "null", "gut", "Wein", "ist hoch.", "m", "genitiv"],
+            ["Die Wirkung", "null", "stark", "Medikamente", "ist schnell.", "p", "genitiv"],
+            ["Der Klang", "null", "klassisch", "Musik", "beruhigt.", "f", "genitiv"],
+            ["Die Bedeutung", "null", "alt", "Traditionen", "ist groß.", "p", "genitiv"],
+        ];
+        const articles = {
+            definite: { nominativ: { m: 'der', f: 'die', n: 'das', p: 'die' }, akkusativ: { m: 'den', f: 'die', n: 'das', p: 'die' }, dativ: { m: 'dem', f: 'der', n: 'dem', p: 'den' }, genitiv: { m: 'des', f: 'der', n: 'des', p: 'der' } },
+            indefinite: { nominativ: { m: 'ein', f: 'eine', n: 'ein', p: '—' }, akkusativ: { m: 'einen', f: 'eine', n: 'ein', p: '—' }, dativ: { m: 'einem', f: 'einer', n: 'einem', p: '—' }, genitiv: { m: 'eines', f: 'einer', n: 'eines', p: '—' } },
+            negation: { nominativ: { m: 'kein', f: 'keine', n: 'kein', p: 'keine' }, akkusativ: { m: 'keinen', f: 'keine', n: 'kein', p: 'keine' }, dativ: { m: 'keinem', f: 'keiner', n: 'keinem', p: 'keinen' }, genitiv: { m: 'keines', f: 'keiner', n: 'keines', p: 'keiner' } },
+            possessiveBase: { 'poss-mein': 'mein', 'poss-dein': 'dein', 'poss-sein': 'sein', 'poss-ihr': 'ihr', 'poss-unser': 'unser', 'poss-euer': 'euer' }
+        };
+        const possessiveEndings = { nominativ: { m: '', f: 'e', n: '', p: 'e' }, akkusativ: { m: 'en', f: 'e', n: '', p: 'e' }, dativ: { m: 'em', f: 'er', n: 'em', p: 'en' }, genitiv: { m: 'es', f: 'er', n: 'es', p: 'er' } };
+        const adjEndings = {
+            weak: { nominativ: { m: 'e', f: 'e', n: 'e', p: 'en' }, akkusativ: { m: 'en', f: 'e', n: 'e', p: 'en' }, dativ: { m: 'en', f: 'en', n: 'en', p: 'en' }, genitiv: { m: 'en', f: 'en', n: 'en', p: 'en' } },
+            mixed: { nominativ: { m: 'er', f: 'e', n: 'es', p: 'en' }, akkusativ: { m: 'en', f: 'e', n: 'es', p: 'en' }, dativ: { m: 'en', f: 'en', n: 'en', p: 'en' }, genitiv: { m: 'en', f: 'en', n: 'en', p: 'en' } },
+            strong: { nominativ: { m: 'er', f: 'e', n: 'es', p: 'e' }, akkusativ: { m: 'en', f: 'e', n: 'es', p: 'e' }, dativ: { m: 'em', f: 'er', n: 'em', p: 'en' }, genitiv: { m: 'en', f: 'er', n: 'en', p: 'er' } }
+        };
+        function getCorrectArticle(articleType, gender, caseType) {
+            if (articleType === 'def') return articles.definite[caseType][gender];
+            if (articleType === 'indef') return articles.indefinite[caseType][gender];
+            if (articleType === 'neg') return articles.negation[caseType][gender];
+            if (articleType === 'null') return '—';
+            if (articleType.startsWith('poss-')) {
+                const base = articles.possessiveBase[articleType];
+                const ending = possessiveEndings[caseType][gender];
+                if (articleType === 'poss-euer' && ending !== '') return 'eur' + ending;
+                return base + ending;
+            }
+            return '?';
         }
-    });
-    
-    if (artCorrect && adjCorrect) {
-        // Correct!
-        G.correct++;
-        G.streak++;
-        if (G.streak > G.bestStreak) G.bestStreak = G.streak;
-        
-        let pts = 10 + (G.streak >= 3 ? G.streak * 2 : 0);
-        G.points += pts;
-        
-        playSound('correct');
-        showPopup(pts);
-        
-        document.getElementById('feedbackArea').innerHTML = `
-            <div class="feedback-box">
-                ✓ Richtig! ${explanation}
-            </div>
-        `;
-        
-        G.solved.push(G.current);
-        
-        // Check milestones
-        if (G.solved.length % 5 === 0 && G.solved.length > 0) {
-            setTimeout(() => showMilestone(G.solved.length), 1000);
-        } else {
-            setTimeout(loadNext, 2000);
+        function getCorrectEnding(articleType, gender, caseType) {
+            if (articleType === 'def') return adjEndings.weak[caseType][gender];
+            if (articleType === 'null') return adjEndings.strong[caseType][gender];
+            return adjEndings.mixed[caseType][gender];
         }
-    } else {
-        // Wrong
-        G.streak = 0;
-        playSound('wrong');
-        
-        let feedback = '✗ Nicht ganz richtig. ';
-        if (!artCorrect) {
-            feedback += `Artikel: "${correctArt || '∅'}". `;
+        function getArticleType(articleType) {
+            if (articleType === 'def') return 'definite';
+            if (articleType === 'indef') return 'indefinite';
+            if (articleType === 'neg') return 'negation';
+            if (articleType === 'null') return 'nullartikel';
+            if (articleType.startsWith('poss-')) return 'possessive';
+            return 'definite';
         }
-        if (!adjCorrect) {
-            feedback += `Endung: "-${correctAdj || '∅'}". `;
+        function getAllArticleOptions() {
+            return [
+                { text: 'der', type: 'definite' }, { text: 'die', type: 'definite' }, { text: 'das', type: 'definite' },
+                { text: 'den', type: 'definite' }, { text: 'dem', type: 'definite' }, { text: 'des', type: 'definite' },
+                { text: 'ein', type: 'indefinite' }, { text: 'eine', type: 'indefinite' }, { text: 'einen', type: 'indefinite' },
+                { text: 'einem', type: 'indefinite' }, { text: 'einer', type: 'indefinite' }, { text: 'eines', type: 'indefinite' },
+                { text: 'mein', type: 'possessive' }, { text: 'meine', type: 'possessive' }, { text: 'meinen', type: 'possessive' },
+                { text: 'meinem', type: 'possessive' }, { text: 'meiner', type: 'possessive' }, { text: 'meines', type: 'possessive' },
+                { text: 'dein', type: 'possessive' }, { text: 'deine', type: 'possessive' }, { text: 'deinen', type: 'possessive' },
+                { text: 'deinem', type: 'possessive' }, { text: 'deiner', type: 'possessive' }, { text: 'deines', type: 'possessive' },
+                { text: 'sein', type: 'possessive' }, { text: 'seine', type: 'possessive' }, { text: 'seinen', type: 'possessive' },
+                { text: 'seinem', type: 'possessive' }, { text: 'seiner', type: 'possessive' }, { text: 'seines', type: 'possessive' },
+                { text: 'ihr', type: 'possessive' }, { text: 'ihre', type: 'possessive' }, { text: 'ihren', type: 'possessive' },
+                { text: 'ihrem', type: 'possessive' }, { text: 'ihrer', type: 'possessive' }, { text: 'ihres', type: 'possessive' },
+                { text: 'unser', type: 'possessive' }, { text: 'unsere', type: 'possessive' }, { text: 'unseren', type: 'possessive' },
+                { text: 'unserem', type: 'possessive' }, { text: 'unserer', type: 'possessive' }, { text: 'unseres', type: 'possessive' },
+                { text: 'euer', type: 'possessive' }, { text: 'eure', type: 'possessive' }, { text: 'euren', type: 'possessive' },
+                { text: 'eurem', type: 'possessive' }, { text: 'eurer', type: 'possessive' }, { text: 'eures', type: 'possessive' },
+                { text: 'kein', type: 'negation' }, { text: 'keine', type: 'negation' }, { text: 'keinen', type: 'negation' },
+                { text: 'keinem', type: 'negation' }, { text: 'keiner', type: 'negation' }, { text: 'keines', type: 'negation' },
+                { text: '—', type: 'nullartikel' }
+            ];
         }
-        feedback += `<br><br>${explanation}`;
-        
-        document.getElementById('feedbackArea').innerHTML = `
-            <div class="feedback-box error">
-                ${feedback}
-            </div>
-        `;
-        
-        // Add back to queue
-        G.remaining.push(G.current);
-        
-        setTimeout(loadNext, 3500);
-    }
-    
-    updateStats();
-    document.getElementById('checkBtn').style.display = 'none';
-}
-
-function showHint() {
-    const [prefix, artOptions, adj, suffix, correctArt, correctAdj, explanation, caseType, gender] = G.current;
-    
-    const caseNames = {nom: 'Nominativ', akk: 'Akkusativ', dat: 'Dativ', gen: 'Genitiv'};
-    const genderNames = {m: 'Maskulin', f: 'Feminin', n: 'Neutrum', p: 'Plural'};
-    
-    let hint = `💡 Hinweis: ${genderNames[gender]}, ${caseNames[caseType]}`;
-    
-    if (G.step === 'art') {
-        if (artOptions.includes('')) hint += ' – Artikelloser Gebrauch ist möglich!';
-    } else {
-        if (G.selectedArt === '') {
-            hint += ' – Ohne Artikel: starke Deklination (Adjektiv zeigt Kasus)';
-        } else if (['der', 'die', 'das', 'den', 'dem', 'des'].includes(G.selectedArt)) {
-            hint += ' – Mit bestimmtem Artikel: schwache Deklination';
-        } else {
-            hint += ' – Mit unbestimmtem Artikel: gemischte Deklination';
+        let gameState = { mode: null, currentSentence: null, solvedSentences: [], remainingSentences: [], selectedSlot: null, slotType: null, points: 0, streak: 0, bestStreak: 0, startTime: null, timerInterval: null, correctAnswers: 0, totalAttempts: 0, soundEnabled: true, articleCorrect: false, endingCorrect: false };
+        function playSound(type) {
+            if (!gameState.soundEnabled) return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                if (type === 'correct') { osc.frequency.value = 523; gain.gain.value = 0.3; osc.start(); setTimeout(() => { osc.frequency.value = 659; setTimeout(() => osc.stop(), 100); }, 100); }
+                else if (type === 'wrong') { osc.frequency.value = 200; gain.gain.value = 0.3; osc.start(); setTimeout(() => osc.stop(), 200); }
+                else if (type === 'select') { osc.frequency.value = 440; gain.gain.value = 0.1; osc.start(); setTimeout(() => osc.stop(), 50); }
+                else if (type === 'milestone') { osc.frequency.value = 523; gain.gain.value = 0.3; osc.start(); setTimeout(() => { osc.frequency.value = 659; setTimeout(() => { osc.frequency.value = 784; setTimeout(() => osc.stop(), 150); }, 150); }, 150); }
+            } catch (e) {}
         }
-    }
-    
-    document.getElementById('feedbackArea').innerHTML = `<div class="hint-box">${hint}</div>`;
-}
-
-function skipSentence() {
-    G.remaining.push(G.current);
-    G.streak = 0;
-    updateStats();
-    loadNext();
-}
-
-function showPopup(pts) {
-    const p = document.createElement('div');
-    p.className = 'points-popup';
-    p.textContent = `+${pts}`;
-    p.style.cssText = 'left:50%;top:40%;transform:translateX(-50%)';
-    document.body.appendChild(p);
-    setTimeout(() => p.remove(), 1000);
-}
-
-function updateStats() {
-    document.getElementById('points').textContent = G.points;
-    document.getElementById('streak').innerHTML = G.streak + (G.streak >= 3 ? ' <span class="streak-fire">🔥</span>' : '');
-}
-
-function updateProgress() {
-    const total = G.solved.length + G.remaining.length + 1;
-    document.getElementById('progressFill').style.width = (G.solved.length / total * 100) + '%';
-    document.getElementById('progressText').textContent = `${G.solved.length} / ${total} Sätze`;
-}
-
-function showMilestone(n) {
-    playSound('milestone');
-    createConfetti();
-    const o = document.createElement('div');
-    o.className = 'milestone-overlay';
-    o.innerHTML = `<div class="milestone-content"><div class="milestone-number">${n}</div><div class="milestone-text">Sätze geschafft! 🎉</div></div>`;
-    document.body.appendChild(o);
-    setTimeout(() => { o.remove(); loadNext(); }, 2500);
-}
-
-function createConfetti() {
-    const colors = ['#FFD700','#C71585','#E91E9E','#8B1538','#B8860B'];
-    for (let i = 0; i < 60; i++) {
-        const c = document.createElement('div');
-        c.className = 'confetti';
-        c.style.cssText = `left:${Math.random()*100}vw;top:-10px;background:${colors[Math.floor(Math.random()*colors.length)]};width:${Math.random()*10+5}px;height:${Math.random()*10+5}px;border-radius:${Math.random()>0.5?'50%':'0'}`;
-        document.body.appendChild(c);
-        c.animate([{transform:'translateY(0) rotate(0)',opacity:1},{transform:`translateY(100vh) rotate(${Math.random()*720}deg)`,opacity:0}],{duration:Math.random()*2000+2000,easing:'ease-out'}).onfinish = () => c.remove();
-    }
-}
-
-function endGame() {
-    clearInterval(G.timer);
-    const s = Math.floor((Date.now() - G.startTime) / 1000);
-    document.getElementById('finalPoints').textContent = G.points;
-    document.getElementById('finalTime').textContent = `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
-    document.getElementById('bestStreak').textContent = G.bestStreak;
-    document.getElementById('accuracy').textContent = G.attempts > 0 ? Math.round(G.correct/G.attempts*100)+'%' : '0%';
-    showScreen('resultScreen');
-    document.getElementById('backBtn').style.display = 'none';
-    updateResultLeaderboard();
-    playSound('milestone');
-    createConfetti();
-}
-
-function playSound(type) {
-    try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        gain.gain.value = 0.1;
-        if (type === 'correct') {
-            osc.frequency.value = 523;
-            osc.start();
-            setTimeout(() => osc.frequency.value = 659, 100);
-            setTimeout(() => osc.frequency.value = 784, 200);
-            osc.stop(ctx.currentTime + 0.3);
-        } else if (type === 'wrong') {
-            osc.frequency.value = 200;
-            osc.start();
-            osc.stop(ctx.currentTime + 0.3);
-        } else {
-            osc.frequency.value = 523;
-            osc.start();
-            setTimeout(() => osc.frequency.value = 659, 150);
-            setTimeout(() => osc.frequency.value = 784, 300);
-            setTimeout(() => osc.frequency.value = 1047, 450);
-            osc.stop(ctx.currentTime + 0.6);
+        function init() { createStars(); updateMenuLeaderboard(); document.getElementById('soundBtn').addEventListener('click', toggleSound); }
+        function createStars() { const c = document.getElementById('stars'); for (let i = 0; i < 80; i++) { const s = document.createElement('div'); s.className = 'star'; s.style.left = Math.random() * 100 + '%'; s.style.top = Math.random() * 100 + '%'; s.style.width = Math.random() * 3 + 1 + 'px'; s.style.height = s.style.width; s.style.animationDelay = Math.random() * 2 + 's'; c.appendChild(s); } }
+        function toggleSound() { gameState.soundEnabled = !gameState.soundEnabled; const b = document.getElementById('soundBtn'); b.textContent = gameState.soundEnabled ? '🔊' : '🔇'; b.classList.toggle('muted', !gameState.soundEnabled); }
+        function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        function startGame(mode) {
+            let pool = [], text = '', cls = '';
+            if (mode === 'definite') { pool = [...definiteSentences]; text = '📘 Bestimmte Artikel'; cls = 'definite'; }
+            else if (mode === 'indefinite') { pool = [...indefiniteSentences]; text = '📙 Unbestimmte Artikel'; cls = 'indefinite'; }
+            else if (mode === 'possessive') { pool = [...possessiveSentences]; text = '💜 Possessivpronomen'; cls = 'possessive'; }
+            else if (mode === 'negation') { pool = [...negationSentences]; text = '🚫 Negation'; cls = 'negation'; }
+            else if (mode === 'nullartikel') { pool = [...nullartikelSentences]; text = '🌿 Ohne Artikel'; cls = 'nullartikel'; }
+            else if (mode === 'mixed') { pool = [...definiteSentences, ...indefiniteSentences, ...possessiveSentences, ...negationSentences, ...nullartikelSentences]; text = '🎲 Alles gemischt'; cls = 'mixed'; }
+            gameState = { mode, currentSentence: null, solvedSentences: [], remainingSentences: pool.sort(() => Math.random() - 0.5), selectedSlot: null, slotType: null, points: 0, streak: 0, bestStreak: 0, startTime: Date.now(), timerInterval: null, correctAnswers: 0, totalAttempts: 0, soundEnabled: gameState.soundEnabled, articleCorrect: false, endingCorrect: false };
+            document.getElementById('modeIndicator').textContent = text;
+            document.getElementById('modeIndicator').className = 'mode-indicator ' + cls;
+            setupButtons(); showScreen('gameScreen'); document.getElementById('backBtn').style.display = 'flex';
+            gameState.timerInterval = setInterval(updateTimer, 1000);
+            loadNextSentence(); updateStats(); updateProgress();
         }
-    } catch(e) {}
-}
-
-function loadLeaderboard() { const s = localStorage.getItem('adjektivMeisterLB'); return s ? JSON.parse(s) : []; }
-function saveLeaderboard(lb) { localStorage.setItem('adjektivMeisterLB', JSON.stringify(lb)); }
-
-function saveScore() {
-    const name = document.getElementById('playerName').value.trim() || 'Anonym';
-    const s = Math.floor((Date.now() - G.startTime) / 1000);
-    const lb = loadLeaderboard();
-    const modeNames = {a: 'A1-A2', b: 'B1-B2', c: 'C1-C2'};
-    lb.push({name, points: G.points, time: s, mode: modeNames[G.mode], date: new Date().toLocaleDateString('de-DE')});
-    lb.sort((a,b) => b.points - a.points);
-    saveLeaderboard(lb.slice(0,10));
-    updateResultLeaderboard();
-    updateMenuLeaderboard();
-    document.getElementById('playerName').disabled = true;
-    event.target.disabled = true;
-    event.target.textContent = '✓ Gespeichert!';
-}
-
-function formatTime(s) { return `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`; }
-
-function updateMenuLeaderboard() {
-    const c = document.getElementById('menuLeaderboard');
-    const lb = loadLeaderboard();
-    if (lb.length === 0) { c.innerHTML = '<p style="color:var(--text-muted);text-align:center">Noch keine Einträge. Spiele ein Level, um auf die Bestenliste zu kommen!</p>'; return; }
-    c.innerHTML = lb.slice(0,5).map((e,i) => `<div class="leaderboard-entry"><span class="leaderboard-rank rank-${i+1}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.'}</span><span class="leaderboard-name">${e.name}</span><span class="leaderboard-score">${e.points} Pkt</span><span class="leaderboard-time">${e.mode}</span></div>`).join('');
-}
-
-function updateResultLeaderboard() {
-    const c = document.getElementById('resultLeaderboard');
-    const lb = loadLeaderboard();
-    c.innerHTML = `<h3 class="leaderboard-title">🏆 Bestenliste</h3>${lb.slice(0,5).map((e,i) => `<div class="leaderboard-entry"><span class="leaderboard-rank rank-${i+1}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.'}</span><span class="leaderboard-name">${e.name}</span><span class="leaderboard-score">${e.points} Pkt</span><span class="leaderboard-time">${formatTime(e.time)}</span></div>`).join('')}`;
-}
-
-function playAgain() {
-    document.getElementById('playerName').disabled = false;
-    document.getElementById('playerName').value = '';
-    const btn = document.querySelector('#resultScreen .control-btn.primary');
-    if (btn) { btn.disabled = false; btn.textContent = '💾 Speichern'; }
-    startGame(G.mode);
-}
-
-function goToMenu() {
-    clearInterval(G.timer);
-    document.getElementById('backBtn').style.display = 'none';
-    document.getElementById('playerName').disabled = false;
-    document.getElementById('playerName').value = '';
-    const btn = document.querySelector('#resultScreen .control-btn.primary');
-    if (btn) { btn.disabled = false; btn.textContent = '💾 Speichern'; }
-    showScreen('startScreen');
-    updateMenuLeaderboard();
-}
-
-document.addEventListener('DOMContentLoaded', init);
-</script>
+        function setupButtons() {
+            const articleGrid = document.getElementById('articleGrid');
+            let articleOptions = getAllArticleOptions();
+            if (gameState.mode === 'definite') articleOptions = articleOptions.filter(a => a.type === 'definite');
+            else if (gameState.mode === 'indefinite') articleOptions = articleOptions.filter(a => a.type === 'indefinite' || a.text === '—');
+            else if (gameState.mode === 'possessive') articleOptions = articleOptions.filter(a => a.type === 'possessive');
+            else if (gameState.mode === 'negation') articleOptions = articleOptions.filter(a => a.type === 'negation');
+            else if (gameState.mode === 'nullartikel') articleOptions = articleOptions.filter(a => a.text === '—');
+            articleGrid.innerHTML = articleOptions.map(a => `<button class="article-btn type-${a.type}" onclick="selectArticle('${a.text}')">${a.text}</button>`).join('');
+            document.getElementById('endingGrid').innerHTML = ['-e', '-en', '-er', '-es', '-em'].map(e => `<button class="ending-btn" onclick="selectEnding('${e.slice(1)}')">${e}</button>`).join('');
+        }
+        function updateTimer() { const e = Math.floor((Date.now() - gameState.startTime) / 1000); document.getElementById('timer').textContent = `${Math.floor(e / 60)}:${(e % 60).toString().padStart(2, '0')}`; }
+        function loadNextSentence() {
+            if (gameState.remainingSentences.length === 0) { endGame(); return; }
+            gameState.currentSentence = gameState.remainingSentences[0];
+            gameState.selectedSlot = null; gameState.slotType = null; gameState.articleCorrect = false; gameState.endingCorrect = false;
+            const [before, articleType, adjective, noun, after, gender, caseType] = gameState.currentSentence;
+            const correctArticle = getCorrectArticle(articleType, gender, caseType);
+            const correctEnding = getCorrectEnding(articleType, gender, caseType);
+            const caseNames = { 'nominativ': 'NOMINATIV (wer/was?)', 'akkusativ': 'AKKUSATIV (wen/was?)', 'dativ': 'DATIV (wem?)', 'genitiv': 'GENITIV (wessen?)' };
+            const articleTypeNames = { 'definite': 'bestimmt', 'indefinite': 'unbestimmt', 'possessive': 'possessiv', 'negation': 'Verneinung', 'nullartikel': 'ohne Artikel' };
+            const atType = getArticleType(articleType);
+            document.getElementById('caseHint').innerHTML = `${caseNames[caseType]} <span class="article-type ${atType}">${articleTypeNames[atType]}</span>`;
+            document.getElementById('sentence').innerHTML = `${before ? `<span class="word">${before}</span>` : ''}<span class="slot-group"><span class="article-slot" data-answer="${correctArticle}" onclick="selectSlot(this, 'article')">?</span><span class="adjective-stem">${adjective}</span><span class="ending-slot" data-answer="${correctEnding}" onclick="selectSlot(this, 'ending')">?</span></span><span class="word">${noun}</span>${after ? `<span class="word">${after}</span>` : ''}`;
+            setTimeout(() => { const firstSlot = document.querySelector('.article-slot'); if (firstSlot) selectSlot(firstSlot, 'article'); }, 100);
+        }
+        function selectSlot(slot, type) { if (slot.classList.contains('correct')) return; playSound('select'); document.querySelectorAll('.article-slot, .ending-slot').forEach(s => s.classList.remove('selected')); slot.classList.add('selected'); gameState.selectedSlot = slot; gameState.slotType = type; }
+        function selectArticle(art) {
+            if (gameState.slotType !== 'article' || !gameState.selectedSlot) { const slot = document.querySelector('.article-slot:not(.correct)'); if (slot) { selectSlot(slot, 'article'); selectArticle(art); } return; }
+            const slot = gameState.selectedSlot; const correct = slot.dataset.answer; gameState.totalAttempts++;
+            if (art === correct) { playSound('correct'); slot.textContent = art; slot.classList.remove('selected'); slot.classList.add('correct'); gameState.articleCorrect = true;
+                const endingSlot = document.querySelector('.ending-slot:not(.correct)'); if (endingSlot) setTimeout(() => selectSlot(endingSlot, 'ending'), 200); checkBothCorrect();
+            } else { playSound('wrong'); slot.classList.add('wrong'); gameState.streak = 0; updateStats(); setTimeout(() => slot.classList.remove('wrong'), 500); }
+        }
+        function selectEnding(end) {
+            if (gameState.slotType !== 'ending' || !gameState.selectedSlot) { const slot = document.querySelector('.ending-slot:not(.correct)'); if (slot) { selectSlot(slot, 'ending'); selectEnding(end); } return; }
+            const slot = gameState.selectedSlot; const correct = slot.dataset.answer; gameState.totalAttempts++;
+            if (end === correct) { playSound('correct'); slot.textContent = '-' + end; slot.classList.remove('selected'); slot.classList.add('correct'); gameState.endingCorrect = true; checkBothCorrect();
+            } else { playSound('wrong'); slot.classList.add('wrong'); gameState.streak = 0; updateStats(); setTimeout(() => slot.classList.remove('wrong'), 500); }
+        }
+        function checkBothCorrect() {
+            if (gameState.articleCorrect && gameState.endingCorrect) {
+                gameState.streak++; if (gameState.streak > gameState.bestStreak) gameState.bestStreak = gameState.streak; gameState.correctAnswers++;
+                let pts = 10; if (gameState.streak >= 3) pts += Math.min(gameState.streak * 2, 20); gameState.points += pts;
+                const slot = document.querySelector('.ending-slot.correct'); showPointsPopup(slot, pts, gameState.streak >= 3); updateStats();
+                gameState.solvedSentences.push(gameState.remainingSentences.shift()); updateProgress();
+                setTimeout(() => { if (gameState.solvedSentences.length % 10 === 0 && gameState.solvedSentences.length > 0) showMilestone(gameState.solvedSentences.length); else loadNextSentence(); }, 600);
+            }
+        }
+        function showPointsPopup(el, pts, bonus) { const p = document.createElement('div'); p.className = 'points-popup' + (bonus ? ' streak-bonus' : ''); p.textContent = `+${pts}`; const r = el.getBoundingClientRect(); p.style.left = r.left + r.width / 2 + 'px'; p.style.top = r.top + 'px'; document.body.appendChild(p); setTimeout(() => p.remove(), 1000); }
+        function updateStats() { document.getElementById('points').textContent = gameState.points; document.getElementById('streak').innerHTML = gameState.streak + (gameState.streak >= 3 ? ' <span class="streak-fire">🔥</span>' : ''); }
+        function updateProgress() { const t = gameState.solvedSentences.length + gameState.remainingSentences.length; document.getElementById('progressFill').style.width = (gameState.solvedSentences.length / t * 100) + '%'; document.getElementById('progressText').textContent = `${gameState.solvedSentences.length} / ${t} Sätze gelöst`; }
+        function skipSentence() { gameState.remainingSentences.push(gameState.remainingSentences.shift()); gameState.streak = 0; updateStats(); loadNextSentence(); }
+        function showMilestone(c) { playSound('milestone'); createConfetti(); const o = document.createElement('div'); o.className = 'milestone-overlay'; o.innerHTML = `<div class="milestone-content"><div class="milestone-number">${c}</div><div class="milestone-text">Sätze geschafft! 🎉</div></div>`; document.body.appendChild(o); setTimeout(() => { o.remove(); loadNextSentence(); }, 2500); }
+        function createConfetti() { const cols = ['#4a9eff', '#9c27b0', '#f5c842', '#4ecdc4', '#ff6b6b', '#38a169']; for (let i = 0; i < 80; i++) { const c = document.createElement('div'); c.className = 'confetti'; c.style.left = Math.random() * 100 + 'vw'; c.style.top = '-10px'; c.style.background = cols[Math.floor(Math.random() * cols.length)]; c.style.borderRadius = Math.random() > 0.5 ? '50%' : '0'; c.style.width = (Math.random() * 10 + 5) + 'px'; c.style.height = c.style.width; document.body.appendChild(c); const a = c.animate([{ transform: 'translateY(0) rotate(0deg)', opacity: 1 }, { transform: `translateY(100vh) rotate(${Math.random() * 720}deg)`, opacity: 0 }], { duration: Math.random() * 2000 + 2000, easing: 'cubic-bezier(0.25,0.46,0.45,0.94)' }); a.onfinish = () => c.remove(); } }
+        function endGame() { clearInterval(gameState.timerInterval); const e = Math.floor((Date.now() - gameState.startTime) / 1000); document.getElementById('finalPoints').textContent = gameState.points; document.getElementById('finalTime').textContent = `${Math.floor(e / 60)}:${(e % 60).toString().padStart(2, '0')}`; document.getElementById('bestStreak').textContent = gameState.bestStreak; const acc = gameState.totalAttempts > 0 ? Math.round((gameState.correctAnswers * 2 / gameState.totalAttempts) * 100) : 0; document.getElementById('accuracy').textContent = Math.min(acc, 100) + '%'; showScreen('resultScreen'); document.getElementById('backBtn').style.display = 'none'; updateResultLeaderboard(); playSound('milestone'); createConfetti(); }
+        function loadLeaderboard() { const s = localStorage.getItem('adjDeklinationMeisterLeaderboard'); return s ? JSON.parse(s) : []; }
+        function saveLeaderboard(l) { localStorage.setItem('adjDeklinationMeisterLeaderboard', JSON.stringify(l)); }
+        function saveScore() { const n = document.getElementById('playerName').value.trim() || 'Anonym'; const e = Math.floor((Date.now() - gameState.startTime) / 1000); const modes = { definite: 'Bestimmt', indefinite: 'Unbestimmt', possessive: 'Possessiv', negation: 'Negation', nullartikel: 'Ohne Artikel', mixed: 'Gemischt' }; const entry = { name: n, points: gameState.points, time: e, mode: modes[gameState.mode], date: new Date().toLocaleDateString('de-DE') }; const l = loadLeaderboard(); l.push(entry); l.sort((a, b) => b.points - a.points); saveLeaderboard(l.slice(0, 10)); updateResultLeaderboard(); updateMenuLeaderboard(); document.getElementById('playerName').disabled = true; event.target.disabled = true; event.target.textContent = '✓ Gespeichert!'; }
+        function formatTime(s) { return `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`; }
+        function updateMenuLeaderboard() { const c = document.getElementById('menuLeaderboard'); const l = loadLeaderboard(); if (l.length === 0) { c.innerHTML = '<p style="color:var(--text-muted);text-align:center;">Noch keine Einträge. Sei der Erste!</p>'; return; } c.innerHTML = l.slice(0, 5).map((e, i) => `<div class="leaderboard-entry"><span class="leaderboard-rank">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1) + '.'}</span><span class="leaderboard-name">${e.name}</span><span class="leaderboard-score">${e.points} Pkt</span><span class="leaderboard-time">${formatTime(e.time)}</span></div>`).join(''); }
+        function updateResultLeaderboard() { const c = document.getElementById('resultLeaderboard'); const l = loadLeaderboard(); c.innerHTML = `<h3 class="leaderboard-title">🏅 Bestenliste</h3>${l.slice(0, 5).map((e, i) => `<div class="leaderboard-entry"><span class="leaderboard-rank">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1) + '.'}</span><span class="leaderboard-name">${e.name}</span><span class="leaderboard-score">${e.points} Pkt</span><span class="leaderboard-time">${formatTime(e.time)}</span></div>`).join('')}`; }
+        function playAgain() { document.getElementById('playerName').disabled = false; document.getElementById('playerName').value = ''; const b = document.querySelector('#resultScreen .control-btn.primary'); if (b) { b.disabled = false; b.textContent = '💾 Speichern'; } startGame(gameState.mode); }
+        function goToMenu() { clearInterval(gameState.timerInterval); document.getElementById('backBtn').style.display = 'none'; document.getElementById('playerName').disabled = false; document.getElementById('playerName').value = ''; const b = document.querySelector('#resultScreen .control-btn.primary'); if (b) { b.disabled = false; b.textContent = '💾 Speichern'; } showScreen('startScreen'); updateMenuLeaderboard(); }
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
 </body>
 </html>
