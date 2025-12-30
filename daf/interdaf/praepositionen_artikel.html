@@ -630,7 +630,9 @@
                 genitiv: { m: 'es', f: 'er', n: 'es', p: 'er' }
             };
             let ending = endings[caseType][gender];
-            if (possessor === 'ihr' && ending !== '') {
+            // Spezialfall: "euer" verliert das innere 'e' wenn eine Endung kommt
+            // euer -> eure, euren, eurem, eurer, eures (nicht "euere")
+            if (base === 'euer' && ending !== '') {
                 return 'eu' + (ending.startsWith('e') ? 'r' + ending.slice(1) : 'er' + ending);
             }
             return base + ending;
@@ -739,9 +741,9 @@
                 const [bef, poss, noun, aft, gen, cas] = gameState.currentSentence;
                 const fullAnswer = getPossessiveForm(poss, gen, cas);
                 const base = articles.possessive[poss];
-                // Bei "euer" spezielle Behandlung
+                // Bei "euer" spezielle Behandlung (das innere 'e' fällt weg)
                 let ending = '';
-                if (poss === 'ihr') {
+                if (base === 'euer') {
                     // euer -> eure, euren, eurem, eurer, eures
                     if (fullAnswer === 'euer') ending = '';
                     else ending = fullAnswer.slice(2); // eu + rest
