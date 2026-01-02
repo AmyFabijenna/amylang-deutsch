@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sätze Bilden - Zauberwald-Abenteuer</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Quicksand:wght@400;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Quicksand', Arial, sans-serif;
+            background: linear-gradient(180deg, #f3e5f5 0%, #e1bee7 30%, #ce93d8 70%, #f3e5f5 100%);
+            min-height: 100vh;
+            color: #4a148c;
+            font-size: 16px;
+            line-height: 1.5;
+            position: relative;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239c27b0' fill-opacity='0.08'%3E%3Cpath d='M30 30l-5-8.66 5-8.66 5 8.66z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; position: relative; z-index: 1; }
+        .header { text-align: center; padding: 20px; margin-bottom: 20px; }
+        .header h1 { 
+            font-family: 'Cinzel', serif;
+            font-size: 2.2rem; 
+            font-weight: 700; 
+            color: #7b1fa2;
+            text-shadow: 0 0 20px rgba(123,31,162,0.3), 0 0 40px rgba(156,39,176,0.2);
+        }
+        .header-emoji { font-size: 2rem; display: block; margin-bottom: 10px; }
+        .header-subtitle { font-size: 1rem; color: #7b1fa2; margin-top: 5px; font-style: italic; }
+        .welcome-screen {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(243,229,245,0.95));
+            border: 3px solid #9c27b0;
+            border-radius: 16px; padding: 35px; max-width: 450px;
+            margin: 0 auto; box-shadow: 0 8px 40px rgba(156,39,176,0.25), inset 0 0 30px rgba(156,39,176,0.05); text-align: center;
+        }
+        .welcome-screen h2 { 
+            font-family: 'Cinzel', serif;
+            color: #7b1fa2; font-size: 1.5rem; margin-bottom: 18px; 
+        }
+        .welcome-screen p { color: #6a1b9a; margin-bottom: 20px; font-size: 1.1rem; }
+        .name-input {
+            width: 100%; padding: 14px 18px; font-size: 1.15rem; font-family: 'Quicksand', Arial;
+            border: 2px solid #9b59b6; border-radius: 10px; outline: none; text-align: center;
+            background: rgba(255,255,255,0.9); color: #4a148c;
+        }
+        .name-input:focus { border-color: #7b1fa2; box-shadow: 0 0 15px rgba(156,39,176,0.3); }
+        .name-input::placeholder { color: #9575cd; }
+        .start-btn {
+            margin-top: 22px; padding: 14px 45px; font-size: 1.15rem; font-family: 'Quicksand', Arial;
+            font-weight: 700; background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; border: none;
+            border-radius: 25px; cursor: pointer; transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(155,89,182,0.4);
+        }
+        .start-btn:hover:not(:disabled) { 
+            background: linear-gradient(135deg, #8e44ad, #7d3c98); 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(155,89,182,0.5);
+        }
+        .start-btn:disabled { background: #4a4a6a; cursor: not-allowed; box-shadow: none; }
+        .game-area { display: none; }
+        .game-area.active { display: block; }
+        .score-bar {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(243,229,245,0.95));
+            border: 2px solid #9b59b6;
+            border-radius: 12px; padding: 14px 22px; margin-bottom: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 20px rgba(155,89,182,0.2);
+        }
+        .player-info { display: flex; align-items: center; gap: 10px; }
+        .player-avatar {
+            width: 42px; height: 42px; background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+            box-shadow: 0 0 15px rgba(155,89,182,0.5);
+        }
+        .player-name { font-weight: 700; font-size: 1.05rem; color: #7b1fa2; }
+        .score-display {
+            display: flex; align-items: center; gap: 6px;
+            background: linear-gradient(135deg, #ffd700, #f39c12);
+            padding: 9px 18px; border-radius: 20px; font-weight: 700; color: #4a148c;
+        }
+        .magic-mode-toggle {
+            display: flex; align-items: center; gap: 8px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            padding: 8px 14px; border-radius: 20px; cursor: pointer; transition: all 0.3s;
+        }
+        .magic-mode-toggle:hover { transform: scale(1.05); }
+        .magic-mode-toggle.active {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            box-shadow: 0 0 15px rgba(46,204,113,0.5);
+        }
+        .magic-mode-toggle span { color: white; font-weight: 600; font-size: 0.9rem; }
+        .game-panel { 
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(243,229,245,0.95));
+            border: 2px solid #9b59b6;
+            border-radius: 16px; padding: 25px; 
+            box-shadow: 0 8px 40px rgba(155,89,182,0.2); 
+        }
+        .game-title { 
+            font-family: 'Cinzel', serif;
+            font-size: 1.4rem; font-weight: 700; color: #7b1fa2; text-align: center; margin-bottom: 8px;
+            text-shadow: 0 0 10px rgba(123,31,162,0.2);
+        }
+        .game-description { text-align: center; color: #6a1b9a; margin-bottom: 20px; font-size: 1rem; }
+        .sentence-builder { display: flex; flex-direction: column; gap: 15px; }
+        .step-indicator { display: flex; justify-content: center; gap: 8px; margin-bottom: 12px; }
+        .step { 
+            width: 34px; height: 34px; border-radius: 50%; 
+            background: rgba(206,147,216,0.4); color: #7b1fa2; 
+            display: flex; align-items: center; justify-content: center; 
+            font-weight: 700; transition: all 0.3s; 
+        }
+        .step.active { 
+            background: linear-gradient(135deg, #9b59b6, #8e44ad); 
+            color: white; transform: scale(1.15);
+            box-shadow: 0 0 15px rgba(155,89,182,0.6);
+        }
+        .step.completed { 
+            background: linear-gradient(135deg, #ffd700, #f39c12); 
+            color: #4a148c; 
+        }
+        .sentence-display { 
+            background: rgba(206,147,216,0.2); 
+            border: 2px dashed #9b59b6; 
+            border-radius: 12px; padding: 18px; min-height: 70px; 
+            display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; 
+            font-size: 1.2rem; font-weight: 700; 
+        }
+        .sentence-part { padding: 10px 16px; border-radius: 8px; box-shadow: 0 2px 15px rgba(0,0,0,0.15); }
+        .sentence-part.subject { background: linear-gradient(135deg, #ffd700, #f39c12); color: #4a148c; }
+        .sentence-part.verb { background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; }
+        .sentence-part.ending { background: linear-gradient(135deg, #26a69a, #00897b); color: white; }
+        .sentence-part.placeholder { background: rgba(206,147,216,0.3); color: #7b1fa2; border: 2px dashed #9b59b6; }
+        .selection-area { background: rgba(206,147,216,0.15); border-radius: 12px; padding: 15px; }
+        .selection-label { font-weight: 700; color: #7b1fa2; margin-bottom: 10px; font-size: 1rem; }
+        .selection-options { display: flex; flex-wrap: wrap; gap: 8px; max-height: 320px; overflow-y: auto; padding: 5px; }
+        .select-btn { 
+            padding: 10px 14px; font-size: 0.95rem; font-family: 'Quicksand', Arial; font-weight: 600; 
+            background: rgba(255,255,255,0.9); color: #4a148c; border: 2px solid #9b59b6; 
+            border-radius: 8px; cursor: pointer; transition: all 0.2s; 
+        }
+        .select-btn:hover { 
+            background: linear-gradient(135deg, #9b59b6, #8e44ad); 
+            color: white; transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(155,89,182,0.4);
+        }
+        .select-btn.correct { 
+            background: linear-gradient(135deg, #27ae60, #2ecc71) !important; 
+            border-color: #27ae60 !important; color: white !important; 
+        }
+        .select-btn.wrong { 
+            background: linear-gradient(135deg, #e74c3c, #c0392b) !important; 
+            border-color: #e74c3c !important; color: white !important; 
+            animation: shake 0.4s ease; 
+        }
+        .select-btn.magic-highlight { 
+            background: linear-gradient(135deg, #ffd700, #f39c12); 
+            border-color: #f39c12; color: #4a148c; font-weight: 700; 
+            box-shadow: 0 0 20px rgba(255,215,0,0.5);
+            animation: magicPulse 1.5s infinite;
+        }
+        @keyframes magicPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(255,215,0,0.5); }
+            50% { box-shadow: 0 0 30px rgba(255,215,0,0.8); }
+        }
+        @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);} }
+        .action-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 15px; }
+        .game-btn { 
+            padding: 10px 22px; font-size: 0.95rem; font-family: 'Quicksand', Arial; font-weight: 700; 
+            border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s; 
+        }
+        .btn-primary { background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; }
+        .btn-primary:hover { background: linear-gradient(135deg, #8e44ad, #7d3c98); }
+        .btn-secondary { background: transparent; color: #7b1fa2; border: 2px solid #9b59b6; }
+        .btn-secondary:hover { background: rgba(155,89,182,0.1); }
+        .btn-success { background: linear-gradient(135deg, #27ae60, #2ecc71); color: white; }
+        .btn-success:hover { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+        .sentence-collection { 
+            margin-top: 25px; 
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(243,229,245,0.9)); 
+            border: 2px solid #9b59b6; 
+            border-radius: 16px; padding: 20px; 
+        }
+        .collection-header { 
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; 
+            padding-bottom: 10px; border-bottom: 2px dashed #9b59b6; 
+        }
+        .collection-title { font-weight: 700; color: #7b1fa2; font-size: 1.1rem; }
+        .collection-count { 
+            background: linear-gradient(135deg, #ffd700, #f39c12); 
+            color: #4a148c; padding: 6px 16px; border-radius: 20px; font-weight: 700; font-size: 1rem; 
+        }
+        .sentence-list { max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 5px; }
+        .collected-sentence { 
+            background: rgba(255,255,255,0.8); padding: 12px 16px; border-radius: 10px; 
+            border-left: 5px solid #9b59b6; font-size: 1.05rem; color: #4a148c; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); animation: slideIn 0.3s ease; 
+        }
+        .collected-sentence.magic-sentence {
+            border-left-color: #ffd700;
+            background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,255,255,0.9));
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+        .collected-sentence:nth-child(even) { border-left-color: #3498db; }
+        .collected-sentence:nth-child(3n) { border-left-color: #27ae60; }
+        .no-sentences { color: #7b1fa2; font-style: italic; text-align: center; padding: 30px; font-size: 1rem; }
+        .save-section { margin-top: 15px; padding-top: 15px; border-top: 2px dashed #9b59b6; text-align: center; }
+        .help-modal { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(74,20,140,0.85); z-index: 1000; align-items: center; justify-content: center; padding: 20px; 
+        }
+        .help-modal.active { display: flex; }
+        .help-content { 
+            background: linear-gradient(135deg, #fff, #f3e5f5);
+            border: 2px solid #9b59b6;
+            border-radius: 16px; padding: 25px; max-width: 600px; max-height: 80vh; overflow-y: auto; position: relative;
+            color: #4a148c;
+        }
+        .help-close { 
+            position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; 
+            background: #e74c3c; color: white; border: none; border-radius: 50%; font-size: 1.1rem; cursor: pointer; 
+        }
+        .help-title { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 700; color: #7b1fa2; margin-bottom: 15px; }
+        .conj-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.85rem; }
+        .conj-table th, .conj-table td { padding: 8px; text-align: left; border-bottom: 1px solid rgba(155,89,182,0.3); }
+        .conj-table th { background: rgba(155,89,182,0.15); color: #7b1fa2; font-weight: 700; }
+        .magic-info { 
+            background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(155,89,182,0.1)); 
+            padding: 12px; border-radius: 8px; margin-top: 15px; border-left: 4px solid #ffd700; 
+        }
+        .magic-info strong { color: #7b1fa2; }
+        .success-overlay { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(155,89,182,0.95); z-index: 1000; 
+            align-items: center; justify-content: center; flex-direction: column; 
+        }
+        .success-overlay.active { display: flex; }
+        .success-overlay.magic-success { background: linear-gradient(135deg, rgba(255,215,0,0.95), rgba(155,89,182,0.95)); }
+        .success-emoji { font-size: 4rem; animation: bounce 0.5s ease; }
+        @keyframes bounce { 0%,100%{transform:scale(1);} 50%{transform:scale(1.2);} }
+        .success-text { font-family: 'Cinzel', serif; font-size: 1.8rem; font-weight: 700; color: white; margin-top: 15px; text-shadow: 0 0 20px rgba(0,0,0,0.3); }
+        .success-points { font-size: 1.2rem; font-weight: 700; color: white; margin-top: 8px; }
+        .confetti { position: fixed; width: 10px; height: 10px; top: -10px; z-index: 1001; pointer-events: none; animation: confettiFall 2.5s ease-out forwards; }
+        @keyframes confettiFall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+        .magic-star { position: fixed; font-size: 1.5rem; z-index: 1001; pointer-events: none; animation: starFloat 2s ease-out forwards; }
+        @keyframes starFloat { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-100px) scale(0); opacity: 0; } }
+        .save-all-section { 
+            margin-top: 25px; 
+            background: linear-gradient(135deg, #9b59b6, #8e44ad); 
+            border-radius: 16px; padding: 25px; text-align: center; 
+            box-shadow: 0 6px 25px rgba(155,89,182,0.4); 
+        }
+        .save-all-section h3 { font-family: 'Cinzel', serif; color: white; font-size: 1.2rem; margin-bottom: 15px; }
+        .save-all-btn { 
+            padding: 16px 40px; font-size: 1.2rem; font-family: 'Quicksand', Arial; font-weight: 700; 
+            background: linear-gradient(135deg, #ffd700, #f39c12); color: #4a148c; border: none; 
+            border-radius: 30px; cursor: pointer; transition: all 0.2s; 
+            box-shadow: 0 4px 15px rgba(255,215,0,0.4); 
+        }
+        .save-all-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 25px rgba(255,215,0,0.5); }
+        .lesson-info { 
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(243,229,245,0.9)); 
+            border: 2px solid #9b59b6; 
+            border-radius: 12px; padding: 15px; margin-bottom: 20px; text-align: center; 
+        }
+        .lesson-info h3 { font-family: 'Cinzel', serif; color: #7b1fa2; margin-bottom: 8px; }
+        .lesson-info p { color: #6a1b9a; font-size: 0.95rem; }
+        .surprise-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-left: 8px;
+            animation: surprisePop 0.5s ease;
+        }
+        @keyframes surprisePop { 0% { transform: scale(0); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        @media (max-width: 768px) { 
+            .container { padding: 12px; } 
+            .game-panel { padding: 18px; } 
+            .step { width: 28px; height: 28px; font-size: 0.85rem; } 
+            .selection-options { max-height: 250px; } 
+            .select-btn { padding: 8px 10px; font-size: 0.85rem; } 
+            .score-bar { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <span class="header-emoji">🏰✨🧙‍♂️🦋🌙</span>
+            <h1>Zauberwald-Abenteuer</h1>
+            <p class="header-subtitle">Bilde magische Sätze und erwecke den Wald zum Leben!</p>
+        </header>
+        <div class="welcome-screen" id="welcomeScreen">
+            <h2>Willkommen, junger Zauberer! ✨</h2>
+            <p>Wie heißt du?</p>
+            <input type="text" class="name-input" id="playerName" placeholder="Dein magischer Name..." maxlength="20">
+            <button class="start-btn" id="startBtn" disabled>Das Abenteuer beginnt! 🌟</button>
+        </div>
+        <div class="game-area" id="gameArea">
+            <div class="score-bar">
+                <div class="player-info">
+                    <div class="player-avatar">🧙</div>
+                    <span class="player-name" id="displayName">Zauberer</span>
+                </div>
+                <div class="magic-mode-toggle" id="magicToggle" title="Verrückter Zauber-Modus!">
+                    <span>🪄</span>
+                    <span>Zauber-Modus</span>
+                </div>
+                <div class="score-display">
+                    <span>⭐</span>
+                    <span id="scoreValue">0</span> Magie
+                </div>
+            </div>
+            <div class="lesson-info">
+                <h3>🔮 Deine Mission</h3>
+                <p>Wähle magische Wesen → finde das richtige Verb → konjugiere → erschaffe Zaubersprüche!</p>
+            </div>
+            <div class="game-panel" id="mainGame">
+                <h2 class="game-title">🌲 Geschichten aus dem Zauberwald</h2>
+                <p class="game-description">Erschaffe Sätze über Hexen, Zauberer und magische Wesen!</p>
+                <div class="sentence-builder">
+                    <div class="step-indicator" id="mainSteps">
+                        <div class="step active">1</div>
+                        <div class="step">2</div>
+                        <div class="step">3</div>
+                        <div class="step">4</div>
+                    </div>
+                    <div class="sentence-display" id="sentenceDisplay">
+                        <span class="sentence-part placeholder">❓ Wer?</span>
+                        <span class="sentence-part placeholder">❓ Was tut?</span>
+                        <span class="sentence-part placeholder">❓ Wie/Wo?</span>
+                    </div>
+                    <div class="selection-area" id="selectionArea"></div>
+                    <div class="action-btns">
+                        <button class="game-btn btn-secondary" id="newRound">🔄 Neuer Zauber</button>
+                        <button class="game-btn btn-secondary" id="helpBtn">📖 Hilfe</button>
+                    </div>
+                </div>
+            </div>
+            <div class="sentence-collection" id="sentenceCollection">
+                <div class="collection-header">
+                    <span class="collection-title">📜 Dein Zauberbuch</span>
+                    <span class="collection-count" id="sentenceCount">0 Zaubersprüche</span>
+                </div>
+                <div class="sentence-list" id="sentenceList">
+                    <p class="no-sentences">Noch keine Zaubersprüche... Beginne dein Abenteuer!</p>
+                </div>
+                <div class="save-section">
+                    <button class="game-btn btn-success" id="saveSentences">💾 Zauberbuch speichern</button>
+                </div>
+            </div>
+            <div class="save-all-section">
+                <h3>✨ Speichere alle deine Zaubersprüche!</h3>
+                <button class="save-all-btn" id="saveAll">📥 Zauberbuch herunterladen</button>
+            </div>
+        </div>
+    </div>
+    <div class="help-modal" id="helpModal">
+        <div class="help-content" id="helpContent"></div>
+    </div>
+    <div class="success-overlay" id="successOverlay">
+        <div class="success-emoji" id="successEmoji">✨</div>
+        <div class="success-text" id="successText">Zauber gelungen!</div>
+        <div class="success-points" id="successPoints">+10 Magie</div>
+    </div>
+
+    <script>
+    (function() {
+        var subjects = [
+            // Pronomen
+            {text:"Ich", type:"ich", emoji:"👆", isPronoun:true, category:"person"},
+            {text:"Du", type:"du", emoji:"👉", isPronoun:true, category:"person"},
+            {text:"Wir", type:"wir", emoji:"👥", isPronoun:true, category:"person"},
+            {text:"Ihr", type:"ihr", emoji:"👫", isPronoun:true, category:"person"},
+            // Charaktere aus den Geschichten
+            {text:"Lea", type:"er", emoji:"👧", isPronoun:false, category:"held"},
+            {text:"Finn", type:"er", emoji:"👦", isPronoun:false, category:"held"},
+            {text:"Fidelio", type:"er", emoji:"🐦", isPronoun:false, category:"magisch", surprise:"der blaue Vogel mit goldenen Flügeln"},
+            {text:"Aurelius", type:"er", emoji:"🪲", isPronoun:false, category:"magisch", surprise:"der sprechende goldene Käfer"},
+            // Magische Wesen
+            {text:"Die Hexe", type:"er", emoji:"🧙‍♀️", isPronoun:false, category:"magisch"},
+            {text:"Der Zauberer", type:"er", emoji:"🧙‍♂️", isPronoun:false, category:"magisch"},
+            {text:"Die böse Hexe", type:"er", emoji:"🧹", isPronoun:false, category:"magisch"},
+            {text:"Der alte Zauberer", type:"er", emoji:"🔮", isPronoun:false, category:"magisch"},
+            {text:"Die kleine Fee", type:"er", emoji:"🧚", isPronoun:false, category:"magisch"},
+            {text:"Die Feen", type:"sie", emoji:"🧚‍♀️", isPronoun:false, category:"magisch"},
+            {text:"Der Drache", type:"er", emoji:"🐉", isPronoun:false, category:"magisch"},
+            {text:"Die Drachen", type:"sie", emoji:"🐲", isPronoun:false, category:"magisch"},
+            {text:"Das Einhorn", type:"er", emoji:"🦄", isPronoun:false, category:"magisch"},
+            {text:"Die Einhörner", type:"sie", emoji:"🦄", isPronoun:false, category:"magisch"},
+            // Tiere aus dem Zauberwald
+            {text:"Der Zauber-Hase", type:"er", emoji:"🐰", isPronoun:false, category:"tier", surprise:"kann sprechen!"},
+            {text:"Die Zauber-Hasen", type:"sie", emoji:"🐰", isPronoun:false, category:"tier"},
+            {text:"Der schlaue Fuchs", type:"er", emoji:"🦊", isPronoun:false, category:"tier"},
+            {text:"Die Füchse", type:"sie", emoji:"🦊", isPronoun:false, category:"tier"},
+            {text:"Das scheue Reh", type:"er", emoji:"🦌", isPronoun:false, category:"tier"},
+            {text:"Die Rehe", type:"sie", emoji:"🦌", isPronoun:false, category:"tier"},
+            {text:"Die Eule", type:"er", emoji:"🦉", isPronoun:false, category:"tier", surprise:"sieht alles in der Nacht"},
+            {text:"Die Eulen", type:"sie", emoji:"🦉", isPronoun:false, category:"tier"},
+            {text:"Der goldene Käfer", type:"er", emoji:"✨", isPronoun:false, category:"magisch"},
+            {text:"Der Singvogel", type:"er", emoji:"🐦", isPronoun:false, category:"tier"},
+            {text:"Die Singvögel", type:"sie", emoji:"🐦", isPronoun:false, category:"tier"},
+            {text:"Der Schmetterling", type:"er", emoji:"🦋", isPronoun:false, category:"tier"},
+            {text:"Die Schmetterlinge", type:"sie", emoji:"🦋", isPronoun:false, category:"tier"},
+            // Magische Objekte und Orte
+            {text:"Die goldene Glocke", type:"er", emoji:"🔔", isPronoun:false, category:"objekt", surprise:"weckt alle schlafenden Tiere"},
+            {text:"Der schwarze Turm", type:"er", emoji:"🏰", isPronoun:false, category:"ort"},
+            {text:"Der alte Baum", type:"er", emoji:"🌳", isPronoun:false, category:"ort", surprise:"ist ein Portal!"},
+            {text:"Der Zauberwald", type:"er", emoji:"🌲", isPronoun:false, category:"ort"},
+            {text:"Die magische Tür", type:"er", emoji:"🚪", isPronoun:false, category:"objekt"},
+            {text:"Der Zauberstab", type:"er", emoji:"🪄", isPronoun:false, category:"objekt"},
+            {text:"Die Zauberstäbe", type:"sie", emoji:"🪄", isPronoun:false, category:"objekt"},
+            {text:"Der Kessel", type:"er", emoji:"🫕", isPronoun:false, category:"objekt"},
+            {text:"Das Zauberbuch", type:"er", emoji:"📖", isPronoun:false, category:"objekt"},
+            {text:"Die Kristallkugel", type:"er", emoji:"🔮", isPronoun:false, category:"objekt"},
+            // Weitere Charaktere
+            {text:"Die mutige Prinzessin", type:"er", emoji:"👸", isPronoun:false, category:"held"},
+            {text:"Der tapfere Ritter", type:"er", emoji:"🤴", isPronoun:false, category:"held"},
+            {text:"Das kleine Mädchen", type:"er", emoji:"👧", isPronoun:false, category:"held"},
+            {text:"Der mutige Junge", type:"er", emoji:"👦", isPronoun:false, category:"held"},
+            {text:"Die Kinder", type:"sie", emoji:"👧👦", isPronoun:false, category:"held"},
+            // Naturelemente
+            {text:"Der Mond", type:"er", emoji:"🌙", isPronoun:false, category:"natur"},
+            {text:"Die Sterne", type:"sie", emoji:"⭐", isPronoun:false, category:"natur"},
+            {text:"Der Nebel", type:"er", emoji:"🌫️", isPronoun:false, category:"natur"},
+            {text:"Das Licht", type:"er", emoji:"💡", isPronoun:false, category:"natur"}
+        ];
+        
+        var verbs = {
+            // Zauber-Verben
+            "zaubern": {inf:"zaubern", ich:"zaubere", du:"zauberst", er:"zaubert", wir:"zaubern", ihr:"zaubert", sie:"zaubern", endings: [{text:"einen mächtigen Zauber",emoji:"✨"},{text:"im Mondschein",emoji:"🌙"},{text:"mit dem Zauberstab",emoji:"🪄"},{text:"geheime Sprüche",emoji:"🔮"},{text:"wunderschöne Magie",emoji:"💫"},{text:"einen Schutzkreis",emoji:"⭕"}]},
+            "verzaubern": {inf:"verzaubern", ich:"verzaubere", du:"verzauberst", er:"verzaubert", wir:"verzaubern", ihr:"verzaubert", sie:"verzaubern", endings: [{text:"den ganzen Wald",emoji:"🌲"},{text:"alle Tiere",emoji:"🦊"},{text:"die bösen Wesen",emoji:"👿"},{text:"mit einem Lächeln",emoji:"😊"},{text:"die Nacht",emoji:"🌙"}]},
+            "verwandeln": {inf:"verwandeln", ich:"verwandle", du:"verwandelst", er:"verwandelt", wir:"verwandeln", ihr:"verwandelt", sie:"verwandeln", endings: [{text:"sich in einen Vogel",emoji:"🐦"},{text:"Blei in Gold",emoji:"✨"},{text:"Tränen in Freude",emoji:"😊"},{text:"Dunkelheit in Licht",emoji:"💡"},{text:"sich in Nebel",emoji:"🌫️"}]},
+            "verschwinden": {inf:"verschwinden", ich:"verschwinde", du:"verschwindest", er:"verschwindet", wir:"verschwinden", ihr:"verschwindet", sie:"verschwinden", endings: [{text:"im Nebel",emoji:"🌫️"},{text:"in der Dunkelheit",emoji:"🌑"},{text:"wie von Zauberhand",emoji:"✨"},{text:"spurlos",emoji:"👻"},{text:"plötzlich",emoji:"💨"}]},
+            "erscheinen": {inf:"erscheinen", ich:"erscheine", du:"erscheinst", er:"erscheint", wir:"erscheinen", ihr:"erscheint", sie:"erscheinen", endings: [{text:"aus dem Nichts",emoji:"💫"},{text:"im Mondlicht",emoji:"🌙"},{text:"wie durch Magie",emoji:"✨"},{text:"plötzlich",emoji:"⚡"},{text:"geheimnisvoll",emoji:"🔮"}]},
+            // Helden-Verben
+            "retten": {inf:"retten", ich:"rette", du:"rettest", er:"rettet", wir:"retten", ihr:"rettet", sie:"retten", endings: [{text:"alle Tiere",emoji:"🦊"},{text:"den Zauberwald",emoji:"🌲"},{text:"die Prinzessin",emoji:"👸"},{text:"mutig den Tag",emoji:"☀️"},{text:"die verzauberten Wesen",emoji:"✨"}]},
+            "helfen": {inf:"helfen", ich:"helfe", du:"hilfst", er:"hilft", wir:"helfen", ihr:"helft", sie:"helfen", endings: [{text:"den traurigen Tieren",emoji:"🦊"},{text:"der alten Hexe",emoji:"🧙‍♀️"},{text:"mit viel Mut",emoji:"💪"},{text:"im Zauberwald",emoji:"🌲"},{text:"gerne",emoji:"😊"}]},
+            "kämpfen": {inf:"kämpfen", ich:"kämpfe", du:"kämpfst", er:"kämpft", wir:"kämpfen", ihr:"kämpft", sie:"kämpfen", endings: [{text:"gegen das Böse",emoji:"⚔️"},{text:"mutig",emoji:"💪"},{text:"für die Freunde",emoji:"👫"},{text:"mit Zauberkraft",emoji:"✨"},{text:"tapfer",emoji:"🛡️"}]},
+            "suchen": {inf:"suchen", ich:"suche", du:"suchst", er:"sucht", wir:"suchen", ihr:"sucht", sie:"suchen", endings: [{text:"die goldene Glocke",emoji:"🔔"},{text:"den geheimen Weg",emoji:"🗺️"},{text:"im dunklen Wald",emoji:"🌲"},{text:"mutig weiter",emoji:"💪"},{text:"das Abenteuer",emoji:"⭐"}]},
+            "finden": {inf:"finden", ich:"finde", du:"findest", er:"findet", wir:"finden", ihr:"findet", sie:"finden", endings: [{text:"den Schatz",emoji:"💎"},{text:"neue Freunde",emoji:"👫"},{text:"den richtigen Weg",emoji:"🗺️"},{text:"die Wahrheit",emoji:"💡"},{text:"Mut im Herzen",emoji:"❤️"}]},
+            // Bewegungs-Verben
+            "fliegen": {inf:"fliegen", ich:"fliege", du:"fliegst", er:"fliegt", wir:"fliegen", ihr:"fliegt", sie:"fliegen", endings: [{text:"durch die Nacht",emoji:"🌙"},{text:"über den Zauberwald",emoji:"🌲"},{text:"zum schwarzen Turm",emoji:"🏰"},{text:"hoch am Himmel",emoji:"☁️"},{text:"mit goldenen Flügeln",emoji:"✨"},{text:"schnell wie der Wind",emoji:"💨"}]},
+            "schweben": {inf:"schweben", ich:"schwebe", du:"schwebst", er:"schwebt", wir:"schweben", ihr:"schwebt", sie:"schweben", endings: [{text:"im Mondlicht",emoji:"🌙"},{text:"über dem Wald",emoji:"🌲"},{text:"sanft dahin",emoji:"🪶"},{text:"wie von Zauberhand",emoji:"✨"},{text:"leise durch die Nacht",emoji:"🌌"}]},
+            "laufen": {inf:"laufen", ich:"laufe", du:"läufst", er:"läuft", wir:"laufen", ihr:"lauft", sie:"laufen", endings: [{text:"durch den Zauberwald",emoji:"🌲"},{text:"zum schwarzen Turm",emoji:"🏰"},{text:"schnell wie der Wind",emoji:"💨"},{text:"mutig voran",emoji:"💪"},{text:"durch die Dunkelheit",emoji:"🌑"}]},
+            "springen": {inf:"springen", ich:"springe", du:"springst", er:"springt", wir:"springen", ihr:"springt", sie:"springen", endings: [{text:"über den Bach",emoji:"💧"},{text:"von Ast zu Ast",emoji:"🌳"},{text:"hoch in die Luft",emoji:"⬆️"},{text:"fröhlich umher",emoji:"😊"},{text:"mutig ins Abenteuer",emoji:"⭐"}]},
+            "rennen": {inf:"rennen", ich:"renne", du:"rennst", er:"rennt", wir:"rennen", ihr:"rennt", sie:"rennen", endings: [{text:"durch den dunklen Wald",emoji:"🌲"},{text:"zum rettenden Licht",emoji:"💡"},{text:"schnell wie ein Blitz",emoji:"⚡"},{text:"davon",emoji:"🏃"},{text:"mutig voran",emoji:"💪"}]},
+            "schleichen": {inf:"schleichen", ich:"schleiche", du:"schleichst", er:"schleicht", wir:"schleichen", ihr:"schleicht", sie:"schleichen", endings: [{text:"durch die Nacht",emoji:"🌙"},{text:"leise wie eine Katze",emoji:"🐱"},{text:"zum schwarzen Turm",emoji:"🏰"},{text:"durch den Nebel",emoji:"🌫️"},{text:"vorsichtig",emoji:"🤫"}]},
+            // Kommunikations-Verben
+            "singen": {inf:"singen", ich:"singe", du:"singst", er:"singt", wir:"singen", ihr:"singt", sie:"singen", endings: [{text:"ein Zauberlied",emoji:"🎵"},{text:"wunderschön",emoji:"✨"},{text:"in der Nacht",emoji:"🌙"},{text:"mit den Vögeln",emoji:"🐦"},{text:"fröhlich",emoji:"😊"},{text:"laut und klar",emoji:"📢"}]},
+            "rufen": {inf:"rufen", ich:"rufe", du:"rufst", er:"ruft", wir:"rufen", ihr:"ruft", sie:"rufen", endings: [{text:"nach den Freunden",emoji:"👫"},{text:"in den Wald hinein",emoji:"🌲"},{text:"laut um Hilfe",emoji:"🆘"},{text:"einen Zauberspruch",emoji:"✨"},{text:"mutig",emoji:"💪"}]},
+            "flüstern": {inf:"flüstern", ich:"flüstere", du:"flüsterst", er:"flüstert", wir:"flüstern", ihr:"flüstert", sie:"flüstern", endings: [{text:"geheime Zauberworte",emoji:"🔮"},{text:"in der Dunkelheit",emoji:"🌑"},{text:"leise Geheimnisse",emoji:"🤫"},{text:"magische Sprüche",emoji:"✨"},{text:"dem Wind zu",emoji:"💨"}]},
+            "sprechen": {inf:"sprechen", ich:"spreche", du:"sprichst", er:"spricht", wir:"sprechen", ihr:"sprecht", sie:"sprechen", endings: [{text:"mit den Tieren",emoji:"🦊"},{text:"einen Zauberspruch",emoji:"✨"},{text:"weise Worte",emoji:"📖"},{text:"mit der Hexe",emoji:"🧙‍♀️"},{text:"mutig die Wahrheit",emoji:"💡"}]},
+            // Licht und Magie
+            "leuchten": {inf:"leuchten", ich:"leuchte", du:"leuchtest", er:"leuchtet", wir:"leuchten", ihr:"leuchtet", sie:"leuchten", endings: [{text:"hell in der Nacht",emoji:"💡"},{text:"golden",emoji:"✨"},{text:"wie tausend Sterne",emoji:"⭐"},{text:"geheimnisvoll",emoji:"🔮"},{text:"wunderschön",emoji:"🌟"}]},
+            "glitzern": {inf:"glitzern", ich:"glitzere", du:"glitzerst", er:"glitzert", wir:"glitzern", ihr:"glitzert", sie:"glitzern", endings: [{text:"im Mondlicht",emoji:"🌙"},{text:"wie Diamanten",emoji:"💎"},{text:"geheimnisvoll",emoji:"🔮"},{text:"wunderschön",emoji:"✨"},{text:"in allen Farben",emoji:"🌈"}]},
+            "funkeln": {inf:"funkeln", ich:"funkele", du:"funkelst", er:"funkelt", wir:"funkeln", ihr:"funkelt", sie:"funkeln", endings: [{text:"am Nachthimmel",emoji:"🌌"},{text:"magisch",emoji:"✨"},{text:"wie Edelsteine",emoji:"💎"},{text:"geheimnisvoll",emoji:"🔮"},{text:"hell und klar",emoji:"💫"}]},
+            "scheinen": {inf:"scheinen", ich:"scheine", du:"scheinst", er:"scheint", wir:"scheinen", ihr:"scheint", sie:"scheinen", endings: [{text:"auf den Zauberwald",emoji:"🌲"},{text:"silbern",emoji:"🥈"},{text:"durch die Wolken",emoji:"☁️"},{text:"geheimnisvoll",emoji:"🔮"},{text:"die ganze Nacht",emoji:"🌙"}]},
+            // Aktions-Verben
+            "klingen": {inf:"klingen", ich:"klinge", du:"klingst", er:"klingt", wir:"klingen", ihr:"klingt", sie:"klingen", endings: [{text:"wunderschön",emoji:"🎵"},{text:"durch den ganzen Wald",emoji:"🌲"},{text:"laut und klar",emoji:"🔔"},{text:"magisch",emoji:"✨"},{text:"wie Glockenspiel",emoji:"🎶"}]},
+            "öffnen": {inf:"öffnen", ich:"öffne", du:"öffnest", er:"öffnet", wir:"öffnen", ihr:"öffnet", sie:"öffnen", endings: [{text:"die geheime Tür",emoji:"🚪"},{text:"das Zauberbuch",emoji:"📖"},{text:"ein Portal",emoji:"🌀"},{text:"die Augen",emoji:"👀"},{text:"den Weg",emoji:"🗺️"}]},
+            "schließen": {inf:"schließen", ich:"schließe", du:"schließt", er:"schließt", wir:"schließen", ihr:"schließt", sie:"schließen", endings: [{text:"die Augen",emoji:"😌"},{text:"das Tor",emoji:"🚪"},{text:"den Kreis",emoji:"⭕"},{text:"das Zauberbuch",emoji:"📖"},{text:"die dunkle Seite ab",emoji:"🌑"}]},
+            "erwachen": {inf:"erwachen", ich:"erwache", du:"erwachst", er:"erwacht", wir:"erwachen", ihr:"erwacht", sie:"erwachen", endings: [{text:"aus dem Zauberschlaf",emoji:"😴"},{text:"langsam",emoji:"🐢"},{text:"aus dem bösen Bann",emoji:"✨"},{text:"zum Leben",emoji:"💫"},{text:"bei Sonnenaufgang",emoji:"🌅"}]},
+            "schlafen": {inf:"schlafen", ich:"schlafe", du:"schläfst", er:"schläft", wir:"schlafen", ihr:"schlaft", sie:"schlafen", endings: [{text:"tief und fest",emoji:"😴"},{text:"unter einem Zauber",emoji:"✨"},{text:"im dunklen Turm",emoji:"🏰"},{text:"hundert Jahre",emoji:"💯"},{text:"friedlich",emoji:"😌"}]},
+            "wachen": {inf:"wachen", ich:"wache", du:"wachst", er:"wacht", wir:"wachen", ihr:"wacht", sie:"wachen", endings: [{text:"über den Wald",emoji:"🌲"},{text:"die ganze Nacht",emoji:"🌙"},{text:"treu und mutig",emoji:"💪"},{text:"über die Freunde",emoji:"👫"},{text:"im Turm",emoji:"🏰"}]},
+            "leben": {inf:"leben", ich:"lebe", du:"lebst", er:"lebt", wir:"leben", ihr:"lebt", sie:"leben", endings: [{text:"im Zauberwald",emoji:"🌲"},{text:"im schwarzen Turm",emoji:"🏰"},{text:"glücklich",emoji:"😊"},{text:"in Frieden",emoji:"☮️"},{text:"für immer",emoji:"♾️"}]},
+            "tanzen": {inf:"tanzen", ich:"tanze", du:"tanzt", er:"tanzt", wir:"tanzen", ihr:"tanzt", sie:"tanzen", endings: [{text:"im Mondschein",emoji:"🌙"},{text:"um das Feuer",emoji:"🔥"},{text:"fröhlich",emoji:"😊"},{text:"durch die Nacht",emoji:"🌌"},{text:"zusammen",emoji:"👫"}]},
+            "feiern": {inf:"feiern", ich:"feiere", du:"feierst", er:"feiert", wir:"feiern", ihr:"feiert", sie:"feiern", endings: [{text:"ein großes Fest",emoji:"🎉"},{text:"den Sieg",emoji:"🏆"},{text:"mit allen Freunden",emoji:"👫"},{text:"bis zum Morgen",emoji:"🌅"},{text:"fröhlich",emoji:"😊"}]},
+            "lächeln": {inf:"lächeln", ich:"lächle", du:"lächelst", er:"lächelt", wir:"lächeln", ihr:"lächelt", sie:"lächeln", endings: [{text:"freundlich",emoji:"😊"},{text:"zum ersten Mal",emoji:"✨"},{text:"voller Freude",emoji:"🥰"},{text:"geheimnisvoll",emoji:"🔮"},{text:"glücklich",emoji:"😄"}]},
+            "weinen": {inf:"weinen", ich:"weine", du:"weinst", er:"weint", wir:"weinen", ihr:"weint", sie:"weinen", endings: [{text:"vor Freude",emoji:"😂"},{text:"vor Glück",emoji:"🥹"},{text:"bittere Tränen",emoji:"😢"},{text:"nicht mehr",emoji:"😊"},{text:"leise",emoji:"🤫"}]},
+            "stehlen": {inf:"stehlen", ich:"stehle", du:"stiehlst", er:"stiehlt", wir:"stehlen", ihr:"stehlt", sie:"stehlen", endings: [{text:"die Stimmen",emoji:"🎵"},{text:"das Licht",emoji:"💡"},{text:"die Magie",emoji:"✨"},{text:"die Freude",emoji:"😊"},{text:"im Dunkeln",emoji:"🌑"}]},
+            "bringen": {inf:"bringen", ich:"bringe", du:"bringst", er:"bringt", wir:"bringen", ihr:"bringt", sie:"bringen", endings: [{text:"die Stimmen zurück",emoji:"🎵"},{text:"Licht in die Dunkelheit",emoji:"💡"},{text:"Frieden",emoji:"☮️"},{text:"große Freude",emoji:"😊"},{text:"Hoffnung",emoji:"⭐"}]}
+        };
+        
+        var subjectVerbMapping = {
+            // Pronomen
+            "Ich": ["zaubern","laufen","springen","rennen","suchen","finden","singen","rufen","helfen","kämpfen","fliegen","tanzen","lächeln"],
+            "Du": ["zaubern","laufen","springen","rennen","suchen","finden","singen","rufen","helfen","kämpfen","fliegen","tanzen","lächeln"],
+            "Wir": ["zaubern","laufen","springen","rennen","suchen","finden","singen","rufen","helfen","kämpfen","fliegen","tanzen","feiern"],
+            "Ihr": ["zaubern","laufen","springen","rennen","suchen","finden","singen","rufen","helfen","kämpfen","fliegen","tanzen","feiern"],
+            // Helden
+            "Lea": ["singen","helfen","laufen","suchen","finden","retten","lächeln","rufen","sprechen","tanzen"],
+            "Finn": ["kämpfen","helfen","laufen","suchen","finden","retten","springen","rennen","klettern"],
+            "Die mutige Prinzessin": ["kämpfen","helfen","laufen","suchen","finden","retten","tanzen","singen"],
+            "Der tapfere Ritter": ["kämpfen","helfen","laufen","suchen","finden","retten","schleichen"],
+            "Das kleine Mädchen": ["singen","helfen","laufen","suchen","finden","lächeln","tanzen"],
+            "Der mutige Junge": ["kämpfen","helfen","laufen","suchen","finden","springen","rennen"],
+            "Die Kinder": ["singen","helfen","laufen","suchen","finden","tanzen","feiern","lächeln"],
+            // Magische Wesen
+            "Fidelio": ["fliegen","singen","helfen","flüstern","leuchten","schweben"],
+            "Aurelius": ["fliegen","sprechen","helfen","leuchten","glitzern","führen"],
+            "Die Hexe": ["zaubern","verzaubern","verwandeln","flüstern","lächeln","leben","stehlen","bringen"],
+            "Der Zauberer": ["zaubern","verzaubern","verwandeln","flüstern","leben","schlafen","stehlen","weinen"],
+            "Die böse Hexe": ["zaubern","verzaubern","stehlen","verschwinden","schleichen"],
+            "Der alte Zauberer": ["zaubern","verzaubern","verwandeln","flüstern","leben","weinen","lächeln"],
+            "Die kleine Fee": ["fliegen","zaubern","schweben","leuchten","tanzen","lächeln","helfen"],
+            "Die Feen": ["fliegen","zaubern","schweben","leuchten","tanzen","singen","helfen"],
+            "Der Drache": ["fliegen","schweben","schlafen","erwachen","wachen","leben"],
+            "Die Drachen": ["fliegen","schweben","schlafen","erwachen","wachen","leben"],
+            "Das Einhorn": ["laufen","springen","leuchten","glitzern","leben","helfen"],
+            "Die Einhörner": ["laufen","springen","leuchten","glitzern","leben","tanzen"],
+            // Zauberwald-Tiere
+            "Der Zauber-Hase": ["hüpfen","sprechen","helfen","laufen","leben"],
+            "Die Zauber-Hasen": ["hüpfen","sprechen","helfen","laufen","tanzen"],
+            "Der schlaue Fuchs": ["schleichen","suchen","helfen","leben","sprechen"],
+            "Die Füchse": ["schleichen","suchen","helfen","leben","laufen"],
+            "Das scheue Reh": ["laufen","springen","schlafen","erwachen","leben"],
+            "Die Rehe": ["laufen","springen","schlafen","erwachen","tanzen"],
+            "Die Eule": ["fliegen","rufen","wachen","leben","sprechen"],
+            "Die Eulen": ["fliegen","rufen","wachen","leben"],
+            "Der goldene Käfer": ["fliegen","leuchten","glitzern","sprechen","helfen"],
+            "Der Singvogel": ["singen","fliegen","leben"],
+            "Die Singvögel": ["singen","fliegen","leben","tanzen"],
+            "Der Schmetterling": ["fliegen","schweben","tanzen","leben"],
+            "Die Schmetterlinge": ["fliegen","schweben","tanzen","leben"],
+            // Magische Objekte
+            "Die goldene Glocke": ["klingen","leuchten","erwachen"],
+            "Der schwarze Turm": ["stehen","wachen","leben"],
+            "Der alte Baum": ["leben","flüstern","wachen","öffnen"],
+            "Der Zauberwald": ["leben","erwachen","schlafen"],
+            "Die magische Tür": ["öffnen","schließen","verschwinden","erscheinen"],
+            "Der Zauberstab": ["leuchten","glitzern","zaubern"],
+            "Die Zauberstäbe": ["leuchten","glitzern","zaubern"],
+            "Der Kessel": ["brodeln","leuchten"],
+            "Das Zauberbuch": ["öffnen","leuchten","sprechen"],
+            "Die Kristallkugel": ["leuchten","glitzern","funkeln"],
+            // Naturelemente
+            "Der Mond": ["scheinen","leuchten","wachen"],
+            "Die Sterne": ["funkeln","glitzern","leuchten","scheinen"],
+            "Der Nebel": ["schweben","verschwinden","erscheinen"],
+            "Das Licht": ["leuchten","scheinen","verschwinden","erscheinen"]
+        };
+        
+        // Zusätzliche Verben für das Mapping
+        verbs["hüpfen"] = {inf:"hüpfen", ich:"hüpfe", du:"hüpfst", er:"hüpft", wir:"hüpfen", ihr:"hüpft", sie:"hüpfen", endings: [{text:"fröhlich",emoji:"😊"},{text:"durch den Wald",emoji:"🌲"},{text:"von Pilz zu Pilz",emoji:"🍄"},{text:"im Mondschein",emoji:"🌙"}]};
+        verbs["brodeln"] = {inf:"brodeln", ich:"brodele", du:"brodelst", er:"brodelt", wir:"brodeln", ihr:"brodelt", sie:"brodeln", endings: [{text:"geheimnisvoll",emoji:"🔮"},{text:"mit grünem Rauch",emoji:"💚"},{text:"laut",emoji:"📢"},{text:"die ganze Nacht",emoji:"🌙"}]};
+        verbs["stehen"] = {inf:"stehen", ich:"stehe", du:"stehst", er:"steht", wir:"stehen", ihr:"steht", sie:"stehen", endings: [{text:"dunkel und geheimnisvoll",emoji:"🌑"},{text:"seit hundert Jahren",emoji:"💯"},{text:"im Nebel",emoji:"🌫️"},{text:"still und stumm",emoji:"🤫"}]};
+        verbs["führen"] = {inf:"führen", ich:"führe", du:"führst", er:"führt", wir:"führen", ihr:"führt", sie:"führen", endings: [{text:"den Weg",emoji:"🗺️"},{text:"durch den Wald",emoji:"🌲"},{text:"zum Ziel",emoji:"🎯"},{text:"mutig voran",emoji:"💪"}]};
+        verbs["klettern"] = {inf:"klettern", ich:"klettere", du:"kletterst", er:"klettert", wir:"klettern", ihr:"klettert", sie:"klettern", endings: [{text:"den Turm hinauf",emoji:"🏰"},{text:"auf den Baum",emoji:"🌳"},{text:"mutig nach oben",emoji:"⬆️"},{text:"schnell",emoji:"⚡"}]};
+
+        var playerName = "";
+        var score = 0;
+        var currentStep = 1;
+        var currentSubject = null;
+        var currentVerb = null;
+        var currentVerbConjugated = null;
+        var currentEnding = null;
+        var sentences = [];
+        var magicMode = false;
+
+        function $(id) { return document.getElementById(id); }
+
+        function shuffle(arr) {
+            var a = arr.slice();
+            for (var i = a.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var t = a[i]; a[i] = a[j]; a[j] = t;
+            }
+            return a;
+        }
+
+        function startGame() {
+            var nameEl = $("playerName");
+            if (!nameEl) return;
+            playerName = nameEl.value.trim();
+            if (playerName.length < 1) return;
+            var dn = $("displayName");
+            if (dn) dn.textContent = playerName;
+            var ws = $("welcomeScreen");
+            var ga = $("gameArea");
+            if (ws) ws.style.display = "none";
+            if (ga) ga.classList.add("active");
+            newRound();
+        }
+
+        function addPoints(p) {
+            score += p;
+            var sv = $("scoreValue");
+            if (sv) sv.textContent = score;
+        }
+
+        function createMagicStars(count) {
+            for (var i = 0; i < count; i++) {
+                setTimeout(function() {
+                    var star = document.createElement("div");
+                    star.className = "magic-star";
+                    star.textContent = ["✨","⭐","💫","🌟"][Math.floor(Math.random() * 4)];
+                    star.style.left = Math.random() * 100 + "vw";
+                    star.style.top = Math.random() * 100 + "vh";
+                    document.body.appendChild(star);
+                    setTimeout(function() { star.remove(); }, 2000);
+                }, i * 100);
+            }
+        }
+
+        function createConfetti() {
+            var colors = ["#ffd700", "#9b59b6", "#3498db", "#27ae60", "#e74c3c", "#f39c12"];
+            for (var i = 0; i < 30; i++) {
+                setTimeout(function() {
+                    var c = document.createElement("div");
+                    c.className = "confetti";
+                    c.style.left = Math.random() * 100 + "vw";
+                    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    c.style.animationDuration = (1.5 + Math.random()) + "s";
+                    document.body.appendChild(c);
+                    setTimeout(function() { c.remove(); }, 2500);
+                }, i * 50);
+            }
+        }
+
+        function showSuccess(isMagic) {
+            var ov = $("successOverlay");
+            var em = $("successEmoji");
+            var tx = $("successText");
+            var pt = $("successPoints");
+            if (!ov || !em || !tx || !pt) return;
+            
+            if (isMagic) {
+                ov.classList.add("magic-success");
+                em.textContent = "🪄✨🌟";
+                tx.textContent = "Magischer Zauber!";
+                pt.textContent = "+25 Magie";
+                createMagicStars(20);
+            } else {
+                ov.classList.remove("magic-success");
+                em.textContent = ["✨","🌟","💫","⭐"][Math.floor(Math.random() * 4)];
+                tx.textContent = ["Zauber gelungen!","Wunderbar!","Perfekt!","Magisch!"][Math.floor(Math.random() * 4)];
+                pt.textContent = "+10 Magie";
+            }
+            
+            ov.classList.add("active");
+            createConfetti();
+            setTimeout(function() { ov.classList.remove("active"); }, 1100);
+        }
+
+        function updateSentenceList() {
+            var sl = $("sentenceList");
+            var sc = $("sentenceCount");
+            if (!sl || !sc) return;
+            sc.textContent = sentences.length + " Zaubersprüche";
+            if (sentences.length === 0) {
+                sl.innerHTML = '<p class="no-sentences">Noch keine Zaubersprüche... Beginne dein Abenteuer!</p>';
+                return;
+            }
+            sl.innerHTML = "";
+            sentences.forEach(function(s, i) {
+                var d = document.createElement("div");
+                d.className = "collected-sentence";
+                if (s.isMagic) d.classList.add("magic-sentence");
+                d.textContent = (i + 1) + ". " + s.text;
+                if (s.surprise) {
+                    var badge = document.createElement("span");
+                    badge.className = "surprise-badge";
+                    badge.textContent = "🎁 " + s.surprise;
+                    d.appendChild(badge);
+                }
+                sl.appendChild(d);
+            });
+        }
+
+        function saveToTxt(filename, data) {
+            var text = "=== " + playerName + "s Zauberbuch ===\n";
+            text += "Erstellt am: " + new Date().toLocaleDateString("de-DE") + "\n";
+            text += "Magische Punkte: " + score + "\n\n";
+            data.forEach(function(s, i) {
+                text += (i + 1) + ". " + s.text;
+                if (s.surprise) text += " (" + s.surprise + ")";
+                if (s.isMagic) text += " ✨";
+                text += "\n";
+            });
+            var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
+            var a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+        }
+
+        function updateSteps() {
+            var steps = document.querySelectorAll("#mainSteps .step");
+            steps.forEach(function(s, i) {
+                s.classList.remove("active", "completed");
+                if (i + 1 < currentStep) s.classList.add("completed");
+                else if (i + 1 === currentStep) s.classList.add("active");
+            });
+        }
+
+        function updateSentenceDisplay() {
+            var sd = $("sentenceDisplay");
+            if (!sd) return;
+            var parts = [];
+            if (currentSubject) {
+                parts.push('<span class="sentence-part subject">' + currentSubject.emoji + ' ' + currentSubject.text + '</span>');
+            } else {
+                parts.push('<span class="sentence-part placeholder">❓ Wer?</span>');
+            }
+            if (currentVerbConjugated) {
+                parts.push('<span class="sentence-part verb">' + currentVerbConjugated + '</span>');
+            } else if (currentVerb) {
+                parts.push('<span class="sentence-part placeholder">🎯 ' + currentVerb.inf + '?</span>');
+            } else {
+                parts.push('<span class="sentence-part placeholder">❓ Was tut?</span>');
+            }
+            if (currentEnding) {
+                parts.push('<span class="sentence-part ending">' + currentEnding.emoji + ' ' + currentEnding.text + '</span>');
+            } else {
+                parts.push('<span class="sentence-part placeholder">❓ Wie/Wo?</span>');
+            }
+            sd.innerHTML = parts.join(" ");
+        }
+
+        function getVerbsForSubject(subjectText) {
+            var verbKeys = subjectVerbMapping[subjectText];
+            if (!verbKeys) return Object.keys(verbs).slice(0, 8);
+            return verbKeys;
+        }
+
+        function updateSelection() {
+            var sel = $("selectionArea");
+            if (!sel) return;
+            
+            if (currentStep === 1) {
+                sel.innerHTML = '<div class="selection-label">✨ Wähle ein magisches Wesen oder einen Helden:</div><div class="selection-options" id="selOpts"></div>';
+                var opts = $("selOpts");
+                var displaySubjects = magicMode ? shuffle(subjects) : shuffle(subjects).slice(0, 24);
+                
+                displaySubjects.forEach(function(subj) {
+                    var b = document.createElement("button");
+                    b.className = "select-btn";
+                    if (subj.isPronoun) b.classList.add("magic-highlight");
+                    b.textContent = subj.emoji + " " + subj.text;
+                    b.onclick = function() {
+                        currentSubject = subj;
+                        addPoints(5);
+                        currentStep = 2;
+                        updateSteps();
+                        updateSentenceDisplay();
+                        updateSelection();
+                    };
+                    opts.appendChild(b);
+                });
+                
+            } else if (currentStep === 2) {
+                sel.innerHTML = '<div class="selection-label">🪄 Wähle ein passendes Verb für ' + currentSubject.text + ':</div><div class="selection-options" id="selOpts"></div>';
+                var opts = $("selOpts");
+                var verbKeys = getVerbsForSubject(currentSubject.text);
+                
+                shuffle(verbKeys).forEach(function(key) {
+                    var v = verbs[key];
+                    if (!v) return;
+                    var b = document.createElement("button");
+                    b.className = "select-btn";
+                    b.textContent = v.inf;
+                    b.onclick = function() {
+                        currentVerb = v;
+                        addPoints(5);
+                        currentStep = 3;
+                        updateSteps();
+                        updateSentenceDisplay();
+                        updateSelection();
+                    };
+                    opts.appendChild(b);
+                });
+                
+            } else if (currentStep === 3) {
+                sel.innerHTML = '<div class="selection-label">📖 Konjugiere: ' + currentSubject.text + ' ___ (' + currentVerb.inf + ')</div><div class="selection-options" id="selOpts"></div>';
+                var correctForm;
+                var subType = currentSubject.type;
+                if (subType === "ich") correctForm = currentVerb.ich;
+                else if (subType === "du") correctForm = currentVerb.du;
+                else if (subType === "er") correctForm = currentVerb.er;
+                else if (subType === "wir") correctForm = currentVerb.wir;
+                else if (subType === "ihr") correctForm = currentVerb.ihr;
+                else if (subType === "sie") correctForm = currentVerb.sie;
+                else correctForm = currentVerb.er;
+
+                var allForms = [currentVerb.ich, currentVerb.du, currentVerb.er, currentVerb.wir, currentVerb.ihr, currentVerb.sie];
+                var uniqueForms = [];
+                allForms.forEach(function(f) { if (uniqueForms.indexOf(f) === -1) uniqueForms.push(f); });
+                
+                var opts = $("selOpts");
+                shuffle(uniqueForms).forEach(function(form) {
+                    var b = document.createElement("button");
+                    b.className = "select-btn";
+                    b.textContent = form;
+                    b.onclick = function() {
+                        if (form === correctForm) {
+                            this.classList.add("correct");
+                            currentVerbConjugated = form;
+                            addPoints(10);
+                            setTimeout(function() {
+                                currentStep = 4;
+                                updateSteps();
+                                updateSentenceDisplay();
+                                updateSelection();
+                            }, 400);
+                        } else {
+                            this.classList.add("wrong");
+                            var self = this;
+                            setTimeout(function() { self.classList.remove("wrong"); }, 400);
+                        }
+                    };
+                    opts.appendChild(b);
+                });
+                
+            } else if (currentStep === 4) {
+                sel.innerHTML = '<div class="selection-label">🌟 Wähle ein magisches Ende für deinen Zauberspruch:</div><div class="selection-options" id="selOpts"></div>';
+                var opts = $("selOpts");
+                var endings = currentVerb.endings || [{text:"wunderschön", emoji:"✨"}];
+                
+                shuffle(endings).forEach(function(ending) {
+                    var b = document.createElement("button");
+                    b.className = "select-btn";
+                    b.textContent = ending.emoji + " " + ending.text;
+                    b.onclick = function() {
+                        currentEnding = ending;
+                        updateSentenceDisplay();
+                        
+                        var sentenceText = currentSubject.text + " " + currentVerbConjugated + " " + currentEnding.text + ".";
+                        var isMagicSentence = magicMode || currentSubject.category === "magisch" || currentSubject.surprise;
+                        
+                        var sentenceObj = {
+                            text: sentenceText,
+                            isMagic: isMagicSentence,
+                            surprise: currentSubject.surprise || null
+                        };
+                        
+                        sentences.push(sentenceObj);
+                        updateSentenceList();
+                        
+                        if (isMagicSentence) {
+                            addPoints(25);
+                            showSuccess(true);
+                        } else {
+                            addPoints(10);
+                            showSuccess(false);
+                        }
+                        
+                        setTimeout(newRound, 1200);
+                    };
+                    opts.appendChild(b);
+                });
+            }
+        }
+
+        function newRound() {
+            currentStep = 1;
+            currentSubject = null;
+            currentVerb = null;
+            currentVerbConjugated = null;
+            currentEnding = null;
+            updateSteps();
+            updateSentenceDisplay();
+            updateSelection();
+        }
+
+        function showHelp() {
+            var hc = $("helpContent");
+            if (!hc) return;
+            var html = '<button class="help-close" id="helpClose2">✕</button>';
+            html += '<h3 class="help-title">📖 So funktioniert der Zauber</h3>';
+            html += '<p style="color:#6a1b9a"><strong style="color:#7b1fa2">Schritt 1:</strong> Wähle ein magisches Wesen oder einen Helden</p>';
+            html += '<p style="color:#6a1b9a"><strong style="color:#7b1fa2">Schritt 2:</strong> Wähle ein passendes Verb</p>';
+            html += '<p style="color:#6a1b9a"><strong style="color:#7b1fa2">Schritt 3:</strong> Konjugiere das Verb richtig</p>';
+            html += '<p style="color:#6a1b9a"><strong style="color:#7b1fa2">Schritt 4:</strong> Wähle ein magisches Ende</p>';
+            html += '<div class="magic-info"><strong>🪄 Zauber-Modus:</strong> Aktiviere den Zauber-Modus für verrückte Kombinationen und extra Punkte!</div>';
+            html += '<div class="magic-info"><strong>🎁 Überraschungen:</strong> Manche Wesen haben geheime Überraschungen!</div>';
+            html += '<h3 class="help-title" style="margin-top:20px;">📖 Konjugation</h3>';
+            html += '<table class="conj-table">';
+            html += '<tr><th>Pronomen</th><th>Endung</th><th>zaubern</th><th>helfen</th></tr>';
+            html += '<tr><td>ich</td><td>-e</td><td>zaubere</td><td>helfe</td></tr>';
+            html += '<tr><td>du</td><td>-st</td><td>zauberst</td><td><b>hilfst</b></td></tr>';
+            html += '<tr><td>er/sie/es</td><td>-t</td><td>zaubert</td><td><b>hilft</b></td></tr>';
+            html += '<tr><td>wir</td><td>-en</td><td>zaubern</td><td>helfen</td></tr>';
+            html += '<tr><td>ihr</td><td>-t</td><td>zaubert</td><td>helft</td></tr>';
+            html += '<tr><td>sie (Plural)</td><td>-en</td><td>zaubern</td><td>helfen</td></tr>';
+            html += '</table>';
+            html += '<p style="margin-top:12px;color:#6a1b9a">⚠️ Achtung: <b style="color:#7b1fa2">helfen → du hilfst</b>, <b style="color:#7b1fa2">sprechen → du sprichst</b></p>';
+            hc.innerHTML = html;
+            var hm = $("helpModal");
+            if (hm) hm.classList.add("active");
+            var hc2 = document.getElementById("helpClose2");
+            if (hc2) hc2.onclick = closeHelp;
+        }
+
+        function closeHelp() {
+            var hm = $("helpModal");
+            if (hm) hm.classList.remove("active");
+        }
+
+        function toggleMagicMode() {
+            magicMode = !magicMode;
+            var toggle = $("magicToggle");
+            if (toggle) {
+                toggle.classList.toggle("active", magicMode);
+            }
+            if (magicMode) {
+                createMagicStars(10);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            var nameEl = $("playerName");
+            var startBtn = $("startBtn");
+            if (nameEl && startBtn) {
+                nameEl.oninput = function() { startBtn.disabled = this.value.trim().length < 1; };
+                nameEl.onkeypress = function(e) { if (e.key === "Enter" && this.value.trim().length >= 1) startGame(); };
+                startBtn.onclick = startGame;
+            }
+            var nb = $("newRound"); if (nb) nb.onclick = newRound;
+            var hb = $("helpBtn"); if (hb) hb.onclick = showHelp;
+            var hm = $("helpModal");
+            if (hm) hm.onclick = function(e) { if (e.target === hm) closeHelp(); };
+            var mt = $("magicToggle"); if (mt) mt.onclick = toggleMagicMode;
+            var ss = $("saveSentences");
+            if (ss) ss.onclick = function() { saveToTxt("zauberbuch-" + playerName.toLowerCase().replace(/\s+/g, '-') + ".txt", sentences); };
+            var sa = $("saveAll");
+            if (sa) sa.onclick = function() { saveToTxt("zauberbuch-" + playerName.toLowerCase().replace(/\s+/g, '-') + ".txt", sentences); };
+        });
+    })();
+    </script>
+</body>
+</html>
