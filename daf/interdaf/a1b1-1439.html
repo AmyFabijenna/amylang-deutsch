@@ -1416,8 +1416,8 @@ function toggleDirection() {
             const options = document.querySelectorAll('.quiz-option');
             const clickedOption = options[optionIndex];
             
-            // Wenn diese Option bereits als falsch markiert wurde, ignoriere weitere Klicks darauf
-            if (clickedOption.classList.contains('incorrect')) {
+            // Wenn bereits eine Animation läuft, ignoriere weitere Klicks
+            if (clickedOption.classList.contains('animating')) {
                 return;
             }
             
@@ -1428,28 +1428,37 @@ function toggleDirection() {
             }
             
             if (selected === correct) {
-                // RICHTIGE Antwort - grün markieren
+                // RICHTIGE Antwort
                 quizScore.total++;
                 quizScore.correct++;
                 clickedOption.classList.add('correct');
+                clickedOption.classList.add('animating');
                 toggleLearned(filteredVocab[currentIndex].word, true);
                 
                 // Alle Optionen deaktivieren
                 options.forEach(opt => opt.style.pointerEvents = 'none');
                 
-                // Nach 1,5 Sekunden automatisch zur nächsten Frage springen
+                // Nach 1 Sekunde grün zur nächsten Frage springen
                 setTimeout(() => {
                     currentIndex++;
                     renderContent();
-                }, 1500);
+                }, 1000);
             } else {
-                // FALSCHE Antwort - nur rot markieren, KEIN Score-Update
+                // FALSCHE Antwort - kurz rot blinken lassen
                 clickedOption.classList.add('incorrect');
+                clickedOption.classList.add('animating');
                 
-                // Nur diese falsche Option deaktivieren, andere bleiben klickbar
-                clickedOption.style.pointerEvents = 'none';
+                // Alle Optionen temporär deaktivieren während der Animation
+                options.forEach(opt => opt.style.pointerEvents = 'none');
                 
-                // Der Schüler kann weiter raten - keine automatische Anzeige der richtigen Antwort
+                // Nach 1 Sekunde: rot entfernen, Optionen wieder aktivieren
+                setTimeout(() => {
+                    clickedOption.classList.remove('incorrect');
+                    clickedOption.classList.remove('animating');
+                    
+                    // Alle Optionen wieder aktivieren
+                    options.forEach(opt => opt.style.pointerEvents = 'auto');
+                }, 1000);
             }
         }
 
