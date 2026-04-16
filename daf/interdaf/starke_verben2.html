@@ -678,6 +678,11 @@
         <div id="lessonScreen" class="screen">
             <div class="menu-card">
                 <h2 class="mode-title">📚 Wähle deine Lektion</h2>
+                
+                <div class="name-input-container">
+                    <input type="text" id="playerNameLesson" class="name-input" placeholder="Dein Name" maxlength="20">
+                </div>
+                
                 <div class="lesson-selector" id="lessonSelector"></div>
                 
                 <div class="display-mode-selector">
@@ -787,9 +792,10 @@
     
     <script>
         // Complete verb data with all forms including Konjunktiv I & II
+        // ALL verbs from both lists, carefully merged and deduplicated
         const VERBS = [
-            // From images - carefully merged and deduplicated
             {inf: "backen", pr3: "bäckt/backt", prt: "backte/buk", pf: "hat gebacken", k2: "backte/büke", k1: "backe", hu: "süt", en: "to bake"},
+            {inf: "befehlen", pr3: "befiehlt", prt: "befahl", pf: "hat befohlen", k2: "beföhle/befähle", k1: "befehle", hu: "parancsol", en: "to command"},
             {inf: "beginnen", pr3: "beginnt", prt: "begann", pf: "hat begonnen", k2: "begänne/begönne", k1: "beginne", hu: "kezd", en: "to begin"},
             {inf: "beißen", pr3: "beißt", prt: "biss", pf: "hat gebissen", k2: "bisse", k1: "beiße", hu: "harap", en: "to bite"},
             {inf: "bergen", pr3: "birgt", prt: "barg", pf: "hat geborgen", k2: "bärge", k1: "berge", hu: "ment", en: "to rescue"},
@@ -1083,7 +1089,7 @@
                 return;
             }
             
-            const name = document.getElementById('playerName').value.trim();
+            const name = document.getElementById('playerNameLesson').value.trim();
             if (!name) {
                 alert('Bitte gib deinen Namen ein!');
                 return;
@@ -1172,9 +1178,16 @@
             
             renderVerbCard();
             
+            // Reset all buttons
             document.getElementById('checkBtn').disabled = false;
+            document.getElementById('checkBtn').style.opacity = '1';
             document.getElementById('revealBtn').disabled = false;
-            document.getElementById('skipBtn').disabled = false;
+            document.getElementById('revealBtn').style.opacity = '1';
+            
+            const skipBtn = document.getElementById('skipBtn');
+            skipBtn.disabled = false;
+            skipBtn.textContent = '⏭ Überspringen';
+            skipBtn.onclick = skipVerb;
         }
 
         function renderVerbCard() {
@@ -1241,7 +1254,23 @@
                 return;
             }
             
-            // Regular random mode
+            // Regular random mode - but ALWAYS show translations at the top
+            const translationDiv = document.createElement('div');
+            translationDiv.style.gridColumn = '1 / -1';
+            translationDiv.style.textAlign = 'center';
+            translationDiv.style.marginBottom = '20px';
+            translationDiv.style.padding = '15px';
+            translationDiv.style.background = 'rgba(0, 212, 255, 0.1)';
+            translationDiv.style.borderRadius = '12px';
+            translationDiv.style.border = '2px solid var(--accent-dark)';
+            translationDiv.innerHTML = `
+                <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px;">Übersetzung</div>
+                <div style="font-size: 1.1rem; color: var(--accent-glow); font-weight: 600;">
+                    🇭🇺 ${verb.hu} | 🇬🇧 ${verb.en}
+                </div>
+            `;
+            container.appendChild(translationDiv);
+            
             FORMS.forEach((formKey, idx) => {
                 const group = document.createElement('div');
                 group.className = 'form-group';
@@ -1257,14 +1286,6 @@
                     value.textContent = verb[formKey];
                     group.appendChild(label);
                     group.appendChild(value);
-                    
-                    // Add translation hint for infinitive
-                    if (formKey === 'inf') {
-                        const hint = document.createElement('div');
-                        hint.className = 'translation-hint';
-                        hint.textContent = `🇭🇺 ${verb.hu} | 🇬🇧 ${verb.en}`;
-                        group.appendChild(hint);
-                    }
                 } else {
                     // Input field
                     const input = document.createElement('input');
@@ -1359,17 +1380,28 @@
                 
                 updateStats();
                 
-                // Check milestone
+                // Disable check and reveal buttons
+                document.getElementById('checkBtn').disabled = true;
+                document.getElementById('checkBtn').style.opacity = '0.5';
+                document.getElementById('revealBtn').disabled = true;
+                document.getElementById('revealBtn').style.opacity = '0.5';
+                
+                // Change skip button to "Weiter" for milestones or regular continue
+                const skipBtn = document.getElementById('skipBtn');
+                skipBtn.textContent = '▶ Weiter';
+                
                 if ([10, 25, 50, 100].includes(gameState.solvedCount + 1)) {
-                    setTimeout(() => showMilestone(gameState.solvedCount + 1), 300);
+                    skipBtn.onclick = () => showMilestone(gameState.solvedCount + 1);
                 } else {
-                    setTimeout(() => {
-                        gameState.solvedCount++;
-                        updateProgress();
-                        loadNextVerb();
-                    }, 1000);
+                    skipBtn.onclick = continueAfterCorrect;
                 }
             }
+        }
+        
+        function continueAfterCorrect() {
+            gameState.solvedCount++;
+            updateProgress();
+            loadNextVerb();
         }
 
         function revealAnswer() {
@@ -1383,15 +1415,21 @@
             
             document.getElementById('revealBtn').disabled = true;
             document.getElementById('revealBtn').style.opacity = '0.5';
+            document.getElementById('checkBtn').disabled = true;
+            document.getElementById('checkBtn').style.opacity = '0.5';
+            
+            // Change skip button to "Weiter" button
+            const skipBtn = document.getElementById('skipBtn');
+            skipBtn.textContent = '▶ Weiter';
+            skipBtn.onclick = continueAfterReveal;
             
             updateStats();
-            
-            // Auto-continue
-            setTimeout(() => {
-                gameState.solvedCount++;
-                updateProgress();
-                loadNextVerb();
-            }, 1500);
+        }
+        
+        function continueAfterReveal() {
+            gameState.solvedCount++;
+            updateProgress();
+            loadNextVerb();
         }
 
         function skipVerb() {
