@@ -1146,29 +1146,40 @@ function toggleDirection() {
 
         // Render flashcard mode
         function renderFlashcard(container) {
+            if (filteredVocab.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #004d4d; font-size: 1.3em;">Keine Vokabeln gefunden!</p>';
+                return;
+            }
+
             const item = filteredVocab[currentIndex];
-            const showingGerman = !isReversed && !isFlipped || isReversed && isFlipped;
+            
+            // Vorderseite vs Rückseite bestimmen
+            let frontSide, backSide;
+            
+            if (!isReversed) {
+                // Normal: Deutsch → Fremdsprache
+                frontSide = `
+                    <div class="flashcard-word">${item.word}</div>
+                    <div class="flashcard-type">${item.type}</div>
+                    ${item.type === 'Nomen' ? `<p style="color: #666; margin-top: 15px; font-size: 0.9em;">Plural: ${item.plural}</p>` : ''}
+                    ${item.type === 'Verb' ? `<p style="color: #666; margin-top: 15px; font-size: 0.9em;">Präteritum: ${item.preterite}<br>Perfekt: ${item.perfect}</p>` : ''}
+                `;
+                backSide = `<div class="flashcard-translation">${item[currentLanguage]}</div>`;
+            } else {
+                // Umgekehrt: Fremdsprache → Deutsch
+                frontSide = `<div class="flashcard-word">${item[currentLanguage]}</div>`;
+                backSide = `
+                    <div class="flashcard-translation">${item.word}</div>
+                    <div class="flashcard-type">${item.type}</div>
+                    ${item.type === 'Nomen' ? `<p style="color: #666; margin-top: 15px; font-size: 0.9em;">Plural: ${item.plural}</p>` : ''}
+                    ${item.type === 'Verb' ? `<p style="color: #666; margin-top: 15px; font-size: 0.9em;">Präteritum: ${item.preterite}<br>Perfekt: ${item.perfect}</p>` : ''}
+                `;
+            }
             
             container.innerHTML = `
                 <div class="flashcard-container">
                     <div class="flashcard" onclick="flipCard()">
-                        <div class="flashcard-word">${isFlipped ? (isReversed ? item.word : item[currentLanguage]) : (isReversed ? item[currentLanguage] : item.word)}</div>
-                        ${!isFlipped && showingGerman ? `
-                            <div class="flashcard-details">
-                                <span class="vocab-type">${item.type}</span><br>
-                                ${getDetails(item)}
-                            </div>
-                        ` : ``}
-                        ${isFlipped && !showingGerman ? `
-                            <div class="flashcard-translation">${isReversed ? item.word : item[currentLanguage]}</div>
-                        ` : ``}
-                        ${isFlipped && showingGerman ? `
-                            <div class="flashcard-translation">${isReversed ? item[currentLanguage] : item.word}</div>
-                            <div class="flashcard-details">
-                                <span class="vocab-type">${item.type}</span><br>
-                                ${getDetails(item)}
-                            </div>
-                        ` : ``}
+                        ${isFlipped ? backSide : frontSide}
                         <p style="margin-top: 20px; color: #999; font-size: 0.9em;">Klicken zum Umdrehen</p>
                     </div>
                     <div class="flashcard-controls">
