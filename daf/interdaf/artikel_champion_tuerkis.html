@@ -1136,7 +1136,21 @@
             const slot = document.getElementById('slot-0');
             if (!slot) return;
 
-            if (art === correct) {
+            let isCorrect = false;
+            
+            if (gameState.mode === 'possessive') {
+                // Bei Possessivpronomen: nur Endung vergleichen
+                const { person, gender, kasus } = gameState.currentPossBase;
+                const base = articles.possessive[person];
+                const fullForm = getPossessiveForm(person, gender, kasus);
+                const correctEnding = fullForm.substring(base.length);
+                isCorrect = (art === correctEnding);
+            } else {
+                // Bei allen anderen Modi: normale Prüfung
+                isCorrect = (art === correct);
+            }
+
+            if (isCorrect) {
                 slot.textContent = art || '–';
                 slot.classList.remove('selected'); slot.classList.add('correct');
                 gameState.correctAnswers++; gameState.streak++;
@@ -1153,7 +1167,15 @@
                 gameState.streak = 0; updateStats(); playSound('wrong');
                 const hint = document.getElementById('hintBox');
                 hint.style.display = 'block';
-                document.getElementById('hintText').textContent = `Richtig wäre: "${correct}"`;
+                if (gameState.mode === 'possessive') {
+                    const { person, gender, kasus } = gameState.currentPossBase;
+                    const base = articles.possessive[person];
+                    const fullForm = getPossessiveForm(person, gender, kasus);
+                    const correctEnding = fullForm.substring(base.length);
+                    document.getElementById('hintText').textContent = `Richtig wäre: "${correctEnding || '(keine Endung)'}"`;
+                } else {
+                    document.getElementById('hintText').textContent = `Richtig wäre: "${correct}"`;
+                }
                 setTimeout(() => { slot.classList.remove('wrong'); slot.classList.remove('selected'); }, 500);
             }
         }
