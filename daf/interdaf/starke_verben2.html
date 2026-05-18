@@ -618,11 +618,98 @@
             text-shadow: 0 0 20px var(--gold);
         }
 
+        /* Solutions Modal */
+        .solutions-modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 20000;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 20px;
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease;
+        }
+        .solutions-modal {
+            background: linear-gradient(135deg, var(--bg-card), var(--primary-light));
+            border-radius: 20px;
+            border: 2px solid var(--accent);
+            padding: 30px;
+            max-width: 900px;
+            width: 100%;
+            margin: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 30px rgba(0,212,255,0.2);
+        }
+        .solutions-modal h2 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.8rem;
+            color: var(--accent-glow);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .solutions-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+        .solutions-table th {
+            background: var(--primary);
+            color: var(--accent-glow);
+            padding: 10px 8px;
+            text-align: left;
+            border-bottom: 2px solid var(--accent-dark);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .solutions-table td {
+            padding: 9px 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            color: var(--text);
+            vertical-align: top;
+        }
+        .solutions-table tr:nth-child(even) td {
+            background: rgba(255,255,255,0.04);
+        }
+        .solutions-table tr:hover td {
+            background: rgba(0,212,255,0.08);
+        }
+        .solutions-table td:first-child {
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .solutions-table td:last-child,
+        .solutions-table td:nth-last-child(2) {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        .solutions-close-btn {
+            display: block;
+            margin: 20px auto 0;
+            background: linear-gradient(135deg, var(--accent-dark), var(--accent));
+            border: none;
+            border-radius: 12px;
+            padding: 14px 40px;
+            color: var(--primary);
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .solutions-close-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,212,255,0.4);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             h1 { font-size: 2rem; }
             .verb-forms { grid-template-columns: 1fr; }
             .lesson-selector { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
+            .solutions-table { font-size: 0.78rem; }
+            .solutions-table th, .solutions-table td { padding: 7px 5px; }
         }
     </style>
 </head>
@@ -701,6 +788,9 @@
                 
                 <button class="start-btn" onclick="startMode2()" id="startLessonBtn" disabled>
                     ✨ Lektion starten
+                </button>
+                <button class="control-btn secondary" onclick="showLessonSolutions()" id="showSolutionsBtn" disabled style="display: block; margin: 10px auto;">
+                    📋 Lösungen anzeigen
                 </button>
                 <button class="control-btn" onclick="backToMenu()" style="display: block; margin: 20px auto;">
                     ← Zurück
@@ -1076,6 +1166,64 @@
             document.querySelectorAll('.lesson-btn')[lessonNum].classList.add('selected');
             gameState.currentLesson = lessonNum;
             document.getElementById('startLessonBtn').disabled = false;
+            document.getElementById('showSolutionsBtn').disabled = false;
+        }
+
+        function showLessonSolutions() {
+            if (gameState.currentLesson === null) return;
+            const startIdx = gameState.currentLesson * 10;
+            const endIdx = Math.min(startIdx + 10, VERBS.length);
+            const lessonVerbs = VERBS.slice(startIdx, endIdx);
+
+            const overlay = document.createElement('div');
+            overlay.className = 'solutions-modal-overlay';
+            overlay.id = 'solutionsModalOverlay';
+
+            const rows = lessonVerbs.map(v => `
+                <tr>
+                    <td>${v.inf}</td>
+                    <td>${v.pr3}</td>
+                    <td>${v.prt}</td>
+                    <td>${v.pf}</td>
+                    <td>${v.k2}</td>
+                    <td>${v.k1}</td>
+                    <td>${v.hu}</td>
+                    <td>${v.en}</td>
+                </tr>
+            `).join('');
+
+            overlay.innerHTML = `
+                <div class="solutions-modal">
+                    <h2>📋 Lektion ${gameState.currentLesson + 1} – Lösungen</h2>
+                    <div style="overflow-x: auto;">
+                        <table class="solutions-table">
+                            <thead>
+                                <tr>
+                                    <th>Infinitiv</th>
+                                    <th>3. Sg. Präs.</th>
+                                    <th>Präteritum</th>
+                                    <th>Perfekt</th>
+                                    <th>Konj. II</th>
+                                    <th>Konj. I</th>
+                                    <th>🇭🇺</th>
+                                    <th>🇬🇧</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                    </div>
+                    <button class="solutions-close-btn" onclick="closeSolutionsModal()">✕ Schließen</button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) closeSolutionsModal();
+            });
+        }
+
+        function closeSolutionsModal() {
+            const overlay = document.getElementById('solutionsModalOverlay');
+            if (overlay) overlay.remove();
         }
 
         function backToMenu() {
