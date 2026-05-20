@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attribut Champion 🌊</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #006064;
+            --primary-light: #00838f;
+            --accent: #26c6da;
+            --accent-glow: #4dd0e1;
+            --success: #26a69a;
+            --error: #e85d75;
+            --bg-dark: #004d56;
+            --bg-card: #006064;
+            --text: #e0f7fa;
+            --text-muted: #b2ebf2;
+            --turquoise: #00bcd4;
+            --stream: #80deea;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(160deg, #00acc1 0%, #00bcd4 40%, #26c6da 70%, #4dd0e1 100%);
+            min-height: 100vh;
+            color: #1a1a1a;
+            overflow-x: hidden;
+        }
+
+        /* Water ripple animations */
+        .decorations { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid rgba(77, 208, 225, 0.15);
+            animation: rippleOut 10s ease-out infinite;
+        }
+        @keyframes rippleOut {
+            0% { transform: scale(0.2); opacity: 0.8; }
+            100% { transform: scale(4); opacity: 0; }
+        }
+        .wave {
+            position: absolute;
+            width: 100%;
+            height: 100px;
+            background: linear-gradient(90deg, transparent, rgba(128, 222, 234, 0.1), transparent);
+            animation: waveFlow 8s ease-in-out infinite;
+        }
+        @keyframes waveFlow {
+            0%, 100% { transform: translateX(-100%) skewY(-2deg); }
+            50% { transform: translateX(100%) skewY(2deg); }
+        }
+        .bubble {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            animation: bubbleRise 12s ease-in infinite;
+        }
+        @keyframes bubbleRise {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            50% { opacity: 0.6; }
+            100% { transform: translateY(-20px) scale(1); opacity: 0; }
+        }
+
+        .container { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 20px; }
+        header { text-align: center; margin-bottom: 30px; padding-top: 10px; }
+        h1 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 2.5rem;
+            color: #004d56;
+            text-shadow: 2px 2px 4px rgba(255,255,255,0.3);
+            margin-bottom: 10px;
+        }
+        .subtitle { color: #006064; font-size: 1.05rem; font-weight: 600; }
+
+        .screen { display: none; animation: fadeIn 0.5s ease; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+        .menu-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(224,247,250,0.95) 100%);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border: 2px solid rgba(38,198,218,0.3);
+            box-shadow: 0 8px 32px rgba(0,96,100,0.15);
+        }
+
+        .mode-title {
+            font-family: 'Fredoka', sans-serif;
+            color: #006064;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #00acc1 0%, #26c6da 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 15px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(38,198,218,0.4);
+            display: block;
+            margin: 30px auto;
+        }
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(38,198,218,0.6);
+        }
+
+        .game-container {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(224,247,250,0.95) 100%);
+            border-radius: 20px;
+            padding: 35px;
+            border: 2px solid rgba(38,198,218,0.3);
+            box-shadow: 0 8px 32px rgba(0,96,100,0.15);
+        }
+
+        .progress-bar {
+            background: rgba(38,198,218,0.2);
+            height: 12px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #00acc1, #26c6da);
+            height: 100%;
+            transition: width 0.4s ease;
+            border-radius: 10px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 25px;
+            gap: 15px;
+        }
+        .stat-item {
+            background: rgba(38,198,218,0.1);
+            padding: 12px 20px;
+            border-radius: 12px;
+            text-align: center;
+            flex: 1;
+        }
+        .stat-label { font-size: 0.85rem; color: #006064; font-weight: 600; }
+        .stat-value { font-size: 1.4rem; color: #004d56; font-weight: 700; margin-top: 5px; }
+
+        .question-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 2px solid rgba(38,198,218,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .question-label {
+            font-size: 0.9rem;
+            color: #006064;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .task-box {
+            padding: 15px;
+            background: rgba(77,208,225,0.1);
+            border-radius: 10px;
+            border-left: 4px solid #00acc1;
+            margin-bottom: 20px;
+        }
+
+        .task-noun {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.2rem;
+            color: #004d56;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .task-attribute {
+            font-size: 1.05rem;
+            color: #00838f;
+            font-weight: 600;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 2px solid rgba(38,198,218,0.3);
+            padding: 18px 20px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            line-height: 1.5;
+            font-family: 'Quicksand', sans-serif;
+        }
+        .option-btn:hover {
+            border-color: #00acc1;
+            background: rgba(77,208,225,0.05);
+            transform: translateX(3px);
+        }
+        .option-btn.correct {
+            border-color: #26a69a;
+            background: rgba(38,166,154,0.1);
+            border-width: 3px;
+        }
+        .option-btn.wrong {
+            border-color: #e85d75;
+            background: rgba(232,93,117,0.1);
+            border-width: 3px;
+        }
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .result-screen {
+            text-align: center;
+        }
+        .result-title {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 2.2rem;
+            color: #006064;
+            margin-bottom: 20px;
+        }
+        .result-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .result-stat {
+            background: rgba(38,198,218,0.1);
+            padding: 20px;
+            border-radius: 15px;
+        }
+        .result-stat-label { font-size: 0.95rem; color: #006064; font-weight: 600; }
+        .result-stat-value { font-size: 2rem; color: #004d56; font-weight: 700; margin-top: 8px; }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            .task-noun { font-size: 1.05rem; }
+            .option-btn { font-size: 0.95rem; padding: 15px; }
+            .result-stats { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="decorations" id="decorations"></div>
+
+    <div class="container">
+        <header>
+            <h1>🌊 Attribut Champion 🌊</h1>
+            <div class="subtitle">Meistere Adjektive, Partizipien, Relativsätze und mehr!</div>
+        </header>
+
+        <!-- Start Screen -->
+        <div class="screen active" id="startScreen">
+            <div class="menu-card">
+                <h2 class="mode-title">Willkommen beim Attribut-Training!</h2>
+                <p style="text-align: center; color: #006064; font-size: 1.05rem; line-height: 1.6; margin: 20px 0;">
+                    Hier übst du verschiedene Arten von Attributen: Adjektive, Partizipien, Relativsätze, Genitive, erweiterte Partizipien und mehr. Du bekommst ein Bezugswort und eine Attributart – wähle den Satz, der diese Attributart korrekt verwendet! 🎯
+                </p>
+                <p style="text-align: center; color: #004d56; font-size: 0.95rem; margin: 15px 0;">
+                    <strong>150 Übungssätze</strong> aus Alltag und Berufsleben warten auf dich!
+                </p>
+                <button class="start-btn" onclick="startGame()">Los geht's! 🚀</button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="screen" id="gameScreen">
+            <div class="game-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-label">Frage</div>
+                        <div class="stat-value"><span id="currentQuestion">1</span> / <span id="totalQuestions">150</span></div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Richtig</div>
+                        <div class="stat-value" id="correctCount">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Punkte</div>
+                        <div class="stat-value" id="score">0</div>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <div class="question-label">Aufgabe:</div>
+                    <div class="task-box">
+                        <div class="task-noun" id="taskNoun"></div>
+                        <div class="task-attribute" id="taskAttribute"></div>
+                    </div>
+                    
+                    <div class="question-label">Welcher Satz verwendet die richtige Attributart?</div>
+                    <div class="options-grid" id="optionsGrid"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div class="screen" id="resultScreen">
+            <div class="menu-card result-screen">
+                <h2 class="result-title">🎉 Fantastisch! 🎉</h2>
+                <p style="color: #006064; font-size: 1.1rem; margin: 15px 0;">
+                    Du hast alle 150 Fragen geschafft!
+                </p>
+                <div class="result-stats">
+                    <div class="result-stat">
+                        <div class="result-stat-label">Richtige Antworten</div>
+                        <div class="result-stat-value" id="finalCorrect">0</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-label">Gesamtpunkte</div>
+                        <div class="result-stat-value" id="finalScore">0</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-label">Genauigkeit</div>
+                        <div class="result-stat-value" id="accuracy">0%</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-label">Bewertung</div>
+                        <div class="result-stat-value" id="rating" style="font-size: 1.5rem;">⭐</div>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button class="start-btn" onclick="startGame()">Nochmal spielen 🔄</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            // ADJEKTIV als Linksattribut
+            { noun: "das Bewerbungsgespräch", attributeType: "Adjektiv", correct: "Das erfolgreiche Bewerbungsgespräch hat mich überzeugt.", wrong: ["Das Bewerbungsgespräch, das gestern stattfand, hat mich überzeugt.", "Das bei der Firma stattfindende Bewerbungsgespräch hat mich überzeugt.", "Das Bewerbungsgespräch des Bewerbers hat mich überzeugt."] },
+            { noun: "die Arbeitsmoral", attributeType: "Adjektiv", correct: "Die hohe Arbeitsmoral wird geschätzt.", wrong: ["Die Arbeitsmoral, die hoch ist, wird geschätzt.", "Die von allen bewunderte Arbeitsmoral wird geschätzt.", "Die Arbeitsmoral der Kollegen wird geschätzt."] },
+            { noun: "der Kollege", attributeType: "Adjektiv", correct: "Der neue Kollege stellt sich vor.", wrong: ["Der Kollege, der neu ist, stellt sich vor.", "Der gerade eingestellte Kollege stellt sich vor.", "Der Kollege aus der Buchhaltung stellt sich vor."] },
+            { noun: "das Projekt", attributeType: "Adjektiv", correct: "Das wichtige Projekt startet nächste Woche.", wrong: ["Das Projekt, das wichtig ist, startet nächste Woche.", "Das vom Chef genehmigte Projekt startet nächste Woche.", "Das Projekt des Teams startet nächste Woche."] },
+            { noun: "die Ausbildung", attributeType: "Adjektiv", correct: "Die dreijährige Ausbildung endet im Juli.", wrong: ["Die Ausbildung, die drei Jahre dauert, endet im Juli.", "Die vor drei Jahren begonnene Ausbildung endet im Juli.", "Die Ausbildung des Azubis endet im Juli."] },
+            { noun: "der Termin", attributeType: "Adjektiv", correct: "Der wichtige Termin wurde verschoben.", wrong: ["Der Termin, der wichtig war, wurde verschoben.", "Der vom Chef angesetzte Termin wurde verschoben.", "Der Termin beim Zahnarzt wurde verschoben."] },
+            { noun: "die Besprechung", attributeType: "Adjektiv", correct: "Die wöchentliche Besprechung findet montags statt.", wrong: ["Die Besprechung, die wöchentlich stattfindet, findet montags statt.", "Die vom Team geplante Besprechung findet montags statt.", "Die Besprechung des Vorstands findet montags statt."] },
+            { noun: "das Gehalt", attributeType: "Adjektiv", correct: "Das gute Gehalt motiviert mich.", wrong: ["Das Gehalt, das gut ist, motiviert mich.", "Das vom Unternehmen gezahlte Gehalt motiviert mich.", "Das Gehalt der Angestellten motiviert mich."] },
+            { noun: "die Aufgabe", attributeType: "Adjektiv", correct: "Die schwierige Aufgabe fordert mich heraus.", wrong: ["Die Aufgabe, die schwierig ist, fordert mich heraus.", "Die vom Chef verteilte Aufgabe fordert mich heraus.", "Die Aufgabe des Praktikanten fordert mich heraus."] },
+            { noun: "der Urlaub", attributeType: "Adjektiv", correct: "Der erholsame Urlaub war wunderschön.", wrong: ["Der Urlaub, der erholsam war, war wunderschön.", "Der von mir geplante Urlaub war wunderschön.", "Der Urlaub meiner Familie war wunderschön."] },
+
+            // PARTIZIP I als Linksattribut
+            { noun: "der Kunde", attributeType: "Partizip I", correct: "Der wartende Kunde wird ungeduldig.", wrong: ["Der geduldige Kunde wird ungeduldig.", "Der Kunde, der wartet, wird ungeduldig.", "Der Kunde aus Hamburg wird ungeduldig."] },
+            { noun: "die Kinder", attributeType: "Partizip I", correct: "Die spielenden Kinder haben Spaß.", wrong: ["Die fröhlichen Kinder haben Spaß.", "Die Kinder, die spielen, haben Spaß.", "Die Kinder meiner Schwester haben Spaß."] },
+            { noun: "der Student", attributeType: "Partizip I", correct: "Der lernende Student sitzt in der Bibliothek.", wrong: ["Der fleißige Student sitzt in der Bibliothek.", "Der Student, der lernt, sitzt in der Bibliothek.", "Der Student aus Berlin sitzt in der Bibliothek."] },
+            { noun: "die Kollegin", attributeType: "Partizip I", correct: "Die lachende Kollegin erzählt einen Witz.", wrong: ["Die lustige Kollegin erzählt einen Witz.", "Die Kollegin, die lacht, erzählt einen Witz.", "Die Kollegin aus der Personalabteilung erzählt einen Witz."] },
+            { noun: "der Zug", attributeType: "Partizip I", correct: "Der ankommende Zug hat Verspätung.", wrong: ["Der verspätete Zug hat Verspätung.", "Der Zug, der ankommt, hat Verspätung.", "Der Zug nach München hat Verspätung."] },
+            { noun: "die Gäste", attributeType: "Partizip I", correct: "Die anreisenden Gäste werden am Bahnhof abgeholt.", wrong: ["Die zahlreichen Gäste werden am Bahnhof abgeholt.", "Die Gäste, die anreisen, werden am Bahnhof abgeholt.", "Die Gäste aus dem Ausland werden am Bahnhof abgeholt."] },
+            { noun: "der Mitarbeiter", attributeType: "Partizip I", correct: "Der arbeitende Mitarbeiter konzentriert sich.", wrong: ["Der konzentrierte Mitarbeiter konzentriert sich.", "Der Mitarbeiter, der arbeitet, konzentriert sich.", "Der Mitarbeiter der IT-Abteilung konzentriert sich."] },
+            { noun: "das Baby", attributeType: "Partizip I", correct: "Das schlafende Baby liegt im Kinderwagen.", wrong: ["Das süße Baby liegt im Kinderwagen.", "Das Baby, das schläft, liegt im Kinderwagen.", "Das Baby meiner Nachbarin liegt im Kinderwagen."] },
+            { noun: "die Nachbarn", attributeType: "Partizip I", correct: "Die streitenden Nachbarn sind laut.", wrong: ["Die lauten Nachbarn sind laut.", "Die Nachbarn, die streiten, sind laut.", "Die Nachbarn aus dem dritten Stock sind laut."] },
+            { noun: "der Hund", attributeType: "Partizip I", correct: "Der bellende Hund stört die Ruhe.", wrong: ["Der große Hund stört die Ruhe.", "Der Hund, der bellt, stört die Ruhe.", "Der Hund meines Nachbarn stört die Ruhe."] },
+
+            // PARTIZIP II als Linksattribut
+            { noun: "die Bewerbung", attributeType: "Partizip II", correct: "Die abgeschickte Bewerbung wurde bestätigt.", wrong: ["Die vollständige Bewerbung wurde bestätigt.", "Die Bewerbung, die abgeschickt wurde, wurde bestätigt.", "Die Bewerbung des Kandidaten wurde bestätigt."] },
+            { noun: "der Brief", attributeType: "Partizip II", correct: "Der unterschriebene Brief liegt auf dem Tisch.", wrong: ["Der wichtige Brief liegt auf dem Tisch.", "Der Brief, der unterschrieben wurde, liegt auf dem Tisch.", "Der Brief vom Anwalt liegt auf dem Tisch."] },
+            { noun: "das Essen", attributeType: "Partizip II", correct: "Das gekochte Essen schmeckt lecker.", wrong: ["Das leckere Essen schmeckt lecker.", "Das Essen, das gekocht wurde, schmeckt lecker.", "Das Essen meiner Mutter schmeckt lecker."] },
+            { noun: "die Rechnung", attributeType: "Partizip II", correct: "Die bezahlte Rechnung ist archiviert.", wrong: ["Die hohe Rechnung ist archiviert.", "Die Rechnung, die bezahlt wurde, ist archiviert.", "Die Rechnung vom Elektriker ist archiviert."] },
+            { noun: "das Auto", attributeType: "Partizip II", correct: "Das reparierte Auto steht in der Garage.", wrong: ["Das neue Auto steht in der Garage.", "Das Auto, das repariert wurde, steht in der Garage.", "Das Auto meines Bruders steht in der Garage."] },
+            { noun: "die Wohnung", attributeType: "Partizip II", correct: "Die renovierte Wohnung sieht toll aus.", wrong: ["Die schöne Wohnung sieht toll aus.", "Die Wohnung, die renoviert wurde, sieht toll aus.", "Die Wohnung im dritten Stock sieht toll aus."] },
+            { noun: "der Vertrag", attributeType: "Partizip II", correct: "Der unterzeichnete Vertrag ist gültig.", wrong: ["Der wichtige Vertrag ist gültig.", "Der Vertrag, der unterzeichnet wurde, ist gültig.", "Der Vertrag mit dem Lieferanten ist gültig."] },
+            { noun: "das Fenster", attributeType: "Partizip II", correct: "Das geöffnete Fenster lässt frische Luft herein.", wrong: ["Das große Fenster lässt frische Luft herein.", "Das Fenster, das geöffnet ist, lässt frische Luft herein.", "Das Fenster im Wohnzimmer lässt frische Luft herein."] },
+            { noun: "die Dokumente", attributeType: "Partizip II", correct: "Die kopierten Dokumente liegen bereit.", wrong: ["Die wichtigen Dokumente liegen bereit.", "Die Dokumente, die kopiert wurden, liegen bereit.", "Die Dokumente des Kunden liegen bereit."] },
+            { noun: "der Kaffee", attributeType: "Partizip II", correct: "Der gebrühte Kaffee duftet herrlich.", wrong: ["Der frische Kaffee duftet herrlich.", "Der Kaffee, der gebrüht wurde, duftet herrlich.", "Der Kaffee aus Kolumbien duftet herrlich."] },
+
+            // RELATIVSATZ
+            { noun: "die Stelle", attributeType: "Relativsatz", correct: "Die Stelle, die ich gefunden habe, ist perfekt.", wrong: ["Die gefundene Stelle ist perfekt.", "Die perfekte Stelle ist perfekt.", "Die Stelle bei einer bekannten Firma ist perfekt."] },
+            { noun: "der Chef", attributeType: "Relativsatz", correct: "Der Chef, der gestern gekommen ist, ist sehr nett.", wrong: ["Der gestern gekommene Chef ist sehr nett.", "Der nette Chef ist sehr nett.", "Der Chef unserer Abteilung ist sehr nett."] },
+            { noun: "die Kollegin", attributeType: "Relativsatz", correct: "Die Kollegin, die neben mir sitzt, heißt Anna.", wrong: ["Die neben mir sitzende Kollegin heißt Anna.", "Die neue Kollegin heißt Anna.", "Die Kollegin aus der Buchhaltung heißt Anna."] },
+            { noun: "das Meeting", attributeType: "Relativsatz", correct: "Das Meeting, das um 10 Uhr beginnt, ist wichtig.", wrong: ["Das um 10 Uhr beginnende Meeting ist wichtig.", "Das wichtige Meeting ist wichtig.", "Das Meeting im Konferenzraum ist wichtig."] },
+            { noun: "die Firma", attributeType: "Relativsatz", correct: "Die Firma, die in Berlin liegt, expandiert.", wrong: ["Die in Berlin liegende Firma expandiert.", "Die expandierende Firma expandiert.", "Die Firma meines Bruders expandiert."] },
+            { noun: "der Kunde", attributeType: "Relativsatz", correct: "Der Kunde, der angerufen hat, möchte einen Termin.", wrong: ["Der anrufende Kunde möchte einen Termin.", "Der wichtige Kunde möchte einen Termin.", "Der Kunde aus Hamburg möchte einen Termin."] },
+            { noun: "das Paket", attributeType: "Relativsatz", correct: "Das Paket, das gestern ankam, enthält Bücher.", wrong: ["Das gestern angekommene Paket enthält Bücher.", "Das große Paket enthält Bücher.", "Das Paket vom Versandhaus enthält Bücher."] },
+            { noun: "die Nachbarn", attributeType: "Relativsatz", correct: "Die Nachbarn, die nebenan wohnen, sind freundlich.", wrong: ["Die nebenan wohnenden Nachbarn sind freundlich.", "Die freundlichen Nachbarn sind freundlich.", "Die Nachbarn aus dem dritten Stock sind freundlich."] },
+            { noun: "der Bus", attributeType: "Relativsatz", correct: "Der Bus, der um 8 Uhr fährt, ist pünktlich.", wrong: ["Der um 8 Uhr fahrende Bus ist pünktlich.", "Der pünktliche Bus ist pünktlich.", "Der Bus zur Arbeit ist pünktlich."] },
+            { noun: "die Aufgabe", attributeType: "Relativsatz", correct: "Die Aufgabe, die ich erledigt habe, war schwierig.", wrong: ["Die von mir erledigte Aufgabe war schwierig.", "Die schwierige Aufgabe war schwierig.", "Die Aufgabe des Chefs war schwierig."] },
+
+            // GENITIV
+            { noun: "die Entscheidung", attributeType: "Genitiv", correct: "Die Entscheidung des Chefs war richtig.", wrong: ["Die richtige Entscheidung war richtig.", "Die Entscheidung, die der Chef getroffen hat, war richtig.", "Die vom Chef getroffene Entscheidung war richtig."] },
+            { noun: "das Büro", attributeType: "Genitiv", correct: "Das Büro meiner Kollegin ist hell.", wrong: ["Das helle Büro ist hell.", "Das Büro, das hell ist, ist hell.", "Das neu eingerichtete Büro ist hell."] },
+            { noun: "die Arbeit", attributeType: "Genitiv", correct: "Die Arbeit des Teams wird geschätzt.", wrong: ["Die geschätzte Arbeit wird geschätzt.", "Die Arbeit, die geschätzt wird, wird geschätzt.", "Die vom Chef gelobte Arbeit wird geschätzt."] },
+            { noun: "der Plan", attributeType: "Genitiv", correct: "Der Plan der Geschäftsführung ist ehrgeizig.", wrong: ["Der ehrgeizige Plan ist ehrgeizig.", "Der Plan, der ehrgeizig ist, ist ehrgeizig.", "Der von der Geschäftsführung entwickelte Plan ist ehrgeizig."] },
+            { noun: "das Auto", attributeType: "Genitiv", correct: "Das Auto meines Nachbarn ist neu.", wrong: ["Das neue Auto ist neu.", "Das Auto, das neu ist, ist neu.", "Das gerade gekaufte Auto ist neu."] },
+            { noun: "die Meinung", attributeType: "Genitiv", correct: "Die Meinung der Experten ist wichtig.", wrong: ["Die wichtige Meinung ist wichtig.", "Die Meinung, die wichtig ist, ist wichtig.", "Die von Experten geäußerte Meinung ist wichtig."] },
+            { noun: "das Haus", attributeType: "Genitiv", correct: "Das Haus meiner Eltern steht am Stadtrand.", wrong: ["Das große Haus steht am Stadtrand.", "Das Haus, das am Stadtrand steht, steht am Stadtrand.", "Das am Stadtrand stehende Haus steht am Stadtrand."] },
+            { noun: "die Idee", attributeType: "Genitiv", correct: "Die Idee des Praktikanten war genial.", wrong: ["Die geniale Idee war genial.", "Die Idee, die genial war, war genial.", "Die vom Praktikanten vorgeschlagene Idee war genial."] },
+            { noun: "der Computer", attributeType: "Genitiv", correct: "Der Computer meines Kollegen ist kaputt.", wrong: ["Der kaputte Computer ist kaputt.", "Der Computer, der kaputt ist, ist kaputt.", "Der gestern reparierte Computer ist kaputt."] },
+            { noun: "die Präsentation", attributeType: "Genitiv", correct: "Die Präsentation der Abteilung war überzeugend.", wrong: ["Die überzeugende Präsentation war überzeugend.", "Die Präsentation, die überzeugend war, war überzeugend.", "Die von der Abteilung gehaltene Präsentation war überzeugend."] },
+
+            // ERWEITERTES PARTIZIP
+            { noun: "die Ausbildung", attributeType: "erweitertes Partizip", correct: "Die vor drei Jahren abgeschlossene Ausbildung hilft mir.", wrong: ["Die abgeschlossene Ausbildung hilft mir.", "Die Ausbildung, die vor drei Jahren abgeschlossen wurde, hilft mir.", "Die Ausbildung des Azubis hilft mir."] },
+            { noun: "der Vertrag", attributeType: "erweitertes Partizip", correct: "Der gestern unterzeichnete Vertrag ist gültig.", wrong: ["Der unterzeichnete Vertrag ist gültig.", "Der Vertrag, der gestern unterzeichnet wurde, ist gültig.", "Der Vertrag mit dem Partner ist gültig."] },
+            { noun: "das Projekt", attributeType: "erweitertes Partizip", correct: "Das vom Team entwickelte Projekt ist erfolgreich.", wrong: ["Das entwickelte Projekt ist erfolgreich.", "Das Projekt, das vom Team entwickelt wurde, ist erfolgreich.", "Das Projekt der Abteilung ist erfolgreich."] },
+            { noun: "die E-Mail", attributeType: "erweitertes Partizip", correct: "Die heute Morgen verschickte E-Mail kam an.", wrong: ["Die verschickte E-Mail kam an.", "Die E-Mail, die heute Morgen verschickt wurde, kam an.", "Die E-Mail vom Chef kam an."] },
+            { noun: "der Bericht", attributeType: "erweitertes Partizip", correct: "Der von mir geschriebene Bericht wurde gelobt.", wrong: ["Der geschriebene Bericht wurde gelobt.", "Der Bericht, der von mir geschrieben wurde, wurde gelobt.", "Der Bericht über das Projekt wurde gelobt."] },
+            { noun: "die Wohnung", attributeType: "erweitertes Partizip", correct: "Die letzten Monat renovierte Wohnung ist vermietet.", wrong: ["Die renovierte Wohnung ist vermietet.", "Die Wohnung, die letzten Monat renoviert wurde, ist vermietet.", "Die Wohnung im Erdgeschoss ist vermietet."] },
+            { noun: "das Dokument", attributeType: "erweitertes Partizip", correct: "Das vom Anwalt geprüfte Dokument ist korrekt.", wrong: ["Das geprüfte Dokument ist korrekt.", "Das Dokument, das vom Anwalt geprüft wurde, ist korrekt.", "Das Dokument des Mandanten ist korrekt."] },
+            { noun: "der Antrag", attributeType: "erweitertes Partizip", correct: "Der rechtzeitig eingereichte Antrag wurde genehmigt.", wrong: ["Der eingereichte Antrag wurde genehmigt.", "Der Antrag, der rechtzeitig eingereicht wurde, wurde genehmigt.", "Der Antrag auf Urlaub wurde genehmigt."] },
+            { noun: "die Arbeit", attributeType: "erweitertes Partizip", correct: "Die gestern abgegebene Arbeit war gut.", wrong: ["Die abgegebene Arbeit war gut.", "Die Arbeit, die gestern abgegeben wurde, war gut.", "Die Arbeit des Schülers war gut."] },
+            { noun: "das Angebot", attributeType: "erweitertes Partizip", correct: "Das von der Firma unterbreitete Angebot ist interessant.", wrong: ["Das unterbreitete Angebot ist interessant.", "Das Angebot, das von der Firma unterbreitet wurde, ist interessant.", "Das Angebot für das Projekt ist interessant."] },
+
+            // PRÄPOSITION + NOMEN
+            { noun: "die Stelle", attributeType: "Präposition + Nomen", correct: "Die Stelle bei einer bekannten Firma ist attraktiv.", wrong: ["Die attraktive Stelle ist attraktiv.", "Die Stelle, die attraktiv ist, ist attraktiv.", "Die von vielen gesuchte Stelle ist attraktiv."] },
+            { noun: "der Kollege", attributeType: "Präposition + Nomen", correct: "Der Kollege aus der IT-Abteilung hilft mir.", wrong: ["Der hilfsbereite Kollege hilft mir.", "Der Kollege, der mir hilft, hilft mir.", "Der mir helfende Kollege hilft mir."] },
+            { noun: "das Meeting", attributeType: "Präposition + Nomen", correct: "Das Meeting im Konferenzraum beginnt um 10 Uhr.", wrong: ["Das wichtige Meeting beginnt um 10 Uhr.", "Das Meeting, das um 10 Uhr beginnt, beginnt um 10 Uhr.", "Das um 10 Uhr beginnende Meeting beginnt um 10 Uhr."] },
+            { noun: "die Reise", attributeType: "Präposition + Nomen", correct: "Die Reise nach Berlin war anstrengend.", wrong: ["Die anstrengende Reise war anstrengend.", "Die Reise, die anstrengend war, war anstrengend.", "Die gestern unternommene Reise war anstrengend."] },
+            { noun: "der Termin", attributeType: "Präposition + Nomen", correct: "Der Termin beim Zahnarzt ist morgen.", wrong: ["Der morgige Termin ist morgen.", "Der Termin, der morgen ist, ist morgen.", "Der auf morgen verschobene Termin ist morgen."] },
+            { noun: "das Geschenk", attributeType: "Präposition + Nomen", correct: "Das Geschenk für meine Mutter ist schön.", wrong: ["Das schöne Geschenk ist schön.", "Das Geschenk, das schön ist, ist schön.", "Das liebevoll ausgewählte Geschenk ist schön."] },
+            { noun: "die Fahrt", attributeType: "Präposition + Nomen", correct: "Die Fahrt zur Arbeit dauert lange.", wrong: ["Die lange Fahrt dauert lange.", "Die Fahrt, die lange dauert, dauert lange.", "Die täglich wiederholte Fahrt dauert lange."] },
+            { noun: "das Gespräch", attributeType: "Präposition + Nomen", correct: "Das Gespräch mit dem Chef war konstruktiv.", wrong: ["Das konstruktive Gespräch war konstruktiv.", "Das Gespräch, das konstruktiv war, war konstruktiv.", "Das gestern geführte Gespräch war konstruktiv."] },
+            { noun: "der Brief", attributeType: "Präposition + Nomen", correct: "Der Brief an die Versicherung ist fertig.", wrong: ["Der fertige Brief ist fertig.", "Der Brief, der fertig ist, ist fertig.", "Der soeben geschriebene Brief ist fertig."] },
+            { noun: "die Diskussion", attributeType: "Präposition + Nomen", correct: "Die Diskussion über das Thema war spannend.", wrong: ["Die spannende Diskussion war spannend.", "Die Diskussion, die spannend war, war spannend.", "Die gestern geführte Diskussion war spannend."] },
+
+            // INFINITIV + ZU
+            { noun: "der Versuch", attributeType: "Infinitiv + zu", correct: "Der Versuch, die Prüfung zu bestehen, war erfolgreich.", wrong: ["Der erfolgreiche Versuch war erfolgreich.", "Der Versuch, der erfolgreich war, war erfolgreich.", "Der von mir unternommene Versuch war erfolgreich."] },
+            { noun: "die Möglichkeit", attributeType: "Infinitiv + zu", correct: "Die Möglichkeit, im Ausland zu arbeiten, ist spannend.", wrong: ["Die spannende Möglichkeit ist spannend.", "Die Möglichkeit, die spannend ist, ist spannend.", "Die sich bietende Möglichkeit ist spannend."] },
+            { noun: "der Plan", attributeType: "Infinitiv + zu", correct: "Der Plan, ein Haus zu bauen, wird umgesetzt.", wrong: ["Der umgesetzte Plan wird umgesetzt.", "Der Plan, der umgesetzt wird, wird umgesetzt.", "Der von uns entwickelte Plan wird umgesetzt."] },
+            { noun: "die Entscheidung", attributeType: "Infinitiv + zu", correct: "Die Entscheidung, zu kündigen, war schwierig.", wrong: ["Die schwierige Entscheidung war schwierig.", "Die Entscheidung, die schwierig war, war schwierig.", "Die gestern getroffene Entscheidung war schwierig."] },
+            { noun: "der Wunsch", attributeType: "Infinitiv + zu", correct: "Der Wunsch, selbstständig zu werden, ist groß.", wrong: ["Der große Wunsch ist groß.", "Der Wunsch, der groß ist, ist groß.", "Der von vielen gehaltene Wunsch ist groß."] },
+            { noun: "die Hoffnung", attributeType: "Infinitiv + zu", correct: "Die Hoffnung, befördert zu werden, motiviert mich.", wrong: ["Die motivierende Hoffnung motiviert mich.", "Die Hoffnung, die mich motiviert, motiviert mich.", "Die von mir gehaltene Hoffnung motiviert mich."] },
+            { noun: "das Angebot", attributeType: "Infinitiv + zu", correct: "Das Angebot, umzuziehen, ist verlockend.", wrong: ["Das verlockende Angebot ist verlockend.", "Das Angebot, das verlockend ist, ist verlockend.", "Das von der Firma gemachte Angebot ist verlockend."] },
+            { noun: "der Vorschlag", attributeType: "Infinitiv + zu", correct: "Der Vorschlag, früher zu kommen, wurde angenommen.", wrong: ["Der angenommene Vorschlag wurde angenommen.", "Der Vorschlag, der angenommen wurde, wurde angenommen.", "Der vom Chef gemachte Vorschlag wurde angenommen."] },
+            { noun: "die Idee", attributeType: "Infinitiv + zu", correct: "Die Idee, ein Fest zu organisieren, gefällt allen.", wrong: ["Die gefallende Idee gefällt allen.", "Die Idee, die allen gefällt, gefällt allen.", "Die von mir vorgeschlagene Idee gefällt allen."] },
+            { noun: "die Absicht", attributeType: "Infinitiv + zu", correct: "Die Absicht, zu studieren, ist ernst gemeint.", wrong: ["Die ernst gemeinte Absicht ist ernst gemeint.", "Die Absicht, die ernst gemeint ist, ist ernst gemeint.", "Die von mir gefasste Absicht ist ernst gemeint."] },
+
+            // Weitere ADJEKTIV-Beispiele
+            { noun: "die Prüfung", attributeType: "Adjektiv", correct: "Die schwere Prüfung war bestanden.", wrong: ["Die Prüfung, die schwer war, war bestanden.", "Die von allen gefürchtete Prüfung war bestanden.", "Die Prüfung im letzten Semester war bestanden."] },
+            { noun: "der Lehrer", attributeType: "Adjektiv", correct: "Der strenge Lehrer gibt viele Hausaufgaben.", wrong: ["Der Lehrer, der streng ist, gibt viele Hausaufgaben.", "Der Hausaufgaben gebende Lehrer gibt viele Hausaufgaben.", "Der Lehrer unserer Klasse gibt viele Hausaufgaben."] },
+            { noun: "das Wetter", attributeType: "Adjektiv", correct: "Das schöne Wetter lädt zum Spaziergang ein.", wrong: ["Das Wetter, das schön ist, lädt zum Spaziergang ein.", "Das zum Spaziergang einladende Wetter lädt zum Spaziergang ein.", "Das Wetter der letzten Tage lädt zum Spaziergang ein."] },
+            { noun: "die Stadt", attributeType: "Adjektiv", correct: "Die große Stadt ist aufregend.", wrong: ["Die Stadt, die groß ist, ist aufregend.", "Die viele Touristen anziehende Stadt ist aufregend.", "Die Stadt in Norddeutschland ist aufregend."] },
+            { noun: "das Restaurant", attributeType: "Adjektiv", correct: "Das italienische Restaurant ist bekannt.", wrong: ["Das Restaurant, das italienisch ist, ist bekannt.", "Das für seine Pizza bekannte Restaurant ist bekannt.", "Das Restaurant in der Innenstadt ist bekannt."] },
+            { noun: "die Straße", attributeType: "Adjektiv", correct: "Die enge Straße ist schwer zu befahren.", wrong: ["Die Straße, die eng ist, ist schwer zu befahren.", "Die schwer zu befahrende Straße ist schwer zu befahren.", "Die Straße in der Altstadt ist schwer zu befahren."] },
+            { noun: "der Film", attributeType: "Adjektiv", correct: "Der spannende Film läuft im Kino.", wrong: ["Der Film, der spannend ist, läuft im Kino.", "Der gerade angelaufene Film läuft im Kino.", "Der Film aus Hollywood läuft im Kino."] },
+            { noun: "das Buch", attributeType: "Adjektiv", correct: "Das interessante Buch lese ich gerade.", wrong: ["Das Buch, das interessant ist, lese ich gerade.", "Das von vielen empfohlene Buch lese ich gerade.", "Das Buch vom Bestsellerautor lese ich gerade."] },
+            { noun: "die Wohnung", attributeType: "Adjektiv", correct: "Die helle Wohnung gefällt mir.", wrong: ["Die Wohnung, die hell ist, gefällt mir.", "Die mir gefallende Wohnung gefällt mir.", "Die Wohnung im zweiten Stock gefällt mir."] },
+            { noun: "der Park", attributeType: "Adjektiv", correct: "Der grüne Park ist perfekt zum Joggen.", wrong: ["Der Park, der grün ist, ist perfekt zum Joggen.", "Der zum Joggen geeignete Park ist perfekt zum Joggen.", "Der Park in der Nähe ist perfekt zum Joggen."] },
+
+            // Weitere PARTIZIP I-Beispiele
+            { noun: "die Musik", attributeType: "Partizip I", correct: "Die laufende Musik ist laut.", wrong: ["Die laute Musik ist laut.", "Die Musik, die läuft, ist laut.", "Die Musik aus den Lautsprechern ist laut."] },
+            { noun: "der Regen", attributeType: "Partizip I", correct: "Der fallende Regen ist erfrischend.", wrong: ["Der starke Regen ist erfrischend.", "Der Regen, der fällt, ist erfrischend.", "Der Regen vom Himmel ist erfrischend."] },
+            { noun: "die Sonne", attributeType: "Partizip I", correct: "Die scheinende Sonne wärmt uns.", wrong: ["Die warme Sonne wärmt uns.", "Die Sonne, die scheint, wärmt uns.", "Die Sonne am Himmel wärmt uns."] },
+            { noun: "der Verkehr", attributeType: "Partizip I", correct: "Der fließende Verkehr ist selten.", wrong: ["Der seltene Verkehr ist selten.", "Der Verkehr, der fließt, ist selten.", "Der Verkehr zur Rushhour ist selten."] },
+            { noun: "das Telefon", attributeType: "Partizip I", correct: "Das klingelnde Telefon stört mich.", wrong: ["Das störende Telefon stört mich.", "Das Telefon, das klingelt, stört mich.", "Das Telefon auf dem Schreibtisch stört mich."] },
+            { noun: "die Vögel", attributeType: "Partizip I", correct: "Die singenden Vögel wecken mich.", wrong: ["Die lauten Vögel wecken mich.", "Die Vögel, die singen, wecken mich.", "Die Vögel im Garten wecken mich."] },
+            { noun: "das Wasser", attributeType: "Partizip I", correct: "Das fließende Wasser beruhigt mich.", wrong: ["Das klare Wasser beruhigt mich.", "Das Wasser, das fließt, beruhigt mich.", "Das Wasser im Bach beruhigt mich."] },
+            { noun: "der Laptop", attributeType: "Partizip I", correct: "Der laufende Laptop wird warm.", wrong: ["Der warme Laptop wird warm.", "Der Laptop, der läuft, wird warm.", "Der Laptop auf dem Schreibtisch wird warm."] },
+            { noun: "die Maschine", attributeType: "Partizip I", correct: "Die laufende Maschine ist laut.", wrong: ["Die laute Maschine ist laut.", "Die Maschine, die läuft, ist laut.", "Die Maschine in der Fabrik ist laut."] },
+            { noun: "der Motor", attributeType: "Partizip I", correct: "Der dröhnende Motor nervt die Nachbarn.", wrong: ["Der laute Motor nervt die Nachbarn.", "Der Motor, der dröhnt, nervt die Nachbarn.", "Der Motor des Motorrads nervt die Nachbarn."] },
+
+            // Weitere PARTIZIP II-Beispiele
+            { noun: "die Tür", attributeType: "Partizip II", correct: "Die geschlossene Tür lässt keine Geräusche durch.", wrong: ["Die dicke Tür lässt keine Geräusche durch.", "Die Tür, die geschlossen ist, lässt keine Geräusche durch.", "Die Tür zum Schlafzimmer lässt keine Geräusche durch."] },
+            { noun: "das Geschirr", attributeType: "Partizip II", correct: "Das gespülte Geschirr steht im Schrank.", wrong: ["Das saubere Geschirr steht im Schrank.", "Das Geschirr, das gespült wurde, steht im Schrank.", "Das Geschirr aus Porzellan steht im Schrank."] },
+            { noun: "die Wäsche", attributeType: "Partizip II", correct: "Die gewaschene Wäsche hängt auf der Leine.", wrong: ["Die saubere Wäsche hängt auf der Leine.", "Die Wäsche, die gewaschen wurde, hängt auf der Leine.", "Die Wäsche vom letzten Wochenende hängt auf der Leine."] },
+            { noun: "der Rasen", attributeType: "Partizip II", correct: "Der gemähte Rasen sieht gepflegt aus.", wrong: ["Der gepflegte Rasen sieht gepflegt aus.", "Der Rasen, der gemäht wurde, sieht gepflegt aus.", "Der Rasen im Garten sieht gepflegt aus."] },
+            { noun: "das Zimmer", attributeType: "Partizip II", correct: "Das aufgeräumte Zimmer ist ordentlich.", wrong: ["Das ordentliche Zimmer ist ordentlich.", "Das Zimmer, das aufgeräumt wurde, ist ordentlich.", "Das Zimmer im ersten Stock ist ordentlich."] },
+            { noun: "die Schuhe", attributeType: "Partizip II", correct: "Die geputzten Schuhe glänzen.", wrong: ["Die glänzenden Schuhe glänzen.", "Die Schuhe, die geputzt wurden, glänzen.", "Die Schuhe aus Leder glänzen."] },
+            { noun: "das Bild", attributeType: "Partizip II", correct: "Das gemalte Bild hängt an der Wand.", wrong: ["Das schöne Bild hängt an der Wand.", "Das Bild, das gemalt wurde, hängt an der Wand.", "Das Bild vom Künstler hängt an der Wand."] },
+            { noun: "der Kuchen", attributeType: "Partizip II", correct: "Der gebackene Kuchen schmeckt lecker.", wrong: ["Der leckere Kuchen schmeckt lecker.", "Der Kuchen, der gebacken wurde, schmeckt lecker.", "Der Kuchen von meiner Oma schmeckt lecker."] },
+            { noun: "die Haare", attributeType: "Partizip II", correct: "Die gefärbten Haare sehen toll aus.", wrong: ["Die tollen Haare sehen toll aus.", "Die Haare, die gefärbt wurden, sehen toll aus.", "Die Haare meiner Schwester sehen toll aus."] },
+            { noun: "das Bett", attributeType: "Partizip II", correct: "Das gemachte Bett sieht ordentlich aus.", wrong: ["Das ordentliche Bett sieht ordentlich aus.", "Das Bett, das gemacht wurde, sieht ordentlich aus.", "Das Bett im Schlafzimmer sieht ordentlich aus."] },
+
+            // Weitere RELATIVSATZ-Beispiele
+            { noun: "die Lehrerin", attributeType: "Relativsatz", correct: "Die Lehrerin, die Mathe unterrichtet, ist nett.", wrong: ["Die Mathe unterrichtende Lehrerin ist nett.", "Die nette Lehrerin ist nett.", "Die Lehrerin unserer Schule ist nett."] },
+            { noun: "der Arzt", attributeType: "Relativsatz", correct: "Der Arzt, der mich behandelt hat, war kompetent.", wrong: ["Der mich behandelnde Arzt war kompetent.", "Der kompetente Arzt war kompetent.", "Der Arzt im Krankenhaus war kompetent."] },
+            { noun: "das Handy", attributeType: "Relativsatz", correct: "Das Handy, das ich gestern gekauft habe, ist teuer.", wrong: ["Das gestern gekaufte Handy ist teuer.", "Das teure Handy ist teuer.", "Das Handy mit der großen Kamera ist teuer."] },
+            { noun: "die Freundin", attributeType: "Relativsatz", correct: "Die Freundin, die in Hamburg wohnt, besucht mich.", wrong: ["Die in Hamburg wohnende Freundin besucht mich.", "Die mich besuchende Freundin besucht mich.", "Die Freundin aus meiner Kindheit besucht mich."] },
+            { noun: "der Kuchen", attributeType: "Relativsatz", correct: "Der Kuchen, den ich gebacken habe, ist fertig.", wrong: ["Der von mir gebackene Kuchen ist fertig.", "Der fertige Kuchen ist fertig.", "Der Kuchen mit Sahne ist fertig."] },
+            { noun: "die Aufgabe", attributeType: "Relativsatz", correct: "Die Aufgabe, die wir lösen müssen, ist komplex.", wrong: ["Die zu lösende Aufgabe ist komplex.", "Die komplexe Aufgabe ist komplex.", "Die Aufgabe aus dem Lehrbuch ist komplex."] },
+            { noun: "der Laden", attributeType: "Relativsatz", correct: "Der Laden, der um die Ecke ist, hat geschlossen.", wrong: ["Der um die Ecke befindliche Laden hat geschlossen.", "Der geschlossene Laden hat geschlossen.", "Der Laden meiner Nachbarin hat geschlossen."] },
+            { noun: "die Zeitung", attributeType: "Relativsatz", correct: "Die Zeitung, die ich lese, ist informativ.", wrong: ["Die von mir gelesene Zeitung ist informativ.", "Die informative Zeitung ist informativ.", "Die Zeitung vom Kiosk ist informativ."] },
+            { noun: "das Problem", attributeType: "Relativsatz", correct: "Das Problem, das wir haben, ist lösbar.", wrong: ["Das zu lösende Problem ist lösbar.", "Das lösbare Problem ist lösbar.", "Das Problem unseres Teams ist lösbar."] },
+            { noun: "der Zug", attributeType: "Relativsatz", correct: "Der Zug, der gerade eingefahren ist, fährt nach Berlin.", wrong: ["Der gerade eingefahrene Zug fährt nach Berlin.", "Der nach Berlin fahrende Zug fährt nach Berlin.", "Der Zug vom Gleis 3 fährt nach Berlin."] },
+
+            // Weitere GENITIV-Beispiele
+            { noun: "die Tasche", attributeType: "Genitiv", correct: "Die Tasche meiner Schwester ist schön.", wrong: ["Die schöne Tasche ist schön.", "Die Tasche, die schön ist, ist schön.", "Die von meiner Schwester gekaufte Tasche ist schön."] },
+            { noun: "das Fahrrad", attributeType: "Genitiv", correct: "Das Fahrrad meines Freundes ist neu.", wrong: ["Das neue Fahrrad ist neu.", "Das Fahrrad, das neu ist, ist neu.", "Das gerade gekaufte Fahrrad ist neu."] },
+            { noun: "die Schuhe", attributeType: "Genitiv", correct: "Die Schuhe meiner Mutter passen mir.", wrong: ["Die passenden Schuhe passen mir.", "Die Schuhe, die mir passen, passen mir.", "Die mir geschenkten Schuhe passen mir."] },
+            { noun: "der Hund", attributeType: "Genitiv", correct: "Der Hund meines Nachbarn bellt oft.", wrong: ["Der bellende Hund bellt oft.", "Der Hund, der oft bellt, bellt oft.", "Der im Garten spielende Hund bellt oft."] },
+            { noun: "das Spielzeug", attributeType: "Genitiv", correct: "Das Spielzeug der Kinder liegt überall.", wrong: ["Das überall liegende Spielzeug liegt überall.", "Das Spielzeug, das überall liegt, liegt überall.", "Das bunte Spielzeug liegt überall."] },
+            { noun: "die Entscheidung", attributeType: "Genitiv", correct: "Die Entscheidung der Jury war eindeutig.", wrong: ["Die eindeutige Entscheidung war eindeutig.", "Die Entscheidung, die eindeutig war, war eindeutig.", "Die gestern verkündete Entscheidung war eindeutig."] },
+            { noun: "der Erfolg", attributeType: "Genitiv", correct: "Der Erfolg des Projekts ist sicher.", wrong: ["Der sichere Erfolg ist sicher.", "Der Erfolg, der sicher ist, ist sicher.", "Der vom Team erarbeitete Erfolg ist sicher."] },
+            { noun: "die Adresse", attributeType: "Genitiv", correct: "Die Adresse des Hotels ist im Navigationssystem.", wrong: ["Die gespeicherte Adresse ist im Navigationssystem.", "Die Adresse, die im Navigationssystem ist, ist im Navigationssystem.", "Die neue Adresse ist im Navigationssystem."] },
+            { noun: "das Ergebnis", attributeType: "Genitiv", correct: "Das Ergebnis der Umfrage ist überraschend.", wrong: ["Das überraschende Ergebnis ist überraschend.", "Das Ergebnis, das überraschend ist, ist überraschend.", "Das gestern veröffentlichte Ergebnis ist überraschend."] },
+            { noun: "die Qualität", attributeType: "Genitiv", correct: "Die Qualität der Ware ist ausgezeichnet.", wrong: ["Die ausgezeichnete Qualität ist ausgezeichnet.", "Die Qualität, die ausgezeichnet ist, ist ausgezeichnet.", "Die von allen gelobte Qualität ist ausgezeichnet."] }
+        ];
+
+        let gameState = {
+            currentIndex: 0,
+            correctAnswers: 0,
+            score: 0,
+            shuffledQuestions: []
+        };
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function startGame() {
+            gameState = {
+                currentIndex: 0,
+                correctAnswers: 0,
+                score: 0,
+                shuffledQuestions: shuffleArray(questions)
+            };
+            showScreen('gameScreen');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (gameState.currentIndex >= gameState.shuffledQuestions.length) {
+                showResults();
+                return;
+            }
+
+            const question = gameState.shuffledQuestions[gameState.currentIndex];
+            document.getElementById('taskNoun').textContent = 'Bezugswort: ' + question.noun;
+            document.getElementById('taskAttribute').textContent = 'Attributart: ' + question.attributeType;
+            
+            const allOptions = [question.correct, ...question.wrong];
+            const shuffledOptions = shuffleArray(allOptions);
+            
+            const grid = document.getElementById('optionsGrid');
+            grid.innerHTML = '';
+            
+            shuffledOptions.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = option;
+                btn.onclick = () => checkAnswer(option, question.correct, btn);
+                grid.appendChild(btn);
+            });
+
+            updateStats();
+        }
+
+        function checkAnswer(selected, correct, btnElement) {
+            const allButtons = document.querySelectorAll('.option-btn');
+            
+            if (selected === correct) {
+                btnElement.classList.add('correct');
+                gameState.correctAnswers++;
+                gameState.score += 10;
+                
+                allButtons.forEach(btn => btn.disabled = true);
+                
+                setTimeout(() => {
+                    gameState.currentIndex++;
+                    loadQuestion();
+                }, 3000);
+            } else {
+                btnElement.classList.add('wrong');
+            }
+            
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('currentQuestion').textContent = gameState.currentIndex + 1;
+            document.getElementById('totalQuestions').textContent = gameState.shuffledQuestions.length;
+            document.getElementById('correctCount').textContent = gameState.correctAnswers;
+            document.getElementById('score').textContent = gameState.score;
+            
+            const progress = ((gameState.currentIndex + 1) / gameState.shuffledQuestions.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function showResults() {
+            const accuracy = Math.round((gameState.correctAnswers / gameState.shuffledQuestions.length) * 100);
+            
+            document.getElementById('finalCorrect').textContent = gameState.correctAnswers;
+            document.getElementById('finalScore').textContent = gameState.score;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+            
+            let rating = '⭐';
+            if (accuracy >= 90) rating = '⭐⭐⭐⭐⭐';
+            else if (accuracy >= 75) rating = '⭐⭐⭐⭐';
+            else if (accuracy >= 60) rating = '⭐⭐⭐';
+            else if (accuracy >= 40) rating = '⭐⭐';
+            
+            document.getElementById('rating').textContent = rating;
+            
+            showScreen('resultScreen');
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function createDecorations() {
+            const container = document.getElementById('decorations');
+            
+            // Water ripples
+            for (let i = 0; i < 10; i++) {
+                const ripple = document.createElement('div');
+                ripple.className = 'ripple';
+                ripple.style.width = ripple.style.height = (Math.random() * 200 + 100) + 'px';
+                ripple.style.left = Math.random() * 100 + '%';
+                ripple.style.top = Math.random() * 100 + '%';
+                ripple.style.animationDelay = Math.random() * 10 + 's';
+                container.appendChild(ripple);
+            }
+            
+            // Waves
+            for (let i = 0; i < 3; i++) {
+                const wave = document.createElement('div');
+                wave.className = 'wave';
+                wave.style.top = (Math.random() * 80 + 10) + '%';
+                wave.style.animationDelay = (i * 2.5) + 's';
+                container.appendChild(wave);
+            }
+            
+            // Bubbles
+            for (let i = 0; i < 25; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                bubble.style.left = Math.random() * 100 + '%';
+                bubble.style.animationDelay = Math.random() * 12 + 's';
+                bubble.style.animationDuration = (Math.random() * 6 + 8) + 's';
+                container.appendChild(bubble);
+            }
+        }
+
+        createDecorations();
+    </script>
+</body>
+</html>
