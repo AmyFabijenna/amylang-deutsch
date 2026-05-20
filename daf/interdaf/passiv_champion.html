@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passiv Champion 🌿</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2d5016;
+            --primary-light: #3d6b1f;
+            --accent: #6ba83d;
+            --accent-glow: #8bc758;
+            --success: #4caf50;
+            --error: #e85d75;
+            --bg-dark: #1a3010;
+            --bg-card: #2d5016;
+            --text: #f0ffe0;
+            --text-muted: #b8d99f;
+            --apple-green: #8bc34a;
+            --leaf-green: #689f38;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(160deg, #76b852 0%, #8bc34a 40%, #9ccc65 70%, #8bc34a 100%);
+            min-height: 100vh;
+            color: #1a1a1a;
+            overflow-x: hidden;
+        }
+
+        /* Floating leaf animations */
+        .decorations { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
+        .leaf {
+            position: absolute;
+            width: 40px; height: 40px;
+            opacity: 0.15;
+            animation: floatLeaf 12s ease-in-out infinite;
+        }
+        @keyframes floatLeaf {
+            0%, 100% { transform: translateY(0) rotate(0deg) translateX(0); }
+            25% { transform: translateY(-20px) rotate(90deg) translateX(15px); }
+            50% { transform: translateY(0) rotate(180deg) translateX(0); }
+            75% { transform: translateY(-20px) rotate(270deg) translateX(-15px); }
+        }
+        .sparkle {
+            position: absolute;
+            width: 4px; height: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: sparkleFloat 8s ease-in-out infinite;
+        }
+        @keyframes sparkleFloat {
+            0%, 100% { transform: translateY(0) scale(1); opacity: 0.6; }
+            50% { transform: translateY(-100vh) scale(0.5); opacity: 0; }
+        }
+
+        .container { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 20px; }
+        header { text-align: center; margin-bottom: 30px; padding-top: 10px; }
+        h1 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 2.5rem;
+            color: #1a3010;
+            text-shadow: 2px 2px 4px rgba(255,255,255,0.3);
+            margin-bottom: 10px;
+        }
+        .subtitle { color: #2d5016; font-size: 1.05rem; font-weight: 600; }
+
+        .screen { display: none; animation: fadeIn 0.5s ease; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+        .menu-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(245,255,235,0.95) 100%);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border: 2px solid rgba(107,168,61,0.3);
+            box-shadow: 0 8px 32px rgba(29,48,16,0.15);
+        }
+
+        .mode-title {
+            font-family: 'Fredoka', sans-serif;
+            color: #2d5016;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #6ba83d 0%, #8bc758 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 15px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(107,168,61,0.4);
+            display: block;
+            margin: 30px auto;
+        }
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(107,168,61,0.6);
+        }
+
+        .game-container {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(245,255,235,0.95) 100%);
+            border-radius: 20px;
+            padding: 35px;
+            border: 2px solid rgba(107,168,61,0.3);
+            box-shadow: 0 8px 32px rgba(29,48,16,0.15);
+        }
+
+        .progress-bar {
+            background: rgba(107,168,61,0.2);
+            height: 12px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #6ba83d, #8bc758);
+            height: 100%;
+            transition: width 0.4s ease;
+            border-radius: 10px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 25px;
+            gap: 15px;
+        }
+        .stat-item {
+            background: rgba(107,168,61,0.1);
+            padding: 12px 20px;
+            border-radius: 12px;
+            text-align: center;
+            flex: 1;
+        }
+        .stat-label { font-size: 0.85rem; color: #2d5016; font-weight: 600; }
+        .stat-value { font-size: 1.4rem; color: #1a3010; font-weight: 700; margin-top: 5px; }
+
+        .question-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 2px solid rgba(107,168,61,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .question-label {
+            font-size: 0.9rem;
+            color: #2d5016;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .active-sentence {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.3rem;
+            color: #1a1a1a;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(139,195,88,0.1);
+            border-radius: 10px;
+            border-left: 4px solid #6ba83d;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 2px solid rgba(107,168,61,0.3);
+            padding: 18px 20px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            line-height: 1.5;
+            font-family: 'Quicksand', sans-serif;
+        }
+        .option-btn:hover {
+            border-color: #6ba83d;
+            background: rgba(139,195,88,0.05);
+            transform: translateX(3px);
+        }
+        .option-btn.correct {
+            border-color: #4caf50;
+            background: rgba(76,175,80,0.1);
+            border-width: 3px;
+        }
+        .option-btn.wrong {
+            border-color: #e85d75;
+            background: rgba(232,93,117,0.1);
+            border-width: 3px;
+        }
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .result-screen {
+            text-align: center;
+        }
+        .result-title {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 2.2rem;
+            color: #2d5016;
+            margin-bottom: 20px;
+        }
+        .result-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .result-stat {
+            background: rgba(107,168,61,0.1);
+            padding: 20px;
+            border-radius: 15px;
+        }
+        .result-stat-label { font-size: 0.95rem; color: #2d5016; font-weight: 600; }
+        .result-stat-value { font-size: 2rem; color: #1a3010; font-weight: 700; margin-top: 8px; }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        .secondary-btn {
+            background: linear-gradient(135deg, #9ccc65 0%, #aed581 100%);
+            color: #1a3010;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 12px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .secondary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(156,204,101,0.4);
+        }
+
+        .feedback-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 12px;
+            font-weight: 600;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            display: none;
+        }
+        .feedback-message.show { display: block; }
+        .feedback-message.success {
+            background: #4caf50;
+            color: white;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            .active-sentence { font-size: 1.1rem; }
+            .option-btn { font-size: 0.95rem; padding: 15px; }
+            .result-stats { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="decorations" id="decorations"></div>
+
+    <div class="container">
+        <header>
+            <h1>🌿 Passiv Champion 🌿</h1>
+            <div class="subtitle">Verwandle Aktivsätze in perfekte Passivsätze!</div>
+        </header>
+
+        <!-- Start Screen -->
+        <div class="screen active" id="startScreen">
+            <div class="menu-card">
+                <h2 class="mode-title">Willkommen beim Passiv-Training!</h2>
+                <p style="text-align: center; color: #2d5016; font-size: 1.05rem; line-height: 1.6; margin: 20px 0;">
+                    Hier lernst du, Aktivsätze in Passivsätze umzuwandeln. Du bekommst einen Aktivsatz und vier mögliche Passiv-Varianten. Nur eine ist korrekt! Wähle die richtige Antwort aus und sammle Punkte. 🎯
+                </p>
+                <p style="text-align: center; color: #1a3010; font-size: 0.95rem; margin: 15px 0;">
+                    <strong>250 Übungssätze</strong> über Freundschaft und gemeinsame Freizeit warten auf dich!
+                </p>
+                <button class="start-btn" onclick="startGame()">Los geht's! 🚀</button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="screen" id="gameScreen">
+            <div class="game-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-label">Frage</div>
+                        <div class="stat-value"><span id="currentQuestion">1</span> / <span id="totalQuestions">250</span></div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Richtig</div>
+                        <div class="stat-value" id="correctCount">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Punkte</div>
+                        <div class="stat-value" id="score">0</div>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <div class="question-label">Aktivsatz:</div>
+                    <div class="active-sentence" id="activeSentence"></div>
+                    
+                    <div class="question-label" style="margin-top: 20px;">Welcher Passivsatz ist korrekt?</div>
+                    <div class="options-grid" id="optionsGrid"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div class="screen" id="resultScreen">
+            <div class="menu-card result-screen">
+                <h2 class="result-title">🎉 Fantastisch! 🎉</h2>
+                <p style="color: #2d5016; font-size: 1.1rem; margin: 15px 0;">
+                    Du hast alle 250 Fragen geschafft!
+                </p>
+                <div class="result-stats">
+                    <div class="result-stat">
+                        <div class="result-stat-label">Richtige Antworten</div>
+                        <div class="result-stat-value" id="finalCorrect">0</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-label">Gesamtpunkte</div>
+                        <div class="result-stat-value" id="finalScore">0</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-label">Genauigkeit</div>
+                        <div class="result-stat-value" id="accuracy">0%</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-label">Bewertung</div>
+                        <div class="result-stat-value" id="rating" style="font-size: 1.5rem;">⭐</div>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button class="start-btn" onclick="startGame()">Nochmal spielen 🔄</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="feedback-message" id="feedbackMessage"></div>
+
+    <script>
+        const questions = [
+            // Präsens Passiv - einfach
+            { active: "Meine Freundin backt einen köstlichen Apfelkuchen.", correct: "Ein köstlicher Apfelkuchen wird von meiner Freundin gebacken.", wrong: ["Ein köstlicher Apfelkuchen wurde von meiner Freundin gebacken.", "Ein köstlicher Apfelkuchen ist von meiner Freundin gebacken worden.", "Ein köstlicher Apfelkuchen wird von meiner Freundin backen."] },
+            { active: "Wir organisieren eine überraschende Geburtstagsparty.", correct: "Eine überraschende Geburtstagsparty wird von uns organisiert.", wrong: ["Eine überraschende Geburtstagsparty wurde von uns organisiert.", "Eine überraschende Geburtstagsparty ist von uns organisiert worden.", "Eine überraschende Geburtstagsparty wird von uns organisieren."] },
+            { active: "Die Kinder bauen ein fantasievolles Baumhaus.", correct: "Ein fantasievolles Baumhaus wird von den Kindern gebaut.", wrong: ["Ein fantasievolles Baumhaus wurde von den Kindern gebaut.", "Ein fantasievolles Baumhaus ist von den Kindern gebaut worden.", "Ein fantasievolles Baumhaus wird von den Kindern bauen."] },
+            { active: "Mein Bruder repariert das alte Fahrrad.", correct: "Das alte Fahrrad wird von meinem Bruder repariert.", wrong: ["Das alte Fahrrad wurde von meinem Bruder repariert.", "Das alte Fahrrad ist von meinem Bruder repariert worden.", "Das alte Fahrrad wird von meinem Bruder reparieren."] },
+            { active: "Sie pflanzen bunte Blumen im Garten.", correct: "Bunte Blumen werden im Garten gepflanzt.", wrong: ["Bunte Blumen wurden im Garten gepflanzt.", "Bunte Blumen sind im Garten gepflanzt worden.", "Bunte Blumen werden im Garten pflanzen."] },
+            { active: "Wir spielen gemeinsam ein lustiges Kartenspiel.", correct: "Ein lustiges Kartenspiel wird gemeinsam gespielt.", wrong: ["Ein lustiges Kartenspiel wurde gemeinsam gespielt.", "Ein lustiges Kartenspiel ist gemeinsam gespielt worden.", "Ein lustiges Kartenspiel wird gemeinsam spielen."] },
+            { active: "Die Freunde planen einen spontanen Ausflug.", correct: "Ein spontaner Ausflug wird von den Freunden geplant.", wrong: ["Ein spontaner Ausflug wurde von den Freunden geplant.", "Ein spontaner Ausflug ist von den Freunden geplant worden.", "Ein spontaner Ausflug wird von den Freunden planen."] },
+            { active: "Ich schreibe eine herzliche Geburtstagskarte.", correct: "Eine herzliche Geburtstagskarte wird von mir geschrieben.", wrong: ["Eine herzliche Geburtstagskarte wurde von mir geschrieben.", "Eine herzliche Geburtstagskarte ist von mir geschrieben worden.", "Eine herzliche Geburtstagskarte wird von mir schreiben."] },
+            { active: "Er fotografiert die schönen Sonnenuntergänge.", correct: "Die schönen Sonnenuntergänge werden von ihm fotografiert.", wrong: ["Die schönen Sonnenuntergänge wurden von ihm fotografiert.", "Die schönen Sonnenuntergänge sind von ihm fotografiert worden.", "Die schönen Sonnenuntergänge werden von ihm fotografieren."] },
+            { active: "Sie kochen zusammen ein exotisches Abendessen.", correct: "Ein exotisches Abendessen wird zusammen gekocht.", wrong: ["Ein exotisches Abendessen wurde zusammen gekocht.", "Ein exotisches Abendessen ist zusammen gekocht worden.", "Ein exotisches Abendessen wird zusammen kochen."] },
+            
+            // Präsens Passiv - mehr Variation
+            { active: "Die Clique dekoriert den Partyraum kreativ.", correct: "Der Partyraum wird von der Clique kreativ dekoriert.", wrong: ["Der Partyraum wurde von der Clique kreativ dekoriert.", "Der Partyraum ist von der Clique kreativ dekoriert worden.", "Der Partyraum wird von der Clique kreativ dekorieren."] },
+            { active: "Meine Schwester näht ein einzigartiges Kostüm.", correct: "Ein einzigartiges Kostüm wird von meiner Schwester genäht.", wrong: ["Ein einzigartiges Kostüm wurde von meiner Schwester genäht.", "Ein einzigartiges Kostüm ist von meiner Schwester genäht worden.", "Ein einzigartiges Kostüm wird von meiner Schwester nähen."] },
+            { active: "Wir basteln originelle Geschenke für alle.", correct: "Originelle Geschenke werden für alle gebastelt.", wrong: ["Originelle Geschenke wurden für alle gebastelt.", "Originelle Geschenke sind für alle gebastelt worden.", "Originelle Geschenke werden für alle basteln."] },
+            { active: "Die Gruppe singt fröhliche Geburtstagslieder.", correct: "Fröhliche Geburtstagslieder werden von der Gruppe gesungen.", wrong: ["Fröhliche Geburtstagslieder wurden von der Gruppe gesungen.", "Fröhliche Geburtstagslieder sind von der Gruppe gesungen worden.", "Fröhliche Geburtstagslieder werden von der Gruppe singen."] },
+            { active: "Er zeichnet ein wunderschönes Porträt.", correct: "Ein wunderschönes Porträt wird von ihm gezeichnet.", wrong: ["Ein wunderschönes Porträt wurde von ihm gezeichnet.", "Ein wunderschönes Porträt ist von ihm gezeichnet worden.", "Ein wunderschönes Porträt wird von ihm zeichnen."] },
+            { active: "Sie erfinden ein verrücktes Spiel.", correct: "Ein verrücktes Spiel wird von ihnen erfunden.", wrong: ["Ein verrücktes Spiel wurde von ihnen erfunden.", "Ein verrücktes Spiel ist von ihnen erfunden worden.", "Ein verrücktes Spiel wird von ihnen erfinden."] },
+            { active: "Ich lade meine besten Freunde ein.", correct: "Meine besten Freunde werden von mir eingeladen.", wrong: ["Meine besten Freunde wurden von mir eingeladen.", "Meine besten Freunde sind von mir eingeladen worden.", "Meine besten Freunde werden von mir einladen."] },
+            { active: "Die Freunde hängen bunte Lichterketten auf.", correct: "Bunte Lichterketten werden von den Freunden aufgehängt.", wrong: ["Bunte Lichterketten wurden von den Freunden aufgehängt.", "Bunte Lichterketten sind von den Freunden aufgehängt worden.", "Bunte Lichterketten werden von den Freunden aufhängen."] },
+            { active: "Wir packen ein spannendes Picknick ein.", correct: "Ein spannendes Picknick wird von uns eingepackt.", wrong: ["Ein spannendes Picknick wurde von uns eingepackt.", "Ein spannendes Picknick ist von uns eingepackt worden.", "Ein spannendes Picknick wird von uns einpacken."] },
+            { active: "Sie malen ein buntes Gemeinschaftsbild.", correct: "Ein buntes Gemeinschaftsbild wird von ihnen gemalt.", wrong: ["Ein buntes Gemeinschaftsbild wurde von ihnen gemalt.", "Ein buntes Gemeinschaftsbild ist von ihnen gemalt worden.", "Ein buntes Gemeinschaftsbild wird von ihnen malen."] },
+
+            // Präteritum Passiv - einfach
+            { active: "Mein Freund brachte eine leckere Pizza mit.", correct: "Eine leckere Pizza wurde von meinem Freund mitgebracht.", wrong: ["Eine leckere Pizza wird von meinem Freund mitgebracht.", "Eine leckere Pizza ist von meinem Freund mitgebracht worden.", "Eine leckere Pizza wurde von meinem Freund mitbringen."] },
+            { active: "Wir sahen gestern einen spannenden Film.", correct: "Gestern wurde ein spannender Film gesehen.", wrong: ["Gestern wird ein spannender Film gesehen.", "Gestern ist ein spannender Film gesehen worden.", "Gestern wurde ein spannender Film sehen."] },
+            { active: "Die Kinder spielten ein fröhliches Versteckspiel.", correct: "Ein fröhliches Versteckspiel wurde von den Kindern gespielt.", wrong: ["Ein fröhliches Versteckspiel wird von den Kindern gespielt.", "Ein fröhliches Versteckspiel ist von den Kindern gespielt worden.", "Ein fröhliches Versteckspiel wurde von den Kindern spielen."] },
+            { active: "Sie kaufte ein schönes Geschenk.", correct: "Ein schönes Geschenk wurde von ihr gekauft.", wrong: ["Ein schönes Geschenk wird von ihr gekauft.", "Ein schönes Geschenk ist von ihr gekauft worden.", "Ein schönes Geschenk wurde von ihr kaufen."] },
+            { active: "Ich schrieb eine liebevolle Nachricht.", correct: "Eine liebevolle Nachricht wurde von mir geschrieben.", wrong: ["Eine liebevolle Nachricht wird von mir geschrieben.", "Eine liebevolle Nachricht ist von mir geschrieben worden.", "Eine liebevolle Nachricht wurde von mir schreiben."] },
+            { active: "Er organisierte eine großartige Überraschung.", correct: "Eine großartige Überraschung wurde von ihm organisiert.", wrong: ["Eine großartige Überraschung wird von ihm organisiert.", "Eine großartige Überraschung ist von ihm organisiert worden.", "Eine großartige Überraschung wurde von ihm organisieren."] },
+            { active: "Die Freunde feierten ein unvergessliches Fest.", correct: "Ein unvergessliches Fest wurde von den Freunden gefeiert.", wrong: ["Ein unvergessliches Fest wird von den Freunden gefeiert.", "Ein unvergessliches Fest ist von den Freunden gefeiert worden.", "Ein unvergessliches Fest wurde von den Freunden feiern."] },
+            { active: "Wir teilten unsere besten Erinnerungen.", correct: "Unsere besten Erinnerungen wurden geteilt.", wrong: ["Unsere besten Erinnerungen werden geteilt.", "Unsere besten Erinnerungen sind geteilt worden.", "Unsere besten Erinnerungen wurden teilen."] },
+            { active: "Sie tanzten die ganze Nacht durch.", correct: "Die ganze Nacht wurde durchgetanzt.", wrong: ["Die ganze Nacht wird durchgetanzt.", "Die ganze Nacht ist durchgetanzt worden.", "Die ganze Nacht wurde durchtanzen."] },
+            { active: "Meine Schwester backte den Geburtstagskuchen.", correct: "Der Geburtstagskuchen wurde von meiner Schwester gebacken.", wrong: ["Der Geburtstagskuchen wird von meiner Schwester gebacken.", "Der Geburtstagskuchen ist von meiner Schwester gebacken worden.", "Der Geburtstagskuchen wurde von meiner Schwester backen."] },
+
+            // Präteritum Passiv - mehr Variation
+            { active: "Die Clique besuchte ein cooles Konzert.", correct: "Ein cooles Konzert wurde von der Clique besucht.", wrong: ["Ein cooles Konzert wird von der Clique besucht.", "Ein cooles Konzert ist von der Clique besucht worden.", "Ein cooles Konzert wurde von der Clique besuchen."] },
+            { active: "Er erfand eine lustige Geschichte.", correct: "Eine lustige Geschichte wurde von ihm erfunden.", wrong: ["Eine lustige Geschichte wird von ihm erfunden.", "Eine lustige Geschichte ist von ihm erfunden worden.", "Eine lustige Geschichte wurde von ihm erfinden."] },
+            { active: "Wir machten viele schöne Fotos.", correct: "Viele schöne Fotos wurden von uns gemacht.", wrong: ["Viele schöne Fotos werden von uns gemacht.", "Viele schöne Fotos sind von uns gemacht worden.", "Viele schöne Fotos wurden von uns machen."] },
+            { active: "Sie versteckten die Geschenke im Schrank.", correct: "Die Geschenke wurden im Schrank versteckt.", wrong: ["Die Geschenke werden im Schrank versteckt.", "Die Geschenke sind im Schrank versteckt worden.", "Die Geschenke wurden im Schrank verstecken."] },
+            { active: "Ich lud alle Freunde zum Grillen ein.", correct: "Alle Freunde wurden zum Grillen eingeladen.", wrong: ["Alle Freunde werden zum Grillen eingeladen.", "Alle Freunde sind zum Grillen eingeladen worden.", "Alle Freunde wurden zum Grillen einladen."] },
+            { active: "Die Gruppe bastelte lustige Masken.", correct: "Lustige Masken wurden von der Gruppe gebastelt.", wrong: ["Lustige Masken werden von der Gruppe gebastelt.", "Lustige Masken sind von der Gruppe gebastelt worden.", "Lustige Masken wurden von der Gruppe basteln."] },
+            { active: "Mein Bruder brachte seine Gitarre mit.", correct: "Seine Gitarre wurde von meinem Bruder mitgebracht.", wrong: ["Seine Gitarre wird von meinem Bruder mitgebracht.", "Seine Gitarre ist von meinem Bruder mitgebracht worden.", "Seine Gitarre wurde von meinem Bruder mitbringen."] },
+            { active: "Sie dekorierten den ganzen Garten.", correct: "Der ganze Garten wurde von ihnen dekoriert.", wrong: ["Der ganze Garten wird von ihnen dekoriert.", "Der ganze Garten ist von ihnen dekoriert worden.", "Der ganze Garten wurde von ihnen dekorieren."] },
+            { active: "Wir grillten leckere Würstchen am Lagerfeuer.", correct: "Leckere Würstchen wurden am Lagerfeuer gegrillt.", wrong: ["Leckere Würstchen werden am Lagerfeuer gegrillt.", "Leckere Würstchen sind am Lagerfeuer gegrillt worden.", "Leckere Würstchen wurden am Lagerfeuer grillen."] },
+            { active: "Er erzählte spannende Gruselgeschichten.", correct: "Spannende Gruselgeschichten wurden von ihm erzählt.", wrong: ["Spannende Gruselgeschichten werden von ihm erzählt.", "Spannende Gruselgeschichten sind von ihm erzählt worden.", "Spannende Gruselgeschichten wurden von ihm erzählen."] },
+
+            // Perfekt Passiv
+            { active: "Wir haben ein kreatives Kunstprojekt gemacht.", correct: "Ein kreatives Kunstprojekt ist von uns gemacht worden.", wrong: ["Ein kreatives Kunstprojekt wurde von uns gemacht.", "Ein kreatives Kunstprojekt wird von uns gemacht.", "Ein kreatives Kunstprojekt hat von uns gemacht worden."] },
+            { active: "Sie haben einen fröhlichen Song geschrieben.", correct: "Ein fröhlicher Song ist von ihnen geschrieben worden.", wrong: ["Ein fröhlicher Song wurde von ihnen geschrieben.", "Ein fröhlicher Song wird von ihnen geschrieben.", "Ein fröhlicher Song hat von ihnen geschrieben worden."] },
+            { active: "Ich habe die Überraschung vorbereitet.", correct: "Die Überraschung ist von mir vorbereitet worden.", wrong: ["Die Überraschung wurde von mir vorbereitet.", "Die Überraschung wird von mir vorbereitet.", "Die Überraschung hat von mir vorbereitet worden."] },
+            { active: "Die Freunde haben ein tolles Video gedreht.", correct: "Ein tolles Video ist von den Freunden gedreht worden.", wrong: ["Ein tolles Video wurde von den Freunden gedreht.", "Ein tolles Video wird von den Freunden gedreht.", "Ein tolles Video hat von den Freunden gedreht worden."] },
+            { active: "Meine Schwester hat den Tisch gedeckt.", correct: "Der Tisch ist von meiner Schwester gedeckt worden.", wrong: ["Der Tisch wurde von meiner Schwester gedeckt.", "Der Tisch wird von meiner Schwester gedeckt.", "Der Tisch hat von meiner Schwester gedeckt worden."] },
+            { active: "Er hat eine witzige Ansprache gehalten.", correct: "Eine witzige Ansprache ist von ihm gehalten worden.", wrong: ["Eine witzige Ansprache wurde von ihm gehalten.", "Eine witzige Ansprache wird von ihm gehalten.", "Eine witzige Ansprache hat von ihm gehalten worden."] },
+            { active: "Wir haben gemeinsam ein Lied gesungen.", correct: "Ein Lied ist gemeinsam gesungen worden.", wrong: ["Ein Lied wurde gemeinsam gesungen.", "Ein Lied wird gemeinsam gesungen.", "Ein Lied hat gemeinsam gesungen worden."] },
+            { active: "Die Kinder haben Blumen gepflückt.", correct: "Blumen sind von den Kindern gepflückt worden.", wrong: ["Blumen wurden von den Kindern gepflückt.", "Blumen werden von den Kindern gepflückt.", "Blumen haben von den Kindern gepflückt worden."] },
+            { active: "Sie haben einen Plan geschmiedet.", correct: "Ein Plan ist von ihnen geschmiedet worden.", wrong: ["Ein Plan wurde von ihnen geschmiedet.", "Ein Plan wird von ihnen geschmiedet.", "Ein Plan hat von ihnen geschmiedet worden."] },
+            { active: "Ich habe alle Gäste begrüßt.", correct: "Alle Gäste sind von mir begrüßt worden.", wrong: ["Alle Gäste wurden von mir begrüßt.", "Alle Gäste werden von mir begrüßt.", "Alle Gäste haben von mir begrüßt worden."] },
+
+            // Perfekt Passiv - weitere Sätze
+            { active: "Die Clique hat ein Abenteuer erlebt.", correct: "Ein Abenteuer ist von der Clique erlebt worden.", wrong: ["Ein Abenteuer wurde von der Clique erlebt.", "Ein Abenteuer wird von der Clique erlebt.", "Ein Abenteuer hat von der Clique erlebt worden."] },
+            { active: "Mein Bruder hat die Musik ausgewählt.", correct: "Die Musik ist von meinem Bruder ausgewählt worden.", wrong: ["Die Musik wurde von meinem Bruder ausgewählt.", "Die Musik wird von meinem Bruder ausgewählt.", "Die Musik hat von meinem Bruder ausgewählt worden."] },
+            { active: "Wir haben einen Schatz versteckt.", correct: "Ein Schatz ist von uns versteckt worden.", wrong: ["Ein Schatz wurde von uns versteckt.", "Ein Schatz wird von uns versteckt.", "Ein Schatz hat von uns versteckt worden."] },
+            { active: "Sie haben bunte Luftballons aufgeblasen.", correct: "Bunte Luftballons sind von ihnen aufgeblasen worden.", wrong: ["Bunte Luftballons wurden von ihnen aufgeblasen.", "Bunte Luftballons werden von ihnen aufgeblasen.", "Bunte Luftballons haben von ihnen aufgeblasen worden."] },
+            { active: "Er hat alle Freunde informiert.", correct: "Alle Freunde sind von ihm informiert worden.", wrong: ["Alle Freunde wurden von ihm informiert.", "Alle Freunde werden von ihm informiert.", "Alle Freunde haben von ihm informiert worden."] },
+            { active: "Die Freunde haben eine Zeitkapsel vergraben.", correct: "Eine Zeitkapsel ist von den Freunden vergraben worden.", wrong: ["Eine Zeitkapsel wurde von den Freunden vergraben.", "Eine Zeitkapsel wird von den Freunden vergraben.", "Eine Zeitkapsel hat von den Freunden vergraben worden."] },
+            { active: "Ich habe ein Geheimnis bewahrt.", correct: "Ein Geheimnis ist von mir bewahrt worden.", wrong: ["Ein Geheimnis wurde von mir bewahrt.", "Ein Geheimnis wird von mir bewahrt.", "Ein Geheimnis hat von mir bewahrt worden."] },
+            { active: "Meine Freundin hat Cupcakes verziert.", correct: "Cupcakes sind von meiner Freundin verziert worden.", wrong: ["Cupcakes wurden von meiner Freundin verziert.", "Cupcakes werden von meiner Freundin verziert.", "Cupcakes haben von meiner Freundin verziert worden."] },
+            { active: "Wir haben Erinnerungsfotos gemacht.", correct: "Erinnerungsfotos sind von uns gemacht worden.", wrong: ["Erinnerungsfotos wurden von uns gemacht.", "Erinnerungsfotos werden von uns gemacht.", "Erinnerungsfotos haben von uns gemacht worden."] },
+            { active: "Sie haben die Party dokumentiert.", correct: "Die Party ist von ihnen dokumentiert worden.", wrong: ["Die Party wurde von ihnen dokumentiert.", "Die Party wird von ihnen dokumentiert.", "Die Party hat von ihnen dokumentiert worden."] },
+
+            // Modalverben Präsens
+            { active: "Wir müssen den Raum aufräumen.", correct: "Der Raum muss von uns aufgeräumt werden.", wrong: ["Der Raum muss von uns aufgeräumt worden.", "Der Raum musste von uns aufgeräumt werden.", "Der Raum wird von uns aufgeräumt müssen."] },
+            { active: "Sie kann ein schönes Lied singen.", correct: "Ein schönes Lied kann von ihr gesungen werden.", wrong: ["Ein schönes Lied kann von ihr gesungen worden.", "Ein schönes Lied konnte von ihr gesungen werden.", "Ein schönes Lied wird von ihr gesungen können."] },
+            { active: "Ich soll die Einladungen verteilen.", correct: "Die Einladungen sollen von mir verteilt werden.", wrong: ["Die Einladungen sollen von mir verteilt worden.", "Die Einladungen sollten von mir verteilt werden.", "Die Einladungen werden von mir verteilt sollen."] },
+            { active: "Er darf den ersten Kuchen essen.", correct: "Der erste Kuchen darf von ihm gegessen werden.", wrong: ["Der erste Kuchen darf von ihm gegessen worden.", "Der erste Kuchen durfte von ihm gegessen werden.", "Der erste Kuchen wird von ihm gegessen dürfen."] },
+            { active: "Die Freunde wollen ein Fest organisieren.", correct: "Ein Fest will von den Freunden organisiert werden.", wrong: ["Ein Fest will von den Freunden organisiert worden.", "Ein Fest wollte von den Freunden organisiert werden.", "Ein Fest wird von den Freunden organisiert wollen."] },
+            { active: "Wir möchten gemeinsam kochen.", correct: "Gemeinsam möchte gekocht werden.", wrong: ["Gemeinsam möchte gekocht worden.", "Gemeinsam wollte gekocht werden.", "Gemeinsam wird gekocht möchten."] },
+            { active: "Sie müssen die Dekoration aufhängen.", correct: "Die Dekoration muss von ihnen aufgehängt werden.", wrong: ["Die Dekoration muss von ihnen aufgehängt worden.", "Die Dekoration musste von ihnen aufgehängt werden.", "Die Dekoration wird von ihnen aufgehängt müssen."] },
+            { active: "Ich kann ein Geschenk besorgen.", correct: "Ein Geschenk kann von mir besorgt werden.", wrong: ["Ein Geschenk kann von mir besorgt worden.", "Ein Geschenk konnte von mir besorgt werden.", "Ein Geschenk wird von mir besorgt können."] },
+            { active: "Er soll die Musik auswählen.", correct: "Die Musik soll von ihm ausgewählt werden.", wrong: ["Die Musik soll von ihm ausgewählt worden.", "Die Musik sollte von ihm ausgewählt werden.", "Die Musik wird von ihm ausgewählt sollen."] },
+            { active: "Wir dürfen bis Mitternacht bleiben.", correct: "Bis Mitternacht darf geblieben werden.", wrong: ["Bis Mitternacht darf geblieben worden.", "Bis Mitternacht durfte geblieben werden.", "Bis Mitternacht wird geblieben dürfen."] },
+
+            // Modalverben Präsens - weitere
+            { active: "Die Kinder können Spiele spielen.", correct: "Spiele können von den Kindern gespielt werden.", wrong: ["Spiele können von den Kindern gespielt worden.", "Spiele konnten von den Kindern gespielt werden.", "Spiele werden von den Kindern gespielt können."] },
+            { active: "Meine Schwester muss Snacks vorbereiten.", correct: "Snacks müssen von meiner Schwester vorbereitet werden.", wrong: ["Snacks müssen von meiner Schwester vorbereitet worden.", "Snacks mussten von meiner Schwester vorbereitet werden.", "Snacks werden von meiner Schwester vorbereitet müssen."] },
+            { active: "Sie will ein Foto machen.", correct: "Ein Foto will von ihr gemacht werden.", wrong: ["Ein Foto will von ihr gemacht worden.", "Ein Foto wollte von ihr gemacht werden.", "Ein Foto wird von ihr gemacht wollen."] },
+            { active: "Ich soll einen Toast aussprechen.", correct: "Ein Toast soll von mir ausgesprochen werden.", wrong: ["Ein Toast soll von mir ausgesprochen worden.", "Ein Toast sollte von mir ausgesprochen werden.", "Ein Toast wird von mir ausgesprochen sollen."] },
+            { active: "Er darf die Kerzen anzünden.", correct: "Die Kerzen dürfen von ihm angezündet werden.", wrong: ["Die Kerzen dürfen von ihm angezündet worden.", "Die Kerzen durften von ihm angezündet werden.", "Die Kerzen werden von ihm angezündet dürfen."] },
+            { active: "Wir möchten neue Freunde kennenlernen.", correct: "Neue Freunde möchten kennengelernt werden.", wrong: ["Neue Freunde möchten kennengelernt worden.", "Neue Freunde wollten kennengelernt werden.", "Neue Freunde werden kennengelernt möchten."] },
+            { active: "Die Freunde können Witze erzählen.", correct: "Witze können von den Freunden erzählt werden.", wrong: ["Witze können von den Freunden erzählt worden.", "Witze konnten von den Freunden erzählt werden.", "Witze werden von den Freunden erzählt können."] },
+            { active: "Sie muss die Gästeliste erstellen.", correct: "Die Gästeliste muss von ihr erstellt werden.", wrong: ["Die Gästeliste muss von ihr erstellt worden.", "Die Gästeliste musste von ihr erstellt werden.", "Die Gästeliste wird von ihr erstellt müssen."] },
+            { active: "Ich will eine Überraschung planen.", correct: "Eine Überraschung will von mir geplant werden.", wrong: ["Eine Überraschung will von mir geplant worden.", "Eine Überraschung wollte von mir geplant werden.", "Eine Überraschung wird von mir geplant wollen."] },
+            { active: "Er soll die Getränke kaufen.", correct: "Die Getränke sollen von ihm gekauft werden.", wrong: ["Die Getränke sollen von ihm gekauft worden.", "Die Getränke sollten von ihm gekauft werden.", "Die Getränke werden von ihm gekauft sollen."] },
+
+            // Modalverben Präteritum
+            { active: "Wir mussten das Fest verschieben.", correct: "Das Fest musste von uns verschoben werden.", wrong: ["Das Fest muss von uns verschoben werden.", "Das Fest musste von uns verschoben worden.", "Das Fest wurde von uns verschoben müssen."] },
+            { active: "Sie konnte den Weg nicht finden.", correct: "Der Weg konnte von ihr nicht gefunden werden.", wrong: ["Der Weg kann von ihr nicht gefunden werden.", "Der Weg konnte von ihr nicht gefunden worden.", "Der Weg wurde von ihr nicht gefunden können."] },
+            { active: "Ich sollte die Nachricht überbringen.", correct: "Die Nachricht sollte von mir überbracht werden.", wrong: ["Die Nachricht soll von mir überbracht werden.", "Die Nachricht sollte von mir überbracht worden.", "Die Nachricht wurde von mir überbracht sollen."] },
+            { active: "Er durfte als Erster spielen.", correct: "Als Erster durfte gespielt werden.", wrong: ["Als Erster darf gespielt werden.", "Als Erster durfte gespielt worden.", "Als Erster wurde gespielt dürfen."] },
+            { active: "Die Kinder wollten draußen spielen.", correct: "Draußen wollte gespielt werden.", wrong: ["Draußen will gespielt werden.", "Draußen wollte gespielt worden.", "Draußen wurde gespielt wollen."] },
+            { active: "Wir konnten nicht alle einladen.", correct: "Nicht alle konnten eingeladen werden.", wrong: ["Nicht alle können eingeladen werden.", "Nicht alle konnten eingeladen worden.", "Nicht alle wurden eingeladen können."] },
+            { active: "Sie musste früher gehen.", correct: "Früher musste gegangen werden.", wrong: ["Früher muss gegangen werden.", "Früher musste gegangen worden.", "Früher wurde gegangen müssen."] },
+            { active: "Ich durfte den Film aussuchen.", correct: "Der Film durfte von mir ausgesucht werden.", wrong: ["Der Film darf von mir ausgesucht werden.", "Der Film durfte von mir ausgesucht worden.", "Der Film wurde von mir ausgesucht dürfen."] },
+            { active: "Er sollte die Fotos sortieren.", correct: "Die Fotos sollten von ihm sortiert werden.", wrong: ["Die Fotos sollen von ihm sortiert werden.", "Die Fotos sollten von ihm sortiert worden.", "Die Fotos wurden von ihm sortiert sollen."] },
+            { active: "Die Freunde wollten zusammen verreisen.", correct: "Zusammen wollte verreist werden.", wrong: ["Zusammen will verreist werden.", "Zusammen wollte verreist worden.", "Zusammen wurde verreist wollen."] },
+
+            // Modalverben Präteritum - weitere
+            { active: "Meine Schwester konnte gut singen.", correct: "Gut konnte von meiner Schwester gesungen werden.", wrong: ["Gut kann von meiner Schwester gesungen werden.", "Gut konnte von meiner Schwester gesungen worden.", "Gut wurde von meiner Schwester gesungen können."] },
+            { active: "Wir mussten länger aufbleiben.", correct: "Länger musste aufgeblieben werden.", wrong: ["Länger muss aufgeblieben werden.", "Länger musste aufgeblieben worden.", "Länger wurde aufgeblieben müssen."] },
+            { active: "Sie sollten die Geschenke verstecken.", correct: "Die Geschenke sollten von ihnen versteckt werden.", wrong: ["Die Geschenke sollen von ihnen versteckt werden.", "Die Geschenke sollten von ihnen versteckt worden.", "Die Geschenke wurden von ihnen versteckt sollen."] },
+            { active: "Ich durfte die Überraschung nicht verraten.", correct: "Die Überraschung durfte von mir nicht verraten werden.", wrong: ["Die Überraschung darf von mir nicht verraten werden.", "Die Überraschung durfte von mir nicht verraten worden.", "Die Überraschung wurde von mir nicht verraten dürfen."] },
+            { active: "Er wollte einen Witz erzählen.", correct: "Ein Witz wollte von ihm erzählt werden.", wrong: ["Ein Witz will von ihm erzählt werden.", "Ein Witz wollte von ihm erzählt worden.", "Ein Witz wurde von ihm erzählt wollen."] },
+            { active: "Die Gruppe konnte nicht kommen.", correct: "Es konnte von der Gruppe nicht gekommen werden.", wrong: ["Es kann von der Gruppe nicht gekommen werden.", "Es konnte von der Gruppe nicht gekommen worden.", "Es wurde von der Gruppe nicht gekommen können."] },
+            { active: "Wir sollten pünktlich sein.", correct: "Pünktlich sollte gewesen werden.", wrong: ["Pünktlich soll gewesen werden.", "Pünktlich sollte gewesen worden.", "Pünktlich wurde gewesen sollen."] },
+            { active: "Sie musste die Entscheidung treffen.", correct: "Die Entscheidung musste von ihr getroffen werden.", wrong: ["Die Entscheidung muss von ihr getroffen werden.", "Die Entscheidung musste von ihr getroffen worden.", "Die Entscheidung wurde von ihr getroffen müssen."] },
+            { active: "Ich konnte alle Rätsel lösen.", correct: "Alle Rätsel konnten von mir gelöst werden.", wrong: ["Alle Rätsel können von mir gelöst werden.", "Alle Rätsel konnten von mir gelöst worden.", "Alle Rätsel wurden von mir gelöst können."] },
+            { active: "Er durfte den ersten Tanz machen.", correct: "Der erste Tanz durfte von ihm gemacht werden.", wrong: ["Der erste Tanz darf von ihm gemacht werden.", "Der erste Tanz durfte von ihm gemacht worden.", "Der erste Tanz wurde von ihm gemacht dürfen."] },
+
+            // Gemischte Sätze mit verschiedenen Verben
+            { active: "Die Clique trägt bunte Kostüme.", correct: "Bunte Kostüme werden von der Clique getragen.", wrong: ["Bunte Kostüme wurden von der Clique getragen.", "Bunte Kostüme sind von der Clique getragen worden.", "Bunte Kostüme werden von der Clique tragen."] },
+            { active: "Mein Freund hält eine lustige Rede.", correct: "Eine lustige Rede wird von meinem Freund gehalten.", wrong: ["Eine lustige Rede wurde von meinem Freund gehalten.", "Eine lustige Rede ist von meinem Freund gehalten worden.", "Eine lustige Rede wird von meinem Freund halten."] },
+            { active: "Wir empfangen die Gäste herzlich.", correct: "Die Gäste werden herzlich empfangen.", wrong: ["Die Gäste wurden herzlich empfangen.", "Die Gäste sind herzlich empfangen worden.", "Die Gäste werden herzlich empfangen werden."] },
+            { active: "Sie bringt frische Blumen mit.", correct: "Frische Blumen werden von ihr mitgebracht.", wrong: ["Frische Blumen wurden von ihr mitgebracht.", "Frische Blumen sind von ihr mitgebracht worden.", "Frische Blumen werden von ihr mitbringen."] },
+            { active: "Ich erinnere mich an schöne Momente.", correct: "An schöne Momente wird von mir erinnert.", wrong: ["An schöne Momente wurde von mir erinnert.", "An schöne Momente ist von mir erinnert worden.", "An schöne Momente werden von mir erinnern."] },
+            { active: "Er bereitet ein tolles Programm vor.", correct: "Ein tolles Programm wird von ihm vorbereitet.", wrong: ["Ein tolles Programm wurde von ihm vorbereitet.", "Ein tolles Programm ist von ihm vorbereitet worden.", "Ein tolles Programm wird von ihm vorbereiten."] },
+            { active: "Die Freunde teilen ihre Freude.", correct: "Ihre Freude wird von den Freunden geteilt.", wrong: ["Ihre Freude wurde von den Freunden geteilt.", "Ihre Freude ist von den Freunden geteilt worden.", "Ihre Freude werden von den Freunden teilen."] },
+            { active: "Wir genießen die gemeinsame Zeit.", correct: "Die gemeinsame Zeit wird von uns genossen.", wrong: ["Die gemeinsame Zeit wurde von uns genossen.", "Die gemeinsame Zeit ist von uns genossen worden.", "Die gemeinsame Zeit wird von uns genießen."] },
+            { active: "Sie sammeln tolle Erinnerungen.", correct: "Tolle Erinnerungen werden von ihnen gesammelt.", wrong: ["Tolle Erinnerungen wurden von ihnen gesammelt.", "Tolle Erinnerungen sind von ihnen gesammelt worden.", "Tolle Erinnerungen werden von ihnen sammeln."] },
+            { active: "Ich bewundere ihre Kreativität.", correct: "Ihre Kreativität wird von mir bewundert.", wrong: ["Ihre Kreativität wurde von mir bewundert.", "Ihre Kreativität ist von mir bewundert worden.", "Ihre Kreativität wird von mir bewundern."] },
+
+            // Weitere Präsens-Sätze
+            { active: "Die Kinder erfinden neue Spiele.", correct: "Neue Spiele werden von den Kindern erfunden.", wrong: ["Neue Spiele wurden von den Kindern erfunden.", "Neue Spiele sind von den Kindern erfunden worden.", "Neue Spiele werden von den Kindern erfinden."] },
+            { active: "Meine Freundin wählt die beste Musik aus.", correct: "Die beste Musik wird von meiner Freundin ausgewählt.", wrong: ["Die beste Musik wurde von meiner Freundin ausgewählt.", "Die beste Musik ist von meiner Freundin ausgewählt worden.", "Die beste Musik wird von meiner Freundin auswählen."] },
+            { active: "Wir entdecken versteckte Schätze.", correct: "Versteckte Schätze werden von uns entdeckt.", wrong: ["Versteckte Schätze wurden von uns entdeckt.", "Versteckte Schätze sind von uns entdeckt worden.", "Versteckte Schätze werden von uns entdecken."] },
+            { active: "Sie verleihen dem Raum Atmosphäre.", correct: "Dem Raum wird von ihnen Atmosphäre verliehen.", wrong: ["Dem Raum wurde von ihnen Atmosphäre verliehen.", "Dem Raum ist von ihnen Atmosphäre verliehen worden.", "Dem Raum werden von ihnen Atmosphäre verleihen."] },
+            { active: "Er zeigt uns seine Talente.", correct: "Seine Talente werden uns von ihm gezeigt.", wrong: ["Seine Talente wurden uns von ihm gezeigt.", "Seine Talente sind uns von ihm gezeigt worden.", "Seine Talente werden uns von ihm zeigen."] },
+            { active: "Die Gruppe lernt einen neuen Tanz.", correct: "Ein neuer Tanz wird von der Gruppe gelernt.", wrong: ["Ein neuer Tanz wurde von der Gruppe gelernt.", "Ein neuer Tanz ist von der Gruppe gelernt worden.", "Ein neuer Tanz wird von der Gruppe lernen."] },
+            { active: "Ich schenke meinen Freunden Aufmerksamkeit.", correct: "Meinen Freunden wird von mir Aufmerksamkeit geschenkt.", wrong: ["Meinen Freunden wurde von mir Aufmerksamkeit geschenkt.", "Meinen Freunden ist von mir Aufmerksamkeit geschenkt worden.", "Meinen Freunden werden von mir Aufmerksamkeit schenken."] },
+            { active: "Mein Bruder führt durch das Programm.", correct: "Durch das Programm wird von meinem Bruder geführt.", wrong: ["Durch das Programm wurde von meinem Bruder geführt.", "Durch das Programm ist von meinem Bruder geführt worden.", "Durch das Programm werden von meinem Bruder führen."] },
+            { active: "Wir bewahren schöne Traditionen.", correct: "Schöne Traditionen werden von uns bewahrt.", wrong: ["Schöne Traditionen wurden von uns bewahrt.", "Schöne Traditionen sind von uns bewahrt worden.", "Schöne Traditionen werden von uns bewahren."] },
+            { active: "Sie gestalten unvergessliche Abende.", correct: "Unvergessliche Abende werden von ihnen gestaltet.", wrong: ["Unvergessliche Abende wurden von ihnen gestaltet.", "Unvergessliche Abende sind von ihnen gestaltet worden.", "Unvergessliche Abende werden von ihnen gestalten."] },
+
+            // Weitere Präteritum-Sätze
+            { active: "Die Freunde lachten die ganze Nacht.", correct: "Die ganze Nacht wurde gelacht.", wrong: ["Die ganze Nacht wird gelacht.", "Die ganze Nacht ist gelacht worden.", "Die ganze Nacht wurde lachen."] },
+            { active: "Ich entdeckte ein altes Fotoalbum.", correct: "Ein altes Fotoalbum wurde von mir entdeckt.", wrong: ["Ein altes Fotoalbum wird von mir entdeckt.", "Ein altes Fotoalbum ist von mir entdeckt worden.", "Ein altes Fotoalbum wurde von mir entdecken."] },
+            { active: "Sie erlebten zusammen ein Abenteuer.", correct: "Ein Abenteuer wurde zusammen erlebt.", wrong: ["Ein Abenteuer wird zusammen erlebt.", "Ein Abenteuer ist zusammen erlebt worden.", "Ein Abenteuer wurde zusammen erleben."] },
+            { active: "Er teilte seine Lebensgeschichte.", correct: "Seine Lebensgeschichte wurde von ihm geteilt.", wrong: ["Seine Lebensgeschichte wird von ihm geteilt.", "Seine Lebensgeschichte ist von ihm geteilt worden.", "Seine Lebensgeschichte wurde von ihm teilen."] },
+            { active: "Wir beobachteten die Sterne am Himmel.", correct: "Die Sterne am Himmel wurden von uns beobachtet.", wrong: ["Die Sterne am Himmel werden von uns beobachtet.", "Die Sterne am Himmel sind von uns beobachtet worden.", "Die Sterne am Himmel wurden von uns beobachten."] },
+            { active: "Die Kinder malten bunte Bilder.", correct: "Bunte Bilder wurden von den Kindern gemalt.", wrong: ["Bunte Bilder werden von den Kindern gemalt.", "Bunte Bilder sind von den Kindern gemalt worden.", "Bunte Bilder wurden von den Kindern malen."] },
+            { active: "Meine Schwester zauberte ein Festmahl.", correct: "Ein Festmahl wurde von meiner Schwester gezaubert.", wrong: ["Ein Festmahl wird von meiner Schwester gezaubert.", "Ein Festmahl ist von meiner Schwester gezaubert worden.", "Ein Festmahl wurde von meiner Schwester zaubern."] },
+            { active: "Sie öffneten die Geschenke gemeinsam.", correct: "Die Geschenke wurden gemeinsam geöffnet.", wrong: ["Die Geschenke werden gemeinsam geöffnet.", "Die Geschenke sind gemeinsam geöffnet worden.", "Die Geschenke wurden gemeinsam öffnen."] },
+            { active: "Ich bewahrte alle Einladungskarten auf.", correct: "Alle Einladungskarten wurden von mir aufbewahrt.", wrong: ["Alle Einladungskarten werden von mir aufbewahrt.", "Alle Einladungskarten sind von mir aufbewahrt worden.", "Alle Einladungskarten wurden von mir aufbewahren."] },
+            { active: "Er verkündete die große Neuigkeit.", correct: "Die große Neuigkeit wurde von ihm verkündet.", wrong: ["Die große Neuigkeit wird von ihm verkündet.", "Die große Neuigkeit ist von ihm verkündet worden.", "Die große Neuigkeit wurde von ihm verkünden."] },
+
+            // Weitere Perfekt-Sätze
+            { active: "Die Gruppe hat ein Theaterstück aufgeführt.", correct: "Ein Theaterstück ist von der Gruppe aufgeführt worden.", wrong: ["Ein Theaterstück wurde von der Gruppe aufgeführt.", "Ein Theaterstück wird von der Gruppe aufgeführt.", "Ein Theaterstück hat von der Gruppe aufgeführt worden."] },
+            { active: "Wir haben einen Ausflug gemacht.", correct: "Ein Ausflug ist von uns gemacht worden.", wrong: ["Ein Ausflug wurde von uns gemacht.", "Ein Ausflug wird von uns gemacht.", "Ein Ausflug hat von uns gemacht worden."] },
+            { active: "Sie haben die Party perfekt geplant.", correct: "Die Party ist perfekt geplant worden.", wrong: ["Die Party wurde perfekt geplant.", "Die Party wird perfekt geplant.", "Die Party hat perfekt geplant worden."] },
+            { active: "Ich habe alle Freunde informiert.", correct: "Alle Freunde sind von mir informiert worden.", wrong: ["Alle Freunde wurden von mir informiert.", "Alle Freunde werden von mir informiert.", "Alle Freunde haben von mir informiert worden."] },
+            { active: "Er hat eine tolle Geschichte erfunden.", correct: "Eine tolle Geschichte ist von ihm erfunden worden.", wrong: ["Eine tolle Geschichte wurde von ihm erfunden.", "Eine tolle Geschichte wird von ihm erfunden.", "Eine tolle Geschichte hat von ihm erfunden worden."] },
+            { active: "Die Kinder haben Schneemänner gebaut.", correct: "Schneemänner sind von den Kindern gebaut worden.", wrong: ["Schneemänner wurden von den Kindern gebaut.", "Schneemänner werden von den Kindern gebaut.", "Schneemänner haben von den Kindern gebaut worden."] },
+            { active: "Meine Freundin hat ein Gedicht geschrieben.", correct: "Ein Gedicht ist von meiner Freundin geschrieben worden.", wrong: ["Ein Gedicht wurde von meiner Freundin geschrieben.", "Ein Gedicht wird von meiner Freundin geschrieben.", "Ein Gedicht hat von meiner Freundin geschrieben worden."] },
+            { active: "Wir haben zusammen gelacht und geweint.", correct: "Zusammen ist gelacht und geweint worden.", wrong: ["Zusammen wurde gelacht und geweint.", "Zusammen wird gelacht und geweint.", "Zusammen hat gelacht und geweint worden."] },
+            { active: "Sie haben tolle Erinnerungen geschaffen.", correct: "Tolle Erinnerungen sind von ihnen geschaffen worden.", wrong: ["Tolle Erinnerungen wurden von ihnen geschaffen.", "Tolle Erinnerungen werden von ihnen geschaffen.", "Tolle Erinnerungen haben von ihnen geschaffen worden."] },
+            { active: "Ich habe das Geheimrezept verraten.", correct: "Das Geheimrezept ist von mir verraten worden.", wrong: ["Das Geheimrezept wurde von mir verraten.", "Das Geheimrezept wird von mir verraten.", "Das Geheimrezept hat von mir verraten worden."] },
+
+            // Mehr Modalverben-Präsens
+            { active: "Die Freunde möchten einen Film drehen.", correct: "Ein Film möchte von den Freunden gedreht werden.", wrong: ["Ein Film möchte von den Freunden gedreht worden.", "Ein Film wollte von den Freunden gedreht werden.", "Ein Film wird von den Freunden gedreht möchten."] },
+            { active: "Wir können ein großes Fest feiern.", correct: "Ein großes Fest kann von uns gefeiert werden.", wrong: ["Ein großes Fest kann von uns gefeiert worden.", "Ein großes Fest konnte von uns gefeiert werden.", "Ein großes Fest wird von uns gefeiert können."] },
+            { active: "Sie soll die Hauptrolle spielen.", correct: "Die Hauptrolle soll von ihr gespielt werden.", wrong: ["Die Hauptrolle soll von ihr gespielt worden.", "Die Hauptrolle sollte von ihr gespielt werden.", "Die Hauptrolle wird von ihr gespielt sollen."] },
+            { active: "Ich darf den Gewinner verkünden.", correct: "Der Gewinner darf von mir verkündet werden.", wrong: ["Der Gewinner darf von mir verkündet worden.", "Der Gewinner durfte von mir verkündet werden.", "Der Gewinner wird von mir verkündet dürfen."] },
+            { active: "Er will alle überraschen.", correct: "Alle wollen von ihm überrascht werden.", wrong: ["Alle wollen von ihm überrascht worden.", "Alle wollten von ihm überrascht werden.", "Alle werden von ihm überrascht wollen."] },
+            { active: "Die Gruppe muss zusammenarbeiten.", correct: "Zusammen muss von der Gruppe gearbeitet werden.", wrong: ["Zusammen muss von der Gruppe gearbeitet worden.", "Zusammen musste von der Gruppe gearbeitet werden.", "Zusammen wird von der Gruppe gearbeitet müssen."] },
+            { active: "Wir möchten neue Traditionen schaffen.", correct: "Neue Traditionen möchten geschaffen werden.", wrong: ["Neue Traditionen möchten geschaffen worden.", "Neue Traditionen wollten geschaffen werden.", "Neue Traditionen werden geschaffen möchten."] },
+            { active: "Sie kann ausgezeichnet kochen.", correct: "Ausgezeichnet kann von ihr gekocht werden.", wrong: ["Ausgezeichnet kann von ihr gekocht worden.", "Ausgezeichnet konnte von ihr gekocht werden.", "Ausgezeichnet wird von ihr gekocht können."] },
+            { active: "Ich soll die Überraschung vorbereiten.", correct: "Die Überraschung soll von mir vorbereitet werden.", wrong: ["Die Überraschung soll von mir vorbereitet worden.", "Die Überraschung sollte von mir vorbereitet werden.", "Die Überraschung wird von mir vorbereitet sollen."] },
+            { active: "Er darf die Party eröffnen.", correct: "Die Party darf von ihm eröffnet werden.", wrong: ["Die Party darf von ihm eröffnet worden.", "Die Party durfte von ihm eröffnet werden.", "Die Party wird von ihm eröffnet dürfen."] },
+
+            // Noch mehr Präsens-Variationen
+            { active: "Meine Freunde bewundern meine Sammlung.", correct: "Meine Sammlung wird von meinen Freunden bewundert.", wrong: ["Meine Sammlung wurde von meinen Freunden bewundert.", "Meine Sammlung ist von meinen Freunden bewundert worden.", "Meine Sammlung werden von meinen Freunden bewundern."] },
+            { active: "Die Clique plant ein Picknick im Park.", correct: "Ein Picknick im Park wird von der Clique geplant.", wrong: ["Ein Picknick im Park wurde von der Clique geplant.", "Ein Picknick im Park ist von der Clique geplant worden.", "Ein Picknick im Park werden von der Clique planen."] },
+            { active: "Wir besuchen regelmäßig Konzerte.", correct: "Konzerte werden regelmäßig besucht.", wrong: ["Konzerte wurden regelmäßig besucht.", "Konzerte sind regelmäßig besucht worden.", "Konzerte werden regelmäßig besuchen."] },
+            { active: "Sie erkunden gemeinsam die Stadt.", correct: "Die Stadt wird gemeinsam erkundet.", wrong: ["Die Stadt wurde gemeinsam erkundet.", "Die Stadt ist gemeinsam erkundet worden.", "Die Stadt werden gemeinsam erkunden."] },
+            { active: "Ich bewahre alte Briefe sorgfältig auf.", correct: "Alte Briefe werden von mir sorgfältig aufbewahrt.", wrong: ["Alte Briefe wurden von mir sorgfältig aufbewahrt.", "Alte Briefe sind von mir sorgfältig aufbewahrt worden.", "Alte Briefe werden von mir sorgfältig aufbewahren."] },
+            { active: "Er begleitet uns mit seiner Gitarre.", correct: "Wir werden von ihm mit seiner Gitarre begleitet.", wrong: ["Wir wurden von ihm mit seiner Gitarre begleitet.", "Wir sind von ihm mit seiner Gitarre begleitet worden.", "Wir werden von ihm mit seiner Gitarre begleiten."] },
+            { active: "Die Freunde unterstützen einander immer.", correct: "Einander wird immer unterstützt.", wrong: ["Einander wurde immer unterstützt.", "Einander ist immer unterstützt worden.", "Einander werden immer unterstützen."] },
+            { active: "Meine Schwester komponiert schöne Lieder.", correct: "Schöne Lieder werden von meiner Schwester komponiert.", wrong: ["Schöne Lieder wurden von meiner Schwester komponiert.", "Schöne Lieder sind von meiner Schwester komponiert worden.", "Schöne Lieder werden von meiner Schwester komponieren."] },
+            { active: "Wir erschaffen bleibende Erinnerungen.", correct: "Bleibende Erinnerungen werden von uns erschaffen.", wrong: ["Bleibende Erinnerungen wurden von uns erschaffen.", "Bleibende Erinnerungen sind von uns erschaffen worden.", "Bleibende Erinnerungen werden von uns erschaffen werden."] },
+            { active: "Sie erzählen spannende Anekdoten.", correct: "Spannende Anekdoten werden von ihnen erzählt.", wrong: ["Spannende Anekdoten wurden von ihnen erzählt.", "Spannende Anekdoten sind von ihnen erzählt worden.", "Spannende Anekdoten werden von ihnen erzählen."] },
+
+            // Noch mehr Präteritum-Variationen
+            { active: "Die Kinder bastelten kreative Masken.", correct: "Kreative Masken wurden von den Kindern gebastelt.", wrong: ["Kreative Masken werden von den Kindern gebastelt.", "Kreative Masken sind von den Kindern gebastelt worden.", "Kreative Masken wurden von den Kindern basteln."] },
+            { active: "Ich verschenkte selbstgemachte Pralinen.", correct: "Selbstgemachte Pralinen wurden von mir verschenkt.", wrong: ["Selbstgemachte Pralinen werden von mir verschenkt.", "Selbstgemachte Pralinen sind von mir verschenkt worden.", "Selbstgemachte Pralinen wurden von mir verschenken."] },
+            { active: "Wir erkundeten geheimnisvolle Orte.", correct: "Geheimnisvolle Orte wurden von uns erkundet.", wrong: ["Geheimnisvolle Orte werden von uns erkundet.", "Geheimnisvolle Orte sind von uns erkundet worden.", "Geheimnisvolle Orte wurden von uns erkunden."] },
+            { active: "Sie verzierten den ganzen Raum.", correct: "Der ganze Raum wurde von ihnen verziert.", wrong: ["Der ganze Raum wird von ihnen verziert.", "Der ganze Raum ist von ihnen verziert worden.", "Der ganze Raum wurde von ihnen verzieren."] },
+            { active: "Er überraschte uns mit einem Zaubertrick.", correct: "Wir wurden von ihm mit einem Zaubertrick überrascht.", wrong: ["Wir werden von ihm mit einem Zaubertrick überrascht.", "Wir sind von ihm mit einem Zaubertrick überrascht worden.", "Wir wurden von ihm mit einem Zaubertrick überraschen."] },
+            { active: "Die Gruppe komponierte einen Song.", correct: "Ein Song wurde von der Gruppe komponiert.", wrong: ["Ein Song wird von der Gruppe komponiert.", "Ein Song ist von der Gruppe komponiert worden.", "Ein Song wurde von der Gruppe komponieren."] },
+            { active: "Meine Freundin nähte wunderschöne Kostüme.", correct: "Wunderschöne Kostüme wurden von meiner Freundin genäht.", wrong: ["Wunderschöne Kostüme werden von meiner Freundin genäht.", "Wunderschöne Kostüme sind von meiner Freundin genäht worden.", "Wunderschöne Kostüme wurden von meiner Freundin nähen."] },
+            { active: "Wir teilten unsere größten Geheimnisse.", correct: "Unsere größten Geheimnisse wurden geteilt.", wrong: ["Unsere größten Geheimnisse werden geteilt.", "Unsere größten Geheimnisse sind geteilt worden.", "Unsere größten Geheimnisse wurden teilen."] },
+            { active: "Sie bewahrten die Tradition.", correct: "Die Tradition wurde von ihnen bewahrt.", wrong: ["Die Tradition wird von ihnen bewahrt.", "Die Tradition ist von ihnen bewahrt worden.", "Die Tradition wurde von ihnen bewahren."] },
+            { active: "Ich lernte viele neue Leute kennen.", correct: "Viele neue Leute wurden von mir kennengelernt.", wrong: ["Viele neue Leute werden von mir kennengelernt.", "Viele neue Leute sind von mir kennengelernt worden.", "Viele neue Leute wurden von mir kennenlernen."] },
+
+            // Noch mehr Perfekt-Variationen
+            { active: "Die Clique hat ein Konzert organisiert.", correct: "Ein Konzert ist von der Clique organisiert worden.", wrong: ["Ein Konzert wurde von der Clique organisiert.", "Ein Konzert wird von der Clique organisiert.", "Ein Konzert hat von der Clique organisiert worden."] },
+            { active: "Mein Bruder hat eine App entwickelt.", correct: "Eine App ist von meinem Bruder entwickelt worden.", wrong: ["Eine App wurde von meinem Bruder entwickelt.", "Eine App wird von meinem Bruder entwickelt.", "Eine App hat von meinem Bruder entwickelt worden."] },
+            { active: "Wir haben einen Rekord aufgestellt.", correct: "Ein Rekord ist von uns aufgestellt worden.", wrong: ["Ein Rekord wurde von uns aufgestellt.", "Ein Rekord wird von uns aufgestellt.", "Ein Rekord hat von uns aufgestellt worden."] },
+            { active: "Sie haben eine Challenge gemeistert.", correct: "Eine Challenge ist von ihnen gemeistert worden.", wrong: ["Eine Challenge wurde von ihnen gemeistert.", "Eine Challenge wird von ihnen gemeistert.", "Eine Challenge hat von ihnen gemeistert worden."] },
+            { active: "Ich habe ein Überraschungsvideo gedreht.", correct: "Ein Überraschungsvideo ist von mir gedreht worden.", wrong: ["Ein Überraschungsvideo wurde von mir gedreht.", "Ein Überraschungsvideo wird von mir gedreht.", "Ein Überraschungsvideo hat von mir gedreht worden."] },
+            { active: "Er hat alle zum Lachen gebracht.", correct: "Alle sind von ihm zum Lachen gebracht worden.", wrong: ["Alle wurden von ihm zum Lachen gebracht.", "Alle werden von ihm zum Lachen gebracht.", "Alle haben von ihm zum Lachen gebracht worden."] },
+            { active: "Die Freunde haben Spuren hinterlassen.", correct: "Spuren sind von den Freunden hinterlassen worden.", wrong: ["Spuren wurden von den Freunden hinterlassen.", "Spuren werden von den Freunden hinterlassen.", "Spuren haben von den Freunden hinterlassen worden."] },
+            { active: "Meine Schwester hat ein Rezept kreiert.", correct: "Ein Rezept ist von meiner Schwester kreiert worden.", wrong: ["Ein Rezept wurde von meiner Schwester kreiert.", "Ein Rezept wird von meiner Schwester kreiert.", "Ein Rezept hat von meiner Schwester kreiert worden."] },
+            { active: "Wir haben gemeinsame Ziele erreicht.", correct: "Gemeinsame Ziele sind von uns erreicht worden.", wrong: ["Gemeinsame Ziele wurden von uns erreicht.", "Gemeinsame Ziele werden von uns erreicht.", "Gemeinsame Ziele haben von uns erreicht worden."] },
+            { active: "Sie haben Vertrauen aufgebaut.", correct: "Vertrauen ist von ihnen aufgebaut worden.", wrong: ["Vertrauen wurde von ihnen aufgebaut.", "Vertrauen wird von ihnen aufgebaut.", "Vertrauen hat von ihnen aufgebaut worden."] },
+
+            // Noch mehr Modalverben-Präsens
+            { active: "Die Kinder wollen ein Abenteuer erleben.", correct: "Ein Abenteuer will von den Kindern erlebt werden.", wrong: ["Ein Abenteuer will von den Kindern erlebt worden.", "Ein Abenteuer wollte von den Kindern erlebt werden.", "Ein Abenteuer wird von den Kindern erlebt wollen."] },
+            { active: "Ich muss eine wichtige Entscheidung treffen.", correct: "Eine wichtige Entscheidung muss von mir getroffen werden.", wrong: ["Eine wichtige Entscheidung muss von mir getroffen worden.", "Eine wichtige Entscheidung musste von mir getroffen werden.", "Eine wichtige Entscheidung wird von mir getroffen müssen."] },
+            { active: "Wir können neue Wege gehen.", correct: "Neue Wege können von uns gegangen werden.", wrong: ["Neue Wege können von uns gegangen worden.", "Neue Wege konnten von uns gegangen werden.", "Neue Wege werden von uns gegangen können."] },
+            { active: "Sie soll die Gruppe leiten.", correct: "Die Gruppe soll von ihr geleitet werden.", wrong: ["Die Gruppe soll von ihr geleitet worden.", "Die Gruppe sollte von ihr geleitet werden.", "Die Gruppe wird von ihr geleitet sollen."] },
+            { active: "Er darf die Kerzen ausblasen.", correct: "Die Kerzen dürfen von ihm ausgeblasen werden.", wrong: ["Die Kerzen dürfen von ihm ausgeblasen worden.", "Die Kerzen durften von ihm ausgeblasen werden.", "Die Kerzen werden von ihm ausgeblasen dürfen."] },
+            { active: "Die Freunde möchten Erinnerungen schaffen.", correct: "Erinnerungen möchten von den Freunden geschaffen werden.", wrong: ["Erinnerungen möchten von den Freunden geschaffen worden.", "Erinnerungen wollten von den Freunden geschaffen werden.", "Erinnerungen werden von den Freunden geschaffen möchten."] },
+            { active: "Meine Schwester kann fantastisch tanzen.", correct: "Fantastisch kann von meiner Schwester getanzt werden.", wrong: ["Fantastisch kann von meiner Schwester getanzt worden.", "Fantastisch konnte von meiner Schwester getanzt werden.", "Fantastisch wird von meiner Schwester getanzt können."] },
+            { active: "Wir sollen pünktlich erscheinen.", correct: "Pünktlich soll erschienen werden.", wrong: ["Pünktlich soll erschienen worden.", "Pünktlich sollte erschienen werden.", "Pünktlich wird erschienen sollen."] },
+            { active: "Sie will eine Geschichte vorlesen.", correct: "Eine Geschichte will von ihr vorgelesen werden.", wrong: ["Eine Geschichte will von ihr vorgelesen worden.", "Eine Geschichte wollte von ihr vorgelesen werden.", "Eine Geschichte wird von ihr vorgelesen wollen."] },
+            { active: "Ich muss die Wahrheit sagen.", correct: "Die Wahrheit muss von mir gesagt werden.", wrong: ["Die Wahrheit muss von mir gesagt worden.", "Die Wahrheit musste von mir gesagt werden.", "Die Wahrheit wird von mir gesagt müssen."] },
+
+            // Noch mehr Modalverben-Präteritum
+            { active: "Die Gruppe wollte gemeinsam singen.", correct: "Gemeinsam wollte von der Gruppe gesungen werden.", wrong: ["Gemeinsam will von der Gruppe gesungen werden.", "Gemeinsam wollte von der Gruppe gesungen worden.", "Gemeinsam wurde von der Gruppe gesungen wollen."] },
+            { active: "Ich konnte nicht länger warten.", correct: "Nicht länger konnte gewartet werden.", wrong: ["Nicht länger kann gewartet werden.", "Nicht länger konnte gewartet worden.", "Nicht länger wurde gewartet können."] },
+            { active: "Wir mussten Abschied nehmen.", correct: "Abschied musste genommen werden.", wrong: ["Abschied muss genommen werden.", "Abschied musste genommen worden.", "Abschied wurde genommen müssen."] },
+            { active: "Sie sollte den Brief schreiben.", correct: "Der Brief sollte von ihr geschrieben werden.", wrong: ["Der Brief soll von ihr geschrieben werden.", "Der Brief sollte von ihr geschrieben worden.", "Der Brief wurde von ihr geschrieben sollen."] },
+            { active: "Er durfte die Nachricht verkünden.", correct: "Die Nachricht durfte von ihm verkündet werden.", wrong: ["Die Nachricht darf von ihm verkündet werden.", "Die Nachricht durfte von ihm verkündet worden.", "Die Nachricht wurde von ihm verkündet dürfen."] },
+            { active: "Die Kinder wollten draußen toben.", correct: "Draußen wollte getobt werden.", wrong: ["Draußen will getobt werden.", "Draußen wollte getobt worden.", "Draußen wurde getobt wollen."] },
+            { active: "Mein Freund konnte gut jonglieren.", correct: "Gut konnte von meinem Freund jongliert werden.", wrong: ["Gut kann von meinem Freund jongliert werden.", "Gut konnte von meinem Freund jongliert worden.", "Gut wurde von meinem Freund jongliert können."] },
+            { active: "Wir sollten vorsichtig sein.", correct: "Vorsichtig sollte gewesen werden.", wrong: ["Vorsichtig soll gewesen werden.", "Vorsichtig sollte gewesen worden.", "Vorsichtig wurde gewesen sollen."] },
+            { active: "Sie musste eine Rede halten.", correct: "Eine Rede musste von ihr gehalten werden.", wrong: ["Eine Rede muss von ihr gehalten werden.", "Eine Rede musste von ihr gehalten worden.", "Eine Rede wurde von ihr gehalten müssen."] },
+            { active: "Ich durfte das Geheimnis bewahren.", correct: "Das Geheimnis durfte von mir bewahrt werden.", wrong: ["Das Geheimnis darf von mir bewahrt werden.", "Das Geheimnis durfte von mir bewahrt worden.", "Das Geheimnis wurde von mir bewahrt dürfen."] },
+
+            // Letzte 40 Sätze - Abwechslungsreiche Mischung
+            { active: "Die Freunde genießen den Sonnenuntergang.", correct: "Der Sonnenuntergang wird von den Freunden genossen.", wrong: ["Der Sonnenuntergang wurde von den Freunden genossen.", "Der Sonnenuntergang ist von den Freunden genossen worden.", "Der Sonnenuntergang werden von den Freunden genießen."] },
+            { active: "Wir feierten bis zum Morgengrauen.", correct: "Bis zum Morgengrauen wurde gefeiert.", wrong: ["Bis zum Morgengrauen wird gefeiert.", "Bis zum Morgengrauen ist gefeiert worden.", "Bis zum Morgengrauen wurde feiern."] },
+            { active: "Sie haben ein großes Abenteuer erlebt.", correct: "Ein großes Abenteuer ist von ihnen erlebt worden.", wrong: ["Ein großes Abenteuer wurde von ihnen erlebt.", "Ein großes Abenteuer wird von ihnen erlebt.", "Ein großes Abenteuer hat von ihnen erlebt worden."] },
+            { active: "Ich kann deine Hilfe gebrauchen.", correct: "Deine Hilfe kann von mir gebraucht werden.", wrong: ["Deine Hilfe kann von mir gebraucht worden.", "Deine Hilfe konnte von mir gebraucht werden.", "Deine Hilfe wird von mir gebraucht können."] },
+            { active: "Er musste eine schwere Entscheidung treffen.", correct: "Eine schwere Entscheidung musste von ihm getroffen werden.", wrong: ["Eine schwere Entscheidung muss von ihm getroffen werden.", "Eine schwere Entscheidung musste von ihm getroffen worden.", "Eine schwere Entscheidung wurde von ihm getroffen müssen."] },
+            { active: "Die Clique pflanzt einen Freundschaftsbaum.", correct: "Ein Freundschaftsbaum wird von der Clique gepflanzt.", wrong: ["Ein Freundschaftsbaum wurde von der Clique gepflanzt.", "Ein Freundschaftsbaum ist von der Clique gepflanzt worden.", "Ein Freundschaftsbaum werden von der Clique pflanzen."] },
+            { active: "Meine Schwester formte kleine Figuren aus Ton.", correct: "Kleine Figuren aus Ton wurden von meiner Schwester geformt.", wrong: ["Kleine Figuren aus Ton werden von meiner Schwester geformt.", "Kleine Figuren aus Ton sind von meiner Schwester geformt worden.", "Kleine Figuren aus Ton wurden von meiner Schwester formen."] },
+            { active: "Wir haben Freundschaftsbänder geknüpft.", correct: "Freundschaftsbänder sind von uns geknüpft worden.", wrong: ["Freundschaftsbänder wurden von uns geknüpft.", "Freundschaftsbänder werden von uns geknüpft.", "Freundschaftsbänder haben von uns geknüpft worden."] },
+            { active: "Sie will uns ihre Welt zeigen.", correct: "Ihre Welt will uns von ihr gezeigt werden.", wrong: ["Ihre Welt will uns von ihr gezeigt worden.", "Ihre Welt wollte uns von ihr gezeigt werden.", "Ihre Welt wird uns von ihr gezeigt wollen."] },
+            { active: "Ich sollte mehr Zeit mit Freunden verbringen.", correct: "Mehr Zeit sollte von mir mit Freunden verbracht werden.", wrong: ["Mehr Zeit soll von mir mit Freunden verbracht werden.", "Mehr Zeit sollte von mir mit Freunden verbracht worden.", "Mehr Zeit wurde von mir mit Freunden verbracht sollen."] },
+            
+            { active: "Die Kinder spielen fröhlich im Garten.", correct: "Fröhlich wird im Garten gespielt.", wrong: ["Fröhlich wurde im Garten gespielt.", "Fröhlich ist im Garten gespielt worden.", "Fröhlich werden im Garten spielen."] },
+            { active: "Er erfand ein neues Gruppenspiel.", correct: "Ein neues Gruppenspiel wurde von ihm erfunden.", wrong: ["Ein neues Gruppenspiel wird von ihm erfunden.", "Ein neues Gruppenspiel ist von ihm erfunden worden.", "Ein neues Gruppenspiel wurde von ihm erfinden."] },
+            { active: "Wir haben gemeinsame Träume verwirklicht.", correct: "Gemeinsame Träume sind von uns verwirklicht worden.", wrong: ["Gemeinsame Träume wurden von uns verwirklicht.", "Gemeinsame Träume werden von uns verwirklicht.", "Gemeinsame Träume haben von uns verwirklicht worden."] },
+            { active: "Sie können tolle Geschichten erzählen.", correct: "Tolle Geschichten können von ihnen erzählt werden.", wrong: ["Tolle Geschichten können von ihnen erzählt worden.", "Tolle Geschichten konnten von ihnen erzählt werden.", "Tolle Geschichten werden von ihnen erzählt können."] },
+            { active: "Ich durfte das erste Stück Kuchen nehmen.", correct: "Das erste Stück Kuchen durfte von mir genommen werden.", wrong: ["Das erste Stück Kuchen darf von mir genommen werden.", "Das erste Stück Kuchen durfte von mir genommen worden.", "Das erste Stück Kuchen wurde von mir genommen dürfen."] },
+            { active: "Die Freunde gestalten ein buntes Plakat.", correct: "Ein buntes Plakat wird von den Freunden gestaltet.", wrong: ["Ein buntes Plakat wurde von den Freunden gestaltet.", "Ein buntes Plakat ist von den Freunden gestaltet worden.", "Ein buntes Plakat werden von den Freunden gestalten."] },
+            { active: "Mein Bruder entdeckte eine geheime Höhle.", correct: "Eine geheime Höhle wurde von meinem Bruder entdeckt.", wrong: ["Eine geheime Höhle wird von meinem Bruder entdeckt.", "Eine geheime Höhle ist von meinem Bruder entdeckt worden.", "Eine geheime Höhle wurde von meinem Bruder entdecken."] },
+            { active: "Wir haben eine Tradition begründet.", correct: "Eine Tradition ist von uns begründet worden.", wrong: ["Eine Tradition wurde von uns begründet.", "Eine Tradition wird von uns begründet.", "Eine Tradition hat von uns begründet worden."] },
+            { active: "Sie möchte allen etwas Gutes tun.", correct: "Allen möchte etwas Gutes getan werden.", wrong: ["Allen möchte etwas Gutes getan worden.", "Allen wollte etwas Gutes getan werden.", "Allen wird etwas Gutes getan möchten."] },
+            { active: "Er sollte seine Talente zeigen.", correct: "Seine Talente sollten von ihm gezeigt werden.", wrong: ["Seine Talente sollen von ihm gezeigt werden.", "Seine Talente sollten von ihm gezeigt worden.", "Seine Talente wurden von ihm gezeigt sollen."] },
+            
+            { active: "Die Gruppe kreiert unvergessliche Momente.", correct: "Unvergessliche Momente werden von der Gruppe kreiert.", wrong: ["Unvergessliche Momente wurden von der Gruppe kreiert.", "Unvergessliche Momente sind von der Gruppe kreiert worden.", "Unvergessliche Momente werden von der Gruppe kreieren."] },
+            { active: "Ich teilte meine Freude mit allen.", correct: "Meine Freude wurde mit allen geteilt.", wrong: ["Meine Freude wird mit allen geteilt.", "Meine Freude ist mit allen geteilt worden.", "Meine Freude wurde mit allen teilen."] },
+            { active: "Wir haben Wünsche ausgetauscht.", correct: "Wünsche sind von uns ausgetauscht worden.", wrong: ["Wünsche wurden von uns ausgetauscht.", "Wünsche werden von uns ausgetauscht.", "Wünsche haben von uns ausgetauscht worden."] },
+            { active: "Sie kann wunderbar Geschichten illustrieren.", correct: "Geschichten können wunderbar von ihr illustriert werden.", wrong: ["Geschichten können wunderbar von ihr illustriert worden.", "Geschichten konnten wunderbar von ihr illustriert werden.", "Geschichten werden wunderbar von ihr illustriert können."] },
+            { active: "Er musste seinen Mut beweisen.", correct: "Sein Mut musste von ihm bewiesen werden.", wrong: ["Sein Mut muss von ihm bewiesen werden.", "Sein Mut musste von ihm bewiesen worden.", "Sein Mut wurde von ihm bewiesen müssen."] },
+            { active: "Die Kinder schmücken den Weihnachtsbaum.", correct: "Der Weihnachtsbaum wird von den Kindern geschmückt.", wrong: ["Der Weihnachtsbaum wurde von den Kindern geschmückt.", "Der Weihnachtsbaum ist von den Kindern geschmückt worden.", "Der Weihnachtsbaum werden von den Kindern schmücken."] },
+            { active: "Meine Freundin malte ein Wandbild.", correct: "Ein Wandbild wurde von meiner Freundin gemalt.", wrong: ["Ein Wandbild wird von meiner Freundin gemalt.", "Ein Wandbild ist von meiner Freundin gemalt worden.", "Ein Wandbild wurde von meiner Freundin malen."] },
+            { active: "Wir haben Brücken gebaut.", correct: "Brücken sind von uns gebaut worden.", wrong: ["Brücken wurden von uns gebaut.", "Brücken werden von uns gebaut.", "Brücken haben von uns gebaut worden."] },
+            { active: "Sie will die Welt verändern.", correct: "Die Welt will von ihr verändert werden.", wrong: ["Die Welt will von ihr verändert worden.", "Die Welt wollte von ihr verändert werden.", "Die Welt wird von ihr verändert wollen."] },
+            { active: "Ich sollte öfter danke sagen.", correct: "Öfter sollte danke gesagt werden.", wrong: ["Öfter soll danke gesagt werden.", "Öfter sollte danke gesagt worden.", "Öfter wurde danke gesagt sollen."] },
+            
+            { active: "Die Freunde besiegeln ihre Freundschaft.", correct: "Ihre Freundschaft wird von den Freunden besiegelt.", wrong: ["Ihre Freundschaft wurde von den Freunden besiegelt.", "Ihre Freundschaft ist von den Freunden besiegelt worden.", "Ihre Freundschaft werden von den Freunden besiegeln."] },
+            { active: "Mein Bruder bewahrt alte Traditionen.", correct: "Alte Traditionen werden von meinem Bruder bewahrt.", wrong: ["Alte Traditionen wurden von meinem Bruder bewahrt.", "Alte Traditionen sind von meinem Bruder bewahrt worden.", "Alte Traditionen werden von meinem Bruder bewahren."] },
+            { active: "Wir entdeckten einen magischen Ort.", correct: "Ein magischer Ort wurde von uns entdeckt.", wrong: ["Ein magischer Ort wird von uns entdeckt.", "Ein magischer Ort ist von uns entdeckt worden.", "Ein magischer Ort wurde von uns entdecken."] },
+            { active: "Sie haben Hoffnung geschenkt.", correct: "Hoffnung ist von ihnen geschenkt worden.", wrong: ["Hoffnung wurde von ihnen geschenkt.", "Hoffnung wird von ihnen geschenkt.", "Hoffnung hat von ihnen geschenkt worden."] },
+            { active: "Er darf den Abschluss feiern.", correct: "Der Abschluss darf von ihm gefeiert werden.", wrong: ["Der Abschluss darf von ihm gefeiert worden.", "Der Abschluss durfte von ihm gefeiert werden.", "Der Abschluss wird von ihm gefeiert dürfen."] },
+            { active: "Die Clique erschafft magische Momente.", correct: "Magische Momente werden von der Clique erschaffen.", wrong: ["Magische Momente wurden von der Clique erschaffen.", "Magische Momente sind von der Clique erschaffen worden.", "Magische Momente werden von der Clique erschaffen werden."] },
+            { active: "Ich begleitete meine Freundin zum Konzert.", correct: "Meine Freundin wurde von mir zum Konzert begleitet.", wrong: ["Meine Freundin wird von mir zum Konzert begleitet.", "Meine Freundin ist von mir zum Konzert begleitet worden.", "Meine Freundin wurde von mir zum Konzert begleiten."] },
+            { active: "Wir haben Spuren hinterlassen.", correct: "Spuren sind von uns hinterlassen worden.", wrong: ["Spuren wurden von uns hinterlassen.", "Spuren werden von uns hinterlassen.", "Spuren haben von uns hinterlassen worden."] },
+            { active: "Sie kann jeden aufmuntern.", correct: "Jeder kann von ihr aufgemuntert werden.", wrong: ["Jeder kann von ihr aufgemuntert worden.", "Jeder konnte von ihr aufgemuntert werden.", "Jeder wird von ihr aufgemuntert können."] },
+            { active: "Meine Schwester sollte stolz sein.", correct: "Stolz sollte von meiner Schwester gewesen werden.", wrong: ["Stolz soll von meiner Schwester gewesen werden.", "Stolz sollte von meiner Schwester gewesen worden.", "Stolz wurde von meiner Schwester gewesen sollen."] }
+        ];
+
+        let gameState = {
+            currentIndex: 0,
+            correctAnswers: 0,
+            score: 0,
+            shuffledQuestions: []
+        };
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function startGame() {
+            gameState = {
+                currentIndex: 0,
+                correctAnswers: 0,
+                score: 0,
+                shuffledQuestions: shuffleArray(questions)
+            };
+            showScreen('gameScreen');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (gameState.currentIndex >= gameState.shuffledQuestions.length) {
+                showResults();
+                return;
+            }
+
+            const question = gameState.shuffledQuestions[gameState.currentIndex];
+            document.getElementById('activeSentence').textContent = question.active;
+            
+            // Create shuffled options
+            const allOptions = [question.correct, ...question.wrong];
+            const shuffledOptions = shuffleArray(allOptions);
+            
+            const grid = document.getElementById('optionsGrid');
+            grid.innerHTML = '';
+            
+            shuffledOptions.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = option;
+                btn.onclick = () => checkAnswer(option, question.correct, btn);
+                grid.appendChild(btn);
+            });
+
+            updateStats();
+        }
+
+        function checkAnswer(selected, correct, btnElement) {
+            const allButtons = document.querySelectorAll('.option-btn');
+            
+            if (selected === correct) {
+                btnElement.classList.add('correct');
+                gameState.correctAnswers++;
+                gameState.score += 10;
+                
+                // Disable all buttons
+                allButtons.forEach(btn => btn.disabled = true);
+                
+                // Auto-advance after 3 seconds
+                setTimeout(() => {
+                    gameState.currentIndex++;
+                    loadQuestion();
+                }, 3000);
+            } else {
+                btnElement.classList.add('wrong');
+                // Don't disable buttons - allow user to keep trying
+            }
+            
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('currentQuestion').textContent = gameState.currentIndex + 1;
+            document.getElementById('totalQuestions').textContent = gameState.shuffledQuestions.length;
+            document.getElementById('correctCount').textContent = gameState.correctAnswers;
+            document.getElementById('score').textContent = gameState.score;
+            
+            const progress = ((gameState.currentIndex + 1) / gameState.shuffledQuestions.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function showResults() {
+            const accuracy = Math.round((gameState.correctAnswers / gameState.shuffledQuestions.length) * 100);
+            
+            document.getElementById('finalCorrect').textContent = gameState.correctAnswers;
+            document.getElementById('finalScore').textContent = gameState.score;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+            
+            let rating = '⭐';
+            if (accuracy >= 90) rating = '⭐⭐⭐⭐⭐';
+            else if (accuracy >= 75) rating = '⭐⭐⭐⭐';
+            else if (accuracy >= 60) rating = '⭐⭐⭐';
+            else if (accuracy >= 40) rating = '⭐⭐';
+            
+            document.getElementById('rating').textContent = rating;
+            
+            showScreen('resultScreen');
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // Create decorative elements
+        function createDecorations() {
+            const container = document.getElementById('decorations');
+            
+            // Create floating leaves
+            for (let i = 0; i < 15; i++) {
+                const leaf = document.createElement('div');
+                leaf.className = 'leaf';
+                leaf.textContent = '🍃';
+                leaf.style.left = Math.random() * 100 + '%';
+                leaf.style.top = Math.random() * 100 + '%';
+                leaf.style.animationDelay = Math.random() * 12 + 's';
+                leaf.style.fontSize = (Math.random() * 20 + 20) + 'px';
+                container.appendChild(leaf);
+            }
+            
+            // Create sparkles
+            for (let i = 0; i < 30; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = Math.random() * 100 + '%';
+                sparkle.style.top = Math.random() * 100 + '%';
+                sparkle.style.animationDelay = Math.random() * 8 + 's';
+                container.appendChild(sparkle);
+            }
+        }
+
+        // Initialize
+        createDecorations();
+    </script>
+</body>
+</html>
