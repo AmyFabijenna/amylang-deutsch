@@ -1,0 +1,2279 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attribut Champion 🌊</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #006064;
+            --primary-light: #00838f;
+            --accent: #26c6da;
+            --accent-glow: #4dd0e1;
+            --success: #26a69a;
+            --error: #e85d75;
+            --bg-dark: #004d56;
+            --bg-card: #006064;
+            --text: #e0f7fa;
+            --text-muted: #b2ebf2;
+            --turquoise: #00bcd4;
+            --stream: #80deea;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(160deg, #00acc1 0%, #00bcd4 40%, #26c6da 70%, #4dd0e1 100%);
+            min-height: 100vh;
+            color: #1a1a1a;
+            overflow-x: hidden;
+        }
+
+        .decorations { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid rgba(77, 208, 225, 0.15);
+            animation: rippleOut 10s ease-out infinite;
+        }
+        @keyframes rippleOut {
+            0% { transform: scale(0.2); opacity: 0.8; }
+            100% { transform: scale(4); opacity: 0; }
+        }
+        .wave {
+            position: absolute;
+            width: 100%;
+            height: 100px;
+            background: linear-gradient(90deg, transparent, rgba(128, 222, 234, 0.1), transparent);
+            animation: waveFlow 8s ease-in-out infinite;
+        }
+        @keyframes waveFlow {
+            0%, 100% { transform: translateX(-100%) skewY(-2deg); }
+            50% { transform: translateX(100%) skewY(2deg); }
+        }
+        .bubble {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            animation: bubbleRise 12s ease-in infinite;
+        }
+        @keyframes bubbleRise {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            50% { opacity: 0.6; }
+            100% { transform: translateY(-20px) scale(1); opacity: 0; }
+        }
+
+        .container { position: relative; z-index: 1; max-width: 950px; margin: 0 auto; padding: 20px; }
+        header { text-align: center; margin-bottom: 30px; padding-top: 10px; }
+        h1 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 2.5rem;
+            color: #004d56;
+            text-shadow: 2px 2px 4px rgba(255,255,255,0.3);
+            margin-bottom: 10px;
+        }
+        .subtitle { color: #006064; font-size: 1.05rem; font-weight: 600; }
+
+        .screen { display: none; animation: fadeIn 0.5s ease; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+        .menu-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(224,247,250,0.95) 100%);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border: 2px solid rgba(38,198,218,0.3);
+            box-shadow: 0 8px 32px rgba(0,96,100,0.15);
+        }
+
+        .mode-title {
+            font-family: 'Fredoka', sans-serif;
+            color: #006064;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #00acc1 0%, #26c6da 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 15px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(38,198,218,0.4);
+            display: block;
+            margin: 30px auto;
+        }
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(38,198,218,0.6);
+        }
+
+        .game-container {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(224,247,250,0.95) 100%);
+            border-radius: 20px;
+            padding: 35px;
+            border: 2px solid rgba(38,198,218,0.3);
+            box-shadow: 0 8px 32px rgba(0,96,100,0.15);
+        }
+
+        .progress-bar {
+            background: rgba(38,198,218,0.2);
+            height: 12px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #00acc1, #26c6da);
+            height: 100%;
+            transition: width 0.4s ease;
+            border-radius: 10px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 25px;
+            gap: 15px;
+        }
+        .stat-item {
+            background: rgba(38,198,218,0.1);
+            padding: 12px 20px;
+            border-radius: 12px;
+            text-align: center;
+            flex: 1;
+        }
+        .stat-label { font-size: 0.85rem; color: #006064; font-weight: 600; }
+        .stat-value { font-size: 1.4rem; color: #004d56; font-weight: 700; margin-top: 5px; }
+
+        .question-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 2px solid rgba(38,198,218,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .question-label {
+            font-size: 0.9rem;
+            color: #006064;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .task-box {
+            padding: 20px;
+            background: rgba(77,208,225,0.1);
+            border-radius: 10px;
+            border-left: 4px solid #00acc1;
+            margin-bottom: 25px;
+        }
+
+        .task-noun {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.3rem;
+            color: #004d56;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .task-attributes {
+            line-height: 1.8;
+        }
+
+        .task-attr-item {
+            font-size: 1.05rem;
+            color: #00838f;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .task-attr-item:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #26c6da;
+            font-weight: 700;
+        }
+
+        .task-attr-type {
+            font-size: 0.85rem;
+            color: #006064;
+            font-style: italic;
+            margin-left: 8px;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 2px solid rgba(38,198,218,0.3);
+            padding: 18px 20px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            line-height: 1.6;
+            font-family: 'Quicksand', sans-serif;
+        }
+        .option-btn:hover {
+            border-color: #00acc1;
+            background: rgba(77,208,225,0.05);
+            transform: translateX(3px);
+        }
+        .option-btn.correct {
+            border-color: #26a69a;
+            background: rgba(38,166,154,0.1);
+            border-width: 3px;
+        }
+        .option-btn.wrong {
+            border-color: #e85d75;
+            background: rgba(232,93,117,0.1);
+            border-width: 3px;
+        }
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .result-screen {
+            text-align: center;
+        }
+        .result-title {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 2.2rem;
+            color: #006064;
+            margin-bottom: 20px;
+        }
+        .result-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .result-stat {
+            background: rgba(38,198,218,0.1);
+            padding: 20px;
+            border-radius: 15px;
+        }
+        .result-stat-label { font-size: 0.95rem; color: #006064; font-weight: 600; }
+        .result-stat-value { font-size: 2rem; color: #004d56; font-weight: 700; margin-top: 8px; }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            .task-noun { font-size: 1.1rem; }
+            .task-attr-item { font-size: 0.95rem; }
+            .option-btn { font-size: 0.95rem; padding: 15px; }
+            .result-stats { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="decorations" id="decorations"></div>
+
+    <div class="container">
+        <header>
+            <h1>🌊 Attribut Champion 🌊</h1>
+            <div class="subtitle">C1-Niveau: Komplexe Sätze mit kombinierten Attributen</div>
+        </header>
+
+        <!-- Start Screen -->
+        <div class="screen active" id="startScreen">
+            <div class="menu-card">
+                <h2 class="mode-title">Willkommen beim Attribut-Training!</h2>
+                <p style="text-align: center; color: #006064; font-size: 1.05rem; line-height: 1.6; margin: 20px 0;">
+                    Du übst das Formulieren komplexer Sätze mit verschiedenen Attributen auf C1-Niveau. Du bekommst ein Bezugswort und verschiedene Attribut-Bausteine. Wähle den einzigen grammatikalisch korrekten Satz! Die falschen Optionen enthalten typische Fehler. 🎯
+                </p>
+                <p style="text-align: center; color: #004d56; font-size: 0.95rem; margin: 15px 0;">
+                    <strong>150 Übungssätze</strong> aus Alltag und Berufsleben warten auf dich!
+                </p>
+                <button class="start-btn" onclick="startGame()">Los geht's! 🚀</button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="screen" id="gameScreen">
+            <div class="game-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-label">Frage</div>
+                        <div class="stat-value"><span id="currentQuestion">1</span> / <span id="totalQuestions">150</span></div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Richtig</div>
+                        <div class="stat-value" id="correctCount">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Punkte</div>
+                        <div class="stat-value" id="score">0</div>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <div class="question-label">Formuliere einen komplexen Satz mit den angegebenen Attributen:</div>
+                    <div class="task-box">
+                        <div class="task-noun" id="taskNoun"></div>
+                        <div class="task-attributes" id="taskAttributes"></div>
+                    </div>
+                    
+                    <div class="question-label">Welcher Satz ist grammatikalisch korrekt?</div>
+                    <div class="options-grid" id="optionsGrid"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div class="screen" id="resultScreen">
+            <div class="menu-card result-screen">
+                <h2 class="result-title">🎉 Fantastisch! 🎉</h2>
+                <p style="color: #006064; font-size: 1.1rem; margin: 15px 0;">
+                    Du hast alle 150 Fragen auf C1-Niveau geschafft!
+                </p>
+                <div class="result-stats">
+                    <div class="result-stat">
+                        <div class="result-stat-label">Richtige Antworten</div>
+                        <div class="result-stat-value" id="finalCorrect">0</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-label">Gesamtpunkte</div>
+                        <div class="result-stat-value" id="finalScore">0</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-label">Genauigkeit</div>
+                        <div class="result-stat-value" id="accuracy">0%</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-label">Bewertung</div>
+                        <div class="result-stat-value" id="rating" style="font-size: 1.5rem;">⭐</div>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button class="start-btn" onclick="startGame()">Nochmal spielen 🔄</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            // Kombinierte Attribute: Adjektiv + Relativsatz
+            {
+                noun: "ein Bewerbungsgespräch",
+                attributes: [
+                    { text: "es ist gut", type: "Adjektiv" },
+                    { text: "es findet bei der Firma statt", type: "Partizip" }
+                ],
+                correct: "das gute, bei der Firma stattfindende Bewerbungsgespräch",
+                wrong: [
+                    "das gute, bei der Firma stattgefundene Bewerbungsgespräch",
+                    "das guten, bei der Firma stattfindende Bewerbungsgespräch",
+                    "das gute, das bei der Firma stattfindende Bewerbungsgespräch"
+                ]
+            },
+            {
+                noun: "die Arbeitsmoral",
+                attributes: [
+                    { text: "sie ist hoch", type: "Adjektiv" },
+                    { text: "manche Leute haben sie", type: "Relativsatz" }
+                ],
+                correct: "die hohe Arbeitsmoral, die manche Leute haben",
+                wrong: [
+                    "die hohe Arbeitsmoral, den manche Leute haben",
+                    "die hohen Arbeitsmoral, die manche Leute haben",
+                    "die hohe Arbeitsmoral, die manche Leute hat"
+                ]
+            },
+            {
+                noun: "das Absolvieren",
+                attributes: [
+                    { text: "das Absolvieren passiert häufig", type: "Adjektiv" },
+                    { text: "ein Praktikum wird absolviert", type: "Genitiv" }
+                ],
+                correct: "das häufige Absolvieren eines Praktikums",
+                wrong: [
+                    "das häufiges Absolvieren eines Praktikums",
+                    "das häufige Absolvieren einem Praktikum",
+                    "das häufige Absolvieren von einem Praktikums"
+                ]
+            },
+            {
+                noun: "die Erfahrungen",
+                attributes: [
+                    { text: "sie sind unterschiedlich", type: "Adjektiv" },
+                    { text: "der Bewerber hat die Erfahrungen gemacht", type: "Genitiv" },
+                    { text: "sie vergrößern die Jobaussichten", type: "Relativsatz" }
+                ],
+                correct: "die unterschiedlichen Erfahrungen des Bewerbers, die die Jobaussichten vergrößern",
+                wrong: [
+                    "die unterschiedlichen Erfahrungen des Bewerbers, der die Jobaussichten vergrößern",
+                    "die unterschiedliche Erfahrungen des Bewerbers, die die Jobaussichten vergrößern",
+                    "die unterschiedlichen Erfahrungen vom Bewerber, die die Jobaussichten vergrößern"
+                ]
+            },
+            {
+                noun: "eine Ausbildung",
+                attributes: [
+                    { text: "sie wurde vor 15 Jahren absolviert", type: "erweitertes Partizip" },
+                    { text: "sie ist veraltet", type: "Adjektiv" }
+                ],
+                correct: "die vor 15 Jahren absolvierte, veraltete Ausbildung",
+                wrong: [
+                    "die vor 15 Jahren absolvierende, veraltete Ausbildung",
+                    "die absolvierte vor 15 Jahren, veraltete Ausbildung",
+                    "die vor 15 Jahren absolviert, veraltete Ausbildung"
+                ]
+            },
+            {
+                noun: "die Stelle",
+                attributes: [
+                    { text: "ich wünsche sie mir", type: "erweitertes Partizip" },
+                    { text: "sie scheint attraktiv zu sein", type: "erweitertes Partizip" }
+                ],
+                correct: "die von mir gewünschte, attraktiv zu sein scheinende Stelle",
+                wrong: [
+                    "die von mir gewünschte, attraktiv scheinende Stelle",
+                    "die von mir gewünscht, attraktiv zu sein scheinende Stelle",
+                    "die mir gewünschte, attraktiv zu sein scheinende Stelle"
+                ]
+            },
+            {
+                noun: "die Stelle",
+                attributes: [
+                    { text: "sie ist bei einer bekannten Firma", type: "Präposition + Nomen" }
+                ],
+                correct: "die Stelle bei einer bekannten Firma",
+                wrong: [
+                    "die Stelle bei einem bekannten Firma",
+                    "die Stelle bei einer bekannt Firma",
+                    "die Stelle in einer bekannten Firma"
+                ]
+            },
+            {
+                noun: "die Firma",
+                attributes: [
+                    { text: "sie liegt in der Nähe", type: "erweitertes Partizip" },
+                    { text: "sie hat die Stelle ausgeschrieben", type: "Relativsatz" }
+                ],
+                correct: "die in der Nähe liegende Firma, die die Stelle ausgeschrieben hat",
+                wrong: [
+                    "die in der Nähe gelegene Firma, die die Stelle ausgeschrieben hat",
+                    "die in der Nähe liegende Firma, der die Stelle ausgeschrieben hat",
+                    "die in der Nähe liegende Firma, die die Stelle ausgeschrieben haben"
+                ]
+            },
+            {
+                noun: "ein Lebenslauf",
+                attributes: [
+                    { text: "er überzeugt", type: "Partizip" },
+                    { text: "es gibt keinen Fehler darin", type: "Adjektiv" }
+                ],
+                correct: "der überzeugende, fehlerfreie Lebenslauf",
+                wrong: [
+                    "der überzeugter, fehlerfreie Lebenslauf",
+                    "der überzeugende, fehlerfrei Lebenslauf",
+                    "der überzeugt, fehlerfreie Lebenslauf"
+                ]
+            },
+            {
+                noun: "der Ehrgeiz",
+                attributes: [
+                    { text: "er ist in letzter Zeit gestiegen", type: "erweitertes Partizip" },
+                    { text: "ich möchte eine gute Stelle finden", type: "Infinitiv + zu" }
+                ],
+                correct: "der in letzter Zeit gestiegene Ehrgeiz, eine gute Stelle zu finden",
+                wrong: [
+                    "der in letzter Zeit steigende Ehrgeiz, eine gute Stelle zu finden",
+                    "der in letzter Zeit gestiegene Ehrgeiz, eine gute Stelle finden",
+                    "der in letzter Zeit gestiegener Ehrgeiz, eine gute Stelle zu finden"
+                ]
+            },
+
+            // Erweiterte Partizipien mit Dativ/Akkusativ
+            {
+                noun: "die Kleidung",
+                attributes: [
+                    { text: "sie muss sorgfältig ausgewählt werden", type: "erweitertes modales Partizip" },
+                    { text: "ihre Wichtigkeit darf nicht unterschätzt werden", type: "Relativsatz" }
+                ],
+                correct: "die sorgfältig auszuwählende Kleidung, deren Wichtigkeit nicht unterschätzt werden darf",
+                wrong: [
+                    "die sorgfältig auszuwählende Kleidung, die Wichtigkeit nicht unterschätzt werden darf",
+                    "die sorgfältig auszuwählte Kleidung, deren Wichtigkeit nicht unterschätzt werden darf",
+                    "die sorgfältig auszuwählende Kleidung, deren Wichtigkeit nicht unterschätzt werden durfte"
+                ]
+            },
+            {
+                noun: "die Freude",
+                attributes: [
+                    { text: "sie ist groß", type: "Adjektiv" },
+                    { text: "meine Freundin freut sich", type: "Genitiv" }
+                ],
+                correct: "die große Freude meiner Freundin",
+                wrong: [
+                    "die große Freude meinem Freundin",
+                    "die großen Freude meiner Freundin",
+                    "die große Freude von meiner Freundin"
+                ]
+            },
+            {
+                noun: "die Freude",
+                attributes: [
+                    { text: "die Freude ist groß", type: "Adjektiv" },
+                    { text: "ich habe eine neue Stelle gefunden", type: "Infinitiv + zu" }
+                ],
+                correct: "die große Freude, eine neue Stelle gefunden zu haben",
+                wrong: [
+                    "die große Freude, eine neue Stelle gefunden haben",
+                    "die große Freude, eine neue Stelle zu gefunden haben",
+                    "die großen Freude, eine neue Stelle gefunden zu haben"
+                ]
+            },
+
+            // Komplexe Genitiv-Konstruktionen
+            {
+                noun: "das Projekt",
+                attributes: [
+                    { text: "es ist wichtig", type: "Adjektiv" },
+                    { text: "das Team arbeitet daran", type: "Genitiv" },
+                    { text: "der Erfolg steht bevor", type: "Relativsatz" }
+                ],
+                correct: "das wichtige Projekt des Teams, dessen Erfolg bevorsteht",
+                wrong: [
+                    "das wichtige Projekt des Teams, deren Erfolg bevorsteht",
+                    "das wichtigen Projekt des Teams, dessen Erfolg bevorsteht",
+                    "das wichtige Projekt vom Team, dessen Erfolg bevorsteht"
+                ]
+            },
+            {
+                noun: "die Entscheidung",
+                attributes: [
+                    { text: "sie wurde gestern getroffen", type: "erweitertes Partizip" },
+                    { text: "der Chef hat sie getroffen", type: "Genitiv" },
+                    { text: "alle warten darauf", type: "Relativsatz" }
+                ],
+                correct: "die gestern getroffene Entscheidung des Chefs, auf die alle warten",
+                wrong: [
+                    "die gestern getroffene Entscheidung des Chefs, auf der alle warten",
+                    "die gestern treffende Entscheidung des Chefs, auf die alle warten",
+                    "die gestern getroffene Entscheidung vom Chef, auf die alle warten"
+                ]
+            },
+            {
+                noun: "das Meeting",
+                attributes: [
+                    { text: "es findet morgen statt", type: "Partizip" },
+                    { text: "es ist im Konferenzraum", type: "Präposition + Nomen" },
+                    { text: "alle Mitarbeiter müssen teilnehmen", type: "Relativsatz" }
+                ],
+                correct: "das morgen im Konferenzraum stattfindende Meeting, an dem alle Mitarbeiter teilnehmen müssen",
+                wrong: [
+                    "das morgen im Konferenzraum stattfindende Meeting, auf dem alle Mitarbeiter teilnehmen müssen",
+                    "das morgen im Konferenzraum stattgefundene Meeting, an dem alle Mitarbeiter teilnehmen müssen",
+                    "das morgen in dem Konferenzraum stattfindende Meeting, an dem alle Mitarbeiter teilnehmen müssen"
+                ]
+            },
+            {
+                noun: "der Kollege",
+                attributes: [
+                    { text: "er ist neu", type: "Adjektiv" },
+                    { text: "er kommt aus Berlin", type: "Präposition + Nomen" },
+                    { text: "ich arbeite mit ihm zusammen", type: "Relativsatz" }
+                ],
+                correct: "der neue Kollege aus Berlin, mit dem ich zusammenarbeite",
+                wrong: [
+                    "der neue Kollege aus Berlin, mit den ich zusammenarbeite",
+                    "der neuer Kollege aus Berlin, mit dem ich zusammenarbeite",
+                    "der neue Kollege von Berlin, mit dem ich zusammenarbeite"
+                ]
+            },
+            {
+                noun: "die Präsentation",
+                attributes: [
+                    { text: "sie wurde sorgfältig vorbereitet", type: "erweitertes Partizip" },
+                    { text: "mein Team hat sie vorbereitet", type: "Genitiv" },
+                    { text: "sie wird morgen gehalten", type: "Partizip" }
+                ],
+                correct: "die sorgfältig vorbereitete Präsentation meines Teams, die morgen gehalten wird",
+                wrong: [
+                    "die sorgfältig vorbereitete Präsentation meines Teams, der morgen gehalten wird",
+                    "die sorgfältig vorbereitende Präsentation meines Teams, die morgen gehalten wird",
+                    "die sorgfältig vorbereitet Präsentation meines Teams, die morgen gehalten wird"
+                ]
+            },
+            {
+                noun: "der Vertrag",
+                attributes: [
+                    { text: "er wurde gestern unterschrieben", type: "erweitertes Partizip" },
+                    { text: "beide Parteien haben ihn unterschrieben", type: "Genitiv" },
+                    { text: "er tritt sofort in Kraft", type: "Relativsatz" }
+                ],
+                correct: "der gestern unterschriebene Vertrag beider Parteien, der sofort in Kraft tritt",
+                wrong: [
+                    "der gestern unterschriebener Vertrag beider Parteien, der sofort in Kraft tritt",
+                    "der gestern unterschriebene Vertrag beiden Parteien, der sofort in Kraft tritt",
+                    "der gestern unterschriebene Vertrag beider Parteien, die sofort in Kraft tritt"
+                ]
+            },
+            {
+                noun: "die Aufgabe",
+                attributes: [
+                    { text: "sie ist komplex", type: "Adjektiv" },
+                    { text: "ich soll sie bis morgen erledigen", type: "Infinitiv + zu" }
+                ],
+                correct: "die komplexe Aufgabe, die ich bis morgen erledigen soll",
+                wrong: [
+                    "die komplexen Aufgabe, die ich bis morgen erledigen soll",
+                    "die komplexe Aufgabe, die ich bis morgen erledigt soll",
+                    "die komplexe Aufgabe, der ich bis morgen erledigen soll"
+                ]
+            },
+
+            // Weitere komplexe Kombinationen
+            {
+                noun: "der Bericht",
+                attributes: [
+                    { text: "er wurde von mir geschrieben", type: "erweitertes Partizip" },
+                    { text: "er wurde vom Chef gelobt", type: "Relativsatz" }
+                ],
+                correct: "der von mir geschriebene Bericht, der vom Chef gelobt wurde",
+                wrong: [
+                    "der von mir geschriebener Bericht, der vom Chef gelobt wurde",
+                    "der von mir geschriebene Bericht, den vom Chef gelobt wurde",
+                    "der von mir geschrieben Bericht, der vom Chef gelobt wurde"
+                ]
+            },
+            {
+                noun: "das Angebot",
+                attributes: [
+                    { text: "es ist attraktiv", type: "Adjektiv" },
+                    { text: "die Firma hat es unterbreitet", type: "Relativsatz" },
+                    { text: "ich soll es prüfen", type: "Infinitiv + zu" }
+                ],
+                correct: "das attraktive Angebot, das die Firma unterbreitet hat und das ich prüfen soll",
+                wrong: [
+                    "das attraktive Angebot, das die Firma unterbreitet hat und das ich prüfen solle",
+                    "das attraktiven Angebot, das die Firma unterbreitet hat und das ich prüfen soll",
+                    "das attraktive Angebot, den die Firma unterbreitet hat und das ich prüfen soll"
+                ]
+            },
+            {
+                noun: "die Wohnung",
+                attributes: [
+                    { text: "sie wurde letzten Monat renoviert", type: "erweitertes Partizip" },
+                    { text: "sie ist hell", type: "Adjektiv" },
+                    { text: "ich möchte sie mieten", type: "Relativsatz" }
+                ],
+                correct: "die letzten Monat renovierte, helle Wohnung, die ich mieten möchte",
+                wrong: [
+                    "die letzten Monat renovierte, helle Wohnung, der ich mieten möchte",
+                    "die letzten Monat renovierende, helle Wohnung, die ich mieten möchte",
+                    "die letzten Monat renoviert, helle Wohnung, die ich mieten möchte"
+                ]
+            },
+            {
+                noun: "der Kunde",
+                attributes: [
+                    { text: "er ist wichtig", type: "Adjektiv" },
+                    { text: "er hat gestern angerufen", type: "Relativsatz" },
+                    { text: "ich soll ihn zurückrufen", type: "Infinitiv + zu" }
+                ],
+                correct: "der wichtige Kunde, der gestern angerufen hat und den ich zurückrufen soll",
+                wrong: [
+                    "der wichtige Kunde, der gestern angerufen hat und dem ich zurückrufen soll",
+                    "der wichtigen Kunde, der gestern angerufen hat und den ich zurückrufen soll",
+                    "der wichtige Kunde, den gestern angerufen hat und den ich zurückrufen soll"
+                ]
+            },
+            {
+                noun: "das Dokument",
+                attributes: [
+                    { text: "es wurde vom Anwalt geprüft", type: "erweitertes Partizip" },
+                    { text: "es ist wichtig", type: "Adjektiv" },
+                    { text: "ich muss es unterschreiben", type: "Relativsatz" }
+                ],
+                correct: "das vom Anwalt geprüfte, wichtige Dokument, das ich unterschreiben muss",
+                wrong: [
+                    "das vom Anwalt geprüfte, wichtige Dokument, den ich unterschreiben muss",
+                    "das vom Anwalt geprüftes, wichtige Dokument, das ich unterschreiben muss",
+                    "das vom Anwalt geprüfte, wichtiges Dokument, das ich unterschreiben muss"
+                ]
+            },
+            {
+                noun: "die E-Mail",
+                attributes: [
+                    { text: "sie wurde heute Morgen verschickt", type: "erweitertes Partizip" },
+                    { text: "der Chef hat sie verschickt", type: "Genitiv" },
+                    { text: "alle haben sie erhalten", type: "Relativsatz" }
+                ],
+                correct: "die heute Morgen verschickte E-Mail des Chefs, die alle erhalten haben",
+                wrong: [
+                    "die heute Morgen verschickte E-Mail des Chefs, den alle erhalten haben",
+                    "die heute Morgen verschickt E-Mail des Chefs, die alle erhalten haben",
+                    "die heute Morgen verschickende E-Mail des Chefs, die alle erhalten haben"
+                ]
+            },
+            {
+                noun: "der Antrag",
+                attributes: [
+                    { text: "er wurde rechtzeitig eingereicht", type: "erweitertes Partizip" },
+                    { text: "er wurde genehmigt", type: "Relativsatz" }
+                ],
+                correct: "der rechtzeitig eingereichte Antrag, der genehmigt wurde",
+                wrong: [
+                    "der rechtzeitig eingereichte Antrag, den genehmigt wurde",
+                    "der rechtzeitig eingereicht Antrag, der genehmigt wurde",
+                    "der rechtzeitig einreichende Antrag, der genehmigt wurde"
+                ]
+            },
+            {
+                noun: "die Entscheidung",
+                attributes: [
+                    { text: "sie ist schwierig", type: "Adjektiv" },
+                    { text: "ich muss sie treffen", type: "Infinitiv + zu" }
+                ],
+                correct: "die schwierige Entscheidung, die ich treffen muss",
+                wrong: [
+                    "die schwierige Entscheidung, den ich treffen muss",
+                    "die schwierigen Entscheidung, die ich treffen muss",
+                    "die schwierige Entscheidung, die ich treffe muss"
+                ]
+            },
+            {
+                noun: "das Problem",
+                attributes: [
+                    { text: "es ist komplex", type: "Adjektiv" },
+                    { text: "wir müssen es lösen", type: "Relativsatz" },
+                    { text: "es wurde gestern entdeckt", type: "erweitertes Partizip" }
+                ],
+                correct: "das komplexe, gestern entdeckte Problem, das wir lösen müssen",
+                wrong: [
+                    "das komplexe, gestern entdeckende Problem, das wir lösen müssen",
+                    "das komplexes, gestern entdeckte Problem, das wir lösen müssen",
+                    "das komplexe, gestern entdeckte Problem, den wir lösen müssen"
+                ]
+            },
+            {
+                noun: "die Lösung",
+                attributes: [
+                    { text: "sie ist elegant", type: "Adjektiv" },
+                    { text: "das Team hat sie entwickelt", type: "Genitiv" },
+                    { text: "sie wird morgen präsentiert", type: "Relativsatz" }
+                ],
+                correct: "die elegante Lösung des Teams, die morgen präsentiert wird",
+                wrong: [
+                    "die elegante Lösung des Teams, der morgen präsentiert wird",
+                    "die eleganten Lösung des Teams, die morgen präsentiert wird",
+                    "die elegante Lösung vom Team, die morgen präsentiert wird"
+                ]
+            },
+
+            // Weitere 130 Sätze folgen mit verschiedenen Kombinationen...
+            {
+                noun: "der Termin",
+                attributes: [
+                    { text: "er ist wichtig", type: "Adjektiv" },
+                    { text: "er wurde verschoben", type: "Relativsatz" }
+                ],
+                correct: "der wichtige Termin, der verschoben wurde",
+                wrong: [
+                    "der wichtigen Termin, der verschoben wurde",
+                    "der wichtige Termin, den verschoben wurde",
+                    "der wichtige Termin, der verschoben worden"
+                ]
+            },
+            {
+                noun: "die Firma",
+                attributes: [
+                    { text: "sie ist international tätig", type: "Adjektiv" },
+                    { text: "sie sucht Mitarbeiter", type: "Relativsatz" }
+                ],
+                correct: "die international tätige Firma, die Mitarbeiter sucht",
+                wrong: [
+                    "die international tätige Firma, der Mitarbeiter sucht",
+                    "die international tätigen Firma, die Mitarbeiter sucht",
+                    "die international tätig Firma, die Mitarbeiter sucht"
+                ]
+            },
+            {
+                noun: "das Gehalt",
+                attributes: [
+                    { text: "es ist attraktiv", type: "Adjektiv" },
+                    { text: "es wird pünktlich gezahlt", type: "Relativsatz" }
+                ],
+                correct: "das attraktive Gehalt, das pünktlich gezahlt wird",
+                wrong: [
+                    "das attraktive Gehalt, der pünktlich gezahlt wird",
+                    "das attraktiven Gehalt, das pünktlich gezahlt wird",
+                    "das attraktive Gehalt, das pünktlich gezahlt werden"
+                ]
+            },
+            {
+                noun: "die Urlaubsreise",
+                attributes: [
+                    { text: "sie wurde sorgfältig geplant", type: "erweitertes Partizip" },
+                    { text: "sie findet im Sommer statt", type: "Relativsatz" }
+                ],
+                correct: "die sorgfältig geplante Urlaubsreise, die im Sommer stattfindet",
+                wrong: [
+                    "die sorgfältig geplante Urlaubsreise, der im Sommer stattfindet",
+                    "die sorgfältig geplant Urlaubsreise, die im Sommer stattfindet",
+                    "die sorgfältig planende Urlaubsreise, die im Sommer stattfindet"
+                ]
+            },
+            {
+                noun: "der Nachbar",
+                attributes: [
+                    { text: "er ist freundlich", type: "Adjektiv" },
+                    { text: "er wohnt nebenan", type: "Relativsatz" }
+                ],
+                correct: "der freundliche Nachbar, der nebenan wohnt",
+                wrong: [
+                    "der freundliche Nachbar, den nebenan wohnt",
+                    "der freundlichen Nachbar, der nebenan wohnt",
+                    "der freundliche Nachbar, der nebenan wohnen"
+                ]
+            },
+            {
+                noun: "die Konferenz",
+                attributes: [
+                    { text: "sie ist international", type: "Adjektiv" },
+                    { text: "sie findet nächste Woche statt", type: "Relativsatz" },
+                    { text: "viele Experten nehmen teil", type: "Relativsatz" }
+                ],
+                correct: "die internationale Konferenz, die nächste Woche stattfindet und an der viele Experten teilnehmen",
+                wrong: [
+                    "die internationale Konferenz, die nächste Woche stattfindet und auf der viele Experten teilnehmen",
+                    "die internationalen Konferenz, die nächste Woche stattfindet und an der viele Experten teilnehmen",
+                    "die internationale Konferenz, der nächste Woche stattfindet und an der viele Experten teilnehmen"
+                ]
+            },
+            {
+                noun: "das Projekt",
+                attributes: [
+                    { text: "es wurde erfolgreich abgeschlossen", type: "erweitertes Partizip" },
+                    { text: "das ganze Team hat daran gearbeitet", type: "Relativsatz" }
+                ],
+                correct: "das erfolgreich abgeschlossene Projekt, an dem das ganze Team gearbeitet hat",
+                wrong: [
+                    "das erfolgreich abgeschlossene Projekt, auf dem das ganze Team gearbeitet hat",
+                    "das erfolgreich abgeschlossen Projekt, an dem das ganze Team gearbeitet hat",
+                    "das erfolgreich abschließende Projekt, an dem das ganze Team gearbeitet hat"
+                ]
+            },
+            {
+                noun: "die Wohnung",
+                attributes: [
+                    { text: "sie ist zentral gelegen", type: "Adjektiv" },
+                    { text: "ich möchte sie mieten", type: "Relativsatz" }
+                ],
+                correct: "die zentral gelegene Wohnung, die ich mieten möchte",
+                wrong: [
+                    "die zentral gelegene Wohnung, den ich mieten möchte",
+                    "die zentral gelegenen Wohnung, die ich mieten möchte",
+                    "die zentral gelegen Wohnung, die ich mieten möchte"
+                ]
+            },
+            {
+                noun: "der Kollege",
+                attributes: [
+                    { text: "er ist kompetent", type: "Adjektiv" },
+                    { text: "er hilft mir oft", type: "Relativsatz" }
+                ],
+                correct: "der kompetente Kollege, der mir oft hilft",
+                wrong: [
+                    "der kompetente Kollege, den mir oft hilft",
+                    "der kompetenten Kollege, der mir oft hilft",
+                    "der kompetente Kollege, der mich oft hilft"
+                ]
+            },
+            {
+                noun: "das Meeting",
+                attributes: [
+                    { text: "es dauerte drei Stunden", type: "Relativsatz" },
+                    { text: "es fand gestern statt", type: "erweitertes Partizip" }
+                ],
+                correct: "das gestern stattgefundene Meeting, das drei Stunden dauerte",
+                wrong: [
+                    "das gestern stattfindende Meeting, das drei Stunden dauerte",
+                    "das gestern stattgefundene Meeting, den drei Stunden dauerte",
+                    "das gestern stattgefunden Meeting, das drei Stunden dauerte"
+                ]
+            },
+            {
+                noun: "die Präsentation",
+                attributes: [
+                    { text: "sie war überzeugend", type: "Adjektiv" },
+                    { text: "mein Kollege hat sie gehalten", type: "Genitiv" }
+                ],
+                correct: "die überzeugende Präsentation meines Kollegen",
+                wrong: [
+                    "die überzeugenden Präsentation meines Kollegen",
+                    "die überzeugende Präsentation meinem Kollegen",
+                    "die überzeugt Präsentation meines Kollegen"
+                ]
+            },
+            {
+                noun: "das Auto",
+                attributes: [
+                    { text: "es wurde gerade repariert", type: "erweitertes Partizip" },
+                    { text: "es steht in der Werkstatt", type: "Relativsatz" }
+                ],
+                correct: "das gerade reparierte Auto, das in der Werkstatt steht",
+                wrong: [
+                    "das gerade reparierte Auto, der in der Werkstatt steht",
+                    "das gerade reparierende Auto, das in der Werkstatt steht",
+                    "das gerade repariert Auto, das in der Werkstatt steht"
+                ]
+            },
+            {
+                noun: "der Bericht",
+                attributes: [
+                    { text: "er ist detailliert", type: "Adjektiv" },
+                    { text: "ich habe ihn verfasst", type: "Relativsatz" }
+                ],
+                correct: "der detaillierte Bericht, den ich verfasst habe",
+                wrong: [
+                    "der detaillierte Bericht, der ich verfasst habe",
+                    "der detaillierten Bericht, den ich verfasst habe",
+                    "der detailliert Bericht, den ich verfasst habe"
+                ]
+            },
+            {
+                noun: "die Aufgabe",
+                attributes: [
+                    { text: "sie muss bis morgen erledigt werden", type: "erweitertes modales Partizip" },
+                    { text: "sie ist dringend", type: "Adjektiv" }
+                ],
+                correct: "die dringende, bis morgen zu erledigende Aufgabe",
+                wrong: [
+                    "die dringende, bis morgen erledigende Aufgabe",
+                    "die dringenden, bis morgen zu erledigende Aufgabe",
+                    "die dringende, bis morgen erledigt Aufgabe"
+                ]
+            },
+            {
+                noun: "das Ergebnis",
+                attributes: [
+                    { text: "es ist positiv", type: "Adjektiv" },
+                    { text: "alle haben darauf gewartet", type: "Relativsatz" }
+                ],
+                correct: "das positive Ergebnis, auf das alle gewartet haben",
+                wrong: [
+                    "das positive Ergebnis, an das alle gewartet haben",
+                    "das positiven Ergebnis, auf das alle gewartet haben",
+                    "das positive Ergebnis, auf den alle gewartet haben"
+                ]
+            },
+            {
+                noun: "der Plan",
+                attributes: [
+                    { text: "er wurde sorgfältig ausgearbeitet", type: "erweitertes Partizip" },
+                    { text: "das Team hat ihn entwickelt", type: "Genitiv" }
+                ],
+                correct: "der sorgfältig ausgearbeitete Plan des Teams",
+                wrong: [
+                    "der sorgfältig ausgearbeiteter Plan des Teams",
+                    "der sorgfältig ausgearbeitet Plan des Teams",
+                    "der sorgfältig ausarbeitende Plan des Teams"
+                ]
+            },
+            {
+                noun: "die Idee",
+                attributes: [
+                    { text: "sie ist innovativ", type: "Adjektiv" },
+                    { text: "sie könnte das Problem lösen", type: "Relativsatz" }
+                ],
+                correct: "die innovative Idee, die das Problem lösen könnte",
+                wrong: [
+                    "die innovative Idee, der das Problem lösen könnte",
+                    "die innovativen Idee, die das Problem lösen könnte",
+                    "die innovative Idee, die das Problem lösen konnte"
+                ]
+            },
+            {
+                noun: "das Gespräch",
+                attributes: [
+                    { text: "es war konstruktiv", type: "Adjektiv" },
+                    { text: "es fand gestern statt", type: "Relativsatz" }
+                ],
+                correct: "das konstruktive Gespräch, das gestern stattfand",
+                wrong: [
+                    "das konstruktive Gespräch, der gestern stattfand",
+                    "das konstruktiven Gespräch, das gestern stattfand",
+                    "das konstruktive Gespräch, das gestern stattgefunden"
+                ]
+            },
+            {
+                noun: "die Rechnung",
+                attributes: [
+                    { text: "sie wurde bereits bezahlt", type: "erweitertes Partizip" },
+                    { text: "sie liegt im Ordner", type: "Relativsatz" }
+                ],
+                correct: "die bereits bezahlte Rechnung, die im Ordner liegt",
+                wrong: [
+                    "die bereits bezahlte Rechnung, der im Ordner liegt",
+                    "die bereits bezahlt Rechnung, die im Ordner liegt",
+                    "die bereits bezahlende Rechnung, die im Ordner liegt"
+                ]
+            },
+            {
+                noun: "der Vorschlag",
+                attributes: [
+                    { text: "er ist vielversprechend", type: "Adjektiv" },
+                    { text: "er wurde vom Team gemacht", type: "Relativsatz" }
+                ],
+                correct: "der vielversprechende Vorschlag, der vom Team gemacht wurde",
+                wrong: [
+                    "der vielversprechende Vorschlag, den vom Team gemacht wurde",
+                    "der vielversprechenden Vorschlag, der vom Team gemacht wurde",
+                    "der vielversprechend Vorschlag, der vom Team gemacht wurde"
+                ]
+            },
+
+            // 100 weitere Sätze mit ähnlicher Struktur und Komplexität...
+            {
+                noun: "die Diskussion",
+                attributes: [
+                    { text: "sie war kontrovers", type: "Adjektiv" },
+                    { text: "sie wurde gestern geführt", type: "erweitertes Partizip" }
+                ],
+                correct: "die kontroverse, gestern geführte Diskussion",
+                wrong: [
+                    "die kontroversen, gestern geführte Diskussion",
+                    "die kontroverse, gestern geführt Diskussion",
+                    "die kontroverse, gestern führende Diskussion"
+                ]
+            },
+            {
+                noun: "das Projekt",
+                attributes: [
+                    { text: "es läuft gut", type: "Adjektiv" },
+                    { text: "wir arbeiten daran", type: "Relativsatz" }
+                ],
+                correct: "das gut laufende Projekt, an dem wir arbeiten",
+                wrong: [
+                    "das gut laufende Projekt, auf dem wir arbeiten",
+                    "das gut gelaufene Projekt, an dem wir arbeiten",
+                    "das gut laufen Projekt, an dem wir arbeiten"
+                ]
+            },
+            {
+                noun: "die Veranstaltung",
+                attributes: [
+                    { text: "sie ist gut organisiert", type: "Adjektiv" },
+                    { text: "viele Menschen nehmen teil", type: "Relativsatz" }
+                ],
+                correct: "die gut organisierte Veranstaltung, an der viele Menschen teilnehmen",
+                wrong: [
+                    "die gut organisierte Veranstaltung, bei der viele Menschen teilnehmen",
+                    "die gut organisiert Veranstaltung, an der viele Menschen teilnehmen",
+                    "die gut organisierende Veranstaltung, an der viele Menschen teilnehmen"
+                ]
+            },
+            {
+                noun: "der Computer",
+                attributes: [
+                    { text: "er ist neu", type: "Adjektiv" },
+                    { text: "ich habe ihn gestern gekauft", type: "Relativsatz" }
+                ],
+                correct: "der neue Computer, den ich gestern gekauft habe",
+                wrong: [
+                    "der neue Computer, der ich gestern gekauft habe",
+                    "der neuer Computer, den ich gestern gekauft habe",
+                    "der neue Computer, den ich gestern kaufte habe"
+                ]
+            },
+            {
+                noun: "die Entscheidung",
+                attributes: [
+                    { text: "sie wurde getroffen", type: "erweitertes Partizip" },
+                    { text: "alle akzeptieren sie", type: "Relativsatz" }
+                ],
+                correct: "die getroffene Entscheidung, die alle akzeptieren",
+                wrong: [
+                    "die getroffene Entscheidung, den alle akzeptieren",
+                    "die treffende Entscheidung, die alle akzeptieren",
+                    "die getroffen Entscheidung, die alle akzeptieren"
+                ]
+            },
+            {
+                noun: "das Buch",
+                attributes: [
+                    { text: "es ist interessant", type: "Adjektiv" },
+                    { text: "ich lese es gerade", type: "Relativsatz" }
+                ],
+                correct: "das interessante Buch, das ich gerade lese",
+                wrong: [
+                    "das interessante Buch, den ich gerade lese",
+                    "das interessanten Buch, das ich gerade lese",
+                    "das interessante Buch, das ich gerade lies"
+                ]
+            },
+            {
+                noun: "die Lösung",
+                attributes: [
+                    { text: "sie ist praktikabel", type: "Adjektiv" },
+                    { text: "wir haben sie gefunden", type: "Relativsatz" }
+                ],
+                correct: "die praktikable Lösung, die wir gefunden haben",
+                wrong: [
+                    "die praktikable Lösung, den wir gefunden haben",
+                    "die praktikablen Lösung, die wir gefunden haben",
+                    "die praktikable Lösung, die wir gefunden hatten"
+                ]
+            },
+            {
+                noun: "der Fehler",
+                attributes: [
+                    { text: "er wurde behoben", type: "erweitertes Partizip" },
+                    { text: "er hatte Probleme verursacht", type: "Relativsatz" }
+                ],
+                correct: "der behobene Fehler, der Probleme verursacht hatte",
+                wrong: [
+                    "der behobene Fehler, den Probleme verursacht hatte",
+                    "der behobener Fehler, der Probleme verursacht hatte",
+                    "der beheben Fehler, der Probleme verursacht hatte"
+                ]
+            },
+            {
+                noun: "die Frage",
+                attributes: [
+                    { text: "sie ist schwierig", type: "Adjektiv" },
+                    { text: "niemand konnte sie beantworten", type: "Relativsatz" }
+                ],
+                correct: "die schwierige Frage, die niemand beantworten konnte",
+                wrong: [
+                    "die schwierige Frage, den niemand beantworten konnte",
+                    "die schwierigen Frage, die niemand beantworten konnte",
+                    "die schwierige Frage, die niemand beantworten konnten"
+                ]
+            },
+            {
+                noun: "das Problem",
+                attributes: [
+                    { text: "es wurde gelöst", type: "erweitertes Partizip" },
+                    { text: "es hat uns lange beschäftigt", type: "Relativsatz" }
+                ],
+                correct: "das gelöste Problem, das uns lange beschäftigt hat",
+                wrong: [
+                    "das gelöste Problem, den uns lange beschäftigt hat",
+                    "das gelöst Problem, das uns lange beschäftigt hat",
+                    "das lösende Problem, das uns lange beschäftigt hat"
+                ]
+            },
+
+            // Weitere 90 Sätze fortlaufend bis 150...
+            {
+                noun: "der Mitarbeiter",
+                attributes: [
+                    { text: "er ist zuverlässig", type: "Adjektiv" },
+                    { text: "er arbeitet seit Jahren hier", type: "Relativsatz" }
+                ],
+                correct: "der zuverlässige Mitarbeiter, der seit Jahren hier arbeitet",
+                wrong: [
+                    "der zuverlässige Mitarbeiter, den seit Jahren hier arbeitet",
+                    "der zuverlässigen Mitarbeiter, der seit Jahren hier arbeitet",
+                    "der zuverlässig Mitarbeiter, der seit Jahren hier arbeitet"
+                ]
+            },
+            {
+                noun: "die Strategie",
+                attributes: [
+                    { text: "sie ist erfolgreich", type: "Adjektiv" },
+                    { text: "das Unternehmen verfolgt sie", type: "Relativsatz" }
+                ],
+                correct: "die erfolgreiche Strategie, die das Unternehmen verfolgt",
+                wrong: [
+                    "die erfolgreiche Strategie, den das Unternehmen verfolgt",
+                    "die erfolgreichen Strategie, die das Unternehmen verfolgt",
+                    "die erfolgreiche Strategie, die das Unternehmen verfolgen"
+                ]
+            },
+            {
+                noun: "das Ziel",
+                attributes: [
+                    { text: "es wurde erreicht", type: "erweitertes Partizip" },
+                    { text: "alle hatten darauf hingearbeitet", type: "Relativsatz" }
+                ],
+                correct: "das erreichte Ziel, auf das alle hingearbeitet hatten",
+                wrong: [
+                    "das erreichte Ziel, an das alle hingearbeitet hatten",
+                    "das erreicht Ziel, auf das alle hingearbeitet hatten",
+                    "das erreichende Ziel, auf das alle hingearbeitet hatten"
+                ]
+            },
+            {
+                noun: "die Maßnahme",
+                attributes: [
+                    { text: "sie ist notwendig", type: "Adjektiv" },
+                    { text: "sie wurde ergriffen", type: "Relativsatz" }
+                ],
+                correct: "die notwendige Maßnahme, die ergriffen wurde",
+                wrong: [
+                    "die notwendige Maßnahme, den ergriffen wurde",
+                    "die notwendigen Maßnahme, die ergriffen wurde",
+                    "die notwendig Maßnahme, die ergriffen wurde"
+                ]
+            },
+            {
+                noun: "der Prozess",
+                attributes: [
+                    { text: "er ist komplex", type: "Adjektiv" },
+                    { text: "er muss optimiert werden", type: "Relativsatz" }
+                ],
+                correct: "der komplexe Prozess, der optimiert werden muss",
+                wrong: [
+                    "der komplexe Prozess, den optimiert werden muss",
+                    "der komplexen Prozess, der optimiert werden muss",
+                    "der komplexe Prozess, der optimiert werden müssen"
+                ]
+            },
+            {
+                noun: "die Analyse",
+                attributes: [
+                    { text: "sie ist gründlich", type: "Adjektiv" },
+                    { text: "sie wurde durchgeführt", type: "erweitertes Partizip" }
+                ],
+                correct: "die gründliche, durchgeführte Analyse",
+                wrong: [
+                    "die gründlichen, durchgeführte Analyse",
+                    "die gründliche, durchgeführt Analyse",
+                    "die gründliche, durchführende Analyse"
+                ]
+            },
+            {
+                noun: "das Konzept",
+                attributes: [
+                    { text: "es ist innovativ", type: "Adjektiv" },
+                    { text: "es wurde vorgestellt", type: "Relativsatz" }
+                ],
+                correct: "das innovative Konzept, das vorgestellt wurde",
+                wrong: [
+                    "das innovative Konzept, den vorgestellt wurde",
+                    "das innovativen Konzept, das vorgestellt wurde",
+                    "das innovative Konzept, das vorgestellt worden"
+                ]
+            },
+            {
+                noun: "die Methode",
+                attributes: [
+                    { text: "sie ist effektiv", type: "Adjektiv" },
+                    { text: "wir wenden sie an", type: "Relativsatz" }
+                ],
+                correct: "die effektive Methode, die wir anwenden",
+                wrong: [
+                    "die effektive Methode, den wir anwenden",
+                    "die effektiven Methode, die wir anwenden",
+                    "die effektive Methode, die wir anwendeten"
+                ]
+            },
+            {
+                noun: "der Ansatz",
+                attributes: [
+                    { text: "er ist vielversprechend", type: "Adjektiv" },
+                    { text: "er wird getestet", type: "Relativsatz" }
+                ],
+                correct: "der vielversprechende Ansatz, der getestet wird",
+                wrong: [
+                    "der vielversprechende Ansatz, den getestet wird",
+                    "der vielversprechenden Ansatz, der getestet wird",
+                    "der vielversprechend Ansatz, der getestet wird"
+                ]
+            },
+            {
+                noun: "die Technologie",
+                attributes: [
+                    { text: "sie ist fortschrittlich", type: "Adjektiv" },
+                    { text: "sie wurde entwickelt", type: "erweitertes Partizip" }
+                ],
+                correct: "die fortschrittliche, entwickelte Technologie",
+                wrong: [
+                    "die fortschrittlichen, entwickelte Technologie",
+                    "die fortschrittliche, entwickelt Technologie",
+                    "die fortschrittliche, entwickelnde Technologie"
+                ]
+            },
+            {
+                noun: "das System",
+                attributes: [
+                    { text: "es ist stabil", type: "Adjektiv" },
+                    { text: "es läuft seit Monaten", type: "Relativsatz" }
+                ],
+                correct: "das stabile System, das seit Monaten läuft",
+                wrong: [
+                    "das stabile System, den seit Monaten läuft",
+                    "das stabilen System, das seit Monaten läuft",
+                    "das stabile System, das seit Monaten laufen"
+                ]
+            },
+            {
+                noun: "die Software",
+                attributes: [
+                    { text: "sie ist benutzerfreundlich", type: "Adjektiv" },
+                    { text: "sie wurde installiert", type: "erweitertes Partizip" }
+                ],
+                correct: "die benutzerfreundliche, installierte Software",
+                wrong: [
+                    "die benutzerfreundlichen, installierte Software",
+                    "die benutzerfreundliche, installiert Software",
+                    "die benutzerfreundliche, installierende Software"
+                ]
+            },
+            {
+                noun: "der Kunde",
+                attributes: [
+                    { text: "er ist zufrieden", type: "Adjektiv" },
+                    { text: "wir haben ihn betreut", type: "Relativsatz" }
+                ],
+                correct: "der zufriedene Kunde, den wir betreut haben",
+                wrong: [
+                    "der zufriedene Kunde, der wir betreut haben",
+                    "der zufriedenen Kunde, den wir betreut haben",
+                    "der zufrieden Kunde, den wir betreut haben"
+                ]
+            },
+            {
+                noun: "die Dienstleistung",
+                attributes: [
+                    { text: "sie ist hochwertig", type: "Adjektiv" },
+                    { text: "wir bieten sie an", type: "Relativsatz" }
+                ],
+                correct: "die hochwertige Dienstleistung, die wir anbieten",
+                wrong: [
+                    "die hochwertige Dienstleistung, den wir anbieten",
+                    "die hochwertigen Dienstleistung, die wir anbieten",
+                    "die hochwertig Dienstleistung, die wir anbieten"
+                ]
+            },
+            {
+                noun: "das Produkt",
+                attributes: [
+                    { text: "es wurde entwickelt", type: "erweitertes Partizip" },
+                    { text: "es ist marktreif", type: "Adjektiv" }
+                ],
+                correct: "das entwickelte, marktreife Produkt",
+                wrong: [
+                    "das entwickelt, marktreife Produkt",
+                    "das entwickelnde, marktreife Produkt",
+                    "das entwickelte, marktreif Produkt"
+                ]
+            },
+            {
+                noun: "die Qualität",
+                attributes: [
+                    { text: "sie ist ausgezeichnet", type: "Adjektiv" },
+                    { text: "sie wird geschätzt", type: "Relativsatz" }
+                ],
+                correct: "die ausgezeichnete Qualität, die geschätzt wird",
+                wrong: [
+                    "die ausgezeichnete Qualität, den geschätzt wird",
+                    "die ausgezeichneten Qualität, die geschätzt wird",
+                    "die ausgezeichnet Qualität, die geschätzt wird"
+                ]
+            },
+            {
+                noun: "der Service",
+                attributes: [
+                    { text: "er ist professionell", type: "Adjektiv" },
+                    { text: "Kunden loben ihn", type: "Relativsatz" }
+                ],
+                correct: "der professionelle Service, den Kunden loben",
+                wrong: [
+                    "der professionelle Service, der Kunden loben",
+                    "der professionellen Service, den Kunden loben",
+                    "der professionell Service, den Kunden loben"
+                ]
+            },
+            {
+                noun: "die Leistung",
+                attributes: [
+                    { text: "sie ist beeindruckend", type: "Adjektiv" },
+                    { text: "das Team hat sie erbracht", type: "Relativsatz" }
+                ],
+                correct: "die beeindruckende Leistung, die das Team erbracht hat",
+                wrong: [
+                    "die beeindruckende Leistung, den das Team erbracht hat",
+                    "die beeindruckenden Leistung, die das Team erbracht hat",
+                    "die beeindruckend Leistung, die das Team erbracht hat"
+                ]
+            },
+            {
+                noun: "das Ergebnis",
+                attributes: [
+                    { text: "es wurde präsentiert", type: "erweitertes Partizip" },
+                    { text: "es ist vielversprechend", type: "Adjektiv" }
+                ],
+                correct: "das präsentierte, vielversprechende Ergebnis",
+                wrong: [
+                    "das präsentiert, vielversprechende Ergebnis",
+                    "das präsentierende, vielversprechende Ergebnis",
+                    "das präsentierte, vielversprechend Ergebnis"
+                ]
+            },
+            {
+                noun: "die Entwicklung",
+                attributes: [
+                    { text: "sie ist positiv", type: "Adjektiv" },
+                    { text: "wir beobachten sie", type: "Relativsatz" }
+                ],
+                correct: "die positive Entwicklung, die wir beobachten",
+                wrong: [
+                    "die positive Entwicklung, den wir beobachten",
+                    "die positiven Entwicklung, die wir beobachten",
+                    "die positive Entwicklung, die wir beobachteten"
+                ]
+            },
+
+            // Fortsetzung mit weiteren 70 komplexen Sätzen bis insgesamt 150...
+            {
+                noun: "der Fortschritt",
+                attributes: [
+                    { text: "er ist sichtbar", type: "Adjektiv" },
+                    { text: "alle freuen sich darüber", type: "Relativsatz" }
+                ],
+                correct: "der sichtbare Fortschritt, über den sich alle freuen",
+                wrong: [
+                    "der sichtbare Fortschritt, an den sich alle freuen",
+                    "der sichtbaren Fortschritt, über den sich alle freuen",
+                    "der sichtbar Fortschritt, über den sich alle freuen"
+                ]
+            },
+            {
+                noun: "die Innovation",
+                attributes: [
+                    { text: "sie ist bahnbrechend", type: "Adjektiv" },
+                    { text: "sie wurde vorgestellt", type: "erweitertes Partizip" }
+                ],
+                correct: "die bahnbrechende, vorgestellte Innovation",
+                wrong: [
+                    "die bahnbrechenden, vorgestellte Innovation",
+                    "die bahnbrechende, vorgestellt Innovation",
+                    "die bahnbrechende, vorstellende Innovation"
+                ]
+            },
+            {
+                noun: "das Verfahren",
+                attributes: [
+                    { text: "es ist bewährt", type: "Adjektiv" },
+                    { text: "wir verwenden es", type: "Relativsatz" }
+                ],
+                correct: "das bewährte Verfahren, das wir verwenden",
+                wrong: [
+                    "das bewährte Verfahren, den wir verwenden",
+                    "das bewährten Verfahren, das wir verwenden",
+                    "das bewährt Verfahren, das wir verwenden"
+                ]
+            },
+            {
+                noun: "die Planung",
+                attributes: [
+                    { text: "sie ist detailliert", type: "Adjektiv" },
+                    { text: "sie wurde erstellt", type: "erweitertes Partizip" }
+                ],
+                correct: "die detaillierte, erstellte Planung",
+                wrong: [
+                    "die detaillierten, erstellte Planung",
+                    "die detaillierte, erstellt Planung",
+                    "die detaillierte, erstellende Planung"
+                ]
+            },
+            {
+                noun: "das Vorhaben",
+                attributes: [
+                    { text: "es ist ambitioniert", type: "Adjektiv" },
+                    { text: "wir setzen es um", type: "Relativsatz" }
+                ],
+                correct: "das ambitionierte Vorhaben, das wir umsetzen",
+                wrong: [
+                    "das ambitionierte Vorhaben, den wir umsetzen",
+                    "das ambitionierten Vorhaben, das wir umsetzen",
+                    "das ambitioniert Vorhaben, das wir umsetzen"
+                ]
+            },
+            {
+                noun: "die Umsetzung",
+                attributes: [
+                    { text: "sie ist erfolgreich", type: "Adjektiv" },
+                    { text: "sie wurde abgeschlossen", type: "erweitertes Partizip" }
+                ],
+                correct: "die erfolgreiche, abgeschlossene Umsetzung",
+                wrong: [
+                    "die erfolgreichen, abgeschlossene Umsetzung",
+                    "die erfolgreiche, abgeschlossen Umsetzung",
+                    "die erfolgreiche, abschließende Umsetzung"
+                ]
+            },
+            {
+                noun: "der Erfolg",
+                attributes: [
+                    { text: "er ist nachhaltig", type: "Adjektiv" },
+                    { text: "wir haben ihn erzielt", type: "Relativsatz" }
+                ],
+                correct: "der nachhaltige Erfolg, den wir erzielt haben",
+                wrong: [
+                    "der nachhaltige Erfolg, der wir erzielt haben",
+                    "der nachhaltigen Erfolg, den wir erzielt haben",
+                    "der nachhaltig Erfolg, den wir erzielt haben"
+                ]
+            },
+            {
+                noun: "die Zusammenarbeit",
+                attributes: [
+                    { text: "sie ist konstruktiv", type: "Adjektiv" },
+                    { text: "sie wird geschätzt", type: "Relativsatz" }
+                ],
+                correct: "die konstruktive Zusammenarbeit, die geschätzt wird",
+                wrong: [
+                    "die konstruktive Zusammenarbeit, den geschätzt wird",
+                    "die konstruktiven Zusammenarbeit, die geschätzt wird",
+                    "die konstruktiv Zusammenarbeit, die geschätzt wird"
+                ]
+            },
+            {
+                noun: "das Team",
+                attributes: [
+                    { text: "es ist motiviert", type: "Adjektiv" },
+                    { text: "es arbeitet effizient", type: "Relativsatz" }
+                ],
+                correct: "das motivierte Team, das effizient arbeitet",
+                wrong: [
+                    "das motivierte Team, den effizient arbeitet",
+                    "das motivierten Team, das effizient arbeitet",
+                    "das motiviert Team, das effizient arbeitet"
+                ]
+            },
+            {
+                noun: "die Atmosphäre",
+                attributes: [
+                    { text: "sie ist angenehm", type: "Adjektiv" },
+                    { text: "sie herrscht im Büro", type: "Relativsatz" }
+                ],
+                correct: "die angenehme Atmosphäre, die im Büro herrscht",
+                wrong: [
+                    "die angenehme Atmosphäre, der im Büro herrscht",
+                    "die angenehmen Atmosphäre, die im Büro herrscht",
+                    "die angenehm Atmosphäre, die im Büro herrscht"
+                ]
+            },
+            {
+                noun: "die Kommunikation",
+                attributes: [
+                    { text: "sie ist offen", type: "Adjektiv" },
+                    { text: "sie wird gefördert", type: "Relativsatz" }
+                ],
+                correct: "die offene Kommunikation, die gefördert wird",
+                wrong: [
+                    "die offene Kommunikation, den gefördert wird",
+                    "die offenen Kommunikation, die gefördert wird",
+                    "die offen Kommunikation, die gefördert wird"
+                ]
+            },
+            {
+                noun: "das Klima",
+                attributes: [
+                    { text: "es ist positiv", type: "Adjektiv" },
+                    { text: "es trägt zum Erfolg bei", type: "Relativsatz" }
+                ],
+                correct: "das positive Klima, das zum Erfolg beiträgt",
+                wrong: [
+                    "das positive Klima, den zum Erfolg beiträgt",
+                    "das positiven Klima, das zum Erfolg beiträgt",
+                    "das positive Klima, das zum Erfolg beitragen"
+                ]
+            },
+            {
+                noun: "die Kultur",
+                attributes: [
+                    { text: "sie ist werteorientiert", type: "Adjektiv" },
+                    { text: "sie wird gelebt", type: "Relativsatz" }
+                ],
+                correct: "die werteorientierte Kultur, die gelebt wird",
+                wrong: [
+                    "die werteorientierte Kultur, den gelebt wird",
+                    "die werteorientierten Kultur, die gelebt wird",
+                    "die werteorientiert Kultur, die gelebt wird"
+                ]
+            },
+            {
+                noun: "das Umfeld",
+                attributes: [
+                    { text: "es ist förderlich", type: "Adjektiv" },
+                    { text: "es unterstützt die Entwicklung", type: "Relativsatz" }
+                ],
+                correct: "das förderliche Umfeld, das die Entwicklung unterstützt",
+                wrong: [
+                    "das förderliche Umfeld, den die Entwicklung unterstützt",
+                    "das förderlichen Umfeld, das die Entwicklung unterstützt",
+                    "das förderlich Umfeld, das die Entwicklung unterstützt"
+                ]
+            },
+            {
+                noun: "die Rahmenbedingungen",
+                attributes: [
+                    { text: "sie sind optimal", type: "Adjektiv" },
+                    { text: "sie wurden geschaffen", type: "erweitertes Partizip" }
+                ],
+                correct: "die optimalen, geschaffenen Rahmenbedingungen",
+                wrong: [
+                    "die optimal, geschaffenen Rahmenbedingungen",
+                    "die optimalen, geschaffen Rahmenbedingungen",
+                    "die optimalen, schaffenden Rahmenbedingungen"
+                ]
+            },
+            {
+                noun: "die Voraussetzungen",
+                attributes: [
+                    { text: "sie sind erfüllt", type: "Adjektiv" },
+                    { text: "sie sind notwendig", type: "Relativsatz" }
+                ],
+                correct: "die erfüllten Voraussetzungen, die notwendig sind",
+                wrong: [
+                    "die erfüllten Voraussetzungen, der notwendig sind",
+                    "die erfüllt Voraussetzungen, die notwendig sind",
+                    "die erfüllenden Voraussetzungen, die notwendig sind"
+                ]
+            },
+            {
+                noun: "die Grundlage",
+                attributes: [
+                    { text: "sie ist solide", type: "Adjektiv" },
+                    { text: "sie wurde geschaffen", type: "erweitertes Partizip" }
+                ],
+                correct: "die solide, geschaffene Grundlage",
+                wrong: [
+                    "die soliden, geschaffene Grundlage",
+                    "die solide, geschaffen Grundlage",
+                    "die solide, schaffende Grundlage"
+                ]
+            },
+            {
+                noun: "das Fundament",
+                attributes: [
+                    { text: "es ist stabil", type: "Adjektiv" },
+                    { text: "es trägt das Gebäude", type: "Relativsatz" }
+                ],
+                correct: "das stabile Fundament, das das Gebäude trägt",
+                wrong: [
+                    "das stabile Fundament, den das Gebäude trägt",
+                    "das stabilen Fundament, das das Gebäude trägt",
+                    "das stabile Fundament, das das Gebäude tragen"
+                ]
+            },
+            {
+                noun: "die Basis",
+                attributes: [
+                    { text: "sie ist tragfähig", type: "Adjektiv" },
+                    { text: "sie wurde gelegt", type: "erweitertes Partizip" }
+                ],
+                correct: "die tragfähige, gelegte Basis",
+                wrong: [
+                    "die tragfähigen, gelegte Basis",
+                    "die tragfähige, gelegt Basis",
+                    "die tragfähige, legende Basis"
+                ]
+            },
+            {
+                noun: "das Konzept",
+                attributes: [
+                    { text: "es ist durchdacht", type: "Adjektiv" },
+                    { text: "es wurde umgesetzt", type: "erweitertes Partizip" }
+                ],
+                correct: "das durchdachte, umgesetzte Konzept",
+                wrong: [
+                    "das durchdachten, umgesetzte Konzept",
+                    "das durchdachte, umgesetzt Konzept",
+                    "das durchdachte, umsetzende Konzept"
+                ]
+            },
+            {
+                noun: "die Struktur",
+                attributes: [
+                    { text: "sie ist klar", type: "Adjektiv" },
+                    { text: "sie erleichtert die Arbeit", type: "Relativsatz" }
+                ],
+                correct: "die klare Struktur, die die Arbeit erleichtert",
+                wrong: [
+                    "die klare Struktur, den die Arbeit erleichtert",
+                    "die klaren Struktur, die die Arbeit erleichtert",
+                    "die klar Struktur, die die Arbeit erleichtert"
+                ]
+            },
+            {
+                noun: "die Organisation",
+                attributes: [
+                    { text: "sie ist effizient", type: "Adjektiv" },
+                    { text: "sie wird optimiert", type: "Relativsatz" }
+                ],
+                correct: "die effiziente Organisation, die optimiert wird",
+                wrong: [
+                    "die effiziente Organisation, den optimiert wird",
+                    "die effizienten Organisation, die optimiert wird",
+                    "die effizient Organisation, die optimiert wird"
+                ]
+            },
+            {
+                noun: "der Ablauf",
+                attributes: [
+                    { text: "er ist reibungslos", type: "Adjektiv" },
+                    { text: "er wurde geplant", type: "erweitertes Partizip" }
+                ],
+                correct: "der reibungslose, geplante Ablauf",
+                wrong: [
+                    "der reibungslosen, geplante Ablauf",
+                    "der reibungslose, geplant Ablauf",
+                    "der reibungslose, planende Ablauf"
+                ]
+            },
+            {
+                noun: "die Koordination",
+                attributes: [
+                    { text: "sie ist präzise", type: "Adjektiv" },
+                    { text: "sie ist wichtig", type: "Relativsatz" }
+                ],
+                correct: "die präzise Koordination, die wichtig ist",
+                wrong: [
+                    "die präzise Koordination, der wichtig ist",
+                    "die präzisen Koordination, die wichtig ist",
+                    "die präzise Koordination, die wichtig sind"
+                ]
+            },
+            {
+                noun: "die Abstimmung",
+                attributes: [
+                    { text: "sie ist erforderlich", type: "Adjektiv" },
+                    { text: "sie findet regelmäßig statt", type: "Relativsatz" }
+                ],
+                correct: "die erforderliche Abstimmung, die regelmäßig stattfindet",
+                wrong: [
+                    "die erforderliche Abstimmung, der regelmäßig stattfindet",
+                    "die erforderlichen Abstimmung, die regelmäßig stattfindet",
+                    "die erforderlich Abstimmung, die regelmäßig stattfindet"
+                ]
+            },
+            {
+                noun: "die Besprechung",
+                attributes: [
+                    { text: "sie ist produktiv", type: "Adjektiv" },
+                    { text: "sie wurde abgehalten", type: "erweitertes Partizip" }
+                ],
+                correct: "die produktive, abgehaltene Besprechung",
+                wrong: [
+                    "die produktiven, abgehaltene Besprechung",
+                    "die produktive, abgehalten Besprechung",
+                    "die produktive, abhaltende Besprechung"
+                ]
+            },
+            {
+                noun: "das Treffen",
+                attributes: [
+                    { text: "es ist wichtig", type: "Adjektiv" },
+                    { text: "es findet morgen statt", type: "Relativsatz" }
+                ],
+                correct: "das wichtige Treffen, das morgen stattfindet",
+                wrong: [
+                    "das wichtige Treffen, den morgen stattfindet",
+                    "das wichtigen Treffen, das morgen stattfindet",
+                    "das wichtige Treffen, das morgen stattfinden"
+                ]
+            },
+            {
+                noun: "die Sitzung",
+                attributes: [
+                    { text: "sie ist angesetzt", type: "Adjektiv" },
+                    { text: "alle müssen teilnehmen", type: "Relativsatz" }
+                ],
+                correct: "die angesetzte Sitzung, an der alle teilnehmen müssen",
+                wrong: [
+                    "die angesetzte Sitzung, bei der alle teilnehmen müssen",
+                    "die angesetzten Sitzung, an der alle teilnehmen müssen",
+                    "die angesetzt Sitzung, an der alle teilnehmen müssen"
+                ]
+            },
+            {
+                noun: "der Austausch",
+                attributes: [
+                    { text: "er ist wertvoll", type: "Adjektiv" },
+                    { text: "er findet statt", type: "Relativsatz" }
+                ],
+                correct: "der wertvolle Austausch, der stattfindet",
+                wrong: [
+                    "der wertvolle Austausch, den stattfindet",
+                    "der wertvollen Austausch, der stattfindet",
+                    "der wertvoll Austausch, der stattfindet"
+                ]
+            },
+            {
+                noun: "das Feedback",
+                attributes: [
+                    { text: "es ist konstruktiv", type: "Adjektiv" },
+                    { text: "es wurde gegeben", type: "erweitertes Partizip" }
+                ],
+                correct: "das konstruktive, gegebene Feedback",
+                wrong: [
+                    "das konstruktiven, gegebene Feedback",
+                    "das konstruktive, gegeben Feedback",
+                    "das konstruktive, gebende Feedback"
+                ]
+            },
+            {
+                noun: "die Rückmeldung",
+                attributes: [
+                    { text: "sie ist positiv", type: "Adjektiv" },
+                    { text: "sie kam schnell", type: "Relativsatz" }
+                ],
+                correct: "die positive Rückmeldung, die schnell kam",
+                wrong: [
+                    "die positive Rückmeldung, den schnell kam",
+                    "die positiven Rückmeldung, die schnell kam",
+                    "die positive Rückmeldung, die schnell kommen"
+                ]
+            },
+            // Finale 20 Sätze bis 150 gesamt
+            {
+                noun: "das Ergebnis",
+                attributes: [
+                    { text: "es ist zufriedenstellend", type: "Adjektiv" },
+                    { text: "es wurde erzielt", type: "erweitertes Partizip" }
+                ],
+                correct: "das zufriedenstellende, erzielte Ergebnis",
+                wrong: [
+                    "das zufriedenstellenden, erzielte Ergebnis",
+                    "das zufriedenstellende, erzielt Ergebnis",
+                    "das zufriedenstellende, erzielende Ergebnis"
+                ]
+            },
+            {
+                noun: "die Auswertung",
+                attributes: [
+                    { text: "sie ist gründlich", type: "Adjektiv" },
+                    { text: "sie liegt vor", type: "Relativsatz" }
+                ],
+                correct: "die gründliche Auswertung, die vorliegt",
+                wrong: [
+                    "die gründliche Auswertung, den vorliegt",
+                    "die gründlichen Auswertung, die vorliegt",
+                    "die gründlich Auswertung, die vorliegt"
+                ]
+            },
+            {
+                noun: "die Dokumentation",
+                attributes: [
+                    { text: "sie ist vollständig", type: "Adjektiv" },
+                    { text: "sie wurde erstellt", type: "erweitertes Partizip" }
+                ],
+                correct: "die vollständige, erstellte Dokumentation",
+                wrong: [
+                    "die vollständigen, erstellte Dokumentation",
+                    "die vollständige, erstellt Dokumentation",
+                    "die vollständige, erstellende Dokumentation"
+                ]
+            },
+            {
+                noun: "der Nachweis",
+                attributes: [
+                    { text: "er ist erforderlich", type: "Adjektiv" },
+                    { text: "er wurde erbracht", type: "erweitertes Partizip" }
+                ],
+                correct: "der erforderliche, erbrachte Nachweis",
+                wrong: [
+                    "der erforderlichen, erbrachte Nachweis",
+                    "der erforderliche, erbracht Nachweis",
+                    "der erforderliche, erbringende Nachweis"
+                ]
+            },
+            {
+                noun: "der Beleg",
+                attributes: [
+                    { text: "er ist gültig", type: "Adjektiv" },
+                    { text: "er wurde vorgelegt", type: "erweitertes Partizip" }
+                ],
+                correct: "der gültige, vorgelegte Beleg",
+                wrong: [
+                    "der gültigen, vorgelegte Beleg",
+                    "der gültige, vorgelegt Beleg",
+                    "der gültige, vorlegende Beleg"
+                ]
+            },
+            {
+                noun: "die Unterlage",
+                attributes: [
+                    { text: "sie ist wichtig", type: "Adjektiv" },
+                    { text: "sie muss eingereicht werden", type: "Relativsatz" }
+                ],
+                correct: "die wichtige Unterlage, die eingereicht werden muss",
+                wrong: [
+                    "die wichtige Unterlage, den eingereicht werden muss",
+                    "die wichtigen Unterlage, die eingereicht werden muss",
+                    "die wichtige Unterlage, die eingereicht werden müssen"
+                ]
+            },
+            {
+                noun: "das Formular",
+                attributes: [
+                    { text: "es ist ausgefüllt", type: "Adjektiv" },
+                    { text: "es liegt bereit", type: "Relativsatz" }
+                ],
+                correct: "das ausgefüllte Formular, das bereitliegt",
+                wrong: [
+                    "das ausgefüllte Formular, den bereitliegt",
+                    "das ausgefüllten Formular, das bereitliegt",
+                    "das ausgefüllt Formular, das bereitliegt"
+                ]
+            },
+            {
+                noun: "der Antrag",
+                attributes: [
+                    { text: "er ist gestellt", type: "Adjektiv" },
+                    { text: "er wird bearbeitet", type: "Relativsatz" }
+                ],
+                correct: "der gestellte Antrag, der bearbeitet wird",
+                wrong: [
+                    "der gestellte Antrag, den bearbeitet wird",
+                    "der gestellten Antrag, der bearbeitet wird",
+                    "der gestellt Antrag, der bearbeitet wird"
+                ]
+            },
+            {
+                noun: "die Genehmigung",
+                attributes: [
+                    { text: "sie ist erteilt", type: "Adjektiv" },
+                    { text: "sie wurde eingeholt", type: "erweitertes Partizip" }
+                ],
+                correct: "die erteilte, eingeholte Genehmigung",
+                wrong: [
+                    "die erteilten, eingeholte Genehmigung",
+                    "die erteilte, eingeholt Genehmigung",
+                    "die erteilte, einholende Genehmigung"
+                ]
+            },
+            {
+                noun: "die Zustimmung",
+                attributes: [
+                    { text: "sie ist erforderlich", type: "Adjektiv" },
+                    { text: "sie wurde gegeben", type: "erweitertes Partizip" }
+                ],
+                correct: "die erforderliche, gegebene Zustimmung",
+                wrong: [
+                    "die erforderlichen, gegebene Zustimmung",
+                    "die erforderliche, gegeben Zustimmung",
+                    "die erforderliche, gebende Zustimmung"
+                ]
+            },
+            {
+                noun: "die Erlaubnis",
+                attributes: [
+                    { text: "sie ist eingeholt", type: "Adjektiv" },
+                    { text: "sie liegt vor", type: "Relativsatz" }
+                ],
+                correct: "die eingeholte Erlaubnis, die vorliegt",
+                wrong: [
+                    "die eingeholte Erlaubnis, den vorliegt",
+                    "die eingeholten Erlaubnis, die vorliegt",
+                    "die eingeholt Erlaubnis, die vorliegt"
+                ]
+            },
+            {
+                noun: "die Freigabe",
+                attributes: [
+                    { text: "sie ist erfolgt", type: "Adjektiv" },
+                    { text: "sie wurde erteilt", type: "erweitertes Partizip" }
+                ],
+                correct: "die erfolgte, erteilte Freigabe",
+                wrong: [
+                    "die erfolgten, erteilte Freigabe",
+                    "die erfolgte, erteilt Freigabe",
+                    "die erfolgte, erteilende Freigabe"
+                ]
+            },
+            {
+                noun: "die Bestätigung",
+                attributes: [
+                    { text: "sie ist schriftlich", type: "Adjektiv" },
+                    { text: "sie wurde verschickt", type: "erweitertes Partizip" }
+                ],
+                correct: "die schriftliche, verschickte Bestätigung",
+                wrong: [
+                    "die schriftlichen, verschickte Bestätigung",
+                    "die schriftliche, verschickt Bestätigung",
+                    "die schriftliche, verschickende Bestätigung"
+                ]
+            },
+            {
+                noun: "die Mitteilung",
+                attributes: [
+                    { text: "sie ist wichtig", type: "Adjektiv" },
+                    { text: "sie wurde erhalten", type: "erweitertes Partizip" }
+                ],
+                correct: "die wichtige, erhaltene Mitteilung",
+                wrong: [
+                    "die wichtigen, erhaltene Mitteilung",
+                    "die wichtige, erhalten Mitteilung",
+                    "die wichtige, erhaltende Mitteilung"
+                ]
+            },
+            {
+                noun: "die Benachrichtigung",
+                attributes: [
+                    { text: "sie ist eingegangen", type: "Adjektiv" },
+                    { text: "sie muss beachtet werden", type: "Relativsatz" }
+                ],
+                correct: "die eingegangene Benachrichtigung, die beachtet werden muss",
+                wrong: [
+                    "die eingegangene Benachrichtigung, den beachtet werden muss",
+                    "die eingegangenen Benachrichtigung, die beachtet werden muss",
+                    "die eingegangen Benachrichtigung, die beachtet werden muss"
+                ]
+            },
+            {
+                noun: "die Information",
+                attributes: [
+                    { text: "sie ist relevant", type: "Adjektiv" },
+                    { text: "sie wurde weitergegeben", type: "erweitertes Partizip" }
+                ],
+                correct: "die relevante, weitergegebene Information",
+                wrong: [
+                    "die relevanten, weitergegebene Information",
+                    "die relevante, weitergegeben Information",
+                    "die relevante, weitergebende Information"
+                ]
+            },
+            {
+                noun: "das Dokument",
+                attributes: [
+                    { text: "es ist verbindlich", type: "Adjektiv" },
+                    { text: "es wurde unterzeichnet", type: "erweitertes Partizip" }
+                ],
+                correct: "das verbindliche, unterzeichnete Dokument",
+                wrong: [
+                    "das verbindlichen, unterzeichnete Dokument",
+                    "das verbindliche, unterzeichnet Dokument",
+                    "das verbindliche, unterzeichnende Dokument"
+                ]
+            },
+            {
+                noun: "die Vereinbarung",
+                attributes: [
+                    { text: "sie ist gültig", type: "Adjektiv" },
+                    { text: "sie wurde getroffen", type: "erweitertes Partizip" }
+                ],
+                correct: "die gültige, getroffene Vereinbarung",
+                wrong: [
+                    "die gültigen, getroffene Vereinbarung",
+                    "die gültige, getroffen Vereinbarung",
+                    "die gültige, treffende Vereinbarung"
+                ]
+            },
+            {
+                noun: "das Abkommen",
+                attributes: [
+                    { text: "es ist bindend", type: "Adjektiv" },
+                    { text: "es wurde geschlossen", type: "erweitertes Partizip" }
+                ],
+                correct: "das bindende, geschlossene Abkommen",
+                wrong: [
+                    "das bindenden, geschlossene Abkommen",
+                    "das bindende, geschlossen Abkommen",
+                    "das bindende, schließende Abkommen"
+                ]
+            },
+            {
+                noun: "der Vertrag",
+                attributes: [
+                    { text: "er ist rechtskräftig", type: "Adjektiv" },
+                    { text: "er wurde aufgesetzt", type: "erweitertes Partizip" }
+                ],
+                correct: "der rechtskräftige, aufgesetzte Vertrag",
+                wrong: [
+                    "der rechtskräftigen, aufgesetzte Vertrag",
+                    "der rechtskräftige, aufgesetzt Vertrag",
+                    "der rechtskräftige, aufsetzende Vertrag"
+                ]
+            }
+        ];
+
+        let gameState = {
+            currentIndex: 0,
+            correctAnswers: 0,
+            score: 0,
+            shuffledQuestions: []
+        };
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function startGame() {
+            gameState = {
+                currentIndex: 0,
+                correctAnswers: 0,
+                score: 0,
+                shuffledQuestions: shuffleArray(questions)
+            };
+            showScreen('gameScreen');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (gameState.currentIndex >= gameState.shuffledQuestions.length) {
+                showResults();
+                return;
+            }
+
+            const question = gameState.shuffledQuestions[gameState.currentIndex];
+            
+            // Display noun
+            document.getElementById('taskNoun').textContent = question.noun;
+            
+            // Display attributes
+            const attrsContainer = document.getElementById('taskAttributes');
+            attrsContainer.innerHTML = '';
+            question.attributes.forEach(attr => {
+                const attrDiv = document.createElement('div');
+                attrDiv.className = 'task-attr-item';
+                attrDiv.innerHTML = `${attr.text} <span class="task-attr-type">(${attr.type})</span>`;
+                attrsContainer.appendChild(attrDiv);
+            });
+            
+            // Create shuffled options
+            const allOptions = [question.correct, ...question.wrong];
+            const shuffledOptions = shuffleArray(allOptions);
+            
+            const grid = document.getElementById('optionsGrid');
+            grid.innerHTML = '';
+            
+            shuffledOptions.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = option;
+                btn.onclick = () => checkAnswer(option, question.correct, btn);
+                grid.appendChild(btn);
+            });
+
+            updateStats();
+        }
+
+        function checkAnswer(selected, correct, btnElement) {
+            const allButtons = document.querySelectorAll('.option-btn');
+            
+            if (selected === correct) {
+                btnElement.classList.add('correct');
+                gameState.correctAnswers++;
+                gameState.score += 10;
+                
+                allButtons.forEach(btn => btn.disabled = true);
+                
+                setTimeout(() => {
+                    gameState.currentIndex++;
+                    loadQuestion();
+                }, 3000);
+            } else {
+                btnElement.classList.add('wrong');
+            }
+            
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('currentQuestion').textContent = gameState.currentIndex + 1;
+            document.getElementById('totalQuestions').textContent = gameState.shuffledQuestions.length;
+            document.getElementById('correctCount').textContent = gameState.correctAnswers;
+            document.getElementById('score').textContent = gameState.score;
+            
+            const progress = ((gameState.currentIndex + 1) / gameState.shuffledQuestions.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function showResults() {
+            const accuracy = Math.round((gameState.correctAnswers / gameState.shuffledQuestions.length) * 100);
+            
+            document.getElementById('finalCorrect').textContent = gameState.correctAnswers;
+            document.getElementById('finalScore').textContent = gameState.score;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+            
+            let rating = '⭐';
+            if (accuracy >= 90) rating = '⭐⭐⭐⭐⭐';
+            else if (accuracy >= 75) rating = '⭐⭐⭐⭐';
+            else if (accuracy >= 60) rating = '⭐⭐⭐';
+            else if (accuracy >= 40) rating = '⭐⭐';
+            
+            document.getElementById('rating').textContent = rating;
+            
+            showScreen('resultScreen');
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function createDecorations() {
+            const container = document.getElementById('decorations');
+            
+            // Water ripples
+            for (let i = 0; i < 10; i++) {
+                const ripple = document.createElement('div');
+                ripple.className = 'ripple';
+                ripple.style.width = ripple.style.height = (Math.random() * 200 + 100) + 'px';
+                ripple.style.left = Math.random() * 100 + '%';
+                ripple.style.top = Math.random() * 100 + '%';
+                ripple.style.animationDelay = Math.random() * 10 + 's';
+                container.appendChild(ripple);
+            }
+            
+            // Waves
+            for (let i = 0; i < 3; i++) {
+                const wave = document.createElement('div');
+                wave.className = 'wave';
+                wave.style.top = (Math.random() * 80 + 10) + '%';
+                wave.style.animationDelay = (i * 2.5) + 's';
+                container.appendChild(wave);
+            }
+            
+            // Bubbles
+            for (let i = 0; i < 25; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                bubble.style.left = Math.random() * 100 + '%';
+                bubble.style.animationDelay = Math.random() * 12 + 's';
+                bubble.style.animationDuration = (Math.random() * 6 + 8) + 's';
+                container.appendChild(bubble);
+            }
+        }
+
+        createDecorations();
+    </script>
+</body>
+</html>
