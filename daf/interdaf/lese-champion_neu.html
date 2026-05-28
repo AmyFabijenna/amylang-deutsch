@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lese-Champion</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f4a261 0%, #e76f51 40%, #ffb84d 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            text-align: center;
+            max-width: 700px;
+            width: 100%;
+        }
+        h1 {
+            color: #e76f51;
+            margin-bottom: 20px;
+            font-size: 3em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .word-display {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            color: #1a1a1a;
+            font-size: 6em;
+            font-weight: bold;
+            padding: 80px 40px;
+            border-radius: 20px;
+            margin: 30px 0;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+        .word-display.highlight {
+            transform: scale(1.02);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+        }
+        /* Kleinerer Trennpunkt */
+        .word-display {
+            font-size: 6em;
+        }
+        .word-display::first-line {
+            line-height: 1;
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        button {
+            background: #e76f51;
+            color: white;
+            border: none;
+            padding: 18px 35px;
+            font-size: 1.3em;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        button:hover {
+            background: #d65a3f;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #fff9e7 0%, #ffe0b2 100%);
+            border-radius: 15px;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 1em;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .stat-value {
+            color: #e76f51;
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+        .speed-control {
+            margin: 25px 0;
+            padding: 20px;
+            background: #fff9e7;
+            border-radius: 12px;
+        }
+        .speed-control label {
+            color: #666;
+            font-size: 1.2em;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        .speed-control input {
+            width: 250px;
+            height: 8px;
+            cursor: pointer;
+        }
+        .speed-value {
+            display: inline-block;
+            margin-left: 15px;
+            color: #e76f51;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .start-screen, .end-screen {
+            padding: 40px 20px;
+        }
+        .end-screen {
+            display: none;
+        }
+        .final-score {
+            font-size: 4em;
+            color: #e76f51;
+            font-weight: bold;
+            margin: 30px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .hidden {
+            display: none;
+        }
+        .trophy {
+            font-size: 5em;
+            margin: 20px 0;
+            animation: bounce 0.5s infinite alternate;
+        }
+        @keyframes bounce {
+            from { transform: translateY(0px); }
+            to { transform: translateY(-20px); }
+        }
+        .stars {
+            font-size: 3em;
+            margin: 20px 0;
+        }
+        .message {
+            font-size: 1.5em;
+            color: #d65a3f;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e76f51 0%, #ffb84d 100%);
+            width: 0%;
+            transition: width 0.3s;
+            border-radius: 15px;
+        }
+        .celebration {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 8em;
+            animation: celebrate 1s ease-out;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        @keyframes celebrate {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Lese-Champion</h1>
+        
+        <div id="startScreen" class="start-screen">
+            <p style="font-size: 1.4em; color: #666; margin-bottom: 30px;">
+                Lies so viele Wörter wie du kannst!<br>
+                5 Minuten Zeit - bist du bereit?
+            </p>
+            <div class="speed-control">
+                <label>⏱️ Zeit pro Wort:</label>
+                <input type="range" id="speedSlider" min="1000" max="15000" value="3000" step="500">
+                <span class="speed-value" id="speedLabel">3 Sek.</span>
+            </div>
+            <button onclick="startGame()" style="font-size: 1.8em; padding: 25px 60px;">🚀 START</button>
+        </div>
+
+        <div id="gameScreen" class="hidden">
+            <div class="word-display" id="wordDisplay">Bereit?</div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            
+            <div class="controls">
+                <button onclick="nextWord()">▶️ Nächstes Wort</button>
+                <button onclick="pauseGame()" id="pauseBtn">⏸️ Pause</button>
+                <button onclick="endGame()">🛑 Stopp</button>
+            </div>
+
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-label">Gelesen</div>
+                    <div class="stat-value" id="counter">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Zeit</div>
+                    <div class="stat-value" id="timer">5:00</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="endScreen" class="end-screen">
+            <div class="trophy">🏆</div>
+            <h2>Spiel zu Ende!</h2>
+            <div class="final-score" id="finalScore">0</div>
+            <p style="font-size: 1.3em; color: #666;">Wörter gelesen</p>
+            <div class="stars" id="stars">⭐</div>
+            <div class="message" id="message">Gut gemacht!</div>
+            <button onclick="resetGame()" style="font-size: 1.5em; margin-top: 30px;">🔄 Nochmal spielen</button>
+        </div>
+    </div>
+
+    <script>
+        const words = [
+            // Alltagswörter - Essen und Trinken
+            "Brot", "But•ter", "Kä•se", "Wurst", "Milch", "Saft", "Was•ser", "Tee", 
+            "Kaf•fee", "Zu•cker", "Salz", "Pfef•fer", "Es•sen", "Früh•stück", "Mit•tag",
+            "A•bend•es•sen", "hung•rig", "durs•tig", "Le•cker", "sü•ß", "sau•er", "bit•ter",
+            "Ap•fel", "Bir•ne", "Ba•na•ne", "Erd•bee•re", "Kir•sche", "Pflaum•e", "Trau•be",
+            "To•ma•te", "Gur•ke", "Sa•lat", "Kar•tof•fel", "Zwie•bel", "Knob•lauch",
+            "Fleisch", "Fisch", "Ge•mü•se", "Obst", "Sup•pe", "Nu•del", "Reis",
+            
+            // Alltagswörter - Kleidung
+            "Ho•se", "Hemd", "Kleid", "Ja•cke", "Man•tel", "Pul•li", "T-Shirt",
+            "Schu•he", "So•cken", "Hand•schu•he", "Müt•ze", "Schal", "Gür•tel",
+            "Ta•sche", "Ruck•sack", "an•zie•hen", "aus•zie•hen", "tra•gen", "an•ha•ben",
+            
+            // Alltagswörter - Zuhause
+            "Haus", "Woh•nung", "Zim•mer", "Kü•che", "Bad", "Toi•let•te", "Tür",
+            "Fens•ter", "Wand", "Bo•den", "De•cke", "Trep•pe", "Bal•kon", "Gar•ten",
+            "Tisch", "Stuhl", "Bett", "Schrank", "Re•gal", "Lam•pe", "Tep•pich",
+            "Spie•gel", "Uhr", "Bild", "Vor•hang", "Kis•sen", "De•cke", "woh•nen",
+            "put•zen", "räu•men", "sau•ber", "schmut•zig", "auf•räu•men", "wa•schen",
+            
+            // Alltagswörter - Familie und Beziehungen
+            "Mut•ter", "Va•ter", "El•tern", "Schwes•ter", "Bru•der", "Ge•schwis•ter",
+            "O•ma", "O•pa", "Groß•el•tern", "Tan•te", "On•kel", "Cou•sin", "Cou•si•ne",
+            "Freund", "Freun•din", "Freun•de", "Nach•bar", "Leu•te", "Mensch", "Kind",
+            "Ba•by", "lie•ben", "mö•gen", "hel•fen", "be•su•chen", "ein•la•den",
+            
+            // Alltagswörter - Körper und Gesundheit
+            "Kopf", "Haa•re", "Ge•sicht", "Au•ge", "Na•se", "Mund", "Zahn", "Zäh•ne",
+            "Ohr", "Oh•ren", "Hals", "Schul•ter", "Arm", "Ar•me", "Hand", "Hän•de",
+            "Fin•ger", "Bauch", "Rü•cken", "Bein", "Bei•ne", "Fuß", "Fü•ße", "Ze•he",
+            "ge•sund", "krank", "Schmer•zen", "weh tun", "Arzt", "Ärz•tin", "Me•di•zin",
+            "Pflas•ter", "fie•ber", "Hus•ten", "Schnup•fen", "Er•käl•tung",
+            
+            // Alltagswörter - Schule
+            "Schu•le", "Klas•se", "Leh•rer", "Leh•re•rin", "Schü•ler", "Schü•le•rin",
+            "Un•ter•richt", "Pau•se", "Haus•auf•ga•be", "Heft", "Buch", "Stift",
+            "Blei•stift", "Kul•li", "Ra•dier•gum•mi", "Li•ne•al", "Spit•zer", "Farb•stift",
+            "Sche•re", "Kle•ber", "Ta•fel", "Krei•de", "Ran•zen", "Fe•der•map•pe",
+            "ler•nen", "üben", "wie•der•ho•len", "schrei•ben", "le•sen", "rech•nen",
+            "ma•len", "zeich•nen", "fra•gen", "ant•wor•ten", "er•klä•ren", "ver•ste•hen",
+            "auf•pas•sen", "zu•hö•ren", "mit•ma•chen", "ver•ges•sen", "wis•sen",
+            "Ma•the", "Deutsch", "Eng•lisch", "Sport", "Mu•sik", "Kunst", "Sach•un•ter•richt",
+            "Pro•be", "Test", "No•te", "Zeug•nis", "Fe•ri•en", "frei", "Wo•chen•en•de",
+            
+            // Alltagswörter - Zeit
+            "Tag", "Nacht", "Mor•gen", "Mit•tag", "A•bend", "Wo•che", "Mo•nat", "Jahr",
+            "heu•te", "ges•tern", "mor•gen", "vor•ges•tern", "über•mor•gen",
+            "Mon•tag", "Diens•tag", "Mitt•woch", "Don•ners•tag", "Frei•tag", "Sams•tag", "Sonn•tag",
+            "Ja•nu•ar", "Feb•ru•ar", "März", "A•pril", "Mai", "Ju•ni", "Ju•li",
+            "Au•gust", "Sep•tem•ber", "Ok•to•ber", "No•vem•ber", "De•zem•ber",
+            "Früh•ling", "Som•mer", "Herbst", "Win•ter", "früh", "spät", "pünkt•lich",
+            "war•ten", "dau•ern", "be•gin•nen", "en•den", "an•fan•gen", "auf•hö•ren",
+            
+            // Alltagswörter - Wetter
+            "Wet•ter", "Son•ne", "Re•gen", "Schnee", "Wind", "Wol•ke", "Ne•bel",
+            "Ge•wit•ter", "Blitz", "Don•ner", "warm", "heiß", "kalt", "kühl",
+            "son•nig", "wol•kig", "reg•ne•risch", "schnei•en", "reg•nen", "win•dig",
+            
+            // Alltagswörter - Verkehr und Mobilität
+            "Au•to", "Bus", "Bahn", "Zug", "Stra•ßen•bahn", "Fahr•rad", "Mo•tor•rad",
+            "Flug•zeug", "Schiff", "fah•ren", "ge•hen", "lau•fen", "ren•nen",
+            "Stra•ße", "Weg", "Platz", "Brü•cke", "Am•pel", "Hal•te•stel•le",
+            "Bahn•hof", "Flug•ha•fen", "Park•platz", "schnell", "lang•sam",
+            
+            // Alltagswörter - Aktivitäten
+            "spie•len", "ar•bei•ten", "schla•fen", "es•sen", "trin•ken", "ko•chen",
+            "ba•cken", "sin•gen", "tan•zen", "sport•lich", "schwim•men", "lau•fen",
+            "sprin•gen", "klet•tern", "Fuß•ball", "Ball", "Spiel", "Spiel•zeug",
+            "Pup•pe", "Au•to", "Bau•klöt•ze", "Puz•zle", "bau•en", "bas•teln",
+            "Film", "Fern•se•hen", "Mu•sik", "hö•ren", "schau•en", "an•schau•en",
+            
+            // Alltagswörter - Emotionen und Eigenschaften
+            "fröh•lich", "glück•lich", "trau•rig", "bö•se", "wü•tend", "är•ger•lich",
+            "freu•en", "la•chen", "wei•nen", "Angst", "mu•tig", "feig", "tap•fer",
+            "lieb", "nett", "freund•lich", "höf•lich", "un•höf•lich", "brav", "un•ar•tig",
+            "flei•ßig", "faul", "or•dent•lich", "un•or•dent•lich", "ge•dul•dig", "un•ge•dul•dig",
+            
+            // Alltagswörter - Beschreibungen
+            "groß", "klein", "dick", "dünn", "lang", "kurz", "breit", "schmal",
+            "hoch", "nied•rig", "tief", "flach", "schwer", "leicht", "hart", "weich",
+            "neu", "alt", "jung", "mo•dern", "schön", "häss•lich", "gut", "schlecht",
+            "rich•tig", "falsch", "ein•fach", "schwie•rig", "leicht", "schwer",
+            
+            // Alltagswörter - Verben
+            "sa•gen", "er•zäh•len", "re•den", "spre•chen", "ru•fen", "schrei•en",
+            "flüs•tern", "hö•ren", "zu•hö•ren", "se•hen", "schau•en", "gu•cken",
+            "den•ken", "glau•ben", "mei•nen", "fin•den", "su•chen", "ver•lie•ren",
+            "ge•ben", "neh•men", "be•kom•men", "kau•fen", "ver•kau•fen", "be•zah•len",
+            "kos•ten", "spa•ren", "ha•ben", "sein", "wer•den", "kön•nen", "müs•sen",
+            "dür•fen", "wol•len", "sol•len", "ma•chen", "tun", "las•sen",
+            
+            // Alltagswörter - Orte
+            "Stadt", "Dorf", "Land", "Berg", "Tal", "Fluss", "See", "Meer", "Strand",
+            "Wald", "Wie•se", "Feld", "Park", "Spiel•platz", "Ge•schäft", "La•den",
+            "Su•per•markt", "Bä•cke•rei", "Metz•ge•rei", "Apo•the•ke", "Post",
+            "Bank", "Kran•ken•haus", "Feu•er•wehr", "Po•li•zei", "Bib•li•o•thek",
+            "Ki•no", "The•a•ter", "Mu•se•um", "Kir•che", "Rat•haus",
+            
+            // Alltagswörter - Tiere
+            "Hund", "Kat•ze", "Pferd", "Kuh", "Schwein", "Schaf", "Zie•ge", "Huhn",
+            "Ha•se", "Ka•nin•chen", "Maus", "Ham•ster", "Vo•gel", "Fisch", "Schild•krö•te",
+            "Lö•we", "Ti•ger", "E•le•fant", "Af•fe", "Bär", "Fuchs", "Wolf", "Reh",
+            
+            // Alltagswörter - Farben
+            "rot", "blau", "gelb", "grün", "schwarz", "weiß", "grau", "braun",
+            "o•ran•ge", "li•la", "ro•sa", "Far•be", "bunt", "hell", "dun•kel",
+            
+            // Alltagswörter - Zahlen und Mengen
+            "eins", "zwei", "drei", "vier", "fünf", "sechs", "sie•ben", "acht", "neun", "zehn",
+            "zwölf", "zwan•zig", "drei•ßig", "hun•dert", "tau•send", "viel", "we•nig",
+            "al•le", "man•che", "ei•ni•ge", "et•was", "nichts", "mehr", "we•ni•ger",
+            "ge•nug", "zu viel", "zu we•nig", "ers•te", "zwei•te", "letz•te",
+            
+            // Alltagswörter - Fragen und Antworten
+            "war•um", "wes•halb", "wie•so", "wo", "wo•hin", "wo•her", "wann", "wie",
+            "was", "wer", "wel•che", "wel•cher", "wel•ches", "ja", "nein", "viel•leicht",
+            "bit•te", "dan•ke", "bit•te schön", "ger•ne", "Ent•schul•di•gung",
+            
+            // Schwierige ch/sch-Laute
+            "ma•chen", "la•chen", "sa•chen", "dach", "nach", "auch", "Bauch", "rau•chen",
+            "Buch", "Tuch", "su•chen", "Ku•chen", "Be•such", "spre•chen", "bre•chen",
+            "ste•chen", "re•chen", "Wo•che", "Ko•chen", "Loch", "hoch", "noch", "doch",
+            "Milch", "wel•che", "wel•cher", "wel•ches", "durch", "Kirch•e", "Licht",
+            "nicht", "Pflicht", "Sicht", "Ge•dicht", "be•rich•ten", "Ge•schich•te",
+            "schla•fen", "schlie•ßen", "schrei•ben", "schrei•en", "Schnee", "schnell",
+            "Schu•le", "Schuh", "Schü•ler", "schön", "schlecht", "Schlüs•sel",
+            "Schiff", "Schild", "Schaum", "Scha•le", "schenk•en", "Schen•kel",
+            
+            // Schwierige ei/eu/äu-Laute
+            "Ei", "ei•gen", "ei•gent•lich", "Fleisch", "Lei•ter", "Fei•er", "fei•ern",
+            "Klei•der", "Klei•dung", "bei", "bei•de", "Sei•te", "Sei•fe", "blei•ben",
+            "schrei•ben", "zei•gen", "nei•disch", "pein•lich", "meis•tens", "teil•en",
+            "heu•te", "neu", "teu•er", "Feu•er", "Steu•er", "Freun•de", "träu•men",
+            "Häu•ser", "Bäu•me", "Mäu•se", "Räu•ber", "ver•käu•fen", "Käu•fer",
+            
+            // Längere zusammengesetzte Wörter
+            "Schul•freund", "Turn•schu•he", "Lieb•lings•far•be", "Ge•burts•tags•kind",
+            "Haus•auf•ga•ben•heft", "Pau•sen•brot", "Klas•sen•zim•mer", "Mit•schü•ler",
+            "Nach•mit•tag", "Vor•mit•tag", "Spiel•ka•me•rad", "Turn•hal•le",
+            "Schwimm•bad", "Frei•bad", "Ein•kaufs•zen•trum", "Fuß•gän•ger•zo•ne"
+        ];
+
+        let counter = 0;
+        let timeLeft = 300;
+        let gameInterval;
+        let timerInterval;
+        let autoSpeed = 3000;
+        let isPaused = false;
+        let totalTime = 300;
+
+        // Audio Context für Sounds
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playBeep(frequency, duration) {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function playSuccessSound() {
+            playBeep(523, 0.1);
+            setTimeout(() => playBeep(659, 0.1), 100);
+            setTimeout(() => playBeep(784, 0.2), 200);
+        }
+
+        function playFanfare() {
+            const notes = [523, 659, 784, 1047];
+            notes.forEach((note, index) => {
+                setTimeout(() => playBeep(note, 0.3), index * 150);
+            });
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return mins + ':' + (secs < 10 ? '0' : '') + secs;
+        }
+
+        function showCelebration(emoji) {
+            const celebration = document.createElement('div');
+            celebration.className = 'celebration';
+            celebration.textContent = emoji;
+            document.body.appendChild(celebration);
+            setTimeout(() => celebration.remove(), 1000);
+        }
+
+        // Speed Slider
+        document.getElementById('speedSlider').addEventListener('input', function() {
+            autoSpeed = parseInt(this.value);
+            const seconds = (autoSpeed / 1000).toFixed(1);
+            document.getElementById('speedLabel').textContent = seconds + ' Sek.';
+            
+            // Restart interval with new speed if game is running
+            if (gameInterval) {
+                clearInterval(gameInterval);
+                gameInterval = setInterval(() => {
+                    if (!isPaused) {
+                        nextWord();
+                    }
+                }, autoSpeed);
+            }
+        });
+
+        function startGame() {
+            // Clear any existing intervals first
+            if (gameInterval) clearInterval(gameInterval);
+            if (timerInterval) clearInterval(timerInterval);
+            
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            document.getElementById('endScreen').style.display = 'none';
+            
+            counter = 0;
+            timeLeft = totalTime;
+            isPaused = false;
+            
+            updateDisplay();
+            showNextWord();
+            
+            // Timer
+            timerInterval = setInterval(() => {
+                if (!isPaused) {
+                    timeLeft--;
+                    document.getElementById('timer').textContent = formatTime(timeLeft);
+                    updateProgressBar();
+                    
+                    if (timeLeft <= 0) {
+                        endGame();
+                    }
+                }
+            }, 1000);
+
+            // Auto-advance
+            gameInterval = setInterval(() => {
+                if (!isPaused) {
+                    nextWord();
+                }
+            }, autoSpeed);
+        }
+
+        function showNextWord() {
+            const randomIndex = Math.floor(Math.random() * words.length);
+            const wordDisplay = document.getElementById('wordDisplay');
+            // Replace • with smaller superscript dot
+            const displayWord = words[randomIndex].replace(/•/g, '<span style="font-size:0.3em; vertical-align:middle;">•</span>');
+            wordDisplay.innerHTML = displayWord;
+            wordDisplay.classList.add('highlight');
+            setTimeout(() => wordDisplay.classList.remove('highlight'), 300);
+        }
+
+        function nextWord() {
+            counter++;
+            updateDisplay();
+            showNextWord();
+            playBeep(440, 0.05);
+            
+            // Reset auto-advance interval to prevent double-triggering
+            if (gameInterval && !isPaused) {
+                clearInterval(gameInterval);
+                gameInterval = setInterval(() => {
+                    if (!isPaused) {
+                        nextWord();
+                    }
+                }, autoSpeed);
+            }
+            
+            // Celebration bei Meilensteinen
+            if (counter % 20 === 0) {
+                showCelebration('🎉');
+                playSuccessSound();
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById('counter').textContent = counter;
+        }
+
+        function updateProgressBar() {
+            const progress = ((totalTime - timeLeft) / totalTime) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function pauseGame() {
+            isPaused = !isPaused;
+            const btn = document.getElementById('pauseBtn');
+            btn.textContent = isPaused ? '▶️ Weiter' : '⏸️ Pause';
+        }
+
+        function endGame() {
+            clearInterval(gameInterval);
+            clearInterval(timerInterval);
+            
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('endScreen').style.display = 'block';
+            document.getElementById('finalScore').textContent = counter;
+            
+            // Bewertung basierend auf Anzahl
+            let stars = '⭐';
+            let message = 'Gut gemacht!';
+            
+            if (counter >= 80) {
+                stars = '⭐⭐⭐⭐⭐';
+                message = 'UNGLAUBLICH! Du bist ein Lese-Champion! 🏆';
+            } else if (counter >= 60) {
+                stars = '⭐⭐⭐⭐';
+                message = 'SUPER! Du liest schon sehr gut! 🎯';
+            } else if (counter >= 40) {
+                stars = '⭐⭐⭐';
+                message = 'Toll gemacht! Du wirst immer besser! 🌟';
+            } else if (counter >= 25) {
+                stars = '⭐⭐';
+                message = 'Gut! Weiter so! 💪';
+            }
+            
+            document.getElementById('stars').textContent = stars;
+            document.getElementById('message').textContent = message;
+            
+            // Fanfare abspielen
+            playFanfare();
+            
+            // Konfetti-Effekt
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => showCelebration('🎊'), i * 200);
+            }
+        }
+
+        function resetGame() {
+            document.getElementById('endScreen').style.display = 'none';
+            document.getElementById('startScreen').classList.remove('hidden');
+            counter = 0;
+            timeLeft = totalTime;
+            updateDisplay();
+            document.getElementById('timer').textContent = formatTime(timeLeft);
+            document.getElementById('progressBar').style.width = '0%';
+        }
+    </script>
+</body>
+</html>
