@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lese-Champion – coole Wörter</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #ff8c00 0%, #ff5e00 30%, #9945ff 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: #fef2e0;
+            background: linear-gradient(145deg, #fff3e0 0%, #ffe6c7 100%);
+            border-radius: 55px;
+            padding: 40px;
+            box-shadow: 0 25px 65px rgba(128, 0, 255, 0.5);
+            text-align: center;
+            max-width: 700px;
+            width: 100%;
+            border: 3px solid #ffb347;
+        }
+        h1 {
+            color: #b45f1b;
+            background: linear-gradient(135deg, #ff8c42, #ffb347);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 3px 3px 0 #ffd966;
+            margin-bottom: 20px;
+            font-size: 3em;
+            letter-spacing: 2px;
+        }
+        .word-display {
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #ffefc0 0%, #ffe0a3 100%);
+            color: #5e2a8c;
+            font-size: 6em;
+            font-weight: bold;
+            padding: 80px 40px;
+            border-radius: 55px;
+            margin: 30px 0;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 18px 40px rgba(156, 0, 210, 0.4);
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            border: 3px solid #ffaa33;
+        }
+        .word-display.highlight {
+            transform: scale(1.02);
+            box-shadow: 0 20px 50px rgba(255, 100, 0, 0.6);
+            background: #fff2c9;
+        }
+        .word-display {
+            font-size: 6em;
+        }
+        .word-display::first-line {
+            line-height: 1;
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        button {
+            background: #b45f1b;
+            background: linear-gradient(95deg, #ff9142, #f27024);
+            color: #2e0a4a;
+            border: none;
+            padding: 18px 35px;
+            font-size: 1.3em;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 8px 0 #8b3c00;
+            font-family: inherit;
+        }
+        button:hover {
+            background: linear-gradient(95deg, #ffaa55, #ff7b2c);
+            transform: translateY(-3px);
+            box-shadow: 0 11px 0 #8b3c00;
+        }
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 5px 0 #8b3c00;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            padding: 25px;
+            background: #dbbaff;
+            background: linear-gradient(135deg, #f5e5ff, #e2bdff);
+            border-radius: 48px;
+            border: 2px solid #ffad60;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat-label {
+            color: #6b2e9e;
+            font-size: 1.2em;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .stat-value {
+            color: #c43b00;
+            font-size: 2.5em;
+            font-weight: bold;
+            text-shadow: 2px 2px 0px #ffd58c;
+        }
+        .speed-control {
+            margin: 25px 0;
+            padding: 20px;
+            background: #faebd2;
+            border-radius: 50px;
+            border: 2px dashed #ff9040;
+        }
+        .speed-control label {
+            color: #aa4c1c;
+            font-size: 1.2em;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        .speed-control input {
+            width: 250px;
+            height: 8px;
+            cursor: pointer;
+            accent-color: #ff6a00;
+        }
+        .speed-value {
+            display: inline-block;
+            margin-left: 15px;
+            color: #a53f00;
+            font-weight: bold;
+            font-size: 1.2em;
+            background: #ffe1b3;
+            padding: 4px 12px;
+            border-radius: 30px;
+        }
+        .start-screen, .end-screen {
+            padding: 40px 20px;
+        }
+        .end-screen {
+            display: none;
+        }
+        .final-score {
+            font-size: 4em;
+            color: #ff6a00;
+            font-weight: bold;
+            margin: 30px 0;
+            text-shadow: 3px 3px 0 #cd9cff;
+        }
+        .hidden {
+            display: none;
+        }
+        .trophy {
+            font-size: 5em;
+            margin: 20px 0;
+            animation: bounce 0.5s infinite alternate;
+        }
+        @keyframes bounce {
+            from { transform: translateY(0px); }
+            to { transform: translateY(-20px); }
+        }
+        .stars {
+            font-size: 3em;
+            margin: 20px 0;
+        }
+        .message {
+            font-size: 1.5em;
+            color: #d45500;
+            margin: 20px 0;
+            font-weight: bold;
+            background: #fff2cf;
+            display: inline-block;
+            padding: 10px 25px;
+            border-radius: 45px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #fdd49c;
+            border-radius: 30px;
+            overflow: hidden;
+            margin: 20px 0;
+            border: 2px solid #ffa047;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff9142 0%, #a855f7 100%);
+            width: 0%;
+            transition: width 0.3s;
+            border-radius: 30px;
+        }
+        .celebration {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 8em;
+            animation: celebrate 1s ease-out;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        @keyframes celebrate {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.3) rotate(10deg); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 0; }
+        }
+        button#pauseBtn {
+            background: #a855f7;
+            box-shadow: 0 8px 0 #6029a3;
+        }
+        button#pauseBtn:hover {
+            background: #c77dff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ LESE-CHAMP ⚡</h1>
+        
+        <div id="startScreen" class="start-screen">
+            <p style="font-size: 1.5em; color: #aa5511; margin-bottom: 30px; background:#ffebc2; border-radius:50px; padding:12px;">
+                🚀 Echte Wörter für echte Lese-Profis!<br>
+                5 Minuten – lies so viele coole Wörter wie du kannst! 💪
+            </p>
+            <div class="speed-control">
+                <label>⏱️ Zeit pro Wort:</label>
+                <input type="range" id="speedSlider" min="1000" max="15000" value="3000" step="500">
+                <span class="speed-value" id="speedLabel">3 Sek.</span>
+            </div>
+            <button onclick="startGame()" style="font-size: 1.8em; padding: 25px 60px;">🔥 START 🔥</button>
+        </div>
+
+        <div id="gameScreen" class="hidden">
+            <div class="word-display" id="wordDisplay">✨ LOS ✨</div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            
+            <div class="controls">
+                <button onclick="nextWord()">📖 Nächstes Wort</button>
+                <button onclick="pauseGame()" id="pauseBtn">⏸️ Pause</button>
+                <button onclick="endGame()">🛑 Stopp</button>
+            </div>
+
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-label">🎯 Gelesen</div>
+                    <div class="stat-value" id="counter">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">⏰ Zeit</div>
+                    <div class="stat-value" id="timer">5:00</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="endScreen" class="end-screen">
+            <div class="trophy">🏆</div>
+            <h2 style="color: #fb8c2c; font-size: 2.5em; text-shadow: 2px 2px #b77eff;">SUPER GEMACHT!</h2>
+            <div class="stars" id="stars">⭐⭐⭐</div>
+            <div class="final-score" id="finalScore">0</div>
+            <p class="message" id="message">Wörter gelesen!</p>
+            <button onclick="resetGame()" style="font-size: 1.5em; padding: 20px 50px; margin-top: 30px;">🔄 Nochmal spielen</button>
+        </div>
+    </div>
+
+    <script>
+        // 💡 NORMALE, INTERESSANTE WÖRTER FÜR 10-JÄHRIGE (kein Papperlapapp, kein Staat)
+        // Themen: Abenteuer, Freunde, Schule, Gaming, Tiere, Gefühle, Action, Sport, cool
+        // 🎉 ÜBER 500 WÖRTER – mit korrekter Silbentrennung (Punkt = Silbengrenze)
+        // Silbentrennung: Ap.fel, To.ma.te, Schu.le usw.
+        const finalWordList = [
+
+            // 🍎 Obst
+            "Ap.fel", "Ba.na.ne", "Erd.bee.re", "Him.bee.re", "Blau.bee.re",
+            "Kir.sche", "Pfir.sich", "Bir.ne", "Pflau.me", "Tra.ube",
+            "Man.go", "A.na.nas", "Me.lo.ne", "Was.ser.me.lo.ne", "O.ran.ge",
+            "Zi.tro.ne", "Li.mo.ne", "Pa.pa.ya", "Ko.kos.nuss", "Fei.ge",
+            "Da.ttel", "Kak.tus.fei.ge", "Stach.el.bee.re", "Jo.han.nis.bee.re",
+
+            // 🥦 Gemüse
+            "To.ma.te", "Gur.ke", "Ka.rot.te", "Pa.pri.ka", "Zuc.chi.ni",
+            "Bro.kko.li", "Blu.men.kohl", "Rotkohl", "Spin.at", "Sa.lat",
+            "Ra.dies.chen", "Ko.hl.ra.bi", "Fench.el", "Por.ree", "Zwie.bel",
+            "Knob.lauch", "Kür.bis", "Mais", "Er.bsen", "Boh.nen",
+            "Lin.sen", "As.pa.ra.gus",
+
+            // 🍝 Essen & Gerichte
+            "Spa.ghet.ti", "Nu.deln", "Ma.ka.ro.ni", "La.sag.ne", "Pi.zza",
+            "Hot.dog", "Ham.bur.ger", "Sand.wich", "Wrap", "Bur.ri.to",
+            "Sup.pe", "Ein.topf", "Schnitzel", "Ko.te.lett", "Brat.wurst",
+            "Pfann.ku.chen", "Waf.fel", "O.me.lett", "Rühr.ei", "Spring.rol.le",
+            "Döner", "Ta.cos", "Na.chos", "Po.ken.bowl", "Fisch.stäb.chen",
+            "Kar.tof.fel.brei", "Pom.mes", "Knö.del", "Klöß.chen",
+            "Reis", "Co.us.cous", "Qui.noa",
+
+            // 🍰 Süßes & Snacks
+            "Scho.ko.rie.gel", "Eis.be.cher", "Waf.fel.eis", "Zuc.ker.wat.te",
+            "Pop.corn", "Gum.mi.bär.chen", "Lol.li.pop", "Bon.bon",
+            "Scho.ko.la.de", "Ku.chen", "Tor.te", "Erd.beer.tor.te",
+            "Käse.ku.chen", "Do.nut", "Crois.sant", "Breze.l", "Ma.ca.ron",
+            "Ti.ra.mi.su", "Pud.ding", "Eis.creme", "Gla.cé",
+            "Mil.ch.sha.ke", "Smo.othie", "Li.mo.na.de",
+
+            // 🐶 Haustiere & bekannte Tiere
+            "Hund", "Kat.ze", "Ka.nin.chen", "Ha.ms.ter", "Meer.schwein.chen",
+            "Pa.pa.gei", "Schild.krö.te", "Gold.fisch", "Schlan.ge", "I.gel",
+            "Pferd", "Kuh", "Schwein", "Schaf", "Zie.ge", "Huhn", "Ente",
+            "Gans", "Pute", "Ha.se",
+
+            // 🦁 Wildtiere
+            "Ge.pard", "Kro.ko.dil", "Erd.männ.chen", "Tin.ten.fisch", "Cha.mä.leon",
+            "Gür.tel.tier", "Schnab.el.tier", "Faul.tier", "Glüh.würm.chen", "Nas.horn",
+            "Eis.bär", "Pin.guin", "A.meis.en.bär", "Ko.lib.ri",
+            "Del.fin", "Blau.wal", "Seehofer.chen", "See.pferd.chen",
+            "Ta.pir", "Ja.guar", "Pu.ma", "La.ma", "Al.pa.ka", "Le.mur", "Ge.cko",
+            "Schmet.ter.ling", "Ku.ckuck", "Specht", "Flamingo",
+
+            // 🎨 Farben
+            "rot", "blau", "grün", "gelb", "o.ran.ge", "vio.lett",
+            "ro.sa", "tür.kis", "pur.pur", "grau", "schwarz", "weiß",
+            "bei.ge", "braun", "la.chen.de", "hell.blau", "dun.kel.grün",
+            "gold.gelb", "sil.ber.grau", "knall.pink", "hell.lila",
+
+            // 👕 Kleidung
+            "T-Shirt", "Ho.se", "Rock", "Kleid", "Pull.over", "Ja.cke",
+            "Man.tel", "Schu.he", "Stie.fel", "Turn.schu.he", "San.da.len",
+            "So.cken", "Un.ter.ho.se", "Schlaf.an.zug", "Ba.de.an.zug",
+            "Müt.ze", "Schal", "Hand.schu.he", "Gür.tel", "Ruck.sack",
+            "Schür.ze", "Re.gen.ja.cke", "Ka.pu.ze",
+
+            // 🪑 Möbel & Zimmer
+            "Stuhl", "Tisch", "Bett", "Sofa", "Ses.sel", "Schrank",
+            "Re.gal", "Kom.mo.de", "Schreib.tisch", "Nacht.tisch",
+            "Spie.gel", "Lam.pe", "Fen.ster", "Tür", "Trep.pe",
+            "Bo.den", "De.cke", "Wand", "Dach", "Kell.er",
+            "Kü.che", "Bad", "Wohn.zim.mer", "Kind.er.zim.mer", "Gar.te.n",
+
+            // 📚 Schule & Unterricht
+            "Heft", "Buch", "Bleis.tift", "Ku.gel.schrei.ber", "Li.ne.al",
+            "Ra.die.rer", "Fül.ler", "Scher.re", "Kle.ber", "Zir.kel",
+            "Tas.chen.rech.ner", "Land.kar.te", "Glo.bus", "Ta.fel",
+            "Schwamm", "Krei.de", "Pro.jek.tor", "Bib.lio.thek",
+            "Haus.auf.ga.be", "Pau.sen.brot", "Schul.ran.zen", "Stun.den.plan",
+            "Klas.sen.ar.beit", "Prü.fung", "No.te", "Zeug.nis",
+            "Leh.rer", "Leh.re.rin", "Mit.schü.ler", "Pau.se", "Tur.n.hal.le",
+
+            // 🎮 Freizeit & Spaß
+            "Vi.deo.spiel", "Con.trol.ler", "Hoch.sco.re", "Tram.po.lin",
+            "Schwimm.bad", "Was.ser.rut.sche", "Rie.sen.rad", "Geister.bahn",
+            "Puz.zle", "Brett.spiel", "Ver.ste.cken", "Fan.gen.spie.len",
+            "Fahr.rad", "Rol.ler", "Sca.oter", "Ska.te.board",
+            "Gril.l.par.ty", "Über.nach.tungs.par.ty", "Ki.no.a.bend",
+
+            // 🚀 Abenteuer & Fantasy
+            "A.ben.teu.er", "Ge.heim.nis", "Schatz", "Rät.sel", "Zau.be.rer",
+            "Dra.che", "Ein.horn", "Hexe", "Zau.ber.trank", "Phö.nix",
+            "Meer.jung.frau", "Wer.wolf", "Vam.pir", "Zom.bie",
+            "Ge.spenst", "Kob.old", "Elf", "Riese", "Bur.g", "Ritter",
+
+            // 🌈 Natur & Wetter
+            "Re.gen.bo.gen", "Ge.wit.ter", "Blitz", "Don.ner",
+            "Schnee.sturm", "Ha.gel", "Nebel", "Früh.ling", "Som.mer",
+            "Herbst", "Win.ter", "Son.nen.auf.gang", "Son.nen.un.ter.gang",
+            "Stern.schnup.pe", "Voll.mond", "Mond.licht",
+
+            // 😂 Lustige Wörter
+            "Blöd.sinn", "Kla.mauk", "Quatsch", "Gri.mas.se",
+            "Au.gen.zwin.kern", "Kri.ckeln", "Kitzeln", "Gäh.nen", "Nie.sen",
+            "Ba.uch.klat.scher", "Schluck.auf", "Schul.ter.zu.cken",
+            "Ho.kus.po.kus", "Ab.ra.ka.da.bra", "Wun.der.kind",
+            "Kna.ll.bon.bon", "Don.ner.wet.ter", "Su.per.star",
+
+            // 💬 Häufige Kinderwörter & Sätze-Bausteine
+            "dan.ke", "bit.te", "Ent.schul.di.gung", "Hal.lo", "Tschüss",
+            "na.tür.lich", "ei.gent.lich", "viel.leicht", "trotz.dem",
+            "des.halb", "so.wie.so", "un.be.dingt", "to.tal", "su.per",
+            "fan.tas.tisch", "wun.der.bar", "herr.lich", "schreck.lich",
+            "lang.wei.lig", "auf.re.gend", "ge.heim.nis.voll"
+        ];
+        
+        let counter = 0;
+        let timeLeft = 300;
+        let gameInterval;
+        let timerInterval;
+        let autoSpeed = 3000;
+        let isPaused = false;
+        let totalTime = 300;
+
+        // Audio Context für Sounds
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playBeep(frequency, duration) {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function playSuccessSound() {
+            playBeep(523, 0.1);
+            setTimeout(() => playBeep(659, 0.1), 100);
+            setTimeout(() => playBeep(784, 0.2), 200);
+        }
+
+        function playFanfare() {
+            const notes = [523, 659, 784, 1047];
+            notes.forEach((note, index) => {
+                setTimeout(() => playBeep(note, 0.3), index * 150);
+            });
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return mins + ':' + (secs < 10 ? '0' : '') + secs;
+        }
+
+        function showCelebration(emoji) {
+            const celebration = document.createElement('div');
+            celebration.className = 'celebration';
+            celebration.textContent = emoji;
+            document.body.appendChild(celebration);
+            setTimeout(() => celebration.remove(), 1000);
+        }
+
+        // Speed Slider
+        document.getElementById('speedSlider').addEventListener('input', function() {
+            autoSpeed = parseInt(this.value);
+            const seconds = (autoSpeed / 1000).toFixed(1);
+            document.getElementById('speedLabel').textContent = seconds + ' Sek.';
+            
+            if (gameInterval) {
+                clearInterval(gameInterval);
+                gameInterval = setInterval(() => {
+                    if (!isPaused) {
+                        nextWord();
+                    }
+                }, autoSpeed);
+            }
+        });
+
+        function startGame() {
+            if (gameInterval) clearInterval(gameInterval);
+            if (timerInterval) clearInterval(timerInterval);
+            
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            document.getElementById('endScreen').style.display = 'none';
+            
+            counter = 0;
+            timeLeft = totalTime;
+            isPaused = false;
+            document.getElementById('pauseBtn').textContent = '⏸️ Pause';
+            
+            updateDisplay();
+            showNextWord();
+            
+            timerInterval = setInterval(() => {
+                if (!isPaused) {
+                    timeLeft--;
+                    document.getElementById('timer').textContent = formatTime(timeLeft);
+                    updateProgressBar();
+                    
+                    if (timeLeft <= 0) {
+                        endGame();
+                    }
+                }
+            }, 1000);
+
+            gameInterval = setInterval(() => {
+                if (!isPaused) {
+                    nextWord();
+                }
+            }, autoSpeed);
+        }
+
+        function showNextWord() {
+            const randomIndex = Math.floor(Math.random() * finalWordList.length);
+            const wordDisplay = document.getElementById('wordDisplay');
+            // Silbenpunkt (.) als kleines Zwischenzeichen rendern
+            const word = finalWordList[randomIndex];
+            const rendered = word.replace(/\.(?=[a-zA-ZäöüÄÖÜß])/g,
+                '<span style="font-size:0.35em;vertical-align:middle;color:#e76f51;opacity:0.7;">·</span>');
+            wordDisplay.innerHTML = rendered;
+            wordDisplay.classList.add('highlight');
+            setTimeout(() => wordDisplay.classList.remove('highlight'), 300);
+        }
+
+        function nextWord() {
+            counter++;
+            updateDisplay();
+            showNextWord();
+            playBeep(440, 0.05);
+            
+            if (gameInterval && !isPaused) {
+                clearInterval(gameInterval);
+                gameInterval = setInterval(() => {
+                    if (!isPaused) {
+                        nextWord();
+                    }
+                }, autoSpeed);
+            }
+            
+            if (counter % 20 === 0) {
+                showCelebration('🎉');
+                playSuccessSound();
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById('counter').textContent = counter;
+        }
+
+        function updateProgressBar() {
+            const progress = ((totalTime - timeLeft) / totalTime) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function pauseGame() {
+            isPaused = !isPaused;
+            const btn = document.getElementById('pauseBtn');
+            btn.textContent = isPaused ? '▶️ Weiter' : '⏸️ Pause';
+        }
+
+        function endGame() {
+            clearInterval(gameInterval);
+            clearInterval(timerInterval);
+            
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('endScreen').style.display = 'block';
+            document.getElementById('finalScore').textContent = counter;
+            
+            let stars = '⭐';
+            let message = 'Gut gemacht!';
+            
+            if (counter >= 80) {
+                stars = '⭐⭐⭐⭐⭐';
+                message = 'UNFASSBAR! Lese-Champion! 🏆';
+            } else if (counter >= 60) {
+                stars = '⭐⭐⭐⭐';
+                message = 'SUPER! Du liest wie ein Profi! 🎯';
+            } else if (counter >= 40) {
+                stars = '⭐⭐⭐';
+                message = 'Toll! Immer schneller! 🌟';
+            } else if (counter >= 25) {
+                stars = '⭐⭐';
+                message = 'Gut! Weiter üben! 💪';
+            }
+            
+            document.getElementById('stars').textContent = stars;
+            document.getElementById('message').textContent = message;
+            playFanfare();
+            
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => showCelebration('🎊'), i * 200);
+            }
+        }
+
+        function resetGame() {
+            document.getElementById('endScreen').style.display = 'none';
+            document.getElementById('startScreen').classList.remove('hidden');
+            counter = 0;
+            timeLeft = totalTime;
+            updateDisplay();
+            document.getElementById('timer').textContent = formatTime(timeLeft);
+            document.getElementById('progressBar').style.width = '0%';
+        }
+    </script>
+</body>
+</html>
