@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deutsch-Übungen – Waldorf A2</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: linear-gradient(135deg, #f4a261 0%, #e76f51 45%, #ffb347 100%);
+  min-height: 100vh;
+  padding: 24px 16px 60px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+.container {
+  background: white;
+  border-radius: 24px;
+  padding: 34px 38px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  width: 100%;
+  max-width: 820px;
+}
+h1 { color: #e76f51; font-size: 2.4em; margin-bottom: 4px; text-align:center; }
+.subtitle { color:#999; font-size:1em; font-weight:bold; text-align:center; margin-bottom:26px; }
+
+/* SCREENS */
+.screen { display:none; }
+.screen.active { display:block; }
+
+/* MENU */
+.menu-title { font-size:1.3em; color:#e76f51; font-weight:bold; margin-bottom:14px; }
+.menu-grid { display:flex; flex-direction:column; gap:9px; margin-bottom:22px; }
+.mode-btn {
+  background: linear-gradient(135deg,#fff3e0,#ffe0b2);
+  border: 2px solid #f4a261;
+  border-radius: 13px;
+  padding: 14px 18px;
+  cursor: pointer;
+  text-align: left;
+  font-size: 1.05em;
+  font-weight: bold;
+  color: #333;
+  position: relative;
+  transition: all .22s;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.mode-btn:hover { background:linear-gradient(135deg,#ffe0b2,#ffcc80); border-color:#e76f51; transform:translateX(5px); }
+.mode-btn .ico { position:absolute; right:16px; top:50%; transform:translateY(-50%); font-size:1.5em; }
+.mode-btn .desc { font-size:.78em; color:#888; margin-top:2px; font-weight:normal; }
+.badge { display:inline-block; background:#e76f51; color:white; padding:1px 9px; border-radius:18px; font-size:.68em; font-weight:bold; margin-left:7px; vertical-align:middle; }
+.badge.g { background:#f4a261; }
+
+/* GAME AREA */
+.game-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px; }
+.stats { display:flex; gap:9px; flex-wrap:wrap; }
+.stat { background:linear-gradient(135deg,#fff3e0,#ffe0b2); padding:7px 14px; border-radius:11px; border:2px solid #f4a261; text-align:center; min-width:70px; }
+.stat-l { font-size:.65em; color:#aaa; text-transform:uppercase; letter-spacing:1px; font-weight:bold; }
+.stat-v { font-size:1.5em; font-weight:bold; color:#e76f51; }
+.mode-tag { background:#e76f51; color:white; padding:7px 16px; border-radius:18px; font-weight:bold; font-size:.88em; }
+
+.prog-bar { width:100%; height:18px; background:#eee; border-radius:10px; overflow:hidden; margin-bottom:5px; }
+.prog-fill { height:100%; background:linear-gradient(90deg,#e76f51,#ffb347); transition:width .4s; border-radius:10px; }
+.prog-text { color:#aaa; font-size:.85em; font-weight:bold; margin-bottom:14px; text-align:center; }
+
+/* CARD – sentence display */
+.card {
+  background: linear-gradient(135deg,#fff8f0,#fff3e0);
+  border-radius: 18px;
+  padding: 28px 26px;
+  margin-bottom: 18px;
+  border: 2px solid #f4c494;
+  text-align: center;
+}
+.card .nr { font-size:.78em; color:#ccc; font-weight:bold; margin-bottom:8px; }
+.card .sentence {
+  font-size: 1.65em;
+  font-weight: bold;
+  color: #222;
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+.card .context {
+  font-size: 1.05em;
+  color: #777;
+  font-style: italic;
+  margin-bottom: 0;
+  line-height: 1.5;
+}
+/* READ-ALOUD mode: bigger, clearer */
+.card.read-mode .sentence { font-size:1.9em; color:#1a1a1a; }
+.card.read-mode .context { font-size:1.1em; }
+
+/* ANSWER BUTTONS */
+.ans-row { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:16px; }
+.ans-btn {
+  background: #e76f51;
+  color: white;
+  border: none;
+  border-radius: 13px;
+  padding: 13px 24px;
+  font-size: 1.15em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all .22s;
+  font-family: Arial, Helvetica, sans-serif;
+  box-shadow: 0 4px 12px rgba(0,0,0,.15);
+}
+.ans-btn:hover { background:#d65a3f; transform:translateY(-3px); }
+.ans-btn.correct { background:#28a745 !important; color:white; }
+.ans-btn.wrong { background:#dc3545 !important; color:white; }
+
+/* SOLUTION reveal */
+.solution-box {
+  background: #e8f5e9;
+  border-left: 4px solid #28a745;
+  padding: 13px 18px;
+  border-radius: 11px;
+  margin-bottom: 14px;
+  display: none;
+  text-align: left;
+  font-size: 1.05em;
+  color: #1b5e20;
+  font-weight: bold;
+  line-height: 1.55;
+}
+.solution-box.visible { display:block; }
+
+/* CONTROLS */
+.ctrl-row { display:flex; gap:9px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+.ctrl-btn {
+  background: white;
+  border: 2px solid #f4a261;
+  border-radius: 11px;
+  padding: 10px 20px;
+  color: #e76f51;
+  font-size:.95em;
+  font-weight:bold;
+  cursor:pointer;
+  transition:all .22s;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.ctrl-btn:hover { background:#fff3e0; border-color:#e76f51; transform:translateY(-2px); }
+.ctrl-btn.primary { background:#e76f51; color:white; border-color:#e76f51; }
+.ctrl-btn.primary:hover { background:#d65a3f; }
+.ctrl-btn.secondary { color:#bbb; border-color:#ddd; }
+.ctrl-btn.secondary:hover { color:#e76f51; border-color:#f4a261; }
+.ctrl-btn.sol { background:#fff8e1; border-color:#ffc107; color:#856404; }
+.ctrl-btn.sol:hover { background:#fff3cd; }
+
+/* RESULT */
+.result-wrap { text-align:center; padding:10px 0; }
+.result-wrap .trophy { font-size:4em; animation:bounce .5s infinite alternate; }
+@keyframes bounce { from{transform:translateY(0);} to{transform:translateY(-14px);} }
+.result-title { font-size:2.2em; color:#e76f51; font-weight:bold; margin:16px 0 22px; }
+.res-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:22px; }
+.res-stat { background:linear-gradient(135deg,#fff3e0,#ffe0b2); padding:16px; border-radius:13px; border:2px solid #f4a261; }
+.res-stat-l { font-size:.85em; color:#aaa; font-weight:bold; margin-bottom:5px; }
+.res-stat-v { font-size:2em; font-weight:bold; color:#e76f51; }
+
+/* POINTS POPUP */
+.pts-pop { position:fixed; background:linear-gradient(135deg,#28a745,#5cb85c); color:white; padding:9px 20px; border-radius:20px; font-size:1.4em; font-weight:bold; pointer-events:none; z-index:1000; animation:floatUp 1s ease forwards; }
+@keyframes floatUp { to{transform:translateY(-80px);opacity:0;} }
+
+/* CONFETTI */
+.cfetti { position:fixed; z-index:999; }
+
+/* BACK */
+.back-btn { position:fixed; top:14px; left:14px; background:white; border:2px solid #f4a261; border-radius:11px; padding:8px 16px; color:#e76f51; font-weight:bold; cursor:pointer; display:none; z-index:200; font-family:Arial; }
+.back-btn:hover { background:#fff3e0; }
+
+/* MILESTONE */
+.milestone { position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:2000; }
+.milestone-inner { text-align:center; }
+.milestone-n { font-size:7em; font-weight:bold; color:#ffb347; }
+.milestone-t { font-size:1.8em; color:white; font-weight:bold; margin-top:12px; }
+
+/* SECTION divider in menu */
+.menu-sep { font-size:.8em; color:#ccc; font-weight:bold; text-transform:uppercase; letter-spacing:2px; margin:14px 0 6px; border-top:1px solid #f0e0d0; padding-top:12px; }
+
+@media(max-width:600px){
+  .container{padding:20px 14px;}
+  h1{font-size:1.8em;}
+  .card .sentence{font-size:1.35em;}
+  .ans-btn{font-size:1em;padding:11px 16px;}
+}
+</style>
+</head>
+<body>
+<button class="back-btn" id="backBtn" onclick="goMenu()">← Menü</button>
+<div class="container">
+<h1>📖 Deutsch-Übungen</h1>
+<p class="subtitle">Waldorf A2 · für schlaue Köpfe</p>
+
+<!-- ===================== MENU ===================== -->
+<div id="menuScreen" class="screen active">
+  <div class="menu-title">🎯 Wähle eine Übung!</div>
+  <div class="menu-grid">
+
+    <div class="menu-sep">📍 Präpositionen</div>
+    <button class="mode-btn" onclick="startMode('praep1')">
+      1. Präpositionen – Wo ist das? <span class="badge">Lustig</span>
+      <div class="desc">Wähle die richtige Präposition – viele witzige Sätze zum Lachen!</div>
+      <span class="ico">🗺️</span>
+    </button>
+    <button class="mode-btn" onclick="startMode('praep2')">
+      2. Präpositionen – Womit? Woher? Für wen? <span class="badge g">Vielseitig</span>
+      <div class="desc">mit, aus, von, für, seit, bei, nach, zu – in echten Sätzen üben</div>
+      <span class="ico">🔍</span>
+    </button>
+    <button class="mode-btn" onclick="startMode('praep3')">
+      3. Präpositionen – Wähle passend <span class="badge">Mix</span>
+      <div class="desc">Alle Präpositionen gemischt – was passt am besten?</div>
+      <span class="ico">🎲</span>
+    </button>
+
+    <div class="menu-sep">⏰ Perfekt</div>
+    <button class="mode-btn" onclick="startMode('perfekt')">
+      4. Perfekt – haben oder sein? <span class="badge">Zeitreise</span>
+      <div class="desc">Etwas schwerer: auch Zustandswechsel und knifflige Verben</div>
+      <span class="ico">⏰</span>
+    </button>
+
+    <div class="menu-sep">⚡ Verben</div>
+    <button class="mode-btn" onclick="startMode('verbformen')">
+      5. Unregelmäßige Verben – Präsens <span class="badge g">Achtung!</span>
+      <div class="desc">Nur ganze Verbformen eintippen – trennbare Verben sauber getrennt</div>
+      <span class="ico">⚡</span>
+    </button>
+    <button class="mode-btn" onclick="startMode('modal')">
+      6. Modalverben <span class="badge">Erklärsatz dabei</span>
+      <div class="desc">Immer ein zweiter Satz erklärt die Situation – wähle das richtige Modalverb!</div>
+      <span class="ico">💬</span>
+    </button>
+
+    <div class="menu-sep">📈 Vergleiche</div>
+    <button class="mode-btn" onclick="startMode('komp1')">
+      7. Komparativ &amp; Superlativ – Multiple Choice <span class="badge">Erklärsatz</span>
+      <div class="desc">Vorlesen – Kinder antworten mündlich. Erklärsatz macht klar, was gesucht wird.</div>
+      <span class="ico">🏆</span>
+    </button>
+    <button class="mode-btn" onclick="startMode('komp2')">
+      8. Komparativ – Drei Dinge vergleichen <span class="badge g">Sprechen</span>
+      <div class="desc">Tiger, Löwe, Gepard – bilde alle drei Vergleichsformen!</div>
+      <span class="ico">🐆</span>
+    </button>
+
+    <div class="menu-sep">❌ Verneinung</div>
+    <button class="mode-btn" onclick="startMode('vernein')">
+      9. Verneinung – Stimmt das? <span class="badge">Lachen!</span>
+      <div class="desc">Vorlesen – Kinder schütteln Kopf &amp; negieren. Lustige Sätze, auch nicht mehr / noch nicht!</div>
+      <span class="ico">🚫</span>
+    </button>
+
+    <div class="menu-sep">🪞 Reflexivpronomen</div>
+    <button class="mode-btn" onclick="startMode('reflex')">
+      10. Reflexivpronomen – Ich auch! <span class="badge">Sprechen</span>
+      <div class="desc">Vorlesen – Kinder sagen: "Ich … mich/mir auch …" Akkusativ &amp; Dativ gemischt!</div>
+      <span class="ico">🪞</span>
+    </button>
+
+    <div class="menu-sep">🔄 Passiv</div>
+    <button class="mode-btn" onclick="startMode('passiv')">
+      11. Passiv – was wird gemacht? <span class="badge g">Einstieg</span>
+      <div class="desc">Vorlesen – Kinder formen den Satz ins Passiv um. Schritt für Schritt!</div>
+      <span class="ico">🔄</span>
+    </button>
+
+    <div class="menu-sep">👤 Personalpronomen</div>
+    <button class="mode-btn" onclick="startMode('proakk')">
+      12. Personalpronomen – Akkusativ <span class="badge">Klick!</span>
+      <div class="desc">Die Mutter ruft ihre Tochter. → Die Mutter ruft _____</div>
+      <span class="ico">👉</span>
+    </button>
+    <button class="mode-btn" onclick="startMode('prodat')">
+      13. Personalpronomen – Dativ <span class="badge">Klick!</span>
+      <div class="desc">Die Tochter hilft der Mutter. → Die Tochter hilft _____</div>
+      <span class="ico">🤝</span>
+    </button>
+
+  </div>
+</div><!-- /menuScreen -->
+
+<!-- ===================== GAME SCREEN ===================== -->
+<div id="gameScreen" class="screen">
+  <div class="game-header">
+    <div class="stats">
+      <div class="stat"><div class="stat-l">Punkte</div><div class="stat-v" id="pts">0</div></div>
+      <div class="stat"><div class="stat-l">Richtig</div><div class="stat-v" id="cor">0</div></div>
+      <div class="stat"><div class="stat-l">Nr.</div><div class="stat-v" id="qnr">1</div></div>
+    </div>
+    <div class="mode-tag" id="modeTag">Modus</div>
+  </div>
+  <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+  <div class="prog-text" id="progTxt">0 / 0</div>
+
+  <div class="card" id="mainCard">
+    <div class="nr" id="cardNr"></div>
+    <div class="sentence" id="cardSentence"></div>
+    <div class="context" id="cardContext"></div>
+  </div>
+
+  <div class="solution-box" id="solBox"></div>
+  <div class="ans-row" id="ansRow"></div>
+
+  <div class="ctrl-row">
+    <button class="ctrl-btn sol" onclick="showSol()">💡 Lösung zeigen</button>
+    <button class="ctrl-btn secondary" onclick="skipQ()">⏭ Weiter</button>
+    <button class="ctrl-btn primary" onclick="endGame()">🏁 Fertig</button>
+  </div>
+</div>
+
+<!-- ===================== RESULT SCREEN ===================== -->
+<div id="resultScreen" class="screen">
+  <div class="result-wrap">
+    <div class="trophy">🏆</div>
+    <div class="result-title">Klasse gemacht!</div>
+    <div class="res-stats">
+      <div class="res-stat"><div class="res-stat-l">⭐ Punkte</div><div class="res-stat-v" id="rPts">0</div></div>
+      <div class="res-stat"><div class="res-stat-l">✅ Richtig</div><div class="res-stat-v" id="rCor">0</div></div>
+      <div class="res-stat"><div class="res-stat-l">📋 Gesamt</div><div class="res-stat-v" id="rTot">0</div></div>
+    </div>
+    <div class="ctrl-row">
+      <button class="ctrl-btn primary" onclick="replayMode()">🔄 Nochmal</button>
+      <button class="ctrl-btn secondary" onclick="goMenu()">🏠 Menü</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+<script>
+// ============================================================
+// DATA
+// ============================================================
+
+const data = {
+
+// ---- 1. PRÄPOSITIONEN – WO IST DAS? (lustige Waldorf-Sätze) ----
+praep1: {
+  title: "Präpositionen – Wo ist was?",
+  type: "choice",
+  items: [
+    { s:"Der Zauberer sitzt [?] dem Drachen.", opts:["auf","neben","in","vor"], a:"auf", sol:"auf dem Drachen – oben drauf!" },
+    { s:"Die Hexe schläft [?] dem Kühlschrank.", opts:["in","auf","unter","vor"], a:"auf", sol:"auf dem Kühlschrank – das ist ihre Lieblingsstelle!" },
+    { s:"Das Einhorn steht [?] der Schule.", opts:["vor","in","auf","hinter"], a:"vor", sol:"vor der Schule – es wartet auf die Lehrerin." },
+    { s:"Der Drache wohnt [?] der Höhle.", opts:["in","auf","vor","neben"], a:"in", sol:"in der Höhle – dort ist es schön warm." },
+    { s:"Das Gespenst hängt [?] der Tafel.", opts:["an","auf","vor","in"], a:"an", sol:"an der Tafel – jetzt weiß niemand, was draufsteht!" },
+    { s:"Die Katze sitzt [?] dem Hut des Lehrers.", opts:["auf","in","vor","neben"], a:"auf", sol:"auf dem Hut – natürlich!" },
+    { s:"Das Nilpferd badet [?] dem Schulpool.", opts:["in","auf","vor","hinter"], a:"in", sol:"in dem Schulpool – jetzt ist kein Platz mehr für andere." },
+    { s:"Der Riese schläft [?] dem Gymnasium.", opts:["hinter","auf","in","vor"], a:"hinter", sol:"hinter dem Gymnasium – keiner hat es gemerkt." },
+    { s:"Ein Elefant steht [?] der Tür.", opts:["vor","hinter","in","auf"], a:"vor", sol:"vor der Tür – er will auch Hausaufgaben abgeben." },
+    { s:"Das Sandwich liegt [?] meinem Buch.", opts:["in","auf","neben","unter"], a:"in", sol:"in dem Buch – von gestern!" },
+    { s:"Der Affe sitzt [?] dem Regal.", opts:["auf","vor","hinter","unter"], a:"auf", sol:"auf dem Regal – und hält eine Rede." },
+    { s:"Das Krokodil schläft [?] dem Sofa.", opts:["unter","auf","vor","hinter"], a:"unter", sol:"unter dem Sofa – leider." },
+    { s:"Die Schildkröte rennt [?] dem Tisch.", opts:["um","auf","in","vor"], a:"um", sol:"um den Tisch – sehr langsam natürlich." },
+    { s:"Der Pinguin steht [?] dem Kühlschrank.", opts:["neben","auf","hinter","in"], a:"neben", sol:"neben dem Kühlschrank – er fühlt sich wohl." },
+    { s:"Das Baby-Drache sitzt [?] dem Rucksack.", opts:["in","auf","vor","neben"], a:"in", sol:"in dem Rucksack – Platz ist da!" },
+    { s:"Die Zauberin tanzt [?] dem Brunnen.", opts:["um","auf","in","vor"], a:"um", sol:"um den Brunnen – das ist ein Tanz!" },
+    { s:"Der Hamster läuft [?] dem Käfig.", opts:["in","auf","neben","vor"], a:"in", sol:"in dem Käfig – rundherum und nochmal." },
+    { s:"Das Nilpferd sitzt [?] dem Schreibtisch.", opts:["hinter","auf","in","vor"], a:"hinter", sol:"hinter dem Schreibtisch – und sieht sehr wichtig aus." },
+    { s:"Die Prinzessin wohnt [?] dem Turm.", opts:["in","auf","vor","neben"], a:"in", sol:"in dem Turm – ohne Fahrstuhl." },
+    { s:"Der Roboter schläft [?] dem Bett.", opts:["unter","auf","in","vor"], a:"unter", sol:"unter dem Bett – das ist auch komisch." },
+    { s:"Das Gespenst wohnt [?] dem Kleiderschrank.", opts:["in","auf","vor","hinter"], a:"in", sol:"in dem Kleiderschrank – passt gut dazu." },
+    { s:"Ein Zebra grast [?] dem Schulhof.", opts:["auf","in","vor","neben"], a:"auf", sol:"auf dem Schulhof – mitten in der Pause." },
+    { s:"Die Meerjungfrau schwimmt [?] dem Badezimmer.", opts:["in","auf","vor","neben"], a:"in", sol:"in dem Badezimmer – heute Morgen schon." },
+    { s:"Der Yeti sitzt [?] meinem Stuhl.", opts:["auf","in","vor","neben"], a:"auf", sol:"auf meinem Stuhl – und will nicht aufstehen." },
+    { s:"Das Känguru springt [?] dem Zaun.", opts:["über","auf","in","vor"], a:"über", sol:"über den Zaun – leicht gemacht!" },
+    { s:"Die Lehrerin tanzt [?] dem Lehrerpult.", opts:["auf","vor","hinter","neben"], a:"auf", sol:"auf dem Lehrerpult – Freitagnachmittag!" },
+    { s:"Das Einhorn steht [?] dem Whiteboard.", opts:["vor","hinter","neben","auf"], a:"vor", sol:"vor dem Whiteboard – jetzt erklärt es Mathe." },
+    { s:"Die Spinne sitzt [?] der Suppe.", opts:["in","auf","vor","neben"], a:"in", sol:"in der Suppe – leider." },
+    { s:"Der Frosch hüpft [?] dem Tisch.", opts:["auf","in","vor","neben"], a:"auf", sol:"auf den Tisch – genau in die Mitte." },
+    { s:"Der Pirat schläft [?] dem Steuer.", opts:["an","auf","in","vor"], a:"an", sol:"an dem Steuer – deshalb fährt das Schiff im Kreis." },
+    { s:"Das Chamäleon sitzt [?] dem Heft.", opts:["auf","in","neben","vor"], a:"auf", sol:"auf dem Heft – man sieht es fast nicht!" },
+    { s:"Der Oktopus hängt [?] der Lampe.", opts:["an","auf","in","vor"], a:"an", sol:"an der Lampe – er hält sich fest mit acht Armen." },
+    { s:"Die Oma schläft [?] dem Fernsehen.", opts:["vor","auf","hinter","in"], a:"vor", sol:"vor dem Fernsehen – klassisch!" },
+    { s:"Das Einhorn liegt [?] der Badewanne.", opts:["in","auf","vor","neben"], a:"in", sol:"in der Badewanne – mit Badeschaum und Kerzen." },
+    { s:"Der Riese wohnt [?] dem Wolkenkratzer.", opts:["hinter","auf","in","neben"], a:"hinter", sol:"hinter dem Wolkenkratzer – er ist noch größer!" },
+    { s:"Das Gespenst sitzt [?] dem Frühstückstisch.", opts:["an","auf","in","vor"], a:"an", sol:"an dem Frühstückstisch – und trinkt Geisterkaffee." },
+    { s:"Die Maus läuft [?] dem Zauberer.", opts:["um","auf","in","vor"], a:"um", sol:"um den Zauberer herum – sieben Mal." },
+    { s:"Der Drache schnarcht [?] dem Bergwerk.", opts:["in","auf","vor","neben"], a:"in", sol:"in dem Bergwerk – man hört es bis ins Tal." },
+    { s:"Das Nilpferd tanzt [?] der Bühne.", opts:["auf","vor","in","neben"], a:"auf", sol:"auf der Bühne – die Bretter zittern." },
+    { s:"Die Katze sitzt [?] dem Laptop.", opts:["auf","in","vor","neben"], a:"auf", sol:"auf dem Laptop – natürlich genau dann, wenn man arbeitet." },
+  ]
+},
+
+// ---- 2. PRÄPOSITIONEN – WOMIT, WOHER, FÜR WEN ----
+praep2: {
+  title: "Präpositionen – mit, aus, für, seit, bei, nach, zu ...",
+  type: "choice",
+  items: [
+    { s:"Ella fährt [?] dem Fahrrad zur Schule.", opts:["mit","auf","von","aus"], a:"mit", sol:"mit dem Fahrrad – das Transportmittel." },
+    { s:"Der Drache kommt [?] dem Gebirge.", opts:["aus","von","bei","nach"], a:"aus", sol:"aus dem Gebirge – er kommt von dort." },
+    { s:"Das Geschenk ist [?] die Lehrerin.", opts:["für","von","mit","bei"], a:"für", sol:"für die Lehrerin – wir sind lieb!" },
+    { s:"Wir warten [?] dem Bus.", opts:["auf","bei","mit","von"], a:"auf", sol:"auf den Bus – er kommt hoffentlich bald." },
+    { s:"Finn geht [?] dem Arzt.", opts:["zu","bei","nach","von"], a:"zu", sol:"zum Arzt – er ist krank." },
+    { s:"Das Kind kommt [?] der Schule.", opts:["aus","von","bei","nach"], a:"aus", sol:"aus der Schule – endlich!" },
+    { s:"Lena spielt [?] ihrer Freundin.", opts:["mit","bei","von","für"], a:"mit", sol:"mit ihrer Freundin – zusammen macht es mehr Spaß." },
+    { s:"Wir fahren [?] Wien.", opts:["nach","zu","in","bei"], a:"nach", sol:"nach Wien – Städte: nach!" },
+    { s:"Das Buch ist [?] meiner Oma.", opts:["von","aus","bei","für"], a:"von", sol:"von meiner Oma – sie hat es geschrieben." },
+    { s:"Ich lerne Deutsch [?] drei Jahren.", opts:["seit","vor","bei","nach"], a:"seit", sol:"seit drei Jahren – bis heute." },
+    { s:"Ben wohnt [?] seiner Tante.", opts:["bei","mit","zu","von"], a:"bei", sol:"bei seiner Tante – er lebt dort." },
+    { s:"Das Pferd läuft [?] dem Wald.", opts:["durch","nach","bei","über"], a:"durch", sol:"durch den Wald – mitten hindurch." },
+    { s:"Mia kauft eine Pizza [?] ihrer Mutter.", opts:["für","von","mit","bei"], a:"für", sol:"für ihre Mutter – wie nett!" },
+    { s:"Der Roboter spricht [?] einer komischen Stimme.", opts:["mit","von","bei","aus"], a:"mit", sol:"mit einer komischen Stimme – piep boop." },
+    { s:"Nach dem Unterricht gehen wir [?] Hause.", opts:["nach","zu","von","bei"], a:"nach", sol:"nach Hause – nach Hause ist eine feste Redewendung!" },
+    { s:"Das Krokodil lächelt [?] dem Zahnarzt.", opts:["bei","von","mit","aus"], a:"bei", sol:"beim Zahnarzt – und zeigt stolz seine Zähne." },
+    { s:"Ella spricht [?] ihrem besten Freund.", opts:["mit","bei","von","für"], a:"mit", sol:"mit ihrem besten Freund." },
+    { s:"Der Detektiv kommt [?] einer anderen Stadt.", opts:["aus","von","nach","bei"], a:"aus", sol:"aus einer anderen Stadt." },
+    { s:"Das Paket ist [?] mich!", opts:["für","von","mit","bei"], a:"für", sol:"für mich – Geburtstag!" },
+    { s:"Wir essen Kuchen [?] der Pause.", opts:["in","bei","nach","vor"], a:"in", sol:"in der Pause – super Idee!" },
+    { s:"Die Schule beginnt [?] acht Uhr.", opts:["um","an","bei","in"], a:"um", sol:"um acht Uhr – Uhrzeit: um!" },
+    { s:"Finn fährt [?] dem Zug.", opts:["mit","auf","in","von"], a:"mit", sol:"mit dem Zug." },
+    { s:"Der Brief kommt [?] Österreich.", opts:["aus","von","nach","bei"], a:"aus", sol:"aus Österreich." },
+    { s:"Lena wartet [?] ihre Schwester.", opts:["auf","für","mit","von"], a:"auf", sol:"auf ihre Schwester – sie ist noch nicht da." },
+    { s:"Wir fahren [?] dem Bus.", opts:["mit","auf","in","von"], a:"mit", sol:"mit dem Bus." },
+  ]
+},
+
+// ---- 3. PRÄPOSITIONEN – FREIER MIX ----
+praep3: {
+  title: "Präpositionen – Mix! Was passt?",
+  type: "choice",
+  items: [
+    { s:"Das Buch liegt [?] dem Tisch.", opts:["auf","in","vor","hinter"], a:"auf", sol:"auf dem Tisch." },
+    { s:"Ella kommt [?] Ungarn.", opts:["aus","von","nach","bei"], a:"aus", sol:"aus Ungarn." },
+    { s:"Wir spielen [?] dem Garten.", opts:["in","auf","vor","neben"], a:"in", sol:"in dem Garten." },
+    { s:"Das Geschenk ist [?] dich.", opts:["für","von","mit","bei"], a:"für", sol:"für dich!" },
+    { s:"Finn sitzt [?] Lena.", opts:["neben","auf","in","vor"], a:"neben", sol:"neben Lena." },
+    { s:"Wir gehen [?] dem Unterricht nach Hause.", opts:["nach","vor","in","bei"], a:"nach", sol:"nach dem Unterricht." },
+    { s:"Die Katze schläft [?] dem Sofa.", opts:["auf","in","vor","unter"], a:"auf", sol:"auf dem Sofa." },
+    { s:"Das Nilpferd springt [?] das Wasser.", opts:["in","auf","vor","hinter"], a:"in", sol:"in das Wasser." },
+    { s:"Lena wohnt [?] ihrer Oma.", opts:["bei","mit","von","zu"], a:"bei", sol:"bei ihrer Oma." },
+    { s:"Wir fahren [?] Berlin.", opts:["nach","zu","in","bei"], a:"nach", sol:"nach Berlin – Städte: nach!" },
+    { s:"Das Sandwich ist [?] dem Rucksack.", opts:["in","auf","vor","neben"], a:"in", sol:"in dem Rucksack." },
+    { s:"Ben geht [?] seiner Freundin.", opts:["zu","bei","nach","von"], a:"zu", sol:"zu seiner Freundin." },
+    { s:"Das Zebra wartet [?] dem Eingang.", opts:["vor","auf","in","hinter"], a:"vor", sol:"vor dem Eingang." },
+    { s:"Mia ist [?] zwei Jahren in Wien.", opts:["seit","vor","nach","bei"], a:"seit", sol:"seit zwei Jahren." },
+    { s:"Der Drache sitzt [?] dem Dach.", opts:["auf","in","vor","neben"], a:"auf", sol:"auf dem Dach." },
+    { s:"Ella schreibt [?] einem Stift.", opts:["mit","von","bei","aus"], a:"mit", sol:"mit einem Stift." },
+    { s:"Das Einhorn kommt [?] dem Wald.", opts:["aus","von","nach","bei"], a:"aus", sol:"aus dem Wald." },
+    { s:"Finn spricht [?] seiner Lehrerin.", opts:["mit","bei","von","für"], a:"mit", sol:"mit seiner Lehrerin." },
+    { s:"Das Bild hängt [?] der Wand.", opts:["an","auf","in","vor"], a:"an", sol:"an der Wand." },
+    { s:"Lena spielt [?] der Schule Fußball.", opts:["nach","vor","in","bei"], a:"nach", sol:"nach der Schule." },
+    { s:"Das Gespenst erscheint [?] Mitternacht.", opts:["um","bei","in","an"], a:"um", sol:"um Mitternacht." },
+    { s:"Wir essen [?] dem Unterricht.", opts:["vor","nach","bei","in"], a:"vor", sol:"vor dem Unterricht." },
+    { s:"Der Affe läuft [?] das Gebäude.", opts:["um","auf","in","vor"], a:"um", sol:"um das Gebäude herum." },
+    { s:"Mia schreibt einen Brief [?] ihre Freundin.", opts:["an","für","von","mit"], a:"an", sol:"an ihre Freundin." },
+    { s:"Das Krokodil versteckt sich [?] dem Vorhang.", opts:["hinter","auf","in","vor"], a:"hinter", sol:"hinter dem Vorhang – schlechtes Versteck!" },
+  ]
+},
+
+// ---- 4. PERFEKT – etwas schwerer ----
+perfekt: {
+  title: "Perfekt – haben oder sein?",
+  type: "choice",
+  items: [
+    { s:"Ich [?] heute Morgen zu spät aufgewacht.", opts:["bin","habe","ist","hat"], a:"bin", sol:"BIN aufgewacht – Zustandswechsel → sein!" },
+    { s:"Ella [?] das Fenster aufgemacht.", opts:["hat","ist","habe","bin"], a:"hat", sol:"HAT aufgemacht – jemanden etwas tun → haben." },
+    { s:"Wir [?] nach Budapest geflogen.", opts:["sind","haben","ist","hat"], a:"sind", sol:"SIND geflogen – Bewegung von A nach B → sein!" },
+    { s:"Der Hund [?] die Hausaufgaben gefressen.", opts:["hat","ist","habe","bin"], a:"hat", sol:"HAT gefressen – fressen = kein Ortwechsel → haben." },
+    { s:"Das Krokodil [?] plötzlich verschwunden.", opts:["ist","hat","sind","haben"], a:"ist", sol:"IST verschwunden – Zustandswechsel → sein." },
+    { s:"Finn [?] den ganzen Kuchen gegessen.", opts:["hat","ist","habe","bin"], a:"hat", sol:"HAT gegessen – haben." },
+    { s:"Die Lehrerin [?] müde geworden.", opts:["ist","hat","sind","haben"], a:"ist", sol:"IST geworden – werden → sein!" },
+    { s:"Wir [?] das Experiment gemacht.", opts:["haben","sind","hat","ist"], a:"haben", sol:"HABEN gemacht – haben." },
+    { s:"Ben [?] umgefallen.", opts:["ist","hat","bin","habe"], a:"ist", sol:"IST umgefallen – Zustandswechsel → sein." },
+    { s:"Das Nilpferd [?] den Schuldirektor erschreckt.", opts:["hat","ist","habe","bin"], a:"hat", sol:"HAT erschreckt – jemanden erschrecken → haben." },
+    { s:"Sie [?] die ganze Nacht getanzt.", opts:["hat","ist","habe","bin"], a:"hat", sol:"HAT getanzt – tanzen ohne Ortwechsel → haben." },
+    { s:"Die Rakete [?] abgehoben.", opts:["ist","hat","sind","haben"], a:"ist", sol:"IST abgehoben – Bewegung weg von → sein." },
+    { s:"Er [?] das Buch gelesen.", opts:["hat","ist","habe","bin"], a:"hat", sol:"HAT gelesen – haben." },
+    { s:"Das Gespenst [?] durch die Wand gegangen.", opts:["ist","hat","sind","haben"], a:"ist", sol:"IST gegangen – Bewegung → sein." },
+    { s:"Wir [?] stundenlang gewartet.", opts:["haben","sind","hat","ist"], a:"haben", sol:"HABEN gewartet – warten → haben." },
+    { s:"Lena [?] beim Rennen gestürzt.", opts:["ist","hat","bin","habe"], a:"ist", sol:"IST gestürzt – Sturz = Zustandswechsel → sein." },
+    { s:"Das Baby [?] endlich eingeschlafen.", opts:["ist","hat","sind","haben"], a:"ist", sol:"IST eingeschlafen – Zustandswechsel → sein." },
+    { s:"Ihr [?] sehr gut gespielt!", opts:["habt","seid","hat","ist"], a:"habt", sol:"HABT gespielt – ihr haben → habt." },
+    { s:"Der Zug [?] pünktlich abgefahren.", opts:["ist","hat","sind","haben"], a:"ist", sol:"IST abgefahren – Bewegung → sein." },
+    { s:"Mia [?] ihrer Oma beim Kochen geholfen.", opts:["hat","ist","habe","bin"], a:"hat", sol:"HAT geholfen – haben." },
+    { s:"Das Chamäleon [?] grün geworden.", opts:["ist","hat","sind","haben"], a:"ist", sol:"IST geworden – werden → sein." },
+    { s:"Wir [?] im Wald gezeltet.", opts:["haben","sind","hat","ist"], a:"haben", sol:"HABEN gezeltet – haben." },
+    { s:"Der Ballon [?] geplatzt.", opts:["ist","hat","sind","haben"], a:"ist", sol:"IST geplatzt – platzen = Zustandswechsel → sein." },
+    { s:"Ella [?] die ganze Nacht gelacht.", opts:["hat","ist","habe","bin"], a:"hat", sol:"HAT gelacht – lachen → haben." },
+  ]
+},
+
+// ---- 5. VERBFORMEN – keine trennbaren Verben als Lücke wenn Präfix schon im Satz ----
+verbformen: {
+  title: "Unregelmäßige Verben – welche Form passt?",
+  type: "choice",
+  items: [
+    { s:"Finn [?] jeden Tag zur Schule. (fahren)", opts:["fährt","fahrt","fahre","fähren"], a:"fährt", sol:"Er FÄHRT – a→ä bei er/sie/es." },
+    { s:"Du [?] sehr laut! (schlafen)", opts:["schläfst","schläft","schlafst","schlaft"], a:"schläfst", sol:"Du SCHLÄFST – a→ä bei du/er/sie." },
+    { s:"Das Kind [?] seine Suppe nicht. (essen)", opts:["isst","esst","essst","frisst"], a:"isst", sol:"Es ISST – e→i." },
+    { s:"Sie [?] gerne Abenteuerromane. (lesen)", opts:["liest","lest","liest","lesst"], a:"liest", sol:"Sie LIEST – e→ie." },
+    { s:"Der Zauberer [?] kein Wort. (sprechen)", opts:["spricht","sprechst","sprecht","sprichen"], a:"spricht", sol:"Er SPRICHT – e→i." },
+    { s:"Du [?] mir deinen Kuli. (geben)", opts:["gibst","gebst","gibst","gibt"], a:"gibst", sol:"Du GIBST – e→i." },
+    { s:"Lena [?] den Detektiv im Fernsehen. (sehen)", opts:["sieht","seht","siehst","sehen"], a:"sieht", sol:"Sie SIEHT – e→ie." },
+    { s:"Das Pferd [?] sehr schnell. (laufen)", opts:["läuft","lauft","laufst","läufst"], a:"läuft", sol:"Es LÄUFT – au→äu." },
+    { s:"Er [?] den schweren Koffer. (tragen)", opts:["trägt","tragt","tragst","trägst"], a:"trägt", sol:"Er TRÄGT – a→ä." },
+    { s:"Ihr [?] sehr früh auf. (aufwachen)", opts:["wacht auf","wachst auf","aufwacht","aufwachst"], a:"wacht auf", sol:"Ihr WACHT AUF – trennbar: ihr wacht … auf." },
+    { s:"Sie [?] ihren Freund um Hilfe. (anrufen)", opts:["ruft an","anruft","ruf an","rufen an"], a:"ruft an", sol:"Sie RUFT AN – trennbar: Präfix ans Ende!" },
+    { s:"Er [?] die Fenster. (zumachen)", opts:["macht zu","zumacht","macht","machen zu"], a:"macht zu", sol:"Er MACHT ZU – trennbar." },
+    { s:"Du [?] einen Apfel. (nehmen)", opts:["nimmst","nimmst","nehmst","nimmt"], a:"nimmst", sol:"Du NIMMST – e→i." },
+    { s:"Der Clown [?] alle zum Lachen. (bringen)", opts:["bringt","bringt","bringst","bringen"], a:"bringt", sol:"Er BRINGT – unregelmäßig." },
+    { s:"Wir [?] früh auf. (aufstehen)", opts:["stehen auf","aufstehen","stehen","steh auf"], a:"stehen auf", sol:"Wir STEHEN AUF – trennbar." },
+    { s:"Er [?] sehr schön. (singen)", opts:["singt","singst","singen","singet"], a:"singt", sol:"Er SINGT." },
+    { s:"Lena [?] ihren Namen an die Tafel. (schreiben)", opts:["schreibt","schreibst","schreiben","schrieben"], a:"schreibt", sol:"Sie SCHREIBT." },
+    { s:"Das Einhorn [?] durch den Himmel. (fliegen)", opts:["fliegt","fliegst","fliegen","flieg"], a:"fliegt", sol:"Es FLIEGT." },
+    { s:"Du [?] dein Zimmer auf. (aufräumen)", opts:["räumst auf","aufräumst","räumst","räumen auf"], a:"räumst auf", sol:"Du RÄUMST AUF – trennbar." },
+    { s:"Finn [?] zu spät. (ankommen)", opts:["kommt an","ankommt","kommt","kommen an"], a:"kommt an", sol:"Er KOMMT AN – trennbar." },
+  ]
+},
+
+// ---- 6. MODALVERBEN – immer mit Erklärsatz ----
+modal: {
+  title: "Modalverben – was passt?",
+  type: "choice",
+  items: [
+    { s:"Ella [?] heute nicht zur Schule gehen.", c:"Sie hat 40 Grad Fieber.", opts:["darf","kann","soll","möchte"], a:"kann", sol:"KANN NICHT – sie ist krank, es ist ihr nicht möglich." },
+    { s:"Du [?] jetzt sofort dein Zimmer aufräumen.", c:"Mama hat es dreimal gesagt.", opts:["sollst","kannst","darfst","möchtest"], a:"sollst", sol:"SOLLST – jemand anderes fordert es." },
+    { s:"Ben [?] kein Eis mehr essen.", c:"Er hat schon fünf Kugeln gegessen.", opts:["darf","will","kann","soll"], a:"darf", sol:"DARF – es ist verboten / nicht erlaubt." },
+    { s:"Wir [?] morgen ausschlafen.", c:"Es ist Wochenende und es gibt keine Schule!", opts:["dürfen","müssen","sollen","können"], a:"dürfen", sol:"DÜRFEN – es ist erlaubt!" },
+    { s:"Die Kinder [?] leise sein.", c:"Der kleine Bruder schläft.", opts:["müssen","wollen","dürfen","sollen"], a:"müssen", sol:"MÜSSEN – es ist notwendig, es gibt keine andere Wahl." },
+    { s:"Finn [?] sehr gut Klavier spielen.", c:"Er übt seit Jahren jeden Tag.", opts:["kann","muss","darf","soll"], a:"kann", sol:"KANN – er hat die Fähigkeit!" },
+    { s:"Das Krokodil [?] nicht in die Schule.", c:"Es hat keinen Schülerausweis.", opts:["darf","kann","soll","muss"], a:"darf", sol:"DARF NICHT – es ist verboten." },
+    { s:"Lena [?] heute früher kommen.", c:"Die Lehrerin hat eine Nachricht geschickt.", opts:["soll","kann","darf","will"], a:"soll", sol:"SOLL – die Lehrerin hat es gesagt." },
+    { s:"Ich [?] unbedingt ein Haustier haben!", c:"Ich wünsche mir das schon seit zwei Jahren.", opts:["möchte","muss","soll","darf"], a:"möchte", sol:"MÖCHTE – eigener Wunsch, höflicher Ausdruck." },
+    { s:"Du [?] nicht auf der Straße Fußball spielen.", c:"Es ist verboten und gefährlich.", opts:["darfst","kannst","sollst","musst"], a:"darfst", sol:"DARFST NICHT – verboten!" },
+    { s:"Wir [?] die Hausaufgaben bis Montag abgeben.", c:"So hat es die Lehrerin angeordnet.", opts:["müssen","dürfen","können","wollen"], a:"müssen", sol:"MÜSSEN – Pflicht, keine Wahl." },
+    { s:"Das Baby [?] noch nicht sprechen.", c:"Es ist erst fünf Monate alt.", opts:["kann","darf","soll","muss"], a:"kann", sol:"KANN NOCH NICHT – Fähigkeit fehlt." },
+    { s:"Ihr [?] heute nach der Schule ins Kino.", c:"Eure Eltern haben es erlaubt!", opts:["dürft","müsst","sollt","könnt"], a:"dürft", sol:"DÜRFT – ihr habt die Erlaubnis!" },
+    { s:"Der Zauberer [?] um Mitternacht verschwinden.", c:"So steht es im Zauberbuch.", opts:["soll","muss","darf","kann"], a:"soll", sol:"SOLL – das Buch sagt es so." },
+    { s:"Du [?] dir keine Sorgen machen.", c:"Alles wird gut, versprochen!", opts:["musst nicht","darfst nicht","sollst nicht","kannst nicht"], a:"musst nicht", sol:"MUSST NICHT – es ist nicht nötig." },
+    { s:"Mia [?] eine Ärztin werden.", c:"Das ist ihr größter Traum.", opts:["möchte","soll","muss","darf"], a:"möchte", sol:"MÖCHTE – Wunsch." },
+    { s:"Der Hund [?] auf dem Sofa schlafen.", c:"Das hat Papa ausdrücklich verboten.", opts:["darf nicht","muss nicht","soll nicht","kann nicht"], a:"darf nicht", sol:"DARF NICHT – Papa hat es verboten." },
+    { s:"Ben [?] früher schlafen gehen.", c:"Er ist immer so müde in der Schule.", opts:["sollte","möchte","darf","kann"], a:"sollte", sol:"SOLLTE – Ratschlag, keine strenge Pflicht." },
+    { s:"Das Gespenst [?] durch Wände gehen.", c:"Das ist seine besondere Fähigkeit.", opts:["kann","darf","muss","soll"], a:"kann", sol:"KANN – Fähigkeit." },
+    { s:"Ihr [?] euch für den Ausflug anmelden.", c:"Ohne Anmeldung gibt es keinen Platz.", opts:["müsst","dürft","sollt","möchtet"], a:"müsst", sol:"MÜSST – notwendig, sonst kein Platz." },
+    { s:"Lena [?] heute nicht kochen.", c:"Papa hat Überraschungsabend organisiert.", opts:["muss nicht","darf nicht","soll nicht","kann nicht"], a:"muss nicht", sol:"MUSS NICHT – kein Zwang heute." },
+    { s:"Der Elefant [?] durch die Tür passen.", c:"Leider ist er zu groß.", opts:["kann nicht","darf nicht","soll nicht","muss nicht"], a:"kann nicht", sol:"KANN NICHT – es ist ihm nicht möglich." },
+    { s:"Finn [?] lauter sprechen.", c:"Die Oma hört schlecht.", opts:["muss","darf","soll","möchte"], a:"muss", sol:"MUSS – es ist notwendig." },
+    { s:"Wir [?] jetzt wirklich los.", c:"Der Bus fährt in drei Minuten!", opts:["müssen","dürfen","sollen","können"], a:"müssen", sol:"MÜSSEN – keine Zeit mehr!" },
+  ]
+},
+
+// ---- 7. KOMPARATIV/SUPERLATIV – vorlesen, Erklärsatz ----
+komp1: {
+  title: "Komparativ & Superlativ – Mündlich antworten!",
+  type: "read",
+  items: [
+    { s:"Der Elefant ist groß.", c:"Aber der Dinosaurier war noch ____ als der Elefant. Und das Blauwal ist am ____.", sol:"Dinosaurier war größer als der Elefant. Der Blauwal ist am größten." },
+    { s:"Die Pizza ist lecker.", c:"Aber Schokolade ist noch ____. Und Schokokuchen ist am ____.", sol:"Schokolade ist leckerer. Schokokuchen ist am leckersten." },
+    { s:"Mathe ist schwer.", c:"Aber Physik ist noch ____. Und Altgriechisch ist am ____.", sol:"Physik ist schwerer. Altgriechisch ist am schwersten." },
+    { s:"Das Fahrrad ist schnell.", c:"Aber das Auto ist noch ____. Und das Flugzeug ist am ____.", sol:"Das Auto ist schneller. Das Flugzeug ist am schnellsten." },
+    { s:"Der Hund ist laut.", c:"Aber das Baby ist noch ____. Und das Konzert ist am ____.", sol:"Das Baby ist lauter. Das Konzert ist am lautesten." },
+    { s:"Lena ist gut in Mathe.", c:"Aber Finn ist noch ____ in Mathe. Und Mia ist am ____ in Mathe.", sol:"Finn ist besser. Mia ist am besten. (unregelmäßig: gut – besser – am besten!)" },
+    { s:"Die Katze schläft viel.", c:"Aber der Hund schläft noch ____. Und das Faultier schläft am ____.", sol:"Hund schläft mehr. Das Faultier schläft am meisten." },
+    { s:"Das T-Shirt ist billig.", c:"Aber die Socken sind noch ____. Und der Radiergummi ist am ____.", sol:"Socken sind billiger. Radiergummi ist am billigsten." },
+    { s:"Der Frosch ist klein.", c:"Aber die Ameise ist noch ____. Und das Bakterium ist am ____.", sol:"Die Ameise ist kleiner. Das Bakterium ist am kleinsten." },
+    { s:"Heute ist es kalt.", c:"Gestern war es noch ____. Und letzten Winter war es am ____.", sol:"Gestern war es kälter. Letzten Winter war es am kältesten." },
+    { s:"Der Film war spannend.", c:"Das Buch war noch ____. Aber das echte Erlebnis war am ____.", sol:"Spannender. Am spannendsten." },
+    { s:"Finn läuft gern.", c:"Lena läuft noch ____. Und Ben läuft am ____.", sol:"Lena läuft lieber. Ben läuft am liebsten. (unregelmäßig: gern – lieber – am liebsten!)" },
+    { s:"Die Suppe ist heiß.", c:"Der Tee ist noch ____. Und die Lava ist am ____.", sol:"Der Tee ist heißer. Die Lava ist am heißesten." },
+    { s:"Das Nilpferd ist schwer.", c:"Der Elefant ist noch ____. Und der Blauwal ist am ____.", sol:"Der Elefant ist schwerer. Der Blauwal ist am schwersten." },
+    { s:"Der Clown ist lustig.", c:"Aber der Hund mit Hut ist noch ____. Und das Nilpferd im Tutu ist am ____.", sol:"Lustiger. Am lustigsten!" },
+    { s:"Ella ist groß.", c:"Mama ist noch ____. Und Papa ist am ____.", sol:"Mama ist größer. Papa ist am größten." },
+    { s:"Die Hausaufgabe war leicht.", c:"Der Test war noch ____. Und die Schularbeit war am ____.", sol:"Leichter. Am leichtesten." },
+    { s:"Das Känguru springt hoch.", c:"Der Floh springt noch ____. Und das Einhorn springt am ____.", sol:"Höher. Am höchsten." },
+  ]
+},
+
+// ---- 8. KOMPARATIV – DREI DINGE VERGLEICHEN ----
+komp2: {
+  title: "Drei Dinge vergleichen – Sprich die Sätze!",
+  type: "read",
+  items: [
+    { s:"🐯 Tiger · 🦁 Löwe · 🐆 Gepard", c:"Vergleicht nach: SCHNELL", sol:"Der Tiger ist schnell. Der Löwe ist schneller als der Tiger. Der Gepard ist am schnellsten." },
+    { s:"🍎 Apfel · 🍌 Banane · 🥭 Mango", c:"Vergleicht nach: LECKER (eure Meinung!)", sol:"Der Apfel ist lecker. Die Banane ist leckerer als der Apfel. Die Mango ist am leckersten." },
+    { s:"🐘 Elefant · 🦏 Nashorn · 🦛 Nilpferd", c:"Vergleicht nach: SCHWER", sol:"Der Elefant ist schwer. Das Nashorn ist schwerer als der Elefant. Das Nilpferd ist am schwersten." },
+    { s:"🐜 Ameise · 🐸 Frosch · 🐘 Elefant", c:"Vergleicht nach: GROSS", sol:"Die Ameise ist groß – nein, klein! Der Frosch ist größer als die Ameise. Der Elefant ist am größten." },
+    { s:"🚲 Fahrrad · 🚗 Auto · ✈️ Flugzeug", c:"Vergleicht nach: SCHNELL", sol:"Das Fahrrad ist schnell. Das Auto ist schneller. Das Flugzeug ist am schnellsten." },
+    { s:"📕 Buch · 📺 Film · 🎮 Videospiel", c:"Vergleicht nach: SPANNEND (eure Meinung!)", sol:"Das Buch ist spannend. Der Film ist spannender. Das Videospiel ist am spannendsten." },
+    { s:"🌸 Frühling · ☀️ Sommer · ❄️ Winter", c:"Vergleicht nach: KALT", sol:"Der Frühling ist kalt. Der Winter ist kälter. Der Nordpol ist am kältesten!" },
+    { s:"☕ Kaffee · 🍵 Tee · 🌋 Lava", c:"Vergleicht nach: HEISS", sol:"Kaffee ist heiß. Tee ist heißer. Lava ist am heißesten." },
+    { s:"🎵 Gitarre · 🥁 Schlagzeug · ✈️ Düsenjet", c:"Vergleicht nach: LAUT", sol:"Die Gitarre ist laut. Das Schlagzeug ist lauter. Der Düsenjet ist am lautesten." },
+    { s:"🍦 Eis · 🍰 Kuchen · 🍫 Schokolade", c:"Vergleicht nach: SÜSS (eure Meinung!)", sol:"Eis ist süß. Kuchen ist süßer. Schokolade ist am süßesten." },
+    { s:"🐌 Schnecke · 🐢 Schildkröte · 👴 Opa beim Joggen", c:"Vergleicht nach: LANGSAM", sol:"Die Schnecke ist langsam. Die Schildkröte ist langsamer. Opa ist am langsamsten." },
+    { s:"🏠 Haus · 🏢 Hochhaus · 🗼 Eiffelturm", c:"Vergleicht nach: HOCH", sol:"Das Haus ist hoch. Das Hochhaus ist höher. Der Eiffelturm ist am höchsten." },
+    { s:"📱 Handy · 💻 Laptop · 🖥️ Computer", c:"Vergleicht nach: GROSS", sol:"Das Handy ist groß. Der Laptop ist größer. Der Computer ist am größten." },
+    { s:"😐 Ben · 😄 Finn · 🤣 Der Clown", c:"Vergleicht nach: LUSTIG", sol:"Ben ist lustig. Finn ist lustiger. Der Clown ist am lustigsten." },
+    { s:"🐕 Hund · 🐈 Katze · 🦥 Faultier", c:"Vergleicht nach: FAUL", sol:"Der Hund ist faul. Die Katze ist fauler. Das Faultier ist am faulsten." },
+    { s:"📚 Hausaufgaben · 📝 Test · 🎓 Abitur", c:"Vergleicht nach: SCHWER", sol:"Hausaufgaben sind schwer. Der Test ist schwerer. Das Abitur ist am schwersten." },
+  ]
+},
+
+// ---- 9. VERNEINUNG – Vorlesen, Kinder negieren ----
+vernein: {
+  title: "Verneinung – Stimmt das? Sag NEIN!",
+  type: "read",
+  items: [
+    { s:"Finn isst gerne Spinat.", sol:"Finn isst NICHT gerne Spinat. (Verb negieren → nicht)" },
+    { s:"Der Lehrer hat einen langen Schwanz.", sol:"Der Lehrer hat KEINEN langen Schwanz. (Nomen ohne Artikel → kein)" },
+    { s:"Das Nilpferd ist klein.", sol:"Das Nilpferd ist NICHT klein. (Adjektiv → nicht)" },
+    { s:"Die Katze macht immer Hausaufgaben.", sol:"Die Katze macht NIE Hausaufgaben. (immer → nie)" },
+    { s:"Lena hat schon gegessen.", sol:"Lena hat NOCH NICHT gegessen. (schon → noch nicht)" },
+    { s:"Das Einhorn wohnt in unserem Keller.", sol:"Das Einhorn wohnt NICHT in unserem Keller. (Leider!)" },
+    { s:"Alle Kinder mögen Montage.", sol:"KEIN Kind mag Montage. / Kinder mögen Montage NICHT. (alle → kein)" },
+    { s:"Das Krokodil hat heute gebadet.", sol:"Das Krokodil hat NICHT gebadet. (Verb → nicht)" },
+    { s:"Finn hat eine Schwester.", sol:"Finn hat KEINE Schwester. (Nomen → kein)" },
+    { s:"Der Drache ist noch wach.", sol:"Der Drache ist NICHT MEHR wach. (noch → nicht mehr)" },
+    { s:"Das Gespenst trinkt noch Tee.", sol:"Das Gespenst trinkt KEINEN Tee MEHR. (noch → nicht mehr)" },
+    { s:"Jemand hat den Kuchen aufgegessen.", sol:"NIEMAND hat den Kuchen aufgegessen. (jemand → niemand)" },
+    { s:"Die Hexe ist nett.", sol:"Die Hexe ist NICHT nett. (Adjektiv → nicht)" },
+    { s:"Wir haben schon alle Hausaufgaben.", sol:"Wir haben NOCH NICHT alle Hausaufgaben. (schon → noch nicht)" },
+    { s:"Das Nilpferd tanzt elegant.", sol:"Das Nilpferd tanzt NICHT elegant. (Adverb → nicht)" },
+    { s:"Ben hat heute sein Pausenbrot mitgebracht.", sol:"Ben hat KEIN Pausenbrot mitgebracht. (Nomen → kein)" },
+    { s:"Alle mögen den neuen Mathelehrer.", sol:"KEINER mag den neuen Mathelehrer. / NIEMAND mag ihn." },
+    { s:"Das Chamäleon ist immer sichtbar.", sol:"Das Chamäleon ist NIE sichtbar. (immer → nie)" },
+    { s:"Das Pferd fliegt noch.", sol:"Das Pferd fliegt NICHT MEHR. (noch → nicht mehr)" },
+    { s:"Lena hat noch Hunger.", sol:"Lena hat KEINEN Hunger MEHR. (noch → nicht mehr + kein)" },
+    { s:"Irgendwo wartet ein Einhorn auf dich.", sol:"NIRGENDWO wartet ein Einhorn auf dich. (irgendwo → nirgendwo)" },
+    { s:"Der Zauberer schläft immer nachts.", sol:"Der Zauberer schläft NIE nachts. Er schläft tagsüber." },
+    { s:"Der Hund hat meinen Stift aufgefressen.", sol:"Der Hund hat KEINEN Stift aufgefressen. Das glaubt dir NIEMAND." },
+    { s:"Irgendjemand hat die letzte Schokolade gegessen.", sol:"NIEMAND hat die letzte Schokolade gegessen. (Alle sagen das.)" },
+    { s:"Das Krokodil war schon beim Zahnarzt.", sol:"Das Krokodil war NOCH NIE beim Zahnarzt. Deshalb hat es so viele Zähne!" },
+    { s:"Ella hat heute Geburtstag.", sol:"Ella hat NICHT heute Geburtstag. (Es ist ein anderer Tag.)" },
+    { s:"Alle Piraten haben Angst vor Wasser.", sol:"NICHT ALLE Piraten haben Angst vor Wasser. Nur die meisten." },
+    { s:"Das Einhorn hat sich schon die Zähne geputzt.", sol:"Das Einhorn hat sich NOCH NICHT die Zähne geputzt." },
+  ]
+},
+
+// ---- 10. REFLEXIVPRONOMEN ----
+reflex: {
+  title: "Reflexivpronomen – Ich auch!",
+  type: "read",
+  items: [
+    { s:"Ella wäscht sich die Hände.", c:"Und du?", sol:"Ich wasche MIR auch die Hände. (Dativ: mir – Körperteil dabei)" },
+    { s:"Ben kämmt sich die Haare.", c:"Und du?", sol:"Ich kämme MIR auch die Haare. (Dativ: mir)" },
+    { s:"Lena zieht sich die Jacke an.", c:"Und du?", sol:"Ich ziehe MIR auch die Jacke an. (Dativ: mir)" },
+    { s:"Der Zauberer ärgert sich.", c:"Und du?", sol:"Ich ärgere MICH auch. (Akkusativ: mich – kein Objekt dabei)" },
+    { s:"Finn freut sich auf den Ausflug.", c:"Und du?", sol:"Ich freue MICH auch auf den Ausflug. (Akkusativ: mich)" },
+    { s:"Mia langweilt sich im Unterricht.", c:"Und du?", sol:"Ich langweile MICH auch im Unterricht. (pssst!)" },
+    { s:"Das Krokodil putzt sich die Zähne.", c:"Und du?", sol:"Ich putze MIR auch die Zähne. (Dativ: mir)" },
+    { s:"Ben beeilt sich.", c:"Und du?", sol:"Ich beeile MICH auch. (Akkusativ: mich)" },
+    { s:"Lena setzt sich aufs Sofa.", c:"Und du?", sol:"Ich setze MICH auch aufs Sofa. (Akkusativ: mich)" },
+    { s:"Finn zieht sich die Schuhe aus.", c:"Und du?", sol:"Ich ziehe MIR auch die Schuhe aus. (Dativ: mir)" },
+    { s:"Ella schaut sich einen Film an.", c:"Und du?", sol:"Ich schaue MIR auch einen Film an. (Dativ: mir)" },
+    { s:"Das Einhorn erholt sich.", c:"Und du?", sol:"Ich erhole MICH auch. (Akkusativ: mich)" },
+    { s:"Ben wünscht sich ein Haustier.", c:"Und du?", sol:"Ich wünsche MIR auch ein Haustier. (Dativ: mir)" },
+    { s:"Lena schämt sich.", c:"Und du?", sol:"Ich schäme MICH auch. (Akkusativ: mich)" },
+    { s:"Der Pirat versteckt sich hinter dem Fass.", c:"Und du?", sol:"Ich verstecke MICH auch hinter dem Fass." },
+    { s:"Mia erinnert sich an den Traum.", c:"Und du?", sol:"Ich erinnere MICH auch an den Traum. (Akkusativ: mich)" },
+    { s:"Finn stellt sich vor.", c:"Und du?", sol:"Ich stelle MICH auch vor. / Ich stelle MIR das vor. (kontextabhängig)" },
+    { s:"Das Chamäleon tarnt sich.", c:"Und du?", sol:"Ich tarnte MICH auch – aber ich bin ein Mensch!" },
+    { s:"Ella wundert sich.", c:"Und du?", sol:"Ich wundere MICH auch. (Akkusativ: mich)" },
+    { s:"Ben wäscht sich das Gesicht.", c:"Und du?", sol:"Ich wasche MIR auch das Gesicht. (Dativ: mir)" },
+  ]
+},
+
+// ---- 11. PASSIV – Vorlesen ----
+passiv: {
+  title: "Passiv – Was wird gemacht?",
+  type: "read",
+  items: [
+    { s:"Das Kind öffnet das Geschenk.", c:"Sag es im Passiv!", sol:"Das Geschenk WIRD GEÖFFNET." },
+    { s:"Der Koch macht die Suppe.", c:"Sag es im Passiv!", sol:"Die Suppe WIRD GEMACHT." },
+    { s:"Lena liest das Buch.", c:"Sag es im Passiv!", sol:"Das Buch WIRD GELESEN." },
+    { s:"Ben kauft das Brot.", c:"Sag es im Passiv!", sol:"Das Brot WIRD GEKAUFT." },
+    { s:"Die Kinder malen ein Bild.", c:"Sag es im Passiv!", sol:"Ein Bild WIRD GEMALT." },
+    { s:"Der Zauberer öffnet die Tür.", c:"Sag es im Passiv!", sol:"Die Tür WIRD GEÖFFNET." },
+    { s:"Mama backt einen Kuchen.", c:"Sag es im Passiv!", sol:"Ein Kuchen WIRD GEBACKEN." },
+    { s:"Der Hund frisst das Pausenbrot.", c:"Sag es im Passiv!", sol:"Das Pausenbrot WIRD GEFRESSEN." },
+    { s:"Die Lehrerin erklärt die Aufgabe.", c:"Sag es im Passiv!", sol:"Die Aufgabe WIRD ERKLÄRT." },
+    { s:"Das Gespenst erschreckt den Lehrer.", c:"Sag es im Passiv!", sol:"Der Lehrer WIRD ERSCHRECKT." },
+    { s:"Finn putzt das Fahrrad.", c:"Sag es im Passiv!", sol:"Das Fahrrad WIRD GEPUTZT." },
+    { s:"Das Einhorn bewacht den Schatz.", c:"Sag es im Passiv!", sol:"Der Schatz WIRD BEWACHT." },
+    { s:"Die Eltern stellen Fragen.", c:"Sag es im Passiv!", sol:"Fragen WERDEN GESTELLT." },
+    { s:"Das Nilpferd zerstört die Küche.", c:"Sag es im Passiv!", sol:"Die Küche WIRD ZERSTÖRT." },
+    { s:"Ella schreibt den Brief.", c:"Sag es im Passiv!", sol:"Der Brief WIRD GESCHRIEBEN." },
+    { s:"Der Detektiv löst den Fall.", c:"Sag es im Passiv!", sol:"Der Fall WIRD GELÖST." },
+    { s:"Die Kinder singen ein Lied.", c:"Sag es im Passiv!", sol:"Ein Lied WIRD GESUNGEN." },
+    { s:"Ben repariert das Fahrrad.", c:"Sag es im Passiv!", sol:"Das Fahrrad WIRD REPARIERT." },
+    { s:"Die Hexe verwandelt den Prinzen.", c:"Sag es im Passiv!", sol:"Der Prinz WIRD VERWANDELT." },
+    { s:"Mia vergisst die Hausaufgaben.", c:"Sag es im Passiv!", sol:"Die Hausaufgaben WERDEN VERGESSEN." },
+  ]
+},
+
+// ---- 12. PERSONALPRONOMEN AKKUSATIV ----
+proakk: {
+  title: "Personalpronomen – Akkusativ",
+  type: "choice",
+  items: [
+    { s:"Die Mutter ruft ihre Tochter. → Die Mutter ruft _____.", opts:["sie","ihr","ihn","ihnen"], a:"sie", sol:"SIE – die Tochter ist weiblich, Akkusativ → sie." },
+    { s:"Ben sieht den Lehrer. → Ben sieht _____.", opts:["ihn","ihm","sie","es"], a:"ihn", sol:"IHN – der Lehrer ist männlich, Akkusativ → ihn." },
+    { s:"Lena liebt das Einhorn. → Lena liebt _____.", opts:["es","ihn","sie","ihm"], a:"es", sol:"ES – das Einhorn, sächlich → es." },
+    { s:"Der Hund jagt die Katze. → Der Hund jagt _____.", opts:["sie","ihn","es","ihr"], a:"sie", sol:"SIE – die Katze ist weiblich → sie." },
+    { s:"Mama ruft Ben und Lena. → Mama ruft _____.", opts:["sie","ihnen","ihn","es"], a:"sie", sol:"SIE – Plural → sie." },
+    { s:"Finn kennt den Zauberer. → Finn kennt _____.", opts:["ihn","ihm","sie","es"], a:"ihn", sol:"IHN – der Zauberer, männlich → ihn." },
+    { s:"Ella mag die Pizza. → Ella mag _____.", opts:["sie","ihn","es","ihr"], a:"sie", sol:"SIE – die Pizza, weiblich → sie." },
+    { s:"Der Drache sieht das Kind. → Der Drache sieht _____.", opts:["es","ihn","sie","ihm"], a:"es", sol:"ES – das Kind, sächlich → es." },
+    { s:"Lena besucht ihre Oma. → Lena besucht _____.", opts:["sie","ihn","es","ihr"], a:"sie", sol:"SIE – die Oma → sie." },
+    { s:"Ben hört den Hund. → Ben hört _____.", opts:["ihn","ihm","sie","es"], a:"ihn", sol:"IHN – den Hund, männlich → ihn." },
+    { s:"Mia mag den Clown. → Mia mag _____.", opts:["ihn","ihm","sie","es"], a:"ihn", sol:"IHN – männlich → ihn." },
+    { s:"Der Lehrer lobt die Schüler. → Der Lehrer lobt _____.", opts:["sie","ihn","es","ihm"], a:"sie", sol:"SIE – Plural → sie." },
+    { s:"Das Nilpferd frisst die Blumen. → Es frisst _____.", opts:["sie","ihn","es","ihr"], a:"sie", sol:"SIE – die Blumen, weiblich/Plural → sie." },
+    { s:"Ella findet den Schatz. → Ella findet _____.", opts:["ihn","ihm","sie","es"], a:"ihn", sol:"IHN – den Schatz, männlich → ihn." },
+    { s:"Finn vermisst sein Haustier. → Finn vermisst _____.", opts:["es","ihn","sie","ihm"], a:"es", sol:"ES – das Haustier, sächlich → es." },
+    { s:"Die Lehrerin fragt Ben. → Sie fragt _____.", opts:["ihn","ihm","sie","es"], a:"ihn", sol:"IHN – Ben ist männlich → ihn." },
+    { s:"Wir besuchen unsere Freunde. → Wir besuchen _____.", opts:["sie","ihn","es","ihnen"], a:"sie", sol:"SIE – Plural → sie." },
+    { s:"Das Gespenst erschreckt das Baby. → Es erschreckt _____.", opts:["es","ihn","sie","ihm"], a:"es", sol:"ES – das Baby, sächlich → es." },
+    { s:"Ben mag Mia. → Ben mag _____.", opts:["sie","ihn","es","ihr"], a:"sie", sol:"SIE – Mia ist weiblich → sie." },
+    { s:"Der Zauberer sucht seinen Stab. → Er sucht _____.", opts:["ihn","ihm","sie","es"], a:"ihn", sol:"IHN – den Stab, männlich → ihn." },
+  ]
+},
+
+// ---- 13. PERSONALPRONOMEN DATIV ----
+prodat: {
+  title: "Personalpronomen – Dativ",
+  type: "choice",
+  items: [
+    { s:"Die Tochter hilft der Mutter. → Die Tochter hilft _____.", opts:["ihr","sie","ihm","ihnen"], a:"ihr", sol:"IHR – der Mutter (weiblich) → Dativ: ihr." },
+    { s:"Ben dankt dem Lehrer. → Ben dankt _____.", opts:["ihm","ihn","ihr","ihnen"], a:"ihm", sol:"IHM – dem Lehrer (männlich) → Dativ: ihm." },
+    { s:"Ella antwortet dem Kind. → Ella antwortet _____.", opts:["ihm","ihn","ihr","sie"], a:"ihm", sol:"IHM – dem Kind (sächlich) → Dativ: ihm." },
+    { s:"Finn schreibt seinen Eltern. → Finn schreibt _____.", opts:["ihnen","ihm","ihr","sie"], a:"ihnen", sol:"IHNEN – den Eltern (Plural) → Dativ: ihnen." },
+    { s:"Lena hilft ihrer Freundin. → Lena hilft _____.", opts:["ihr","sie","ihm","ihnen"], a:"ihr", sol:"IHR – der Freundin → ihr." },
+    { s:"Mia gibt dem Hund Futter. → Mia gibt _____ Futter.", opts:["ihm","ihn","ihr","sie"], a:"ihm", sol:"IHM – dem Hund → ihm." },
+    { s:"Ben zeigt seiner Oma das Bild. → Er zeigt _____ das Bild.", opts:["ihr","sie","ihm","ihnen"], a:"ihr", sol:"IHR – der Oma → ihr." },
+    { s:"Das Einhorn schenkt dem Drachen eine Blume. → Es schenkt _____ eine Blume.", opts:["ihm","ihn","ihr","ihnen"], a:"ihm", sol:"IHM – dem Drachen → ihm." },
+    { s:"Lena vertraut ihrer Schwester. → Lena vertraut _____.", opts:["ihr","sie","ihm","ihnen"], a:"ihr", sol:"IHR – der Schwester → ihr." },
+    { s:"Der Lehrer erklärt den Schülern die Aufgabe. → Er erklärt _____ die Aufgabe.", opts:["ihnen","ihm","ihr","sie"], a:"ihnen", sol:"IHNEN – den Schülern (Plural) → ihnen." },
+    { s:"Ella folgt dem Zauberer. → Ella folgt _____.", opts:["ihm","ihn","ihr","sie"], a:"ihm", sol:"IHM – dem Zauberer → ihm." },
+    { s:"Finn hilft seiner Lehrerin. → Er hilft _____.", opts:["ihr","sie","ihm","ihnen"], a:"ihr", sol:"IHR – der Lehrerin → ihr." },
+    { s:"Das Gespenst antwortet dem Kind. → Es antwortet _____.", opts:["ihm","ihn","ihr","ihnen"], a:"ihm", sol:"IHM – dem Kind → ihm." },
+    { s:"Mama erzählt Ben eine Geschichte. → Sie erzählt _____ eine Geschichte.", opts:["ihm","ihn","ihr","ihnen"], a:"ihm", sol:"IHM – Ben (männlich) → ihm." },
+    { s:"Der Zauberer glaubt dem Mädchen. → Er glaubt _____.", opts:["ihr","sie","ihm","ihnen"], a:"ihr", sol:"IHR – dem Mädchen (sächlich, aber Person: ihr)." },
+    { s:"Lena dankt ihren Freunden. → Sie dankt _____.", opts:["ihnen","ihm","ihr","sie"], a:"ihnen", sol:"IHNEN – den Freunden (Plural) → ihnen." },
+    { s:"Ben vertraut dem Detektiv. → Er vertraut _____.", opts:["ihm","ihn","ihr","ihnen"], a:"ihm", sol:"IHM – dem Detektiv → ihm." },
+    { s:"Ella schreibt ihrer Oma. → Sie schreibt _____.", opts:["ihr","sie","ihm","ihnen"], a:"ihr", sol:"IHR – der Oma → ihr." },
+    { s:"Das Krokodil folgt dem Nilpferd. → Es folgt _____.", opts:["ihm","ihn","ihr","sie"], a:"ihm", sol:"IHM – dem Nilpferd → ihm." },
+    { s:"Mia gibt den Kindern Bonbons. → Sie gibt _____ Bonbons.", opts:["ihnen","ihm","ihr","sie"], a:"ihnen", sol:"IHNEN – den Kindern (Plural) → ihnen." },
+  ]
+}
+
+}; // end data
+
+// ============================================================
+// GAME ENGINE
+// ============================================================
+let state = {
+  mode: null,
+  items: [],
+  idx: 0,
+  pts: 0,
+  cor: 0,
+  attempted: 0
+};
+
+const modeNames = {
+  praep1:"📍 Präpositionen I", praep2:"📍 Präpositionen II",
+  praep3:"📍 Präpositionen III", perfekt:"⏰ Perfekt",
+  verbformen:"⚡ Verbformen", modal:"💬 Modalverben",
+  komp1:"📈 Komparativ I", komp2:"🐆 Komparativ II",
+  vernein:"🚫 Verneinung", reflex:"🪞 Reflexiv",
+  passiv:"🔄 Passiv", proakk:"👉 Pronomen Akk.",
+  prodat:"🤝 Pronomen Dat."
+};
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('backBtn').style.display = id === 'gameScreen' ? 'block' : 'none';
+}
+
+function goMenu() {
+  showScreen('menuScreen');
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function startMode(mode) {
+  state.mode = mode;
+  state.items = shuffle(data[mode].items);
+  state.idx = 0;
+  state.pts = 0;
+  state.cor = 0;
+  state.attempted = 0;
+  document.getElementById('modeTag').textContent = modeNames[mode];
+  updateStats();
+  showScreen('gameScreen');
+  renderQ();
+}
+
+function replayMode() { startMode(state.mode); }
+
+function renderQ() {
+  const d = data[state.mode];
+  const q = state.items[state.idx];
+  const total = state.items.length;
+
+  document.getElementById('qnr').textContent = state.idx + 1;
+  document.getElementById('progFill').style.width = (state.idx / total * 100) + '%';
+  document.getElementById('progTxt').textContent = state.idx + ' / ' + total + ' erledigt';
+
+  const isRead = d.type === 'read';
+  const card = document.getElementById('mainCard');
+  card.className = 'card' + (isRead ? ' read-mode' : '');
+
+  document.getElementById('cardNr').textContent = 'Aufgabe ' + (state.idx+1) + ' von ' + total;
+  document.getElementById('cardSentence').textContent = q.s;
+  document.getElementById('cardContext').textContent = q.c || '';
+
+  document.getElementById('solBox').className = 'solution-box';
+  document.getElementById('solBox').innerHTML = '';
+
+  const ansRow = document.getElementById('ansRow');
+  ansRow.innerHTML = '';
+
+  if (d.type === 'choice') {
+    const opts = shuffle(q.opts);
+    opts.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'ans-btn';
+      btn.textContent = opt;
+      btn.onclick = () => checkAnswer(opt, btn, q);
+      ansRow.appendChild(btn);
+    });
+  }
+  // read-aloud: no buttons, just solution on request
+}
+
+function checkAnswer(chosen, btnEl, q) {
+  state.attempted++;
+  const allBtns = document.querySelectorAll('.ans-btn');
+  allBtns.forEach(b => b.onclick = null);
+
+  if (chosen === q.a) {
+    btnEl.classList.add('correct');
+    state.cor++;
+    state.pts += 10;
+    playSound(true);
+    showPop('+10');
+    updateStats();
+    setTimeout(nextQ, 900);
+  } else {
+    btnEl.classList.add('wrong');
+    // highlight correct
+    allBtns.forEach(b => { if (b.textContent === q.a) b.classList.add('correct'); });
+    playSound(false);
+    showSol();
+    updateStats();
+    setTimeout(nextQ, 1600);
+  }
+}
+
+function showSol() {
+  const q = state.items[state.idx];
+  const box = document.getElementById('solBox');
+  box.innerHTML = '✅ ' + (q.sol || q.a);
+  box.classList.add('visible');
+}
+
+function nextQ() {
+  if (state.idx + 1 >= state.items.length) { endGame(); return; }
+  state.idx++;
+  renderQ();
+  if (state.idx > 0 && state.idx % 5 === 0) showMilestone(state.idx);
+}
+
+function skipQ() {
+  state.items.push(state.items[state.idx]);
+  state.idx++;
+  if (state.idx >= state.items.length) { endGame(); return; }
+  renderQ();
+}
+
+function endGame() {
+  document.getElementById('rPts').textContent = state.pts;
+  document.getElementById('rCor').textContent = state.cor;
+  document.getElementById('rTot').textContent = state.items.length;
+  showScreen('resultScreen');
+  document.getElementById('backBtn').style.display = 'none';
+  playFanfare();
+  confetti();
+}
+
+function updateStats() {
+  document.getElementById('pts').textContent = state.pts;
+  document.getElementById('cor').textContent = state.cor;
+}
+
+function playSound(ok) {
+  try {
+    const c = new AudioContext();
+    const o = c.createOscillator();
+    const g = c.createGain();
+    o.connect(g); g.connect(c.destination);
+    o.frequency.value = ok ? 880 : 220;
+    o.type = ok ? 'sine' : 'sawtooth';
+    g.gain.setValueAtTime(.2, c.currentTime);
+    g.gain.exponentialRampToValueAtTime(.01, c.currentTime + .3);
+    o.start(); o.stop(c.currentTime + .3);
+  } catch(e){}
+}
+
+function playFanfare() {
+  try {
+    const c = new AudioContext();
+    [523,659,784,1047].forEach((f,i) => {
+      const o = c.createOscillator(), g = c.createGain();
+      o.connect(g); g.connect(c.destination);
+      o.frequency.value = f;
+      g.gain.setValueAtTime(.15, c.currentTime + i*.15);
+      g.gain.exponentialRampToValueAtTime(.01, c.currentTime + i*.15 + .25);
+      o.start(c.currentTime + i*.15); o.stop(c.currentTime + i*.15 + .3);
+    });
+  } catch(e){}
+}
+
+function showPop(txt) {
+  const p = document.createElement('div');
+  p.className = 'pts-pop';
+  p.textContent = txt;
+  p.style.left = (30 + Math.random()*40) + '%';
+  p.style.top = '30%';
+  document.body.appendChild(p);
+  setTimeout(() => p.remove(), 1000);
+}
+
+function showMilestone(n) {
+  const ov = document.createElement('div');
+  ov.className = 'milestone';
+  ov.innerHTML = '<div class="milestone-inner"><div class="milestone-n">' + n + '</div><div class="milestone-t">🎉 ' + n + ' Aufgaben erledigt!</div></div>';
+  document.body.appendChild(ov);
+  playFanfare(); confetti();
+  setTimeout(() => ov.remove(), 2200);
+}
+
+function confetti() {
+  const cols = ['#e76f51','#f4a261','#ffb347','#28a745','#17a2b8','#a78bfa','#f0abfc'];
+  for (let i = 0; i < 80; i++) {
+    const c = document.createElement('div');
+    c.className = 'cfetti';
+    c.style.left = Math.random()*100+'vw';
+    c.style.top = '-10px';
+    c.style.background = cols[Math.floor(Math.random()*cols.length)];
+    c.style.borderRadius = Math.random()>.5 ? '50%' : '3px';
+    const sz = (Math.random()*10+5)+'px';
+    c.style.width = c.style.height = sz;
+    document.body.appendChild(c);
+    const a = c.animate([
+      {transform:'translateY(0) rotate(0)',opacity:1},
+      {transform:'translateY(100vh) rotate('+Math.floor(Math.random()*720)+'deg)',opacity:0}
+    ], {duration: 2000+Math.random()*1500, easing:'ease-out'});
+    a.onfinish = () => c.remove();
+  }
+}
+</script>
+</body>
+</html>
