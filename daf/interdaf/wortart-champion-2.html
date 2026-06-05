@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wortart-Champion Pro 🏆</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --nomen:    #1a3fa5; --nomen-l:  #2a5fcc; --nomen-g:  #6a9fff;
+            --artikel:  #1a8cc7; --artikel-l:#2aaee8; --artikel-g:#60d0ff;
+            --verb:     #cc2020; --verb-l:   #ee3535; --verb-g:   #ff7070;
+            --adjektiv: #159040; --adjektiv-l:#1db851;--adjektiv-g:#4de880;
+            --success:  #2ecf8a; --error: #ff3030;
+            --bg: #06121f; --card: #0d2240;
+            --text: #e0f4ff; --muted: #7ab8e0; --gold: #ffd700;
+            --accent: #1a6fb5; --accent-g: #3a9de0;
+        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Nunito',sans-serif;background:linear-gradient(160deg,#06121f,#0a1e36 40%,#081528 70%,#06121f);min-height:100vh;color:var(--text);overflow-x:hidden}
+        .stars{position:fixed;inset:0;pointer-events:none;z-index:0}
+        .star{position:absolute;background:#fff;border-radius:50%;animation:twinkle var(--d,3s) var(--dl,0s) ease-in-out infinite;opacity:0}
+        @keyframes twinkle{0%,100%{opacity:0}50%{opacity:var(--o,.5)}}
+        .wrap{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:18px}
+        header{text-align:center;margin-bottom:22px;padding-top:8px}
+        h1{font-family:'Fredoka',sans-serif;font-size:2.3rem;background:linear-gradient(135deg,#ff7070,#ffd700,#4de880,#60d0ff,#ff7070);background-size:400% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:sh 6s linear infinite}
+        @keyframes sh{to{background-position:400% center}}
+        .sub{color:var(--muted);font-size:.95rem;margin-top:4px}
+        .badge{display:inline-block;background:linear-gradient(135deg,#ffd700,#ffaa00);color:#1a1a00;font-family:'Fredoka',sans-serif;font-size:.85rem;font-weight:700;padding:3px 12px;border-radius:20px;margin-top:6px;letter-spacing:.5px}
+        .screen{display:none;animation:fi .4s ease}
+        .screen.active{display:block}
+        @keyframes fi{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+        .card{background:linear-gradient(135deg,rgba(13,34,64,.97),rgba(10,24,45,.97));border-radius:22px;padding:24px;margin-bottom:16px;border:1px solid rgba(58,157,224,.22);box-shadow:0 8px 40px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.05)}
+
+        .legend{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-bottom:20px}
+        .li{display:flex;align-items:center;gap:7px;background:rgba(10,24,45,.85);border-radius:11px;padding:7px 14px;border:1px solid rgba(255,255,255,.1);font-weight:700;font-size:.88rem}
+        .ld{width:16px;height:16px;border-radius:50%}
+
+        .stitle{font-family:'Fredoka',sans-serif;font-size:1.4rem;color:var(--accent-g);margin-bottom:12px;text-align:center}
+        .stxt{color:var(--muted);font-size:.96rem;line-height:1.75;margin-bottom:18px;text-align:center}
+        .sbtn{display:block;width:100%;max-width:290px;margin:0 auto;background:linear-gradient(135deg,#cc2020,#ff7070);border:none;border-radius:16px;padding:16px 26px;color:#fff;font-family:'Fredoka',sans-serif;font-size:1.4rem;font-weight:700;cursor:pointer;transition:all .3s;box-shadow:0 4px 20px rgba(200,30,30,.4)}
+        .sbtn:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(200,30,30,.6)}
+
+        .gh{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:9px}
+        .sb{display:flex;gap:9px;flex-wrap:wrap}
+        .si{background:var(--card);padding:7px 12px;border-radius:11px;border:1px solid rgba(58,157,224,.2);text-align:center;min-width:72px}
+        .sl{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+        .sv{font-family:'Fredoka',sans-serif;font-size:1.25rem;color:var(--accent-g)}
+
+        .pb{background:rgba(13,34,64,.8);border-radius:10px;height:12px;overflow:hidden;margin-bottom:5px;border:1px solid rgba(58,157,224,.2)}
+        .pf{height:100%;background:linear-gradient(90deg,#cc2020,#ff7070);transition:width .5s;box-shadow:0 0 8px rgba(200,50,50,.4)}
+        .pt{text-align:center;color:var(--muted);font-size:.82rem;margin-bottom:14px}
+
+        .instr{text-align:center;font-family:'Fredoka',sans-serif;font-size:1.1rem;color:var(--accent-g);margin-bottom:14px;min-height:28px;transition:color .3s}
+
+        /* sentence box — larger font for longer sentences */
+        .sbox{background:linear-gradient(135deg,rgba(13,34,64,.95),rgba(8,20,42,.98));border-radius:18px;padding:24px 20px;margin-bottom:20px;border:1px solid rgba(58,157,224,.25);box-shadow:0 8px 40px rgba(0,0,0,.4);text-align:center;min-height:80px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:5px 2px;line-height:2.4}
+
+        .tok{display:inline-block;font-family:'Fredoka',sans-serif;font-size:1.35rem;font-weight:600;padding:4px 10px;border-radius:9px;cursor:pointer;transition:all .2s;border:2.5px solid transparent;user-select:none}
+        .tok.dim{cursor:default;opacity:.4}
+        .tok.active:hover{transform:translateY(-3px) scale(1.07)}
+
+        .tok.s-nomen    {background:rgba(26,63,165,.3); border-color:var(--nomen-l); color:var(--nomen-g);  cursor:default}
+        .tok.s-artikel  {background:rgba(26,140,199,.25);border-color:var(--artikel-l);color:var(--artikel-g);cursor:default}
+        .tok.s-verb     {background:rgba(204,32,32,.25); border-color:var(--verb-l);  color:var(--verb-g);   cursor:default}
+        .tok.s-adjektiv {background:rgba(21,144,64,.25); border-color:var(--adjektiv-l);color:var(--adjektiv-g);cursor:default}
+
+        .tok.h-nomen    {background:rgba(26,63,165,.12); border-color:rgba(106,159,255,.4);color:var(--nomen-g)}
+        .tok.h-artikel  {background:rgba(26,140,199,.1); border-color:rgba(96,208,255,.4); color:var(--artikel-g)}
+        .tok.h-verb     {background:rgba(204,32,32,.1);  border-color:rgba(255,112,112,.4);color:var(--verb-g)}
+        .tok.h-adjektiv {background:rgba(21,144,64,.1);  border-color:rgba(77,232,128,.4); color:var(--adjektiv-g)}
+
+        .tok.wrong{border-color:var(--error)!important;box-shadow:0 0 14px rgba(255,48,48,.7);animation:shake .35s ease}
+        .tok.pop  {animation:pop .5s ease}
+        @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+        @keyframes pop  {0%{transform:scale(1)}45%{transform:scale(1.25);box-shadow:0 0 22px var(--success)}100%{transform:scale(1)}}
+
+        /* palette — kleckse NEVER greyed out */
+        .palette{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:11px}
+        @media(max-width:500px){.palette{grid-template-columns:1fr 1fr}}
+
+        .kl{border:3px solid transparent;border-radius:17px;padding:16px 8px;cursor:pointer;font-family:'Fredoka',sans-serif;font-size:1.1rem;font-weight:700;transition:all .25s;text-align:center;display:flex;flex-direction:column;align-items:center;gap:7px;user-select:none}
+        .kl:hover{transform:translateY(-3px)}
+        .kl.sel{transform:scale(1.09);box-shadow:0 0 26px currentColor;border-color:currentColor}
+        .kl.wshake{animation:shake .35s ease}
+        /* NO .done class — kleckse always active */
+
+        .blob{width:48px;height:48px;border-radius:50%;box-shadow:0 4px 12px rgba(0,0,0,.35);transition:box-shadow .25s}
+        .kl.sel .blob{box-shadow:0 0 22px currentColor}
+
+        .kl-nomen   {color:var(--nomen-g);   border-color:rgba(106,159,255,.2); background:rgba(26,63,165,.1)}
+        .kl-artikel {color:var(--artikel-g); border-color:rgba(96,208,255,.2);  background:rgba(26,140,199,.08)}
+        .kl-verb    {color:var(--verb-g);    border-color:rgba(255,112,112,.2); background:rgba(204,32,32,.08)}
+        .kl-adjektiv{color:var(--adjektiv-g);border-color:rgba(77,232,128,.2);  background:rgba(21,144,64,.08)}
+
+        .kl-nomen    .blob{background:radial-gradient(circle at 35% 35%,var(--nomen-g),var(--nomen))}
+        .kl-artikel  .blob{background:radial-gradient(circle at 35% 35%,var(--artikel-g),var(--artikel))}
+        .kl-verb     .blob{background:radial-gradient(circle at 35% 35%,var(--verb-g),var(--verb))}
+        .kl-adjektiv .blob{background:radial-gradient(circle at 35% 35%,var(--adjektiv-g),var(--adjektiv))}
+
+        /* solved counter per type */
+        .type-progress{display:flex;gap:8px;justify-content:center;margin-bottom:14px;flex-wrap:wrap}
+        .tp{font-size:.8rem;font-weight:700;padding:4px 11px;border-radius:8px;border:1.5px solid;opacity:.5;transition:all .3s}
+        .tp.active{opacity:1}
+        .tp.done-type{opacity:1;text-decoration:line-through}
+        .tp-nomen   {color:var(--nomen-g);   border-color:var(--nomen-l)}
+        .tp-artikel {color:var(--artikel-g); border-color:var(--artikel-l)}
+        .tp-verb    {color:var(--verb-g);    border-color:var(--verb-l)}
+        .tp-adjektiv{color:var(--adjektiv-g);border-color:var(--adjektiv-l)}
+
+        .mstars{display:flex;justify-content:center;gap:3px;margin-bottom:12px;flex-wrap:wrap}
+        .ms{font-size:.82rem;opacity:.18;transition:all .3s}
+        .ms.done{opacity:1;transform:scale(1.3)}
+
+        .rg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+        .ri{background:var(--card);border-radius:13px;padding:15px;text-align:center;border:1px solid rgba(58,157,224,.2)}
+        .rl{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+        .rv{font-family:'Fredoka',sans-serif;font-size:1.85rem;color:var(--gold)}
+
+        .cbtn{display:inline-block;padding:12px 24px;border:none;border-radius:13px;font-family:'Fredoka',sans-serif;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s;margin:4px}
+        .cbtn.p{background:linear-gradient(135deg,#cc2020,#ff7070);color:#fff;box-shadow:0 4px 14px rgba(200,30,30,.4)}
+        .cbtn.p:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(200,30,30,.6)}
+        .cbtn.s{background:var(--card);color:var(--text);border:1px solid rgba(58,157,224,.3)}
+        .cbtn.s:hover{border-color:var(--accent-g)}
+        .cbtn:disabled{opacity:.5;cursor:default}
+
+        .cong{font-family:'Fredoka',sans-serif;font-size:1.85rem;text-align:center;margin-bottom:7px;background:linear-gradient(135deg,#ffd700,#fffacd,#ffd700);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:sh 3s linear infinite}
+        .rmsg{color:var(--muted);font-size:.97rem;text-align:center;margin-bottom:16px}
+        .lbt{font-family:'Fredoka',sans-serif;font-size:1.1rem;color:var(--accent-g);margin-bottom:10px}
+        .le{display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(10,24,45,.7);border-radius:9px;margin-bottom:6px;border:1px solid rgba(58,157,224,.12)}
+        .lr{font-family:'Fredoka',sans-serif;font-size:1rem;min-width:32px}
+        .ln{flex:1;font-weight:700}
+        .ls{color:var(--gold);font-family:'Fredoka',sans-serif}
+        .ni{background:var(--card);border:1px solid rgba(58,157,224,.4);border-radius:11px;padding:10px 16px;color:var(--text);font-family:'Nunito',sans-serif;font-size:.97rem;width:100%;max-width:260px;margin-bottom:12px;outline:none}
+        .ni:focus{border-color:var(--accent-g);box-shadow:0 0 10px rgba(58,157,224,.3)}
+    </style>
+</head>
+<body>
+<div class="stars" id="starsEl"></div>
+<div class="wrap">
+    <header>
+        <h1>🏆 Wortart-Champion Pro</h1>
+        <div class="badge">⚡ Schwere Version — ab 10 Jahren</div>
+        <p class="sub" style="margin-top:8px">Farbe wählen → passendes Wort anklicken → alle Wörter im Satz lösen!</p>
+    </header>
+
+    <!-- START -->
+    <div class="screen active" id="startScreen">
+        <div class="card">
+            <div class="legend">
+                <div class="li"><div class="ld" style="background:var(--nomen-l)"></div>Nomen</div>
+                <div class="li"><div class="ld" style="background:var(--artikel-l)"></div>Artikel</div>
+                <div class="li"><div class="ld" style="background:var(--verb-l)"></div>Verb</div>
+                <div class="li"><div class="ld" style="background:var(--adjektiv-l)"></div>Adjektiv</div>
+            </div>
+            <p class="stitle">🎮 Spielregeln:</p>
+            <p class="stxt">
+                Jeder Satz enthält <strong>mehrere Nomen, Verben, Adjektive und Artikel</strong> — alle müssen gefunden werden!<br>
+                <strong>1.</strong> Klicke auf einen Farbklecks.<br>
+                <strong>2.</strong> Klicke das passende Wort im Satz.<br>
+                <strong>3.</strong> Die Farbkleckse bleiben immer alle aktiv — kein Hinweis, welche noch fehlen!<br><br>
+                Falsch → roter Ring, nochmal. Richtig → automatisch weiter! 🔥
+            </p>
+            <div style="text-align:center;margin-bottom:14px">
+                <input class="ni" id="startName" type="text" placeholder="Dein Name..." maxlength="20">
+            </div>
+            <button class="sbtn" onclick="startGame()">🔥 Herausforderung starten!</button>
+        </div>
+        <div class="card">
+            <div class="lbt">🏅 Bestenliste</div>
+            <div id="menuBoard"><p style="color:var(--muted);text-align:center">Noch keine Einträge!</p></div>
+        </div>
+    </div>
+
+    <!-- GAME -->
+    <div class="screen" id="gameScreen">
+        <div class="gh">
+            <div class="sb">
+                <div class="si"><div class="sl">Punkte</div><div class="sv" id="sP">0</div></div>
+                <div class="si"><div class="sl">✅</div><div class="sv" id="sC">0</div></div>
+                <div class="si"><div class="sl">❌</div><div class="sv" id="sW">0</div></div>
+                <div class="si"><div class="sl">Satz</div><div class="sv" id="sSen">1/150</div></div>
+            </div>
+            <button class="cbtn s" onclick="goMenu()" style="font-size:.85rem;padding:8px 13px">🏠 Menü</button>
+        </div>
+        <div class="pb"><div class="pf" id="pf" style="width:0%"></div></div>
+        <div class="pt" id="pt">0 / 150 Sätze</div>
+        <div class="mstars" id="mstars"></div>
+
+        <div class="card">
+            <div class="instr" id="instr">Wähle einen Farbklecks!</div>
+            <div class="type-progress" id="typeProgress"></div>
+            <div class="sbox" id="sbox"></div>
+            <div class="palette">
+                <div class="kl kl-nomen"    id="kn" onclick="pick('nomen')">   <div class="blob"></div>📘 Nomen</div>
+                <div class="kl kl-artikel"  id="ka" onclick="pick('artikel')"> <div class="blob"></div>💙 Artikel</div>
+                <div class="kl kl-verb"     id="kv" onclick="pick('verb')">    <div class="blob"></div>🔴 Verb</div>
+                <div class="kl kl-adjektiv" id="kj" onclick="pick('adjektiv')"><div class="blob"></div>🟢 Adjektiv</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="screen" id="resultScreen">
+        <div class="card" style="text-align:center">
+            <div class="cong" id="cong">🎉 Super!</div>
+            <p class="rmsg" id="rmsg"></p>
+            <div class="rg">
+                <div class="ri"><div class="rl">Punkte</div><div class="rv" id="rP">0</div></div>
+                <div class="ri"><div class="rl">Zeit</div><div class="rv" id="rT">0:00</div></div>
+                <div class="ri"><div class="rl">✅ Richtig</div><div class="rv" id="rC">0</div></div>
+                <div class="ri"><div class="rl">Genauigkeit</div><div class="rv" id="rA">0%</div></div>
+            </div>
+            <input class="ni" id="rName" type="text" placeholder="Dein Name..." maxlength="20"><br>
+            <button class="cbtn p" id="saveBtn" onclick="saveScore()">💾 Speichern</button>
+            <button class="cbtn p" onclick="startGame()">🔄 Nochmal!</button>
+            <button class="cbtn s" onclick="goMenu()">🏠 Menü</button>
+            <div id="rBoard" style="margin-top:18px"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+//  150 HARDER SENTENCES for ages 10-12
+//  Every sentence has multiple nomen, artikel, verb, adjektiv
+//  Tags: nomen | verb | adjektiv | artikel | other | punct
+// ─────────────────────────────────────────────────────────────
+const S = [
+[{w:"Der",t:"artikel"},{w:"neugierige",t:"adjektiv"},{w:"Detektiv",t:"nomen"},{w:"untersuchte",t:"verb"},{w:"die",t:"artikel"},{w:"dunkle",t:"adjektiv"},{w:"Höhle",t:"nomen"},{w:"sehr",t:"other"},{w:"genau",t:"adjektiv"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"mutige",t:"adjektiv"},{w:"Astronautin",t:"nomen"},{w:"betrat",t:"verb"},{w:"die",t:"artikel"},{w:"fremde",t:"adjektiv"},{w:"Raumstation",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"schlafende",t:"adjektiv"},{w:"Drachen",t:"nomen"},{w:"bewachte",t:"verb"},{w:"einen",t:"artikel"},{w:"riesigen",t:"adjektiv"},{w:"Schatz",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"fleißige",t:"adjektiv"},{w:"Schüler",t:"nomen"},{w:"löste",t:"verb"},{w:"die",t:"artikel"},{w:"schwierige",t:"adjektiv"},{w:"Mathematikaufgabe",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"bunte",t:"adjektiv"},{w:"Schmetterlingssammlung",t:"nomen"},{w:"begeisterte",t:"verb"},{w:"die",t:"artikel"},{w:"staunenden",t:"adjektiv"},{w:"Besucher",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"alte",t:"adjektiv"},{w:"Piratenschiff",t:"nomen"},{w:"verschwand",t:"verb"},{w:"im",t:"other"},{w:"dichten",t:"adjektiv"},{w:"Nebel",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"geschickte",t:"adjektiv"},{w:"Zauberer",t:"nomen"},{w:"verwandelte",t:"verb"},{w:"den",t:"artikel"},{w:"hässlichen",t:"adjektiv"},{w:"Frosch",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"tapfere",t:"adjektiv"},{w:"Rittersfrau",t:"nomen"},{w:"rettete",t:"verb"},{w:"das",t:"artikel"},{w:"gefangene",t:"adjektiv"},{w:"Einhorn",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"geheimnisvolle",t:"adjektiv"},{w:"Zauberbuch",t:"nomen"},{w:"öffnete",t:"verb"},{w:"eine",t:"artikel"},{w:"verborgene",t:"adjektiv"},{w:"Tür",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"strenge",t:"adjektiv"},{w:"Kapitän",t:"nomen"},{w:"befahl",t:"verb"},{w:"der",t:"artikel"},{w:"erschöpften",t:"adjektiv"},{w:"Mannschaft",t:"nomen"},{w:"eine",t:"artikel"},{w:"kurze",t:"adjektiv"},{w:"Pause",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"blühende",t:"adjektiv"},{w:"Kirschblüte",t:"nomen"},{w:"bedeckte",t:"verb"},{w:"den",t:"artikel"},{w:"alten",t:"adjektiv"},{w:"Tempel",t:"nomen"},{w:"mit",t:"other"},{w:"einem",t:"artikel"},{w:"rosafarbenen",t:"adjektiv"},{w:"Teppich",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"wildlebende",t:"adjektiv"},{w:"Rudel",t:"nomen"},{w:"jagte",t:"verb"},{w:"die",t:"artikel"},{w:"flinke",t:"adjektiv"},{w:"Gazelle",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"eifrige",t:"adjektiv"},{w:"Forscher",t:"nomen"},{w:"entdeckte",t:"verb"},{w:"einen",t:"artikel"},{w:"neuen",t:"adjektiv"},{w:"Planeten",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"geschickte",t:"adjektiv"},{w:"Köchin",t:"nomen"},{w:"bereitete",t:"verb"},{w:"ein",t:"artikel"},{w:"köstliches",t:"adjektiv"},{w:"Festmahl",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"verlassene",t:"adjektiv"},{w:"Schloss",t:"nomen"},{w:"verbarg",t:"verb"},{w:"ein",t:"artikel"},{w:"altes",t:"adjektiv"},{w:"Geheimnis",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"begeisterte",t:"adjektiv"},{w:"Leser",t:"nomen"},{w:"verschlang",t:"verb"},{w:"das",t:"artikel"},{w:"spannende",t:"adjektiv"},{w:"Abenteuer",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"reißende",t:"adjektiv"},{w:"Strömung",t:"nomen"},{w:"riss",t:"verb"},{w:"das",t:"artikel"},{w:"kleine",t:"adjektiv"},{w:"Boot",t:"nomen"},{w:"mit",t:"other"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"gierige",t:"adjektiv"},{w:"Monster",t:"nomen"},{w:"fraß",t:"verb"},{w:"den",t:"artikel"},{w:"ganzen",t:"adjektiv"},{w:"Vorrat",t:"nomen"},{w:"auf",t:"other"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"kluge",t:"adjektiv"},{w:"Fuchs",t:"nomen"},{w:"stahl",t:"verb"},{w:"dem",t:"other"},{w:"schlafenden",t:"adjektiv"},{w:"Bauern",t:"nomen"},{w:"die",t:"artikel"},{w:"fette",t:"adjektiv"},{w:"Gans",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"leise",t:"adjektiv"},{w:"Melodie",t:"nomen"},{w:"erfüllte",t:"verb"},{w:"den",t:"artikel"},{w:"dunklen",t:"adjektiv"},{w:"Wald",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"gefährliche",t:"adjektiv"},{w:"Experiment",t:"nomen"},{w:"erschreckte",t:"verb"},{w:"die",t:"artikel"},{w:"jungen",t:"adjektiv"},{w:"Wissenschaftler",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"treue",t:"adjektiv"},{w:"Hund",t:"nomen"},{w:"beschützte",t:"verb"},{w:"das",t:"artikel"},{w:"schlafende",t:"adjektiv"},{w:"Kind",t:"nomen"},{w:"die",t:"artikel"},{w:"ganze",t:"adjektiv"},{w:"Nacht",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"funkensprühende",t:"adjektiv"},{w:"Schmiede",t:"nomen"},{w:"hämmerte",t:"verb"},{w:"ein",t:"artikel"},{w:"scharfes",t:"adjektiv"},{w:"Schwert",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"eisige",t:"adjektiv"},{w:"Gebirge",t:"nomen"},{w:"verbarg",t:"verb"},{w:"eine",t:"artikel"},{w:"uralte",t:"adjektiv"},{w:"Höhle",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"ruhige",t:"adjektiv"},{w:"See",t:"nomen"},{w:"spiegelte",t:"verb"},{w:"den",t:"artikel"},{w:"sternklaren",t:"adjektiv"},{w:"Himmel",t:"nomen"},{w:"wider",t:"other"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"stürmische",t:"adjektiv"},{w:"See",t:"nomen"},{w:"verschluckte",t:"verb"},{w:"das",t:"artikel"},{w:"mächtige",t:"adjektiv"},{w:"Schiff",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"verlorene",t:"adjektiv"},{w:"Kind",t:"nomen"},{w:"fand",t:"verb"},{w:"einen",t:"artikel"},{w:"freundlichen",t:"adjektiv"},{w:"Helfer",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"hungrige",t:"adjektiv"},{w:"Wolf",t:"nomen"},{w:"lauerte",t:"verb"},{w:"hinter",t:"other"},{w:"dem",t:"other"},{w:"dichten",t:"adjektiv"},{w:"Gebüsch",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"elektrische",t:"adjektiv"},{w:"Eisenbahn",t:"nomen"},{w:"durchquerte",t:"verb"},{w:"den",t:"artikel"},{w:"langen",t:"adjektiv"},{w:"Tunnel",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"bunte",t:"adjektiv"},{w:"Mosaik",t:"nomen"},{w:"schmückte",t:"verb"},{w:"die",t:"artikel"},{w:"alte",t:"adjektiv"},{w:"Kirchenwand",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"listige",t:"adjektiv"},{w:"Dieb",t:"nomen"},{w:"stahl",t:"verb"},{w:"den",t:"artikel"},{w:"goldenen",t:"adjektiv"},{w:"Schlüssel",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"einsame",t:"adjektiv"},{w:"Insel",t:"nomen"},{w:"bot",t:"verb"},{w:"dem",t:"other"},{w:"gestrandeten",t:"adjektiv"},{w:"Matrosen",t:"nomen"},{w:"Schutz",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"heiße",t:"adjektiv"},{w:"Magma",t:"nomen"},{w:"floss",t:"verb"},{w:"langsam",t:"adjektiv"},{w:"den",t:"artikel"},{w:"steilen",t:"adjektiv"},{w:"Berghang",t:"nomen"},{w:"hinunter",t:"other"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"freundliche",t:"adjektiv"},{w:"Riese",t:"nomen"},{w:"trug",t:"verb"},{w:"die",t:"artikel"},{w:"erschöpften",t:"adjektiv"},{w:"Wanderer",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"geheimnisvolle",t:"adjektiv"},{w:"Karte",t:"nomen"},{w:"führte",t:"verb"},{w:"die",t:"artikel"},{w:"jungen",t:"adjektiv"},{w:"Entdecker",t:"nomen"},{w:"zu",t:"other"},{w:"einem",t:"artikel"},{w:"verborgenen",t:"adjektiv"},{w:"Schatz",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"flinke",t:"adjektiv"},{w:"Eichhörnchen",t:"nomen"},{w:"versteckte",t:"verb"},{w:"die",t:"artikel"},{w:"letzten",t:"adjektiv"},{w:"Nüsse",t:"nomen"},{w:"im",t:"other"},{w:"hohlen",t:"adjektiv"},{w:"Baum",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"weise",t:"adjektiv"},{w:"König",t:"nomen"},{w:"löste",t:"verb"},{w:"den",t:"artikel"},{w:"alten",t:"adjektiv"},{w:"Streit",t:"nomen"},{w:"mit",t:"other"},{w:"einem",t:"artikel"},{w:"einzigen",t:"adjektiv"},{w:"Satz",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"kluge",t:"adjektiv"},{w:"Wissenschaftlerin",t:"nomen"},{w:"erfand",t:"verb"},{w:"eine",t:"artikel"},{w:"neue",t:"adjektiv"},{w:"Methode",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"mächtige",t:"adjektiv"},{w:"Erdbeben",t:"nomen"},{w:"erschütterte",t:"verb"},{w:"die",t:"artikel"},{w:"ganze",t:"adjektiv"},{w:"Stadt",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"aufgeregte",t:"adjektiv"},{w:"Forscher",t:"nomen"},{w:"berichtete",t:"verb"},{w:"von",t:"other"},{w:"einem",t:"artikel"},{w:"außergewöhnlichen",t:"adjektiv"},{w:"Fund",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"dunkle",t:"adjektiv"},{w:"Wolke",t:"nomen"},{w:"entlud",t:"verb"},{w:"einen",t:"artikel"},{w:"heftigen",t:"adjektiv"},{w:"Regensturm",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"rostige",t:"adjektiv"},{w:"Tor",t:"nomen"},{w:"öffnete",t:"verb"},{w:"sich",t:"other"},{w:"mit",t:"other"},{w:"einem",t:"artikel"},{w:"lauten",t:"adjektiv"},{w:"Knarren",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"gestreifte",t:"adjektiv"},{w:"Tiger",t:"nomen"},{w:"schlich",t:"verb"},{w:"lautlos",t:"adjektiv"},{w:"durch",t:"other"},{w:"das",t:"artikel"},{w:"hohe",t:"adjektiv"},{w:"Gras",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"elegante",t:"adjektiv"},{w:"Tänzerin",t:"nomen"},{w:"begeisterte",t:"verb"},{w:"das",t:"artikel"},{w:"staunende",t:"adjektiv"},{w:"Publikum",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"tiefe",t:"adjektiv"},{w:"Tal",t:"nomen"},{w:"füllte",t:"verb"},{w:"sich",t:"other"},{w:"mit",t:"other"},{w:"einem",t:"artikel"},{w:"dichten",t:"adjektiv"},{w:"Morgennebel",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"neugierige",t:"adjektiv"},{w:"Oktopus",t:"nomen"},{w:"untersuchte",t:"verb"},{w:"das",t:"artikel"},{w:"versunkene",t:"adjektiv"},{w:"Schiff",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"verzauberte",t:"adjektiv"},{w:"Prinzessin",t:"nomen"},{w:"pflückte",t:"verb"},{w:"die",t:"artikel"},{w:"leuchtende",t:"adjektiv"},{w:"Blume",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"glitzernde",t:"adjektiv"},{w:"Eis",t:"nomen"},{w:"bedeckte",t:"verb"},{w:"den",t:"artikel"},{w:"ganzen",t:"adjektiv"},{w:"See",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"erschrockene",t:"adjektiv"},{w:"Bauer",t:"nomen"},{w:"floh",t:"verb"},{w:"vor",t:"other"},{w:"dem",t:"other"},{w:"wilden",t:"adjektiv"},{w:"Stier",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"leuchtende",t:"adjektiv"},{w:"Qualle",t:"nomen"},{w:"glitt",t:"verb"},{w:"durch",t:"other"},{w:"das",t:"artikel"},{w:"dunkle",t:"adjektiv"},{w:"Wasser",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"mysteriöse",t:"adjektiv"},{w:"Paket",t:"nomen"},{w:"enthielt",t:"verb"},{w:"eine",t:"artikel"},{w:"wichtige",t:"adjektiv"},{w:"Nachricht",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"schnelle",t:"adjektiv"},{w:"Gepard",t:"nomen"},{w:"überholte",t:"verb"},{w:"die",t:"artikel"},{w:"langsame",t:"adjektiv"},{w:"Schildkröte",t:"nomen"},{w:"mühelos",t:"adjektiv"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"ehrgeizige",t:"adjektiv"},{w:"Sportlerin",t:"nomen"},{w:"trainierte",t:"verb"},{w:"trotz",t:"other"},{w:"des",t:"other"},{w:"schlechten",t:"adjektiv"},{w:"Wetters",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"uralte",t:"adjektiv"},{w:"Fossil",t:"nomen"},{w:"verriet",t:"verb"},{w:"dem",t:"other"},{w:"Forscher",t:"nomen"},{w:"ein",t:"artikel"},{w:"wichtiges",t:"adjektiv"},{w:"Geheimnis",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"frische",t:"adjektiv"},{w:"Wind",t:"nomen"},{w:"trieb",t:"verb"},{w:"das",t:"artikel"},{w:"bunte",t:"adjektiv"},{w:"Segelboot",t:"nomen"},{w:"vorwärts",t:"adjektiv"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"brennende",t:"adjektiv"},{w:"Kerze",t:"nomen"},{w:"warf",t:"verb"},{w:"einen",t:"artikel"},{w:"langen",t:"adjektiv"},{w:"Schatten",t:"nomen"},{w:"an",t:"other"},{w:"die",t:"artikel"},{w:"kalte",t:"adjektiv"},{w:"Wand",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"fleißige",t:"adjektiv"},{w:"Bienenvolk",t:"nomen"},{w:"baute",t:"verb"},{w:"einen",t:"artikel"},{w:"riesigen",t:"adjektiv"},{w:"Bienenstock",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"schlaue",t:"adjektiv"},{w:"Detektiv",t:"nomen"},{w:"entlarvte",t:"verb"},{w:"den",t:"artikel"},{w:"falschen",t:"adjektiv"},{w:"Zeugen",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"lange",t:"adjektiv"},{w:"Expedition",t:"nomen"},{w:"erreichte",t:"verb"},{w:"den",t:"artikel"},{w:"eisigen",t:"adjektiv"},{w:"Gipfel",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"mächtige",t:"adjektiv"},{w:"Gewitter",t:"nomen"},{w:"erleuchtete",t:"verb"},{w:"den",t:"artikel"},{w:"dunklen",t:"adjektiv"},{w:"Himmel",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"tapfere",t:"adjektiv"},{w:"Ritter",t:"nomen"},{w:"besiegte",t:"verb"},{w:"den",t:"artikel"},{w:"grausamen",t:"adjektiv"},{w:"Drachen",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"verborgene",t:"adjektiv"},{w:"Höhle",t:"nomen"},{w:"barg",t:"verb"},{w:"einen",t:"artikel"},{w:"glänzenden",t:"adjektiv"},{w:"Schatz",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"mutige",t:"adjektiv"},{w:"Mädchen",t:"nomen"},{w:"bezwang",t:"verb"},{w:"ihre",t:"other"},{w:"größte",t:"adjektiv"},{w:"Angst",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"ruhelose",t:"adjektiv"},{w:"Geist",t:"nomen"},{w:"wanderte",t:"verb"},{w:"durch",t:"other"},{w:"die",t:"artikel"},{w:"verlassenen",t:"adjektiv"},{w:"Zimmer",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"zerbrechliche",t:"adjektiv"},{w:"Freundschaft",t:"nomen"},{w:"überstand",t:"verb"},{w:"den",t:"artikel"},{w:"schwierigen",t:"adjektiv"},{w:"Winter",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"leuchtende",t:"adjektiv"},{w:"Nordlicht",t:"nomen"},{w:"erhellte",t:"verb"},{w:"den",t:"artikel"},{w:"arktischen",t:"adjektiv"},{w:"Himmel",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"rastlose",t:"adjektiv"},{w:"Vulkan",t:"nomen"},{w:"spuckte",t:"verb"},{w:"glühende",t:"adjektiv"},{w:"Lava",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"neugierige",t:"adjektiv"},{w:"Forscherin",t:"nomen"},{w:"kartierte",t:"verb"},{w:"das",t:"artikel"},{w:"unbekannte",t:"adjektiv"},{w:"Gebiet",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"glänzende",t:"adjektiv"},{w:"Teleskop",t:"nomen"},{w:"zeigte",t:"verb"},{w:"dem",t:"other"},{w:"Astronomen",t:"nomen"},{w:"einen",t:"artikel"},{w:"fernen",t:"adjektiv"},{w:"Stern",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"friedliche",t:"adjektiv"},{w:"Wald",t:"nomen"},{w:"barg",t:"verb"},{w:"zahlreiche",t:"adjektiv"},{w:"Geheimnisse",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"reiche",t:"adjektiv"},{w:"Ernte",t:"nomen"},{w:"belohnte",t:"verb"},{w:"die",t:"artikel"},{w:"harte",t:"adjektiv"},{w:"Arbeit",t:"nomen"},{w:"der",t:"other"},{w:"Bauern",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"gewaltige",t:"adjektiv"},{w:"Raumschiff",t:"nomen"},{w:"verließ",t:"verb"},{w:"die",t:"artikel"},{w:"blaue",t:"adjektiv"},{w:"Erde",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"altehrwürdige",t:"adjektiv"},{w:"Tempel",t:"nomen"},{w:"beeindruckte",t:"verb"},{w:"die",t:"artikel"},{w:"reisenden",t:"adjektiv"},{w:"Touristen",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"zielstrebige",t:"adjektiv"},{w:"Mathematikerin",t:"nomen"},{w:"löste",t:"verb"},{w:"das",t:"artikel"},{w:"unlösbare",t:"adjektiv"},{w:"Problem",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"rauschende",t:"adjektiv"},{w:"Wasserfall",t:"nomen"},{w:"speiste",t:"verb"},{w:"den",t:"artikel"},{w:"klaren",t:"adjektiv"},{w:"Gebirgsfluss",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"gewaltige",t:"adjektiv"},{w:"Hai",t:"nomen"},{w:"kreiste",t:"verb"},{w:"um",t:"other"},{w:"das",t:"artikel"},{w:"treibende",t:"adjektiv"},{w:"Floß",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"geduldige",t:"adjektiv"},{w:"Lehrerin",t:"nomen"},{w:"erklärte",t:"verb"},{w:"den",t:"artikel"},{w:"verwirrten",t:"adjektiv"},{w:"Schülern",t:"nomen"},{w:"die",t:"artikel"},{w:"knifflige",t:"adjektiv"},{w:"Aufgabe",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"strahlende",t:"adjektiv"},{w:"Lagerfeuer",t:"nomen"},{w:"wärmte",t:"verb"},{w:"die",t:"artikel"},{w:"frierenden",t:"adjektiv"},{w:"Wanderer",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"wilde",t:"adjektiv"},{w:"Fluss",t:"nomen"},{w:"riss",t:"verb"},{w:"die",t:"artikel"},{w:"marode",t:"adjektiv"},{w:"Brücke",t:"nomen"},{w:"weg",t:"other"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"geheimnisvolle",t:"adjektiv"},{w:"Stimme",t:"nomen"},{w:"führte",t:"verb"},{w:"den",t:"artikel"},{w:"verirrten",t:"adjektiv"},{w:"Reisenden",t:"nomen"},{w:"nach",t:"other"},{w:"Hause",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"mächtige",t:"adjektiv"},{w:"Schwert",t:"nomen"},{w:"befreite",t:"verb"},{w:"das",t:"artikel"},{w:"verfluchte",t:"adjektiv"},{w:"Königreich",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"einsame",t:"adjektiv"},{w:"Leuchtturm",t:"nomen"},{w:"warnte",t:"verb"},{w:"die",t:"artikel"},{w:"herannahenden",t:"adjektiv"},{w:"Schiffe",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"tiefe",t:"adjektiv"},{w:"Stille",t:"nomen"},{w:"legte",t:"verb"},{w:"sich",t:"other"},{w:"über",t:"other"},{w:"den",t:"artikel"},{w:"verschneiten",t:"adjektiv"},{w:"Wald",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"schimmernde",t:"adjektiv"},{w:"Meerwasser",t:"nomen"},{w:"lockte",t:"verb"},{w:"die",t:"artikel"},{w:"erschöpften",t:"adjektiv"},{w:"Schwimmer",t:"nomen"},{w:"an",t:"other"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"ehrwürdige",t:"adjektiv"},{w:"Gelehrte",t:"nomen"},{w:"schrieb",t:"verb"},{w:"ein",t:"artikel"},{w:"dickes",t:"adjektiv"},{w:"Buch",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"kräftige",t:"adjektiv"},{w:"Strömung",t:"nomen"},{w:"trieb",t:"verb"},{w:"das",t:"artikel"},{w:"hölzerne",t:"adjektiv"},{w:"Floß",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"donnernde",t:"adjektiv"},{w:"Gewitter",t:"nomen"},{w:"ließ",t:"verb"},{w:"den",t:"artikel"},{w:"kleinen",t:"adjektiv"},{w:"Hund",t:"nomen"},{w:"zittern",t:"verb"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"erfahrene",t:"adjektiv"},{w:"Bergsteiger",t:"nomen"},{w:"erreichte",t:"verb"},{w:"den",t:"artikel"},{w:"höchsten",t:"adjektiv"},{w:"Gipfel",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"bedrohliche",t:"adjektiv"},{w:"Dunkelheit",t:"nomen"},{w:"umhüllte",t:"verb"},{w:"das",t:"artikel"},{w:"einsame",t:"adjektiv"},{w:"Dorf",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"versunkene",t:"adjektiv"},{w:"Reich",t:"nomen"},{w:"verbarg",t:"verb"},{w:"einen",t:"artikel"},{w:"unvorstellbaren",t:"adjektiv"},{w:"Reichtum",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"neugierige",t:"adjektiv"},{w:"Forscher",t:"nomen"},{w:"betrat",t:"verb"},{w:"die",t:"artikel"},{w:"unerforschte",t:"adjektiv"},{w:"Höhle",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"knarrende",t:"adjektiv"},{w:"Tür",t:"nomen"},{w:"öffnete",t:"verb"},{w:"sich",t:"other"},{w:"zu",t:"other"},{w:"einem",t:"artikel"},{w:"geheimen",t:"adjektiv"},{w:"Gang",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"riesige",t:"adjektiv"},{w:"Labyrinth",t:"nomen"},{w:"verwirrte",t:"verb"},{w:"den",t:"artikel"},{w:"mutigen",t:"adjektiv"},{w:"Helden",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"flinke",t:"adjektiv"},{w:"Dieb",t:"nomen"},{w:"entwich",t:"verb"},{w:"durch",t:"other"},{w:"ein",t:"artikel"},{w:"offenes",t:"adjektiv"},{w:"Fenster",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"frische",t:"adjektiv"},{w:"Meeresbrise",t:"nomen"},{w:"trug",t:"verb"},{w:"den",t:"artikel"},{w:"salzigen",t:"adjektiv"},{w:"Geruch",t:"nomen"},{w:"heran",t:"other"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"mutige",t:"adjektiv"},{w:"Team",t:"nomen"},{w:"überwand",t:"verb"},{w:"jedes",t:"other"},{w:"schwierige",t:"adjektiv"},{w:"Hindernis",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"unerschrockene",t:"adjektiv"},{w:"Held",t:"nomen"},{w:"rettete",t:"verb"},{w:"die",t:"artikel"},{w:"zitternde",t:"adjektiv"},{w:"Stadt",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"majestätische",t:"adjektiv"},{w:"Adlerin",t:"nomen"},{w:"kreiste",t:"verb"},{w:"über",t:"other"},{w:"dem",t:"other"},{w:"weiten",t:"adjektiv"},{w:"Tal",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"zerbrechliche",t:"adjektiv"},{w:"Kristall",t:"nomen"},{w:"brach",t:"verb"},{w:"in",t:"other"},{w:"tausend",t:"other"},{w:"kleine",t:"adjektiv"},{w:"Splitter",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"verzweifelte",t:"adjektiv"},{w:"Held",t:"nomen"},{w:"kämpfte",t:"verb"},{w:"gegen",t:"other"},{w:"den",t:"artikel"},{w:"mächtigen",t:"adjektiv"},{w:"Bösewicht",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"seltene",t:"adjektiv"},{w:"Pflanze",t:"nomen"},{w:"blühte",t:"verb"},{w:"nur",t:"other"},{w:"einmal",t:"other"},{w:"im",t:"other"},{w:"Jahrhundert",t:"nomen"},{w:"auf",t:"other"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"surrende",t:"adjektiv"},{w:"Uhrwerk",t:"nomen"},{w:"trieb",t:"verb"},{w:"die",t:"artikel"},{w:"komplizierte",t:"adjektiv"},{w:"Maschine",t:"nomen"},{w:"an",t:"other"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"mächtige",t:"adjektiv"},{w:"Sturm",t:"nomen"},{w:"fegte",t:"verb"},{w:"über",t:"other"},{w:"die",t:"artikel"},{w:"verlassene",t:"adjektiv"},{w:"Küste",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"glitzernde",t:"adjektiv"},{w:"Galaxie",t:"nomen"},{w:"enthielt",t:"verb"},{w:"Milliarden",t:"nomen"},{w:"von",t:"other"},{w:"Sternen",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"verlassene",t:"adjektiv"},{w:"Raumschiff",t:"nomen"},{w:"trieb",t:"verb"},{w:"durch",t:"other"},{w:"das",t:"artikel"},{w:"endlose",t:"adjektiv"},{w:"All",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"gerechte",t:"adjektiv"},{w:"Richter",t:"nomen"},{w:"fällte",t:"verb"},{w:"ein",t:"artikel"},{w:"überraschendes",t:"adjektiv"},{w:"Urteil",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"leuchtenden",t:"adjektiv"},{w:"Glühwürmchen",t:"nomen"},{w:"erhellten",t:"verb"},{w:"die",t:"artikel"},{w:"warme",t:"adjektiv"},{w:"Sommernacht",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"brodelnde",t:"adjektiv"},{w:"Süppchen",t:"nomen"},{w:"füllte",t:"verb"},{w:"die",t:"artikel"},{w:"kleine",t:"adjektiv"},{w:"Küche",t:"nomen"},{w:"mit",t:"other"},{w:"einem",t:"artikel"},{w:"leckeren",t:"adjektiv"},{w:"Duft",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"alte",t:"adjektiv"},{w:"Meister",t:"nomen"},{w:"lehrte",t:"verb"},{w:"den",t:"artikel"},{w:"jungen",t:"adjektiv"},{w:"Schüler",t:"nomen"},{w:"die",t:"artikel"},{w:"alte",t:"adjektiv"},{w:"Kunst",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"frostige",t:"adjektiv"},{w:"Nacht",t:"nomen"},{w:"verwandelte",t:"verb"},{w:"die",t:"artikel"},{w:"nasse",t:"adjektiv"},{w:"Wiese",t:"nomen"},{w:"in",t:"other"},{w:"eine",t:"artikel"},{w:"glitzernde",t:"adjektiv"},{w:"Eislandschaft",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"gefährliche",t:"adjektiv"},{w:"Virus",t:"nomen"},{w:"bedrohte",t:"verb"},{w:"die",t:"artikel"},{w:"gesamte",t:"adjektiv"},{w:"Bevölkerung",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"tapfere",t:"adjektiv"},{w:"Feuerwehrmann",t:"nomen"},{w:"rettete",t:"verb"},{w:"das",t:"artikel"},{w:"kleine",t:"adjektiv"},{w:"Kind",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"ferne",t:"adjektiv"},{w:"Galaxie",t:"nomen"},{w:"zog",t:"verb"},{w:"den",t:"artikel"},{w:"jungen",t:"adjektiv"},{w:"Astronomen",t:"nomen"},{w:"in",t:"other"},{w:"ihren",t:"other"},{w:"Bann",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"knappe",t:"adjektiv"},{w:"Ergebnis",t:"nomen"},{w:"überraschte",t:"verb"},{w:"alle",t:"other"},{w:"erfahrenen",t:"adjektiv"},{w:"Experten",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"dunkle",t:"adjektiv"},{w:"Wald",t:"nomen"},{w:"verbarg",t:"verb"},{w:"ein",t:"artikel"},{w:"altes",t:"adjektiv"},{w:"Geheimnis",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"mutige",t:"adjektiv"},{w:"Detektivin",t:"nomen"},{w:"verfolgte",t:"verb"},{w:"eine",t:"artikel"},{w:"heiße",t:"adjektiv"},{w:"Spur",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"tiefe",t:"adjektiv"},{w:"Schweigen",t:"nomen"},{w:"verriet",t:"verb"},{w:"das",t:"artikel"},{w:"dunkle",t:"adjektiv"},{w:"Geheimnis",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"geheime",t:"adjektiv"},{w:"Tunnel",t:"nomen"},{w:"führte",t:"verb"},{w:"direkt",t:"adjektiv"},{w:"unter",t:"other"},{w:"das",t:"artikel"},{w:"bewachte",t:"adjektiv"},{w:"Schloss",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"kräuselten",t:"adjektiv"},{w:"Wellen",t:"nomen"},{w:"umspülten",t:"verb"},{w:"den",t:"artikel"},{w:"alten",t:"adjektiv"},{w:"Fels",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"ferne",t:"adjektiv"},{w:"Donnern",t:"nomen"},{w:"kündete",t:"verb"},{w:"das",t:"artikel"},{w:"nahende",t:"adjektiv"},{w:"Gewitter",t:"nomen"},{w:"an",t:"other"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"erschöpfte",t:"adjektiv"},{w:"Marathon",t:"nomen"},{w:"läufer",t:"nomen"},{w:"überquerte",t:"verb"},{w:"die",t:"artikel"},{w:"ersehnte",t:"adjektiv"},{w:"Ziellinie",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"uralte",t:"adjektiv"},{w:"Eiche",t:"nomen"},{w:"widerstand",t:"verb"},{w:"dem",t:"other"},{w:"heftigen",t:"adjektiv"},{w:"Sturm",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"magische",t:"adjektiv"},{w:"Portal",t:"nomen"},{w:"öffnete",t:"verb"},{w:"eine",t:"artikel"},{w:"fremdartige",t:"adjektiv"},{w:"Welt",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"leuchtende",t:"adjektiv"},{w:"Komet",t:"nomen"},{w:"durchquerte",t:"verb"},{w:"das",t:"artikel"},{w:"dunkle",t:"adjektiv"},{w:"Sonnensystem",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"strenge",t:"adjektiv"},{w:"Prüfung",t:"nomen"},{w:"forderte",t:"verb"},{w:"den",t:"artikel"},{w:"besten",t:"adjektiv"},{w:"Schüler",t:"nomen"},{w:"heraus",t:"other"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"zitternde",t:"adjektiv"},{w:"Licht",t:"nomen"},{w:"der",t:"other"},{w:"Kerze",t:"nomen"},{w:"warf",t:"verb"},{w:"tanzende",t:"adjektiv"},{w:"Schatten",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"gefährliche",t:"adjektiv"},{w:"Pfad",t:"nomen"},{w:"führte",t:"verb"},{w:"über",t:"other"},{w:"eine",t:"artikel"},{w:"schmale",t:"adjektiv"},{w:"Felskante",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"reiche",t:"adjektiv"},{w:"Stadträtin",t:"nomen"},{w:"spendete",t:"verb"},{w:"der",t:"other"},{w:"armen",t:"adjektiv"},{w:"Bevölkerung",t:"nomen"},{w:"ein",t:"artikel"},{w:"neues",t:"adjektiv"},{w:"Schulgebäude",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"kühle",t:"adjektiv"},{w:"Quellwasser",t:"nomen"},{w:"erfrischte",t:"verb"},{w:"die",t:"artikel"},{w:"durstigen",t:"adjektiv"},{w:"Wanderer",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"rasante",t:"adjektiv"},{w:"Rennfahrer",t:"nomen"},{w:"überholte",t:"verb"},{w:"den",t:"artikel"},{w:"letzten",t:"adjektiv"},{w:"Konkurrenten",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"farbenfrohe",t:"adjektiv"},{w:"Ausstellung",t:"nomen"},{w:"begeisterte",t:"verb"},{w:"die",t:"artikel"},{w:"jungen",t:"adjektiv"},{w:"Kunstfans",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"knarrende",t:"adjektiv"},{w:"Schiff",t:"nomen"},{w:"kämpfte",t:"verb"},{w:"gegen",t:"other"},{w:"die",t:"artikel"},{w:"hohen",t:"adjektiv"},{w:"Wellen",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"verlassene",t:"adjektiv"},{w:"Bahnhof",t:"nomen"},{w:"hallte",t:"verb"},{w:"von",t:"other"},{w:"seltsamen",t:"adjektiv"},{w:"Geräuschen",t:"nomen"},{w:"wider",t:"other"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"neugierigen",t:"adjektiv"},{w:"Kinder",t:"nomen"},{w:"beobachteten",t:"verb"},{w:"das",t:"artikel"},{w:"seltene",t:"adjektiv"},{w:"Tier",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"leuchtende",t:"adjektiv"},{w:"Bernsteinamulett",t:"nomen"},{w:"schützte",t:"verb"},{w:"die",t:"artikel"},{w:"junge",t:"adjektiv"},{w:"Hexe",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Der",t:"artikel"},{w:"gewaltige",t:"adjektiv"},{w:"Wasserfall",t:"nomen"},{w:"donnerte",t:"verb"},{w:"in",t:"other"},{w:"die",t:"artikel"},{w:"tiefe",t:"adjektiv"},{w:"Schlucht",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Die",t:"artikel"},{w:"verlassene",t:"adjektiv"},{w:"Stadt",t:"nomen"},{w:"verbarg",t:"verb"},{w:"ein",t:"artikel"},{w:"trauriges",t:"adjektiv"},{w:"Schicksal",t:"nomen"},{w:".",t:"punct"}],
+[{w:"Das",t:"artikel"},{w:"unbesiegbare",t:"adjektiv"},{w:"Team",t:"nomen"},{w:"gewann",t:"verb"},{w:"die",t:"artikel"},{w:"wichtige",t:"adjektiv"},{w:"Meisterschaft",t:"nomen"},{w:".",t:"punct"}],
+];
+
+const TYPES=['nomen','verb','adjektiv','artikel'];
+const LABELS={nomen:'Nomen',verb:'Verb',adjektiv:'Adjektiv',artikel:'Artikel'};
+const KL={nomen:'kn',verb:'kv',adjektiv:'kj',artikel:'ka'};
+
+let G={order:[],si:0,selColor:null,solved:{},correct:0,wrong:0,points:0,startTime:null};
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=0|Math.random()*(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+
+function startGame(){
+  G.order=shuffle([...Array(S.length).keys()]);
+  G.si=0;G.selColor=null;G.solved={};G.correct=0;G.wrong=0;G.points=0;
+  G.startTime=Date.now();
+  const n=document.getElementById('startName').value.trim();
+  if(n)document.getElementById('rName').value=n;
+  buildMini();updStats();show('gameScreen');loadSen();
+}
+
+function buildMini(){
+  const c=document.getElementById('mstars');c.innerHTML='';
+  for(let i=0;i<Math.min(S.length,50);i++){const s=document.createElement('span');s.className='ms';s.id='ms'+i;s.textContent='⭐';c.appendChild(s)}
+}
+
+function loadSen(){
+  if(G.si>=G.order.length){endGame();return}
+  G.solved={};G.selColor=null;
+  resetKl();updProg();renderSen();
+  setInstr('Wähle einen Farbklecks!');
+  renderTypeProg();
+  if(G.si>0){const m=document.getElementById('ms'+(G.si-1));if(m)m.classList.add('done')}
+}
+
+function getTypes(sen){const s=new Set();sen.forEach(w=>{if(TYPES.includes(w.t))s.add(w.t)});return s}
+
+function renderTypeProg(){
+  const sen=S[G.order[G.si]];
+  const types=getTypes(sen);
+  const c=document.getElementById('typeProgress');
+  c.innerHTML='';
+  TYPES.forEach(t=>{
+    if(!types.has(t))return;
+    const all=sen.every((w,i)=>w.t!==t||G.solved[i]===t);
+    const d=document.createElement('span');
+    d.className='tp tp-'+t+(G.selColor===t?' active':'')+(all?' done-type':'');
+    d.textContent=LABELS[t];
+    c.appendChild(d);
+  });
+}
+
+function renderSen(){
+  const sen=S[G.order[G.si]];
+  const box=document.getElementById('sbox');
+  box.innerHTML='';
+  // kleckse: NEVER grey — always active (no .done class added)
+  TYPES.forEach(t=>{
+    const k=document.getElementById(KL[t]);
+    k.classList.remove('sel','wshake');
+    if(G.selColor===t)k.classList.add('sel');
+  });
+  sen.forEach((w,wi)=>{
+    if(w.t==='punct'){const s=document.createElement('span');s.style.cssText='font-family:Fredoka,sans-serif;font-size:1.35rem;font-weight:600;';s.textContent=w.w;box.appendChild(s);return}
+    const sp=document.createElement('span');
+    sp.className='tok';sp.textContent=w.w;sp.dataset.wi=wi;
+    if(G.solved[wi]){sp.classList.add('s-'+G.solved[wi])}
+    else if(TYPES.includes(w.t)){sp.classList.add('active');if(G.selColor)sp.classList.add('h-'+G.selColor);sp.onclick=()=>clickW(wi,sp,w.t)}
+    else{sp.classList.add('dim')}
+    box.appendChild(sp);
+    if(wi<sen.length-1&&sen[wi+1].t!=='punct')box.appendChild(document.createTextNode(' '));
+  });
+}
+
+function pick(color){
+  G.selColor=color;
+  setInstr('Klicke alle <strong style="color:var(--'+color+'-g)">'+LABELS[color]+'</strong> im Satz an!');
+  renderSen();renderTypeProg();tone(600,'sine',.1);
+}
+
+function clickW(wi,sp,wt){
+  if(!G.selColor){const b=document.getElementById('instr');b.style.animation='shake .35s ease';setTimeout(()=>b.style.animation='',400);return}
+  const sen=S[G.order[G.si]];
+  if(G.selColor===wt){
+    G.correct++;G.points+=10;G.solved[wi]=wt;updStats();tone(860,'sine',.15);
+    sp.classList.remove('active','h-'+G.selColor);sp.classList.add('s-'+wt,'pop');sp.onclick=null;
+    // check all of this type done
+    const typeDone=sen.every((w,i)=>w.t!==G.selColor||G.solved[i]===G.selColor);
+    if(typeDone){G.selColor=null;setInstr('Super! Wähle den nächsten Farbklecks!')}
+    // check entire sentence done
+    const senDone=sen.every((w,i)=>!TYPES.includes(w.t)||G.solved[i]===w.t);
+    if(senDone){setTimeout(()=>{G.si++;G.selColor=null;loadSen()},700)}
+    else{renderSen();renderTypeProg()}
+  } else {
+    G.wrong++;updStats();tone(150,'sawtooth',.15);
+    sp.classList.add('wrong');setTimeout(()=>sp.classList.remove('wrong'),700);
+    const k=document.getElementById(KL[G.selColor]);k.classList.add('wshake');setTimeout(()=>k.classList.remove('wshake'),400);
+  }
+}
+
+function resetKl(){TYPES.forEach(t=>{const k=document.getElementById(KL[t]);k.classList.remove('sel','wshake')})}
+function setInstr(h){document.getElementById('instr').innerHTML=h}
+function updStats(){document.getElementById('sP').textContent=G.points;document.getElementById('sC').textContent=G.correct;document.getElementById('sW').textContent=G.wrong;document.getElementById('sSen').textContent=(G.si+1)+'/'+S.length}
+function updProg(){const p=G.si/S.length*100;document.getElementById('pf').style.width=p+'%';document.getElementById('pt').textContent=G.si+' / '+S.length+' Sätze'}
+
+function endGame(){
+  const el=Math.floor((Date.now()-G.startTime)/1000);
+  const tot=G.correct+G.wrong;const acc=tot?Math.round(G.correct/tot*100):100;
+  document.getElementById('rP').textContent=G.points;
+  document.getElementById('rT').textContent=Math.floor(el/60)+':'+(el%60).toString().padStart(2,'0');
+  document.getElementById('rC').textContent=G.correct;
+  document.getElementById('rA').textContent=acc+'%';
+  if(acc===100){document.getElementById('cong').textContent='🌟 Perfekt — Champion der Champions!';document.getElementById('rmsg').textContent='Kein einziger Fehler bei schweren Sätzen — legendär!'}
+  else if(acc>=85){document.getElementById('cong').textContent='🎉 Fantastisch!';document.getElementById('rmsg').textContent='Du hast die Pro-Version gemeistert!'}
+  else if(acc>=65){document.getElementById('cong').textContent='👍 Gut gemacht!';document.getElementById('rmsg').textContent='Die schweren Sätze sind gar nicht so leicht!'}
+  else{document.getElementById('cong').textContent='💪 Gut versucht!';document.getElementById('rmsg').textContent='Die Pro-Version ist wirklich schwer — nochmal!'}
+  show('resultScreen');toneMil();confetti();renderBoard('rBoard',true);
+}
+
+function lb(){try{return JSON.parse(localStorage.getItem('wcpro')||'[]')}catch(e){return[]}}
+function slb(b){try{localStorage.setItem('wcpro',JSON.stringify(b))}catch(e){}}
+function saveScore(){
+  const name=document.getElementById('rName').value.trim()||'Anonym';
+  const el=Math.floor((Date.now()-G.startTime)/1000);
+  const board=lb();board.push({name,points:G.points,time:el});board.sort((a,b)=>b.points-a.points);slb(board.slice(0,10));
+  renderBoard('menuBoard',false);renderBoard('rBoard',true);
+  document.getElementById('saveBtn').textContent='✅ Gespeichert!';document.getElementById('saveBtn').disabled=true;
+}
+function renderBoard(id,wT){
+  const c=document.getElementById(id),e=lb();
+  let h=wT?'<div class="lbt">🏅 Bestenliste</div>':'';
+  if(!e.length){c.innerHTML=h+'<p style="color:var(--muted);text-align:center">Noch keine Einträge!</p>';return}
+  h+=e.slice(0,8).map((x,i)=>`<div class="le"><span class="lr">${i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.'}</span><span class="ln">${x.name}</span><span class="ls">${x.points} Pkt</span></div>`).join('');
+  c.innerHTML=h;
+}
+function goMenu(){show('startScreen');renderBoard('menuBoard',false);document.getElementById('saveBtn').disabled=false;document.getElementById('saveBtn').textContent='💾 Speichern'}
+
+function tone(f,t,v){try{const c=new AudioContext(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=f;o.type=t;g.gain.setValueAtTime(v,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.3);o.start();o.stop(c.currentTime+.3)}catch(e){}}
+function toneMil(){try{const c=new AudioContext();[523,659,784,1047].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=f;g.gain.setValueAtTime(.18,c.currentTime+i*.15);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+i*.15+.3);o.start(c.currentTime+i*.15);o.stop(c.currentTime+i*.15+.3)})}catch(e){}}
+function confetti(){const cols=['#cc2020','#ffd700','#2ecf8a','#3a9de0','#ff7070','#4de880'];for(let i=0;i<80;i++){const d=document.createElement('div');const sz=(Math.random()*9+4)+'px';d.style.cssText=`position:fixed;left:${Math.random()*100}vw;top:-10px;width:${sz};height:${sz};background:${cols[0|Math.random()*cols.length]};border-radius:${Math.random()>.5?'50%':'3px'};pointer-events:none;z-index:9999;`;document.body.appendChild(d);const a=d.animate([{transform:'translateY(0) rotate(0)',opacity:1},{transform:`translateY(100vh) rotate(${Math.random()*720}deg)`,opacity:0}],{duration:Math.random()*2000+2000,easing:'ease-out'});a.onfinish=()=>d.remove()}}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  const c=document.getElementById('starsEl');
+  for(let i=0;i<70;i++){const s=document.createElement('div');s.className='star';const sz=Math.random()*2.5+.8;s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${Math.random()*4+2}s;--o:${Math.random()*.5+.2};--dl:${Math.random()*5}s;`;c.appendChild(s)}
+  renderBoard('menuBoard',false);
+});
+</script>
+</body>
+</html>

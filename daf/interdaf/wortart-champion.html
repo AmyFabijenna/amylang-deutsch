@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wortart-Champion 🏆</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --nomen:    #1a3fa5; --nomen-l:  #2a5fcc; --nomen-g:  #6a9fff;
+            --artikel:  #1a8cc7; --artikel-l:#2aaee8; --artikel-g:#60d0ff;
+            --verb:     #cc2020; --verb-l:   #ee3535; --verb-g:   #ff7070;
+            --adjektiv: #159040; --adjektiv-l:#1db851;--adjektiv-g:#4de880;
+            --success:  #2ecf8a; --error: #ff3030;
+            --bg: #06121f; --card: #0d2240;
+            --text: #e0f4ff; --muted: #7ab8e0; --gold: #ffd700;
+            --accent: #1a6fb5; --accent-g: #3a9de0;
+        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Nunito',sans-serif;background:linear-gradient(160deg,#06121f,#0a1e36 40%,#081528 70%,#06121f);min-height:100vh;color:var(--text);overflow-x:hidden}
+        .stars{position:fixed;inset:0;pointer-events:none;z-index:0}
+        .star{position:absolute;background:#fff;border-radius:50%;animation:twinkle var(--d,3s) var(--dl,0s) ease-in-out infinite;opacity:0}
+        @keyframes twinkle{0%,100%{opacity:0}50%{opacity:var(--o,.5)}}
+        .wrap{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:18px}
+        header{text-align:center;margin-bottom:22px;padding-top:8px}
+        h1{font-family:'Fredoka',sans-serif;font-size:2.4rem;background:linear-gradient(135deg,#4db3ff,#a8d8ff,#ffd700,#4db3ff);background-size:300% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:sh 5s linear infinite}
+        @keyframes sh{to{background-position:300% center}}
+        .sub{color:var(--muted);font-size:.95rem;margin-top:4px}
+        .screen{display:none;animation:fi .4s ease}
+        .screen.active{display:block}
+        @keyframes fi{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+        .card{background:linear-gradient(135deg,rgba(13,34,64,.97),rgba(10,24,45,.97));border-radius:22px;padding:24px;margin-bottom:16px;border:1px solid rgba(58,157,224,.22);box-shadow:0 8px 40px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.05)}
+
+        /* legend */
+        .legend{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-bottom:20px}
+        .li{display:flex;align-items:center;gap:7px;background:rgba(10,24,45,.85);border-radius:11px;padding:7px 14px;border:1px solid rgba(255,255,255,.1);font-weight:700;font-size:.88rem}
+        .ld{width:16px;height:16px;border-radius:50%}
+
+        /* start */
+        .stitle{font-family:'Fredoka',sans-serif;font-size:1.4rem;color:var(--accent-g);margin-bottom:12px;text-align:center}
+        .stxt{color:var(--muted);font-size:.96rem;line-height:1.75;margin-bottom:18px;text-align:center}
+        .sbtn{display:block;width:100%;max-width:290px;margin:0 auto;background:linear-gradient(135deg,var(--accent),var(--accent-g));border:none;border-radius:16px;padding:16px 26px;color:#fff;font-family:'Fredoka',sans-serif;font-size:1.4rem;font-weight:700;cursor:pointer;transition:all .3s;box-shadow:0 4px 20px rgba(26,111,181,.4)}
+        .sbtn:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(26,111,181,.6)}
+
+        /* game header */
+        .gh{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:9px}
+        .sb{display:flex;gap:9px;flex-wrap:wrap}
+        .si{background:var(--card);padding:7px 12px;border-radius:11px;border:1px solid rgba(58,157,224,.2);text-align:center;min-width:72px}
+        .sl{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+        .sv{font-family:'Fredoka',sans-serif;font-size:1.25rem;color:var(--accent-g)}
+
+        /* progress */
+        .pb{background:rgba(13,34,64,.8);border-radius:10px;height:12px;overflow:hidden;margin-bottom:5px;border:1px solid rgba(58,157,224,.2)}
+        .pf{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-g));transition:width .5s;box-shadow:0 0 8px rgba(58,157,224,.4)}
+        .pt{text-align:center;color:var(--muted);font-size:.82rem;margin-bottom:14px}
+
+        /* instruction */
+        .instr{text-align:center;font-family:'Fredoka',sans-serif;font-size:1.12rem;color:var(--accent-g);margin-bottom:14px;min-height:28px;transition:color .3s}
+
+        /* sentence */
+        .sbox{background:linear-gradient(135deg,rgba(13,34,64,.95),rgba(8,20,42,.98));border-radius:18px;padding:26px 22px;margin-bottom:20px;border:1px solid rgba(58,157,224,.25);box-shadow:0 8px 40px rgba(0,0,0,.4);text-align:center;min-height:76px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:5px 3px}
+
+        .tok{display:inline-block;font-family:'Fredoka',sans-serif;font-size:1.55rem;font-weight:600;padding:5px 12px;border-radius:10px;cursor:pointer;transition:all .2s;border:2.5px solid transparent;user-select:none}
+        .tok.dim{cursor:default;opacity:.45}
+        .tok.active:hover{transform:translateY(-3px) scale(1.08)}
+
+        /* solved */
+        .tok.s-nomen    {background:rgba(26,63,165,.3); border-color:var(--nomen-l); color:var(--nomen-g);  cursor:default}
+        .tok.s-artikel  {background:rgba(26,140,199,.25);border-color:var(--artikel-l);color:var(--artikel-g);cursor:default}
+        .tok.s-verb     {background:rgba(204,32,32,.25); border-color:var(--verb-l);  color:var(--verb-g);   cursor:default}
+        .tok.s-adjektiv {background:rgba(21,144,64,.25); border-color:var(--adjektiv-l);color:var(--adjektiv-g);cursor:default}
+
+        /* hover-tinted when color selected */
+        .tok.h-nomen    {background:rgba(26,63,165,.12); border-color:rgba(106,159,255,.4);color:var(--nomen-g)}
+        .tok.h-artikel  {background:rgba(26,140,199,.1); border-color:rgba(96,208,255,.4); color:var(--artikel-g)}
+        .tok.h-verb     {background:rgba(204,32,32,.1);  border-color:rgba(255,112,112,.4);color:var(--verb-g)}
+        .tok.h-adjektiv {background:rgba(21,144,64,.1);  border-color:rgba(77,232,128,.4); color:var(--adjektiv-g)}
+
+        .tok.wrong{border-color:var(--error)!important;box-shadow:0 0 14px rgba(255,48,48,.7);animation:shake .35s ease}
+        .tok.pop  {animation:pop .5s ease}
+        @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+        @keyframes pop  {0%{transform:scale(1)}45%{transform:scale(1.25);box-shadow:0 0 22px var(--success)}100%{transform:scale(1)}}
+
+        /* palette */
+        .palette{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:11px}
+        @media(max-width:500px){.palette{grid-template-columns:1fr 1fr}}
+
+        .kl{border:3px solid transparent;border-radius:17px;padding:16px 8px;cursor:pointer;font-family:'Fredoka',sans-serif;font-size:1.1rem;font-weight:700;transition:all .25s;text-align:center;display:flex;flex-direction:column;align-items:center;gap:7px;user-select:none;position:relative}
+        .kl:hover{transform:translateY(-3px)}
+        .kl.sel{transform:scale(1.09);box-shadow:0 0 26px currentColor;border-color:currentColor}
+        .kl.done{opacity:.28;cursor:default;pointer-events:none;filter:grayscale(.6)}
+        .kl.wshake{animation:shake .35s ease}
+
+        .blob{width:48px;height:48px;border-radius:50%;box-shadow:0 4px 12px rgba(0,0,0,.35);transition:box-shadow .25s}
+        .kl.sel .blob{box-shadow:0 0 22px currentColor}
+
+        .kl-nomen   {color:var(--nomen-g);   border-color:rgba(106,159,255,.2); background:rgba(26,63,165,.1)}
+        .kl-artikel {color:var(--artikel-g); border-color:rgba(96,208,255,.2);  background:rgba(26,140,199,.08)}
+        .kl-verb    {color:var(--verb-g);    border-color:rgba(255,112,112,.2); background:rgba(204,32,32,.08)}
+        .kl-adjektiv{color:var(--adjektiv-g);border-color:rgba(77,232,128,.2);  background:rgba(21,144,64,.08)}
+
+        .kl-nomen    .blob{background:radial-gradient(circle at 35% 35%,var(--nomen-g),var(--nomen))}
+        .kl-artikel  .blob{background:radial-gradient(circle at 35% 35%,var(--artikel-g),var(--artikel))}
+        .kl-verb     .blob{background:radial-gradient(circle at 35% 35%,var(--verb-g),var(--verb))}
+        .kl-adjektiv .blob{background:radial-gradient(circle at 35% 35%,var(--adjektiv-g),var(--adjektiv))}
+
+        /* mini stars */
+        .mstars{display:flex;justify-content:center;gap:3px;margin-bottom:12px;flex-wrap:wrap}
+        .ms{font-size:.82rem;opacity:.18;transition:all .3s}
+        .ms.done{opacity:1;transform:scale(1.3)}
+
+        /* result */
+        .rg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+        .ri{background:var(--card);border-radius:13px;padding:15px;text-align:center;border:1px solid rgba(58,157,224,.2)}
+        .rl{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+        .rv{font-family:'Fredoka',sans-serif;font-size:1.85rem;color:var(--gold)}
+
+        .cbtn{display:inline-block;padding:12px 24px;border:none;border-radius:13px;font-family:'Fredoka',sans-serif;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s;margin:4px}
+        .cbtn.p{background:linear-gradient(135deg,var(--accent),var(--accent-g));color:#fff;box-shadow:0 4px 14px rgba(26,111,181,.4)}
+        .cbtn.p:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(26,111,181,.6)}
+        .cbtn.s{background:var(--card);color:var(--text);border:1px solid rgba(58,157,224,.3)}
+        .cbtn.s:hover{border-color:var(--accent-g)}
+
+        .cong{font-family:'Fredoka',sans-serif;font-size:1.85rem;text-align:center;margin-bottom:7px;background:linear-gradient(135deg,#ffd700,#fffacd,#ffd700);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:sh 3s linear infinite}
+        .rmsg{color:var(--muted);font-size:.97rem;text-align:center;margin-bottom:16px}
+        .lbt{font-family:'Fredoka',sans-serif;font-size:1.1rem;color:var(--accent-g);margin-bottom:10px}
+        .le{display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(10,24,45,.7);border-radius:9px;margin-bottom:6px;border:1px solid rgba(58,157,224,.12)}
+        .lr{font-family:'Fredoka',sans-serif;font-size:1rem;min-width:32px}
+        .ln{flex:1;font-weight:700}
+        .ls{color:var(--gold);font-family:'Fredoka',sans-serif}
+
+        .ni{background:var(--card);border:1px solid rgba(58,157,224,.4);border-radius:11px;padding:10px 16px;color:var(--text);font-family:'Nunito',sans-serif;font-size:.97rem;width:100%;max-width:260px;margin-bottom:12px;outline:none}
+        .ni:focus{border-color:var(--accent-g);box-shadow:0 0 10px rgba(58,157,224,.3)}
+        .cbtn:disabled{opacity:.5;cursor:default}
+    </style>
+</head>
+<body>
+<div class="stars" id="starsEl"></div>
+<div class="wrap">
+    <header>
+        <h1>🏆 Wortart-Champion</h1>
+        <p class="sub">Farbe wählen → passendes Wort anklicken → alle Wörter lösen!</p>
+    </header>
+
+    <!-- START -->
+    <div class="screen active" id="startScreen">
+        <div class="card">
+            <div class="legend">
+                <div class="li"><div class="ld" style="background:var(--nomen-l)"></div>Nomen</div>
+                <div class="li"><div class="ld" style="background:var(--artikel-l)"></div>Artikel</div>
+                <div class="li"><div class="ld" style="background:var(--verb-l)"></div>Verb</div>
+                <div class="li"><div class="ld" style="background:var(--adjektiv-l)"></div>Adjektiv</div>
+            </div>
+            <p class="stitle">🎮 So geht das Spiel:</p>
+            <p class="stxt">
+                Im Satz sind <strong>alle Wortarten</strong> zu lösen!<br>
+                <strong>1.</strong> Klicke auf einen Farbklecks.<br>
+                <strong>2.</strong> Klicke dann das Wort im Satz, das dazu passt.<br>
+                <strong>3.</strong> Weiter, bis alle Wörter im Satz richtig gefärbt sind!<br><br>
+                Falscher Klecks + falsches Wort → roter Fehlerring, nochmal! ✨
+            </p>
+            <div style="text-align:center;margin-bottom:14px">
+                <input class="ni" id="startName" type="text" placeholder="Dein Name..." maxlength="20">
+            </div>
+            <button class="sbtn" onclick="startGame()">🚀 Los geht's!</button>
+        </div>
+        <div class="card">
+            <div class="lbt">🏅 Bestenliste</div>
+            <div id="menuBoard"><p style="color:var(--muted);text-align:center">Noch keine Einträge!</p></div>
+        </div>
+    </div>
+
+    <!-- GAME -->
+    <div class="screen" id="gameScreen">
+        <div class="gh">
+            <div class="sb">
+                <div class="si"><div class="sl">Punkte</div><div class="sv" id="sP">0</div></div>
+                <div class="si"><div class="sl">✅</div><div class="sv" id="sC">0</div></div>
+                <div class="si"><div class="sl">❌</div><div class="sv" id="sW">0</div></div>
+            </div>
+            <button class="cbtn s" onclick="goMenu()" style="font-size:.85rem;padding:8px 13px">🏠 Menü</button>
+        </div>
+        <div class="pb"><div class="pf" id="pf" style="width:0%"></div></div>
+        <div class="pt" id="pt">0 / 150</div>
+        <div class="mstars" id="mstars"></div>
+
+        <div class="card">
+            <div class="instr" id="instr">Wähle einen Farbklecks!</div>
+            <div class="sbox" id="sbox"></div>
+            <div class="palette">
+                <div class="kl kl-nomen"    id="kn" onclick="pick('nomen')">   <div class="blob"></div>📘 Nomen</div>
+                <div class="kl kl-artikel"  id="ka" onclick="pick('artikel')"> <div class="blob"></div>💙 Artikel</div>
+                <div class="kl kl-verb"     id="kv" onclick="pick('verb')">    <div class="blob"></div>🔴 Verb</div>
+                <div class="kl kl-adjektiv" id="kj" onclick="pick('adjektiv')"><div class="blob"></div>🟢 Adjektiv</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="screen" id="resultScreen">
+        <div class="card" style="text-align:center">
+            <div class="cong" id="cong">🎉 Super!</div>
+            <p class="rmsg" id="rmsg"></p>
+            <div class="rg">
+                <div class="ri"><div class="rl">Punkte</div><div class="rv" id="rP">0</div></div>
+                <div class="ri"><div class="rl">Zeit</div><div class="rv" id="rT">0:00</div></div>
+                <div class="ri"><div class="rl">✅ Richtig</div><div class="rv" id="rC">0</div></div>
+                <div class="ri"><div class="rl">Genauigkeit</div><div class="rv" id="rA">0%</div></div>
+            </div>
+            <input class="ni" id="rName" type="text" placeholder="Dein Name..." maxlength="20"><br>
+            <button class="cbtn p" id="saveBtn" onclick="saveScore()">💾 Speichern</button>
+            <button class="cbtn p" onclick="startGame()">🔄 Nochmal!</button>
+            <button class="cbtn s" onclick="goMenu()">🏠 Menü</button>
+            <div id="rBoard" style="margin-top:18px"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+//  150 SENTENCES  — every word tagged:
+//  nomen | verb | adjektiv | artikel | other | punct
+//  RULE: every sentence MUST have at least one of each of:
+//        nomen, verb, artikel   (adjektiv where natural)
+// ─────────────────────────────────────────────────────────────
+const SENTENCES = [
+ [{w:"Der",t:"artikel"},{w:"Hund",t:"nomen"},{w:"bellt",t:"verb"},{w:"laut",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Katze",t:"nomen"},{w:"schläft",t:"verb"},{w:"tief",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Kind",t:"nomen"},{w:"malt",t:"verb"},{w:"ein",t:"artikel"},{w:"buntes",t:"adjektiv"},{w:"Bild",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Sonne",t:"nomen"},{w:"scheint",t:"verb"},{w:"hell",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Ball",t:"nomen"},{w:"rollt",t:"verb"},{w:"schnell",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Mädchen",t:"nomen"},{w:"singt",t:"verb"},{w:"ein",t:"artikel"},{w:"schönes",t:"adjektiv"},{w:"Lied",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Vogel",t:"nomen"},{w:"fliegt",t:"verb"},{w:"hoch",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Blume",t:"nomen"},{w:"blüht",t:"verb"},{w:"bunt",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Auto",t:"nomen"},{w:"fährt",t:"verb"},{w:"schnell",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Junge",t:"nomen"},{w:"trägt",t:"verb"},{w:"einen",t:"artikel"},{w:"roten",t:"adjektiv"},{w:"Rucksack",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Mutter",t:"nomen"},{w:"kocht",t:"verb"},{w:"ein",t:"artikel"},{w:"leckeres",t:"adjektiv"},{w:"Essen",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Buch",t:"nomen"},{w:"ist",t:"verb"},{w:"spannend",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Baum",t:"nomen"},{w:"ist",t:"verb"},{w:"groß",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Lehrerin",t:"nomen"},{w:"erklärt",t:"verb"},{w:"die",t:"artikel"},{w:"schwierige",t:"adjektiv"},{w:"Aufgabe",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Essen",t:"nomen"},{w:"schmeckt",t:"verb"},{w:"gut",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Fisch",t:"nomen"},{w:"schwimmt",t:"verb"},{w:"ruhig",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Prinzessin",t:"nomen"},{w:"tanzt",t:"verb"},{w:"anmutig",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Pferd",t:"nomen"},{w:"galoppiert",t:"verb"},{w:"schnell",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Stern",t:"nomen"},{w:"leuchtet",t:"verb"},{w:"hell",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Wolke",t:"nomen"},{w:"ist",t:"verb"},{w:"weiß",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Eis",t:"nomen"},{w:"ist",t:"verb"},{w:"kalt",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Drachen",t:"nomen"},{w:"fliegt",t:"verb"},{w:"hoch",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Ente",t:"nomen"},{w:"schwimmt",t:"verb"},{w:"im",t:"other"},{w:"tiefen",t:"adjektiv"},{w:"Teich",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Schloss",t:"nomen"},{w:"ist",t:"verb"},{w:"alt",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Riese",t:"nomen"},{w:"schläft",t:"verb"},{w:"tief",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Hexe",t:"nomen"},{w:"rührt",t:"verb"},{w:"einen",t:"artikel"},{w:"dampfenden",t:"adjektiv"},{w:"Kessel",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Einhorn",t:"nomen"},{w:"ist",t:"verb"},{w:"magisch",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Löwe",t:"nomen"},{w:"brüllt",t:"verb"},{w:"laut",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Biene",t:"nomen"},{w:"sammelt",t:"verb"},{w:"süßen",t:"adjektiv"},{w:"Honig",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Kaninchen",t:"nomen"},{w:"hüpft",t:"verb"},{w:"flink",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Schmetterling",t:"nomen"},{w:"flattert",t:"verb"},{w:"bunt",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Schildkröte",t:"nomen"},{w:"trägt",t:"verb"},{w:"einen",t:"artikel"},{w:"schweren",t:"adjektiv"},{w:"Panzer",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Eichhörnchen",t:"nomen"},{w:"klettert",t:"verb"},{w:"schnell",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Elefant",t:"nomen"},{w:"trägt",t:"verb"},{w:"einen",t:"artikel"},{w:"langen",t:"adjektiv"},{w:"Rüssel",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Giraffe",t:"nomen"},{w:"frisst",t:"verb"},{w:"frische",t:"adjektiv"},{w:"Blätter",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Zebra",t:"nomen"},{w:"hat",t:"verb"},{w:"ein",t:"artikel"},{w:"gestreiftes",t:"adjektiv"},{w:"Fell",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Pinguin",t:"nomen"},{w:"watschelt",t:"verb"},{w:"lustig",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Möwe",t:"nomen"},{w:"fliegt",t:"verb"},{w:"über",t:"other"},{w:"das",t:"artikel"},{w:"weite",t:"adjektiv"},{w:"Meer",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Nilpferd",t:"nomen"},{w:"badet",t:"verb"},{w:"im",t:"other"},{w:"kühlen",t:"adjektiv"},{w:"Fluss",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Frosch",t:"nomen"},{w:"springt",t:"verb"},{w:"ins",t:"other"},{w:"kalte",t:"adjektiv"},{w:"Wasser",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Spinne",t:"nomen"},{w:"spinnt",t:"verb"},{w:"ein",t:"artikel"},{w:"zartes",t:"adjektiv"},{w:"Netz",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Krokodil",t:"nomen"},{w:"liegt",t:"verb"},{w:"reglos",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Adler",t:"nomen"},{w:"jagt",t:"verb"},{w:"eine",t:"artikel"},{w:"kleine",t:"adjektiv"},{w:"Maus",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Eule",t:"nomen"},{w:"ruft",t:"verb"},{w:"laut",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Känguru",t:"nomen"},{w:"trägt",t:"verb"},{w:"ein",t:"artikel"},{w:"kleines",t:"adjektiv"},{w:"Baby",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Papagei",t:"nomen"},{w:"wiederholt",t:"verb"},{w:"jedes",t:"other"},{w:"laute",t:"adjektiv"},{w:"Wort",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Ameise",t:"nomen"},{w:"trägt",t:"verb"},{w:"schwere",t:"adjektiv"},{w:"Lasten",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Hamster",t:"nomen"},{w:"läuft",t:"verb"},{w:"im",t:"other"},{w:"runden",t:"adjektiv"},{w:"Rad",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Maus",t:"nomen"},{w:"klaut",t:"verb"},{w:"einen",t:"artikel"},{w:"kleinen",t:"adjektiv"},{w:"Käse",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Pferd",t:"nomen"},{w:"frisst",t:"verb"},{w:"frisches",t:"adjektiv"},{w:"Heu",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Käfer",t:"nomen"},{w:"krabbelt",t:"verb"},{w:"langsam",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Kuh",t:"nomen"},{w:"grast",t:"verb"},{w:"auf",t:"other"},{w:"der",t:"artikel"},{w:"grünen",t:"adjektiv"},{w:"Wiese",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Schaf",t:"nomen"},{w:"trägt",t:"verb"},{w:"ein",t:"artikel"},{w:"weiches",t:"adjektiv"},{w:"Fell",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Hahn",t:"nomen"},{w:"weckt",t:"verb"},{w:"den",t:"artikel"},{w:"ganzen",t:"adjektiv"},{w:"Hof",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Gans",t:"nomen"},{w:"bewacht",t:"verb"},{w:"die",t:"artikel"},{w:"kleinen",t:"adjektiv"},{w:"Küken",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Ferkel",t:"nomen"},{w:"rollt",t:"verb"},{w:"im",t:"other"},{w:"weichen",t:"adjektiv"},{w:"Schlamm",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Hase",t:"nomen"},{w:"hoppelt",t:"verb"},{w:"über",t:"other"},{w:"die",t:"artikel"},{w:"blühende",t:"adjektiv"},{w:"Wiese",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Zauberin",t:"nomen"},{w:"trägt",t:"verb"},{w:"einen",t:"artikel"},{w:"spitzen",t:"adjektiv"},{w:"Hut",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Monster",t:"nomen"},{w:"ist",t:"verb"},{w:"grün",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Zauberer",t:"nomen"},{w:"öffnet",t:"verb"},{w:"eine",t:"artikel"},{w:"geheime",t:"adjektiv"},{w:"Tür",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Fee",t:"nomen"},{w:"streut",t:"verb"},{w:"goldenen",t:"adjektiv"},{w:"Staub",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Gespenst",t:"nomen"},{w:"schwebt",t:"verb"},{w:"lautlos",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Pirat",t:"nomen"},{w:"findet",t:"verb"},{w:"einen",t:"artikel"},{w:"glänzenden",t:"adjektiv"},{w:"Schatz",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Seejungfrau",t:"nomen"},{w:"kämmt",t:"verb"},{w:"ihr",t:"other"},{w:"langes",t:"adjektiv"},{w:"Haar",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Raumschiff",t:"nomen"},{w:"landet",t:"verb"},{w:"sanft",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Astronaut",t:"nomen"},{w:"schwebt",t:"verb"},{w:"schwerelos",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Rakete",t:"nomen"},{w:"startet",t:"verb"},{w:"rasend",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Eis",t:"nomen"},{w:"ist",t:"verb"},{w:"süß",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Kuchen",t:"nomen"},{w:"duftet",t:"verb"},{w:"herrlich",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Pizza",t:"nomen"},{w:"ist",t:"verb"},{w:"knusprig",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Brot",t:"nomen"},{w:"ist",t:"verb"},{w:"frisch",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Apfel",t:"nomen"},{w:"ist",t:"verb"},{w:"saftig",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Erdbeere",t:"nomen"},{w:"ist",t:"verb"},{w:"rot",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Bonbon",t:"nomen"},{w:"ist",t:"verb"},{w:"rund",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Saft",t:"nomen"},{w:"schmeckt",t:"verb"},{w:"fruchtig",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Schokolade",t:"nomen"},{w:"schmilzt",t:"verb"},{w:"süß",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Eis",t:"nomen"},{w:"tropft",t:"verb"},{w:"langsam",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Zug",t:"nomen"},{w:"pfeift",t:"verb"},{w:"laut",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Lokomotive",t:"nomen"},{w:"rauscht",t:"verb"},{w:"schnell",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Fahrrad",t:"nomen"},{w:"rollt",t:"verb"},{w:"leise",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Bus",t:"nomen"},{w:"hält",t:"verb"},{w:"pünktlich",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"U-Bahn",t:"nomen"},{w:"rast",t:"verb"},{w:"durch",t:"other"},{w:"den",t:"artikel"},{w:"langen",t:"adjektiv"},{w:"Tunnel",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Flugzeug",t:"nomen"},{w:"fliegt",t:"verb"},{w:"hoch",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Hubschrauber",t:"nomen"},{w:"fliegt",t:"verb"},{w:"tief",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Feuerwehr",t:"nomen"},{w:"löscht",t:"verb"},{w:"das",t:"artikel"},{w:"große",t:"adjektiv"},{w:"Feuer",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Polizeiauto",t:"nomen"},{w:"fährt",t:"verb"},{w:"schnell",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Krankenwagen",t:"nomen"},{w:"kommt",t:"verb"},{w:"sofort",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Schule",t:"nomen"},{w:"ist",t:"verb"},{w:"groß",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Klassenzimmer",t:"nomen"},{w:"ist",t:"verb"},{w:"hell",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Lehrer",t:"nomen"},{w:"stellt",t:"verb"},{w:"eine",t:"artikel"},{w:"schwierige",t:"adjektiv"},{w:"Frage",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Schülerin",t:"nomen"},{w:"antwortet",t:"verb"},{w:"richtig",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Heft",t:"nomen"},{w:"ist",t:"verb"},{w:"voll",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Bleistift",t:"nomen"},{w:"ist",t:"verb"},{w:"spitz",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Schere",t:"nomen"},{w:"schneidet",t:"verb"},{w:"das",t:"artikel"},{w:"rote",t:"adjektiv"},{w:"Papier",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Lineal",t:"nomen"},{w:"ist",t:"verb"},{w:"gerade",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Rucksack",t:"nomen"},{w:"ist",t:"verb"},{w:"schwer",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Lunchbox",t:"nomen"},{w:"ist",t:"verb"},{w:"bunt",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Spielzeug",t:"nomen"},{w:"ist",t:"verb"},{w:"neu",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Teddy",t:"nomen"},{w:"ist",t:"verb"},{w:"weich",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Puppe",t:"nomen"},{w:"trägt",t:"verb"},{w:"ein",t:"artikel"},{w:"rotes",t:"adjektiv"},{w:"Kleid",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Puzzle",t:"nomen"},{w:"ist",t:"verb"},{w:"schwierig",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Würfel",t:"nomen"},{w:"rollt",t:"verb"},{w:"über",t:"other"},{w:"den",t:"artikel"},{w:"runden",t:"adjektiv"},{w:"Tisch",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Karte",t:"nomen"},{w:"zeigt",t:"verb"},{w:"den",t:"artikel"},{w:"richtigen",t:"adjektiv"},{w:"Weg",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Brunnen",t:"nomen"},{w:"plätschert",t:"verb"},{w:"leise",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Brücke",t:"nomen"},{w:"ist",t:"verb"},{w:"lang",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Haus",t:"nomen"},{w:"ist",t:"verb"},{w:"gemütlich",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Garten",t:"nomen"},{w:"blüht",t:"verb"},{w:"bunt",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Tür",t:"nomen"},{w:"knarrt",t:"verb"},{w:"laut",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Fenster",t:"nomen"},{w:"ist",t:"verb"},{w:"klar",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Schrank",t:"nomen"},{w:"ist",t:"verb"},{w:"groß",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Lampe",t:"nomen"},{w:"leuchtet",t:"verb"},{w:"warm",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Bett",t:"nomen"},{w:"ist",t:"verb"},{w:"weich",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Tisch",t:"nomen"},{w:"ist",t:"verb"},{w:"rund",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Küche",t:"nomen"},{w:"riecht",t:"verb"},{w:"gut",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Bad",t:"nomen"},{w:"ist",t:"verb"},{w:"sauber",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Keller",t:"nomen"},{w:"ist",t:"verb"},{w:"dunkel",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Treppe",t:"nomen"},{w:"ist",t:"verb"},{w:"steil",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Dach",t:"nomen"},{w:"ist",t:"verb"},{w:"rot",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Schnee",t:"nomen"},{w:"ist",t:"verb"},{w:"weiß",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Pfütze",t:"nomen"},{w:"ist",t:"verb"},{w:"tief",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Gewitter",t:"nomen"},{w:"ist",t:"verb"},{w:"laut",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Regenbogen",t:"nomen"},{w:"ist",t:"verb"},{w:"bunt",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Wolke",t:"nomen"},{w:"regnet",t:"verb"},{w:"stark",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Wind",t:"nomen"},{w:"bläst",t:"verb"},{w:"stark",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Wiese",t:"nomen"},{w:"ist",t:"verb"},{w:"grün",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Meer",t:"nomen"},{w:"rauscht",t:"verb"},{w:"laut",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Berg",t:"nomen"},{w:"ist",t:"verb"},{w:"hoch",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Höhle",t:"nomen"},{w:"ist",t:"verb"},{w:"finster",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Tal",t:"nomen"},{w:"liegt",t:"verb"},{w:"tief",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Fluss",t:"nomen"},{w:"fließt",t:"verb"},{w:"ruhig",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Boot",t:"nomen"},{w:"schaukelt",t:"verb"},{w:"sanft",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Fischer",t:"nomen"},{w:"angelt",t:"verb"},{w:"geduldig",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Welle",t:"nomen"},{w:"rollt",t:"verb"},{w:"ans",t:"other"},{w:"steile",t:"adjektiv"},{w:"Ufer",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Segelboot",t:"nomen"},{w:"gleitet",t:"verb"},{w:"lautlos",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Leuchtturm",t:"nomen"},{w:"blinkt",t:"verb"},{w:"hell",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Muschel",t:"nomen"},{w:"liegt",t:"verb"},{w:"still",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Riff",t:"nomen"},{w:"ist",t:"verb"},{w:"bunt",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Wal",t:"nomen"},{w:"taucht",t:"verb"},{w:"tief",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Krabbe",t:"nomen"},{w:"läuft",t:"verb"},{w:"seitwärts",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Seepferdchen",t:"nomen"},{w:"ist",t:"verb"},{w:"winzig",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Hai",t:"nomen"},{w:"schwimmt",t:"verb"},{w:"schnell",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Qualle",t:"nomen"},{w:"leuchtet",t:"verb"},{w:"bläulich",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Aquarium",t:"nomen"},{w:"ist",t:"verb"},{w:"sauber",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Tintenfisch",t:"nomen"},{w:"spritzt",t:"verb"},{w:"schwarze",t:"adjektiv"},{w:"Tinte",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Schwert",t:"nomen"},{w:"glänzt",t:"verb"},{w:"hell",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Ritter",t:"nomen"},{w:"kämpft",t:"verb"},{w:"mutig",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Burg",t:"nomen"},{w:"steht",t:"verb"},{w:"hoch",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Tor",t:"nomen"},{w:"ist",t:"verb"},{w:"riesig",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"König",t:"nomen"},{w:"regiert",t:"verb"},{w:"weise",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Königin",t:"nomen"},{w:"lächelt",t:"verb"},{w:"freundlich",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Zwerg",t:"nomen"},{w:"gräbt",t:"verb"},{w:"fleißig",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Elfe",t:"nomen"},{w:"fliegt",t:"verb"},{w:"leise",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Drache",t:"nomen"},{w:"speit",t:"verb"},{w:"heißes",t:"adjektiv"},{w:"Feuer",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Hexe",t:"nomen"},{w:"reitet",t:"verb"},{w:"auf",t:"other"},{w:"einem",t:"artikel"},{w:"schwarzen",t:"adjektiv"},{w:"Besen",t:"nomen"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Zauberbuch",t:"nomen"},{w:"leuchtet",t:"verb"},{w:"golden",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Schatz",t:"nomen"},{w:"glänzt",t:"verb"},{w:"golden",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Schatzkiste",t:"nomen"},{w:"ist",t:"verb"},{w:"schwer",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Feuer",t:"nomen"},{w:"brennt",t:"verb"},{w:"warm",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Vulkan",t:"nomen"},{w:"brodelt",t:"verb"},{w:"gefährlich",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Wüste",t:"nomen"},{w:"ist",t:"verb"},{w:"heiß",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Eis",t:"nomen"},{w:"knackt",t:"verb"},{w:"laut",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Dschungel",t:"nomen"},{w:"ist",t:"verb"},{w:"dicht",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Savanne",t:"nomen"},{w:"ist",t:"verb"},{w:"weit",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Gebirge",t:"nomen"},{w:"ist",t:"verb"},{w:"verschneit",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Der",t:"artikel"},{w:"Wald",t:"nomen"},{w:"ist",t:"verb"},{w:"dunkel",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Die",t:"artikel"},{w:"Lichtung",t:"nomen"},{w:"ist",t:"verb"},{w:"sonnig",t:"adjektiv"},{w:".",t:"punct"}],
+ [{w:"Das",t:"artikel"},{w:"Moos",t:"nomen"},{w:"ist",t:"verb"},{w:"weich",t:"adjektiv"},{w:".",t:"punct"}],
+];
+
+const TYPES=['nomen','verb','adjektiv','artikel'];
+const LABELS={nomen:'Nomen',verb:'Verb',adjektiv:'Adjektiv',artikel:'Artikel'};
+const KL_IDS={nomen:'kn',verb:'kv',adjektiv:'kj',artikel:'ka'};
+
+let G={
+  order:[],       // shuffled sentence indices
+  si:0,           // current sentence index into order[]
+  selColor:null,  // currently selected color
+  solved:{},      // wi -> type, solved in current sentence
+  correct:0, wrong:0, points:0,
+  startTime:null
+};
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=0|Math.random()*(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
+
+// ── screens ──
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+
+function startGame(){
+  G.order=shuffle([...Array(SENTENCES.length).keys()]);
+  G.si=0; G.selColor=null; G.solved={}; G.correct=0; G.wrong=0; G.points=0;
+  G.startTime=Date.now();
+  const n=document.getElementById('startName').value.trim();
+  if(n) document.getElementById('rName').value=n;
+  buildMini();
+  updStats();
+  show('gameScreen');
+  loadSentence();
+}
+
+function buildMini(){
+  const c=document.getElementById('mstars'); c.innerHTML='';
+  const tot=Math.min(SENTENCES.length,50);
+  for(let i=0;i<tot;i++){const s=document.createElement('span');s.className='ms';s.id='ms'+i;s.textContent='⭐';c.appendChild(s)}
+}
+
+// ── load sentence ──
+function loadSentence(){
+  if(G.si>=G.order.length){endGame();return}
+  G.solved={};
+  G.selColor=null;
+  resetKl();
+  updProgress();
+  renderSentence();
+  setInstr('Wähle zuerst einen Farbklecks!');
+  if(G.si>0){const m=document.getElementById('ms'+(G.si-1));if(m)m.classList.add('done')}
+}
+
+// ── render sentence ──
+function renderSentence(){
+  const sen=SENTENCES[G.order[G.si]];
+  const box=document.getElementById('sbox');
+  box.innerHTML='';
+
+  // Which kleckse should be "done" (greyed) = all types already fully solved
+  const typesInSen=getTypesInSen(sen);
+  const solvedTypes=new Set(Object.values(G.solved));
+  // Grey out klecks for types that are fully solved
+  TYPES.forEach(t=>{
+    const kl=document.getElementById(KL_IDS[t]);
+    kl.classList.remove('done','sel');
+    if(typesInSen.has(t)){
+      // check if all words of this type are solved
+      const allSolved=sen.every((w,wi)=>w.t!==t || G.solved[wi]===t);
+      if(allSolved) kl.classList.add('done');
+      else if(G.selColor===t) kl.classList.add('sel');
+    } else {
+      kl.classList.add('done'); // type not in sentence → grey
+    }
+  });
+
+  sen.forEach((wordObj,wi)=>{
+    if(wordObj.t==='punct'){
+      const sp=document.createElement('span');
+      sp.style.cssText='font-family:Fredoka,sans-serif;font-size:1.55rem;font-weight:600;';
+      sp.textContent=wordObj.w; box.appendChild(sp); return;
+    }
+    const sp=document.createElement('span');
+    sp.className='tok';
+    sp.textContent=wordObj.w;
+    sp.dataset.wi=wi;
+
+    if(G.solved[wi]){
+      sp.classList.add('s-'+G.solved[wi]);
+    } else if(TYPES.includes(wordObj.t)){
+      sp.classList.add('active');
+      if(G.selColor) sp.classList.add('h-'+G.selColor);
+      sp.onclick=()=>clickWord(wi,sp,wordObj.t);
+    } else {
+      sp.classList.add('dim');
+    }
+    box.appendChild(sp);
+    if(wi<sen.length-1 && sen[wi+1].t!=='punct') box.appendChild(document.createTextNode(' '));
+  });
+}
+
+function getTypesInSen(sen){
+  const s=new Set();
+  sen.forEach(w=>{if(TYPES.includes(w.t)) s.add(w.t)});
+  return s;
+}
+
+// ── pick color ──
+function pick(color){
+  const sen=SENTENCES[G.order[G.si]];
+  // Is this type even in the sentence?
+  if(!getTypesInSen(sen).has(color)){
+    // shake klecks
+    const kl=document.getElementById(KL_IDS[color]);
+    kl.classList.add('wshake');
+    setTimeout(()=>kl.classList.remove('wshake'),400);
+    G.wrong++; updStats(); tone(150,'sawtooth',.12);
+    return;
+  }
+  // Is it already fully solved?
+  const allSolved=sen.every((w,wi)=>w.t!==color||G.solved[wi]===color);
+  if(allSolved) return;
+
+  G.selColor=color;
+  setInstr('Jetzt klicke alle <strong style="color:var(--'+color+'-g)">'+LABELS[color]+'</strong> im Satz an!');
+  renderSentence();
+  tone(600,'sine',.1);
+}
+
+// ── click word ──
+function clickWord(wi,sp,wordType){
+  if(!G.selColor){
+    // no color selected — shake instruction
+    const b=document.getElementById('instr');
+    b.style.animation='shake .35s ease';
+    setTimeout(()=>b.style.animation='',400);
+    return;
+  }
+  if(G.selColor===wordType){
+    // ✅ correct
+    G.correct++; G.points+=10; G.solved[wi]=wordType;
+    updStats(); tone(860,'sine',.15);
+    sp.classList.remove('active','h-'+G.selColor);
+    sp.classList.add('s-'+wordType,'pop');
+    sp.onclick=null;
+
+    // check if all words of this type in sentence are now solved
+    const sen=SENTENCES[G.order[G.si]];
+    const typeDone=sen.every((w,i)=>w.t!==G.selColor||G.solved[i]===G.selColor);
+    if(typeDone){
+      // grey out this klecks
+      document.getElementById(KL_IDS[G.selColor]).classList.add('done');
+      G.selColor=null;
+      setInstr('Gut! Wähle den nächsten Farbklecks!');
+    }
+
+    // check if entire sentence is done
+    const senDone=sen.every((w,i)=>!TYPES.includes(w.t)||G.solved[i]===w.t);
+    if(senDone){
+      setTimeout(()=>{G.si++;G.selColor=null;loadSentence()},700);
+    } else {
+      renderSentence();
+    }
+  } else {
+    // ❌ wrong combination
+    G.wrong++; updStats(); tone(150,'sawtooth',.15);
+    sp.classList.add('wrong');
+    setTimeout(()=>sp.classList.remove('wrong'),700);
+    // shake klecks too
+    const kl=document.getElementById(KL_IDS[G.selColor]);
+    kl.classList.add('wshake');
+    setTimeout(()=>kl.classList.remove('wshake'),400);
+  }
+}
+
+// ── helpers ──
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
+function resetKl(){TYPES.forEach(t=>{const k=document.getElementById(KL_IDS[t]);k.classList.remove('done','sel','wshake')})}
+function setInstr(html){document.getElementById('instr').innerHTML=html}
+function updStats(){document.getElementById('sP').textContent=G.points;document.getElementById('sC').textContent=G.correct;document.getElementById('sW').textContent=G.wrong}
+function updProgress(){const p=G.si/G.order.length*100;document.getElementById('pf').style.width=p+'%';document.getElementById('pt').textContent=G.si+' / '+G.order.length+' Sätze'}
+
+// ── end ──
+function endGame(){
+  const el=Math.floor((Date.now()-G.startTime)/1000);
+  const tot=G.correct+G.wrong;
+  const acc=tot?Math.round(G.correct/tot*100):100;
+  document.getElementById('rP').textContent=G.points;
+  document.getElementById('rT').textContent=Math.floor(el/60)+':'+(el%60).toString().padStart(2,'0');
+  document.getElementById('rC').textContent=G.correct;
+  document.getElementById('rA').textContent=acc+'%';
+  if(acc===100){document.getElementById('cong').textContent='🌟 Perfekt — echter Champion!';document.getElementById('rmsg').textContent='Kein einziger Fehler — unglaublich!'}
+  else if(acc>=85){document.getElementById('cong').textContent='🎉 Fantastisch!';document.getElementById('rmsg').textContent='Du kennst dich super gut aus!'}
+  else if(acc>=65){document.getElementById('cong').textContent='👍 Gut gemacht!';document.getElementById('rmsg').textContent='Du wirst immer besser!'}
+  else{document.getElementById('cong').textContent='💪 Tapfer weiter!';document.getElementById('rmsg').textContent='Übung macht den Meister!'}
+  show('resultScreen'); toneMil(); confetti(); renderBoard('rBoard',true);
+}
+
+// ── leaderboard ──
+function lb(){try{return JSON.parse(localStorage.getItem('wca')||'[]')}catch(e){return[]}}
+function slb(b){try{localStorage.setItem('wca',JSON.stringify(b))}catch(e){}}
+function saveScore(){
+  const name=document.getElementById('rName').value.trim()||'Anonym';
+  const el=Math.floor((Date.now()-G.startTime)/1000);
+  const board=lb();
+  board.push({name,points:G.points,time:el});
+  board.sort((a,b)=>b.points-a.points);
+  slb(board.slice(0,10));
+  renderBoard('menuBoard',false); renderBoard('rBoard',true);
+  document.getElementById('saveBtn').textContent='✅ Gespeichert!';
+  document.getElementById('saveBtn').disabled=true;
+}
+function renderBoard(id,wTitle){
+  const c=document.getElementById(id),e=lb();
+  let h=wTitle?'<div class="lbt">🏅 Bestenliste</div>':'';
+  if(!e.length){c.innerHTML=h+'<p style="color:var(--muted);text-align:center">Noch keine Einträge!</p>';return}
+  h+=e.slice(0,8).map((x,i)=>`<div class="le"><span class="lr">${i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.'}</span><span class="ln">${x.name}</span><span class="ls">${x.points} Pkt</span></div>`).join('');
+  c.innerHTML=h;
+}
+function goMenu(){show('startScreen');renderBoard('menuBoard',false);document.getElementById('saveBtn').disabled=false;document.getElementById('saveBtn').textContent='💾 Speichern'}
+
+// ── audio ──
+function tone(f,t,v){try{const c=new AudioContext(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=f;o.type=t;g.gain.setValueAtTime(v,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.3);o.start();o.stop(c.currentTime+.3)}catch(e){}}
+function toneMil(){try{const c=new AudioContext();[523,659,784,1047].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=f;g.gain.setValueAtTime(.18,c.currentTime+i*.15);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+i*.15+.3);o.start(c.currentTime+i*.15);o.stop(c.currentTime+i*.15+.3)})}catch(e){}}
+
+// ── confetti ──
+function confetti(){const cols=['#1a6fb5','#3a9de0','#ffd700','#2ecf8a','#ff5e6a','#25d460'];for(let i=0;i<70;i++){const d=document.createElement('div');const sz=(Math.random()*9+4)+'px';d.style.cssText=`position:fixed;left:${Math.random()*100}vw;top:-10px;width:${sz};height:${sz};background:${cols[0|Math.random()*cols.length]};border-radius:${Math.random()>.5?'50%':'3px'};pointer-events:none;z-index:9999;`;document.body.appendChild(d);const a=d.animate([{transform:'translateY(0) rotate(0)',opacity:1},{transform:`translateY(100vh) rotate(${Math.random()*720}deg)`,opacity:0}],{duration:Math.random()*2000+2000,easing:'ease-out'});a.onfinish=()=>d.remove()}}
+
+// ── stars ──
+document.addEventListener('DOMContentLoaded',()=>{
+  const c=document.getElementById('starsEl');
+  for(let i=0;i<70;i++){const s=document.createElement('div');s.className='star';const sz=Math.random()*2.5+.8;s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${Math.random()*4+2}s;--o:${Math.random()*.5+.2};--dl:${Math.random()*5}s;`;c.appendChild(s)}
+  renderBoard('menuBoard',false);
+});
+</script>
+</body>
+</html>
