@@ -141,6 +141,10 @@
         .article-btn.negation:hover { border-color: #ff8787; }
         .article-btn.possessive-ending { border-color: var(--possessive); font-size: 1.1rem; }
         .article-btn.possessive-ending:hover { border-color: var(--possessive-glow); }
+        .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 25px; }
+        .option-btn { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); border: 2px solid rgba(14,158,142,0.3); border-radius: 12px; padding: 14px 20px; color: var(--text); font-family: 'Quicksand', sans-serif; font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
+        .option-btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(14,158,142,0.35); border-color: var(--accent-glow); background: linear-gradient(135deg, var(--primary-light) 0%, #0a5a5a 100%); }
+        .option-btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .control-buttons { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
         .control-btn {
             background: var(--primary);
@@ -265,15 +269,14 @@
             </div>
             <div class="progress-text" id="progressText">0 / 0 Sätze gelöst</div>
 
-            <div class="hint-box" id="hintBox">
-                <div class="hint-text" id="hintText"></div>
-            </div>
-
             <div class="sentence-box">
                 <div class="sentence" id="sentence"></div>
+                <div class="hint-box" id="hintBox" style="display:none;">
+                    <span id="hintText"></span>
+                </div>
             </div>
 
-            <div class="article-buttons" id="articleButtons"></div>
+            <div class="options-grid" id="optionsGrid"></div>
 
             <div class="control-buttons">
                 <button class="control-btn secondary" onclick="skipSentence()">⏭️ Überspringen</button>
@@ -318,973 +321,425 @@
     </div>
 
     <script>
-        const articles = {
-            definite: {
-                nominativ: { m: 'der', f: 'die', n: 'das', pl: 'die' },
-                akkusativ: { m: 'den', f: 'die', n: 'das', pl: 'die' },
-                dativ: { m: 'dem', f: 'der', n: 'dem', pl: 'den' },
-                genitiv: { m: 'des', f: 'der', n: 'des', pl: 'der' }
-            },
-            indefinite: {
-                nominativ: { m: 'ein', f: 'eine', n: 'ein', pl: '' },
-                akkusativ: { m: 'einen', f: 'eine', n: 'ein', pl: '' },
-                dativ: { m: 'einem', f: 'einer', n: 'einem', pl: '' },
-                genitiv: { m: 'eines', f: 'einer', n: 'eines', pl: '' }
-            },
-            negation: {
-                nominativ: { m: 'kein', f: 'keine', n: 'kein', pl: 'keine' },
-                akkusativ: { m: 'keinen', f: 'keine', n: 'kein', pl: 'keine' },
-                dativ: { m: 'keinem', f: 'keiner', n: 'keinem', pl: 'keinen' },
-                genitiv: { m: 'keines', f: 'keiner', n: 'keines', pl: 'keiner' }
-            },
-            possessive: {
-                'ich': 'mein',
-                'du': 'dein',
-                'er': 'sein',
-                'sie': 'ihr',
-                'es': 'sein',
-                'wir': 'unser',
-                'ihr': 'euer',
-                'sie-pl': 'ihr',
-                'Sie': 'Ihr'
-            }
-        };
+    const sounds = {
+        correct: () => { try { const ctx = new (window.AudioContext||window.webkitAudioContext)(); const osc=ctx.createOscillator(); const gain=ctx.createGain(); osc.connect(gain); gain.connect(ctx.destination); osc.frequency.value=800; gain.gain.value=0.13; osc.start(); gain.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.15); setTimeout(()=>ctx.close(),200); } catch(e){} },
+        wrong: () => { try { const ctx = new (window.AudioContext||window.webkitAudioContext)(); const osc=ctx.createOscillator(); const gain=ctx.createGain(); osc.connect(gain); gain.connect(ctx.destination); osc.frequency.value=200; osc.type='sawtooth'; gain.gain.value=0.1; osc.start(); gain.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.2); setTimeout(()=>ctx.close(),250); } catch(e){} },
+        milestone: () => { try { const ctx = new (window.AudioContext||window.webkitAudioContext)(); [523,659,784,1047].forEach((f,i)=>{ setTimeout(()=>{ const osc=ctx.createOscillator(); const gain=ctx.createGain(); osc.connect(gain); gain.connect(ctx.destination); osc.frequency.value=f; gain.gain.value=0.12; osc.start(); gain.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.3); },i*100); }); setTimeout(()=>ctx.close(),600); } catch(e){} }
+    };
 
-        const sentences = {
-            preposition: [
-                // mit + Dativ (14 Sätze)
-                ['Das Nilpferd tanzt', 'mit', 'Tutu', 'auf der Bühne.', 'n', 'dativ'],
-                ['Die Schildkröte surft', 'mit', 'Welle', 'zum Strand.', 'f', 'dativ'],
-                ['Der Tintenfisch malt', 'mit', 'Tintenstrahl', 'Kunstwerke.', 'm', 'dativ'],
-                ['Das Wombat kocht', 'mit', 'Eukalyptus', 'eine Suppe.', 'm', 'dativ'],
-                ['Die Giraffe spielt', 'mit', 'Schmetterling', 'Federball.', 'm', 'dativ'],
-                ['Der Seelöwe jongliert', 'mit', 'Ball', 'auf der Nase.', 'm', 'dativ'],
-                ['Das Gürteltier rollt', 'mit', 'Tempo', 'bergab.', 'n', 'dativ'],
-                ['Die Fledermaus schläft', 'mit', 'Augenklappe', 'kopfüber.', 'f', 'dativ'],
-                ['Der Kaktus winkt', 'mit', 'Stachel', 'seinen Freunden.', 'm', 'dativ'],
-                ['Das Nashorn schreibt', 'mit', 'Feder', 'seine Memoiren.', 'f', 'dativ'],
-                ['Die Libelle fliegt', 'mit', 'Windrad', 'ums Haus.', 'n', 'dativ'],
-                ['Der Biber baut', 'mit', 'Dampfhammer', 'seinen Damm.', 'm', 'dativ'],
-                ['Das Alpaka läuft', 'mit', 'Sonnenbrille', 'durch die Wüste.', 'f', 'dativ'],
-                ['Die Möwe surft', 'mit', 'Surfbrett', 'über das Meer.', 'n', 'dativ'],
+    const sentenceData = {
+        preposition: [
+            { text: "Das Nilpferd tanzt mit [dem] Tutu auf der Bühne.", slots: [{art:"dem"}] },
+            { text: "Die Schildkröte surft mit [der] Welle zum Strand.", slots: [{art:"der"}] },
+            { text: "Der Tintenfisch malt mit [dem] Tintenstrahl Kunstwerke.", slots: [{art:"dem"}] },
+            { text: "Das Wombat kocht mit [dem] Eukalyptus eine Suppe.", slots: [{art:"dem"}] },
+            { text: "Die Giraffe spielt mit [dem] Schmetterling Federball.", slots: [{art:"dem"}] },
+            { text: "Der Seelöwe jongliert mit [dem] Ball auf der Nase.", slots: [{art:"dem"}] },
+            { text: "Die Fledermaus schläft mit [der] Augenklappe kopfüber.", slots: [{art:"der"}] },
+            { text: "Der Kaktus winkt mit [dem] Stachel seinen Freunden.", slots: [{art:"dem"}] },
+            { text: "Das Nashorn schreibt mit [der] Feder seine Memoiren.", slots: [{art:"der"}] },
+            { text: "Das Axolotl wohnt in [dem] Aquarium mit Disco-Beleuchtung.", slots: [{art:"dem"}] },
+            { text: "Der Pinguin liest in [der] Eisbar seinen Lieblingsroman.", slots: [{art:"der"}] },
+            { text: "Die Ratte trainiert in [dem] Fitnessstudio täglich.", slots: [{art:"dem"}] },
+            { text: "Das Faultier hängt in [der] Hängematte wie ein Champion.", slots: [{art:"der"}] },
+            { text: "Der Otter schläft in [dem] Fluss auf dem Rücken.", slots: [{art:"dem"}] },
+            { text: "Der Pinguin springt in [den] Swimmingpool elegant.", slots: [{art:"den"}] },
+            { text: "Die Katze schleicht in [die] Küche nach dem Käse.", slots: [{art:"die"}] },
+            { text: "Das Nashorn rennt in [den] Blumenladen versehentlich.", slots: [{art:"den"}] },
+            { text: "Der Igel rollt in [die] Turnhalle hinein.", slots: [{art:"die"}] },
+            { text: "Der Frosch springt in [den] Teich mit Anlauf.", slots: [{art:"den"}] },
+            { text: "Der Affe hängt an [der] Liane und grüßt.", slots: [{art:"der"}] },
+            { text: "Die Muschel liegt an [dem] Ufer und lauscht.", slots: [{art:"dem"}] },
+            { text: "Das Chamäleon klebt an [der] Zimmerdecke und denkt.", slots: [{art:"der"}] },
+            { text: "Das Känguru hüpft an [die] Küste zum Sonnenbaden.", slots: [{art:"die"}] },
+            { text: "Der Delfin schwimmt an [das] Ufer neugierig heran.", slots: [{art:"das"}] },
+            { text: "Die Hummel fliegt an [das] Fenster und klopft.", slots: [{art:"das"}] },
+            { text: "Der Froschkönig springt an [die] Seerose geschickt.", slots: [{art:"die"}] },
+            { text: "Die Katze döst auf [dem] Sofa wie eine Königin.", slots: [{art:"dem"}] },
+            { text: "Der Storch steht auf [dem] Dach und philosophiert.", slots: [{art:"dem"}] },
+            { text: "Das Hühnchen scharrt auf [der] Wiese nach Würmern.", slots: [{art:"der"}] },
+            { text: "Der Frosch hockt auf [der] Seerose und wartet.", slots: [{art:"der"}] },
+            { text: "Die Eule fliegt auf [den] Ast lautlos zu.", slots: [{art:"den"}] },
+            { text: "Der Affe klettert auf [den] Baum blitzschnell.", slots: [{art:"den"}] },
+            { text: "Das Kaninchen hüpft auf [das] Sofa unerlaubt.", slots: [{art:"das"}] },
+            { text: "Die Katze springt auf [den] Kühlschrank triumphierend.", slots: [{art:"den"}] },
+            { text: "Der Hamster läuft zu [der] Wintervorratskammer täglich.", slots: [{art:"der"}] },
+            { text: "Die Schnecke kriecht zu [dem] Salatbeet sehr langsam.", slots: [{art:"dem"}] },
+            { text: "Der Vogel fliegt von [der] Insel zum Festland rüber.", slots: [{art:"der"}] },
+            { text: "Der Zug fährt durch [den] langen Tunnel.", slots: [{art:"den"}] },
+            { text: "Das Schaf läuft durch [die] grüne Wiese fröhlich.", slots: [{art:"die"}] },
+            { text: "Der Hund läuft um [den] Tisch dreimal herum.", slots: [{art:"den"}] },
+            { text: "Das Kind sitzt vor [dem] Computer seit Stunden.", slots: [{art:"dem"}] },
+            { text: "Die Katze schläft unter [dem] Bett wie immer.", slots: [{art:"dem"}] },
+            { text: "Der Vogel sitzt neben [dem] Nest auf einem Ast.", slots: [{art:"dem"}] },
+            { text: "Das Eichhörnchen läuft um [den] großen Baum herum.", slots: [{art:"den"}] },
+            { text: "Der Delfin schwimmt durch [das] Riff elegant.", slots: [{art:"das"}] },
+            { text: "Das Nashorn rennt durch [den] Park ohne Pause.", slots: [{art:"den"}] },
+            { text: "Die Giraffe läuft durch [die] Stadt neugierig.", slots: [{art:"die"}] },
+            { text: "Das Kamel wandert durch [die] Wüste tapfer.", slots: [{art:"die"}] },
+            { text: "Das Känguru springt über [den] Zaun mühelos.", slots: [{art:"den"}] },
+            { text: "Die Katze klettert über [das] Dach lautlos.", slots: [{art:"das"}] },
+            { text: "Der Frosch hüpft über [die] Wiese lustig.", slots: [{art:"die"}] },
+            { text: "Das Pferd galoppiert gegen [den] Wind mutig.", slots: [{art:"den"}] },
+            { text: "Das Schaf läuft ohne [den] Hirten durch die Felder.", slots: [{art:"den"}] },
+            { text: "Sie kauft Blumen für [das] Fest morgen früh.", slots: [{art:"das"}] },
+            { text: "Er bringt [einen] Kuchen für [die] ganze Klasse mit.", slots: [{art:"einen"},{art:"die"}] }
+        ],
+        definite: [
+            { text: "[Der] Pinguin tanzt mit [der] Robbe auf [dem] Eis.", slots: [{art:"Der"},{art:"der"},{art:"dem"}] },
+            { text: "[Die] Giraffe trägt [den] Hut auf [dem] Kopf.", slots: [{art:"Die"},{art:"den"},{art:"dem"}] },
+            { text: "[Das] Axolotl liebt [den] Regen und [die] Pfützen.", slots: [{art:"Das"},{art:"den"},{art:"die"}] },
+            { text: "[Die] Fledermäuse schlafen tagsüber in [der] Höhle.", slots: [{art:"Die"},{art:"der"}] },
+            { text: "Ich gebe [dem] Hamster [das] Futter jeden Morgen.", slots: [{art:"dem"},{art:"das"}] },
+            { text: "[Der] Schmetterling flattert über [die] Wiese elegant.", slots: [{art:"Der"},{art:"die"}] },
+            { text: "Das ist [der] Rucksack [des] Schülers auf [dem] Tisch.", slots: [{art:"der"},{art:"des"},{art:"dem"}] },
+            { text: "[Das] Nilpferd tanzt mit [der] Eleganz [des] Schwans.", slots: [{art:"Das"},{art:"der"},{art:"des"}] },
+            { text: "Wir folgen [dem] Pfad durch [den] Wald zum See.", slots: [{art:"dem"},{art:"den"}] },
+            { text: "[Die] Ente kauft [das] Brot für [die] ganze Familie.", slots: [{art:"Die"},{art:"das"},{art:"die"}] },
+            { text: "Er zeigt [dem] Kind [das] Versteck hinter [dem] Baum.", slots: [{art:"dem"},{art:"das"},{art:"dem"}] },
+            { text: "Die Farbe [des] Meeres war unglaublich türkis.", slots: [{art:"des"}] },
+            { text: "Das Lachen [der] Kinder ist das schönste Geräusch.", slots: [{art:"der"}] },
+            { text: "[Der] Frosch springt auf [die] Seerose im Teich.", slots: [{art:"Der"},{art:"die"}] },
+            { text: "Sie dankt [den] Freunden für die lustige Party.", slots: [{art:"den"}] }
+        ],
+        indefinite: [
+            { text: "[Ein] Axolotl lebt in [einem] Aquarium mit Disco-Beleuchtung.", slots: [{art:"Ein"},{art:"einem"}] },
+            { text: "Das ist [eine] Giraffe mit [einem] bunten Hut.", slots: [{art:"eine"},{art:"einem"}] },
+            { text: "Ich sehe [einen] Pinguin auf [einem] Surfbrett.", slots: [{art:"einen"},{art:"einem"}] },
+            { text: "[Eine] Schnecke macht [ein] Rennen gegen [einen] Hasen.", slots: [{art:"Eine"},{art:"ein"},{art:"einen"}] },
+            { text: "Er hat [einen] Plan und [eine] Idee für morgen.", slots: [{art:"einen"},{art:"eine"}] },
+            { text: "Das war der Anfang [einer] großartigen Reise.", slots: [{art:"einer"}] },
+            { text: "Die Kraft [eines] echten Freundes ist unbezahlbar.", slots: [{art:"eines"}] },
+            { text: "Ich helfe [einem] Freund beim Aufbauen des Zeltes.", slots: [{art:"einem"}] },
+            { text: "Sie schenkt [einer] Freundin [ein] Buch zum Geburtstag.", slots: [{art:"einer"},{art:"ein"}] },
+            { text: "Wir sammeln [_] Muscheln am Strand heute.", slots: [{art:"_"}] },
+            { text: "[Ein] Nilpferd kauft [_] Blumen für [einen] Freund.", slots: [{art:"Ein"},{art:"_"},{art:"einen"}] },
+            { text: "[Eine] Ente und [ein] Frosch spielen zusammen.", slots: [{art:"Eine"},{art:"ein"}] },
+            { text: "Er trinkt [einen] Tee und isst [ein] Brötchen.", slots: [{art:"einen"},{art:"ein"}] }
+        ],
+        negation: [
+            { text: "Das ist [kein] normales Axolotl, sondern ein Genie!", slots: [{art:"kein"}] },
+            { text: "Ich habe [keinen] Regenschirm, obwohl es regnet.", slots: [{art:"keinen"}] },
+            { text: "Sie hat [keine] Angst vor dem großen Hund.", slots: [{art:"keine"}] },
+            { text: "Wir haben [kein] WLAN im Ferienlager – herrlich!", slots: [{art:"kein"}] },
+            { text: "Der Pinguin trägt [keinen] Wintermantel im Eis.", slots: [{art:"keinen"}] },
+            { text: "Ich erzähle [keinem] Fremden mein Geheimnis.", slots: [{art:"keinem"}] },
+            { text: "Wir folgen [keiner] Gruppe ohne zu wissen wohin.", slots: [{art:"keiner"}] },
+            { text: "Ich habe [keine] Hausaufgaben in den Ferien!", slots: [{art:"keine"}] },
+            { text: "Er kommt [nicht] pünktlich zum Treffpunkt heute.", slots: [{art:"nicht"}] },
+            { text: "Das Wasser ist [nicht] warm genug zum Schwimmen.", slots: [{art:"nicht"}] },
+            { text: "Ich vergesse [nicht], dir eine Nachricht zu schicken.", slots: [{art:"nicht"}] },
+            { text: "Sie hat [keinen] Mut und traut sich [nicht] zu springen.", slots: [{art:"keinen"},{art:"nicht"}] },
+            { text: "Das ist [kein] gutes Wetter und wir gehen [nicht] raus.", slots: [{art:"kein"},{art:"nicht"}] }
+        ],
+        possessive: [
+            { text: "[Mein] Axolotl lebt im Aquarium und winkt allen zu.", slots: [{art:"Mein"}] },
+            { text: "[Dein] Lachen erhellt jeden Raum der Welt.", slots: [{art:"Dein"}] },
+            { text: "[Sein] Papagei spricht bereits fünf Sprachen fließend.", slots: [{art:"Sein"}] },
+            { text: "[Ihre] Katze schläft auf meiner Tastatur den ganzen Tag.", slots: [{art:"Ihre"}] },
+            { text: "[Unser] Abenteuer beginnt genau jetzt!", slots: [{art:"Unser"}] },
+            { text: "[Eure] Musik ist einfach unvergesslich schön!", slots: [{art:"Eure"}] },
+            { text: "[Ihr] Garten blüht das ganze Jahr über.", slots: [{art:"Ihr"}] },
+            { text: "Ich liebe [meinen] Hund über alle Maßen.", slots: [{art:"meinen"}] },
+            { text: "Du verlierst [deinen] Regenschirm immer wieder!", slots: [{art:"deinen"}] },
+            { text: "Er füttert [seinen] Axolotl täglich mit Freude.", slots: [{art:"seinen"}] },
+            { text: "Sie kämmt [ihr] Einhorn jeden Abend sorgfältig.", slots: [{art:"ihr"}] },
+            { text: "Wir bauen [unser] Traumhaus aus Kissen und Decken.", slots: [{art:"unser"}] },
+            { text: "Ihr zeigt [euren] Mut jeden Tag aufs Neue.", slots: [{art:"euren"}] },
+            { text: "Sie pflegt [ihren] Garten liebevoll das ganze Jahr.", slots: [{art:"ihren"}] },
+            { text: "Ich danke [meinen] Sternen für alle schönen Träume.", slots: [{art:"meinen"}] },
+            { text: "Du vertraust [deinem] Herzen immer mit Mut.", slots: [{art:"deinem"}] },
+            { text: "Er folgt [seiner] Intuition mutig durch alle Stürme.", slots: [{art:"seiner"}] },
+            { text: "Sie lauscht [ihren] Träumen aufmerksam in der Stille.", slots: [{art:"ihren"}] },
+            { text: "Wir folgen [unseren] Instinkten vertrauensvoll.", slots: [{art:"unseren"}] },
+            { text: "Das Abenteuer gehört [meiner] besten Freundin und mir.", slots: [{art:"meiner"}] },
+            { text: "Das Lachen [meines] Kindes ist einfach ansteckend.", slots: [{art:"meines"}] },
+            { text: "Die Farbe [deiner] Augen ist wirklich einzigartig.", slots: [{art:"deiner"}] },
+            { text: "Der Klang [seiner] Stimme ist so beruhigend.", slots: [{art:"seiner"}] },
+            { text: "Die Schönheit [ihrer] Seele leuchtet für alle.", slots: [{art:"ihrer"}] },
+            { text: "Der Wert [unserer] Freundschaft ist unbezahlbar.", slots: [{art:"unserer"}] },
+            { text: "Die Kraft [eures] Zusammenhalts bewegt Berge!", slots: [{art:"eures"}] },
+            { text: "[Meine] Katze besucht [deine] Familie jeden Nachmittag.", slots: [{art:"Meine"},{art:"deine"}] },
+            { text: "[Sein] Hund zeigt [meiner] Schwester den Weg nach Hause.", slots: [{art:"Sein"},{art:"meiner"}] },
+            { text: "[Ihr] Zelt steht neben [unserem] Bungalow am See.", slots: [{art:"Ihr"},{art:"unserem"}] },
+            { text: "[Dein] Vorschlag hat [unserem] Team den Tag gerettet.", slots: [{art:"Dein"},{art:"unserem"}] },
+            { text: "[Sein] Lachen und [seine] Energie machen alles besser.", slots: [{art:"Sein"},{art:"seine"}] }
+        ],
+        relative: [
+            { text: "Das Axolotl, [das] im Aquarium wohnt, winkt allen zu.", slots: [{art:"das"}] },
+            { text: "Der Pinguin, [der] so gut tanzt, gibt uns Unterricht.", slots: [{art:"der"}] },
+            { text: "Die Giraffe, [die] immer ehrlich ist, ist Gold wert.", slots: [{art:"die"}] },
+            { text: "Die Tiere, [die] gemeinsam lachen, halten zusammen.", slots: [{art:"die"}] },
+            { text: "Der Strand, [den] wir entdeckt haben, ist unser Tipp.", slots: [{art:"den"}] },
+            { text: "Das Lied, [das] wir gesungen haben, klingt noch nach.", slots: [{art:"das"}] },
+            { text: "Die Fotos, [die] wir gemacht haben, sind wunderschön.", slots: [{art:"die"}] },
+            { text: "Der Freund, [dem] ich alles erzähle, versteht mich.", slots: [{art:"dem"}] },
+            { text: "Die Lehrerin, [der] wir danken, hat uns vieles gelehrt.", slots: [{art:"der"}] },
+            { text: "Das Kind, [dem] wir geholfen haben, hat uns gewunken.", slots: [{art:"dem"}] },
+            { text: "Die Kinder, [denen] wir das Lager zeigen, staunen.", slots: [{art:"denen"}] },
+            { text: "Das Mädchen, [dessen] Lachen man weit hörte, strahlte.", slots: [{art:"dessen"}] },
+            { text: "Der Junge, [dessen] Idee es war, hat uns überrascht.", slots: [{art:"dessen"}] },
+            { text: "Die Freunde, [deren] Zusammenhalt stark ist, siegen.", slots: [{art:"deren"}] },
+            { text: "Die Freundin, [die] ich vermisse, [der] ich schreibe, ist weit weg.", slots: [{art:"die"},{art:"der"}] },
+            { text: "Das Lagerfeuer, [das] wir anzündeten, [dem] wir zusahen, war magisch.", slots: [{art:"das"},{art:"dem"}] }
+        ]
+    };
 
-                // in + Dativ (10 Sätze)
-                ['Das Axolotl wohnt', 'in', 'Aquarium', 'mit Disco-Beleuchtung.', 'n', 'dativ'],
-                ['Der Pinguin liest', 'in', 'Eisbar', 'seinen Lieblingsroman.', 'f', 'dativ'],
-                ['Die Ratte trainiert', 'in', 'Fitnessstudio', 'täglich.', 'n', 'dativ'],
-                ['Das Kamel träumt', 'in', 'Oase', 'von Schokolade.', 'f', 'dativ'],
-                ['Der Krebs kocht', 'in', 'Küche', 'Pasta al dente.', 'f', 'dativ'],
-                ['Die Krabbe meditiert', 'in', 'Korallenriff', 'still.', 'n', 'dativ'],
-                ['Das Faultier hängt', 'in', 'Hängematte', 'wie ein Champion.', 'f', 'dativ'],
-                ['Der Otter schläft', 'in', 'Fluss', 'auf dem Rücken.', 'm', 'dativ'],
-                ['Die Schnecke wohnt', 'in', 'Gartenhaus', 'mit Terrasse.', 'n', 'dativ'],
-                ['Das Krokodil lächelt', 'in', 'Sumpf', 'freundlich.', 'm', 'dativ'],
+    const optionsData = {
+        preposition: { art: ["der","die","das","dem","den","des","einen","einem","einer","eine","ein"] },
+        definite: { art: ["der","die","das","den","dem","des"] },
+        indefinite: { art: ["ein","eine","einen","einem","einer","eines","_"] },
+        negation: { art: ["kein","keine","keinen","keinem","keiner","nicht"] },
+        possessive: { art: ["mein","dein","sein","ihr","unser","euer","meinen","deinen","seinen","ihren","unseren","euren","meinem","deinem","seinem","ihrem","unserem","eurem","meiner","deiner","seiner","ihrer","unserer","eurer","meine","deine","seine","ihre","unsere","eure","meines","deines","seines","ihres","unseres","eures"] },
+        relative: { art: ["der","die","das","den","dem","denen","dessen","deren"] }
+    };
 
-                // in + Akkusativ (10 Sätze)
-                ['Der Pinguin springt', 'in', 'Swimmingpool', 'elegant hinein.', 'm', 'akkusativ'],
-                ['Die Katze schleicht', 'in', 'Küche', 'nach dem Käse.', 'f', 'akkusativ'],
-                ['Das Nashorn rennt', 'in', 'Blumenladen', 'versehentlich.', 'm', 'akkusativ'],
-                ['Der Igel rollt', 'in', 'Turnhalle', 'hinein.', 'f', 'akkusativ'],
-                ['Die Ente tapst', 'in', 'Supermarkt', 'für Brot.', 'm', 'akkusativ'],
-                ['Das Huhn guckt', 'in', 'Spiegel', 'bewundernd.', 'm', 'akkusativ'],
-                ['Der Maulwurf gräbt', 'in', 'Garten', 'einen Tunnel.', 'm', 'akkusativ'],
-                ['Die Libelle fliegt', 'in', 'Wolke', 'hinein.', 'f', 'akkusativ'],
-                ['Das Schwein hüpft', 'in', 'Pfütze', 'freudig.', 'f', 'akkusativ'],
-                ['Der Frosch springt', 'in', 'Teich', 'mit Anlauf.', 'm', 'akkusativ'],
+    let gameState = {
+        mode: null, points: 0, streak: 0, bestStreak: 0,
+        correctAnswers: 0, totalAttempts: 0, startTime: null, timerInterval: null,
+        allSentences: [], remainingSentences: [], solvedSentences: [],
+        currentSentence: null, basePointsPerSlot: 10
+    };
 
-                // an + Dativ (8 Sätze)
-                ['Der Affe hängt', 'an', 'Liane', 'und grüßt.', 'f', 'dativ'],
-                ['Die Muschel liegt', 'an', 'Ufer', 'und lauscht.', 'n', 'dativ'],
-                ['Das Chamäleon klebt', 'an', 'Zimmerdecke', 'und denkt.', 'f', 'dativ'],
-                ['Der Papagei hockt', 'an', 'Fenster', 'und singt.', 'n', 'dativ'],
-                ['Die Eidechse sonnt sich', 'an', 'Stein', 'stundenlang.', 'm', 'dativ'],
-                ['Das Eichhörnchen knabbert', 'an', 'Nuss', 'wie ein Profi.', 'f', 'dativ'],
-                ['Der Schmetterling trinkt', 'an', 'Blüte', 'Nektar.', 'f', 'dativ'],
-                ['Die Schnecke kriecht', 'an', 'Wand', 'mit Würde.', 'f', 'dativ'],
+    function init() { createBackground(); updateMenuLeaderboard(); showScreen("startScreen"); }
 
-                // an + Akkusativ (8 Sätze)
-                ['Das Känguru hüpft', 'an', 'Küste', 'zum Sonnenbaden.', 'f', 'akkusativ'],
-                ['Der Delfin schwimmt', 'an', 'Ufer', 'neugierig heran.', 'n', 'akkusativ'],
-                ['Die Hummel fliegt', 'an', 'Fenster', 'und klopft.', 'n', 'akkusativ'],
-                ['Das Krokodil kriecht', 'an', 'Flussufer', 'langsam.', 'n', 'akkusativ'],
-                ['Der Froschkönig springt', 'an', 'Seerose', 'geschickt.', 'f', 'akkusativ'],
-                ['Die Robbe robbt', 'an', 'Fels', 'zum Ausruhen.', 'm', 'akkusativ'],
-                ['Das Nashorn trabt', 'an', 'Tränke', 'durstig.', 'f', 'akkusativ'],
-                ['Der Biber schwimmt', 'an', 'Damm', 'stolz vorbei.', 'm', 'akkusativ'],
+    function createBackground() {
+        const stars = document.getElementById("stars");
+        if (!stars) return;
+        for (let i = 0; i < 80; i++) {
+            const s = document.createElement("div");
+            s.style.cssText = "position:absolute;width:" + (Math.random()*3+1) + "px;height:" + (Math.random()*3+1) + "px;background:rgba(20,201,181," + (Math.random()*0.5+0.1) + ");border-radius:50%;left:" + Math.random()*100 + "%;top:" + Math.random()*100 + "%";
+            stars.appendChild(s);
+        }
+    }
 
-                // auf + Dativ (8 Sätze)
-                ['Die Katze döst', 'auf', 'Sofa', 'wie eine Königin.', 'n', 'dativ'],
-                ['Der Storch steht', 'auf', 'Dach', 'und philosophiert.', 'n', 'dativ'],
-                ['Das Hühnchen scharrt', 'auf', 'Wiese', 'nach Würmern.', 'f', 'dativ'],
-                ['Der Frosch hockt', 'auf', 'Seerose', 'und wartet.', 'f', 'dativ'],
-                ['Die Schnecke gleitet', 'auf', 'Blatt', 'elegant.', 'n', 'dativ'],
-                ['Das Kätzchen schläft', 'auf', 'Kissen', 'traumhaft.', 'n', 'dativ'],
-                ['Der Adler kreist', 'auf', 'Thermik', 'mühelos.', 'f', 'dativ'],
-                ['Die Ameise trägt', 'auf', 'Rücken', 'ihr Abendessen.', 'm', 'dativ'],
+    function showScreen(id) {
+        document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+    }
 
-                // auf + Akkusativ (8 Sätze)
-                ['Die Eule fliegt', 'auf', 'Ast', 'lautlos zu.', 'm', 'akkusativ'],
-                ['Der Affe klettert', 'auf', 'Baum', 'blitzschnell.', 'm', 'akkusativ'],
-                ['Das Kaninchen hüpft', 'auf', 'Sofa', 'unerlaubt.', 'n', 'akkusativ'],
-                ['Der Pinguin watschelt', 'auf', 'Eisscholle', 'zufrieden.', 'f', 'akkusativ'],
-                ['Die Katze springt', 'auf', 'Kühlschrank', 'triumphierend.', 'm', 'akkusativ'],
-                ['Das Krokodil klettert', 'auf', 'Fels', 'täuschend schnell.', 'm', 'akkusativ'],
-                ['Der Hund springt', 'auf', 'Bett', 'und macht sich breit.', 'n', 'akkusativ'],
-                ['Die Hummel landet', 'auf', 'Nase', 'des Schläfers.', 'f', 'akkusativ'],
+    function startGame(mode) {
+        gameState.mode = mode;
+        gameState.points = 0; gameState.streak = 0; gameState.bestStreak = 0;
+        gameState.correctAnswers = 0; gameState.totalAttempts = 0;
+        gameState.startTime = Date.now();
+        gameState.allSentences = [...sentenceData[mode]];
+        gameState.remainingSentences = [...gameState.allSentences];
+        gameState.solvedSentences = [];
+        const modeNames = { preposition:"Präpositionen", definite:"Bestimmte Artikel", indefinite:"Unbestimmte Artikel", negation:"Verneinung", possessive:"Possessivpronomen", relative:"Relativpronomen" };
+        document.getElementById("modeIndicator").textContent = modeNames[mode];
+        updateStats(); updateProgress(); loadNextSentence();
+        showScreen("gameScreen");
+        document.getElementById("backBtn").style.display = "block";
+    }
 
-                // zu + Dativ (10 Sätze)
-                ['Die Schildkröte läuft', 'zu', 'Ziel', 'entschlossen.', 'n', 'dativ'],
-                ['Der Hund rennt', 'zu', 'Futternapf', 'mit Höchstgeschwindigkeit.', 'm', 'dativ'],
-                ['Das Kätzchen schleicht', 'zu', 'Fischteich', 'hungrig.', 'm', 'dativ'],
-                ['Die Biene fliegt', 'zu', 'Königin', 'mit Neuigkeiten.', 'f', 'dativ'],
-                ['Der Dachs tappt', 'zu', 'Bau', 'schläfrig.', 'm', 'dativ'],
-                ['Das Rehkitz trabt', 'zu', 'Mutter', 'selig.', 'f', 'dativ'],
-                ['Die Ente watschelt', 'zu', 'Ufer', 'täglich.', 'n', 'dativ'],
-                ['Der Waschbär rennt', 'zu', 'Bach', 'für sein Abendessen.', 'm', 'dativ'],
-                ['Das Eichhörnchen hopst', 'zu', 'Baum', 'flink.', 'm', 'dativ'],
-                ['Die Robbe gleitet', 'zu', 'Meer', 'glücklich.', 'n', 'dativ'],
+    function loadNextSentence() {
+        if (gameState.remainingSentences.length === 0) { endGame(); return; }
+        const idx = Math.floor(Math.random() * gameState.remainingSentences.length);
+        gameState.currentSentence = gameState.remainingSentences[idx];
+        document.getElementById("hintBox").style.display = "none";
+        renderSentence(); renderOptions();
+        const firstSlot = document.querySelector(".article-slot");
+        if (firstSlot) selectSlot(firstSlot);
+    }
 
-                // von + Dativ (8 Sätze)
-                ['Das Einhorn galoppiert', 'von', 'Regenbogen', 'herab.', 'm', 'dativ'],
-                ['Die Banane fällt', 'von', 'Baum', 'auf den Affen.', 'm', 'dativ'],
-                ['Der Schneeball rollt', 'von', 'Berg', 'ins Tal.', 'm', 'dativ'],
-                ['Das Geschenk kommt', 'von', 'Oma', 'mit Keks.', 'f', 'dativ'],
-                ['Der Brief stammt', 'von', 'Prinzessin', 'aus dem Turm.', 'f', 'dativ'],
-                ['Die Schatzkarte kommt', 'von', 'Piraten', 'aus dem 17. Jahrhundert.', 'pl', 'dativ'],
-                ['Das Lied kommt', 'von', 'Eule', 'im Mondschein.', 'f', 'dativ'],
-                ['Der Regen tropft', 'von', 'Blatt', 'sanft herab.', 'n', 'dativ'],
+    function renderSentence() {
+        const s = gameState.currentSentence;
+        const container = document.getElementById("sentence");
+        container.innerHTML = "";
+        let text = s.text, slotIndex = 0;
+        const regex = /\[(.*?)\]/g;
+        let lastIndex = 0, match;
+        while ((match = regex.exec(text)) !== null) {
+            if (match.index > lastIndex) { const w = document.createElement("span"); w.className = "word"; w.textContent = text.substring(lastIndex, match.index); container.appendChild(w); }
+            const slot = document.createElement("span");
+            slot.className = "article-slot"; slot.dataset.slotIndex = slotIndex; slot.textContent = "___";
+            slot.onclick = () => selectSlot(slot);
+            container.appendChild(slot); slotIndex++; lastIndex = regex.lastIndex;
+        }
+        if (lastIndex < text.length) { const w = document.createElement("span"); w.className = "word"; w.textContent = text.substring(lastIndex); container.appendChild(w); }
+    }
 
-                // aus + Dativ (8 Sätze)
-                ['Die Hexe zieht', 'aus', 'Hut', 'ein Huhn hervor.', 'm', 'dativ'],
-                ['Der Schmetterling schlüpft', 'aus', 'Kokon', 'ins neue Leben.', 'm', 'dativ'],
-                ['Das Küken pickt sich', 'aus', 'Ei', 'mutig heraus.', 'n', 'dativ'],
-                ['Die Maus lugt', 'aus', 'Loch', 'neugierig.', 'n', 'dativ'],
-                ['Der Drache purzelt', 'aus', 'Bett', 'ungeschickt.', 'n', 'dativ'],
-                ['Das Meerschweinchen quetscht sich', 'aus', 'Röhre', 'heraus.', 'f', 'dativ'],
-                ['Die Perle rollt', 'aus', 'Muschel', 'heraus.', 'f', 'dativ'],
-                ['Der Zauberkaninchen kommt', 'aus', 'Zylinder', 'gesprungen.', 'm', 'dativ'],
-
-                // bei + Dativ (8 Sätze)
-                ['Die Katze wartet', 'bei', 'Bäcker', 'auf Kekskrümel.', 'm', 'dativ'],
-                ['Der Hund schläft', 'bei', 'Kamin', 'glücklich.', 'm', 'dativ'],
-                ['Das Pferd grast', 'bei', 'Mühle', 'genüsslich.', 'f', 'dativ'],
-                ['Der Dachs wohnt', 'bei', 'Eiche', 'seit Jahren.', 'f', 'dativ'],
-                ['Die Eule wacht', 'bei', 'Mond', 'treue.', 'm', 'dativ'],
-                ['Das Reh grast', 'bei', 'Waldrand', 'friedlich.', 'm', 'dativ'],
-                ['Der Hase wartet', 'bei', 'Möhrenfeld', 'geduldig.', 'n', 'dativ'],
-                ['Die Katze schnurrt', 'bei', 'Kachelofen', 'zufrieden.', 'm', 'dativ'],
-
-                // nach + Dativ (6 Sätze)
-                ['Das Schiff segelt', 'nach', 'Süden', 'Richtung Sonne.', 'm', 'dativ'],
-                ['Die Zugvögel fliegen', 'nach', 'Afrika', 'jedes Jahr.', 'n', 'dativ'],
-                ['Das Einhorn galoppiert', 'nach', 'Hause', 'pünktlich.', 'n', 'dativ'],
-                ['Der Regenwurm kriecht', 'nach', 'Oben', 'nach dem Regen.', 'n', 'dativ'],
-                ['Die Rakete startet', 'nach', 'Mond', 'mutig.', 'm', 'dativ'],
-                ['Das Kamel trabt', 'nach', 'Oase', 'durstig.', 'f', 'dativ'],
-
-                // seit + Dativ (6 Sätze)
-                ['Der Vulkan schläft', 'seit', 'Jahrhundert', 'ruhig.', 'n', 'dativ'],
-                ['Die Eiche steht', 'seit', 'Ewigkeit', 'unverrückt.', 'f', 'dativ'],
-                ['Das Rätsel wartet', 'seit', 'Jahrtausend', 'ungelöst.', 'n', 'dativ'],
-                ['Der Brunnen plätschert', 'seit', 'Mittelalter', 'munter.', 'n', 'dativ'],
-                ['Die Freundschaft hält', 'seit', 'Kindheit', 'fest.', 'f', 'dativ'],
-                ['Das Geheimnis schlummert', 'seit', 'Anbeginn', 'tief.', 'm', 'dativ']
-            ],
-
-            definite: [
-                // Nominativ
-                ['', 'Oktopus', 'spielt acht Instrumente gleichzeitig.', 'm', 'nominativ'],
-                ['', 'Qualle', 'leuchtet im Dunkeln wie eine Disco.', 'f', 'nominativ'],
-                ['', 'Nashorn', 'trägt einen rosa Hut.', 'n', 'nominativ'],
-                ['', 'Albatros', 'fliegt bis ans Ende der Welt.', 'm', 'nominativ'],
-                ['', 'Möpse', 'schnarchen im Chor.', 'pl', 'nominativ'],
-                ['', 'Seepferd', 'singt Opern für Fische.', 'n', 'nominativ'],
-                ['', 'Waschbär', 'wäscht sogar Seife.', 'm', 'nominativ'],
-                ['', 'Hummel', 'trägt ihre Pollentasche stolz.', 'f', 'nominativ'],
-                ['', 'Axolotl', 'lächelt immer.', 'm', 'nominativ'],
-                ['', 'Elefanten', 'vergessen nichts, gar nichts.', 'pl', 'nominativ'],
-                ['', 'Mantarochen', 'tanzt Walzer unter Wasser.', 'm', 'nominativ'],
-                ['', 'Krähe', 'spricht Englisch mit britischem Akzent.', 'f', 'nominativ'],
-                ['', 'Gürteltier', 'rollt sich ein und schläft.', 'n', 'nominativ'],
-                ['', 'Flamingos', 'stehen auf einem Bein aus Prinzip.', 'pl', 'nominativ'],
-                ['', 'Schnabeltier', 'versteht sich selbst nicht.', 'n', 'nominativ'],
-                ['', 'Wombat', 'macht eckige Häufchen.', 'm', 'nominativ'],
-                ['', 'Kobra', 'tanzt zum Flötenspiel.', 'f', 'nominativ'],
-                ['', 'Schimpansen', 'erfanden das Lachen.', 'pl', 'nominativ'],
-                ['', 'Regenbogen', 'gehört niemandem.', 'm', 'nominativ'],
-                ['', 'Mondschein', 'macht alles romantisch.', 'm', 'nominativ'],
-                ['', 'Stille', 'sagt mehr als tausend Worte.', 'f', 'nominativ'],
-                ['', 'Abenteuer', 'beginnt hinter der nächsten Kurve.', 'n', 'nominativ'],
-                ['', 'Träume', 'sind die besten Reisen.', 'pl', 'nominativ'],
-                ['', 'Tapir', 'ist ein lebendes Rätsel.', 'm', 'nominativ'],
-                ['', 'Piranha', 'hat ein schlechtes Image.', 'm', 'nominativ'],
-
-                // Akkusativ
-                ['Ich sehe', 'Pinguin', 'im Frack Tango tanzen.', 'm', 'akkusativ'],
-                ['Wir beobachten', 'Mond', 'beim Leuchten.', 'm', 'akkusativ'],
-                ['Sie hört', 'Vogel', 'beim Morgenkonzert.', 'm', 'akkusativ'],
-                ['Er liebt', 'Qualle', 'wegen ihrer Sanftheit.', 'f', 'akkusativ'],
-                ['Ich bewundere', 'Oktopus', 'für seine Intelligenz.', 'm', 'akkusativ'],
-                ['Wir sehen', 'Regenbogen', 'nach dem Regen.', 'm', 'akkusativ'],
-                ['Du streichelst', 'Axolotl', 'behutsam.', 'm', 'akkusativ'],
-                ['Ich liebe', 'Stille', 'am frühen Morgen.', 'f', 'akkusativ'],
-                ['Er mag', 'Chaos', 'manchmal gerne.', 'n', 'akkusativ'],
-                ['Sie beobachtet', 'Sterne', 'jede Nacht.', 'pl', 'akkusativ'],
-                ['Wir hören', 'Wellen', 'im Schlaf.', 'pl', 'akkusativ'],
-                ['Du kennst', 'Wahrheit', 'schon lange.', 'f', 'akkusativ'],
-                ['Ich vermisse', 'Sommer', 'im Februar.', 'm', 'akkusativ'],
-                ['Wir brauchen', 'Mut', 'täglich.', 'm', 'akkusativ'],
-                ['Er schätzt', 'Freundschaft', 'über alles.', 'f', 'akkusativ'],
-                ['Sie liebt', 'Geheimnis', 'alter Städte.', 'n', 'akkusativ'],
-                ['Ich höre', 'Wind', 'in den Bäumen.', 'm', 'akkusativ'],
-                ['Du findest', 'Antwort', 'in dir.', 'f', 'akkusativ'],
-                ['Wir tanzen', 'Tango', 'in der Küche.', 'm', 'akkusativ'],
-                ['Sie kennt', 'Weg', 'auswendig.', 'm', 'akkusativ'],
-                ['Ich male', 'Himmel', 'türkisblau an.', 'm', 'akkusativ'],
-                ['Er zählt', 'Sterne', 'geduldig.', 'pl', 'akkusativ'],
-                ['Wir backen', 'Kuchen', 'für alle.', 'm', 'akkusativ'],
-                ['Du liebst', 'Regen', 'bei warmem Wetter.', 'm', 'akkusativ'],
-                ['Sie braucht', 'Pause', 'dringend.', 'f', 'akkusativ'],
-
-                // Dativ
-                ['Ich danke', 'Sonne', 'für jeden Morgen.', 'f', 'dativ'],
-                ['Wir folgen', 'Abenteuer', 'mutig.', 'n', 'dativ'],
-                ['Er hilft', 'Oma', 'beim Einkaufen.', 'f', 'dativ'],
-                ['Sie vertraut', 'Meer', 'ihre Gedanken an.', 'n', 'dativ'],
-                ['Ich vertraue', 'Mond', 'jede Nacht.', 'm', 'dativ'],
-                ['Wir folgen', 'Sternen', 'auf der Reise.', 'pl', 'dativ'],
-                ['Du gibst', 'Hund', 'einen Knochen.', 'm', 'dativ'],
-                ['Ich teile', 'Welt', 'mit Millionen Geschöpfen.', 'f', 'dativ'],
-                ['Er glaubt', 'Magie', 'fest.', 'f', 'dativ'],
-                ['Sie dankt', 'Wind', 'für das frische Gefühl.', 'm', 'dativ'],
-                ['Wir winken', 'Wolken', 'beim Vorbeizug.', 'pl', 'dativ'],
-                ['Du hilfst', 'Kind', 'gern.', 'n', 'dativ'],
-                ['Ich schreibe', 'Freund', 'eine Nachricht.', 'm', 'dativ'],
-                ['Er gibt', 'Katze', 'ihr Lieblingsfutter.', 'f', 'dativ'],
-                ['Sie folgt', 'Intuition', 'immer.', 'f', 'dativ'],
-                ['Wir vertrauen', 'Natur', 'blind.', 'f', 'dativ'],
-                ['Du sagst', 'Wahrheit', 'tapfer.', 'f', 'dativ'],
-                ['Ich widerstehe', 'Kuchen', 'nie.', 'm', 'dativ'],
-                ['Er lauscht', 'Stille', 'genüsslich.', 'f', 'dativ'],
-                ['Sie gibt', 'Ärmsten', 'was sie hat.', 'pl', 'dativ'],
-                ['Wir danken', 'Regen', 'für frische Luft.', 'm', 'dativ'],
-                ['Du vertraust', 'Prozess', 'geduldig.', 'm', 'dativ'],
-                ['Ich glaube', 'Wunder', 'noch immer.', 'n', 'dativ'],
-                ['Er hilft', 'Fremden', 'spontan.', 'pl', 'dativ'],
-                ['Sie dankt', 'Kosmos', 'täglich.', 'm', 'dativ'],
-
-                // Genitiv
-                ['Das Lächeln', 'Oktopus', 'ist unvergesslich.', 'm', 'genitiv'],
-                ['Die Schönheit', 'Qualle', 'leuchtet im Dunkel.', 'f', 'genitiv'],
-                ['Der Ruf', 'Eule', 'hallt durch die Nacht.', 'f', 'genitiv'],
-                ['Das Geheimnis', 'Meeres', 'ist unergründlich.', 'n', 'genitiv'],
-                ['Die Weisheit', 'Elefanten', 'kennt keine Grenzen.', 'pl', 'genitiv'],
-                ['Der Duft', 'Blüten', 'trägt in den Frühling.', 'pl', 'genitiv'],
-                ['Die Stärke', 'Ameise', 'übersteigt alles.', 'f', 'genitiv'],
-                ['Das Ende', 'Regenbogens', 'liegt im Herzen.', 'm', 'genitiv'],
-                ['Die Farbe', 'Himmels', 'wechselt täglich.', 'm', 'genitiv'],
-                ['Der Klang', 'Wellen', 'macht ruhig.', 'pl', 'genitiv'],
-                ['Die Tiefe', 'Ozeans', 'birgt Wunder.', 'm', 'genitiv'],
-                ['Das Lachen', 'Kindes', 'heilt alles.', 'n', 'genitiv'],
-                ['Die Kraft', 'Träume', 'ist grenzenlos.', 'pl', 'genitiv'],
-                ['Der Glanz', 'Sterne', 'tröstet uns.', 'pl', 'genitiv'],
-                ['Die Wärme', 'Sonne', 'ist Heimat.', 'f', 'genitiv'],
-                ['Das Rauschen', 'Waldes', 'ist Musik.', 'm', 'genitiv'],
-                ['Die Geduld', 'Schildkröte', 'ist legendär.', 'f', 'genitiv'],
-                ['Der Mut', 'Löwin', 'kennt keine Angst.', 'f', 'genitiv'],
-                ['Das Wesen', 'Lebens', 'ist ein Tanz.', 'n', 'genitiv'],
-                ['Die Sanftheit', 'Windes', 'trägt Samen.', 'm', 'genitiv'],
-                ['Der Duft', 'Regens', 'erinnert an Kindheit.', 'm', 'genitiv'],
-                ['Die Freude', 'Morgens', 'gehört allen.', 'm', 'genitiv'],
-                ['Das Schweigen', 'Nacht', 'ist heilsam.', 'f', 'genitiv'],
-                ['Die Schönheit', 'Einfachen', 'übertrifft alles.', 'pl', 'genitiv'],
-                ['Der Weg', 'Herzens', 'ist immer richtig.', 'n', 'genitiv']
-            ],
-
-            indefinite: [
-                // Nominativ
-                ['Da steht', 'Yak', 'mit Hut im Regen.', 'm', 'nominativ'],
-                ['Da liegt', 'Schatzkarte', 'unter dem Eis.', 'f', 'nominativ'],
-                ['Da schwimmt', 'Axolotl', 'fröhlich im Teich.', 'm', 'nominativ'],
-                ['Da klingelt', 'Glocke', 'ohne Grund.', 'f', 'nominativ'],
-                ['Da tanzt', 'Tintenfisch', 'auf der Bühne.', 'm', 'nominativ'],
-                ['Da fliegt', 'Komet', 'am Nachthimmel.', 'm', 'nominativ'],
-                ['Da wächst', 'Blume', 'im Asphalt.', 'f', 'nominativ'],
-                ['Da schläft', 'Gürteltier', 'auf dem Sofa.', 'n', 'nominativ'],
-                ['Da kocht', 'Hai', 'Spaghetti Bolognese.', 'm', 'nominativ'],
-                ['Da singt', 'Kaktus', 'leise vor sich hin.', 'm', 'nominativ'],
-                ['Da liegt', 'Geheimnis', 'verborgen im Sand.', 'n', 'nominativ'],
-                ['Da wohnt', 'Hexe', 'mit freundlichem Charakter.', 'f', 'nominativ'],
-                ['Da rennt', 'Erdmännchen', 'zur Mittagspause.', 'n', 'nominativ'],
-                ['Da blüht', 'Kaktus', 'einmal im Jahr.', 'm', 'nominativ'],
-                ['Da wartet', 'Drache', 'auf seinen Freund.', 'm', 'nominativ'],
-                ['Da liegt', 'Schatz', 'unentdeckt.', 'm', 'nominativ'],
-                ['Da kommt', 'Idee', 'zur rechten Zeit.', 'f', 'nominativ'],
-                ['Da funkelt', 'Kristall', 'im Sonnenlicht.', 'm', 'nominativ'],
-                ['Da träumt', 'Kind', 'von großen Abenteuern.', 'n', 'nominativ'],
-                ['Da lächelt', 'Fremder', 'im Vorbeigehen.', 'm', 'nominativ'],
-                ['Da öffnet sich', 'Tor', 'ganz allein.', 'n', 'nominativ'],
-                ['Da singt', 'Stimme', 'aus der Ferne.', 'f', 'nominativ'],
-                ['Da rauscht', 'Bach', 'durchs Tal.', 'm', 'nominativ'],
-                ['Da kreist', 'Adler', 'hoch oben.', 'm', 'nominativ'],
-                ['Da blüht', 'Wunder', 'mitten im Alltag.', 'n', 'nominativ'],
-
-                // Akkusativ
-                ['Ich sehe', 'Wolke', 'in Elefantenform.', 'f', 'akkusativ'],
-                ['Er findet', 'Schatz', 'im Garten.', 'm', 'akkusativ'],
-                ['Sie malt', 'Bild', 'voller Farben.', 'n', 'akkusativ'],
-                ['Ich schreibe', 'Brief', 'ans Universum.', 'm', 'akkusativ'],
-                ['Du liest', 'Buch', 'auf einmal durch.', 'n', 'akkusativ'],
-                ['Wir planen', 'Abenteuer', 'für den Sommer.', 'n', 'akkusativ'],
-                ['Er backt', 'Kuchen', 'für die Nachbarn.', 'm', 'akkusativ'],
-                ['Sie singt', 'Lied', 'unter der Dusche.', 'n', 'akkusativ'],
-                ['Ich kaufe', 'Blume', 'für dich.', 'f', 'akkusativ'],
-                ['Du trinkst', 'Tee', 'in aller Ruhe.', 'm', 'akkusativ'],
-                ['Wir sehen', 'Film', 'bis zum Ende.', 'm', 'akkusativ'],
-                ['Er sucht', 'Lösung', 'kreativ.', 'f', 'akkusativ'],
-                ['Sie braucht', 'Pause', 'dringend.', 'f', 'akkusativ'],
-                ['Ich habe', 'Traum', 'für die Zukunft.', 'm', 'akkusativ'],
-                ['Du trägst', 'Lächeln', 'den ganzen Tag.', 'n', 'akkusativ'],
-                ['Wir finden', 'Weg', 'immer.', 'm', 'akkusativ'],
-                ['Er kennt', 'Abkürzung', 'durch den Wald.', 'f', 'akkusativ'],
-                ['Sie schreibt', 'Geschichte', 'über Möpse.', 'f', 'akkusativ'],
-                ['Ich male', 'Drachen', 'an die Wand.', 'm', 'akkusativ'],
-                ['Du pflanzt', 'Baum', 'für die Zukunft.', 'm', 'akkusativ'],
-                ['Wir hören', 'Konzert', 'im Park.', 'n', 'akkusativ'],
-                ['Er baut', 'Burg', 'aus Kissen.', 'f', 'akkusativ'],
-                ['Sie findet', 'Muschel', 'am Strand.', 'f', 'akkusativ'],
-                ['Ich entdecke', 'Talent', 'täglich neu.', 'n', 'akkusativ'],
-                ['Du pflegst', 'Freundschaft', 'mit Sorgfalt.', 'f', 'akkusativ'],
-
-                // Dativ
-                ['Ich gebe', 'Hund', 'das Lieblingsspielzeug.', 'm', 'dativ'],
-                ['Er folgt', 'Instinkt', 'ohne Zögern.', 'm', 'dativ'],
-                ['Sie dankt', 'Fremden', 'für die Hilfe.', 'm', 'dativ'],
-                ['Ich schreibe', 'Freundin', 'täglich.', 'f', 'dativ'],
-                ['Du glaubst', 'Traum', 'mit ganzem Herzen.', 'm', 'dativ'],
-                ['Wir helfen', 'Kind', 'bei den Hausaufgaben.', 'n', 'dativ'],
-                ['Er vertraut', 'Gefühl', 'tief innen.', 'n', 'dativ'],
-                ['Sie lauscht', 'Melodie', 'verzaubert.', 'f', 'dativ'],
-                ['Ich widme', 'Held', 'dieses Lied.', 'm', 'dativ'],
-                ['Du folgst', 'Spur', 'ins Unbekannte.', 'f', 'dativ'],
-                ['Wir tanzen', 'Melodie', 'nach.', 'f', 'dativ'],
-                ['Er schenkt', 'Kind', 'seine Zeit.', 'n', 'dativ'],
-                ['Sie hilft', 'Greisin', 'mit dem Einkauf.', 'f', 'dativ'],
-                ['Ich stimme', 'Lied', 'freudig zu.', 'n', 'dativ'],
-                ['Du vertraust', 'Zeichen', 'aus dem Universum.', 'n', 'dativ'],
-                ['Wir danken', 'Engel', 'leise.', 'm', 'dativ'],
-                ['Er folgt', 'Stern', 'wie die Weisen.', 'm', 'dativ'],
-                ['Sie gibt', 'Bettler', 'ihr letztes Brot.', 'm', 'dativ'],
-                ['Ich lausche', 'Bach', 'meditativ.', 'm', 'dativ'],
-                ['Du glaubst', 'Zeichen', 'vertrauensvoll.', 'n', 'dativ'],
-                ['Wir folgen', 'Spur', 'ins Abenteuer.', 'f', 'dativ'],
-                ['Er gibt', 'Tier', 'Wasser.', 'n', 'dativ'],
-                ['Sie lauscht', 'Erzählung', 'gebannt.', 'f', 'dativ'],
-                ['Ich lächle', 'Fremden', 'zu.', 'm', 'dativ'],
-                ['Du folgst', 'Traum', 'mutig.', 'm', 'dativ'],
-
-                // Genitiv
-                ['Die Tür', 'Turmes', 'öffnet sich lautlos.', 'm', 'genitiv'],
-                ['Das Ende', 'Geschichte', 'überrascht immer.', 'f', 'genitiv'],
-                ['Der Anfang', 'Abenteuers', 'ist der schwerste Schritt.', 'n', 'genitiv'],
-                ['Die Stärke', 'Idee', 'liegt in der Einfachheit.', 'f', 'genitiv'],
-                ['Das Herz', 'Drachen', 'schlägt warm.', 'm', 'genitiv'],
-                ['Die Schönheit', 'Augenblicks', 'ist vergänglich.', 'm', 'genitiv'],
-                ['Der Klang', 'Glocke', 'trägt weit.', 'f', 'genitiv'],
-                ['Das Geheimnis', 'Lächelns', 'ist ansteckend.', 'n', 'genitiv'],
-                ['Die Weisheit', 'Alten', 'ist wertvoll.', 'm', 'genitiv'],
-                ['Der Duft', 'Blume', 'bleibt im Gedächtnis.', 'f', 'genitiv'],
-                ['Das Glück', 'Moments', 'ist unbezahlbar.', 'm', 'genitiv'],
-                ['Die Kraft', 'Wortes', 'verändert alles.', 'n', 'genitiv'],
-                ['Der Wert', 'Stille', 'wird oft vergessen.', 'f', 'genitiv'],
-                ['Das Lachen', 'Kindes', 'ist heilend.', 'n', 'genitiv'],
-                ['Die Energie', 'Traumes', 'trägt durch den Alltag.', 'm', 'genitiv'],
-                ['Der Zauber', 'Morgens', 'liegt im Licht.', 'm', 'genitiv'],
-                ['Die Gabe', 'Lebens', 'ist unermesslich.', 'n', 'genitiv'],
-                ['Das Rauschen', 'Meeres', 'beruhigt die Seele.', 'n', 'genitiv'],
-                ['Der Klang', 'Liedes', 'bleibt ewig.', 'n', 'genitiv'],
-                ['Die Farbe', 'Himmels', 'wechselt jede Stunde.', 'm', 'genitiv'],
-                ['Das Ende', 'Regentages', 'verspricht Regenbogen.', 'm', 'genitiv'],
-                ['Die Wärme', 'Feuers', 'bringt Geborgenheit.', 'n', 'genitiv'],
-                ['Der Glanz', 'Tropfens', 'ist der Sonne Licht.', 'm', 'genitiv'],
-                ['Das Herz', 'Waldes', 'schlägt grün.', 'm', 'genitiv'],
-                ['Die Tiefe', 'Auges', 'birgt eine Welt.', 'n', 'genitiv']
-            ],
-
-            negation: [
-                // Nominativ
-                ['Da ist', 'Vampire', 'am Buffet – nur nette Menschen!', 'm', 'nominativ'],
-                ['Da ist', 'Gespenst', 'im Badezimmer – du bildest es dir ein!', 'n', 'nominativ'],
-                ['Da ist', 'Löwe', 'im Café – alles friedlich.', 'm', 'nominativ'],
-                ['Da ist', 'Hexe', 'beim Bäcker – sie kauft Croissants.', 'f', 'nominativ'],
-                ['Da ist', 'Monster', 'unter dem Bett – ich verspreche es.', 'n', 'nominativ'],
-                ['Da ist', 'Drache', 'im Schornstein.', 'm', 'nominativ'],
-                ['Da ist', 'Troll', 'unter der Brücke.', 'm', 'nominativ'],
-                ['Da ist', 'Alien', 'im Keller.', 'n', 'nominativ'],
-                ['Da ist', 'Problem', 'unüberwindlich.', 'n', 'nominativ'],
-                ['Da ist', 'Wolke', 'ohne Silberstreifen.', 'f', 'nominativ'],
-                ['', 'Weg', 'ist zu weit für entschlossene Füße.', 'm', 'nominativ'],
-                ['', 'Herz', 'ist zu klein für Mitgefühl.', 'n', 'nominativ'],
-                ['', 'Stern', 'leuchtet umsonst.', 'm', 'nominativ'],
-                ['', 'Meer', 'ist zu tief für Träume.', 'n', 'nominativ'],
-                ['', 'Mensch', 'ist ohne Fehler – das ist das Schöne.', 'm', 'nominativ'],
-                ['', 'Idee', 'ist zu verrückt, um wahr zu sein.', 'f', 'nominativ'],
-                ['', 'Traum', 'ist zu groß für tapfere Herzen.', 'm', 'nominativ'],
-                ['', 'Licht', 'ist vergeblich in der Dunkelheit.', 'n', 'nominativ'],
-                ['', 'Kind', 'lacht aus Freude umsonst.', 'n', 'nominativ'],
-                ['', 'Augenblick', 'ist wertlos – jeder zählt.', 'm', 'nominativ'],
-                ['', 'Baum', 'wächst ohne Grund.', 'm', 'nominativ'],
-                ['', 'Stille', 'ist je wirklich leer.', 'f', 'nominativ'],
-                ['', 'Schmetterling', 'lebt vergebens.', 'm', 'nominativ'],
-                ['', 'Freude', 'kommt ohne Einladung.', 'f', 'nominativ'],
-                ['', 'Anfang', 'ist zu klein um zu starten.', 'm', 'nominativ'],
-
-                // Akkusativ
-                ['Ich habe', 'Angst', 'mehr vor dem Unbekannten.', 'f', 'akkusativ'],
-                ['Er braucht', 'Ausrede', '– er sagt einfach die Wahrheit.', 'f', 'akkusativ'],
-                ['Sie hat', 'Zeit', 'zu verlieren.', 'f', 'akkusativ'],
-                ['Ich esse', 'Kuchen', '– versprochen... fast.', 'm', 'akkusativ'],
-                ['Du machst', 'Fehler', 'absichtlich.', 'm', 'akkusativ'],
-                ['Wir haben', 'Geheimnis', 'voreinander.', 'n', 'akkusativ'],
-                ['Er trägt', 'Groll', 'in sich.', 'm', 'akkusativ'],
-                ['Sie sucht', 'Anerkennung', 'von außen.', 'f', 'akkusativ'],
-                ['Ich brauche', 'Erlaubnis', 'um glücklich zu sein.', 'f', 'akkusativ'],
-                ['Du verlierst', 'Mut', 'so leicht.', 'm', 'akkusativ'],
-                ['Wir sehen', 'Grund', 'zur Traurigkeit.', 'm', 'akkusativ'],
-                ['Er hat', 'Problem', 'mit Herzlichkeit.', 'n', 'akkusativ'],
-                ['Sie braucht', 'Wunder', 'für ein gutes Leben.', 'n', 'akkusativ'],
-                ['Ich suche', 'Ausweg', 'aus dem Alltag.', 'm', 'akkusativ'],
-                ['Du trägst', 'Bitterkeit', 'mehr mit dir.', 'f', 'akkusativ'],
-                ['Wir haben', 'Grund', 'dankbar zu sein.', 'm', 'akkusativ'],
-                ['Er braucht', 'Lob', 'um weiterzumachen.', 'n', 'akkusativ'],
-                ['Sie hat', 'Zweifel', 'an sich selbst.', 'm', 'akkusativ'],
-                ['Ich trage', 'Neid', 'in mir.', 'm', 'akkusativ'],
-                ['Du machst', 'Umweg', 'mehr.', 'm', 'akkusativ'],
-                ['Wir brauchen', 'Feind', 'wir haben genug Freunde.', 'm', 'akkusativ'],
-                ['Er zeigt', 'Schwäche', 'im falschen Moment.', 'f', 'akkusativ'],
-                ['Sie verliert', 'Hoffnung', 'jemals.', 'f', 'akkusativ'],
-                ['Ich brauche', 'Beweis', 'dass Freude real ist.', 'm', 'akkusativ'],
-                ['Du verlierst', 'Lächeln', 'für lange.', 'n', 'akkusativ'],
-
-                // Dativ
-                ['Ich gebe', 'Fremden', 'mein Lächeln – allen!', 'pl', 'dativ'],
-                ['Er hilft', 'Feigling', 'beim Mutmachen.', 'm', 'dativ'],
-                ['Sie schenkt', 'Neid', 'ihren Gedanken.', 'm', 'dativ'],
-                ['Ich vertraue', 'Lügner', 'jemals.', 'm', 'dativ'],
-                ['Du folgst', 'Irrtum', 'blind.', 'm', 'dativ'],
-                ['Wir gönnen', 'Feind', 'den Sieg.', 'm', 'dativ'],
-                ['Er vertraut', 'Traurigkeit', 'dauerhaft.', 'f', 'dativ'],
-                ['Sie lauscht', 'Jammern', 'länger.', 'n', 'dativ'],
-                ['Ich gebe', 'Angst', 'die Macht über mich.', 'f', 'dativ'],
-                ['Du folgst', 'Zweifel', 'mehr.', 'm', 'dativ'],
-                ['Wir schenken', 'Vorwurf', 'unsere Energie.', 'm', 'dativ'],
-                ['Er gibt', 'Unrecht', 'einfach nach.', 'n', 'dativ'],
-                ['Sie vertraut', 'Gerede', 'blinder Leute.', 'n', 'dativ'],
-                ['Ich glaube', 'Lüge', 'mehr.', 'f', 'dativ'],
-                ['Du gibst', 'Erinnerung', 'die Macht über heute.', 'f', 'dativ'],
-                ['Wir folgen', 'Irrtum', 'länger.', 'm', 'dativ'],
-                ['Er widmet', 'Hass', 'seine Zeit.', 'm', 'dativ'],
-                ['Sie lauscht', 'Pessimismus', 'gern.', 'm', 'dativ'],
-                ['Ich schenke', 'Gleichgültigkeit', 'Aufmerksamkeit.', 'f', 'dativ'],
-                ['Du gibst', 'Vergangenheit', 'die Kontrolle.', 'f', 'dativ'],
-                ['Wir gönnen', 'Neid', 'unsere Gedanken.', 'm', 'dativ'],
-                ['Er gibt', 'Pessimist', 'Recht.', 'm', 'dativ'],
-                ['Sie glaubt', 'Versprechen', 'von Zauderern.', 'n', 'dativ'],
-                ['Ich widme', 'Hindernissen', 'all meine Kraft.', 'pl', 'dativ'],
-                ['Du folgst', 'Fehler', 'noch einem zweiten.', 'm', 'dativ'],
-
-                // Genitiv
-                ['Das ist das Ende', 'Geschichte', '– neue warten schon!', 'f', 'genitiv'],
-                ['Das ist das Ende', 'Abenteuers', '– das nächste beginnt!', 'n', 'genitiv'],
-                ['Das ist das Ende', 'Regenbogens', '– er dreht im Kreis!', 'm', 'genitiv'],
-                ['Wegen', 'Problems', 'tanzen wir einfach.', 'n', 'genitiv'],
-                ['Trotz', 'Sturms', 'blüht die Blume.', 'm', 'genitiv'],
-                ['Das ist das Ende', 'Wartens', '– es beginnt sofort!', 'n', 'genitiv'],
-                ['Das ist das Ende', 'Traurigkeit', '– sie hat genug gewartet.', 'f', 'genitiv'],
-                ['Wegen', 'Zweifels', 'lacht die Sonne lauter.', 'm', 'genitiv'],
-                ['Das ist das Ende', 'Langeweile', '– das Abenteuer ruft!', 'f', 'genitiv'],
-                ['Trotz', 'Regens', 'tanzen die Vögel.', 'm', 'genitiv'],
-                ['Das ist das Ende', 'Weges', '– neue Wege öffnen sich.', 'm', 'genitiv'],
-                ['Wegen', 'Fehlers', 'lernen wir am meisten.', 'm', 'genitiv'],
-                ['Das ist das Ende', 'Zögerns', '– wir handeln jetzt!', 'n', 'genitiv'],
-                ['Trotz', 'Erschöpfung', 'lächelt sie weiter.', 'f', 'genitiv'],
-                ['Das ist das Ende', 'Ungewissheit', '– wir entscheiden uns.', 'f', 'genitiv'],
-                ['Wegen', 'Irrtums', 'entdeckten wir die Wahrheit.', 'm', 'genitiv'],
-                ['Das ist das Ende', 'Zweifelns', '– der Mut übernimmt!', 'n', 'genitiv'],
-                ['Trotz', 'Hindernisses', 'finden wir den Weg.', 'n', 'genitiv'],
-                ['Das ist das Ende', 'Widerspruchs', '– wir einigen uns.', 'm', 'genitiv'],
-                ['Wegen', 'Augenblicks', 'lohnt sich alles.', 'm', 'genitiv'],
-                ['Das ist das Ende', 'Zauderns', '– wir beginnen!', 'n', 'genitiv'],
-                ['Trotz', 'Widerstands', 'blüht die Freude.', 'm', 'genitiv'],
-                ['Das ist das Ende', 'Nacht', '– der Morgen bricht an.', 'f', 'genitiv'],
-                ['Wegen', 'Lächelns', 'wurde alles besser.', 'n', 'genitiv'],
-                ['Das ist das Ende', 'Wartens', '– der Moment ist jetzt!', 'n', 'genitiv']
-            ],
-
-            possessive: [
-                // Akkusativ – verschiedene Personen
-                ['Ich liebe', 'ich', 'Katze', 'über alle Maßen.', 'f', 'akkusativ'],
-                ['Du verlierst', 'du', 'Regenschirm', 'immer!', 'm', 'akkusativ'],
-                ['Er füttert', 'er', 'Axolotl', 'mit Freude.', 'm', 'akkusativ'],
-                ['Sie kämmt', 'sie', 'Einhorn', 'jeden Abend.', 'n', 'akkusativ'],
-                ['Es wedelt mit', 'es', 'Schwanz', 'voller Energie.', 'm', 'dativ'],
-                ['Wir bauen', 'wir', 'Traumhaus', 'aus Kissen.', 'n', 'akkusativ'],
-                ['Ihr vergesst', 'ihr', 'Schlüssel', 'schon wieder!', 'm', 'akkusativ'],
-                ['Sie füttern', 'sie-pl', 'Tiere', 'mit Hingabe.', 'pl', 'akkusativ'],
-                ['Haben Sie', 'Sie', 'Pass', 'dabei?', 'm', 'akkusativ'],
-                ['Ich vermisse', 'ich', 'Hund', 'jeden Tag.', 'm', 'akkusativ'],
-                ['Du trägst', 'du', 'Herz', 'am rechten Fleck.', 'n', 'akkusativ'],
-                ['Er schätzt', 'er', 'Freundin', 'sehr.', 'f', 'akkusativ'],
-                ['Sie pflegt', 'sie', 'Garten', 'liebevoll.', 'm', 'akkusativ'],
-                ['Wir lieben', 'wir', 'Abenteuer', 'sehr.', 'n', 'akkusativ'],
-                ['Ihr zeigt', 'ihr', 'Mut', 'täglich.', 'm', 'akkusativ'],
-                ['Sie leben', 'sie-pl', 'Leben', 'vollständig.', 'n', 'akkusativ'],
-                ['Ich bewundere', 'ich', 'Freunde', 'sehr.', 'pl', 'akkusativ'],
-                ['Du liebst', 'du', 'Familie', 'von Herzen.', 'f', 'akkusativ'],
-                ['Er ehrt', 'er', 'Versprechen', 'immer.', 'n', 'akkusativ'],
-                ['Sie verteidigt', 'sie', 'Werte', 'mutig.', 'pl', 'akkusativ'],
-                ['Wir teilen', 'wir', 'Freude', 'gerne.', 'f', 'akkusativ'],
-                ['Ihr zeigt', 'ihr', 'Arbeit', 'stolz.', 'f', 'akkusativ'],
-                ['Sie genießen', 'sie-pl', 'Urlaub', 'entspannt.', 'm', 'akkusativ'],
-                ['Haben Sie', 'Sie', 'Hut', 'verloren?', 'm', 'akkusativ'],
-                ['Ich pflege', 'ich', 'Freundschaften', 'mit Sorgfalt.', 'pl', 'akkusativ'],
-
-                // Nominativ
-                ['', 'ich', 'Hund', 'kann walzertanzen!', 'm', 'nominativ'],
-                ['', 'du', 'Lächeln', 'erhellt jeden Raum.', 'n', 'nominativ'],
-                ['', 'er', 'Papagei', 'spricht fünf Sprachen.', 'm', 'nominativ'],
-                ['', 'sie', 'Garten', 'blüht das ganze Jahr.', 'm', 'nominativ'],
-                ['', 'es', 'Geheimnis', 'ist gut bewacht.', 'n', 'nominativ'],
-                ['', 'wir', 'Abenteuer', 'beginnt gleich!', 'n', 'nominativ'],
-                ['', 'ihr', 'Musik', 'ist unvergesslich!', 'f', 'nominativ'],
-                ['', 'sie-pl', 'Freundschaft', 'ist legendär.', 'f', 'nominativ'],
-                ['', 'Sie', 'Weisheit', 'ist bewundernswert.', 'f', 'nominativ'],
-                ['', 'ich', 'Katze', 'schläft auf meiner Tastatur.', 'f', 'nominativ'],
-                ['', 'du', 'Traum', 'trägt dich durch den Alltag.', 'm', 'nominativ'],
-                ['', 'er', 'Stimme', 'klingt wie Musik.', 'f', 'nominativ'],
-                ['', 'sie', 'Kreativität', 'kennt keine Grenzen.', 'f', 'nominativ'],
-                ['', 'wir', 'Hoffnung', 'trägt uns alle.', 'f', 'nominativ'],
-                ['', 'ihr', 'Liebe', 'ist für alle spürbar!', 'f', 'nominativ'],
-                ['', 'sie-pl', 'Glück', 'strahlt auf uns ab.', 'n', 'nominativ'],
-                ['', 'Sie', 'Güte', 'berührt alle Herzen.', 'f', 'nominativ'],
-                ['', 'ich', 'Plan', 'klingt abenteuerlich.', 'm', 'nominativ'],
-                ['', 'du', 'Idee', 'ist brillant.', 'f', 'nominativ'],
-                ['', 'er', 'Optimismus', 'ist ansteckend.', 'm', 'nominativ'],
-                ['', 'sie', 'Entschlossenheit', 'beeindruckt mich.', 'f', 'nominativ'],
-                ['', 'wir', 'Team', 'ist unbesiegbar!', 'n', 'nominativ'],
-                ['', 'ihr', 'Energie', 'ist mitreißend!', 'f', 'nominativ'],
-                ['', 'sie-pl', 'Projekt', 'begeistert alle.', 'n', 'nominativ'],
-                ['', 'Sie', 'Geduld', 'ist vorbildlich.', 'f', 'nominativ'],
-
-                // Dativ
-                ['Ich danke', 'ich', 'Sternen', 'für die Träume.', 'pl', 'dativ'],
-                ['Du vertraust', 'du', 'Herzen', 'immer.', 'n', 'dativ'],
-                ['Er folgt', 'er', 'Intuition', 'mutig.', 'f', 'dativ'],
-                ['Sie lauscht', 'sie', 'Träumen', 'aufmerksam.', 'pl', 'dativ'],
-                ['Es spielt mit', 'es', 'Schatten', 'fröhlich.', 'm', 'dativ'],
-                ['Wir folgen', 'wir', 'Instinkten', 'vertrauensvoll.', 'pl', 'dativ'],
-                ['Ihr schenkt', 'ihr', 'Zeit', 'großzügig.', 'f', 'dativ'],
-                ['Begegnen Sie', 'Sie', 'Ängsten', 'mit Mut?', 'pl', 'dativ'],
-                ['Ich lausche', 'ich', 'Seele', 'täglich.', 'f', 'dativ'],
-                ['Du gibst', 'du', 'Talent', 'Raum.', 'n', 'dativ'],
-                ['Er vertraut', 'er', 'Weg', 'blind.', 'm', 'dativ'],
-                ['Sie widmet', 'sie', 'Kind', 'alle Aufmerksamkeit.', 'n', 'dativ'],
-                ['Wir folgen', 'wir', 'Herzen', 'gemeinsam.', 'n', 'dativ'],
-                ['Ihr helft', 'ihr', 'Freunden', 'immer.', 'pl', 'dativ'],
-                ['Sie danken', 'sie-pl', 'Natur', 'täglich.', 'f', 'dativ'],
-                ['Ich sage', 'ich', 'Meinung', 'klar.', 'f', 'dativ'],
-                ['Du folgst', 'du', 'Überzeugung', 'standhaft.', 'f', 'dativ'],
-                ['Er hilft', 'er', 'Team', 'stets.', 'n', 'dativ'],
-                ['Sie schenkt', 'sie', 'Geschwistern', 'Aufmerksamkeit.', 'pl', 'dativ'],
-                ['Wir danken', 'wir', 'Glück', 'täglich.', 'n', 'dativ'],
-                ['Ihr vertraut', 'ihr', 'Bauchgefühl', 'richtig.', 'n', 'dativ'],
-                ['Sie hören auf', 'sie-pl', 'Intuition', 'stets.', 'f', 'dativ'],
-                ['Ich widme', 'ich', 'Arbeit', 'volle Aufmerksamkeit.', 'f', 'dativ'],
-                ['Du hilfst', 'du', 'Nachbarn', 'bereitwillig.', 'pl', 'dativ'],
-                ['Er vertraut', 'er', 'Freunden', 'voll.', 'pl', 'dativ'],
-
-                // Genitiv
-                ['Das Lachen', 'ich', 'Kindes', 'ist ansteckend.', 'n', 'genitiv'],
-                ['Die Farbe', 'du', 'Augen', 'ist einzigartig.', 'pl', 'genitiv'],
-                ['Der Klang', 'er', 'Stimme', 'ist beruhigend.', 'f', 'genitiv'],
-                ['Die Schönheit', 'sie', 'Seele', 'leuchtet.', 'f', 'genitiv'],
-                ['Die Stärke', 'es', 'Willens', 'überrascht alle.', 'm', 'genitiv'],
-                ['Der Wert', 'wir', 'Freundschaft', 'ist unbezahlbar.', 'f', 'genitiv'],
-                ['Die Kraft', 'ihr', 'Zusammenhalts', 'bewegt Berge!', 'm', 'genitiv'],
-                ['Die Tiefe', 'sie-pl', 'Gedanken', 'beeindruckt uns.', 'pl', 'genitiv'],
-                ['Die Weite', 'Sie', 'Horizonts', 'ist grenzenlos.', 'm', 'genitiv'],
-                ['Das Glück', 'ich', 'Lebens', 'liegt im Jetzt.', 'n', 'genitiv'],
-                ['Der Mut', 'du', 'Herzens', 'trägt dich weit.', 'n', 'genitiv'],
-                ['Die Energie', 'er', 'Lächelns', 'ist ansteckend.', 'n', 'genitiv'],
-                ['Das Licht', 'sie', 'Augen', 'leuchtet weit.', 'pl', 'genitiv'],
-                ['Die Wärme', 'wir', 'Gemeinschaft', 'hält zusammen.', 'f', 'genitiv'],
-                ['Der Zauber', 'ihr', 'Musik', 'verzaubert alle!', 'f', 'genitiv'],
-                ['Die Kraft', 'sie-pl', 'Willens', 'ist bewundernswert.', 'm', 'genitiv'],
-                ['Das Wesen', 'Sie', 'Wesens', 'strahlt Ruhe aus.', 'n', 'genitiv'],
-                ['Das Talent', 'ich', 'Kindes', 'blüht auf.', 'n', 'genitiv'],
-                ['Der Rhythmus', 'du', 'Lebens', 'ist einzigartig.', 'n', 'genitiv'],
-                ['Die Tiefe', 'er', 'Überzeugung', 'bewegt andere.', 'f', 'genitiv'],
-                ['Der Glanz', 'sie', 'Augen', 'bleibt unvergesslich.', 'pl', 'genitiv'],
-                ['Der Reichtum', 'wir', 'Erfahrungen', 'ist unschätzbar.', 'pl', 'genitiv'],
-                ['Die Kraft', 'ihr', 'Zusammenhalts', 'ist legendär!', 'm', 'genitiv'],
-                ['Das Herz', 'sie-pl', 'Projekts', 'schlägt warm.', 'n', 'genitiv'],
-                ['Die Eleganz', 'Sie', 'Auftretens', 'beeindruckt alle.', 'n', 'genitiv']
-            ]
-        };
-
-        function getPossessiveForm(person, gender, kasus) {
-            const base = articles.possessive[person];
-            const endings = {
-                nominativ: { m: '', f: 'e', n: '', pl: 'e' },
-                akkusativ: { m: 'en', f: 'e', n: '', pl: 'e' },
-                dativ: { m: 'em', f: 'er', n: 'em', pl: 'en' },
-                genitiv: { m: 'es', f: 'er', n: 'es', pl: 'er' }
+    function renderOptions() {
+        const grid = document.getElementById("optionsGrid");
+        grid.innerHTML = "";
+        if (gameState.mode === "preposition") {
+            const def = ["der","die","das","dem","den","des"];
+            const indef = ["ein","eine","einen","einem","einer","eines"];
+            const kein = ["kein","keine","keinen","keinem","keiner","keines"];
+            let slotIdx = selectedSlot ? parseInt(selectedSlot.dataset.slotIndex) : 0;
+            const correctArt = (gameState.currentSentence.slots[slotIdx]?.art || "").toLowerCase();
+            let options;
+            if (def.includes(correctArt)) options = [...def];
+            else if (indef.includes(correctArt)) options = [...indef];
+            else if (kein.includes(correctArt)) options = [...kein];
+            else options = [...def, ...indef];
+            options.push("_");
+            options.forEach(opt => { const btn = document.createElement("button"); btn.className = "option-btn"; btn.textContent = opt === "_" ? "(kein Artikel)" : opt; btn.onclick = () => fillSlot(opt); grid.appendChild(btn); });
+        } else if (gameState.mode === "possessive") {
+            let slotIdx = selectedSlot ? parseInt(selectedSlot.dataset.slotIndex) : 0;
+            const targetArt = gameState.currentSentence.slots[slotIdx]?.art || "";
+            const lower = targetArt.toLowerCase();
+            const formSets = {
+                mein: ["mein","meine","meinen","meinem","meiner","meines"],
+                dein: ["dein","deine","deinen","deinem","deiner","deines"],
+                sein: ["sein","seine","seinen","seinem","seiner","seines"],
+                ihr: ["ihr","ihre","ihren","ihrem","ihrer","ihres"],
+                unser: ["unser","unsere","unseren","unserem","unserer","unseres"],
+                euer: ["euer","eure","euren","eurem","eurer","eures"]
             };
-            let ending = endings[kasus][gender];
-            if (base === 'euer' && ending !== '') {
-                return 'eur' + ending;
-            }
-            return base + ending;
+            let base = "mein";
+            if (lower.startsWith("mein")) base = "mein";
+            else if (lower.startsWith("dein")) base = "dein";
+            else if (lower.startsWith("sein")) base = "sein";
+            else if (lower.startsWith("ihr") || lower === "ihr") base = "ihr";
+            else if (lower.startsWith("unser")) base = "unser";
+            else if (lower.startsWith("euer") || lower.startsWith("eur")) base = "euer";
+            formSets[base].forEach(opt => { const btn = document.createElement("button"); btn.className = "option-btn"; btn.textContent = opt; btn.onclick = () => fillSlot(opt); grid.appendChild(btn); });
+        } else {
+            const opts = optionsData[gameState.mode];
+            const allOpts = [];
+            Object.keys(opts).forEach(k => opts[k].forEach(v => { if (!allOpts.includes(v)) allOpts.push(v); }));
+            allOpts.forEach(opt => { const btn = document.createElement("button"); btn.className = "option-btn"; btn.textContent = opt === "_" ? "(kein Artikel)" : opt; btn.onclick = () => fillSlot(opt); grid.appendChild(btn); });
         }
+    }
 
-        let gameState = {
-            mode: null, points: 0, streak: 0, bestStreak: 0,
-            currentSentence: null, currentPossBase: null, selectedSlot: null,
-            remainingSentences: [], solvedSentences: [], startTime: null,
-            timerInterval: null, correctAnswers: 0, totalAttempts: 0
-        };
+    let selectedSlot = null;
 
-        const sounds = {
-            correct: () => { const ctx = new AudioContext(); const osc = ctx.createOscillator(); const gain = ctx.createGain(); osc.connect(gain); gain.connect(ctx.destination); osc.frequency.value = 800; gain.gain.setValueAtTime(0.3, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3); osc.start(); osc.stop(ctx.currentTime + 0.3); },
-            wrong: () => { const ctx = new AudioContext(); const osc = ctx.createOscillator(); const gain = ctx.createGain(); osc.connect(gain); gain.connect(ctx.destination); osc.frequency.value = 200; osc.type = 'sawtooth'; gain.gain.setValueAtTime(0.3, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2); osc.start(); osc.stop(ctx.currentTime + 0.2); },
-            milestone: () => { const ctx = new AudioContext(); [523, 659, 784, 1047].forEach((f, i) => { const osc = ctx.createOscillator(); const gain = ctx.createGain(); osc.connect(gain); gain.connect(ctx.destination); osc.frequency.value = f; gain.gain.setValueAtTime(0.2, ctx.currentTime + i * 0.15); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.15 + 0.3); osc.start(ctx.currentTime + i * 0.15); osc.stop(ctx.currentTime + i * 0.15 + 0.3); }); },
-            select: () => { const ctx = new AudioContext(); const osc = ctx.createOscillator(); const gain = ctx.createGain(); osc.connect(gain); gain.connect(ctx.destination); osc.frequency.value = 400; gain.gain.setValueAtTime(0.1, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1); osc.start(); osc.stop(ctx.currentTime + 0.1); }
-        };
+    function selectSlot(slot) {
+        if (slot.classList.contains("correct") || slot.classList.contains("wrong")) return;
+        document.querySelectorAll(".article-slot").forEach(s => s.classList.remove("selected"));
+        slot.classList.add("selected"); selectedSlot = slot;
+        if (gameState.mode === "possessive" || gameState.mode === "preposition") renderOptions();
+    }
 
-        function playSound(type) { try { sounds[type](); } catch(e) {} }
-
-        function init() { createStars(); showScreen('startScreen'); updateMenuLeaderboard(); }
-
-        function createStars() {
-            const container = document.getElementById('stars');
-            for (let i = 0; i < 100; i++) {
-                const star = document.createElement('div');
-                star.className = 'star';
-                star.style.width = star.style.height = Math.random() * 3 + 'px';
-                star.style.left = Math.random() * 100 + '%';
-                star.style.top = Math.random() * 100 + '%';
-                star.style.animationDelay = Math.random() * 2 + 's';
-                container.appendChild(star);
-            }
+    function fillSlot(value) {
+        if (!selectedSlot) { const fe = document.querySelector(".article-slot:not(.correct):not(.wrong)"); if (fe) selectSlot(fe); else return; }
+        const slotIndex = parseInt(selectedSlot.dataset.slotIndex);
+        const correct = gameState.currentSentence.slots[slotIndex].art;
+        selectedSlot.textContent = value === "_" ? "∅" : value;
+        gameState.totalAttempts++;
+        const isCorrect = value.toLowerCase() === correct.toLowerCase();
+        if (isCorrect) {
+            selectedSlot.classList.add("correct"); selectedSlot.classList.remove("selected");
+            gameState.correctAnswers++; gameState.streak++;
+            if (gameState.streak > gameState.bestStreak) gameState.bestStreak = gameState.streak;
+            let pts = gameState.basePointsPerSlot;
+            if (gameState.streak >= 20) pts *= 5; else if (gameState.streak >= 15) pts *= 4; else if (gameState.streak >= 10) pts *= 3; else if (gameState.streak >= 5) pts *= 2;
+            gameState.points += pts; updateStats(); sounds.correct(); showPointsPopup(pts, gameState.streak >= 5);
+            const allCorrect = Array.from(document.querySelectorAll(".article-slot")).every(sl => sl.classList.contains("correct"));
+            if (allCorrect) { setTimeout(() => { gameState.solvedSentences.push(gameState.remainingSentences.splice(gameState.remainingSentences.indexOf(gameState.currentSentence), 1)[0]); updateProgress(); if (gameState.solvedSentences.length % 10 === 0 && gameState.solvedSentences.length > 0) showMilestone(gameState.solvedSentences.length); loadNextSentence(); }, 800); }
+            const nextEmpty = document.querySelector(".article-slot:not(.correct):not(.wrong)");
+            if (nextEmpty) selectSlot(nextEmpty); else selectedSlot = null;
+        } else {
+            selectedSlot.classList.add("wrong"); gameState.streak = 0; updateStats(); sounds.wrong();
+            document.getElementById("hintBox").style.display = "block";
+            document.getElementById("hintText").textContent = "Richtig wäre: \u201e" + (correct === "_" ? "(kein Artikel)" : correct) + "\u201c";
+            setTimeout(() => { selectedSlot.classList.remove("wrong","selected"); selectedSlot.textContent = "___"; selectedSlot = null; }, 500);
         }
+    }
 
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-            if (screenId === 'gameScreen') document.getElementById('backBtn').style.display = 'block';
-            else document.getElementById('backBtn').style.display = 'none';
+    function skipSentence() { gameState.streak = 0; updateStats(); const s = gameState.remainingSentences.shift(); gameState.remainingSentences.push(s); loadNextSentence(); }
+
+    function updateStats() {
+        document.getElementById("points").textContent = gameState.points;
+        const el = document.getElementById("streak");
+        el.innerHTML = gameState.streak > 2 ? "<span class=\"streak-fire\">🔥</span>" + gameState.streak : gameState.streak;
+    }
+
+    function updateProgress() {
+        const total = gameState.solvedSentences.length + gameState.remainingSentences.length;
+        const solved = gameState.solvedSentences.length;
+        document.getElementById("progressFill").style.width = (total > 0 ? (solved/total)*100 : 0) + "%";
+        document.getElementById("progressText").textContent = solved + " / " + total + " Sätze gelöst";
+    }
+
+    function showPointsPopup(pts, isStreak) {
+        const popup = document.createElement("div");
+        popup.className = "points-popup" + (isStreak ? " streak-bonus" : "");
+        popup.textContent = isStreak ? "+" + pts + " 🔥 Combo!" : "+" + pts;
+        popup.style.left = (Math.random()*60+20) + "%"; popup.style.top = "40%";
+        document.body.appendChild(popup); setTimeout(() => popup.remove(), 1000);
+    }
+
+    function showMilestone(n) {
+        const overlay = document.createElement("div"); overlay.className = "milestone-overlay";
+        overlay.innerHTML = "<div class=\"milestone-content\"><div class=\"milestone-number\">" + n + "</div><div class=\"milestone-text\">🎉 Wow, " + n + " Sätze!</div></div>";
+        document.body.appendChild(overlay); sounds.milestone(); createConfetti();
+        setTimeout(() => overlay.remove(), 2500);
+    }
+
+    function createConfetti() {
+        const colors = ["#0a6e62","#0e9e8e","#14c9b5","#f5c842","#2ed8a0","#ff6b6b"];
+        for (let i = 0; i < 100; i++) {
+            const c = document.createElement("div"); c.className = "confetti";
+            c.style.left = Math.random()*100 + "vw"; c.style.top = "-10px";
+            c.style.background = colors[Math.floor(Math.random()*colors.length)];
+            c.style.borderRadius = Math.random() > 0.5 ? "50%" : "0";
+            const sz = (Math.random()*10+5) + "px"; c.style.width = c.style.height = sz;
+            document.body.appendChild(c);
+            const anim = c.animate([{transform:"translateY(0) rotate(0deg)",opacity:1},{transform:"translateY(100vh) rotate(" + Math.random()*720 + "deg)",opacity:0}],{duration:Math.random()*2000+2000,easing:"ease-out"});
+            anim.onfinish = () => c.remove();
         }
+    }
 
-        function shuffle(arr) {
-            const a = [...arr];
-            for (let i = a.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [a[i], a[j]] = [a[j], a[i]];
-            }
-            return a;
-        }
+    function endGame() {
+        clearInterval(gameState.timerInterval);
+        const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+        document.getElementById("finalPoints").textContent = gameState.points;
+        document.getElementById("finalTime").textContent = Math.floor(elapsed/60) + ":" + (elapsed%60).toString().padStart(2,"0");
+        document.getElementById("bestStreak").textContent = gameState.bestStreak;
+        document.getElementById("accuracy").textContent = gameState.totalAttempts > 0 ? Math.round((gameState.correctAnswers/gameState.totalAttempts)*100) + "%" : "0%";
+        showScreen("resultScreen"); document.getElementById("backBtn").style.display = "none";
+        updateResultLeaderboard(); sounds.milestone(); createConfetti();
+    }
 
-        function startGame(mode) {
-            gameState = {
-                mode: mode, points: 0, streak: 0, bestStreak: 0,
-                currentSentence: null, currentPossBase: null, selectedSlot: null,
-                remainingSentences: shuffle(sentences[mode]),
-                solvedSentences: [], startTime: Date.now(), timerInterval: null,
-                correctAnswers: 0, totalAttempts: 0
-            };
-            const modes = { preposition: 'Präpositionen', definite: 'Bestimmte Artikel', indefinite: 'Unbestimmte Artikel', negation: 'Verneinung (kein)', possessive: 'Possessivpronomen' };
-            const ind = document.getElementById('modeIndicator');
-            ind.textContent = modes[mode];
-            ind.className = 'mode-indicator ' + mode;
-            updateStats(); updateProgress(); setupArticleButtons(); loadNextSentence(); startTimer(); showScreen('gameScreen');
-        }
+    function loadLeaderboard() { try { return JSON.parse(localStorage.getItem("artikelChampionTuerkisLeaderboard") || "[]"); } catch(e) { return []; } }
+    function saveLeaderboard(b) { try { localStorage.setItem("artikelChampionTuerkisLeaderboard", JSON.stringify(b)); } catch(e) {} }
 
-        function startTimer() {
-            clearInterval(gameState.timerInterval);
-            gameState.timerInterval = setInterval(() => {
-                const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
-                document.getElementById('timer').textContent = `${Math.floor(elapsed / 60)}:${(elapsed % 60).toString().padStart(2, '0')}`;
-            }, 1000);
-        }
+    function saveScore() {
+        const name = document.getElementById("playerName").value.trim() || "Anonym";
+        const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+        const modeNames = { preposition:"Präpositionen", definite:"Bestimmte Artikel", indefinite:"Unbestimmte Artikel", negation:"Verneinung", possessive:"Possessivpronomen", relative:"Relativpronomen" };
+        const entry = { name, points:gameState.points, time:elapsed, mode:modeNames[gameState.mode], date:new Date().toLocaleDateString("de-DE") };
+        const board = loadLeaderboard(); board.push(entry); board.sort((a,b)=>b.points-a.points);
+        saveLeaderboard(board.slice(0,10)); updateResultLeaderboard(); updateMenuLeaderboard();
+        document.getElementById("playerName").disabled = true;
+        event.target.disabled = true; event.target.textContent = "✓ Gespeichert!";
+    }
 
-        function setupArticleButtons() {
-            const container = document.getElementById('articleButtons');
-            container.innerHTML = '';
-            if (gameState.mode === 'preposition' || gameState.mode === 'definite') {
-                ['der', 'die', 'das', 'dem', 'den', 'des'].forEach(art => {
-                    const btn = document.createElement('button');
-                    btn.className = 'article-btn definite';
-                    btn.textContent = art;
-                    btn.onclick = () => selectArticle(art);
-                    container.appendChild(btn);
-                });
-            } else if (gameState.mode === 'indefinite') {
-                ['ein', 'eine', 'einen', 'einem', 'einer', 'eines', '—'].forEach(art => {
-                    const btn = document.createElement('button');
-                    btn.className = 'article-btn indefinite';
-                    btn.textContent = art === '—' ? '(kein Artikel)' : art;
-                    btn.onclick = () => selectArticle(art === '—' ? '' : art);
-                    container.appendChild(btn);
-                });
-            } else if (gameState.mode === 'negation') {
-                ['kein', 'keine', 'keinen', 'keinem', 'keiner', 'keines'].forEach(art => {
-                    const btn = document.createElement('button');
-                    btn.className = 'article-btn negation';
-                    btn.textContent = art;
-                    btn.onclick = () => selectArticle(art);
-                    container.appendChild(btn);
-                });
-            } else if (gameState.mode === 'possessive') {
-                ['—', '-e', '-en', '-em', '-er', '-es'].forEach(ending => {
-                    const btn = document.createElement('button');
-                    btn.className = 'article-btn possessive-ending';
-                    btn.textContent = ending === '—' ? '(keine Endung)' : ending;
-                    btn.onclick = () => selectArticle(ending === '—' ? '' : ending.slice(1));
-                    container.appendChild(btn);
-                });
-            }
-        }
+    function formatTime(s) { return Math.floor(s/60) + ":" + (s%60).toString().padStart(2,"0"); }
 
-        function loadNextSentence() {
-            if (gameState.remainingSentences.length === 0) { endGame(); return; }
-            gameState.currentSentence = gameState.remainingSentences[0];
-            gameState.selectedSlot = null;
-            document.getElementById('hintBox').style.display = 'none';
-            renderSentence();
-            updateProgress();
-        }
+    function renderBoard(container, entries, limit) {
+        if (entries.length === 0) { container.innerHTML = "<p style=\"color:var(--text-muted);text-align:center;\">Noch keine Einträge!</p>"; return; }
+        container.innerHTML = entries.slice(0,limit).map((e,i) =>
+            "<div class=\"leaderboard-entry\"><span class=\"leaderboard-rank\">" + (i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1)+".") + "</span><span class=\"leaderboard-name\">" + e.name + "</span><span class=\"leaderboard-score\">" + e.points + " Pkt</span><span class=\"leaderboard-time\">" + formatTime(e.time) + "</span></div>"
+        ).join("");
+    }
 
-        function renderSentence() {
-            const s = gameState.currentSentence;
-            const sentenceDiv = document.getElementById('sentence');
-            sentenceDiv.innerHTML = '';
+    function updateMenuLeaderboard() { renderBoard(document.getElementById("menuLeaderboard"), loadLeaderboard(), 5); }
+    function updateResultLeaderboard() {
+        const c = document.getElementById("resultLeaderboard");
+        c.innerHTML = "<h3 class=\"leaderboard-title\">🏅 Bestenliste</h3>";
+        const inner = document.createElement("div"); renderBoard(inner, loadLeaderboard(), 5); c.appendChild(inner);
+    }
 
-            if (gameState.mode === 'preposition') {
-                const [before, prep, noun, after, gender, kasus] = s;
-                if (before) { const span = document.createElement('span'); span.className = 'word'; span.textContent = before + ' '; sentenceDiv.appendChild(span); }
-                const prepSpan = document.createElement('span'); prepSpan.className = 'word preposition-word'; prepSpan.textContent = prep + ' '; sentenceDiv.appendChild(prepSpan);
-                const slot = document.createElement('span'); slot.className = 'article-slot'; slot.id = 'slot-0'; slot.textContent = '___'; slot.onclick = () => { gameState.selectedSlot = 0; slot.classList.add('selected'); playSound('select'); }; sentenceDiv.appendChild(slot);
-                const nounSpan = document.createElement('span'); nounSpan.className = 'word'; nounSpan.textContent = ' ' + noun + ' '; sentenceDiv.appendChild(nounSpan);
-                if (after) { const afterSpan = document.createElement('span'); afterSpan.className = 'word'; afterSpan.textContent = after; sentenceDiv.appendChild(afterSpan); }
-            } else if (gameState.mode === 'possessive') {
-                const [before, person, noun, after, gender, kasus] = s;
-                const possBase = articles.possessive[person];
-                gameState.currentPossBase = { person, gender, kasus };
-                if (before) { const span = document.createElement('span'); span.className = 'word'; span.textContent = before + ' '; sentenceDiv.appendChild(span); }
-                const baseSpan = document.createElement('span'); baseSpan.className = 'possessive-base'; baseSpan.textContent = possBase; sentenceDiv.appendChild(baseSpan);
-                const slot = document.createElement('span'); slot.className = 'article-slot'; slot.id = 'slot-0'; slot.textContent = '___'; slot.onclick = () => { gameState.selectedSlot = 0; slot.classList.add('selected'); playSound('select'); }; sentenceDiv.appendChild(slot);
-                const nounSpan = document.createElement('span'); nounSpan.className = 'word'; nounSpan.textContent = ' ' + noun + ' '; sentenceDiv.appendChild(nounSpan);
-                if (after) { const afterSpan = document.createElement('span'); afterSpan.className = 'word'; afterSpan.textContent = after; sentenceDiv.appendChild(afterSpan); }
-            } else {
-                const [before, noun, after, gender, kasus] = s;
-                if (before) { const span = document.createElement('span'); span.className = 'word'; span.textContent = before + ' '; sentenceDiv.appendChild(span); }
-                const slot = document.createElement('span'); slot.className = 'article-slot'; slot.id = 'slot-0'; slot.textContent = '___'; slot.onclick = () => { gameState.selectedSlot = 0; slot.classList.add('selected'); playSound('select'); }; sentenceDiv.appendChild(slot);
-                const nounSpan = document.createElement('span'); nounSpan.className = 'word'; nounSpan.textContent = ' ' + noun + ' '; sentenceDiv.appendChild(nounSpan);
-                if (after) { const afterSpan = document.createElement('span'); afterSpan.className = 'word'; afterSpan.textContent = after; sentenceDiv.appendChild(afterSpan); }
-            }
-        }
+    function playAgain() {
+        document.getElementById("playerName").disabled = false; document.getElementById("playerName").value = "";
+        const btn = document.querySelector("#resultScreen .control-btn.primary");
+        if (btn) { btn.disabled = false; btn.textContent = "💾 Speichern"; }
+        startGame(gameState.mode);
+    }
 
-        function getCorrectArticle() {
-            const s = gameState.currentSentence;
-            if (gameState.mode === 'preposition') {
-                const [,, noun, , gender, kasus] = s;
-                return articles.definite[kasus][gender];
-            } else if (gameState.mode === 'possessive') {
-                const { person, gender, kasus } = gameState.currentPossBase;
-                const endings = { nominativ: { m: '', f: 'e', n: '', pl: 'e' }, akkusativ: { m: 'en', f: 'e', n: '', pl: 'e' }, dativ: { m: 'em', f: 'er', n: 'em', pl: 'en' }, genitiv: { m: 'es', f: 'er', n: 'es', pl: 'er' } };
-                const base = articles.possessive[person];
-                const ending = endings[kasus][gender];
-                if (base === 'euer' && ending !== '') return 'eur' + ending;
-                return base + ending;
-            } else {
-                const [, noun, , gender, kasus] = s;
-                const correctFull = articles[gameState.mode][kasus][gender];
-                if (gameState.mode === 'possessive') return correctFull;
-                if (gameState.mode === 'indefinite' && gender === 'pl') return '';
-                return correctFull;
-            }
-        }
+    function goToMenu() {
+        clearInterval(gameState.timerInterval); document.getElementById("backBtn").style.display = "none";
+        document.getElementById("playerName").disabled = false; document.getElementById("playerName").value = "";
+        const btn = document.querySelector("#resultScreen .control-btn.primary");
+        if (btn) { btn.disabled = false; btn.textContent = "💾 Speichern"; }
+        showScreen("startScreen"); updateMenuLeaderboard();
+    }
 
-        function getCorrectAnswer() {
-            const s = gameState.currentSentence;
-            if (gameState.mode === 'preposition') {
-                const [,,,, gender, kasus] = s;
-                return articles.definite[kasus][gender];
-            } else if (gameState.mode === 'possessive') {
-                const { person, gender, kasus } = gameState.currentPossBase;
-                return getPossessiveForm(person, gender, kasus);
-            } else {
-                const gender = s[3]; const kasus = s[4];
-                if (gameState.mode === 'indefinite' && gender === 'pl') return '';
-                return articles[gameState.mode][kasus][gender];
-            }
-        }
-
-        function selectArticle(art) {
-            gameState.totalAttempts++;
-            const correct = getCorrectAnswer();
-            const slot = document.getElementById('slot-0');
-            if (!slot) return;
-
-            if (art === correct) {
-                slot.textContent = art || '–';
-                slot.classList.remove('selected'); slot.classList.add('correct');
-                gameState.correctAnswers++; gameState.streak++;
-                if (gameState.streak > gameState.bestStreak) gameState.bestStreak = gameState.streak;
-                const pts = 10 + (gameState.streak > 1 ? Math.min(gameState.streak - 1, 5) * 5 : 0);
-                gameState.points += pts;
-                showPointsPopup(pts, gameState.streak > 1);
-                playSound('correct'); updateStats();
-                if ([10, 25, 50, 75, 100].includes(gameState.solvedSentences.length + 1)) { showMilestone(gameState.solvedSentences.length + 1); }
-                gameState.solvedSentences.push(gameState.remainingSentences.shift());
-                setTimeout(loadNextSentence, 800);
-            } else {
-                slot.classList.add('wrong');
-                gameState.streak = 0; updateStats(); playSound('wrong');
-                const hint = document.getElementById('hintBox');
-                hint.style.display = 'block';
-                document.getElementById('hintText').textContent = `Richtig wäre: "${correct}"`;
-                setTimeout(() => { slot.classList.remove('wrong'); slot.classList.remove('selected'); }, 500);
-            }
-        }
-
-        function skipSentence() {
-            gameState.streak = 0; updateStats();
-            const s = gameState.remainingSentences.shift();
-            gameState.remainingSentences.push(s);
-            loadNextSentence();
-        }
-
-        function updateStats() {
-            document.getElementById('points').textContent = gameState.points;
-            const streakEl = document.getElementById('streak');
-            streakEl.innerHTML = gameState.streak > 2 ? `<span class="streak-fire">🔥</span>${gameState.streak}` : gameState.streak;
-        }
-
-        function updateProgress() {
-            const total = gameState.solvedSentences.length + gameState.remainingSentences.length;
-            const solved = gameState.solvedSentences.length;
-            const pct = total > 0 ? (solved / total) * 100 : 0;
-            document.getElementById('progressFill').style.width = pct + '%';
-            document.getElementById('progressText').textContent = `${solved} / ${total} Sätze gelöst`;
-        }
-
-        function showPointsPopup(pts, isStreak) {
-            const popup = document.createElement('div');
-            popup.className = 'points-popup' + (isStreak ? ' streak-bonus' : '');
-            popup.textContent = isStreak ? `+${pts} 🔥 Combo!` : `+${pts}`;
-            popup.style.left = (Math.random() * 60 + 20) + '%';
-            popup.style.top = '40%';
-            document.body.appendChild(popup);
-            setTimeout(() => popup.remove(), 1000);
-        }
-
-        function showMilestone(n) {
-            const overlay = document.createElement('div');
-            overlay.className = 'milestone-overlay';
-            overlay.innerHTML = `<div class="milestone-content"><div class="milestone-number">${n}</div><div class="milestone-text">🎉 Wow, ${n} Sätze!</div></div>`;
-            document.body.appendChild(overlay);
-            playSound('milestone'); createConfetti();
-            setTimeout(() => { overlay.remove(); }, 2500);
-        }
-
-        function createConfetti() {
-            const colors = ['#0a6e62', '#0e9e8e', '#14c9b5', '#f5c842', '#2ed8a0', '#ff6b6b'];
-            for (let i = 0; i < 100; i++) {
-                const c = document.createElement('div');
-                c.className = 'confetti';
-                c.style.left = Math.random() * 100 + 'vw';
-                c.style.top = '-10px';
-                c.style.background = colors[Math.floor(Math.random() * colors.length)];
-                c.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
-                c.style.width = (Math.random() * 10 + 5) + 'px';
-                c.style.height = c.style.width;
-                document.body.appendChild(c);
-                const animation = c.animate([
-                    { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
-                    { transform: `translateY(100vh) rotate(${Math.random() * 720}deg)`, opacity: 0 }
-                ], { duration: Math.random() * 2000 + 2000, easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)' });
-                animation.onfinish = () => c.remove();
-            }
-        }
-
-        function endGame() {
-            clearInterval(gameState.timerInterval);
-            const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
-            document.getElementById('finalPoints').textContent = gameState.points;
-            document.getElementById('finalTime').textContent = `${Math.floor(elapsed / 60)}:${(elapsed % 60).toString().padStart(2, '0')}`;
-            document.getElementById('bestStreak').textContent = gameState.bestStreak;
-            document.getElementById('accuracy').textContent = gameState.totalAttempts > 0 ? Math.round((gameState.correctAnswers / gameState.totalAttempts) * 100) + '%' : '0%';
-            showScreen('resultScreen');
-            document.getElementById('backBtn').style.display = 'none';
-            updateResultLeaderboard(); playSound('milestone'); createConfetti();
-        }
-
-        function loadLeaderboard() {
-            const saved = localStorage.getItem('artikelChampionTuerkisLeaderboard');
-            return saved ? JSON.parse(saved) : [];
-        }
-
-        function saveLeaderboard(board) {
-            localStorage.setItem('artikelChampionTuerkisLeaderboard', JSON.stringify(board));
-        }
-
-        function saveScore() {
-            const name = document.getElementById('playerName').value.trim() || 'Anonym';
-            const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
-            const modes = { preposition: 'Präpositionen', definite: 'Bestimmte Artikel', indefinite: 'Unbestimmte Artikel', negation: 'Verneinung (kein)', possessive: 'Possessivpronomen' };
-            const entry = { name, points: gameState.points, time: elapsed, mode: modes[gameState.mode], date: new Date().toLocaleDateString('de-DE') };
-            const board = loadLeaderboard();
-            board.push(entry); board.sort((a, b) => b.points - a.points);
-            saveLeaderboard(board.slice(0, 10)); updateResultLeaderboard(); updateMenuLeaderboard();
-            document.getElementById('playerName').disabled = true;
-            event.target.disabled = true; event.target.textContent = '✓ Gespeichert!';
-        }
-
-        function formatTime(s) { return `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`; }
-
-        function updateMenuLeaderboard() {
-            const container = document.getElementById('menuLeaderboard');
-            const board = loadLeaderboard();
-            if (board.length === 0) { container.innerHTML = '<p style="color:var(--text-muted);text-align:center;">Noch keine Einträge. Sei die Erste!</p>'; return; }
-            container.innerHTML = board.slice(0, 5).map((e, i) => `<div class="leaderboard-entry"><span class="leaderboard-rank">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1)+'.'}</span><span class="leaderboard-name">${e.name}</span><span class="leaderboard-score">${e.points} Pkt</span><span class="leaderboard-time">${formatTime(e.time)}</span></div>`).join('');
-        }
-
-        function updateResultLeaderboard() {
-            const container = document.getElementById('resultLeaderboard');
-            const board = loadLeaderboard();
-            container.innerHTML = `<h3 class="leaderboard-title">🏅 Bestenliste</h3>${board.slice(0, 5).map((e, i) => `<div class="leaderboard-entry"><span class="leaderboard-rank">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1)+'.'}</span><span class="leaderboard-name">${e.name}</span><span class="leaderboard-score">${e.points} Pkt</span><span class="leaderboard-time">${formatTime(e.time)}</span></div>`).join('')}`;
-        }
-
-        function playAgain() {
-            document.getElementById('playerName').disabled = false;
-            document.getElementById('playerName').value = '';
-            const btn = document.querySelector('#resultScreen .control-btn.primary');
-            if (btn) { btn.disabled = false; btn.textContent = '💾 Speichern'; }
-            startGame(gameState.mode);
-        }
-
-        function goToMenu() {
-            clearInterval(gameState.timerInterval);
-            document.getElementById('backBtn').style.display = 'none';
-            document.getElementById('playerName').disabled = false;
-            document.getElementById('playerName').value = '';
-            const btn = document.querySelector('#resultScreen .control-btn.primary');
-            if (btn) { btn.disabled = false; btn.textContent = '💾 Speichern'; }
-            showScreen('startScreen'); updateMenuLeaderboard();
-        }
-
-        document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener("DOMContentLoaded", init);
     </script>
 </body>
 </html>
