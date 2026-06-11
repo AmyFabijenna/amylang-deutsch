@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deutsch A2+ – Neue Herausforderungen</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  min-height: 100vh;
+  padding: 24px 16px 60px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+.container {
+  background: #fafaf8;
+  border-radius: 22px;
+  padding: 34px 38px;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.5);
+  width: 100%;
+  max-width: 840px;
+}
+h1 { color: #0f3460; font-size: 2.4em; margin-bottom: 4px; text-align:center; letter-spacing:-1px; }
+.subtitle { color:#888; font-size:1em; font-weight:bold; text-align:center; margin-bottom:26px; }
+
+.screen { display:none; }
+.screen.active { display:block; }
+
+/* MENU */
+.menu-title { font-size:1.3em; color:#0f3460; font-weight:bold; margin-bottom:14px; }
+.menu-grid { display:flex; flex-direction:column; gap:9px; margin-bottom:22px; }
+.mode-btn {
+  background: linear-gradient(135deg,#f0f4ff,#e8eeff);
+  border: 2px solid #c0cdee;
+  border-radius: 13px;
+  padding: 14px 18px;
+  cursor: pointer;
+  text-align: left;
+  font-size: 1.05em;
+  font-weight: bold;
+  color: #1a1a2e;
+  position: relative;
+  transition: all .22s;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+.mode-btn:hover { background:linear-gradient(135deg,#e8eeff,#d0dbf8); border-color:#0f3460; transform:translateX(5px); }
+.mode-btn .ico { position:absolute; right:16px; top:50%; transform:translateY(-50%); font-size:1.5em; }
+.mode-btn .desc { font-size:.78em; color:#777; margin-top:2px; font-weight:normal; }
+.badge { display:inline-block; background:#0f3460; color:white; padding:1px 9px; border-radius:18px; font-size:.68em; font-weight:bold; margin-left:7px; vertical-align:middle; }
+.badge.g { background:#e76f51; }
+.badge.n { background:#17a2b8; }
+
+/* GAME AREA */
+.game-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px; }
+.stats { display:flex; gap:9px; flex-wrap:wrap; }
+.stat { background:linear-gradient(135deg,#f0f4ff,#e8eeff); padding:7px 14px; border-radius:11px; border:2px solid #c0cdee; text-align:center; min-width:70px; }
+.stat-l { font-size:.65em; color:#aaa; text-transform:uppercase; letter-spacing:1px; font-weight:bold; }
+.stat-v { font-size:1.5em; font-weight:bold; color:#0f3460; }
+.mode-tag { background:#0f3460; color:white; padding:7px 16px; border-radius:18px; font-weight:bold; font-size:.88em; }
+
+.prog-bar { width:100%; height:18px; background:#eee; border-radius:10px; overflow:hidden; margin-bottom:5px; }
+.prog-fill { height:100%; background:linear-gradient(90deg,#0f3460,#e76f51); transition:width .4s; border-radius:10px; }
+.prog-text { color:#aaa; font-size:.85em; font-weight:bold; margin-bottom:14px; text-align:center; }
+
+.card {
+  background: linear-gradient(135deg,#f7f9ff,#f0f4ff);
+  border-radius: 18px;
+  padding: 28px 26px;
+  margin-bottom: 18px;
+  border: 2px solid #c0cdee;
+  text-align: center;
+}
+.card .nr { font-size:.78em; color:#bbb; font-weight:bold; margin-bottom:8px; }
+.card .sentence { font-size: 1.65em; font-weight: bold; color: #1a1a2e; line-height: 1.7; margin-bottom: 8px; }
+.card .context { font-size: 1.05em; color: #666; font-style: italic; margin-bottom: 0; line-height: 1.5; }
+.card.read-mode .sentence { font-size:1.9em; color:#0f3460; }
+.card.read-mode .context { font-size:1.1em; }
+
+.ans-row { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:16px; }
+.ans-btn {
+  background: #0f3460;
+  color: white;
+  border: none;
+  border-radius: 13px;
+  padding: 13px 24px;
+  font-size: 1.1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all .22s;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  box-shadow: 0 4px 12px rgba(15,52,96,.25);
+}
+.ans-btn:hover { background:#16213e; transform:translateY(-3px); }
+.ans-btn.correct { background:#1a7a4a !important; color:white; }
+.ans-btn.wrong { background:#c0392b !important; color:white; }
+
+.solution-box {
+  background: #eafaf1;
+  border-left: 4px solid #1a7a4a;
+  padding: 13px 18px;
+  border-radius: 11px;
+  margin-bottom: 14px;
+  display: none;
+  text-align: left;
+  font-size: 1.05em;
+  color: #145a32;
+  font-weight: bold;
+  line-height: 1.6;
+}
+.solution-box.visible { display:block; }
+
+.ctrl-row { display:flex; gap:9px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+.ctrl-btn {
+  background: white;
+  border: 2px solid #c0cdee;
+  border-radius: 11px;
+  padding: 10px 20px;
+  color: #0f3460;
+  font-size:.95em;
+  font-weight:bold;
+  cursor:pointer;
+  transition:all .22s;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+.ctrl-btn:hover { background:#f0f4ff; border-color:#0f3460; transform:translateY(-2px); }
+.ctrl-btn.primary { background:#0f3460; color:white; border-color:#0f3460; }
+.ctrl-btn.primary:hover { background:#16213e; }
+.ctrl-btn.secondary { color:#bbb; border-color:#ddd; }
+.ctrl-btn.secondary:hover { color:#0f3460; border-color:#c0cdee; }
+.ctrl-btn.sol { background:#fff8e1; border-color:#f0ad00; color:#7a5900; }
+.ctrl-btn.sol:hover { background:#fff3cd; }
+
+.result-wrap { text-align:center; padding:10px 0; }
+.result-wrap .trophy { font-size:4em; animation:bounce .5s infinite alternate; }
+@keyframes bounce { from{transform:translateY(0);} to{transform:translateY(-14px);} }
+.result-title { font-size:2.2em; color:#0f3460; font-weight:bold; margin:16px 0 22px; }
+.res-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:22px; }
+.res-stat { background:linear-gradient(135deg,#f0f4ff,#e8eeff); padding:16px; border-radius:13px; border:2px solid #c0cdee; }
+.res-stat-l { font-size:.85em; color:#aaa; font-weight:bold; margin-bottom:5px; }
+.res-stat-v { font-size:2em; font-weight:bold; color:#0f3460; }
+
+.pts-pop { position:fixed; background:linear-gradient(135deg,#1a7a4a,#27ae60); color:white; padding:9px 20px; border-radius:20px; font-size:1.4em; font-weight:bold; pointer-events:none; z-index:1000; animation:floatUp 1s ease forwards; }
+@keyframes floatUp { to{transform:translateY(-80px);opacity:0;} }
+.cfetti { position:fixed; z-index:999; }
+
+.back-btn { position:fixed; top:14px; left:14px; background:white; border:2px solid #c0cdee; border-radius:11px; padding:8px 16px; color:#0f3460; font-weight:bold; cursor:pointer; display:none; z-index:200; font-family:'Segoe UI',Arial; }
+.back-btn:hover { background:#f0f4ff; }
+
+.milestone { position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;z-index:2000; }
+.milestone-inner { text-align:center; }
+.milestone-n { font-size:7em; font-weight:bold; color:#e76f51; }
+.milestone-t { font-size:1.8em; color:white; font-weight:bold; margin-top:12px; }
+
+.menu-sep { font-size:.78em; color:#aaa; font-weight:bold; text-transform:uppercase; letter-spacing:2px; margin:16px 0 6px; border-top:1px solid #e0e6f5; padding-top:12px; }
+
+@media(max-width:600px){
+  .container{padding:20px 14px;}
+  h1{font-size:1.8em;}
+  .card .sentence{font-size:1.35em;}
+  .ans-btn{font-size:1em;padding:11px 16px;}
+}
+</style>
+</head>
+<body>
+<button class="back-btn" id="backBtn" onclick="goMenu()">← Menü</button>
+<div class="container">
+<h1>🚀 Deutsch A2+</h1>
+<p class="subtitle">Neue Herausforderungen · für echte Profis</p>
+
+<!-- ===== MENU ===== -->
+<div id="menuScreen" class="screen active">
+  <div class="menu-title">🎯 Wähle eine Übung!</div>
+  <div class="menu-grid">
+
+    <div class="menu-sep">📍 Präpositionen</div>
+    <button class="mode-btn" onclick="startMode('praep1')">
+      1. Wechselpräpositionen – Wo oder Wohin? <span class="badge">Dativ vs. Akk</span>
+      <div class="desc">auf den / auf dem? hinter das / hinter dem? – Positions- vs. Richtungsangabe!</div>
+      <span class="ico">🏹</span>
+    </button>
+    <button class="mode-btn" onclick="startMode('praep2')">
+      2. Verb + Präposition – Feste Verbindungen <span class="badge g">Wichtig!</span>
+      <div class="desc">warten auf, denken an, träumen von, sich freuen auf/über – welche Präp. gehört wohin?</div>
+      <span class="ico">🔗</span>
+    </button>
+    <button class="mode-btn" onclick="startMode('praep3')">
+      3. Temporale Präpositionen – Wann? <span class="badge">Zeit!</span>
+      <div class="desc">vor, nach, seit, bis, ab, während, um, am, im – Zeitpräpositionen meistern</div>
+      <span class="ico">⏱️</span>
+    </button>
+
+    <div class="menu-sep">⏰ Perfekt</div>
+    <button class="mode-btn" onclick="startMode('perfekt')">
+      4. Perfekt – Die kniffligen Fälle <span class="badge">Fallen!</span>
+      <div class="desc">Reflexive Verben, liegen/legen, stehen/stellen, begegnen – jetzt wirds schwieriger!</div>
+      <span class="ico">⏰</span>
+    </button>
+
+    <div class="menu-sep">⚡ Verben</div>
+    <button class="mode-btn" onclick="startMode('verbformen')">
+      5. Konjunktiv II – Wünsche &amp; Bedingungen <span class="badge g">A2+</span>
+      <div class="desc">wäre, hätte, könnte, würde, müsste – was wäre, wenn...?</div>
+      <span class="ico">✨</span>
+    </button>
+    <button class="mode-btn" onclick="startMode('modal')">
+      6. Modalverben – Vergangenheit (Präteritum) <span class="badge">Zeitreise!</span>
+      <div class="desc">musste, durfte, konnte, wollte, sollte – früher war das so!</div>
+      <span class="ico">💬</span>
+    </button>
+
+    <div class="menu-sep">📈 Vergleiche</div>
+    <button class="mode-btn" onclick="startMode('komp1')">
+      7. Komparativ – als oder wie? <span class="badge">Knifflig!</span>
+      <div class="desc">größer ALS oder genauso groß WIE? nicht so...WIE – der Unterschied zählt!</div>
+      <span class="ico">⚖️</span>
+    </button>
+    <button class="mode-btn" onclick="startMode('komp2')">
+      8. Komparativ – Drei Dinge vergleichen <span class="badge g">Sprechen</span>
+      <div class="desc">Drei Dinge, drei Formen – jetzt mit schwierigeren Adjektiven und Themen!</div>
+      <span class="ico">🐆</span>
+    </button>
+
+    <div class="menu-sep">❌ Verneinung</div>
+    <button class="mode-btn" onclick="startMode('vernein')">
+      9. Verneinung – Starke Verneinung <span class="badge">Profi!</span>
+      <div class="desc">weder...noch, überhaupt nicht, auf keinen Fall, keineswegs, nirgendwo – stark verneinen!</div>
+      <span class="ico">🚫</span>
+    </button>
+
+    <div class="menu-sep">🪞 Reflexivpronomen</div>
+    <button class="mode-btn" onclick="startMode('reflex')">
+      10. Reflexivpronomen – Ich auch! <span class="badge">Sprechen</span>
+      <div class="desc">Neue Abenteuerwelt-Sätze – Dativ (mir) und Akkusativ (mich) unterscheiden!</div>
+      <span class="ico">🪞</span>
+    </button>
+
+    <div class="menu-sep">🔄 Passiv</div>
+    <button class="mode-btn" onclick="startMode('passiv')">
+      11. Passiv – mit von &amp; Perfekt <span class="badge g">Profi!</span>
+      <div class="desc">wurde gemacht · wird von... · muss/kann/soll gemacht werden – Passiv in allen Formen!</div>
+      <span class="ico">🔄</span>
+    </button>
+
+    <div class="menu-sep">👤 Personalpronomen</div>
+    <button class="mode-btn" onclick="startMode('proakk')">
+      12. Pronomen – Akkusativ <span class="badge">Klick!</span>
+      <div class="desc">Das Mädchen → es! (sächlich!) · die Hufe → sie (Plural!) – genau hinschauen!</div>
+      <span class="ico">👉</span>
+    </button>
+    <button class="mode-btn" onclick="startMode('prodat')">
+      13. Pronomen – Dativ <span class="badge">Klick!</span>
+      <div class="desc">helfen, gehören, gefallen, schmecken, begegnen – Dativverben mit Pronomen!</div>
+      <span class="ico">🤝</span>
+    </button>
+
+    <div class="menu-sep">🆕 Neu – Satzstruktur</div>
+    <button class="mode-btn" onclick="startMode('nebensaetze')">
+      14. Nebensätze – Verb am Ende! <span class="badge n">NEU</span>
+      <div class="desc">weil, dass, obwohl, wenn, damit, ob – Verb steht IMMER am Ende des Nebensatzes!</div>
+      <span class="ico">🔗</span>
+    </button>
+    <button class="mode-btn" onclick="startMode('relativsaetze')">
+      15. Relativsätze – der/die/das/den/dem <span class="badge n">NEU</span>
+      <div class="desc">Das ist der Junge, ___ so gut tanzt. – Welches Relativpronomen passt?</div>
+      <span class="ico">🎯</span>
+    </button>
+
+  </div>
+</div>
+
+<!-- ===== GAME SCREEN ===== -->
+<div id="gameScreen" class="screen">
+  <div class="game-header">
+    <div class="stats">
+      <div class="stat"><div class="stat-l">Punkte</div><div class="stat-v" id="pts">0</div></div>
+      <div class="stat"><div class="stat-l">Richtig</div><div class="stat-v" id="cor">0</div></div>
+      <div class="stat"><div class="stat-l">Nr.</div><div class="stat-v" id="qnr">1</div></div>
+    </div>
+    <div class="mode-tag" id="modeTag">Modus</div>
+  </div>
+  <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+  <div class="prog-text" id="progTxt">0 / 0</div>
+  <div class="card" id="mainCard">
+    <div class="nr" id="cardNr"></div>
+    <div class="sentence" id="cardSentence"></div>
+    <div class="context" id="cardContext"></div>
+  </div>
+  <div class="solution-box" id="solBox"></div>
+  <div class="ans-row" id="ansRow"></div>
+  <div class="ctrl-row">
+    <button class="ctrl-btn sol" onclick="showSol()">💡 Lösung zeigen</button>
+    <button class="ctrl-btn secondary" onclick="skipQ()">⏭ Weiter</button>
+    <button class="ctrl-btn primary" onclick="endGame()">🏁 Fertig</button>
+  </div>
+</div>
+
+<!-- ===== RESULT SCREEN ===== -->
+<div id="resultScreen" class="screen">
+  <div class="result-wrap">
+    <div class="trophy">🏆</div>
+    <div class="result-title">Klasse gemacht!</div>
+    <div class="res-stats">
+      <div class="res-stat"><div class="res-stat-l">⭐ Punkte</div><div class="res-stat-v" id="rPts">0</div></div>
+      <div class="res-stat"><div class="res-stat-l">✅ Richtig</div><div class="res-stat-v" id="rCor">0</div></div>
+      <div class="res-stat"><div class="res-stat-l">📋 Gesamt</div><div class="res-stat-v" id="rTot">0</div></div>
+    </div>
+    <div class="ctrl-row">
+      <button class="ctrl-btn primary" onclick="replayMode()">🔄 Nochmal</button>
+      <button class="ctrl-btn secondary" onclick="goMenu()">🏠 Menü</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+const data = {
+
+// ---- 1. WECHSELPRÄPOSITIONEN ----
+praep1:{title:"Wechselpräpositionen – Wo oder Wohin?",type:"choice",items:[
+  {s:"Ich lege das Buch ___ Tisch.",opts:["auf den","auf dem","in den","an dem"],a:"auf den",sol:"AUF DEN Tisch – wohin? legen = Bewegung zum Ziel → Akkusativ (der → den)."},
+  {s:"Das Buch liegt ___ Tisch.",opts:["auf dem","auf den","an den","in dem"],a:"auf dem",sol:"AUF DEM Tisch – wo? liegen = Position → Dativ (der → dem)."},
+  {s:"Die Lehrerin hängt das Plakat ___ Wand.",opts:["an die","an der","auf die","über die"],a:"an die",sol:"AN DIE Wand – wohin? hängen (transitiv) = Bewegung → Akkusativ (die bleibt die)."},
+  {s:"Das Plakat hängt ___ Wand.",opts:["an der","an die","auf der","auf die"],a:"an der",sol:"AN DER Wand – wo? hängen (intransitiv) = Position → Dativ (die → der)."},
+  {s:"Der Hund springt ___ Sofa.",opts:["auf das","auf dem","in das","in dem"],a:"auf das",sol:"AUF DAS Sofa – wohin? springen = Bewegung → Akkusativ (das bleibt das)."},
+  {s:"Die Katze schläft ___ Sofa.",opts:["auf dem","auf das","in dem","in das"],a:"auf dem",sol:"AUF DEM Sofa – wo? schlafen = Position → Dativ (das → dem)."},
+  {s:"Ben stellt seine Schuhe ___ Tür.",opts:["vor die","vor der","hinter die","hinter der"],a:"vor die",sol:"VOR DIE Tür – wohin? stellen = Bewegung → Akkusativ (die bleibt die)."},
+  {s:"Die Schuhe stehen ___ Tür.",opts:["vor der","vor die","hinter der","hinter die"],a:"vor der",sol:"VOR DER Tür – wo? stehen = Position → Dativ (die → der)."},
+  {s:"Der Drache kriecht ___ Höhle.",opts:["in die","in der","aus der","durch die"],a:"in die",sol:"IN DIE Höhle – wohin? kriechen (hinein) = Bewegung → Akkusativ (die bleibt die)."},
+  {s:"Der Drache schläft ___ Höhle.",opts:["in der","in die","vor der","aus der"],a:"in der",sol:"IN DER Höhle – wo? schlafen = Position → Dativ (die → der)."},
+  {s:"Das Sandwich fällt ___ Boden.",opts:["auf den","auf dem","unter den","unter dem"],a:"auf den",sol:"AUF DEN Boden – wohin? fallen = Bewegung → Akkusativ (der → den)."},
+  {s:"Das Sandwich liegt ___ Boden.",opts:["auf dem","auf den","unter dem","unter den"],a:"auf dem",sol:"AUF DEM Boden – wo? liegen = Position → Dativ (der → dem)."},
+  {s:"Finn hängt seine Jacke ___ Haken.",opts:["an den","an dem","auf den","auf dem"],a:"an den",sol:"AN DEN Haken – wohin? hängen (transitiv) = Bewegung → Akkusativ (der → den)."},
+  {s:"Finns Jacke hängt ___ Haken.",opts:["an dem","an den","auf dem","auf den"],a:"an dem",sol:"AN DEM Haken – wo? hängen (intransitiv) = Position → Dativ (der → dem)."},
+  {s:"Das Kind kriecht ___ Tisch.",opts:["unter den","unter dem","hinter den","hinter dem"],a:"unter den",sol:"UNTER DEN Tisch – wohin? kriechen = Bewegung → Akkusativ (der → den)."},
+  {s:"Das Kind spielt ___ Tisch.",opts:["unter dem","unter den","hinter dem","hinter den"],a:"unter dem",sol:"UNTER DEM Tisch – wo? spielen = Position → Dativ (der → dem)."},
+  {s:"Der Pirat legt den Schatz ___ Sofa.",opts:["hinter das","hinter dem","unter das","unter dem"],a:"hinter das",sol:"HINTER DAS Sofa – wohin? legen = Bewegung → Akkusativ (das bleibt das)."},
+  {s:"Der Schatz liegt ___ Sofa.",opts:["hinter dem","hinter das","unter dem","unter das"],a:"hinter dem",sol:"HINTER DEM Sofa – wo? liegen = Position → Dativ (das → dem)."},
+  {s:"Die Ameise läuft ___ Rucksack.",opts:["in den","in dem","auf den","auf dem"],a:"in den",sol:"IN DEN Rucksack – wohin? hineinlaufen = Bewegung → Akkusativ (der → den)."},
+  {s:"Das Nilpferd sitzt ___ Lehrerpult.",opts:["hinter dem","hinter das","auf dem","auf das"],a:"hinter dem",sol:"HINTER DEM Lehrerpult – wo? sitzen = Position → Dativ (das → dem)."},
+]},
+
+// ---- 2. VERB + PRÄPOSITION ----
+praep2:{title:"Verb + Präposition – Feste Verbindungen",type:"choice",items:[
+  {s:"Ella wartet ___ die nächste Nachricht.",opts:["auf","für","an","nach"],a:"auf",sol:"WARTEN AUF – immer! Man wartet auf jemanden/etwas. auf + Akkusativ."},
+  {s:"Finn denkt immer ___ seinen besten Freund.",opts:["an","auf","über","von"],a:"an",sol:"DENKEN AN – man denkt an jemanden/etwas. an + Akkusativ."},
+  {s:"Mia träumt ___ einem eigenen Pferd.",opts:["von","an","über","auf"],a:"von",sol:"TRÄUMEN VON – immer von! von + Dativ."},
+  {s:"Die Kinder freuen sich ___ den Schulausflug.",opts:["auf","über","von","bei"],a:"auf",sol:"SICH FREUEN AUF – Vorfreude auf etwas Zukünftiges! auf + Akkusativ."},
+  {s:"Ben freut sich ___ das tolle Geschenk.",opts:["über","auf","von","für"],a:"über",sol:"SICH FREUEN ÜBER – Reaktion auf etwas Vorhandenes/Passiertes. über + Akkusativ."},
+  {s:"Der Schüler hat Angst ___ dem Referat.",opts:["vor","auf","an","über"],a:"vor",sol:"ANGST HABEN VOR – immer vor! vor + Dativ."},
+  {s:"Wir sprechen gerade ___ das neue Spiel.",opts:["über","mit","an","von"],a:"über",sol:"SPRECHEN ÜBER – über ein Thema. über + Akkusativ."},
+  {s:"Lena interessiert sich sehr ___ Astronomie.",opts:["für","an","über","auf"],a:"für",sol:"SICH INTERESSIEREN FÜR – immer für! für + Akkusativ."},
+  {s:"Der Detektiv kümmert sich ___ den Fall.",opts:["um","für","an","auf"],a:"um",sol:"SICH KÜMMERN UM – immer um! um + Akkusativ."},
+  {s:"Ella erinnert sich gut ___ den letzten Sommer.",opts:["an","über","auf","von"],a:"an",sol:"SICH ERINNERN AN – an jemanden/etwas. an + Akkusativ."},
+  {s:"Ben ärgert sich sehr ___ den Regen.",opts:["über","an","auf","von"],a:"über",sol:"SICH ÄRGERN ÜBER – über etwas Ärgerliches. über + Akkusativ."},
+  {s:"Das ganze Publikum lacht ___ den Clown.",opts:["über","an","auf","mit"],a:"über",sol:"LACHEN ÜBER – über etwas Lustiges. über + Akkusativ."},
+  {s:"Der Roboter reagiert nicht ___ Befehle.",opts:["auf","an","über","von"],a:"auf",sol:"REAGIEREN AUF – immer auf! auf + Akkusativ."},
+  {s:"Die Mutter passt ___ ihr kleines Baby auf.",opts:["auf","über","an","für"],a:"auf",sol:"AUFPASSEN AUF – auf jemanden aufpassen. auf + Akkusativ."},
+  {s:"Finn beschäftigt sich den ganzen Nachmittag ___ Lego.",opts:["mit","über","an","auf"],a:"mit",sol:"SICH BESCHÄFTIGEN MIT – mit etwas beschäftigt sein. mit + Dativ."},
+  {s:"Wir bedanken uns herzlich ___ der Lehrerin.",opts:["bei","mit","an","für"],a:"bei",sol:"SICH BEDANKEN BEI – bei jemandem. bei + Dativ."},
+  {s:"Das Kind bittet ___ ein zweites Eis.",opts:["um","für","nach","an"],a:"um",sol:"BITTEN UM – um etwas bitten. um + Akkusativ."},
+  {s:"Ella zweifelt ___ der Lösung.",opts:["an","auf","über","von"],a:"an",sol:"ZWEIFELN AN – an etwas zweifeln. an + Dativ."},
+  {s:"Der Zauberer sorgt ___ seine Drachen.",opts:["für","um","an","über"],a:"für",sol:"SORGEN FÜR – für jemanden sorgen. für + Akkusativ."},
+  {s:"Finn spricht mit seiner Lehrerin ___ den Test.",opts:["über","mit","an","von"],a:"über",sol:"SPRECHEN ÜBER – über ein Thema (nicht: 'sprechen mit einem Thema'!). über + Akkusativ."},
+]},
+
+// ---- 3. TEMPORALE PRÄPOSITIONEN ----
+praep3:{title:"Temporale Präpositionen – Wann?",type:"choice",items:[
+  {s:"Die Ferien beginnen ___ 15. Juli.",c:"Datum/Wochentag?",opts:["am","im","an","in"],a:"am",sol:"AM 15. Juli – Daten und Wochentage: am + Dativ."},
+  {s:"Wir fahren ___ Sommer nach Kroatien.",c:"Jahreszeit!",opts:["im","am","in","an"],a:"im",sol:"IM Sommer – Jahreszeiten und Monate: im (= in dem) + Dativ."},
+  {s:"Der Film beginnt ___ 20:00 Uhr.",c:"Uhrzeit!",opts:["um","am","im","an"],a:"um",sol:"UM 20:00 Uhr – Uhrzeiten immer mit um!"},
+  {s:"Ella lernt Deutsch ___ drei Jahren.",c:"Von damals bis heute – immer noch!",opts:["seit","vor","nach","ab"],a:"seit",sol:"SEIT drei Jahren – von einem Punkt in der Vergangenheit bis jetzt. seit + Dativ."},
+  {s:"Wir sehen uns ___ einer Woche.",c:"In der Zukunft, nach einer Wartezeit.",opts:["in","seit","vor","ab"],a:"in",sol:"IN einer Woche – Zeitspanne bis zu einem Punkt in der Zukunft. in + Dativ."},
+  {s:"Der Kurs läuft ___ Mai.",c:"Er endet dann.",opts:["bis","seit","ab","nach"],a:"bis",sol:"BIS Mai – Endpunkt. bis + Akkusativ."},
+  {s:"Das neue Schuljahr beginnt ___ September.",c:"Startpunkt in der Zukunft.",opts:["ab","seit","bis","vor"],a:"ab",sol:"AB September – Startpunkt von da an. ab + Dativ."},
+  {s:"___ dem Mittagessen macht Finn Hausaufgaben.",c:"Wann genau – vorher oder nachher?",opts:["Nach","Vor","Seit","Während"],a:"Nach",sol:"NACH dem Mittagessen – zeitlich danach. nach + Dativ."},
+  {s:"Ben schläft ein ___ der langen Fahrt.",c:"Gleichzeitig mit der Fahrt.",opts:["während","vor","nach","seit"],a:"während",sol:"WÄHREND der Fahrt – gleichzeitig. während + Genitiv."},
+  {s:"Ella hat ___ dem Zahnarzttermin Angst.",c:"Noch bevor sie dort ist.",opts:["vor","nach","seit","bis"],a:"vor",sol:"VOR dem Termin – noch nicht dort, aber schon nervös. vor + Dativ."},
+  {s:"Er lernt ___ einer Stunde für die Prüfung.",c:"Hat schon vor einer Stunde angefangen.",opts:["seit","vor","ab","in"],a:"seit",sol:"SEIT einer Stunde – begann damals und dauert noch an. seit + Dativ."},
+  {s:"___ Montag gibt es einen Test.",c:"An welchem Wochentag?",opts:["Am","Im","An","In"],a:"Am",sol:"AM Montag – Wochentage: am + Dativ."},
+  {s:"Das Spiel endet ___ Mitternacht.",c:"Welche Präposition bei Uhrzeiten?",opts:["um","am","im","an"],a:"um",sol:"UM Mitternacht – Uhrzeit: immer um!"},
+  {s:"Finn hat ___ dem Ausflug noch nie so gelacht.",c:"Seitdem geht es ihm besser.",opts:["seit","vor","nach","bis"],a:"seit",sol:"SEIT dem Ausflug – von diesem Moment anhaltend bis heute. seit + Dativ."},
+  {s:"Wir treffen uns ___ Samstag.",c:"An welchem Tag?",opts:["am","im","an","in"],a:"am",sol:"AM Samstag – Wochentag: am + Dativ."},
+  {s:"Die Schule beginnt ___ Herbst.",c:"Welche Jahreszeit?",opts:["im","am","an","in"],a:"im",sol:"IM Herbst – Jahreszeit: im + Dativ."},
+  {s:"Lena schläft ein, ___ der Lehrer spricht.",c:"Gleichzeitig!",opts:["während","bevor","nachdem","obwohl"],a:"während",sol:"WÄHREND – gleichzeitig. während + Genitiv."},
+  {s:"___ dem Konzert gehen wir noch Eis essen.",c:"Hinterher.",opts:["Nach","Vor","Seit","Bis"],a:"Nach",sol:"NACH dem Konzert – danach. nach + Dativ."},
+  {s:"Der Zug kommt ___ 5 Minuten an.",c:"Fast da – wie lange noch?",opts:["in","seit","vor","ab"],a:"in",sol:"IN 5 Minuten – Zeitspanne bis zum Ereignis. in + Dativ."},
+  {s:"___ dem Test war Finn sehr erleichtert.",c:"Der Test ist schon vorbei.",opts:["Nach","Vor","Seit","Bis"],a:"Nach",sol:"NACH dem Test – danach. nach + Dativ."},
+]},
+
+// ---- 4. PERFEKT – KNIFFLIG ----
+perfekt:{title:"Perfekt – Die kniffligen Fälle",type:"choice",items:[
+  {s:"Der Drache ___ sich lange nicht gewaschen.",opts:["hat","ist","habe","sein"],a:"hat",sol:"HAT sich gewaschen – reflexives Verb, sich waschen → haben (keine Ortsveränderung)."},
+  {s:"Das Einhorn ___ in den Wald gelaufen.",opts:["ist","hat","sind","haben"],a:"ist",sol:"IST gelaufen – Bewegung von A nach B → sein."},
+  {s:"Ben ___ das Buch auf den Tisch gelegt.",opts:["hat","ist","habe","bin"],a:"hat",sol:"HAT gelegt – legen ist transitiv (das Buch = Objekt) → haben."},
+  {s:"Das Buch ___ auf dem Tisch gelegen.",opts:["hat","ist","habe","sein"],a:"hat",sol:"HAT gelegen – liegen → haben (Standarddeutsch). Österreich: auch 'ist gelegen'."},
+  {s:"Der Ritter ___ stundenlang vor dem Schloss gestanden.",opts:["hat","ist","habe","sein"],a:"hat",sol:"HAT gestanden – stehen → haben (keine Veränderung). Österreich: auch 'ist gestanden'."},
+  {s:"Das Kind ___ plötzlich aufgewacht.",opts:["ist","hat","bin","habe"],a:"ist",sol:"IST aufgewacht – Zustandswechsel: Schlaf → Wachen → sein."},
+  {s:"Lena ___ sich sehr über das Geschenk gefreut.",opts:["hat","ist","habe","bin"],a:"hat",sol:"HAT sich gefreut – sich freuen (reflexiv) → haben."},
+  {s:"Der Zug ___ um 9 Uhr pünktlich abgefahren.",opts:["ist","hat","sind","haben"],a:"ist",sol:"IST abgefahren – Bewegung weg von einem Punkt → sein."},
+  {s:"Das Eis ___ in der Sonne geschmolzen.",opts:["ist","hat","sind","haben"],a:"ist",sol:"IST geschmolzen – Zustandswechsel: fest → flüssig → sein."},
+  {s:"Mia ___ ihrer Oma beim Kochen geholfen.",opts:["hat","ist","habe","bin"],a:"hat",sol:"HAT geholfen – helfen → haben."},
+  {s:"Ben ___ dem alten Mann auf der Straße begegnet.",opts:["ist","hat","bin","habe"],a:"ist",sol:"IST begegnet – begegnen → sein! (selten bekannt) begegnen + Dativ."},
+  {s:"Die Katze ___ plötzlich aufgesprungen.",opts:["ist","hat","sind","haben"],a:"ist",sol:"IST aufgesprungen – Zustandswechsel + Bewegung nach oben → sein."},
+  {s:"Wir ___ das Experiment im Labor beobachtet.",opts:["haben","sind","hat","ist"],a:"haben",sol:"HABEN beobachtet – transitiv (das Experiment = Objekt) → haben."},
+  {s:"Der Ritter ___ seinen Feind im Kampf besiegt.",opts:["hat","ist","habe","bin"],a:"hat",sol:"HAT besiegt – transitiv → haben."},
+  {s:"Das Gespenst ___ mitten in der Nacht durch die Wand gegangen.",opts:["ist","hat","sind","haben"],a:"ist",sol:"IST gegangen – gehen = Bewegung → sein."},
+  {s:"Ella ___ in diesem Sommer sehr schnell gewachsen.",opts:["ist","hat","sind","haben"],a:"ist",sol:"IST gewachsen – wachsen = Zustandsveränderung → sein."},
+  {s:"Das Krokodil ___ lautlos ins Wasser gesprungen.",opts:["ist","hat","sind","haben"],a:"ist",sol:"IST gesprungen – Bewegung → sein."},
+  {s:"Finn ___ sich das Knie aufgeschlagen.",opts:["hat","ist","bin","habe"],a:"hat",sol:"HAT sich aufgeschlagen – reflexiv mit Dativobjekt → haben."},
+  {s:"Die Rakete ___ erfolgreich abgehoben.",opts:["ist","hat","sind","haben"],a:"ist",sol:"IST abgehoben – Bewegung weg von der Erde → sein."},
+  {s:"Lena ___ beim Laufen gestürzt.",opts:["ist","hat","bin","habe"],a:"ist",sol:"IST gestürzt – stürzen = Zustandswechsel / Bewegung nach unten → sein."},
+  {s:"Der Ballon ___ mit lautem Knall geplatzt.",opts:["ist","hat","sind","haben"],a:"ist",sol:"IST geplatzt – platzen = Zustandswechsel → sein."},
+  {s:"Wir ___ im Wald gezeltet und Sterne geschaut.",opts:["haben","sind","hat","ist"],a:"haben",sol:"HABEN gezeltet – zelten ohne Ortsveränderung → haben."},
+]},
+
+// ---- 5. KONJUNKTIV II ----
+verbformen:{title:"Konjunktiv II – Wünsche & Bedingungen",type:"choice",items:[
+  {s:"Wenn ich ein Drache ___, würde ich alles anbraten.",opts:["wäre","war","sei","bin"],a:"wäre",sol:"WÄRE – Konjunktiv II von 'sein'. Irrealis: ich bin kein Drache, aber wenn..."},
+  {s:"Ich ___ so gerne ein Haustier!",opts:["hätte","habe","hatte","haben"],a:"hätte",sol:"HÄTTE – Konjunktiv II von 'haben'. Wunsch: ich habe keins, aber ich möchte."},
+  {s:"___ du mir bitte helfen?",opts:["Könntest","Kannst","Konntest","Können"],a:"Könntest",sol:"KÖNNTEST – Konjunktiv II von 'können'. Höflichere Bitte als 'kannst'!"},
+  {s:"Das ___ doch eigentlich funktionieren!",opts:["müsste","musste","muss","müsse"],a:"müsste",sol:"MÜSSTE – Konjunktiv II von 'müssen'. müsste = sollte eigentlich klappen."},
+  {s:"Wenn wir Flügel hätten, ___ wir fliegen.",opts:["könnten","können","konnten","konnte"],a:"könnten",sol:"KÖNNTEN – Konjunktiv II Plural von 'können'. Wäre möglich, wenn..."},
+  {s:"An deiner Stelle ___ ich das nicht machen.",opts:["würde","werde","wird","worden"],a:"würde",sol:"WÜRDE + Infinitiv – Konjunktiv II Umschreibung. An deiner Stelle würde ich..."},
+  {s:"Er ___ wirklich mehr lernen.",opts:["sollte","soll","sollen","solle"],a:"sollte",sol:"SOLLTE – Konjunktiv II von 'sollen'. Ratschlag ohne absolute Pflicht."},
+  {s:"Wenn sie mehr Zeit ___, würde sie Klavier spielen.",opts:["hätte","hat","hatte","haben"],a:"hätte",sol:"HÄTTE – Konjunktiv II von 'haben'. Sie hat keine Zeit, aber wenn..."},
+  {s:"___ ich bitte einen Keks haben?",opts:["Dürfte","Durfte","Darf","Dürfe"],a:"Dürfte",sol:"DÜRFTE – Konjunktiv II von 'dürfen'. Höflichste Form der Bitte!"},
+  {s:"Das ___ ich nie im Leben tun!",opts:["würde","werde","wurde","werden"],a:"würde",sol:"WÜRDE – Konjunktiv II: würde...tun = Aussage über (irreale) Handlung."},
+  {s:"Wenn er krank ___, bliebe er zu Hause.",opts:["wäre","war","ist","sei"],a:"wäre",sol:"WÄRE – Konjunktiv II von 'sein'. Er ist nicht krank, aber hypothetisch..."},
+  {s:"Sie ___ wirklich früher schlafen gehen.",opts:["sollte","soll","sollt","sollten"],a:"sollte",sol:"SOLLTE – Ratschlag. Sie tut es nicht, aber es wäre besser."},
+  {s:"Ohne dich ___ ich das nie geschafft!",opts:["hätte","habe","hatte","haben"],a:"hätte",sol:"HÄTTE – Konjunktiv II Perfekt: hätte + Partizip. Hypothetische Vergangenheit."},
+  {s:"Das ___ wirklich schön sein!",opts:["wäre","war","ist","sei"],a:"wäre",sol:"WÄRE – Wunschaussage: das wäre schön = Konjunktiv II von 'sein'."},
+  {s:"An deiner Stelle ___ ich mehr Wasser trinken.",opts:["würde","werde","wird","worden"],a:"würde",sol:"WÜRDE + Infinitiv – Ratschlag im Konjunktiv II."},
+  {s:"Wenn ich Zauberin ___, ___ ich Hausaufgaben verschwinden lassen.",opts:["wäre / würde","war / wurde","sei / solle","bin / werde"],a:"wäre / würde",sol:"WÄRE / WÜRDE – klassisches wenn-Paar: wenn + Konjunktiv II → Hauptsatz mit würde."},
+  {s:"Sie ___ eigentlich in der Schule sein.",opts:["sollte","soll","solle","sollen"],a:"sollte",sol:"SOLLTE – Erwartung, die vielleicht nicht erfüllt wird. Konjunktiv II von 'sollen'."},
+  {s:"Ich ___ so gerne Astronautin werden!",opts:["würde","werde","wird","worden"],a:"würde",sol:"WÜRDE + Infinitiv – Wunsch: ich würde gerne...werden."},
+  {s:"___ du mir sagen, wie spät es ist?",opts:["Könntest","Kannst","Konntest","Können"],a:"Könntest",sol:"KÖNNTEST – höfliche Frage im Konjunktiv II."},
+  {s:"Das ___ ein großer Fehler gewesen sein.",opts:["könnte","kann","konnte","könne"],a:"könnte",sol:"KÖNNTE – Konjunktiv II: Vermutung. Es ist möglich, dass es ein Fehler war."},
+]},
+
+// ---- 6. MODALVERBEN PRÄTERITUM ----
+modal:{title:"Modalverben – Vergangenheit (Präteritum)",type:"choice",items:[
+  {s:"Früher ___ Ben jeden Tag sein Zimmer aufräumen.",c:"Seine Mutter hatte keine Wahl gelassen.",opts:["musste","muss","hätte müssen","müsste"],a:"musste",sol:"MUSSTE – Zwang in der Vergangenheit. müssen → musste (Präteritum, keine Perfektform!)."},
+  {s:"Als Kind ___ Lena abends um 8 ins Bett.",c:"Die Eltern hatten es bestimmt.",opts:["musste","muss","müsste","müssen"],a:"musste",sol:"MUSSTE – Pflicht in der Vergangenheit. müssen → musste."},
+  {s:"Gestern ___ Ben nicht in die Schule gehen.",c:"Er hatte Fieber – Verbot der Eltern.",opts:["durfte","darf","musste","konnte"],a:"durfte",sol:"DURFTE NICHT – Verbot. musste nicht = nicht nötig; durfte nicht = verboten!"},
+  {s:"Als Finn 5 war, ___ er noch nicht lesen.",c:"Die Fähigkeit fehlte noch.",opts:["konnte","kann","muss","musste"],a:"konnte",sol:"KONNTE NICHT – fehlende Fähigkeit in der Vergangenheit. können → konnte."},
+  {s:"Lena ___ gestern das Konzert nicht besuchen.",c:"Ihre Eltern hatten es verboten.",opts:["durfte","darf","wollte","mochte"],a:"durfte",sol:"DURFTE NICHT – Verbot von den Eltern. dürfen → durfte."},
+  {s:"Ben ___ unbedingt das neue Spiel haben.",c:"Er hatte tagelang davon geredet.",opts:["wollte","will","sollte","musste"],a:"wollte",sol:"WOLLTE – eigener starker Wunsch. wollen → wollte."},
+  {s:"Das Kind ___ nicht alleine in den Wald.",c:"Die Eltern hatten es ausdrücklich gesagt.",opts:["sollte","soll","musste","wollte"],a:"sollte",sol:"SOLLTE NICHT – Auftrag/Vorschrift von den Eltern. sollen → sollte."},
+  {s:"Als er klein war, ___ Ben gar keine Suppe.",c:"Er mochte sie wirklich nicht.",opts:["mochte","mag","wollte","musste"],a:"mochte",sol:"MOCHTE KEINE – Abneigung in der Vergangenheit. mögen → mochte."},
+  {s:"Der Zauberer ___ drei Tage lang keine Magie benutzen.",c:"So stand es im Regelwerk.",opts:["durfte","konnte","musste","wollte"],a:"durfte",sol:"DURFTE NICHT – Verbot durch Regelwerk. dürfen → durfte."},
+  {s:"Finn ___ gestern sehr früh aufstehen.",c:"Der Bus fuhr um 6 Uhr ab.",opts:["musste","durfte","sollte","wollte"],a:"musste",sol:"MUSSTE – Zwang durch äußere Umstände. müssen → musste."},
+  {s:"Ella ___ als Kind sehr gut reiten.",c:"Sie hatte jahrelange Übung.",opts:["konnte","kann","muss","will"],a:"konnte",sol:"KONNTE – Fähigkeit in der Vergangenheit. können → konnte."},
+  {s:"Das Krokodil ___ nicht in die Schulkantine.",c:"Der Direktor hatte es verboten.",opts:["durfte","musste","wollte","konnte"],a:"durfte",sol:"DURFTE NICHT – offizielles Verbot. dürfen → durfte."},
+  {s:"Ben ___ gestern für die Lehrerin eine Nachricht bringen.",c:"Sie hatte ihn darum gebeten.",opts:["sollte","musste","wollte","durfte"],a:"sollte",sol:"SOLLTE – Auftrag von jemandem anderen. sollen → sollte."},
+  {s:"Früher ___ man hier keinen Hund mitbringen.",c:"Es gab ein Schild am Eingang.",opts:["durfte","musste","konnte","mochte"],a:"durfte",sol:"DURFTE NICHT – nicht erlaubt. dürfen → durfte."},
+  {s:"Als Lena krank war, ___ sie einfach nicht aufstehen.",c:"Körperlich unmöglich.",opts:["konnte","wollte","sollte","mochte"],a:"konnte",sol:"KONNTE NICHT – physische Unmöglichkeit. können → konnte."},
+  {s:"Der Pirat ___ unbedingt nach dem Schatz suchen.",c:"Sein eigener Plan.",opts:["wollte","sollte","musste","durfte"],a:"wollte",sol:"WOLLTE – eigener Wille. wollen → wollte."},
+  {s:"Das Einhorn ___ im Unterricht leise sein.",c:"Die Lehrerin hatte es dreimal gesagt.",opts:["musste","durfte","wollte","mochte"],a:"musste",sol:"MUSSTE – Pflicht, keine andere Möglichkeit. müssen → musste."},
+  {s:"Ben ___ als Kind keine Süßigkeiten vor dem Abendessen.",c:"Das war die Hausregel.",opts:["durfte","musste","wollte","sollte"],a:"durfte",sol:"DURFTE KEINE – Verbot. dürfen → durfte. (durfte keine = kein + dürfen nicht)"},
+  {s:"Der Roboter ___ anfangs kein Deutsch sprechen.",c:"Er hatte es noch nicht gelernt.",opts:["konnte","wollte","musste","durfte"],a:"konnte",sol:"KONNTE NICHT – fehlende Fähigkeit. können → konnte."},
+  {s:"Finn ___ gestern beim Aufräumen helfen.",c:"Das hatte seine Mutter bestimmt.",opts:["sollte","musste","wollte","mochte"],a:"sollte",sol:"SOLLTE – Auftrag von der Mutter. Vorsicht: musste = harter Zwang, sollte = Auftrag/Bitte."},
+  {s:"Mia ___ als Kind sehr gerne Märchen hören.",c:"Immer wieder dieselben!",opts:["mochte","wollte","sollte","musste"],a:"mochte",sol:"MOCHTE – Vorliebe in der Vergangenheit. mögen → mochte."},
+  {s:"Die Klasse ___ einen Ausflug ins Museum machen.",c:"Die Lehrerin hatte es geplant.",opts:["sollte","musste","wollte","durfte"],a:"sollte",sol:"SOLLTE – Plan/Vorhaben der Lehrerin für die Klasse. sollen → sollte."},
+]},
+
+// ---- 7. ALS ODER WIE? ----
+komp1:{title:"Komparativ – als oder wie?",type:"choice",items:[
+  {s:"Der Elefant ist größer ___ der Esel.",opts:["als","wie","als wie","so wie"],a:"als",sol:"ALS – nach dem Komparativ (größer) immer als. Ungleicher Vergleich."},
+  {s:"Finn ist genauso groß ___ Ben.",opts:["wie","als","als wie","so als"],a:"wie",sol:"WIE – genauso...wie = Gleichheit."},
+  {s:"Mia läuft schneller ___ ich.",opts:["als","wie","so wie","als wie"],a:"als",sol:"ALS – schneller = Komparativ → als."},
+  {s:"Der Hund ist nicht so gefährlich ___ der Löwe.",opts:["wie","als","als wie","so als"],a:"wie",sol:"WIE – nicht so...wie = Gleichheitsvergleich (negiert). Immer wie, nie als!"},
+  {s:"Das Einhorn ist schöner ___ alle anderen Pferde.",opts:["als","wie","so wie","als wie"],a:"als",sol:"ALS – schöner = Komparativ → als."},
+  {s:"Lena ist genauso alt ___ ihre Cousine.",opts:["wie","als","so als","als wie"],a:"wie",sol:"WIE – genauso alt wie = gleich alt. Gleichheitsvergleich → wie."},
+  {s:"Ben schläft länger ___ erlaubt.",opts:["als","wie","so wie","als wie"],a:"als",sol:"ALS – länger = Komparativ → als."},
+  {s:"Die Prüfung war nicht so schwer ___ erwartet.",opts:["wie","als","als wie","so als"],a:"wie",sol:"WIE – nicht so...wie. Achtung: auch wenn ungleich, bleibt es wie!"},
+  {s:"Der Drache ist viel größer ___ das Einhorn.",opts:["als","wie","so als","als wie"],a:"als",sol:"ALS – größer = Komparativ → als."},
+  {s:"Das Eis schmeckt genauso gut ___ der Kuchen.",opts:["wie","als","als wie","so wie"],a:"wie",sol:"WIE – genauso gut wie = Gleichheit."},
+  {s:"Heute ist es wärmer ___ gestern.",opts:["als","wie","so wie","als wie"],a:"als",sol:"ALS – wärmer = Komparativ → als."},
+  {s:"Ella spielt Klavier so gut ___ ihre Lehrerin.",opts:["wie","als","so als","als wie"],a:"wie",sol:"WIE – so gut wie = Gleichheit (fast gleich)."},
+  {s:"Der Gepard ist schneller ___ das Auto.",opts:["als","wie","als wie","so wie"],a:"als",sol:"ALS – schneller = Komparativ → als."},
+  {s:"Er ist genauso müde ___ ich.",opts:["wie","als","als wie","so als"],a:"wie",sol:"WIE – genauso müde wie = gleich müde."},
+  {s:"Der Berg ist höher ___ ich dachte.",opts:["als","wie","so wie","als wie"],a:"als",sol:"ALS – höher = Komparativ → als."},
+  {s:"Der Film ist nicht so gut ___ das Buch.",opts:["wie","als","als wie","so als"],a:"wie",sol:"WIE – nicht so gut wie. Auch negativer Gleichheitsvergleich → wie (nie als!)."},
+  {s:"Lena arbeitet fleißiger ___ alle anderen.",opts:["als","wie","als wie","so wie"],a:"als",sol:"ALS – fleißiger = Komparativ → als."},
+  {s:"Das Nilpferd ist genauso schwer ___ ein kleines Auto.",opts:["wie","als","so als","als wie"],a:"wie",sol:"WIE – genauso schwer wie = Gleichheitsvergleich."},
+  {s:"Der Kuchen schmeckt heute besser ___ gestern.",opts:["als","wie","als wie","so wie"],a:"als",sol:"ALS – besser = Komparativ (gut → besser → am besten) → als."},
+  {s:"Finn kann nicht so hoch springen ___ sein Bruder.",opts:["wie","als","als wie","so als"],a:"wie",sol:"WIE – nicht so hoch wie. Negativer Gleichheitsvergleich → immer wie!"},
+]},
+
+// ---- 8. DREI-SACHEN-VERGLEICH ----
+komp2:{title:"Drei Dinge vergleichen – Sprich die Sätze!",type:"read",items:[
+  {s:"🦇 Fledermaus · 🦉 Eule · 🚀 Rakete",c:"Vergleicht nach: SCHNELL",sol:"Die Fledermaus ist schnell. Die Eule ist schneller als die Fledermaus. Die Rakete ist am schnellsten."},
+  {s:"🥉 Bronze · 🥈 Silber · 🥇 Gold",c:"Vergleicht nach: WERTVOLL",sol:"Bronze ist wertvoll. Silber ist wertvoller als Bronze. Gold ist am wertvollsten."},
+  {s:"🌱 Setzling · 🌲 Baum · 🌳 Urwaldriese",c:"Vergleicht nach: GROSS",sol:"Der Setzling ist groß – nein, klein! Der Baum ist größer. Der Urwaldriese ist am größten."},
+  {s:"🎵 Summton · 🎶 Rocklied · 🎸 Heavy-Metal-Konzert",c:"Vergleicht nach: LAUT",sol:"Ein Summton ist laut. Ein Rocklied ist lauter. Ein Heavy-Metal-Konzert ist am lautesten."},
+  {s:"🧊 Eiswürfel · 🌨️ Schnee · 🌌 Weltraum",c:"Vergleicht nach: KALT",sol:"Ein Eiswürfel ist kalt. Schnee ist kälter. Der Weltraum ist am kältesten."},
+  {s:"🦐 Garnele · 🐟 Fisch · 🐋 Blauwal",c:"Vergleicht nach: GROSS",sol:"Eine Garnele ist groß – nein, winzig! Ein Fisch ist größer. Ein Blauwal ist am größten."},
+  {s:"🍭 Bonbon · 🎂 Geburtstagskuchen · 🍯 Honig",c:"Vergleicht nach: SÜSS",sol:"Ein Bonbon ist süß. Ein Geburtstagskuchen ist süßer. Honig ist am süßesten."},
+  {s:"🌧️ Nieselregen · ⛈️ Gewitter · 🌪️ Tornado",c:"Vergleicht nach: GEFÄHRLICH",sol:"Nieselregen ist gefährlich. Ein Gewitter ist gefährlicher. Ein Tornado ist am gefährlichsten."},
+  {s:"😕 Hausaufgaben · 📋 Prüfung · 🎓 Abitur",c:"Vergleicht nach: SCHWER",sol:"Hausaufgaben sind schwer. Eine Prüfung ist schwerer. Das Abitur ist am schwersten."},
+  {s:"🐢 Schildkröte · 🐌 Schnecke · 😴 Finn beim Aufwachen",c:"Vergleicht nach: LANGSAM",sol:"Die Schildkröte ist langsam. Die Schnecke ist langsamer. Finn beim Aufwachen ist am langsamsten."},
+  {s:"🏠 Gartenhaus · 🏢 Hochhaus · 🌋 Mount Everest",c:"Vergleicht nach: HOCH",sol:"Ein Gartenhaus ist hoch. Ein Hochhaus ist höher. Der Mount Everest ist am höchsten."},
+  {s:"📱 Handy · 💻 Laptop · 🖥️ Filmstudio-Rechner",c:"Vergleicht nach: TEUER",sol:"Ein Handy ist teuer. Ein Laptop ist teurer. Ein Filmstudio-Rechner ist am teuersten."},
+  {s:"🐛 Raupe · 🦋 Schmetterling · 🦅 Adler",c:"Vergleicht nach: MUTIG",sol:"Eine Raupe ist mutig. Ein Schmetterling ist mutiger. Ein Adler ist am mutigsten."},
+  {s:"😊 Lächeln · 😄 Lachen · 🦛 Nilpferd im Tutu",c:"Vergleicht nach: LUSTIG",sol:"Ein Lächeln ist lustig. Lachen ist lustiger. Ein Nilpferd im Tutu ist am lustigsten!"},
+  {s:"📻 Radio · 📺 Fernsehen · 🎮 Videospiel",c:"Vergleicht nach: SPANNEND (eure Meinung!)",sol:"Radio ist spannend. Fernsehen ist spannender. Ein Videospiel ist am spannendsten."},
+  {s:"🔦 Kerze · 💡 Glühbirne · ☀️ Sonne",c:"Vergleicht nach: HELL",sol:"Eine Kerze ist hell. Eine Glühbirne ist heller. Die Sonne ist am hellsten."},
+]},
+
+// ---- 9. VERNEINUNG – STARK ----
+vernein:{title:"Verneinung – Starke Verneinung",type:"read",items:[
+  {s:"Finn und Lena helfen beide.",sol:"WEDER Finn NOCH Lena helfen. (weder...noch = keiner von beiden)"},
+  {s:"Alle mögen diesen Film sehr.",sol:"NIEMAND mag diesen Film. (alle → niemand)"},
+  {s:"Das Chamäleon ist immer irgendwo sichtbar.",sol:"Das Chamäleon ist NIRGENDWO sichtbar. (immer irgendwo → nirgendwo/nirgends)"},
+  {s:"Ja, ich mache das natürlich sofort!",sol:"Auf KEINEN FALL mache ich das! / Das mache ich KEINESWEGS! (stärkste Verneinung)"},
+  {s:"Die Hexe mag Kinder und Tiere.",sol:"Die Hexe mag WEDER Kinder NOCH Tiere. (und → weder...noch)"},
+  {s:"Ella geht manchmal ins Kino.",sol:"Ella geht ÜBERHAUPT NICHT ins Kino. (manchmal → überhaupt nicht = vollständige Verneinung)"},
+  {s:"Der Pirat hat noch Geld.",sol:"Der Pirat hat KEIN Geld MEHR. (noch + Nomen → kein...mehr)"},
+  {s:"Ich habe etwas Interessantes gefunden.",sol:"Ich habe NICHTS Interessantes gefunden. (etwas → nichts)"},
+  {s:"Ben mag sowohl Mathe als auch Deutsch.",sol:"Ben mag WEDER Mathe NOCH Deutsch. Pech! (sowohl...als auch → weder...noch)"},
+  {s:"Das Krokodil putzt sich die Zähne jeden Tag.",sol:"Das Krokodil putzt sich SCHON LANGE NICHT MEHR die Zähne. (jeden Tag → schon lange nicht mehr)"},
+  {s:"Jemand hat mir geholfen.",sol:"NIEMAND hat mir geholfen. (jemand → niemand)"},
+  {s:"Irgendwo liegt ein Drache in unserem Garten.",sol:"NIRGENDWO liegt ein Drache in unserem Garten. (irgendwo → nirgendwo/nirgends)"},
+  {s:"Finn macht das vielleicht.",sol:"Finn macht das auf KEINEN FALL. (vielleicht → auf keinen Fall = absolute Verneinung)"},
+  {s:"Der Zauberer hat sowohl einen Zauberstab als auch einen Zylinder.",sol:"Der Zauberer hat WEDER einen Zauberstab NOCH einen Zylinder. (sowohl...als auch → weder...noch)"},
+  {s:"Überall hört man den Drachen schnarchen.",sol:"NIRGENDWO hört man den Drachen schnarchen. Endlich Stille! (überall → nirgendwo)"},
+  {s:"Das Nilpferd trinkt noch Tee.",sol:"Das Nilpferd trinkt KEINEN Tee MEHR. (noch + Nomen → kein...mehr)"},
+  {s:"Alle finden Montage wunderschön.",sol:"NIEMAND findet Montage wunderschön. (alle → niemand)"},
+  {s:"Es war irgendwie eine gute Idee.",sol:"Es war ÜBERHAUPT KEINE gute Idee. / Es war KEINESWEGS eine gute Idee."},
+  {s:"Der Schüler hat schon alle Hausaufgaben gemacht.",sol:"Der Schüler hat NOCH NICHT ALLE Hausaufgaben gemacht. / Er hat ÜBERHAUPT KEINE gemacht."},
+  {s:"Das Einhorn wohnt irgendwo in unserem Garten.",sol:"Das Einhorn wohnt NIRGENDWO in unserem Garten. Leider. (irgendwo → nirgendwo)"},
+]},
+
+// ---- 10. REFLEXIVPRONOMEN – NEUE SÄTZE ----
+reflex:{title:"Reflexivpronomen – Ich auch!",type:"read",items:[
+  {s:"Der Drache putzt sich die Zähne.",c:"Und du?",sol:"Ich putze MIR auch die Zähne. (Dativ: mir – Körperteil dabei!)"},
+  {s:"Das Einhorn kämmt sich die Mähne.",c:"Und du?",sol:"Ich kämme MIR auch das Haar. (Dativ: mir – Körperteil dabei!)"},
+  {s:"Der Ritter schmiedet sich ein neues Schwert.",c:"Und du?",sol:"Ich schmiede MIR auch ein Schwert – aus Karton! (Dativ: mir – Objekt dabei)"},
+  {s:"Der Ninja zieht sich die Maske über den Kopf.",c:"Und du?",sol:"Ich ziehe MIR auch eine Maske über den Kopf. (Dativ: mir – Körperteil dabei)"},
+  {s:"Der Pirat zeichnet sich eine Schatzkarte.",c:"Und du?",sol:"Ich zeichne MIR auch eine Schatzkarte! (Dativ: mir – Objekt dabei)"},
+  {s:"Der Zauberer braut sich einen Unsichtbarkeitstrank.",c:"Und du?",sol:"Ich braue MIR auch einen Trank! (Dativ: mir – Objekt dabei)"},
+  {s:"Der Minecraft-Spieler baut sich eine riesige Burg.",c:"Und du?",sol:"Ich baue MIR auch eine riesige Burg! (Dativ: mir – Objekt dabei)"},
+  {s:"Der Dinosaurier wünscht sich ein Eis.",c:"Und du?",sol:"Ich wünsche MIR auch ein Eis. (Dativ: mir – Objekt dabei)"},
+  {s:"Der Detektiv notiert sich den geheimen Hinweis.",c:"Und du?",sol:"Ich notiere MIR auch den Hinweis. (Dativ: mir – Objekt dabei)"},
+  {s:"Der Wikinger schnitzt sich ein Boot.",c:"Und du?",sol:"Ich schnitze MIR auch ein Boot. (Dativ: mir – Objekt dabei)"},
+  {s:"Das Einhorn wäscht sich.",c:"Und du?",sol:"Ich wasche MICH auch. (Akkusativ: mich – kein Objekt dabei!)"},
+  {s:"Der Hamster dreht sich im Rad.",c:"Und du?",sol:"Ich drehe MICH auch im Kreis – ganz schwindelig! (Akkusativ: mich)"},
+  {s:"Der Löwe streckt sich in der Sonne.",c:"Und du?",sol:"Ich strecke MICH auch. (Akkusativ: mich)"},
+  {s:"Der Roboter schaltet sich automatisch ab.",c:"Und du?",sol:"Ich schalte MICH auch ab – Schlafenszeit! (Akkusativ: mich)"},
+  {s:"Der Pirat beeilt sich zum Schatz.",c:"Und du?",sol:"Ich beeile MICH auch! (Akkusativ: mich)"},
+  {s:"Der Superheld ärgert sich über den Schurken.",c:"Und du?",sol:"Ich ärgere MICH auch. (Akkusativ: mich)"},
+  {s:"Der Drache fürchtet sich vor dem Regen.",c:"Und du?",sol:"Ich fürchte MICH nicht vor dem Regen – nur vor Mathematiktests! (Akkusativ: mich)"},
+  {s:"Der Schüler langweilt sich im Unterricht.",c:"Und du?",sol:"Ich langweile MICH auch im Unterricht. Psssst! (Akkusativ: mich)"},
+  {s:"Der Drache freut sich auf das große Abenteuer.",c:"Und du?",sol:"Ich freue MICH auch auf das Abenteuer! (Akkusativ: mich)"},
+  {s:"Das Einhorn verwandelt sich in einen Regenbogen.",c:"Und du?",sol:"Ich verwandle MICH auch – in einen Drachen! (Akkusativ: mich)"},
+]},
+
+// ---- 11. PASSIV MIT VON & PERFEKT ----
+passiv:{title:"Passiv – mit von & Passiv Perfekt",type:"read",items:[
+  {s:"Der Detektiv löst den Fall.",c:"Sag es im Passiv – mit 'vom Detektiv'!",sol:"Der Fall WIRD VOM Detektiv gelöst. (von + Dativ → vom = von dem)"},
+  {s:"Die Lehrerin erklärt die Aufgabe.",c:"Passiv + von der Lehrerin!",sol:"Die Aufgabe WIRD VON DER Lehrerin erklärt."},
+  {s:"Jemand hat das Fenster geöffnet.",c:"Passiv Perfekt! (abgeschlossene Handlung)",sol:"Das Fenster WURDE GEÖFFNET. (Passiv Perfekt: wurde + Partizip II)"},
+  {s:"Der Koch hat die Suppe gemacht.",c:"Passiv Perfekt + vom Koch!",sol:"Die Suppe WURDE VOM Koch GEMACHT."},
+  {s:"Man muss die Hausaufgaben bis Montag abgeben.",c:"Passiv + Modalverb!",sol:"Die Hausaufgaben MÜSSEN bis Montag ABGEGEBEN WERDEN. (Modalverb + Passiv)"},
+  {s:"Mama hat den Kuchen gebacken.",c:"Passiv Perfekt!",sol:"Der Kuchen WURDE (VON MAMA) GEBACKEN."},
+  {s:"Der Arzt soll den Patienten untersuchen.",c:"Passiv + Modalverb!",sol:"Der Patient SOLL UNTERSUCHT WERDEN. (soll + Partizip + werden)"},
+  {s:"Niemand hat die Tür abgeschlossen.",c:"Passiv Perfekt mit Verneinung!",sol:"Die Tür WURDE NICHT ABGESCHLOSSEN."},
+  {s:"Man darf hier nicht rauchen.",c:"Passiv + Modalverb!",sol:"Hier DARF NICHT GERAUCHT WERDEN."},
+  {s:"Die Feuerwehr hat das Haus gerettet.",c:"Passiv Perfekt + von der Feuerwehr!",sol:"Das Haus WURDE VON DER FEUERWEHR GERETTET."},
+  {s:"Jemand hat mein Fahrrad gestohlen!",c:"Passiv Perfekt!",sol:"Mein Fahrrad WURDE GESTOHLEN!"},
+  {s:"Man muss das Licht ausmachen.",c:"Passiv + Modalverb!",sol:"Das Licht MUSS AUSGEMACHT WERDEN."},
+  {s:"Der Zauberer hat den Drachen verzaubert.",c:"Passiv Perfekt + vom Zauberer!",sol:"Der Drache WURDE VOM ZAUBERER VERZAUBERT."},
+  {s:"Man kann das Problem lösen.",c:"Passiv + Modalverb!",sol:"Das Problem KANN GELÖST WERDEN."},
+  {s:"Die Schüler haben die Aufgabe verstanden.",c:"Passiv Perfekt!",sol:"Die Aufgabe WURDE (VON DEN SCHÜLERN) VERSTANDEN."},
+  {s:"Man soll die Antwort laut vorlesen.",c:"Passiv + Modalverb! (trennbar!)",sol:"Die Antwort SOLL LAUT VORGELESEN WERDEN. (trennbar → vorgelesen, nicht vorlesen)"},
+  {s:"Der Erfinder hat den Roboter gebaut.",c:"Passiv Perfekt + vom Erfinder!",sol:"Der Roboter WURDE VOM ERFINDER GEBAUT."},
+  {s:"Man muss alle Fenster putzen.",c:"Passiv + Modalverb!",sol:"Alle Fenster MÜSSEN GEPUTZT WERDEN."},
+  {s:"Die Eltern haben das Geschenk versteckt.",c:"Passiv Perfekt!",sol:"Das Geschenk WURDE (VON DEN ELTERN) VERSTECKT."},
+  {s:"Man kann die Antwort googeln.",c:"Passiv + kann!",sol:"Die Antwort KANN GEGOOGELT WERDEN."},
+]},
+
+// ---- 12. PRONOMEN AKKUSATIV ----
+proakk:{title:"Personalpronomen – Akkusativ",type:"choice",items:[
+  {s:"Der Koch backt den Kuchen. → Er backt _____.",opts:["ihn","ihm","sie","es"],a:"ihn",sol:"IHN – der Kuchen (maskulin) → Akkusativ: ihn."},
+  {s:"Ben vermisst seine Katze. → Er vermisst _____.",opts:["sie","ihn","es","ihr"],a:"sie",sol:"SIE – die Katze (feminin) → sie."},
+  {s:"Die Lehrerin lobt das Mädchen. → Sie lobt _____.",opts:["es","sie","ihn","ihr"],a:"es",sol:"ES – das Mädchen (grammatisch sächlich!) → es. Achtung!"},
+  {s:"Finn braucht seinen Schlüssel. → Er braucht _____.",opts:["ihn","ihm","sie","es"],a:"ihn",sol:"IHN – der Schlüssel (maskulin) → ihn."},
+  {s:"Ella hört die Musik nicht. → Sie hört _____ nicht.",opts:["sie","ihn","es","ihr"],a:"sie",sol:"SIE – die Musik (feminin) → sie."},
+  {s:"Die Kinder finden den Schatz. → Sie finden _____.",opts:["ihn","ihm","sie","es"],a:"ihn",sol:"IHN – der Schatz (maskulin) → ihn."},
+  {s:"Das Einhorn betrachtet seine Hufe. → Es betrachtet _____.",opts:["sie","ihn","es","ihr"],a:"sie",sol:"SIE – die Hufe (Plural) → sie."},
+  {s:"Ben ruft seine Eltern an. → Er ruft _____ an.",opts:["sie","ihn","es","ihr"],a:"sie",sol:"SIE – die Eltern (Plural) → sie."},
+  {s:"Der Zauberer benutzt seinen Zauberstab. → Er benutzt _____.",opts:["ihn","ihm","sie","es"],a:"ihn",sol:"IHN – der Zauberstab (maskulin) → ihn."},
+  {s:"Lena fotografiert das Einhorn. → Sie fotografiert _____.",opts:["es","ihn","sie","ihm"],a:"es",sol:"ES – das Einhorn (sächlich) → es."},
+  {s:"Der Detektiv beobachtet die Verdächtige. → Er beobachtet _____.",opts:["sie","ihn","es","ihr"],a:"sie",sol:"SIE – die Verdächtige (feminin) → sie."},
+  {s:"Mia sucht ihren Bruder. → Sie sucht _____.",opts:["ihn","ihm","sie","es"],a:"ihn",sol:"IHN – ihr Bruder (maskulin) → ihn."},
+  {s:"Der Pirat findet das Baby-Drachen. → Er findet _____.",opts:["es","ihn","sie","ihm"],a:"es",sol:"ES – das Baby-Drachen (sächlich) → es."},
+  {s:"Finn versteht das Problem nicht. → Er versteht _____ nicht.",opts:["es","ihn","sie","ihm"],a:"es",sol:"ES – das Problem (sächlich) → es."},
+  {s:"Ben lädt seine Freunde ein. → Er lädt _____ ein.",opts:["sie","ihn","es","ihr"],a:"sie",sol:"SIE – die Freunde (Plural) → sie."},
+  {s:"Ella bewundert den Sonnenuntergang. → Sie bewundert _____.",opts:["ihn","ihm","sie","es"],a:"ihn",sol:"IHN – der Sonnenuntergang (maskulin) → ihn."},
+  {s:"Die Oma strickt eine Mütze. → Sie strickt _____.",opts:["sie","ihn","es","ihr"],a:"sie",sol:"SIE – eine Mütze (feminin) → sie."},
+  {s:"Lena möchte den neuen Film sehen. → Sie möchte _____ sehen.",opts:["ihn","ihm","sie","es"],a:"ihn",sol:"IHN – der Film (maskulin) → ihn."},
+  {s:"Ben bekommt ein neues Fahrrad. → Er bekommt _____.",opts:["es","ihn","sie","ihm"],a:"es",sol:"ES – das Fahrrad (sächlich) → es."},
+  {s:"Der Drache bewacht seinen Schatz. → Er bewacht _____.",opts:["ihn","ihm","sie","es"],a:"ihn",sol:"IHN – der Schatz (maskulin) → ihn."},
+]},
+
+// ---- 13. PRONOMEN DATIV ----
+prodat:{title:"Personalpronomen – Dativ",type:"choice",items:[
+  {s:"Ben hilft dem Drachen. → Er hilft _____.",opts:["ihm","ihn","ihr","sie"],a:"ihm",sol:"IHM – der Drache (maskulin) → Dativ: ihm."},
+  {s:"Ella dankt ihrer Lehrerin. → Sie dankt _____.",opts:["ihr","ihn","ihm","sie"],a:"ihr",sol:"IHR – die Lehrerin (feminin) → Dativ: ihr."},
+  {s:"Der Roboter folgt dem Kind. → Er folgt _____.",opts:["ihm","ihn","ihr","sie"],a:"ihm",sol:"IHM – das Kind (sächlich) → Dativ: ihm. Folgen + Dativ!"},
+  {s:"Finn begegnet seinen Freunden. → Er begegnet _____.",opts:["ihnen","ihm","ihr","sie"],a:"ihnen",sol:"IHNEN – die Freunde (Plural) → Dativ: ihnen. Begegnen + Dativ!"},
+  {s:"Lena glaubt dem Zauberer nicht. → Sie glaubt _____ nicht.",opts:["ihm","ihn","ihr","sie"],a:"ihm",sol:"IHM – der Zauberer (maskulin) → Dativ: ihm. Glauben + Dativ!"},
+  {s:"Ben gratuliert seiner Schwester. → Er gratuliert _____.",opts:["ihr","ihm","ihn","sie"],a:"ihr",sol:"IHR – die Schwester (feminin) → Dativ: ihr. Gratulieren + Dativ!"},
+  {s:"Das Einhorn vertraut dem Ritter. → Es vertraut _____.",opts:["ihm","ihn","ihr","sie"],a:"ihm",sol:"IHM – der Ritter (maskulin) → Dativ: ihm. Vertrauen + Dativ!"},
+  {s:"Mia antwortet der Lehrerin. → Sie antwortet _____.",opts:["ihr","ihm","ihn","sie"],a:"ihr",sol:"IHR – die Lehrerin (feminin) → Dativ: ihr. Antworten + Dativ!"},
+  {s:"Dieses Buch gehört Ben. → Es gehört _____.",opts:["ihm","ihn","ihr","sie"],a:"ihm",sol:"IHM – Ben (maskulin) → Dativ: ihm. Gehören + Dativ!"},
+  {s:"Das Essen schmeckt dem Drachen nicht. → Es schmeckt _____ nicht.",opts:["ihm","ihn","ihr","sie"],a:"ihm",sol:"IHM – der Drache (maskulin) → Dativ: ihm. Schmecken + Dativ!"},
+  {s:"Ella zeigt ihrem Vater das Bild. → Sie zeigt _____ das Bild.",opts:["ihm","ihn","ihr","sie"],a:"ihm",sol:"IHM – der Vater (maskulin) → Dativ: ihm."},
+  {s:"Der Lehrer erklärt den Schülerinnen die Regel. → Er erklärt _____ die Regel.",opts:["ihnen","ihm","ihr","sie"],a:"ihnen",sol:"IHNEN – die Schülerinnen (Plural) → Dativ: ihnen."},
+  {s:"Ben leiht seiner Freundin sein Fahrrad. → Er leiht _____ sein Fahrrad.",opts:["ihr","ihm","ihn","sie"],a:"ihr",sol:"IHR – die Freundin (feminin) → Dativ: ihr."},
+  {s:"Der Schuh passt dem Kind nicht. → Er passt _____ nicht.",opts:["ihm","ihn","ihr","sie"],a:"ihm",sol:"IHM – das Kind (sächlich) → Dativ: ihm. Passen + Dativ!"},
+  {s:"Ella bringt ihrer Oma Blumen. → Sie bringt _____ Blumen.",opts:["ihr","ihm","ihn","sie"],a:"ihr",sol:"IHR – die Oma (feminin) → Dativ: ihr."},
+  {s:"Der Zauberer gibt dem Kind einen Zauberstab. → Er gibt _____ einen Zauberstab.",opts:["ihm","ihn","ihr","sie"],a:"ihm",sol:"IHM – das Kind (sächlich) → Dativ: ihm."},
+  {s:"Finn schreibt seinen Großeltern. → Er schreibt _____.",opts:["ihnen","ihm","ihr","sie"],a:"ihnen",sol:"IHNEN – die Großeltern (Plural) → Dativ: ihnen."},
+  {s:"Lena fehlt ihre beste Freundin sehr. → Sie fehlt _____ sehr.",opts:["ihr","ihm","ihn","sie"],a:"ihr",sol:"IHR – Lena = Dativobjekt! Die Freundin fehlt ihr (=Lena). Fehlen + Dativ."},
+  {s:"Das Buch gefällt dem Detektiv. → Es gefällt _____.",opts:["ihm","ihn","ihr","sie"],a:"ihm",sol:"IHM – der Detektiv (maskulin) → Dativ: ihm. Gefallen + Dativ!"},
+  {s:"Ben erklärt seiner Klasse den Plan. → Er erklärt _____ den Plan.",opts:["ihr","ihm","ihn","ihnen"],a:"ihr",sol:"IHR – die Klasse (feminin, Singular!) → Dativ: ihr."},
+]},
+
+// ---- 14. NEBENSÄTZE ----
+nebensaetze:{title:"Nebensätze – Verb am Ende!",type:"choice",items:[
+  {s:"Finn bleibt zu Hause, ___ er Fieber hat.",opts:["weil","obwohl","damit","ob"],a:"weil",sol:"WEIL – Grund/Ursache: Er bleibt wegen des Fiebers."},
+  {s:"Lena lernt fleißig, ___ sie eine gute Note bekommt.",opts:["damit","weil","obwohl","wenn"],a:"damit",sol:"DAMIT – Ziel/Zweck: Sie lernt, um ein Ziel zu erreichen. damit + Verb am Ende."},
+  {s:"Ich weiß nicht, ___ morgen die Schule ausfällt.",opts:["ob","weil","obwohl","dass"],a:"ob",sol:"OB – indirekter Fragesatz (ja oder nein?). Ich weiß nicht, ob..."},
+  {s:"Das Nilpferd tanzt, ___ es keinen Rhythmus hat.",opts:["obwohl","weil","wenn","damit"],a:"obwohl",sol:"OBWOHL – Konzession: Es tanzt trotzdem! obwohl = trotz der Tatsache, dass..."},
+  {s:"Der Zauberer sagt, ___ er das Rätsel gelöst hat.",opts:["dass","weil","obwohl","ob"],a:"dass",sol:"DASS – indirektes Statement. Er sagt etwas (was?) → dass..."},
+  {s:"___ du Hunger hast, können wir essen.",opts:["Wenn","Weil","Obwohl","Damit"],a:"Wenn",sol:"WENN – Bedingung: Falls du Hunger hast. wenn = if / falls."},
+  {s:"Ben schläft nicht, weil ___",opts:["er Angst hat","hat er Angst","Angst er hat","er Angst ist"],a:"er Angst hat",sol:"ER ANGST HAT – Nebensatz: Verb steht AM ENDE! weil er Angst hat ✓"},
+  {s:"Lena fragt, ob ___",opts:["das stimmt","stimmt das","das ist richtig","richtig das ist"],a:"das stimmt",sol:"DAS STIMMT – Nebensatz: Verb am Ende. ob das stimmt ✓"},
+  {s:"Ich hoffe, dass ___",opts:["wir gewinnen","gewinnen wir","wir sind gut","sind wir gut"],a:"wir gewinnen",sol:"WIR GEWINNEN – Verb am Ende. dass wir gewinnen ✓"},
+  {s:"Finn kann nicht kommen, weil ___",opts:["er arbeiten muss","muss er arbeiten","er muss arbeiten","arbeiten muss er"],a:"er arbeiten muss",sol:"ER ARBEITEN MUSS – Modalverb kommt GANZ ans Ende! weil er arbeiten muss ✓"},
+  {s:"Das Einhorn ist traurig, obwohl ___",opts:["es regenbunt ist","regenbunt es ist","es ist regenbunt","ist regenbunt es"],a:"es regenbunt ist",sol:"ES REGENBUNT IST – Adjektiv vor Verb, Verb am Ende. obwohl es regenbunt ist ✓"},
+  {s:"Der Detektiv weiß, dass ___",opts:["der Täter lügt","lügt der Täter","der Täter ist lügend","lügend ist der Täter"],a:"der Täter lügt",sol:"DER TÄTER LÜGT – Verb ganz am Ende. dass der Täter lügt ✓"},
+  {s:"Wir gehen ins Kino, wenn ___",opts:["Mama Zeit hat","Zeit hat Mama","hat Mama Zeit","Mama hat Zeit"],a:"Mama Zeit hat",sol:"MAMA ZEIT HAT – Verb am Ende! wenn Mama Zeit hat ✓"},
+  {s:"Ben fragt, ob ___",opts:["er früher gehen darf","darf er früher gehen","er darf früher gehen","früher gehen er darf"],a:"er früher gehen darf",sol:"ER FRÜHER GEHEN DARF – Modalverb GANZ am Ende! ob er früher gehen darf ✓"},
+  {s:"Ella isst das Gemüse, obwohl ___",opts:["es ihr nicht schmeckt","schmeckt es ihr nicht","es schmeckt ihr nicht","nicht ihr schmeckt es"],a:"es ihr nicht schmeckt",sol:"ES IHR NICHT SCHMECKT – Negation, dann Verb. obwohl es ihr nicht schmeckt ✓"},
+  {s:"Der Zauberer hofft, dass ___",opts:["der Spruch funktioniert","funktioniert der Spruch","der Spruch ist gut","gut ist der Spruch"],a:"der Spruch funktioniert",sol:"DER SPRUCH FUNKTIONIERT – Verb am Ende. dass der Spruch funktioniert ✓"},
+  {s:"Das Kind weint, weil ___",opts:["es das Eis verloren hat","hat es das Eis verloren","es hat das Eis verloren","verloren das Eis hat"],a:"es das Eis verloren hat",sol:"ES DAS EIS VERLOREN HAT – Perfekt im Nebensatz: Hilfsverb HAT ganz ans Ende! ✓"},
+  {s:"Lena möchte wissen, ob ___",opts:["der Film gut ist","ist der Film gut","gut der Film ist","der Film ist gut"],a:"der Film gut ist",sol:"DER FILM GUT IST – Verb am Ende. ob der Film gut ist ✓"},
+  {s:"Finn lernt Spanisch, damit ___",opts:["er in Spanien reisen kann","kann er in Spanien reisen","er kann in Spanien reisen","in Spanien reisen kann er"],a:"er in Spanien reisen kann",sol:"ER IN SPANIEN REISEN KANN – Modalverb am allerletzten Platz! damit er reisen kann ✓"},
+  {s:"Ella bleibt draußen, ___ es regnet.",opts:["obwohl","weil","wenn","damit"],a:"obwohl",sol:"OBWOHL – Konzession: Sie bleibt draußen, obwohl es regnet. Trotz Regen!"},
+]},
+
+// ---- 15. RELATIVSÄTZE ----
+relativsaetze:{title:"Relativsätze – der/die/das/den/dem",type:"choice",items:[
+  {s:"Das ist der Junge, ___ immer zu spät kommt.",opts:["der","den","dem","die"],a:"der",sol:"DER – maskulin (der Junge), Nominativ (er kommt). Relativpronomen = der."},
+  {s:"Das ist die Katze, ___ ich gefunden habe.",opts:["die","der","den","das"],a:"die",sol:"DIE – feminin (die Katze), Akkusativ (ich habe sie gefunden). Akkusativ feminin → die."},
+  {s:"Das ist das Buch, ___ mir so gut gefällt.",opts:["das","dem","den","die"],a:"das",sol:"DAS – neutral (das Buch), Nominativ (es gefällt). Relativpronomen: das."},
+  {s:"Das ist der Film, ___ ich dreimal gesehen habe.",opts:["den","der","dem","das"],a:"den",sol:"DEN – maskulin (der Film), Akkusativ (ich habe ihn gesehen) → den!"},
+  {s:"Das sind die Kinder, ___ so laut singen.",opts:["die","der","den","das"],a:"die",sol:"DIE – Plural, Nominativ. Plural Relativpronomen = die."},
+  {s:"Das ist die Schülerin, ___ den Preis gewonnen hat.",opts:["die","der","den","das"],a:"die",sol:"DIE – feminin (die Schülerin), Nominativ (sie hat gewonnen) → die."},
+  {s:"Das ist der Drache, ___ wir gestern gesehen haben.",opts:["den","der","dem","die"],a:"den",sol:"DEN – maskulin (der Drache), Akkusativ (wir haben ihn gesehen) → den."},
+  {s:"Das ist das Mädchen, ___ so gut Klavier spielen kann.",opts:["das","dem","die","den"],a:"das",sol:"DAS – neutral (das Mädchen), Nominativ → das."},
+  {s:"Das ist der Lehrer, ___ alle mögen.",opts:["den","der","dem","die"],a:"den",sol:"DEN – maskulin, Akkusativ (alle mögen ihn) → den."},
+  {s:"Das ist die Stadt, ___ ich besuchen möchte.",opts:["die","der","den","das"],a:"die",sol:"DIE – feminin (die Stadt), Akkusativ (ich möchte sie besuchen) → die. (gleich wie Nominativ bei feminin!)"},
+  {s:"Das ist der Zauberer, ___ das Rätsel gelöst hat.",opts:["der","den","dem","die"],a:"der",sol:"DER – maskulin, Nominativ (er hat es gelöst) → der."},
+  {s:"Das ist das Schloss, ___ die Prinzessin bewohnt.",opts:["das","dem","den","die"],a:"das",sol:"DAS – neutral (das Schloss), Akkusativ (sie bewohnt es) → das. (gleich wie Nominativ bei neutral!)"},
+  {s:"Das sind die Freunde, ___ mir geholfen haben.",opts:["die","der","den","dem"],a:"die",sol:"DIE – Plural, Nominativ (sie haben geholfen) → die."},
+  {s:"Das ist der Roboter, ___ sich selbst programmiert hat.",opts:["der","den","dem","die"],a:"der",sol:"DER – maskulin, Nominativ (er hat sich programmiert) → der."},
+  {s:"Das ist die Insel, ___ der Pirat sucht.",opts:["die","der","den","das"],a:"die",sol:"DIE – feminin (die Insel), Akkusativ (er sucht sie) → die."},
+  {s:"Das ist der Mann, ___ ich im Park begegnet bin.",opts:["dem","den","der","die"],a:"dem",sol:"DEM – maskulin, Dativ! begegnen + Dativ: ich bin ihm begegnet → dem. Begegnen nimmt Dativ!"},
+  {s:"Das ist das Einhorn, ___ mich immer besucht.",opts:["das","dem","den","die"],a:"das",sol:"DAS – neutral (das Einhorn), Nominativ (es besucht mich) → das."},
+  {s:"Das ist die Freundin, ___ Lena ihr Geheimnis erzählt hat.",opts:["der","die","den","dem"],a:"der",sol:"DER – feminin (die Freundin), Dativ (Lena hat ihr das Geheimnis erzählt → ihr = Dativ feminin → der)."},
+]},
+
+};// end data
+
+// ===== ENGINE =====
+let state={mode:null,items:[],idx:0,pts:0,cor:0,attempted:0};
+const modeNames={
+  praep1:"📍 Wechselpräp.",praep2:"🔗 Verb+Präp.",praep3:"⏱️ Temporal",
+  perfekt:"⏰ Perfekt",verbformen:"✨ Konjunktiv II",modal:"💬 Modal-Prät.",
+  komp1:"⚖️ als/wie",komp2:"🐆 3 Dinge",vernein:"🚫 Verneinung",
+  reflex:"🪞 Reflexiv",passiv:"🔄 Passiv",proakk:"👉 Pron.Akk.",
+  prodat:"🤝 Pron.Dat.",nebensaetze:"🔗 Nebensätze",relativsaetze:"🎯 Relativsätze"
+};
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('backBtn').style.display=id==='gameScreen'?'block':'none';
+}
+function goMenu(){showScreen('menuScreen');}
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function startMode(mode){
+  state.mode=mode;
+  state.items=shuffle(data[mode].items);
+  state.idx=0;state.pts=0;state.cor=0;state.attempted=0;
+  document.getElementById('modeTag').textContent=modeNames[mode];
+  updateStats();showScreen('gameScreen');renderQ();
+}
+function replayMode(){startMode(state.mode);}
+
+function renderQ(){
+  const d=data[state.mode],q=state.items[state.idx],total=state.items.length;
+  document.getElementById('qnr').textContent=state.idx+1;
+  document.getElementById('progFill').style.width=(state.idx/total*100)+'%';
+  document.getElementById('progTxt').textContent=state.idx+' / '+total+' erledigt';
+  const isRead=d.type==='read';
+  const card=document.getElementById('mainCard');
+  card.className='card'+(isRead?' read-mode':'');
+  document.getElementById('cardNr').textContent='Aufgabe '+(state.idx+1)+' von '+total;
+  document.getElementById('cardSentence').textContent=q.s;
+  document.getElementById('cardContext').textContent=q.c||'';
+  document.getElementById('solBox').className='solution-box';
+  document.getElementById('solBox').innerHTML='';
+  const ansRow=document.getElementById('ansRow');
+  ansRow.innerHTML='';
+  if(d.type==='choice'){
+    const opts=shuffle(q.opts);
+    opts.forEach(opt=>{
+      const btn=document.createElement('button');
+      btn.className='ans-btn';btn.textContent=opt;
+      btn.onclick=()=>checkAnswer(opt,btn,q);
+      ansRow.appendChild(btn);
+    });
+  }
+}
+
+function checkAnswer(chosen,btnEl,q){
+  state.attempted++;
+  const allBtns=document.querySelectorAll('.ans-btn');
+  allBtns.forEach(b=>b.onclick=null);
+  if(chosen===q.a){
+    btnEl.classList.add('correct');state.cor++;state.pts+=10;
+    playSound(true);showPop('+10');updateStats();
+    setTimeout(nextQ,900);
+  }else{
+    btnEl.classList.add('wrong');
+    allBtns.forEach(b=>{if(b.textContent===q.a)b.classList.add('correct');});
+    playSound(false);showSol();updateStats();
+    setTimeout(nextQ,1700);
+  }
+}
+
+function showSol(){
+  const q=state.items[state.idx];
+  const box=document.getElementById('solBox');
+  box.innerHTML='✅ '+( q.sol||q.a);box.classList.add('visible');
+}
+function nextQ(){
+  if(state.idx+1>=state.items.length){endGame();return;}
+  state.idx++;renderQ();
+  if(state.idx>0&&state.idx%5===0)showMilestone(state.idx);
+}
+function skipQ(){
+  state.items.push(state.items[state.idx]);state.idx++;
+  if(state.idx>=state.items.length){endGame();return;}
+  renderQ();
+}
+function endGame(){
+  document.getElementById('rPts').textContent=state.pts;
+  document.getElementById('rCor').textContent=state.cor;
+  document.getElementById('rTot').textContent=state.items.length;
+  showScreen('resultScreen');
+  document.getElementById('backBtn').style.display='none';
+  playFanfare();confetti();
+}
+function updateStats(){
+  document.getElementById('pts').textContent=state.pts;
+  document.getElementById('cor').textContent=state.cor;
+}
+function playSound(ok){
+  try{const c=new AudioContext(),o=c.createOscillator(),g=c.createGain();
+    o.connect(g);g.connect(c.destination);
+    o.frequency.value=ok?880:220;o.type=ok?'sine':'sawtooth';
+    g.gain.setValueAtTime(.18,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(.01,c.currentTime+.3);
+    o.start();o.stop(c.currentTime+.3);}catch(e){}
+}
+function playFanfare(){
+  try{const c=new AudioContext();
+    [523,659,784,1047].forEach((f,i)=>{
+      const o=c.createOscillator(),g=c.createGain();
+      o.connect(g);g.connect(c.destination);o.frequency.value=f;
+      g.gain.setValueAtTime(.15,c.currentTime+i*.15);
+      g.gain.exponentialRampToValueAtTime(.01,c.currentTime+i*.15+.25);
+      o.start(c.currentTime+i*.15);o.stop(c.currentTime+i*.15+.3);
+    });}catch(e){}
+}
+function showPop(txt){
+  const p=document.createElement('div');p.className='pts-pop';p.textContent=txt;
+  p.style.left=(30+Math.random()*40)+'%';p.style.top='30%';
+  document.body.appendChild(p);setTimeout(()=>p.remove(),1000);
+}
+function showMilestone(n){
+  const ov=document.createElement('div');ov.className='milestone';
+  ov.innerHTML='<div class="milestone-inner"><div class="milestone-n">'+n+'</div><div class="milestone-t">🎉 '+n+' Aufgaben erledigt!</div></div>';
+  document.body.appendChild(ov);playFanfare();confetti();
+  setTimeout(()=>ov.remove(),2200);
+}
+function confetti(){
+  const cols=['#0f3460','#e76f51','#17a2b8','#1a7a4a','#f0ad00','#a78bfa','#f0abfc'];
+  for(let i=0;i<90;i++){
+    const c=document.createElement('div');c.className='cfetti';
+    c.style.left=Math.random()*100+'vw';c.style.top='-10px';
+    c.style.background=cols[Math.floor(Math.random()*cols.length)];
+    c.style.borderRadius=Math.random()>.5?'50%':'3px';
+    const sz=(Math.random()*10+5)+'px';c.style.width=c.style.height=sz;
+    document.body.appendChild(c);
+    const a=c.animate([{transform:'translateY(0) rotate(0)',opacity:1},{transform:'translateY(100vh) rotate('+Math.floor(Math.random()*720)+'deg)',opacity:0}],
+      {duration:2000+Math.random()*1500,easing:'ease-out'});
+    a.onfinish=()=>c.remove();
+  }
+}
+</script>
+</body>
+</html>
