@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍋 Passiv Champion</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#180E00;--bg2:#241600;--card:#2E1C00;--card2:#3A2200;
+  --gelb:#F5D800;--gelb-h:#FFEC60;--gelb-d:#A08000;--gelb-dim:rgba(245,216,0,.12);
+  --pink:#C8005A;--pink-h:#F01070;--pink-dim:rgba(200,0,90,.15);
+  --ok:#50C060;--err:#E84040;--warn:#FF9020;
+  --txt:#FFF8E0;--txt2:#D4C090;--gold:#FFD700;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Quicksand',sans-serif;background:linear-gradient(160deg,var(--bg) 0%,var(--bg2) 40%,#1E1200 70%,var(--bg) 100%);min-height:100vh;color:var(--txt);overflow-x:hidden;}
+
+/* PARTICLES */
+.parts{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:hidden;}
+.rip{position:absolute;border-radius:50%;border:1px solid rgba(245,216,0,.12);animation:ripOut 10s ease-out infinite;}
+@keyframes ripOut{0%{transform:scale(.2);opacity:.7;}100%{transform:scale(3);opacity:0;}}
+.shim{position:absolute;width:220px;height:3px;background:linear-gradient(90deg,transparent,rgba(245,216,0,.3),transparent);animation:shimFlow 8s ease-in-out infinite;}
+@keyframes shimFlow{0%{transform:translateX(-220px) translateY(0) rotate(-6deg);opacity:0;}50%{opacity:1;}100%{transform:translateX(110vw) translateY(50px) rotate(-6deg);opacity:0;}}
+.star{position:absolute;width:5px;height:5px;background:rgba(245,216,0,.35);border-radius:50%;animation:twink 4s ease-in-out infinite;}
+@keyframes twink{0%,100%{opacity:.15;transform:scale(1);}50%{opacity:.9;transform:scale(1.7);}}
+
+.wrap{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:20px;}
+header{text-align:center;margin-bottom:28px;padding-top:12px;}
+h1{font-family:'Fredoka',sans-serif;font-size:2.6rem;background:linear-gradient(135deg,var(--gelb),var(--gelb-h),#FFF5A0,var(--gelb));background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimTxt 4s linear infinite;margin-bottom:8px;}
+@keyframes shimTxt{to{background-position:200% center;}}
+.sub{color:var(--txt2);font-size:1.05rem;}
+
+/* SCREENS */
+.scr{display:none;animation:fadeIn .4s ease;}
+.scr.on{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+/* BACK BTN */
+.back-btn{position:fixed;top:16px;left:16px;z-index:100;display:none;background:linear-gradient(135deg,rgba(46,28,0,.95),rgba(30,18,0,.95));border:1px solid rgba(245,216,0,.3);border-radius:12px;padding:9px 16px;color:var(--txt);font-family:'Quicksand',sans-serif;font-size:.93rem;font-weight:600;cursor:pointer;transition:all .2s;}
+.back-btn:hover{background:var(--card2);box-shadow:0 3px 14px rgba(245,216,0,.2);}
+.back-btn.show{display:block;}
+
+/* START SCREEN */
+.menu-card{background:linear-gradient(135deg,rgba(46,28,0,.95),rgba(30,18,0,.95));border-radius:20px;padding:28px;margin-bottom:18px;border:1px solid rgba(245,216,0,.18);box-shadow:0 8px 40px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.04);}
+.sec-title{font-family:'Fredoka',sans-serif;font-size:1.25rem;color:var(--gelb-h);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.sec-line{flex:1;height:1px;background:linear-gradient(90deg,rgba(245,216,0,.3),transparent);}
+.mode-btns{display:flex;flex-direction:column;gap:10px;}
+.mode-btn{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid rgba(245,216,0,.2);border-radius:14px;padding:16px 22px;color:var(--txt);font-family:'Quicksand',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:all .3s;text-align:left;position:relative;}
+.mode-btn:hover{transform:translateX(7px);box-shadow:0 4px 20px rgba(245,216,0,.25);border-color:var(--gelb-h);background:linear-gradient(135deg,var(--card2),#4A2E00);}
+.mode-icon{position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:1.4rem;}
+.mode-desc{font-size:.82rem;color:var(--txt2);margin-top:3px;font-weight:400;}
+.mode-badge{display:inline-block;background:linear-gradient(135deg,var(--pink),var(--pink-h));color:#fff;padding:2px 10px;border-radius:16px;font-size:.72rem;font-weight:700;margin-left:8px;}
+.mode-badge.ab{background:linear-gradient(135deg,#5A7A00,#90C820);}
+
+/* GAME HEADER */
+.g-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.stats{display:flex;gap:12px;flex-wrap:wrap;}
+.stat{background:var(--card);padding:9px 16px;border-radius:11px;border:1px solid rgba(245,216,0,.15);text-align:center;min-width:80px;}
+.stat-l{font-size:.7rem;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;}
+.stat-v{font-family:'Fredoka',sans-serif;font-size:1.35rem;color:var(--gelb-h);}
+.fire{display:inline-block;animation:flame .5s ease infinite alternate;}
+@keyframes flame{from{transform:scale(1);}to{transform:scale(1.2);}}
+.mode-tag{background:linear-gradient(135deg,var(--pink),var(--pink-h));color:#fff;padding:7px 18px;border-radius:18px;font-weight:700;font-size:.86rem;}
+.prog-bar{background:rgba(46,28,0,.8);border-radius:9px;height:16px;overflow:hidden;margin-bottom:22px;border:1px solid rgba(245,216,0,.15);}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--gelb),var(--gelb-h));transition:width .5s ease;box-shadow:0 0 8px rgba(245,216,0,.4);}
+.prog-txt{text-align:center;margin-top:5px;color:var(--txt2);font-size:.86rem;}
+
+/* QUESTION CARD */
+.q-card{background:linear-gradient(135deg,rgba(46,28,0,.97),rgba(24,12,0,.99));border-radius:20px;padding:36px 28px;margin-bottom:26px;border:1px solid rgba(245,216,0,.2);box-shadow:0 8px 40px rgba(0,0,0,.5),0 0 60px rgba(245,216,0,.05);text-align:center;}
+.q-num{font-size:.78rem;color:var(--txt2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;}
+.q-text{font-family:'Fredoka',sans-serif;font-size:1.5rem;line-height:1.55;color:var(--txt);margin-bottom:8px;}
+.q-text em{color:var(--gelb-h);font-style:normal;}
+.q-hint{display:none;background:var(--pink-dim);border:1px solid rgba(200,0,90,.3);border-radius:11px;padding:12px 18px;margin-top:16px;font-size:.9rem;color:var(--txt2);}
+.q-hint.on{display:block;}
+.q-hint em{color:var(--gelb-h);}
+
+/* OPTIONS */
+.opts{display:flex;flex-direction:column;gap:11px;margin-bottom:22px;}
+.opt-btn{background:linear-gradient(135deg,var(--card),var(--card2));border:2px solid rgba(245,216,0,.2);border-radius:13px;padding:15px 22px;color:var(--txt);font-family:'Quicksand',sans-serif;font-size:.97rem;font-weight:600;cursor:pointer;transition:all .3s;text-align:left;display:flex;align-items:center;gap:14px;}
+.opt-btn:hover:not(:disabled){transform:translateX(5px);box-shadow:0 4px 18px rgba(245,216,0,.2);border-color:var(--gelb-h);background:linear-gradient(135deg,var(--card2),#4A2E00);}
+.opt-btn:disabled{opacity:.5;cursor:not-allowed;}
+.opt-lbl{background:var(--card2);border:1px solid rgba(245,216,0,.2);border-radius:7px;padding:4px 12px;font-family:'Fredoka',sans-serif;font-size:1rem;color:var(--gelb-h);flex-shrink:0;min-width:36px;text-align:center;}
+.opt-btn.ok{border-color:var(--ok)!important;background:linear-gradient(135deg,rgba(80,192,96,.25),rgba(80,192,96,.1))!important;animation:pulseOk .5s ease;}
+.opt-btn.ok .opt-lbl{background:var(--ok);color:#fff;border-color:var(--ok);}
+.opt-btn.wrong{border-color:var(--err)!important;background:linear-gradient(135deg,rgba(232,64,64,.25),rgba(232,64,64,.1))!important;animation:shake .45s ease;}
+.opt-btn.wrong .opt-lbl{background:var(--err);color:#fff;border-color:var(--err);}
+@keyframes pulseOk{0%,100%{transform:scale(1);}50%{transform:scale(1.02);}}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-8px);}75%{transform:translateX(8px);}}
+
+/* CONTROLS */
+.ctrls{display:flex;gap:11px;justify-content:center;flex-wrap:wrap;}
+.ctrl-btn{background:linear-gradient(135deg,var(--card),var(--card2));border:2px solid rgba(245,216,0,.25);border-radius:12px;padding:11px 22px;color:var(--txt);font-family:'Quicksand',sans-serif;font-size:.92rem;font-weight:600;cursor:pointer;transition:all .2s;}
+.ctrl-btn:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(245,216,0,.2);border-color:var(--gelb-h);}
+.ctrl-btn.prim{background:linear-gradient(135deg,#8A0040,var(--pink));border-color:var(--pink-h);color:#fff;font-weight:700;}
+.ctrl-btn.prim:hover{background:linear-gradient(135deg,var(--pink),var(--pink-h));box-shadow:0 5px 22px rgba(200,0,90,.4);}
+.ctrl-btn.next{background:linear-gradient(135deg,var(--gelb-d),var(--gelb));border-color:var(--gelb-h);color:#1A1000;font-weight:800;}
+.ctrl-btn.next:hover{background:linear-gradient(135deg,var(--gelb),var(--gelb-h));box-shadow:0 5px 22px rgba(245,216,0,.4);}
+
+/* POINTS POPUP */
+.pp{position:fixed;font-family:'Fredoka',sans-serif;font-size:1.9rem;font-weight:700;color:var(--ok);pointer-events:none;z-index:1000;animation:floatUp 1s ease-out forwards;text-shadow:0 2px 8px rgba(0,0,0,.5);}
+.pp.bonus{color:var(--gold);font-size:2.3rem;}
+@keyframes floatUp{0%{transform:translateY(0) scale(.8);opacity:1;}100%{transform:translateY(-80px) scale(1.2);opacity:0;}}
+
+/* MILESTONE */
+.milestone{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(24,8,0,.9);display:flex;align-items:center;justify-content:center;z-index:2000;animation:fadeIn .3s ease;}
+.milestone-inner{text-align:center;animation:scaleIn .5s cubic-bezier(.175,.885,.32,1.275);}
+@keyframes scaleIn{from{transform:scale(.3);opacity:0;}to{transform:scale(1);opacity:1;}}
+.milestone-n{font-family:'Fredoka',sans-serif;font-size:6rem;color:var(--gelb-h);margin-bottom:12px;}
+.milestone-t{font-family:'Fredoka',sans-serif;font-size:2rem;color:var(--txt);}
+
+/* RESULT */
+.res-card{background:linear-gradient(135deg,rgba(46,28,0,.97),rgba(24,12,0,.99));border-radius:20px;padding:34px;margin-bottom:18px;border:1px solid rgba(245,216,0,.2);box-shadow:0 8px 40px rgba(0,0,0,.5);text-align:center;}
+.res-title{font-family:'Fredoka',sans-serif;font-size:2rem;margin-bottom:22px;color:var(--gelb-h);}
+.res-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;margin-bottom:26px;}
+.res-stat{background:rgba(46,28,0,.6);padding:16px;border-radius:13px;border:1px solid rgba(245,216,0,.15);}
+.res-stat-l{font-size:.8rem;color:var(--txt2);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px;}
+.res-stat-v{font-family:'Fredoka',sans-serif;font-size:1.9rem;color:var(--gelb-h);}
+.name-input{width:100%;max-width:320px;background:rgba(46,28,0,.9);border:2px solid rgba(245,216,0,.3);border-radius:12px;padding:13px 17px;color:var(--txt);font-family:'Quicksand',sans-serif;font-size:1rem;margin:18px auto;display:block;text-align:center;}
+.name-input:focus{outline:none;border-color:var(--gelb-h);box-shadow:0 0 14px rgba(245,216,0,.25);}
+.lb-wrap{background:rgba(46,28,0,.6);border-radius:13px;padding:22px;margin-top:22px;border:1px solid rgba(245,216,0,.15);}
+.lb-title{font-family:'Fredoka',sans-serif;font-size:1.3rem;color:var(--gelb-h);margin-bottom:15px;text-align:center;}
+.lb-row{display:grid;grid-template-columns:44px 1fr auto auto;gap:10px;padding:10px;background:rgba(46,28,0,.4);border-radius:9px;margin-bottom:7px;align-items:center;border:1px solid rgba(245,216,0,.1);}
+.lb-rank{font-size:1.1rem;font-weight:700;text-align:center;}
+.lb-name{font-weight:600;}
+.lb-score{color:var(--gelb-h);font-weight:700;}
+.lb-time{color:var(--txt2);font-size:.85rem;}
+.medal-1{color:#FFD700;}
+.medal-2{color:#C0C0C0;}
+.medal-3{color:#CD7F32;}
+
+/* CONFETTI */
+.conf{position:fixed;pointer-events:none;z-index:3000;}
+
+@media(max-width:700px){
+  h1{font-size:2rem;}
+  .q-text{font-size:1.25rem;}
+  .mode-btn{padding:13px 16px;}
+  .res-stats{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+<div class="parts" id="parts"></div>
+<button class="back-btn" id="backBtn" onclick="goMenu()">← Menü</button>
+
+<div class="wrap">
+<header>
+  <h1>🍋 Passiv Champion</h1>
+  <p class="sub">Das Passiv auf Deutsch trainieren – Präsens, Präteritum, Perfekt</p>
+</header>
+
+<!-- START SCREEN -->
+<div id="startScr" class="scr on">
+  <div class="menu-card">
+    <div class="sec-title"><span>🔆 Passiv Gegenwart</span><span class="sec-line"></span></div>
+    <div class="mode-btns">
+      <button class="mode-btn" onclick="startGame('praesens')">
+        <span class="mode-icon">🔨</span>
+        Passiv Präsens &amp; Modalverb
+        <div class="mode-desc">Passiv Präsens bilden – mit und ohne Modalverb (14 Fragen)</div>
+      </button>
+      <button class="mode-btn" onclick="startGame('verbote')">
+        <span class="mode-icon">🚫</span>
+        Verbote &amp; Regeln
+        <div class="mode-desc">Verbotsschilder im Passiv formulieren (8 Fragen)</div>
+      </button>
+      <button class="mode-btn" onclick="startGame('aktivpassiv')">
+        <span class="mode-icon">🔄</span>
+        Aktiv ↔ Passiv Präsens
+        <div class="mode-desc">Zwischen Aktiv und Passiv umschreiben (8 Fragen)</div>
+      </button>
+    </div>
+  </div>
+  <div class="menu-card">
+    <div class="sec-title"><span>📜 Passiv Vergangenheit</span><span class="sec-line"></span></div>
+    <div class="mode-btns">
+      <button class="mode-btn" onclick="startGame('praet_a')">
+        <span class="mode-icon">📜</span>
+        Passiv Präteritum<span class="mode-badge ab">A</span>
+        <div class="mode-desc">wurde / wurden + Partizip II – Teil A (8 Fragen)</div>
+      </button>
+      <button class="mode-btn" onclick="startGame('praet_b')">
+        <span class="mode-icon">📜</span>
+        Passiv Präteritum<span class="mode-badge ab">B</span>
+        <div class="mode-desc">wurde / wurden + Partizip II – Teil B (8 Fragen)</div>
+      </button>
+      <button class="mode-btn" onclick="startGame('praet_modal_a')">
+        <span class="mode-icon">⚙️</span>
+        Passiv Prät. + Modalverb<span class="mode-badge ab">A</span>
+        <div class="mode-desc">musste/mussten/durfte + PP + werden – Teil A (5 Fragen)</div>
+      </button>
+      <button class="mode-btn" onclick="startGame('praet_modal_b')">
+        <span class="mode-icon">⚙️</span>
+        Passiv Prät. + Modalverb<span class="mode-badge ab">B</span>
+        <div class="mode-desc">sollte/konnte/wollte + PP + werden – Teil B (5 Fragen)</div>
+      </button>
+    </div>
+  </div>
+  <div class="menu-card">
+    <div class="sec-title"><span>⭐ Passiv Perfekt &amp; Gemischt</span><span class="sec-line"></span></div>
+    <div class="mode-btns">
+      <button class="mode-btn" onclick="startGame('perfekt_a')">
+        <span class="mode-icon">⭐</span>
+        Passiv Perfekt<span class="mode-badge ab">A</span>
+        <div class="mode-desc">sein + PP + worden (nicht geworden!) – Teil A (6 Fragen)</div>
+      </button>
+      <button class="mode-btn" onclick="startGame('perfekt_b')">
+        <span class="mode-icon">⭐</span>
+        Passiv Perfekt<span class="mode-badge ab">B</span>
+        <div class="mode-desc">sein + PP + worden – Teil B (6 Fragen)</div>
+      </button>
+      <button class="mode-btn" onclick="startGame('musste_a')">
+        <span class="mode-icon">✅</span>
+        Was musste gemacht werden?<span class="mode-badge ab">A</span>
+        <div class="mode-desc">Start-up gründen: Aufgaben im Passiv Prät. + Modalverb (8 Fragen)</div>
+      </button>
+      <button class="mode-btn" onclick="startGame('musste_b')">
+        <span class="mode-icon">✅</span>
+        Was musste gemacht werden?<span class="mode-badge ab">B</span>
+        <div class="mode-desc">Veranstaltung organisieren: Passiv Prät. + Modalverb (8 Fragen)</div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="gameScr" class="scr">
+  <div class="g-header">
+    <div class="stats">
+      <div class="stat"><div class="stat-l">Punkte</div><div class="stat-v" id="score">0</div></div>
+      <div class="stat"><div class="stat-l">Serie</div><div class="stat-v" id="streak">0 <span class="fire" id="fire" style="display:none">🔥</span></div></div>
+      <div class="stat"><div class="stat-l">Leben</div><div class="stat-v" id="lives">❤️❤️❤️</div></div>
+    </div>
+    <div class="mode-tag" id="modeTag"></div>
+  </div>
+  <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0"></div></div>
+  <div class="prog-txt" id="progTxt"></div>
+
+  <div class="q-card">
+    <div class="q-num" id="qNum"></div>
+    <div class="q-text" id="qText"></div>
+    <div class="q-hint" id="qHint"></div>
+  </div>
+
+  <div class="opts" id="opts">
+    <button class="opt-btn" id="oA" onclick="answer('a')"><span class="opt-lbl">A</span><span id="tA"></span></button>
+    <button class="opt-btn" id="oB" onclick="answer('b')"><span class="opt-lbl">B</span><span id="tB"></span></button>
+    <button class="opt-btn" id="oC" onclick="answer('c')"><span class="opt-lbl">C</span><span id="tC"></span></button>
+  </div>
+
+  <div class="ctrls">
+    <button class="ctrl-btn" onclick="showHint()">💡 Tipp</button>
+    <button class="ctrl-btn next" id="nextBtn" style="display:none" onclick="nextQ()">Weiter →</button>
+  </div>
+</div>
+
+<!-- RESULT SCREEN -->
+<div id="resultScr" class="scr">
+  <div class="res-card">
+    <div class="res-title" id="resTitle"></div>
+    <div class="res-stats">
+      <div class="res-stat"><div class="res-stat-l">Punkte</div><div class="res-stat-v" id="resPts"></div></div>
+      <div class="res-stat"><div class="res-stat-l">Richtig</div><div class="res-stat-v" id="resRight"></div></div>
+      <div class="res-stat"><div class="res-stat-l">Genauigkeit</div><div class="res-stat-v" id="resAcc"></div></div>
+      <div class="res-stat"><div class="res-stat-l">Zeit</div><div class="res-stat-v" id="resTime"></div></div>
+    </div>
+    <input class="name-input" id="nameInput" type="text" placeholder="Dein Name für die Bestenliste…" maxlength="24">
+    <div class="ctrls" style="margin-top:4px;">
+      <button class="ctrl-btn prim" onclick="saveLB()">🏆 Eintragen</button>
+      <button class="ctrl-btn next" onclick="restartMode()">↺ Nochmal</button>
+      <button class="ctrl-btn" onclick="goMenu()">← Menü</button>
+    </div>
+    <div class="lb-wrap" id="lbWrap" style="display:none">
+      <div class="lb-title">🏆 Bestenliste</div>
+      <div id="lbList"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+// ============================================================
+// ALLE FRAGEN
+// ============================================================
+const MODES = {
+praesens:{title:"Passiv Präsens & Modalverb",icon:"🔨",qs:[
+{p:"Man transportiert das Gepäck zum Terminal.",a:"Das Gepäck wird zum Terminal transportiert.",b:"Das Gepäck werden zum Terminal transportiert.",c:"Das Gepäck wird zum Terminal transportieren.",k:"a",t:"Singular → <em>wird</em> + Partizip II"},
+{p:"Man serviert das Frühstück ab 7 Uhr.",a:"Das Frühstück werden ab 7 Uhr serviert.",b:"Das Frühstück wird ab 7 Uhr serviert.",c:"Das Frühstück wird ab 7 Uhr servieren.",k:"b",t:"<em>wird</em> (Sg.) + Partizip II am Satzende"},
+{p:"Man bestellt die Waren online.",a:"Die Waren werden online bestellt.",b:"Die Waren wird online bestellt.",c:"Die Waren werden online bestellen.",k:"a",t:"Plural → <em>werden</em> + Partizip II"},
+{p:"Man kontrolliert die Tickets am Eingang.",a:"Die Tickets wird am Eingang kontrolliert.",b:"Die Tickets werden am Eingang kontrollieren.",c:"Die Tickets werden am Eingang kontrolliert.",k:"c",t:"Plural <em>Tickets</em> → <em>werden</em>"},
+{p:"Man schickt den Brief per Express.",a:"Der Brief werden per Express geschickt.",b:"Der Brief wird per Express schicken.",c:"Der Brief wird per Express geschickt.",k:"c",t:"<em>schicken</em> → PP: <em>geschickt</em>"},
+{p:"Man druckt die Fotos sofort aus.",a:"Die Fotos werden sofort ausgedruckt.",b:"Die Fotos wird sofort ausgedruckt.",c:"Die Fotos werden sofort ausdrucken.",k:"a",t:"Trennbares Verb: PP = <em>ausgedruckt</em>"},
+{p:"Man wäscht die Wäsche bei 60 Grad.",a:"Die Wäsche werden bei 60 Grad gewaschen.",b:"Die Wäsche wird bei 60 Grad gewaschen.",c:"Die Wäsche wird bei 60 Grad waschen.",k:"b",t:"<em>die Wäsche</em> (Sg.) → <em>wird</em>"},
+{p:"Man lagert die Ware kühl.",a:"Die Ware werden kühl gelagert.",b:"Die Ware wird kühl lagern.",c:"Die Ware wird kühl gelagert.",k:"c",t:"<em>lagern</em> → PP: <em>gelagert</em>"},
+{p:"Man verteilt die Unterlagen in der Konferenz.",a:"Die Unterlagen werden in der Konferenz verteilt.",b:"Die Unterlagen wird in der Konferenz verteilt.",c:"Die Unterlagen werden in der Konferenz verteilen.",k:"a",t:"Plural → <em>werden</em>"},
+{p:"Man muss das Auto sofort reparieren.",a:"Das Auto muss sofort reparieren werden.",b:"Das Auto muss sofort repariert werden.",c:"Das Auto repariert werden muss sofort.",k:"b",t:"Modalverb Pos. 2 + PP + <em>werden</em> am Ende"},
+{p:"Man kann das Problem lösen.",a:"Das Problem kann lösen werden.",b:"Das Problem gelöst werden kann.",c:"Das Problem kann gelöst werden.",k:"c",t:"<em>kann</em> (Pos. 2) + … + <em>gelöst werden</em>"},
+{p:"Man soll den Vertrag unterschreiben.",a:"Der Vertrag soll unterschrieben werden.",b:"Der Vertrag soll unterschreiben werden.",c:"Der Vertrag unterschrieben werden soll.",k:"a",t:"PP <em>unterschrieben</em> (nicht Infinitiv!)"},
+{p:"Man darf hier nicht parken.",a:"Hier darf nicht parken werden.",b:"Hier nicht geparkt werden darf.",c:"Hier darf nicht geparkt werden.",k:"c",t:"<em>parken</em> → PP: <em>geparkt</em>"},
+{p:"Man muss die Aufgaben bis Freitag abgeben.",a:"Die Aufgaben muss bis Freitag abgegeben werden.",b:"Die Aufgaben müssen bis Freitag abgegeben werden.",c:"Die Aufgaben müssen bis Freitag abgeben werden.",k:"b",t:"Plural <em>Aufgaben</em> → <em>müssen</em>"},
+]},
+verbote:{title:"Verbote & Regeln",icon:"🚫",qs:[
+{p:"🚫 Schild: <em>Fotografieren verboten</em>",a:"Hier darf nicht fotografiert werden.",b:"Hier darf nicht fotografieren werden.",c:"Hier muss nicht fotografiert werden.",k:"a",t:"Verbot: <em>darf nicht</em> + PP + <em>werden</em>"},
+{p:"🚬 Schild: <em>Rauchen verboten</em>",a:"Hier wird nicht geraucht werden.",b:"Hier darf nicht geraucht werden.",c:"Hier darf nicht rauchen werden.",k:"b",t:"<em>rauchen</em> → PP: <em>geraucht</em>"},
+{p:"🥤 Schild: <em>Kein Trinken erlaubt</em>",a:"Hier darf nicht trinken werden.",b:"Hier kann nicht getrunken werden.",c:"Hier darf nicht getrunken werden.",k:"c",t:"<em>trinken</em> → PP: <em>getrunken</em>"},
+{p:"📱 Schild: <em>Handy ausschalten!</em>",a:"Das Handy darf nicht benutzen werden.",b:"Das Handy muss ausgeschaltet werden.",c:"Das Handy muss ausschalten werden.",k:"b",t:"<em>ausschalten</em> → PP: <em>ausgeschaltet</em>"},
+{p:"🐕 Schild: <em>Keine Hunde erlaubt</em>",a:"Hunde darf hier nicht mitgebracht werden.",b:"Hunde dürfen hier nicht mitbringen werden.",c:"Hunde dürfen hier nicht mitgebracht werden.",k:"c",t:"Plural <em>Hunde</em> → <em>dürfen</em>"},
+{p:"🎵 Schild: <em>Musik spielen verboten</em>",a:"Hier darf keine Musik spielen werden.",b:"Hier darf keine Musik gespielt werden.",c:"Hier kann keine Musik gespielt werden.",k:"b",t:"<em>spielen</em> → PP: <em>gespielt</em>"},
+{p:"🏊 Schild: <em>Schwimmen verboten</em>",a:"Hier darf nicht schwimmen werden.",b:"Hier muss nicht geschwommen werden.",c:"Hier darf nicht geschwommen werden.",k:"c",t:"<em>schwimmen</em> → PP: <em>geschwommen</em>"},
+{p:"🍕 Schild: <em>Essen mitbringen verboten</em>",a:"Essen dürfen hier nicht mitgebracht werden.",b:"Essen darf hier nicht mitgebracht werden.",c:"Essen darf hier nicht mitgebracht worden.",k:"b",t:"<em>Essen</em> (Sg.) → <em>darf</em>"},
+]},
+aktivpassiv:{title:"Aktiv ↔ Passiv Präsens",icon:"🔄",qs:[
+{p:"Aktiv → Passiv: <em>In Deutschland isst man gerne Brot zum Abendessen.</em>",a:"In Deutschland wird gerne Brot zum Abendessen gegessen.",b:"In Deutschland werden gerne Brot zum Abendessen gegessen.",c:"In Deutschland isst gerne Brot zum Abendessen werden.",k:"a",t:"<em>das Brot</em> (Sg.) → <em>wird</em> + <em>gegessen</em>"},
+{p:"Aktiv → Passiv: <em>In Bayern trinkt man traditionell viel Bier.</em>",a:"In Bayern werden traditionell viel Bier getrunken.",b:"In Bayern wird traditionell viel Bier getrunken.",c:"In Bayern wird traditionell viel Bier trinken.",k:"b",t:"<em>Bier</em> (Sg./Masse) → <em>wird</em>"},
+{p:"Aktiv → Passiv: <em>Im Wiener Café bestellt man oft Melange und Topfenstrudel.</em>",a:"Im Wiener Café wird oft Melange und Topfenstrudel bestellt.",b:"Im Wiener Café werden oft Melange und Topfenstrudel bestellt.",c:"Im Wiener Café werden oft Melange und Topfenstrudel bestellen.",k:"b",t:"Zwei Substantive → Plural → <em>werden</em>"},
+{p:"Aktiv → Passiv: <em>In der Schweiz produziert man weltberühmten Käse.</em>",a:"In der Schweiz wird weltberühmten Käse produzieren.",b:"In der Schweiz werden weltberühmter Käse produziert.",c:"In der Schweiz wird weltberühmter Käse produziert.",k:"c",t:"<em>Käse</em> (Sg.) → <em>wird</em>; Nom. → <em>weltberühmter</em>"},
+{p:"Passiv → Aktiv: <em>In Mexiko wird sehr scharf gegessen.</em>",a:"In Mexiko isst man sehr scharf.",b:"In Mexiko esse man sehr scharf.",c:"In Mexiko isst sehr scharf man.",k:"a",t:"Passiv mit <em>man</em> zurückschreiben"},
+{p:"Passiv → Aktiv: <em>In Italien wird täglich frische Pasta gekocht.</em>",a:"In Italien kochte man täglich frische Pasta.",b:"In Italien kocht man täglich frische Pasta.",c:"In Italien wird man täglich frische Pasta kochen.",k:"b",t:"Präsens Passiv → Präsens Aktiv mit <em>man</em>"},
+{p:"Passiv → Aktiv: <em>In Frankreich werden täglich Baguettes gebacken.</em>",a:"In Frankreich bäckt man täglich Baguettes.",b:"In Frankreich backt man täglich Baguettes.",c:"In Frankreich backte man täglich Baguettes.",k:"b",t:"Korrekte Präsens-Form: <em>backt</em>"},
+{p:"Passiv → Aktiv: <em>In Japan wird viel grüner Tee getrunken.</em>",a:"In Japan trinken viel grünen Tee.",b:"In Japan trank man viel grünen Tee.",c:"In Japan trinkt man viel grünen Tee.",k:"c",t:"<em>man trinkt</em> — Präsens, nicht Präteritum"},
+]},
+praet_a:{title:"Passiv Präteritum A",icon:"📜",qs:[
+{p:"Man baute die Brücke im Jahr 1900.",a:"Die Brücke wurde im Jahr 1900 gebaut.",b:"Die Brücke wurden im Jahr 1900 gebaut.",c:"Die Brücke wurde im Jahr 1900 bauen.",k:"a",t:"<em>die Brücke</em> (Sg.) → <em>wurde</em>"},
+{p:"Man gründete die Universität im 14. Jahrhundert.",a:"Die Universität wurden im 14. Jh. gegründet.",b:"Die Universität wurde im 14. Jh. gegründet.",c:"Die Universität wurde im 14. Jh. gründen.",k:"b",t:"<em>gründen</em> → PP: <em>gegründet</em>"},
+{p:"Man renovierte das historische Rathaus.",a:"Das historische Rathaus wurde renoviert.",b:"Das historische Rathaus wurden renoviert.",c:"Das historische Rathaus wurde renovieren.",k:"a",t:"Neutrum Sg. → <em>wurde</em>"},
+{p:"Man druckte die ersten Bücher in Mainz.",a:"Die ersten Bücher wurde in Mainz gedruckt.",b:"Die ersten Bücher wurden in Mainz gedruckt.",c:"Die ersten Bücher wurden in Mainz drucken.",k:"b",t:"Plural → <em>wurden</em>"},
+{p:"Man pflanzte viele Obstbäume im Park.",a:"Viele Obstbäume wurde im Park gepflanzt.",b:"Viele Obstbäume wurden im Park pflanzen.",c:"Viele Obstbäume wurden im Park gepflanzt.",k:"c",t:"Plural → <em>wurden</em> + PP"},
+{p:"Man beendete den Krieg 1945.",a:"Der Krieg wurde 1945 beendet.",b:"Der Krieg wurden 1945 beendet.",c:"Der Krieg wurde 1945 beenden.",k:"a",t:"Maskulin Sg. → <em>wurde</em>"},
+{p:"Man öffnete das neue Museum am Freitag.",a:"Das neue Museum wurden am Freitag geöffnet.",b:"Das neue Museum wurde am Freitag geöffnet.",c:"Das neue Museum wurde am Freitag öffnen.",k:"b",t:"Neutrum Sg. → <em>wurde</em>"},
+{p:"Man verkaufte die alten Gemälde im Auktionshaus.",a:"Die alten Gemälde wurde im Auktionshaus verkauft.",b:"Die alten Gemälde wurden im Auktionshaus verkauft.",c:"Die alten Gemälde wurden im Auktionshaus verkaufen.",k:"b",t:"Plural → <em>wurden</em>"},
+]},
+praet_b:{title:"Passiv Präteritum B",icon:"📜",qs:[
+{p:"Man erfand das Telefon im 19. Jahrhundert.",a:"Das Telefon wurden im 19. Jh. erfunden.",b:"Das Telefon wurde im 19. Jh. erfunden.",c:"Das Telefon wurde im 19. Jh. erfinden.",k:"b",t:"<em>erfinden</em> → PP: <em>erfunden</em> (unregelm.)"},
+{p:"Man entdeckte Amerika im Jahr 1492.",a:"Amerika wurde im Jahr 1492 entdecken.",b:"Amerika wurden im Jahr 1492 entdeckt.",c:"Amerika wurde im Jahr 1492 entdeckt.",k:"c",t:"<em>Amerika</em> (Sg.) → <em>wurde</em>"},
+{p:"Man teilte Deutschland nach dem Krieg.",a:"Deutschland wurde nach dem Krieg geteilt.",b:"Deutschland wurden nach dem Krieg geteilt.",c:"Deutschland wurde nach dem Krieg teilen.",k:"a",t:"<em>teilen</em> → PP: <em>geteilt</em>"},
+{p:"Man veröffentlichte das Buch im Jahr 1850.",a:"Das Buch wurden im Jahr 1850 veröffentlicht.",b:"Das Buch wurde im Jahr 1850 veröffentlicht.",c:"Das Buch wurde im Jahr 1850 veröffentlichen.",k:"b",t:"Neutrum Sg. → <em>wurde</em>"},
+{p:"Man wählte den ersten Bundestag 1949.",a:"Der erste Bundestag wurde 1949 gewählt.",b:"Der erste Bundestag wurden 1949 gewählt.",c:"Der erste Bundestag wurde 1949 wählen.",k:"a",t:"<em>wählen</em> → PP: <em>gewählt</em>"},
+{p:"Man stellte das neue Modell auf der Messe vor.",a:"Das neue Modell wurden auf der Messe vorgestellt.",b:"Das neue Modell wurde auf der Messe vorgestellt.",c:"Das neue Modell wurde auf der Messe vorstellen.",k:"b",t:"Trennbares Verb: PP = <em>vorgestellt</em>"},
+{p:"Man schloss die Fabrik nach zwanzig Jahren.",a:"Die Fabrik wurde nach 20 Jahren geschlossen.",b:"Die Fabrik wurden nach 20 Jahren geschlossen.",c:"Die Fabrik wurde nach 20 Jahren schließen.",k:"a",t:"<em>schließen</em> → PP: <em>geschlossen</em>"},
+{p:"Man übersetzte den Roman in dreißig Sprachen.",a:"Der Roman wurden in 30 Sprachen übersetzt.",b:"Der Roman wurde in 30 Sprachen übersetzt.",c:"Der Roman wurde in 30 Sprachen übersetzen.",k:"b",t:"<em>übersetzen</em> → PP: <em>übersetzt</em>"},
+]},
+praet_modal_a:{title:"Passiv Prät. + Modalverb A",icon:"⚙️",qs:[
+{p:"Man musste den Verletzten sofort operieren.",a:"Der Verletzte musste sofort operieren werden.",b:"Der Verletzte musste sofort operiert werden.",c:"Der Verletzte musste sofort werden operiert.",k:"b",t:"Passiv Prät. + Modalverb: Pos. 2 + PP + <em>werden</em>"},
+{p:"Man musste die Bremsen kontrollieren.",a:"Die Bremsen musste kontrolliert werden.",b:"Die Bremsen mussten kontrolliert werden.",c:"Die Bremsen mussten kontrollieren werden.",k:"b",t:"Plural → <em>mussten</em>"},
+{p:"Man musste die Kinder rechtzeitig informieren.",a:"Die Kinder müssten informiert werden.",b:"Die Kinder mussten informieren werden.",c:"Die Kinder mussten informiert werden.",k:"c",t:"Präteritum: <em>mussten</em>, nicht Konjunktiv"},
+{p:"Man musste den Anruf sofort weiterleiten.",a:"Der Anruf musste sofort weitergeleitet werden.",b:"Der Anruf musste sofort weiterleiten werden.",c:"Der Anruf musste sofort werden weitergeleitet.",k:"a",t:"Trennbares Verb: PP = <em>weitergeleitet</em>"},
+{p:"Man durfte das Gebäude nicht betreten.",a:"Das Gebäude durfte nicht betreten sein.",b:"Das Gebäude durfte nicht betreten wären.",c:"Das Gebäude durfte nicht betreten werden.",k:"c",t:"<em>dürfen</em> im Passiv: Prät. + PP + <em>werden</em>"},
+]},
+praet_modal_b:{title:"Passiv Prät. + Modalverb B",icon:"⚙️",qs:[
+{p:"Man sollte die Fenster schließen.",a:"Die Fenster sollte geschlossen werden.",b:"Die Fenster sollten geschlossen werden.",c:"Die Fenster sollten schließen werden.",k:"b",t:"Plural → <em>sollten</em>"},
+{p:"Man konnte das Problem nicht lösen.",a:"Das Problem könnten nicht gelöst werden.",b:"Das Problem konnte nicht gelöst werden.",c:"Das Problem konnte nicht lösen werden.",k:"b",t:"<em>können</em> Prät. Sg. → <em>konnte</em>"},
+{p:"Man sollte den Brief sofort schreiben.",a:"Der Brief sollten sofort geschrieben werden.",b:"Der Brief sollte sofort schreiben werden.",c:"Der Brief sollte sofort geschrieben werden.",k:"c",t:"Sg. → <em>sollte</em>; PP <em>geschrieben</em>"},
+{p:"Man konnte die Kosten nicht vermeiden.",a:"Die Kosten konnten nicht vermieden werden.",b:"Die Kosten konnte nicht vermieden werden.",c:"Die Kosten konnten nicht vermeiden werden.",k:"a",t:"Plural → <em>konnten</em>; PP <em>vermieden</em>"},
+{p:"Man sollte das Projekt bis Jahresende abschließen.",a:"Das Projekt sollten bis Jahresende abgeschlossen werden.",b:"Das Projekt sollte bis Jahresende abgeschlossen werden.",c:"Das Projekt sollte bis Jahresende abschließen werden.",k:"b",t:"Sg. Neutrum → <em>sollte</em>"},
+]},
+perfekt_a:{title:"Passiv Perfekt A",icon:"⭐",qs:[
+{p:"Man hat die E-Mails schon beantwortet.",a:"Die E-Mails haben schon beantwortet worden.",b:"Die E-Mails sind schon beantwortet worden.",c:"Die E-Mails sind schon beantwortet geworden.",k:"b",t:"Passiv Perfekt: <em>sein</em> (nicht haben!) + PP + <em>worden</em>"},
+{p:"Man hat den Vertrag endlich unterschrieben.",a:"Der Vertrag hat endlich unterschrieben worden.",b:"Der Vertrag ist endlich unterschrieben worden.",c:"Der Vertrag ist endlich unterschrieben geworden.",k:"b",t:"Achtung: <em>worden</em> (nicht <em>geworden</em>)!"},
+{p:"Man hat die Rechnungen schon bezahlt.",a:"Die Rechnungen haben schon bezahlt worden.",b:"Die Rechnungen sind schon bezahlt worden.",c:"Die Rechnungen sind schon bezahlt geworden.",k:"b",t:"Plural → <em>sind</em> + PP + <em>worden</em>"},
+{p:"Man hat das neue Museum feierlich eröffnet.",a:"Das neue Museum hat feierlich eröffnet worden.",b:"Das neue Museum ist feierlich eröffnet worden.",c:"Das neue Museum ist feierlich eröffnet geworden.",k:"b",t:"Neutrum Sg. → <em>ist</em>"},
+{p:"Man hat die Geschäftspartner eingeladen.",a:"Die Geschäftspartner haben eingeladen worden.",b:"Die Geschäftspartner sind eingeladen worden.",c:"Die Geschäftspartner sind eingeladen geworden.",k:"b",t:"<em>einladen</em> → PP: <em>eingeladen</em> (unregelm.)"},
+{p:"Man hat die Aufgaben sorgfältig korrigiert.",a:"Die Aufgaben sind sorgfältig korrigiert worden.",b:"Die Aufgaben haben sorgfältig korrigiert worden.",c:"Die Aufgaben sind sorgfältig korrigiert geworden.",k:"a",t:"Immer <em>worden</em> im Passiv Perfekt, nie <em>geworden</em>!"},
+]},
+perfekt_b:{title:"Passiv Perfekt B",icon:"⭐",qs:[
+{p:"Man hat das Schloss komplett renoviert.",a:"Das Schloss ist komplett renoviert worden.",b:"Das Schloss hat komplett renoviert worden.",c:"Das Schloss ist komplett renoviert geworden.",k:"a",t:"<em>sein</em> + PP + <em>worden</em>"},
+{p:"Man hat den Täter endlich verhaftet.",a:"Der Täter hat endlich verhaftet worden.",b:"Der Täter ist endlich verhaftet worden.",c:"Der Täter ist endlich verhaftet geworden.",k:"b",t:"<em>verhaften</em> → PP: <em>verhaftet</em>"},
+{p:"Man hat das Projekt erfolgreich abgeschlossen.",a:"Das Projekt hat erfolgreich abgeschlossen worden.",b:"Das Projekt ist erfolgreich abgeschlossen worden.",c:"Das Projekt ist erfolgreich abgeschlossen geworden.",k:"b",t:"Trennbares Verb PP: <em>abgeschlossen</em>"},
+{p:"Man hat die Waren pünktlich geliefert.",a:"Die Waren haben pünktlich geliefert worden.",b:"Die Waren sind pünktlich geliefert worden.",c:"Die Waren sind pünktlich geliefert geworden.",k:"b",t:"Plural → <em>sind</em>"},
+{p:"Man hat das Gesetz im Parlament beschlossen.",a:"Das Gesetz hat im Parlament beschlossen worden.",b:"Das Gesetz ist im Parlament beschlossen worden.",c:"Das Gesetz ist im Parlament beschlossen geworden.",k:"b",t:"<em>beschließen</em> → PP: <em>beschlossen</em>"},
+{p:"Man hat die Pakete schon zugestellt.",a:"Die Pakete haben schon zugestellt worden.",b:"Die Pakete sind schon zugestellt worden.",c:"Die Pakete sind schon zugestellt geworden.",k:"b",t:"<em>zustellen</em> → PP: <em>zugestellt</em>"},
+]},
+musste_a:{title:"Was musste gemacht werden? A",icon:"✅",qs:[
+{p:"Aufgabe beim Start-up: <em>Geschäftspartner finden</em>",a:"Geschäftspartner musste gefunden werden.",b:"Geschäftspartner mussten gefunden werden.",c:"Geschäftspartner mussten finden werden.",k:"b",t:"Plural → <em>mussten</em>"},
+{p:"Aufgabe beim Start-up: <em>eine Finanzierung planen</em>",a:"Eine Finanzierung musste geplant werden.",b:"Eine Finanzierung mussten geplant werden.",c:"Eine Finanzierung musste planen werden.",k:"a",t:"Sg. Fem. → <em>musste</em>"},
+{p:"Aufgabe beim Start-up: <em>einen Kredit aufnehmen</em>",a:"Ein Kredit mussten aufgenommen werden.",b:"Ein Kredit musste aufgenommen werden.",c:"Ein Kredit musste aufnehmen werden.",k:"b",t:"Trennbares Verb PP: <em>aufgenommen</em>"},
+{p:"Aufgabe beim Start-up: <em>die Geschäftsidee ausprobieren</em>",a:"Die Geschäftsidee mussten ausprobiert werden.",b:"Die Geschäftsidee musste ausprobiert werden.",c:"Die Geschäftsidee musste ausprobieren werden.",k:"b",t:"Sg. Fem. → <em>musste</em>"},
+{p:"Aufgabe beim Start-up: <em>einen Laden mieten</em>",a:"Ein Laden mussten gemietet werden.",b:"Ein Laden musste mieten werden.",c:"Ein Laden musste gemietet werden.",k:"c",t:"<em>mieten</em> → PP: <em>gemietet</em>"},
+{p:"Aufgabe beim Start-up: <em>die Räume renovieren</em>",a:"Die Räume mussten renoviert werden.",b:"Die Räume musste renoviert werden.",c:"Die Räume mussten renovieren werden.",k:"a",t:"Plural → <em>mussten</em>"},
+{p:"Aufgabe beim Start-up: <em>Waren einkaufen</em>",a:"Waren mussten kaufen werden.",b:"Waren musste gekauft werden.",c:"Waren mussten gekauft werden.",k:"c",t:"Plural → <em>mussten</em>; PP: <em>gekauft</em>"},
+{p:"Aufgabe beim Start-up: <em>den Laden eröffnen</em>",a:"Der Laden musste eröffnet werden.",b:"Der Laden mussten eröffnet werden.",c:"Der Laden musste eröffnen werden.",k:"a",t:"Masc. Sg. → <em>musste</em>"},
+]},
+musste_b:{title:"Was musste gemacht werden? B",icon:"✅",qs:[
+{p:"Aufgabe bei der Veranstaltung: <em>Gäste einladen</em>",a:"Gäste musste eingeladen werden.",b:"Gäste mussten eingeladen werden.",c:"Gäste mussten einladen werden.",k:"b",t:"Plural → <em>mussten</em>; PP: <em>eingeladen</em>"},
+{p:"Aufgabe bei der Veranstaltung: <em>einen Veranstaltungsort buchen</em>",a:"Ein Veranstaltungsort musste gebucht werden.",b:"Ein Veranstaltungsort mussten gebucht werden.",c:"Ein Veranstaltungsort musste buchen werden.",k:"a",t:"Sg. → <em>musste</em>"},
+{p:"Aufgabe bei der Veranstaltung: <em>Essen und Getränke bestellen</em>",a:"Essen und Getränke musste bestellt werden.",b:"Essen und Getränke mussten bestellen werden.",c:"Essen und Getränke mussten bestellt werden.",k:"c",t:"Zwei Substantive → Plural → <em>mussten</em>"},
+{p:"Aufgabe bei der Veranstaltung: <em>die Dekoration vorbereiten</em>",a:"Die Dekoration musste vorbereitet werden.",b:"Die Dekoration mussten vorbereitet werden.",c:"Die Dekoration musste vorbereiten werden.",k:"a",t:"Sg. Fem. → <em>musste</em>"},
+{p:"Aufgabe bei der Veranstaltung: <em>Musik organisieren</em>",a:"Musik mussten organisiert werden.",b:"Musik musste organisiert werden.",c:"Musik musste organisieren werden.",k:"b",t:"<em>Musik</em> (Sg. Fem.) → <em>musste</em>"},
+{p:"Aufgabe bei der Veranstaltung: <em>Stühle und Tische aufstellen</em>",a:"Stühle und Tische mussten aufgestellt werden.",b:"Stühle und Tische musste aufgestellt werden.",c:"Stühle und Tische mussten aufstellen werden.",k:"a",t:"Plural → <em>mussten</em>; PP: <em>aufgestellt</em>"},
+{p:"Aufgabe bei der Veranstaltung: <em>Einladungen verschicken</em>",a:"Einladungen musste verschickt werden.",b:"Einladungen mussten verschicken werden.",c:"Einladungen mussten verschickt werden.",k:"c",t:"Plural → <em>mussten</em>; PP: <em>verschickt</em>"},
+{p:"Aufgabe bei der Veranstaltung: <em>einen Fotografen engagieren</em>",a:"Ein Fotograf musste engagiert werden.",b:"Ein Fotograf mussten engagiert werden.",c:"Ein Fotograf musste engagieren werden.",k:"a",t:"Sg. → <em>musste</em>; PP: <em>engagiert</em>"},
+]},
+};
+
+// ============================================================
+// GAME STATE
+// ============================================================
+let curMode='',qs=[],qi=0,score=0,streak=0,lives=3,right=0,startT=0,answered=false,lastMode='';
+
+function startGame(m){
+  curMode=m; lastMode=m;
+  const md=MODES[m];
+  qs=[...md.qs].sort(()=>Math.random()-.5);
+  qi=0;score=0;streak=0;lives=3;right=0;answered=false;
+  startT=Date.now();
+  document.getElementById('backBtn').classList.add('show');
+  document.getElementById('modeTag').innerHTML=md.icon+' '+md.title;
+  showScr('gameScr');
+  renderQ();
+}
+
+function renderQ(){
+  if(qi>=qs.length||lives<=0){endGame();return;}
+  const q=qs[qi];
+  answered=false;
+  document.getElementById('qNum').textContent='Frage '+(qi+1)+' von '+qs.length;
+  document.getElementById('qText').innerHTML=q.p;
+  document.getElementById('tA').innerHTML=q.a;
+  document.getElementById('tB').innerHTML=q.b;
+  document.getElementById('tC').innerHTML=q.c;
+  document.getElementById('qHint').className='q-hint';
+  document.getElementById('qHint').innerHTML='💡 '+q.t;
+  document.getElementById('nextBtn').style.display='none';
+  ['oA','oB','oC'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.className='opt-btn'; el.disabled=false;
+  });
+  const pct=(qi/qs.length)*100;
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('progTxt').textContent='Fortschritt: '+qi+' / '+qs.length;
+  updateStats();
+}
+
+function answer(choice){
+  if(answered)return;
+  answered=true;
+  const q=qs[qi];
+  const btnMap={a:'oA',b:'oB',c:'oC'};
+  const el=document.getElementById(btnMap[choice]);
+  ['oA','oB','oC'].forEach(id=>document.getElementById(id).disabled=true);
+
+  if(choice===q.k){
+    el.classList.add('ok');
+    streak++; right++;
+    const pts=streak>=3?20:10;
+    score+=pts;
+    showPopup(streak>=3?'+'+pts+' 🔥':'+'+pts, el, streak>=3);
+    if(streak===3||streak===5||streak===10) showMilestone(streak);
+  } else {
+    el.classList.add('wrong');
+    document.getElementById(btnMap[q.k]).classList.add('ok');
+    streak=0; lives--;
+    showPopup('✘'+(lives>0?' '+lives+'❤️ übrig':''), el, false);
+    document.getElementById('qHint').classList.add('on');
+  }
+  document.getElementById('nextBtn').style.display='block';
+  updateStats();
+  if(lives<=0){setTimeout(endGame,1200);return;}
+}
+
+function showHint(){document.getElementById('qHint').classList.toggle('on');}
+
+function nextQ(){qi++;renderQ();}
+
+function updateStats(){
+  document.getElementById('score').textContent=score;
+  const s=streak;
+  document.getElementById('streak').innerHTML=s+(s>=3?' <span class="fire">🔥</span>':'');
+  const h='❤️'.repeat(lives)+'🖤'.repeat(3-lives);
+  document.getElementById('lives').textContent=h;
+}
+
+function showPopup(txt,el,bonus){
+  const p=document.createElement('div');
+  p.className='pp'+(bonus?' bonus':'');
+  p.textContent=txt;
+  const r=el.getBoundingClientRect();
+  p.style.left=r.left+r.width/2-30+'px';
+  p.style.top=r.top+window.scrollY-20+'px';
+  document.body.appendChild(p);
+  setTimeout(()=>p.remove(),1000);
+}
+
+function showMilestone(n){
+  const msgs={3:'Starke Serie! 🔥',5:'Unaufhaltbar! ⚡',10:'Passiv-Meister! 🏆'};
+  const div=document.createElement('div');
+  div.className='milestone';
+  div.innerHTML=`<div class="milestone-inner"><div class="milestone-n">${n}🔥</div><div class="milestone-t">${msgs[n]||'Super!'}</div></div>`;
+  document.body.appendChild(div);
+  setTimeout(()=>div.remove(),1800);
+}
+
+function endGame(){
+  const t=Math.round((Date.now()-startT)/1000);
+  const acc=qs.length>0?Math.round((right/qs.length)*100):0;
+  const emojis=acc>=90?'🏆':acc>=70?'⭐':acc>=50?'🌻':'💪';
+  document.getElementById('resTitle').textContent=emojis+' Ergebnis!';
+  document.getElementById('resPts').textContent=score;
+  document.getElementById('resRight').textContent=right+' / '+qs.length;
+  document.getElementById('resAcc').textContent=acc+'%';
+  const m=Math.floor(t/60),s=t%60;
+  document.getElementById('resTime').textContent=(m>0?m+'m ':'')+s+'s';
+  showScr('resultScr');
+  if(acc>=90)confetti();
+}
+
+function restartMode(){startGame(lastMode);}
+
+function goMenu(){
+  showScr('startScr');
+  document.getElementById('backBtn').classList.remove('show');
+}
+
+function showScr(id){
+  ['startScr','gameScr','resultScr'].forEach(s=>{
+    document.getElementById(s).className='scr'+(s===id?' on':'');
+  });
+}
+
+// ============================================================
+// LEADERBOARD (localStorage)
+// ============================================================
+function saveLB(){
+  const name=document.getElementById('nameInput').value.trim()||'Anonym';
+  const key='passivChampion_'+curMode;
+  let lb=JSON.parse(localStorage.getItem(key)||'[]');
+  const t=document.getElementById('resTime').textContent;
+  lb.push({name,score,acc:parseInt(document.getElementById('resAcc').textContent),time:t,date:new Date().toLocaleDateString('de')});
+  lb.sort((a,b)=>b.score-a.score);
+  lb=lb.slice(0,10);
+  localStorage.setItem(key,JSON.stringify(lb));
+  renderLB(lb);
+  document.getElementById('lbWrap').style.display='block';
+}
+
+function renderLB(lb){
+  const medals=['🥇','🥈','🥉'];
+  document.getElementById('lbList').innerHTML=lb.map((e,i)=>`
+    <div class="lb-row">
+      <div class="lb-rank">${medals[i]||'#'+(i+1)}</div>
+      <div class="lb-name">${e.name}</div>
+      <div class="lb-score">${e.score} Pkt.</div>
+      <div class="lb-time">${e.acc}% · ${e.time}</div>
+    </div>`).join('');
+}
+
+// ============================================================
+// CONFETTI
+// ============================================================
+function confetti(){
+  const cols=['#F5D800','#C8005A','#FF7040','#50C060','#40A0FF','#FFEC60','#FF40A0'];
+  for(let i=0;i<80;i++){
+    setTimeout(()=>{
+      const c=document.createElement('div');
+      c.className='conf';
+      c.style.cssText=`left:${Math.random()*100}vw;top:-10px;width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;background:${cols[Math.floor(Math.random()*cols.length)]};border-radius:${Math.random()>.5?'50%':'2px'};animation:confFall ${1.5+Math.random()}s ease-in forwards;`;
+      document.body.appendChild(c);
+      setTimeout(()=>c.remove(),3000);
+    },i*30);
+  }
+}
+const confStyle=document.createElement('style');
+confStyle.textContent='@keyframes confFall{to{transform:translateY(105vh) rotate(720deg);opacity:0;}}';
+document.head.appendChild(confStyle);
+
+// ============================================================
+// PARTICLE BACKGROUND
+// ============================================================
+const pWrap=document.getElementById('parts');
+for(let i=0;i<6;i++){
+  const r=document.createElement('div');r.className='rip';
+  r.style.cssText=`width:${100+i*120}px;height:${100+i*120}px;left:${10+i*14}%;top:${15+i*12}%;animation-delay:${i*1.5}s;`;
+  pWrap.appendChild(r);
+}
+for(let i=0;i<4;i++){
+  const s=document.createElement('div');s.className='shim';
+  s.style.cssText=`top:${20+i*20}%;animation-delay:${i*2}s;animation-duration:${7+i}s;`;
+  pWrap.appendChild(s);
+}
+for(let i=0;i<20;i++){
+  const st=document.createElement('div');st.className='star';
+  st.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*4}s;`;
+  pWrap.appendChild(st);
+}
+</script>
+</body>
+</html>
