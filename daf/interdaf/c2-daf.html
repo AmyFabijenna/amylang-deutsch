@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C2 Übungsmaterial - Amy Lang</title>
+
+<!-- DAF Zugangsschutz -->
+    <script src="../daf-access-control.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a2463 0%, #1e3c72 25%, #2a5298 50%, #3a6ea5 75%, #4b88c2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section-title {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.8em;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin: 30px 0 20px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .section-title:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .section-title::after {
+            content: ' ▼';
+            font-size: 0.7em;
+        }
+
+        .section-title.collapsed::after {
+            content: ' ►';
+        }
+
+        .category-title {
+            background: linear-gradient(135deg, #ffb347, #ff9500, #ffcc00);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 25px 0 15px 0;
+            font-size: 1.3em;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .category-title:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .category-title::after {
+            content: ' ▼';
+            font-size: 0.7em;
+        }
+
+        .category-title.collapsed::after {
+            content: ' ►';
+        }
+
+        .exercise-container {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .exercise-container:hover {
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .exercise-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #1a2980;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #26d0ce;
+        }
+
+        .difficulty-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .difficulty-leicht {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .difficulty-mittel {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .difficulty-schwer {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .exercise-content {
+            margin: 20px 0;
+            line-height: 1.8;
+        }
+
+        .input-field {
+            border: 2px solid #26d0ce;
+            border-radius: 5px;
+            padding: 8px 12px;
+            font-size: 1em;
+            width: 200px;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #1a2980;
+            box-shadow: 0 0 8px rgba(26, 41, 128, 0.3);
+        }
+
+        .input-field.correct {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .input-field.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button-secondary {
+            background: linear-gradient(135deg, #ffb347, #ff9500);
+        }
+
+        .button-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .solution-box {
+            background: #e7f3ff;
+            border-left: 4px solid #1a2980;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .solution-box.visible {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .quiz-option {
+            background: white;
+            border: 2px solid #dee2e6;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover {
+            border-color: #26d0ce;
+            background: #f0f8ff;
+            transform: translateX(5px);
+        }
+
+        .quiz-option.selected {
+            border-color: #1a2980;
+            background: #e7f3ff;
+        }
+
+        .quiz-option.correct {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .quiz-option.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .drag-item {
+            background: linear-gradient(135deg, #ffb347, #ffcc00);
+            color: #333;
+            padding: 12px 20px;
+            margin: 8px;
+            border-radius: 8px;
+            cursor: move;
+            display: inline-block;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .drag-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .drop-zone {
+            border: 3px dashed #26d0ce;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 12px;
+            min-height: 60px;
+            background: rgba(38, 208, 206, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .drop-zone.drag-over {
+            background: rgba(38, 208, 206, 0.15);
+            border-color: #1a2980;
+        }
+
+        .collapsible-content {
+            max-height: 5000px;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+
+        .collapsible-content.collapsed {
+            max-height: 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            width: 0%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .score-display {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: 600;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .score-display.visible {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+            text-align: center;
+            padding: 30px;
+            margin-top: 40px;
+        }
+
+        .info-box {
+            background: #fff9e6;
+            border-left: 4px solid #ffb347;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .info-box h3 {
+            color: #ff9500;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+
+            .input-field {
+                width: 150px;
+            }
+
+            .button {
+                padding: 10px 20px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🎓 Amy Lang - C2 Deutsch als Fremdsprache</h1>
+            <p>Interaktives Übungsmaterial für die C2-Prüfung</p>
+        </header>
+
+        <main class="content">
+            <!-- Einführung -->
+            <div class="info-box">
+                <h3>📋 Informationen zur C2-Prüfung</h3>
+                <p><strong>C2</strong> ist das höchste Sprachniveau nach dem Gemeinsamen Europäischen Referenzrahmen (GER). Auf diesem Niveau können Sie:</p>
+                <ul style="margin: 10px 0 10px 30px;">
+                    <li>Praktisch alles mühelos verstehen</li>
+                    <li>Sich spontan, sehr flüssig und präzise ausdrücken</li>
+                    <li>Auch bei komplexen Sachverhalten feinere Bedeutungsnuancen deutlich machen</li>
+                </ul>
+                <p><strong>Relevante Prüfungen:</strong> Goethe-Zertifikat C2: GDS, TestDaF, telc Deutsch C2</p>
+            </div>
+
+            <!-- Sektion 1: GRAMMATIK -->
+            <div class="section-title" onclick="toggleSection('grammar')">
+                📚 1. GRAMMATIK
+            </div>
+            <div id="grammar" class="collapsible-content">
+                
+                <!-- 1.1 Kasus -->
+                <div class="category-title" onclick="toggleCategory('kasus')">
+                    1.1 Kasus (Dativ, Akkusativ, Genitiv)
+                </div>
+                <div id="kasus" class="collapsible-content">
+                    
+                    <!-- Übung: Verben und Kasus -->
+                    <div class="exercise-container">
+                        <div class="exercise-title">
+                            Verben und ihre Kasus
+                            <span class="difficulty-badge difficulty-mittel">Mittel</span>
+                        </div>
+                        <div class="exercise-content">
+                            <p><strong>Aufgabe:</strong> Welchen Kasus regiert das Verb? Wählen Sie die richtige Antwort.</p>
+                            
+                            <div id="quiz-kasus">
+                                <div style="margin: 20px 0;">
+                                    <p><strong>1. Das Verb "helfen" regiert:</strong></p>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-kasus', 1, 'dativ')">
+                                        den Dativ
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-kasus', 1, 'akkusativ')">
+                                        den Akkusativ
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-kasus', 1, 'genitiv')">
+                                        den Genitiv
+                                    </div>
+                                </div>
+
+                                <div style="margin: 20px 0;">
+                                    <p><strong>2. Das Verb "vermissen" regiert:</strong></p>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-kasus', 2, 'dativ')">
+                                        den Dativ
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-kasus', 2, 'akkusativ')">
+                                        den Akkusativ
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-kasus', 2, 'genitiv')">
+                                        den Genitiv
+                                    </div>
+                                </div>
+
+                                <div style="margin: 20px 0;">
+                                    <p><strong>3. Das Verb "gedenken" regiert:</strong></p>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-kasus', 3, 'dativ')">
+                                        den Dativ
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-kasus', 3, 'akkusativ')">
+                                        den Akkusativ
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-kasus', 3, 'genitiv')">
+                                        den Genitiv
+                                    </div>
+                                </div>
+
+                                <div style="margin: 20px 0;">
+                                    <p><strong>4. Das Verb "schenken" regiert (beide Objekte):</strong></p>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-kasus', 4, 'dativ-akkusativ')">
+                                        Dativ und Akkusativ
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-kasus', 4, 'akkusativ-genitiv')">
+                                        Akkusativ und Genitiv
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-kasus', 4, 'nur-akkusativ')">
+                                        nur Akkusativ
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="button" onclick="checkQuiz('quiz-kasus')">Überprüfen</button>
+                            <button class="button button-secondary" onclick="resetQuiz('quiz-kasus')">Zurücksetzen</button>
+                            <div id="quiz-kasus-score" class="score-display"></div>
+                        </div>
+                    </div>
+
+                    <!-- Übung: Lückentext Dativ/Akkusativ -->
+                    <div class="exercise-container">
+                        <div class="exercise-title">
+                            Lückentext: Digitalisierung und junge Menschen
+                            <span class="difficulty-badge difficulty-schwer">Schwer</span>
+                        </div>
+                        <div class="exercise-content">
+                            <p><strong>Aufgabe:</strong> Setzen Sie die fehlenden Artikel oder Pronomen in der richtigen Form (Dativ oder Akkusativ) ein.</p>
+                            
+                            <div id="lueckentext-digital" style="line-height: 2.5;">
+                                <p>1. Die Digitalisierung stellt <input type="text" class="input-field" data-answer="die" id="digital-1"> junge Generation vor große Herausforderungen.</p>
+                                <p>2. Viele Eltern erlauben <input type="text" class="input-field" data-answer="den" id="digital-2"> Kindern, bereits früh ein Smartphone zu nutzen.</p>
+                                <p>3. Die Schule vermittelt <input type="text" class="input-field" data-answer="den" id="digital-3"> Schülern digitale Kompetenzen.</p>
+                                <p>4. Man sollte <input type="text" class="input-field" data-answer="den" id="digital-4"> Jugendlichen den bewussten Umgang mit sozialen Medien beibringen.</p>
+                                <p>5. Die sozialen Netzwerke bieten <input type="text" class="input-field" data-answer="den" id="digital-5"> Nutzern unzählige Möglichkeiten der Vernetzung.</p>
+                                <p>6. Der Lehrer erklärte <input type="text" class="input-field" data-answer="der" id="digital-6"> Klasse die Risiken der digitalen Welt.</p>
+                                <p>7. Einige Studien zeigen, dass zu viel Bildschirmzeit <input type="text" class="input-field" data-answer="dem" id="digital-7"> Gehirn schadet.</p>
+                                <p>8. Der ständige Zugang zum Internet kann <input type="text" class="input-field" data-answer="die" id="digital-8"> Konzentrationsfähigkeit negativ beeinflussen.</p>
+                                <p>9. Die Digitalisierung eröffnet <input type="text" class="input-field" data-answer="den" id="digital-9"> jungen Menschen völlig neue Berufsfelder.</p>
+                                <p>10. Viele Apps greifen auf <input type="text" class="input-field" data-answer="die" id="digital-10"> persönlichen Daten der Nutzer zu.</p>
+                            </div>
+
+                            <div style="margin-top: 20px;">
+                                <button class="button" onclick="checkLueckentext('digital')">Überprüfen</button>
+                                <button class="button button-secondary" onclick="resetLueckentext('digital')">Zurücksetzen</button>
+                                <button class="button button-success" onclick="showSolution('solution-digital')">Lösung anzeigen</button>
+                            </div>
+
+                            <div id="lueckentext-digital-score" class="score-display"></div>
+
+                            <div id="solution-digital" class="solution-box">
+                                <h3>✅ Lösungen:</h3>
+                                <p>1. <strong>die</strong> (Akkusativ) - "stellt" + Akkusativ</p>
+                                <p>2. <strong>den</strong> (Dativ) - "erlauben" + Dativ</p>
+                                <p>3. <strong>den</strong> (Dativ) - "vermitteln" + Dativ</p>
+                                <p>4. <strong>den</strong> (Dativ) - "beibringen" + Dativ</p>
+                                <p>5. <strong>den</strong> (Dativ) - "bieten" + Dativ</p>
+                                <p>6. <strong>der</strong> (Dativ) - "erklären" + Dativ</p>
+                                <p>7. <strong>dem</strong> (Dativ) - "schaden" + Dativ</p>
+                                <p>8. <strong>die</strong> (Akkusativ) - "beeinflussen" + Akkusativ</p>
+                                <p>9. <strong>den</strong> (Dativ) - "eröffnen" + Dativ</p>
+                                <p>10. <strong>die</strong> (Akkusativ) - "greifen auf" + Akkusativ</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Drag & Drop: Akkusativ vor Dativ -->
+                    <div class="exercise-container">
+                        <div class="exercise-title">
+                            Drag & Drop: Akkusativpronomen vor Dativpronomen
+                            <span class="difficulty-badge difficulty-mittel">Mittel</span>
+                        </div>
+                        <div class="exercise-content">
+                            <p><strong>Regel:</strong> Wenn beide Objekte Pronomen sind, steht das Akkusativpronomen vor dem Dativpronomen.</p>
+                            <p><strong>Aufgabe:</strong> Ziehen Sie die Pronomen in die richtige Reihenfolge.</p>
+                            
+                            <div id="drag-akkdativ" style="margin: 20px 0;">
+                                <p><strong>Ich gebe _____ _____ (das Buch / ihm)</strong></p>
+                                <div class="drop-zone" id="drop-akk-1" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                                <div class="drop-zone" id="drop-dat-1" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                                
+                                <div style="margin: 20px 0;">
+                                    <span class="drag-item" draggable="true" ondragstart="drag(event)" id="es-1">es</span>
+                                    <span class="drag-item" draggable="true" ondragstart="drag(event)" id="ihm-1">ihm</span>
+                                </div>
+                            </div>
+
+                            <button class="button" onclick="checkDragDrop('akkdativ', 1)">Überprüfen</button>
+                            <button class="button button-secondary" onclick="resetDragDrop('akkdativ', 1)">Zurücksetzen</button>
+                            <button class="button button-success" onclick="showSolution('solution-akkdativ')">Erklärung anzeigen</button>
+
+                            <div id="drag-akkdativ-result" class="score-display"></div>
+
+                            <div id="solution-akkdativ" class="solution-box">
+                                <h3>✅ Erklärung:</h3>
+                                <p><strong>Richtige Reihenfolge:</strong> Ich gebe <strong>es ihm</strong>.</p>
+                                <p><strong>Regel:</strong> Akkusativpronomen (es) steht vor Dativpronomen (ihm).</p>
+                                <p><strong>Merkhilfe:</strong> Wenn beides Pronomen ist: "Akkusativ vor Dativ!"</p>
+                                <p><strong>Weitere Beispiele:</strong></p>
+                                <ul style="margin-left: 30px;">
+                                    <li>Ich zeige es dir. (nicht: Ich zeige dir es.)</li>
+                                    <li>Er gibt sie mir. (nicht: Er gibt mir sie.)</li>
+                                    <li>Sie schickt es uns. (nicht: Sie schickt uns es.)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 1.2 Reflexivpronomen -->
+                <div class="category-title" onclick="toggleCategory('reflexiv')">
+                    1.2 Reflexivpronomen
+                </div>
+                <div id="reflexiv" class="collapsible-content">
+                    
+                    <!-- Übung: Reflexiv oder nicht? -->
+                    <div class="exercise-container">
+                        <div class="exercise-title">
+                            Reflexiv oder nicht? - Quiz
+                            <span class="difficulty-badge difficulty-mittel">Mittel</span>
+                        </div>
+                        <div class="exercise-content">
+                            <p><strong>Aufgabe:</strong> Entscheiden Sie, ob das Reflexivpronomen korrekt eingesetzt ist.</p>
+                            
+                            <div id="quiz-reflexiv">
+                                <div style="margin: 20px 0;">
+                                    <p><strong>1. "Ich überlege mir, ob ich ins Kino gehe."</strong></p>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-reflexiv', 1, 'richtig')">
+                                        Richtig - "überlegen" braucht ein Reflexivpronomen
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-reflexiv', 1, 'falsch')">
+                                        Falsch - "überlegen" braucht kein Reflexivpronomen
+                                    </div>
+                                </div>
+
+                                <div style="margin: 20px 0;">
+                                    <p><strong>2. "Er installiert sich eine neue App."</strong></p>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-reflexiv', 2, 'richtig')">
+                                        Richtig - "installieren" braucht ein Reflexivpronomen
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-reflexiv', 2, 'falsch')">
+                                        Falsch - "installieren" braucht kein Reflexivpronomen
+                                    </div>
+                                </div>
+
+                                <div style="margin: 20px 0;">
+                                    <p><strong>3. "Wir informieren uns über digitale Sicherheit."</strong></p>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-reflexiv', 3, 'richtig')">
+                                        Richtig - "informieren" braucht ein Reflexivpronomen
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-reflexiv', 3, 'falsch')">
+                                        Falsch - "informieren" braucht kein Reflexivpronomen
+                                    </div>
+                                </div>
+
+                                <div style="margin: 20px 0;">
+                                    <p><strong>4. "Sie kann sich nicht von ihrem Handy trennen."</strong></p>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-reflexiv', 4, 'richtig')">
+                                        Richtig - "trennen" braucht ein Reflexivpronomen
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-reflexiv', 4, 'falsch')">
+                                        Falsch - "trennen" braucht kein Reflexivpronomen
+                                    </div>
+                                </div>
+
+                                <div style="margin: 20px 0;">
+                                    <p><strong>5. "Ich lade mir eine neue App herunter."</strong></p>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-reflexiv', 5, 'richtig')">
+                                        Richtig - "herunterladen" braucht ein Reflexivpronomen
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-reflexiv', 5, 'falsch')">
+                                        Falsch - "herunterladen" braucht kein Reflexivpronomen
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="button" onclick="checkQuiz('quiz-reflexiv')">Überprüfen</button>
+                            <button class="button button-secondary" onclick="resetQuiz('quiz-reflexiv')">Zurücksetzen</button>
+                            <button class="button button-success" onclick="showSolution('solution-reflexiv-quiz')">Lösungen anzeigen</button>
+                            <div id="quiz-reflexiv-score" class="score-display"></div>
+
+                            <div id="solution-reflexiv-quiz" class="solution-box">
+                                <h3>✅ Lösungen und Erklärungen:</h3>
+                                <p><strong>1. Richtig</strong> - "sich überlegen" ist reflexiv (Dativ)</p>
+                                <p><strong>2. Falsch</strong> - "installieren" ist nicht reflexiv; richtig: "Er installiert eine neue App."</p>
+                                <p><strong>3. Richtig</strong> - "sich informieren" ist reflexiv (Akkusativ)</p>
+                                <p><strong>4. Richtig</strong> - "sich trennen von" ist reflexiv (Akkusativ)</p>
+                                <p><strong>5. Falsch</strong> - "herunterladen" ist nicht reflexiv; richtig: "Ich lade eine neue App herunter."</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lückentext Reflexivpronomen -->
+                    <div class="exercise-container">
+                        <div class="exercise-title">
+                            Lückentext: Reflexivpronomen einsetzen
+                            <span class="difficulty-badge difficulty-schwer">Schwer</span>
+                        </div>
+                        <div class="exercise-content">
+                            <p><strong>Aufgabe:</strong> Setzen Sie das passende Reflexivpronomen ein (mich, mir, dich, dir, sich, uns, euch) – oder lassen Sie die Lücke leer, wenn kein Reflexivpronomen nötig ist.</p>
+                            
+                            <div id="lueckentext-reflexiv" style="line-height: 2.5;">
+                                <p>1. Viele Jugendliche können <input type="text" class="input-field" data-answer="sich" id="refl-1"> ein Leben ohne Smartphone nicht mehr vorstellen.</p>
+                                <p>2. Hast du <input type="text" class="input-field" data-answer="dir" id="refl-2"> schon einmal Gedanken darüber gemacht?</p>
+                                <p>3. Wir müssen <input type="text" class="input-field" data-answer="uns" id="refl-3"> bewusst machen, dass unsere Daten oft weitergegeben werden.</p>
+                                <p>4. Er meldet <input type="text" class="input-field" data-answer="sich" id="refl-4"> bei einem neuen Streaming-Dienst an.</p>
+                                <p>5. Ich installiere <input type="text" class="input-field" data-answer="" id="refl-5"> eine neue App auf meinem Handy.</p>
+                                <p>6. Sie sollten <input type="text" class="input-field" data-answer="sich" id="refl-6"> nicht so stark von Likes beeinflussen lassen.</p>
+                                <p>7. Wir informieren <input type="text" class="input-field" data-answer="uns" id="refl-7"> regelmäßig über neue Technologien.</p>
+                                <p>8. Kannst du <input type="text" class="input-field" data-answer="" id="refl-8"> bitte das neue Betriebssystem herunterladen?</p>
+                                <p>9. Ich freue <input type="text" class="input-field" data-answer="mich" id="refl-9">, dass mein neuer Laptop so schnell ist.</p>
+                                <p>10. Er interessiert <input type="text" class="input-field" data-answer="sich" id="refl-10"> sehr für künstliche Intelligenz.</p>
+                            </div>
+
+                            <div style="margin-top: 20px;">
+                                <button class="button" onclick="checkLueckentext('refl')">Überprüfen</button>
+                                <button class="button button-secondary" onclick="resetLueckentext('refl')">Zurücksetzen</button>
+                                <button class="button button-success" onclick="showSolution('solution-reflexiv-luecken')">Lösung anzeigen</button>
+                            </div>
+
+                            <div id="lueckentext-refl-score" class="score-display"></div>
+
+                            <div id="solution-reflexiv-luecken" class="solution-box">
+                                <h3>✅ Lösungen:</h3>
+                                <p>1. <strong>sich</strong> - "sich vorstellen" (reflexiv, Dativ)</p>
+                                <p>2. <strong>dir</strong> - "sich Gedanken machen" (reflexiv, Dativ)</p>
+                                <p>3. <strong>uns</strong> - "sich bewusst machen" (reflexiv, Dativ)</p>
+                                <p>4. <strong>sich</strong> - "sich anmelden" (reflexiv, Akkusativ)</p>
+                                <p>5. <strong>(leer)</strong> - "installieren" ist nicht reflexiv</p>
+                                <p>6. <strong>sich</strong> - "sich beeinflussen lassen" (reflexiv, Akkusativ)</p>
+                                <p>7. <strong>uns</strong> - "sich informieren" (reflexiv, Akkusativ)</p>
+                                <p>8. <strong>(leer)</strong> - "herunterladen" ist nicht reflexiv</p>
+                                <p>9. <strong>mich</strong> - "sich freuen" (reflexiv, Akkusativ)</p>
+                                <p>10. <strong>sich</strong> - "sich interessieren für" (reflexiv, Akkusativ)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 1.3 Satzstruktur (Te-Ka-Mo-Lo) -->
+                <div class="category-title" onclick="toggleCategory('satzstruktur')">
+                    1.3 Satzstruktur & Te-Ka-Mo-Lo
+                </div>
+                <div id="satzstruktur" class="collapsible-content">
+                    
+                    <!-- Übung: Satzglieder ordnen -->
+                    <div class="exercise-container">
+                        <div class="exercise-title">
+                            Satzglieder in die richtige Reihenfolge bringen
+                            <span class="difficulty-badge difficulty-schwer">Schwer</span>
+                        </div>
+                        <div class="exercise-content">
+                            <p><strong>Regel:</strong> Te-Ka-Mo-Lo = Temporal - Kausal - Modal - Lokal</p>
+                            <p><strong>Aufgabe:</strong> Ordnen Sie die Satzglieder richtig an.</p>
+                            
+                            <div style="margin: 20px 0;">
+                                <p><strong>Beispiel: Ich gehe / zur Arbeit / mit dem Bus / jeden Morgen</strong></p>
+                                <div id="tekamolo-1" style="margin: 15px 0;">
+                                    <div style="margin: 10px 0;">
+                                        <span class="drag-item" draggable="true" ondragstart="drag(event)" id="tek-ich">Ich gehe</span>
+                                        <span class="drag-item" draggable="true" ondragstart="drag(event)" id="tek-morgen">jeden Morgen</span>
+                                        <span class="drag-item" draggable="true" ondragstart="drag(event)" id="tek-bus">mit dem Bus</span>
+                                        <span class="drag-item" draggable="true" ondragstart="drag(event)" id="tek-arbeit">zur Arbeit</span>
+                                    </div>
+                                    <p style="margin-top: 15px;"><strong>Richtige Reihenfolge:</strong></p>
+                                    <div class="drop-zone" id="tek-drop-1" ondrop="drop(event)" ondragover="allowDrop(event)" style="display: inline-block; width: 120px;"></div>
+                                    <div class="drop-zone" id="tek-drop-2" ondrop="drop(event)" ondragover="allowDrop(event)" style="display: inline-block; width: 150px;"></div>
+                                    <div class="drop-zone" id="tek-drop-3" ondrop="drop(event)" ondragover="allowDrop(event)" style="display: inline-block; width: 150px;"></div>
+                                    <div class="drop-zone" id="tek-drop-4" ondrop="drop(event)" ondragover="allowDrop(event)" style="display: inline-block; width: 120px;"></div>
+                                </div>
+                            </div>
+
+                            <button class="button" onclick="checkTekamolo()">Überprüfen</button>
+                            <button class="button button-secondary" onclick="resetTekamolo()">Zurücksetzen</button>
+                            <button class="button button-success" onclick="showSolution('solution-tekamolo')">Lösung anzeigen</button>
+
+                            <div id="tekamolo-result" class="score-display"></div>
+
+                            <div id="solution-tekamolo" class="solution-box">
+                                <h3>✅ Lösung:</h3>
+                                <p><strong>Ich gehe jeden Morgen mit dem Bus zur Arbeit.</strong></p>
+                                <ul style="margin-left: 30px; margin-top: 10px;">
+                                    <li><strong>Ich gehe</strong> = Subjekt + Verb</li>
+                                    <li><strong>jeden Morgen</strong> = Temporal (wann?)</li>
+                                    <li><strong>mit dem Bus</strong> = Modal (wie?)</li>
+                                    <li><strong>zur Arbeit</strong> = Lokal (wohin?)</li>
+                                </ul>
+                                <p style="margin-top: 15px;"><strong>Merkhilfe:</strong></p>
+                                <p><strong>Te</strong>mporal (wann?) → <strong>Ka</strong>usal (warum?) → <strong>Mo</strong>dal (wie?) → <strong>Lo</strong>kal (wo/wohin?)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quiz: Satzstruktur erkennen -->
+                    <div class="exercise-container">
+                        <div class="exercise-title">
+                            Quiz: Welches Satzglied ist es?
+                            <span class="difficulty-badge difficulty-mittel">Mittel</span>
+                        </div>
+                        <div class="exercise-content">
+                            <p><strong>Aufgabe:</strong> Identifizieren Sie die Art des Satzglieds.</p>
+                            
+                            <div id="quiz-satzglieder">
+                                <div style="margin: 20px 0;">
+                                    <p><strong>1. "jeden Tag" in: "Ich lerne jeden Tag Deutsch."</strong></p>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-satzglieder', 1, 'temporal')">
+                                        Temporalergänzung
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-satzglieder', 1, 'kausal')">
+                                        Kausalergänzung
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-satzglieder', 1, 'modal')">
+                                        Modalergänzung
+                                    </div>
+                                </div>
+
+                                <div style="margin: 20px 0;">
+                                    <p><strong>2. "wegen der Prüfung" in: "Er lernt wegen der Prüfung."</strong></p>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-satzglieder', 2, 'temporal')">
+                                        Temporalergänzung
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-satzglieder', 2, 'kausal')">
+                                        Kausalergänzung
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-satzglieder', 2, 'lokal')">
+                                        Lokalergänzung
+                                    </div>
+                                </div>
+
+                                <div style="margin: 20px 0;">
+                                    <p><strong>3. "in die Bibliothek" in: "Sie geht in die Bibliothek."</strong></p>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-satzglieder', 3, 'temporal')">
+                                        Temporalergänzung
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-satzglieder', 3, 'modal')">
+                                        Modalergänzung
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-satzglieder', 3, 'lokal')">
+                                        Lokalergänzung
+                                    </div>
+                                </div>
+
+                                <div style="margin: 20px 0;">
+                                    <p><strong>4. "mit großer Freude" in: "Er lernt mit großer Freude."</strong></p>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-satzglieder', 4, 'kausal')">
+                                        Kausalergänzung
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-satzglieder', 4, 'modal')">
+                                        Modalergänzung
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-satzglieder', 4, 'lokal')">
+                                        Lokalergänzung
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="button" onclick="checkQuiz('quiz-satzglieder')">Überprüfen</button>
+                            <button class="button button-secondary" onclick="resetQuiz('quiz-satzglieder')">Zurücksetzen</button>
+                            <div id="quiz-satzglieder-score" class="score-display"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Sektion 2: WORTSCHATZ -->
+            <div class="section-title" onclick="toggleSection('wortschatz')">
+                📝 2. WORTSCHATZ & THEMEN
+            </div>
+            <div id="wortschatz" class="collapsible-content">
+                
+                <!-- 2.1 Über den Deutschkurs sprechen -->
+                <div class="category-title" onclick="toggleCategory('deutschkurs')">
+                    2.1 Über den Deutschkurs sprechen
+                </div>
+                <div id="deutschkurs" class="collapsible-content">
+                    
+                    <!-- Vocabulary Quiz -->
+                    <div class="exercise-container">
+                        <div class="exercise-title">
+                            Vokabelquiz: Deutschkurs
+                            <span class="difficulty-badge difficulty-leicht">Leicht</span>
+                        </div>
+                        <div class="exercise-content">
+                            <p><strong>Aufgabe:</strong> Übersetzen Sie die Wörter.</p>
+                            
+                            <div id="vocab-deutschkurs" style="line-height: 2.5;">
+                                <p>1. die Aussprache = <input type="text" class="input-field" data-answer="pronunciation" id="vocab-1"></p>
+                                <p>2. der Fortschritt = <input type="text" class="input-field" data-answer="progress" id="vocab-2"></p>
+                                <p>3. der Wortschatz = <input type="text" class="input-field" data-answer="vocabulary" id="vocab-3"></p>
+                                <p>4. die Sprachpraxis = <input type="text" class="input-field" data-answer="language practice" id="vocab-4"></p>
+                                <p>5. sich verbessern = <input type="text" class="input-field" data-answer="to improve" id="vocab-5"></p>
+                            </div>
+
+                            <button class="button" onclick="checkVocab()">Überprüfen</button>
+                            <button class="button button-secondary" onclick="resetVocab()">Zurücksetzen</button>
+                            <button class="button button-success" onclick="showSolution('solution-vocab')">Lösungen anzeigen</button>
+
+                            <div id="vocab-deutschkurs-score" class="score-display"></div>
+
+                            <div id="solution-vocab" class="solution-box">
+                                <h3>✅ Lösungen:</h3>
+                                <p>1. die Aussprache = <strong>pronunciation</strong></p>
+                                <p>2. der Fortschritt = <strong>progress</strong></p>
+                                <p>3. der Wortschatz = <strong>vocabulary</strong></p>
+                                <p>4. die Sprachpraxis = <strong>language practice</strong></p>
+                                <p>5. sich verbessern = <strong>to improve</strong></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phrase matching -->
+                    <div class="exercise-container">
+                        <div class="exercise-title">
+                            Redewendungen zuordnen
+                            <span class="difficulty-badge difficulty-mittel">Mittel</span>
+                        </div>
+                        <div class="exercise-content">
+                            <p><strong>Aufgabe:</strong> Ordnen Sie die deutschen Redewendungen den englischen Übersetzungen zu.</p>
+                            
+                            <div id="matching-phrases">
+                                <div style="margin: 20px 0;">
+                                    <p><strong>1. Ich bin der Ansicht, dass...</strong></p>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'matching-phrases', 1, 'a')">
+                                        A) I completely agree with you
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'matching-phrases', 1, 'b')">
+                                        B) I am of the opinion that...
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'matching-phrases', 1, 'c')">
+                                        C) Could we go slower?
+                                    </div>
+                                </div>
+
+                                <div style="margin: 20px 0;">
+                                    <p><strong>2. Ich stimme dir vollkommen zu.</strong></p>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'matching-phrases', 2, 'a')">
+                                        A) I completely agree with you
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'matching-phrases', 2, 'b')">
+                                        B) I see that differently
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'matching-phrases', 2, 'c')">
+                                        C) Can you explain that again?
+                                    </div>
+                                </div>
+
+                                <div style="margin: 20px 0;">
+                                    <p><strong>3. Könnten wir langsamer vorangehen?</strong></p>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'matching-phrases', 3, 'a')">
+                                        A) That helps me a lot
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'matching-phrases', 3, 'b')">
+                                        B) Could we go slower?
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'matching-phrases', 3, 'c')">
+                                        C) I feel confident
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="button" onclick="checkQuiz('matching-phrases')">Überprüfen</button>
+                            <button class="button button-secondary" onclick="resetQuiz('matching-phrases')">Zurücksetzen</button>
+                            <div id="matching-phrases-score" class="score-display"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 2.2 Reisen -->
+                <div class="category-title" onclick="toggleCategory('reisen')">
+                    2.2 Über Reisen sprechen
+                </div>
+                <div id="reisen" class="collapsible-content">
+                    
+                    <!-- Lückentext Reisen -->
+                    <div class="exercise-container">
+                        <div class="exercise-title">
+                            Lückentext: Reiseerfahrungen
+                            <span class="difficulty-badge difficulty-mittel">Mittel</span>
+                        </div>
+                        <div class="exercise-content">
+                            <p><strong>Aufgabe:</strong> Ergänzen Sie die fehlenden Wörter.</p>
+                            
+                            <div id="lueckentext-reisen" style="line-height: 2.5;">
+                                <p>1. Ich war letztes Jahr in Spanien im <input type="text" class="input-field" data-answer="Urlaub" id="reis-1">.</p>
+                                <p>2. Die <input type="text" class="input-field" data-answer="Landschaft" id="reis-2"> war beeindruckend.</p>
+                                <p>3. Ich habe viele <input type="text" class="input-field" data-answer="Sehenswürdigkeiten" id="reis-3"> besucht.</p>
+                                <p>4. Das Essen dort war <input type="text" class="input-field" data-answer="köstlich" id="reis-4">.</p>
+                                <p>5. Ich würde gerne wieder dorthin <input type="text" class="input-field" data-answer="reisen" id="reis-5">.</p>
+                            </div>
+
+                            <button class="button" onclick="checkLueckentext('reis')">Überprüfen</button>
+                            <button class="button button-secondary" onclick="resetLueckentext('reis')">Zurücksetzen</button>
+                            <button class="button button-success" onclick="showSolution('solution-reisen')">Lösung anzeigen</button>
+
+                            <div id="lueckentext-reis-score" class="score-display"></div>
+
+                            <div id="solution-reisen" class="solution-box">
+                                <h3>✅ Lösungen:</h3>
+                                <p>1. <strong>Urlaub</strong> - im Urlaub sein = on vacation</p>
+                                <p>2. <strong>Landschaft</strong> - die Landschaft = the landscape</p>
+                                <p>3. <strong>Sehenswürdigkeiten</strong> - die Sehenswürdigkeiten = sights/attractions</p>
+                                <p>4. <strong>köstlich</strong> - köstlich = delicious</p>
+                                <p>5. <strong>reisen</strong> - reisen = to travel</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 2.3 Aktuelle Trends -->
+                <div class="category-title" onclick="toggleCategory('trends')">
+                    2.3 Aktuelle Trends für junge Menschen
+                </div>
+                <div id="trends" class="collapsible-content">
+                    
+                    <!-- Lückentext Trends -->
+                    <div class="exercise-container">
+                        <div class="exercise-title">
+                            Lückentext: Trends und Lifestyle
+                            <span class="difficulty-badge difficulty-schwer">Schwer</span>
+                        </div>
+                        <div class="exercise-content">
+                            <p><strong>Aufgabe:</strong> Setzen Sie die Wörter im richtigen Kasus ein.</p>
+                            
+                            <div id="lueckentext-trends" style="line-height: 2.5;">
+                                <p>1. Viele Menschen folgen <input type="text" class="input-field" data-answer="ihrem" id="trend-1"> Lieblingsinfluencer täglich.</p>
+                                <p>2. Sie kaufen oft <input type="text" class="input-field" data-answer="Secondhand-Kleidung" id="trend-2"> (Secondhand-Kleidung).</p>
+                                <p>3. Einige verzichten auf <input type="text" class="input-field" data-answer="tierische" id="trend-3"> (tierisch) Produkte.</p>
+                                <p>4. Sie treffen sich gerne mit <input type="text" class="input-field" data-answer="ihren" id="trend-4"> (ihr) Freunden in Cafés.</p>
+                                <p>5. Viele bevorzugen <input type="text" class="input-field" data-answer="nachhaltige" id="trend-5"> (nachhaltig) Reiseziele.</p>
+                            </div>
+
+                            <button class="button" onclick="checkLueckentext('trend')">Überprüfen</button>
+                            <button class="button button-secondary" onclick="resetLueckentext('trend')">Zurücksetzen</button>
+                            <button class="button button-success" onclick="showSolution('solution-trends')">Lösung anzeigen</button>
+
+                            <div id="lueckentext-trend-score" class="score-display"></div>
+
+                            <div id="solution-trends" class="solution-box">
+                                <h3>✅ Lösungen:</h3>
+                                <p>1. <strong>ihrem</strong> - "folgen" + Dativ</p>
+                                <p>2. <strong>Secondhand-Kleidung</strong> - Akkusativ (direktes Objekt)</p>
+                                <p>3. <strong>tierische</strong> - Adjektivdeklination, Akkusativ Plural</p>
+                                <p>4. <strong>ihren</strong> - "mit" + Dativ, Plural</p>
+                                <p>5. <strong>nachhaltige</strong> - Adjektivdeklination, Akkusativ Plural</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Sektion 3: LESEVERSTEHEN -->
+            <div class="section-title" onclick="toggleSection('leseverstehen')">
+                📖 3. LESEVERSTEHEN
+            </div>
+            <div id="leseverstehen" class="collapsible-content">
+                
+                <!-- 3.1 Kritischer Text -->
+                <div class="category-title" onclick="toggleCategory('kritisch')">
+                    3.1 Kritische Textanalyse
+                </div>
+                <div id="kritisch" class="collapsible-content">
+                    
+                    <!-- Kritischer Text mit Fragen -->
+                    <div class="exercise-container">
+                        <div class="exercise-title">
+                            Textanalyse: "Shoppen als Lebensstil?"
+                            <span class="difficulty-badge difficulty-schwer">Schwer</span>
+                        </div>
+                        <div class="exercise-content">
+                            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                                <h3>Shoppen als Lebensstil?</h3>
+                                <p style="margin: 15px 0;">Heutzutage gehen viele junge Erwachsene regelmäßig shoppen, weil sie sich an neuen Trends orientieren wollen. Fast jeden Monat erscheinen neue Kollektionen, sodass viele das Gefühl haben, immer wieder etwas Neues kaufen zu müssen. Besonders an den Wochenenden strömen sie in die Einkaufszentren, wo sie sich von Reklamen und Sonderangeboten verführen lassen.</p>
+                                
+                                <p style="margin: 15px 0;">Das Problem dabei ist, dass sich die meisten nur kurzzeitig über ihre Käufe freuen. Nach wenigen Wochen landen viele Kleidungsstücke ungetragen im Schrank oder werden nach einer Saison entsorgt. Aus diesem Grund sprechen Kritiker von „Fast Fashion", die nicht nur schlecht für die Umwelt, sondern auch ethisch fragwürdig ist.</p>
+                                
+                                <p style="margin: 15px 0;">Dennoch gibt es Alternativen. Seit einiger Zeit setzen sich immer mehr junge Menschen für nachhaltige Mode ein. Sie kaufen Kleidung in Secondhand-Läden oder achten bewusst auf faire Produktion.</p>
+                            </div>
+
+                            <div id="quiz-kritisch">
+                                <div style="margin: 20px 0;">
+                                    <p><strong>1. Was ist das Hauptproblem, das im Text beschrieben wird?</strong></p>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-kritisch', 1, 'a')">
+                                        A) Junge Menschen haben zu wenig Geld
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-kritisch', 1, 'b')">
+                                        B) Gekaufte Kleidung wird oft schnell weggeworfen
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-kritisch', 1, 'c')">
+                                        C) Einkaufszentren sind zu voll
+                                    </div>
+                                </div>
+
+                                <div style="margin: 20px 0;">
+                                    <p><strong>2. Was bedeutet "Fast Fashion" laut Text?</strong></p>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-kritisch', 2, 'a')">
+                                        A) Schnell produzierte Mode, die oft weggeworfen wird
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-kritisch', 2, 'b')">
+                                        B) Mode, die man schnell kaufen kann
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-kritisch', 2, 'c')">
+                                        C) Sportkleidung für schnelles Laufen
+                                    </div>
+                                </div>
+
+                                <div style="margin: 20px 0;">
+                                    <p><strong>3. Welche Alternative wird im Text genannt?</strong></p>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-kritisch', 3, 'a')">
+                                        A) Gar keine Kleidung mehr kaufen
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-kritisch', 3, 'b')">
+                                        B) Nur noch online einkaufen
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-kritisch', 3, 'c')">
+                                        C) Secondhand-Läden nutzen und auf faire Produktion achten
+                                    </div>
+                                </div>
+
+                                <div style="margin: 20px 0;">
+                                    <p><strong>4. Welche Aussage stimmt mit dem Text überein?</strong></p>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-kritisch', 4, 'a')">
+                                        A) Alle jungen Menschen kaufen nur nachhaltige Mode
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-kritisch', 4, 'b')">
+                                        B) Es gibt einen Trend zu mehr Nachhaltigkeit
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-kritisch', 4, 'c')">
+                                        C) Shopping macht langfristig glücklich
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="button" onclick="checkQuiz('quiz-kritisch')">Überprüfen</button>
+                            <button class="button button-secondary" onclick="resetQuiz('quiz-kritisch')">Zurücksetzen</button>
+                            <div id="quiz-kritisch-score" class="score-display"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Sektion 4: PRÜFUNGSVORBEREITUNG -->
+            <div class="section-title" onclick="toggleSection('pruefung')">
+                🎯 4. PRÜFUNGSVORBEREITUNG
+            </div>
+            <div id="pruefung" class="collapsible-content">
+                
+                <!-- 4.1 Diskussionsphrasen -->
+                <div class="category-title" onclick="toggleCategory('diskussion')">
+                    4.1 Diskussionsphrasen für die mündliche Prüfung
+                </div>
+                <div id="diskussion" class="collapsible-content">
+                    
+                    <div class="exercise-container">
+                        <div class="exercise-title">
+                            Wichtige Redemittel lernen
+                            <span class="difficulty-badge difficulty-mittel">Mittel</span>
+                        </div>
+                        <div class="exercise-content">
+                            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                                <h3>📢 Meinung äußern</h3>
+                                <ul style="margin-left: 30px; line-height: 2;">
+                                    <li>Meiner Meinung nach...</li>
+                                    <li>Ich bin der Ansicht, dass...</li>
+                                    <li>Ich vertrete die Position, dass...</li>
+                                    <li>Aus meiner Perspektive...</li>
+                                </ul>
+
+                                <h3 style="margin-top: 20px;">✅ Zustimmung</h3>
+                                <ul style="margin-left: 30px; line-height: 2;">
+                                    <li>Das sehe ich genauso.</li>
+                                    <li>Ich stimme dir/Ihnen vollkommen zu.</li>
+                                    <li>Das kann ich nur unterstützen.</li>
+                                    <li>Ich teile deine/Ihre Auffassung.</li>
+                                </ul>
+
+                                <h3 style="margin-top: 20px;">❌ Widerspruch</h3>
+                                <ul style="margin-left: 30px; line-height: 2;">
+                                    <li>Da bin ich anderer Meinung.</li>
+                                    <li>Ich sehe das etwas anders, weil...</li>
+                                    <li>Das überzeugt mich nicht ganz.</li>
+                                    <li>Dagegen spricht, dass...</li>
+                                </ul>
+
+                                <h3 style="margin-top: 20px;">💡 Argumente anführen</h3>
+                                <ul style="margin-left: 30px; line-height: 2;">
+                                    <li>Ein wichtiger Punkt ist, dass...</li>
+                                    <li>Man sollte nicht vergessen, dass...</li>
+                                    <li>Ein entscheidender Vorteil/Nachteil ist...</li>
+                                    <li>Besonders relevant ist hier, dass...</li>
+                                </ul>
+                            </div>
+
+                            <div style="margin-top: 20px;">
+                                <p><strong>💪 Übung:</strong> Wählen Sie ein Thema und formulieren Sie Ihre Meinung mit den gelernten Redemitteln:</p>
+                                <ul style="margin-left: 30px;">
+                                    <li>Sollten Universitäten mehr Praxisbezug haben?</li>
+                                    <li>Ist Homeoffice eine langfristige Lösung?</li>
+                                    <li>Braucht es eine Vier-Tage-Woche?</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quiz zu Redemitteln -->
+                    <div class="exercise-container">
+                        <div class="exercise-title">
+                            Quiz: Passende Redemittel wählen
+                            <span class="difficulty-badge difficulty-mittel">Mittel</span>
+                        </div>
+                        <div class="exercise-content">
+                            <p><strong>Aufgabe:</strong> Welche Phrase passt in die Situation?</p>
+                            
+                            <div id="quiz-redemittel">
+                                <div style="margin: 20px 0;">
+                                    <p><strong>1. Sie möchten Ihre Meinung äußern:</strong></p>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-redemittel', 1, 'a')">
+                                        A) Meiner Meinung nach ist das wichtig.
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-redemittel', 1, 'b')">
+                                        B) Das sehe ich genauso.
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-redemittel', 1, 'c')">
+                                        C) Da bin ich anderer Meinung.
+                                    </div>
+                                </div>
+
+                                <div style="margin: 20px 0;">
+                                    <p><strong>2. Sie möchten zustimmen:</strong></p>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-redemittel', 2, 'a')">
+                                        A) Ich bin der Ansicht, dass...
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-redemittel', 2, 'b')">
+                                        B) Ich stimme Ihnen vollkommen zu.
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-redemittel', 2, 'c')">
+                                        C) Dagegen spricht, dass...
+                                    </div>
+                                </div>
+
+                                <div style="margin: 20px 0;">
+                                    <p><strong>3. Sie möchten widersprechen:</strong></p>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-redemittel', 3, 'a')">
+                                        A) Das kann ich nur unterstützen.
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-redemittel', 3, 'b')">
+                                        B) Da bin ich anderer Meinung.
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-redemittel', 3, 'c')">
+                                        C) Ich teile Ihre Auffassung.
+                                    </div>
+                                </div>
+
+                                <div style="margin: 20px 0;">
+                                    <p><strong>4. Sie möchten ein Argument einführen:</strong></p>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-redemittel', 4, 'a')">
+                                        A) Das sehe ich genauso.
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-redemittel', 4, 'b')">
+                                        B) Ein wichtiger Punkt ist, dass...
+                                    </div>
+                                    <div class="quiz-option" onclick="selectQuizOption(this, 'quiz-redemittel', 4, 'c')">
+                                        C) Das überzeugt mich nicht.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="button" onclick="checkQuiz('quiz-redemittel')">Überprüfen</button>
+                            <button class="button button-secondary" onclick="resetQuiz('quiz-redemittel')">Zurücksetzen</button>
+                            <div id="quiz-redemittel-score" class="score-display"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 4.2 Prüfungsthemen B2-C2 -->
+                <div class="category-title" onclick="toggleCategory('themen')">
+                    4.2 Typische Prüfungsthemen
+                </div>
+                <div id="themen" class="collapsible-content">
+                    
+                    <div class="exercise-container">
+                        <div class="exercise-title">
+                            Diskussionsthemen für Akademiker (B2-C2)
+                            <span class="difficulty-badge difficulty-schwer">Schwer</span>
+                        </div>
+                        <div class="exercise-content">
+                            <div class="info-box">
+                                <h3>💼 Bildung & Wissenschaft</h3>
+                                <ul style="margin-left: 30px; line-height: 2;">
+                                    <li>Ist Online-Lernen so effektiv wie Präsenzunterricht?</li>
+                                    <li>Sollte lebenslanges Lernen Pflicht sein?</li>
+                                    <li>Brauchen Universitäten mehr Praxisbezug?</li>
+                                    <li>Sind Noten ein fairer Maßstab für Wissen?</li>
+                                    <li>Ist künstliche Intelligenz eine Gefahr für akademische Berufe?</li>
+                                </ul>
+
+                                <h3 style="margin-top: 20px;">💻 Technologie & Digitalisierung</h3>
+                                <ul style="margin-left: 30px; line-height: 2;">
+                                    <li>Wird KI menschliche Arbeitskräfte ersetzen?</li>
+                                    <li>Sollten Forschungsergebnisse frei zugänglich sein?</li>
+                                    <li>Sind soziale Medien eine Gefahr für die Meinungsbildung?</li>
+                                    <li>Datenschutz vs. Komfort: Wie viel Privatsphäre sollten wir aufgeben?</li>
+                                </ul>
+
+                                <h3 style="margin-top: 20px;">🌍 Umwelt & Nachhaltigkeit</h3>
+                                <ul style="margin-left: 30px; line-height: 2;">
+                                    <li>Sind Elektroautos wirklich umweltfreundlich?</li>
+                                    <li>Braucht die Welt eine striktere Klimapolitik?</li>
+                                    <li>Ist ein plastikfreies Leben realistisch?</li>
+                                    <li>Sollten Unternehmen für Umweltschäden haften?</li>
+                                </ul>
+
+                                <h3 style="margin-top: 20px;">⚖️ Gesellschaft & Ethik</h3>
+                                <ul style="margin-left: 30px; line-height: 2;">
+                                    <li>Ist eine Welt ohne Bargeld wünschenswert?</li>
+                                    <li>Brauchen moderne Gesellschaften eine allgemeine Dienstpflicht?</li>
+                                    <li>Sollten alle das gleiche Grundeinkommen bekommen?</li>
+                                    <li>Gibt es eine Verpflichtung zur Organspende?</li>
+                                </ul>
+                            </div>
+
+                            <div style="margin-top: 20px; background: #fff9e6; padding: 15px; border-radius: 8px;">
+                                <h3>💡 Tipp für die Prüfung:</h3>
+                                <p>Strukturieren Sie Ihre Antwort immer nach diesem Schema:</p>
+                                <ol style="margin-left: 30px; line-height: 2;">
+                                    <li><strong>These:</strong> Ihre Meinung klar äußern</li>
+                                    <li><strong>Argument 1:</strong> Mit Beispiel oder Studie belegen</li>
+                                    <li><strong>Argument 2:</strong> Weitere Begründung</li>
+                                    <li><strong>Gegenargument:</strong> Andere Sichtweise erwähnen</li>
+                                    <li><strong>Fazit:</strong> Zusammenfassen und Position bekräftigen</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 4.3 Prüfungsformate -->
+                <div class="category-title" onclick="toggleCategory('formate')">
+                    4.3 Prüfungsformate kennenlernen
+                </div>
+                <div id="formate" class="collapsible-content">
+                    
+                    <div class="exercise-container">
+                        <div class="exercise-title">
+                            Übersicht: C2-Deutschprüfungen
+                            <span class="difficulty-badge difficulty-leicht">Info</span>
+                        </div>
+                        <div class="exercise-content">
+                            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 10px 0;">
+                                <h3>📝 1. TestDaF (Test Deutsch als Fremdsprache)</h3>
+                                <ul style="margin-left: 30px; line-height: 2;">
+                                    <li><strong>Geeignet für:</strong> Studienbewerber an deutschen Hochschulen</li>
+                                    <li><strong>Niveau:</strong> B2-C1</li>
+                                    <li><strong>Besteht aus:</strong> Leseverstehen, Hörverstehen, schriftlicher Ausdruck, mündlicher Ausdruck</li>
+                                    <li><strong>Anerkennung:</strong> Universitäten in Deutschland</li>
+                                </ul>
+                            </div>
+
+                            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 10px 0;">
+                                <h3>📝 2. DSH (Deutsche Sprachprüfung für den Hochschulzugang)</h3>
+                                <ul style="margin-left: 30px; line-height: 2;">
+                                    <li><strong>Geeignet für:</strong> Studienbewerber in Deutschland</li>
+                                    <li><strong>Niveau:</strong> B2-C1</li>
+                                    <li><strong>Besteht aus:</strong> Leseverstehen, Hörverstehen, wissenschaftliches Schreiben, Grammatik, mündliche Prüfung</li>
+                                    <li><strong>Besonderheit:</strong> Wird direkt an Hochschulen abgelegt</li>
+                                </ul>
+                            </div>
+
+                            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 10px 0;">
+                                <h3>📝 3. telc Deutsch C1 Hochschule</h3>
+                                <ul style="margin-left: 30px; line-height: 2;">
+                                    <li><strong>Geeignet für:</strong> Hochschulbewerber und Akademiker</li>
+                                    <li><strong>Niveau:</strong> C1</li>
+                                    <li><strong>Besteht aus:</strong> Leseverstehen, Hörverstehen, Sprachbausteine, schriftlicher Ausdruck, mündliche Prüfung</li>
+                                    <li><strong>Anerkennung:</strong> Viele Universitäten</li>
+                                </ul>
+                            </div>
+
+                            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 10px 0;">
+                                <h3>📝 4. Goethe-Zertifikat C2: GDS</h3>
+                                <ul style="margin-left: 30px; line-height: 2;">
+                                    <li><strong>Geeignet für:</strong> Berufstätige Akademiker mit höchsten Anforderungen</li>
+                                    <li><strong>Niveau:</strong> C2</li>
+                                    <li><strong>Besonderheit:</strong> Höchstes Zertifikat, oft für berufliche Zwecke</li>
+                                </ul>
+                            </div>
+
+                            <div class="info-box" style="margin-top: 20px;">
+                                <h3>✨ Welche Prüfung ist die richtige für mich?</h3>
+                                <p><strong>Für Studium in Deutschland:</strong> TestDaF oder DSH</p>
+                                <p><strong>Für akademische Karriere:</strong> telc C1 Hochschule oder Goethe C2</p>
+                                <p><strong>Für höchste Sprachkompetenz:</strong> Goethe-Zertifikat C2: GDS</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Progress Tracker -->
+            <div style="margin-top: 40px;">
+                <h2 style="text-align: center; color: #1a2980; margin-bottom: 20px;">📊 Ihr Lernfortschritt</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="overall-progress">0%</div>
+                </div>
+                <p style="text-align: center; color: #666; margin-top: 10px;">
+                    Vervollständigen Sie die Übungen, um Ihren Fortschritt zu verfolgen!
+                </p>
+            </div>
+
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 Amy Lang - Deutschtrainerin | Alle Rechte vorbehalten</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">Viel Erfolg bei Ihrer C2-Prüfung! 🎓</p>
+        </footer>
+    </div>
+
+    <script>
+        // Quiz answers storage
+        const quizAnswers = {
+            'quiz-kasus': ['dativ', 'akkusativ', 'genitiv', 'dativ-akkusativ'],
+            'quiz-reflexiv': ['richtig', 'falsch', 'richtig', 'richtig', 'falsch'],
+            'quiz-satzglieder': ['temporal', 'kausal', 'lokal', 'modal'],
+            'quiz-kritisch': ['b', 'a', 'c', 'b'],
+            'quiz-redemittel': ['a', 'b', 'b', 'b'],
+            'matching-phrases': ['b', 'a', 'b']
+        };
+
+        const userAnswers = {};
+        let completedExercises = 0;
+        const totalExercises = 15; // Update this as you add more exercises
+
+        // Toggle sections
+        function toggleSection(id) {
+            const element = document.getElementById(id);
+            const title = element.previousElementSibling;
+            
+            if (element.classList.contains('collapsed')) {
+                element.classList.remove('collapsed');
+                title.classList.remove('collapsed');
+            } else {
+                element.classList.add('collapsed');
+                title.classList.add('collapsed');
+            }
+        }
+
+        // Toggle categories
+        function toggleCategory(id) {
+            const element = document.getElementById(id);
+            const title = element.previousElementSibling;
+            
+            if (element.classList.contains('collapsed')) {
+                element.classList.remove('collapsed');
+                title.classList.remove('collapsed');
+            } else {
+                element.classList.add('collapsed');
+                title.classList.add('collapsed');
+            }
+        }
+
+        // Show solution
+        function showSolution(id) {
+            const solution = document.getElementById(id);
+            if (solution.classList.contains('visible')) {
+                solution.classList.remove('visible');
+            } else {
+                solution.classList.add('visible');
+            }
+        }
+
+        // Quiz functionality
+        function selectQuizOption(element, quizId, questionNum, answer) {
+            // Remove previous selection for this question
+            const allOptions = element.parentElement.querySelectorAll('.quiz-option');
+            allOptions.forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Mark this option as selected
+            element.classList.add('selected');
+            
+            // Store answer
+            if (!userAnswers[quizId]) {
+                userAnswers[quizId] = {};
+            }
+            userAnswers[quizId][questionNum] = answer;
+        }
+
+        function checkQuiz(quizId) {
+            const correctAnswers = quizAnswers[quizId];
+            const userQuizAnswers = userAnswers[quizId] || {};
+            
+            let correct = 0;
+            let total = correctAnswers.length;
+            
+            // Check each answer
+            for (let i = 1; i <= total; i++) {
+                const userAnswer = userQuizAnswers[i];
+                const correctAnswer = correctAnswers[i - 1];
+                
+                const questionDiv = document.querySelector(`#${quizId}`).children[i - 1];
+                const options = questionDiv.querySelectorAll('.quiz-option');
+                
+                options.forEach(opt => {
+                    opt.classList.remove('correct', 'incorrect');
+                    const optAnswer = opt.getAttribute('onclick').match(/'([^']+)'\)/)[1];
+                    
+                    if (optAnswer === correctAnswer) {
+                        opt.classList.add('correct');
+                    } else if (opt.classList.contains('selected')) {
+                        opt.classList.add('incorrect');
+                    }
+                });
+                
+                if (userAnswer === correctAnswer) {
+                    correct++;
+                }
+            }
+            
+            // Display score
+            const scoreDiv = document.getElementById(`${quizId}-score`);
+            const percentage = Math.round((correct / total) * 100);
+            scoreDiv.textContent = `✅ ${correct} von ${total} richtig (${percentage}%)`;
+            scoreDiv.classList.add('visible');
+            
+            // Update progress
+            updateProgress();
+        }
+
+        function resetQuiz(quizId) {
+            const quizDiv = document.getElementById(quizId);
+            const options = quizDiv.querySelectorAll('.quiz-option');
+            
+            options.forEach(opt => {
+                opt.classList.remove('selected', 'correct', 'incorrect');
+            });
+            
+            const scoreDiv = document.getElementById(`${quizId}-score`);
+            scoreDiv.classList.remove('visible');
+            
+            if (userAnswers[quizId]) {
+                delete userAnswers[quizId];
+            }
+        }
+
+        // Lückentext functionality
+        function checkLueckentext(prefix) {
+            const inputs = document.querySelectorAll(`#lueckentext-${prefix} .input-field`);
+            let correct = 0;
+            
+            inputs.forEach(input => {
+                const userAnswer = input.value.trim().toLowerCase();
+                const correctAnswer = input.getAttribute('data-answer').toLowerCase();
+                
+                input.classList.remove('correct', 'incorrect');
+                
+                if (userAnswer === correctAnswer) {
+                    input.classList.add('correct');
+                    correct++;
+                } else if (userAnswer !== '') {
+                    input.classList.add('incorrect');
+                }
+            });
+            
+            const total = inputs.length;
+            const percentage = Math.round((correct / total) * 100);
+            const scoreDiv = document.getElementById(`lueckentext-${prefix}-score`);
+            scoreDiv.textContent = `✅ ${correct} von ${total} richtig (${percentage}%)`;
+            scoreDiv.classList.add('visible');
+            
+            updateProgress();
+        }
+
+        function resetLueckentext(prefix) {
+            const inputs = document.querySelectorAll(`#lueckentext-${prefix} .input-field`);
+            
+            inputs.forEach(input => {
+                input.value = '';
+                input.classList.remove('correct', 'incorrect');
+            });
+            
+            const scoreDiv = document.getElementById(`lueckentext-${prefix}-score`);
+            scoreDiv.classList.remove('visible');
+        }
+
+        // Vocabulary check
+        function checkVocab() {
+            const inputs = document.querySelectorAll('#vocab-deutschkurs .input-field');
+            let correct = 0;
+            
+            inputs.forEach(input => {
+                const userAnswer = input.value.trim().toLowerCase();
+                const correctAnswer = input.getAttribute('data-answer').toLowerCase();
+                
+                input.classList.remove('correct', 'incorrect');
+                
+                if (userAnswer === correctAnswer) {
+                    input.classList.add('correct');
+                    correct++;
+                } else if (userAnswer !== '') {
+                    input.classList.add('incorrect');
+                }
+            });
+            
+            const total = inputs.length;
+            const percentage = Math.round((correct / total) * 100);
+            const scoreDiv = document.getElementById('vocab-deutschkurs-score');
+            scoreDiv.textContent = `✅ ${correct} von ${total} richtig (${percentage}%)`;
+            scoreDiv.classList.add('visible');
+            
+            updateProgress();
+        }
+
+        function resetVocab() {
+            const inputs = document.querySelectorAll('#vocab-deutschkurs .input-field');
+            
+            inputs.forEach(input => {
+                input.value = '';
+                input.classList.remove('correct', 'incorrect');
+            });
+            
+            const scoreDiv = document.getElementById('vocab-deutschkurs-score');
+            scoreDiv.classList.remove('visible');
+        }
+
+        // Drag and Drop functionality
+        function allowDrop(ev) {
+            ev.preventDefault();
+            ev.target.classList.add('drag-over');
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            const data = ev.dataTransfer.getData("text");
+            const draggedElement = document.getElementById(data);
+            
+            // Get the drop zone
+            let dropZone = ev.target;
+            if (!dropZone.classList.contains('drop-zone')) {
+                dropZone = dropZone.closest('.drop-zone');
+            }
+            
+            // Clear the drop zone first
+            while (dropZone.firstChild) {
+                dropZone.removeChild(dropZone.firstChild);
+            }
+            
+            // Clone and append
+            const clone = draggedElement.cloneNode(true);
+            clone.style.margin = '0';
+            dropZone.appendChild(clone);
+            dropZone.classList.remove('drag-over');
+        }
+
+        function checkDragDrop(type, num) {
+            if (type === 'akkdativ' && num === 1) {
+                const drop1 = document.getElementById('drop-akk-1').textContent.trim();
+                const drop2 = document.getElementById('drop-dat-1').textContent.trim();
+                
+                const resultDiv = document.getElementById('drag-akkdativ-result');
+                
+                if (drop1 === 'es' && drop2 === 'ihm') {
+                    resultDiv.textContent = '✅ Perfekt! "Ich gebe es ihm" ist korrekt. Das Akkusativpronomen steht vor dem Dativpronomen.';
+                    resultDiv.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+                } else {
+                    resultDiv.textContent = '❌ Nicht ganz. Erinnern Sie sich: Akkusativpronomen vor Dativpronomen! Richtig: "Ich gebe es ihm."';
+                    resultDiv.style.background = 'linear-gradient(135deg, #dc3545, #c82333)';
+                }
+                
+                resultDiv.classList.add('visible');
+                updateProgress();
+            }
+        }
+
+        function resetDragDrop(type, num) {
+            if (type === 'akkdativ' && num === 1) {
+                document.getElementById('drop-akk-1').innerHTML = '';
+                document.getElementById('drop-dat-1').innerHTML = '';
+                
+                const resultDiv = document.getElementById('drag-akkdativ-result');
+                resultDiv.classList.remove('visible');
+            }
+        }
+
+        // Te-Ka-Mo-Lo check
+        function checkTekamolo() {
+            const drop1 = document.getElementById('tek-drop-1').textContent.trim();
+            const drop2 = document.getElementById('tek-drop-2').textContent.trim();
+            const drop3 = document.getElementById('tek-drop-3').textContent.trim();
+            const drop4 = document.getElementById('tek-drop-4').textContent.trim();
+            
+            const correct = (drop1 === 'Ich gehe' && drop2 === 'jeden Morgen' && 
+                           drop3 === 'mit dem Bus' && drop4 === 'zur Arbeit');
+            
+            const resultDiv = document.getElementById('tekamolo-result');
+            
+            if (correct) {
+                resultDiv.textContent = '✅ Perfekt! Die Reihenfolge stimmt: Subjekt+Verb - Temporal - Modal - Lokal';
+                resultDiv.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+            } else {
+                resultDiv.textContent = '❌ Nicht ganz. Achten Sie auf Te-Ka-Mo-Lo: Temporal - Kausal - Modal - Lokal';
+                resultDiv.style.background = 'linear-gradient(135deg, #dc3545, #c82333)';
+            }
+            
+            resultDiv.classList.add('visible');
+            updateProgress();
+        }
+
+        function resetTekamolo() {
+            document.getElementById('tek-drop-1').innerHTML = '';
+            document.getElementById('tek-drop-2').innerHTML = '';
+            document.getElementById('tek-drop-3').innerHTML = '';
+            document.getElementById('tek-drop-4').innerHTML = '';
+            
+            const resultDiv = document.getElementById('tekamolo-result');
+            resultDiv.classList.remove('visible');
+        }
+
+        // Progress tracking
+        function updateProgress() {
+            // Count completed exercises (those with visible scores)
+            const scores = document.querySelectorAll('.score-display.visible');
+            completedExercises = scores.length;
+            
+            const percentage = Math.round((completedExercises / totalExercises) * 100);
+            const progressFill = document.getElementById('overall-progress');
+            progressFill.style.width = percentage + '%';
+            progressFill.textContent = percentage + '%';
+        }
+
+        // Initialize: Collapse all sections except the first
+        window.addEventListener('DOMContentLoaded', function() {
+            // Start with grammar section open
+            const sections = ['wortschatz', 'leseverstehen', 'pruefung'];
+            sections.forEach(id => {
+                document.getElementById(id).classList.add('collapsed');
+                document.getElementById(id).previousElementSibling.classList.add('collapsed');
+            });
+
+            // Collapse all categories initially
+            const categories = ['kasus', 'reflexiv', 'satzstruktur', 'deutschkurs', 'reisen', 
+                              'trends', 'kritisch', 'diskussion', 'themen', 'formate'];
+            categories.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.classList.add('collapsed');
+                    element.previousElementSibling.classList.add('collapsed');
+                }
+            });
+        });
+
+        // Prevent drag items from being removed
+        document.addEventListener('dragstart', function(e) {
+            if (e.target.classList.contains('drag-item')) {
+                e.dataTransfer.effectAllowed = 'copy';
+            }
+        });
+
+        // Remove drag-over class when leaving
+        document.addEventListener('dragleave', function(e) {
+            if (e.target.classList.contains('drop-zone')) {
+                e.target.classList.remove('drag-over');
+            }
+        });
+    </script>
+</body>
+</html>
