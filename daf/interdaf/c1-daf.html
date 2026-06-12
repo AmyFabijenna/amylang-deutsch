@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C1 Übungsmaterialien - Amy Lang</title>
+
+<!-- DAF Zugangsschutz -->
+    <script src="../daf-access-control.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a2463 0%, #1e3c72 25%, #2a5298 50%, #3a6ea5 75%, #4b88c2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .nav-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section-title {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.8em;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin: 30px 0 20px 0;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease;
+        }
+
+        .section-title:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .section-title::after {
+            content: ' ▼';
+            font-size: 0.7em;
+            transition: transform 0.3s ease;
+            display: inline-block;
+        }
+
+        .section-title.collapsed::after {
+            transform: rotate(-90deg);
+        }
+
+        .category-title {
+            background: linear-gradient(135deg, #ffb347, #ff9500, #ffcc00);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 25px 0 15px 0;
+            font-size: 1.3em;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease;
+        }
+
+        .category-title:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .category-title::after {
+            content: ' ▼';
+            font-size: 0.7em;
+            transition: transform 0.3s ease;
+            display: inline-block;
+        }
+
+        .category-title.collapsed::after {
+            transform: rotate(-90deg);
+        }
+
+        .collapsible-content {
+            max-height: 5000px;
+            overflow: hidden;
+            transition: max-height 0.5s ease, opacity 0.3s ease;
+            opacity: 1;
+        }
+
+        .collapsible-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+
+        .exercise-box {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .exercise-box h3 {
+            color: #1a2980;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .exercise-item {
+            margin: 15px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            border-left: 4px solid #26d0ce;
+        }
+
+        .input-field {
+            width: 200px;
+            padding: 8px;
+            border: 2px solid #dee2e6;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #26d0ce;
+        }
+
+        .input-field.correct {
+            border-color: #28a745;
+            background-color: #d4edda;
+        }
+
+        .input-field.incorrect {
+            border-color: #dc3545;
+            background-color: #f8d7da;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+        }
+
+        .btn-check {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+        .btn-solution {
+    background: linear-gradient(135deg, #ff9500, #ffb347);
+}
+
+        .feedback {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .feedback.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .discussion-topic {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #ff9500;
+            transition: all 0.3s ease;
+        }
+
+        .discussion-topic:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform: translateX(5px);
+        }
+
+        .vocab-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            padding: 12px;
+            margin: 8px 0;
+            background: white;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .vocab-item:hover {
+            background: #fff3cd;
+        }
+
+        .vocab-de {
+            font-weight: 600;
+            color: #1a2980;
+        }
+
+        .vocab-en {
+            color: #495057;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            width: 0%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .quiz-option {
+            background: white;
+            padding: 12px 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 2px solid #dee2e6;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover {
+            background: #f8f9fa;
+            border-color: #26d0ce;
+        }
+
+        .quiz-option.selected {
+            background: #cfe2ff;
+            border-color: #0d6efd;
+        }
+
+        .quiz-option.correct {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+
+        .quiz-option.incorrect {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .sortable-list {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .sortable-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 8px 0;
+            border-radius: 5px;
+            border: 2px solid #dee2e6;
+            cursor: move;
+            transition: all 0.3s ease;
+        }
+
+        .sortable-item:hover {
+            background: #e9ecef;
+            transform: scale(1.02);
+        }
+
+        .sortable-item.dragging {
+            opacity: 0.5;
+        }
+
+        .grammar-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .grammar-table th {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .grammar-table td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .grammar-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+            text-align: center;
+            padding: 30px;
+            margin-top: 20px;
+        }
+
+        .score-display {
+            background: linear-gradient(135deg, #ffb347, #ff9500);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: 600;
+            margin: 20px 0;
+        }
+
+        .flip-card {
+            background-color: transparent;
+            width: 100%;
+            height: 200px;
+            perspective: 1000px;
+            margin: 15px 0;
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .flip-card:hover .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            font-size: 1.2em;
+        }
+
+        .flip-card-front {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+        }
+
+        .flip-card-back {
+            background: linear-gradient(135deg, #ffb347, #ff9500);
+            color: white;
+            transform: rotateY(180deg);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .vocab-item {
+                grid-template-columns: 1fr;
+            }
+
+            .input-field {
+                width: 100%;
+            }
+
+            .nav-link {
+                position: static;
+                display: inline-block;
+                margin: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <a href="index.html" class="nav-link">← Zurück zur Hauptseite</a>
+            <h1>Amy Lang - Deutsch als Fremdsprache</h1>
+            <p>C1 Übungsmaterialien - Interaktiv & Umfassend</p>
+        </header>
+
+        <main class="content">
+            <div class="section-title" onclick="toggleSection('intro-section')">
+                📚 Willkommen zu den C1-Materialien
+            </div>
+            <div id="intro-section" class="collapsible-content">
+                <div class="exercise-box">
+                    <p style="font-size: 1.1em; line-height: 1.8; color: #495057;">
+                        Diese interaktiven Übungen sind speziell für das C1-Niveau entwickelt worden. 
+                        Sie finden hier umfassende Materialien zu Grammatik, Wortschatz, Diskussionsthemen, 
+                        Redewendungen und vielem mehr. Alle Übungen sind interaktiv gestaltet und bieten 
+                        sofortiges Feedback.
+                    </p>
+                    <div class="score-display" id="overall-score">
+                        Ihre Gesamtpunktzahl: <span id="total-score">0</span> / <span id="max-score">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grammatik Section -->
+            <div class="section-title" onclick="toggleSection('grammar-section')">
+                📖 Grammatik
+            </div>
+            <div id="grammar-section" class="collapsible-content">
+                
+                <!-- Konjunktiv II -->
+                <div class="category-title" onclick="toggleCategory('konjunktiv-cat')">
+                    Konjunktiv II - Aktiv & Passiv
+                </div>
+                <div id="konjunktiv-cat" class="collapsible-content">
+                    <div class="exercise-box">
+                        <h3>📋 Übersicht: Konjunktiv II Aktiv</h3>
+                        <table class="grammar-table">
+                            <thead>
+                                <tr>
+                                    <th>Zeitform</th>
+                                    <th>Bildung</th>
+                                    <th>Beispiel (haben)</th>
+                                    <th>Beispiel (gehen)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Präsens</td>
+                                    <td>Präteritumstamm + Endung</td>
+                                    <td>ich hätte</td>
+                                    <td>ich ginge</td>
+                                </tr>
+                                <tr>
+                                    <td>Perfekt</td>
+                                    <td>Konj. II von haben/sein + Partizip II</td>
+                                    <td>ich hätte gehabt</td>
+                                    <td>ich wäre gegangen</td>
+                                </tr>
+                                <tr>
+                                    <td>Futur I</td>
+                                    <td>"würde" + Infinitiv</td>
+                                    <td>ich würde haben</td>
+                                    <td>ich würde gehen</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="exercise-box">
+                        <h3>✍️ Übung: Konjunktiv II Passiv</h3>
+                        <p><strong>Setze die Sätze ins Passiv (Präsens):</strong></p>
+                        <div class="exercise-item">
+                            1. Man renoviert das historische Theater.<br>
+                            → Das historische Theater <input type="text" class="input-field" id="passiv1" data-answer="wird renoviert"> .
+                        </div>
+                        <div class="exercise-item">
+                            2. Experten planen eine neue U-Bahn-Linie.<br>
+                            → Eine neue U-Bahn-Linie <input type="text" class="input-field" id="passiv2" data-answer="wird geplant"> .
+                        </div>
+                        <div class="exercise-item">
+                            3. Die Regierung fördert nachhaltige Projekte.<br>
+                            → Nachhaltige Projekte <input type="text" class="input-field" id="passiv3" data-answer="werden gefördert"> .
+                        </div>
+                        <button class="btn btn-check" onclick="checkPassivExercise()">Überprüfen</button>
+                        <button class="btn btn-secondary" onclick="resetPassivExercise()">Zurücksetzen</button>
+                        <div id="passiv-feedback" class="feedback"></div>
+                    </div>
+                </div>
+
+                <!-- Trennbare und untrennbare Verben -->
+                <div class="category-title" onclick="toggleCategory('verben-cat')">
+                    Trennbare und untrennbare Verben
+                </div>
+                <div id="verben-cat" class="collapsible-content">
+                    <div class="exercise-box">
+                        <h3>🎯 Interaktive Übung: Verben in Graz</h3>
+                        <p><strong>Setze die richtigen Verbformen ein:</strong></p>
+                        <div class="exercise-item">
+                            1. Viele Menschen <input type="text" class="input-field" id="verb1" data-answer="ziehen um"> (umziehen) nach Graz.
+                        </div>
+                        <div class="exercise-item">
+                            2. Der Bürgermeister <input type="text" class="input-field" id="verb2" data-answer="stellt vor"> (vorstellen) ein neues Konzept.
+                        </div>
+                        <div class="exercise-item">
+                            3. Die Schloßbergbahn <input type="text" class="input-field" id="verb3" data-answer="fährt hinauf"> (hinauffahren) die Besucher.
+                        </div>
+                        <div class="exercise-item">
+                            4. Das Schloss Eggenberg <input type="text" class="input-field" id="verb4" data-answer="zieht an"> (anziehen) viele Besucher.
+                        </div>
+                        <div class="exercise-item">
+                            5. Die Universität Graz <input type="text" class="input-field" id="verb5" data-answer="unterstützt"> (unterstützen) Studierende.
+                        </div>
+                        <button class="btn btn-check" onclick="checkVerbenExercise()">Überprüfen</button>
+                        <button class="btn btn-secondary" onclick="resetVerbenExercise()">Zurücksetzen</button>
+                        <div id="verben-feedback" class="feedback"></div>
+                    </div>
+
+                    <div class="exercise-box">
+                        <h3>🔄 Flip-Cards: Wichtige Verben</h3>
+                        <div class="flip-card">
+                            <div class="flip-card-inner">
+                                <div class="flip-card-front">
+                                    <strong>umziehen</strong>
+                                </div>
+                                <div class="flip-card-back">
+                                    trennbar<br>Er zieht um.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flip-card">
+                            <div class="flip-card-inner">
+                                <div class="flip-card-front">
+                                    <strong>unterstützen</strong>
+                                </div>
+                                <div class="flip-card-back">
+                                    untrennbar<br>Sie unterstützt ihn.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flip-card">
+                            <div class="flip-card-inner">
+                                <div class="flip-card-front">
+                                    <strong>vorstellen</strong>
+                                </div>
+                                <div class="flip-card-back">
+                                    trennbar<br>Er stellt sich vor.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Konjunktionen und Satzbau -->
+                <div class="category-title" onclick="toggleCategory('satzbau-cat')">
+                    Konjunktionen und Satzbau
+                </div>
+                <div id="satzbau-cat" class="collapsible-content">
+                    <div class="exercise-box">
+                        <h3>Drag & Drop: Sätze ordnen</h3>
+                        <p><strong>Ziehe die Wörter in die richtige Reihenfolge:</strong></p>
+                        <p style="color: #6c757d; margin-bottom: 15px;">Satz 1: "Wie lautet der folgende Satz?"</p>
+                        <div class="sortable-list" id="sortable1">
+                            <div class="sortable-item" draggable="true">deshalb</div>
+                            <div class="sortable-item" draggable="true">,</div>
+                            <div class="sortable-item" draggable="true">war</div>
+                            <div class="sortable-item" draggable="true">haben</div>
+                            <div class="sortable-item" draggable="true">das Wetter</div>
+                            <div class="sortable-item" draggable="true">abgesagt</div>
+                            <div class="sortable-item" draggable="true">schlecht</div>
+                            <div class="sortable-item" draggable="true">.</div>
+                            <div class="sortable-item" draggable="true">wir</div>
+                            <div class="sortable-item" draggable="true">die Wanderung</div>
+                        </div>
+                        <button class="btn btn-check" onclick="checkSortable()">Überprüfen</button>
+                        <button class="btn btn-secondary" onclick="shuffleSortable()">Neu mischen</button>
+                        <button class="btn btn-solution" onclick="showSolution()">Lösung anzeigen</button>
+                        <div id="sortable-feedback" class="feedback"></div>
+                    </div>
+
+                    <div class="exercise-box">
+                        <h3>🎲 Quiz: Konjunktionen</h3>
+                        <div id="conjunction-quiz">
+                            <p><strong>Welche Konjunktion passt?</strong></p>
+                            <p style="margin: 15px 0;">Er war den ganzen Tag unterwegs, ___ ist er jetzt sehr müde.</p>
+                            <div class="quiz-option" onclick="selectQuizOption(this, 'deshalb')">deshalb</div>
+                            <div class="quiz-option" onclick="selectQuizOption(this, 'aber')">aber</div>
+                            <div class="quiz-option" onclick="selectQuizOption(this, 'denn')">denn</div>
+                            <div class="quiz-option" onclick="selectQuizOption(this, 'oder')">oder</div>
+                        </div>
+                        <button class="btn btn-check" onclick="checkConjunctionQuiz()">Überprüfen</button>
+                        <div id="conjunction-feedback" class="feedback"></div>
+                    </div>
+                </div>
+
+                <!-- Verbgefährten -->
+                <div class="category-title" onclick="toggleCategory('verbgefaehrten-cat')">
+                    Verbgefährten (Verb + Präposition)
+                </div>
+                <div id="verbgefaehrten-cat" class="collapsible-content">
+                    <div class="exercise-box">
+                        <h3>🔗 Übung: Richtige Präpositionen</h3>
+                        <div class="exercise-item">
+                            1. Ich kann mich nicht <input type="text" class="input-field" id="vg1" data-answer="an"> die Entscheidung erinnern.
+                        </div>
+                        <div class="exercise-item">
+                            2. Er zweifelt <input type="text" class="input-field" id="vg2" data-answer="an"> der Richtigkeit seiner Aussage.
+                        </div>
+                        <div class="exercise-item">
+                            3. Sie hat sich intensiv <input type="text" class="input-field" id="vg3" data-answer="auf"> die Prüfung vorbereitet.
+                        </div>
+                        <div class="exercise-item">
+                            4. Ich bin nicht sicher, ob wir diese Option <input type="text" class="input-field" id="vg4" data-answer="in"> Betracht ziehen sollten.
+                        </div>
+                        <div class="exercise-item">
+                            5. Sie hat sich sehr <input type="text" class="input-field" id="vg5" data-answer="über"> die neue Stelle gefreut.
+                        </div>
+                        <button class="btn btn-check" onclick="checkVerbgefaehrten()">Überprüfen</button>
+                        <button class="btn btn-secondary" onclick="resetVerbgefaehrten()">Zurücksetzen</button>
+                        <div id="vg-feedback" class="feedback"></div>
+                    </div>
+
+                    <div class="exercise-box">
+                        <h3>📚 Wichtige Verbgefährten - Referenz</h3>
+                        <table class="grammar-table">
+                            <thead>
+                                <tr>
+                                    <th>Verb</th>
+                                    <th>Präposition</th>
+                                    <th>Beispiel</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>sich erinnern</td>
+                                    <td>an + Akk.</td>
+                                    <td>Ich erinnere mich an den Urlaub.</td>
+                                </tr>
+                                <tr>
+                                    <td>zweifeln</td>
+                                    <td>an + Dat.</td>
+                                    <td>Er zweifelt an der Lösung.</td>
+                                </tr>
+                                <tr>
+                                    <td>sich vorbereiten</td>
+                                    <td>auf + Akk.</td>
+                                    <td>Sie bereitet sich auf die Prüfung vor.</td>
+                                </tr>
+                                <tr>
+                                    <td>sich freuen</td>
+                                    <td>über + Akk.</td>
+                                    <td>Ich freue mich über das Geschenk.</td>
+                                </tr>
+                                <tr>
+                                    <td>sich beschäftigen</td>
+                                    <td>mit + Dat.</td>
+                                    <td>Er beschäftigt sich mit dem Thema.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wortschatz Section -->
+            <div class="section-title" onclick="toggleSection('vocab-section')">
+                💬 Wortschatz & Redewendungen
+            </div>
+            <div id="vocab-section" class="collapsible-content">
+                
+                <!-- Reisen -->
+                <div class="category-title" onclick="toggleCategory('travel-cat')">
+                    Über das Reisen sprechen
+                </div>
+                <div id="travel-cat" class="collapsible-content">
+                    <div class="exercise-box">
+                        <h3>🌍 Vokabular: Reisen</h3>
+                        <div class="vocab-item">
+                            <div class="vocab-de">die Reise, die Reisen</div>
+                            <div class="vocab-en">the trip, the trips</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-de">die Sehenswürdigkeit, die Sehenswürdigkeiten</div>
+                            <div class="vocab-en">the tourist attraction, the tourist attractions</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-de">die Unterkunft, die Unterkünfte</div>
+                            <div class="vocab-en">the accommodation, the accommodations</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-de">malerisch</div>
+                            <div class="vocab-en">picturesque</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-de">entdecken (entdeckte, hat entdeckt)</div>
+                            <div class="vocab-en">to discover</div>
+                        </div>
+                    </div>
+
+                    <div class="exercise-box">
+                        <h3>💭 C2 Diskussionsfragen</h3>
+                        <div class="discussion-topic">
+                            <strong>Unerwartete Reiseerfahrungen:</strong><br>
+                            Ich dachte, ich würde mich sofort in Paris verlieben, aber irgendwie hat die Stadt mich kaltgelassen.
+                        </div>
+                        <div class="discussion-topic">
+                            <strong>Kulturelle Missverständnisse:</strong><br>
+                            Ich dachte, ich hätte „Danke" gesagt, aber anscheinend habe ich jemanden beleidigt.
+                        </div>
+                        <div class="discussion-topic">
+                            <strong>Intensive Reiseerlebnisse:</strong><br>
+                            Ich habe mich in einer Stadt noch nie so willkommen gefühlt wie dort.
+                        </div>
+                        <div class="discussion-topic">
+                            <strong>Reflexion über Identität:</strong><br>
+                            Ich dachte immer, Heimat ist ein Ort – aber je mehr ich reise, desto mehr merke ich, dass es ein Gefühl ist.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sport-Redewendungen -->
+                <div class="category-title" onclick="toggleCategory('sport-cat')">
+                    Sport-Wörter & Redewendungen
+                </div>
+                <div id="sport-cat" class="collapsible-content">
+                    <div class="exercise-box">
+                        <h3>🏃 Memory-Spiel: Sportredewendungen</h3>
+                        <p><strong>Finde die passenden Paare!</strong></p>
+                        <div id="memory-game" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0;">
+                            <!-- Memory cards will be generated by JavaScript -->
+                        </div>
+                        <button class="btn btn-secondary" onclick="resetMemoryGame()">Neu starten</button>
+                        <div class="score-display">
+                            Versuche: <span id="memory-attempts">0</span> | 
+                            Gefunden: <span id="memory-found">0</span>/8
+                        </div>
+                    </div>
+
+                    <div class="exercise-box">
+                        <h3>📝 Sportredewendungen - Liste</h3>
+                        <div class="vocab-item">
+                            <div class="vocab-de"><strong>Ins Schwitzen kommen</strong></div>
+                            <div class="vocab-en">Sich anstrengen, es wird anstrengend</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-de"><strong>Am Ball bleiben</strong></div>
+                            <div class="vocab-en">Dranbleiben, nicht aufgeben</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-de"><strong>Die Muskeln spielen lassen</strong></div>
+                            <div class="vocab-en">Seine Stärke zeigen</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-de"><strong>Einen langen Atem haben</strong></div>
+                            <div class="vocab-en">Durchhaltevermögen beweisen</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-de"><strong>Den inneren Schweinehund überwinden</strong></div>
+                            <div class="vocab-en">Die eigene Bequemlichkeit besiegen</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-de"><strong>Einen kühlen Kopf bewahren</strong></div>
+                            <div class="vocab-en">In stressigen Situationen ruhig bleiben</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-de"><strong>In Topform sein</strong></div>
+                            <div class="vocab-en">Sehr fit oder leistungsfähig sein</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-de"><strong>Die Nase vorn haben</strong></div>
+                            <div class="vocab-en">Besser sein als die Konkurrenz</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Redemittel für Diskussionen -->
+                <div class="category-title" onclick="toggleCategory('redemittel-cat')">
+                    Redemittel für akademische Diskussionen
+                </div>
+                <div id="redemittel-cat" class="collapsible-content">
+                    <div class="exercise-box">
+                        <h3>🗣️ Meinung äußern</h3>
+                        <ul style="line-height: 2; padding-left: 20px;">
+                            <li>Meiner Meinung nach …</li>
+                            <li>Ich bin der Ansicht, dass …</li>
+                            <li>Ich vertrete die Position, dass …</li>
+                            <li>Aus meiner Perspektive …</li>
+                            <li>Ich bin überzeugt, dass …</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-box">
+                        <h3>✅ Zustimmung ausdrücken</h3>
+                        <ul style="line-height: 2; padding-left: 20px;">
+                            <li>Das sehe ich genauso.</li>
+                            <li>Ich stimme dir/Ihnen vollkommen zu.</li>
+                            <li>Genau, das finde ich auch.</li>
+                            <li>Das kann ich nur unterstützen.</li>
+                            <li>Ich teile deine/Ihre Auffassung.</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-box">
+                        <h3>❌ Widerspruch und Ablehnung</h3>
+                        <ul style="line-height: 2; padding-left: 20px;">
+                            <li>Da bin ich anderer Meinung.</li>
+                            <li>Ich sehe das etwas anders, weil …</li>
+                            <li>Ich kann dem nur teilweise zustimmen.</li>
+                            <li>Das überzeugt mich nicht ganz.</li>
+                            <li>Dagegen spricht, dass …</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-box">
+                        <h3>📊 Argumente anführen</h3>
+                        <ul style="line-height: 2; padding-left: 20px;">
+                            <li>Ein wichtiger Punkt ist, dass …</li>
+                            <li>Man sollte nicht vergessen, dass …</li>
+                            <li>Ein entscheidender Vorteil/Nachteil ist …</li>
+                            <li>Wissenschaftliche Studien zeigen, dass …</li>
+                            <li>Besonders relevant ist hier, dass …</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diskussionsthemen Section -->
+            <div class="section-title" onclick="toggleSection('discussion-section')">
+                💭 Diskussionsthemen & Konversation
+            </div>
+            <div id="discussion-section" class="collapsible-content">
+                
+                <div class="category-title" onclick="toggleCategory('controversial-cat')">
+                    Kontroverse ethische Fragen (B2-C2)
+                </div>
+                <div id="controversial-cat" class="collapsible-content">
+                    <div class="exercise-box">
+                        <h3>🔥 Gesellschaft & persönliche Werte</h3>
+                        <div class="discussion-topic">
+                            <strong>B2-C2:</strong> Braucht die Gesellschaft wirklich Regeln – oder funktionieren Menschen auch ohne Gesetze?
+                        </div>
+                        <div class="discussion-topic">
+                            <strong>B2-C2:</strong> Gibt es das perfekte Gleichgewicht zwischen Freiheit und Sicherheit?
+                        </div>
+                        <div class="discussion-topic">
+                            <strong>B2-C2:</strong> Sollten Menschen, die nicht arbeiten wollen, trotzdem finanzielle Unterstützung bekommen?
+                        </div>
+                        <div class="discussion-topic">
+                            <strong>B2-C2:</strong> Was ist wichtiger: persönliche Freiheit oder das Wohl der Gemeinschaft?
+                        </div>
+                    </div>
+
+                    <div class="exercise-box">
+                        <h3>🌍 Kulturelle Unterschiede & Identität</h3>
+                        <div class="discussion-topic">
+                            <strong>B2-C2:</strong> Kann man mehrere „Heimaten" haben, oder gehört man immer nur zu einer Kultur?
+                        </div>
+                        <div class="discussion-topic">
+                            <strong>B2-C2:</strong> Sollte man sich anpassen, wenn man in einem anderen Land lebt – oder seine Kultur bewahren?
+                        </div>
+                        <div class="discussion-topic">
+                            <strong>B2-C2:</strong> Sind kulturelle Unterschiede wirklich so groß, oder sind wir am Ende alle gleich?
+                        </div>
+                    </div>
+
+                    <div class="exercise-box">
+                        <h3>💼 Arbeit, Erfolg & Glück</h3>
+                        <div class="discussion-topic">
+                            <strong>B2-C2:</strong> Ist es wirklich wichtig, Karriere zu machen – oder reicht ein Job, den man einfach nur mag?
+                        </div>
+                        <div class="discussion-topic">
+                            <strong>B2-C2:</strong> Gibt es zu viel Druck, immer „erfolgreich" sein zu müssen?
+                        </div>
+                        <div class="discussion-topic">
+                            <strong>B2-C2:</strong> Ist Geld wirklich der Schlüssel zum Glück?
+                        </div>
+                        <div class="discussion-topic">
+                            <strong>B2-C2:</strong> Kann man ohne Leidenschaft für den Job ein erfülltes Leben führen?
+                        </div>
+                    </div>
+
+                    <div class="exercise-box">
+                        <h3>🤖 Zukunft & Technologie</h3>
+                        <div class="discussion-topic">
+                            <strong>B2-C2:</strong> Macht uns Technologie freier oder abhängiger?
+                        </div>
+                        <div class="discussion-topic">
+                            <strong>B2-C2:</strong> Werden Künstliche Intelligenz und Roboter irgendwann unsere Jobs übernehmen?
+                        </div>
+                        <div class="discussion-topic">
+                            <strong>B2-C2:</strong> Sollten Menschen das Recht haben, ihr eigenes Leben mit Hilfe von Medizin oder Technik zu verlängern?
+                        </div>
+                        <div class="discussion-topic">
+                            <strong>B2-C2:</strong> Ist die Welt in 50 Jahren ein besserer oder ein schlechterer Ort?
+                        </div>
+                    </div>
+                </div>
+
+                <div class="category-title" onclick="toggleCategory('academic-cat')">
+                    Akademische Diskussionsthemen (B2)
+                </div>
+                <div id="academic-cat" class="collapsible-content">
+                    <div class="exercise-box">
+                        <h3>🎓 Bildung & Wissenschaft</h3>
+                        <div class="discussion-topic">Ist Online-Lernen so effektiv wie Präsenzunterricht?</div>
+                        <div class="discussion-topic">Sollte lebenslanges Lernen Pflicht sein?</div>
+                        <div class="discussion-topic">Brauchen Universitäten mehr Praxisbezug?</div>
+                        <div class="discussion-topic">Sind Noten ein fairer Maßstab für Wissen und Können?</div>
+                        <div class="discussion-topic">Ist künstliche Intelligenz eine Gefahr für akademische Berufe?</div>
+                    </div>
+
+                    <div class="exercise-box">
+                        <h3>🌱 Umwelt & Nachhaltigkeit</h3>
+                        <div class="discussion-topic">Sind Elektroautos wirklich umweltfreundlich?</div>
+                        <div class="discussion-topic">Braucht die Welt eine striktere Klimapolitik?</div>
+                        <div class="discussion-topic">Ist ein plastikfreies Leben realistisch?</div>
+                        <div class="discussion-topic">Nachhaltiger Konsum: Brauchen wir weniger oder bessere Produkte?</div>
+                        <div class="discussion-topic">Sollten Unternehmen für Umweltschäden haften?</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prüfungsvorbereitung Section -->
+            <div class="section-title" onclick="toggleSection('exam-section')">
+                🎓 Prüfungsvorbereitung
+            </div>
+            <div id="exam-section" class="collapsible-content">
+                <div class="exercise-box">
+                    <h3>📋 Deutschprüfungen für Akademiker</h3>
+                    <table class="grammar-table">
+                        <thead>
+                            <tr>
+                                <th>Prüfung</th>
+                                <th>Niveau</th>
+                                <th>Für wen?</th>
+                                <th>Besonderheiten</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>TestDaF</strong></td>
+                                <td>B2-C1</td>
+                                <td>Studienbewerber</td>
+                                <td>An deutschen Hochschulen anerkannt</td>
+                            </tr>
+                            <tr>
+                                <td><strong>DSH</strong></td>
+                                <td>B2-C1</td>
+                                <td>Studienbewerber in Deutschland</td>
+                                <td>Direkt an Hochschulen</td>
+                            </tr>
+                            <tr>
+                                <td><strong>telc Deutsch C1 Hochschule</strong></td>
+                                <td>C1</td>
+                                <td>Hochschulbewerber und Akademiker</td>
+                                <td>Von vielen Unis akzeptiert</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Goethe-Zertifikat C1/C2</strong></td>
+                                <td>C1/C2</td>
+                                <td>Berufstätige Akademiker</td>
+                                <td>Für berufliche Zwecke</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="exercise-box">
+                    <h3>📝 Redemittel für Präsentationen</h3>
+                    <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                        <strong>Einstieg:</strong>
+                        <ul style="margin-top: 10px; padding-left: 20px;">
+                            <li>„Ich möchte heute eine neue Sportart / ein innovatives Fitnessgerät vorstellen."</li>
+                            <li>„Mein Konzept heißt … und wird das Training revolutionieren."</li>
+                            <li>„Die Idee dahinter ist, dass …"</li>
+                        </ul>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                        <strong>Beschreibung:</strong>
+                        <ul style="margin-top: 10px; padding-left: 20px;">
+                            <li>„Das Besondere an meiner Erfindung ist …"</li>
+                            <li>„Im Gegensatz zu herkömmlichen Fitnessstudios bietet mein Konzept …"</li>
+                            <li>„Dieses Gerät funktioniert folgendermaßen: …"</li>
+                        </ul>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                        <strong>Vorteile & Nutzen:</strong>
+                        <ul style="margin-top: 10px; padding-left: 20px;">
+                            <li>„Ein großer Vorteil ist, dass …"</li>
+                            <li>„Dadurch kann man … schneller / effizienter / mit mehr Spaß trainieren."</li>
+                            <li>„Es ist besonders geeignet für Menschen, die …"</li>
+                        </ul>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                        <strong>Fazit:</strong>
+                        <ul style="margin-top: 10px; padding-left: 20px;">
+                            <li>„Ich bin überzeugt, dass mein Konzept die Fitnesswelt verändern wird, weil …"</li>
+                            <li>„In Zukunft könnte man diese Idee noch weiterentwickeln, indem …"</li>
+                            <li>„Zusammenfassend lässt sich sagen: Wer … möchte, sollte unbedingt … ausprobieren!"</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Tracking -->
+            <div class="section-title" onclick="toggleSection('progress-section')">
+                📊 Ihr Fortschritt
+            </div>
+            <div id="progress-section" class="collapsible-content">
+                <div class="exercise-box">
+                    <h3>🎯 Gesamtfortschritt</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="overall-progress">0%</div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;">
+                        <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
+                            <strong>Grammatik</strong><br>
+                            <span id="grammar-score" style="font-size: 2em; color: #1a2980;">0</span>/15
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
+                            <strong>Wortschatz</strong><br>
+                            <span id="vocab-score" style="font-size: 2em; color: #26d0ce;">0</span>/10
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
+                            <strong>Memory-Spiel</strong><br>
+                            <span id="game-score" style="font-size: 2em; color: #ff9500;">0</span>/8
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 Amy Lang - Deutschtrainerin | Alle Rechte vorbehalten</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">Interaktive C1-Materialien für effektives Deutschlernen</p>
+        </footer>
+    </div>
+
+    <script>
+        // Global variables
+        let totalScore = 0;
+        let maxScore = 0;
+        let grammarScore = 0;
+        let vocabScore = 0;
+        let gameScore = 0;
+        let memoryAttempts = 0;
+        let memoryFound = 0;
+        let selectedQuizAnswer = null;
+
+        // Toggle sections and categories
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const title = section.previousElementSibling;
+            
+            section.classList.toggle('collapsed');
+            title.classList.toggle('collapsed');
+        }
+
+        function toggleCategory(categoryId) {
+            const category = document.getElementById(categoryId);
+            const title = category.previousElementSibling;
+            
+            category.classList.toggle('collapsed');
+            title.classList.toggle('collapsed');
+        }
+
+        // Passiv Exercise
+        function checkPassivExercise() {
+            const inputs = [
+                { id: 'passiv1', answer: 'wird renoviert' },
+                { id: 'passiv2', answer: 'wird geplant' },
+                { id: 'passiv3', answer: 'werden gefördert' }
+            ];
+            
+            let correct = 0;
+            inputs.forEach(item => {
+                const input = document.getElementById(item.id);
+                const value = input.value.trim().toLowerCase();
+                const expected = item.answer.toLowerCase();
+                
+                if (value === expected) {
+                    input.classList.remove('incorrect');
+                    input.classList.add('correct');
+                    correct++;
+                } else {
+                    input.classList.remove('correct');
+                    input.classList.add('incorrect');
+                }
+            });
+            
+            const feedback = document.getElementById('passiv-feedback');
+            feedback.className = 'feedback show';
+            
+            if (correct === inputs.length) {
+                feedback.className = 'feedback show success';
+                feedback.textContent = `🎉 Perfekt! Alle ${correct} Antworten sind richtig!`;
+                updateScore('grammar', 3);
+            } else {
+                feedback.className = 'feedback show error';
+                feedback.textContent = `Sie haben ${correct} von ${inputs.length} Antworten richtig. Versuchen Sie es noch einmal!`;
+            }
+        }
+
+        function resetPassivExercise() {
+            ['passiv1', 'passiv2', 'passiv3'].forEach(id => {
+                const input = document.getElementById(id);
+                input.value = '';
+                input.classList.remove('correct', 'incorrect');
+            });
+            document.getElementById('passiv-feedback').className = 'feedback';
+        }
+
+        // Verben Exercise
+        function checkVerbenExercise() {
+            const inputs = [
+                { id: 'verb1', answer: 'ziehen um' },
+                { id: 'verb2', answer: 'stellt vor' },
+                { id: 'verb3', answer: 'fährt hinauf' },
+                { id: 'verb4', answer: 'zieht an' },
+                { id: 'verb5', answer: 'unterstützt' }
+            ];
+            
+            let correct = 0;
+            inputs.forEach(item => {
+                const input = document.getElementById(item.id);
+                const value = input.value.trim().toLowerCase();
+                const expected = item.answer.toLowerCase();
+                
+                if (value === expected) {
+                    input.classList.remove('incorrect');
+                    input.classList.add('correct');
+                    correct++;
+                } else {
+                    input.classList.remove('correct');
+                    input.classList.add('incorrect');
+                }
+            });
+            
+            const feedback = document.getElementById('verben-feedback');
+            feedback.className = 'feedback show';
+            
+            if (correct === inputs.length) {
+                feedback.className = 'feedback show success';
+                feedback.textContent = `🎉 Ausgezeichnet! Alle ${correct} Verben sind korrekt konjugiert!`;
+                updateScore('grammar', 5);
+            } else {
+                feedback.className = 'feedback show error';
+                feedback.textContent = `Sie haben ${correct} von ${inputs.length} Verben richtig. Überprüfen Sie trennbare/untrennbare Verben!`;
+            }
+        }
+
+        function resetVerbenExercise() {
+            ['verb1', 'verb2', 'verb3', 'verb4', 'verb5'].forEach(id => {
+                const input = document.getElementById(id);
+                input.value = '';
+                input.classList.remove('correct', 'incorrect');
+            });
+            document.getElementById('verben-feedback').className = 'feedback';
+        }
+
+        // Verbgefährten Exercise
+        function checkVerbgefaehrten() {
+            const inputs = [
+                { id: 'vg1', answer: 'an' },
+                { id: 'vg2', answer: 'an' },
+                { id: 'vg3', answer: 'auf' },
+                { id: 'vg4', answer: 'in' },
+                { id: 'vg5', answer: 'über' }
+            ];
+            
+            let correct = 0;
+            inputs.forEach(item => {
+                const input = document.getElementById(item.id);
+                const value = input.value.trim().toLowerCase();
+                const expected = item.answer.toLowerCase();
+                
+                if (value === expected) {
+                    input.classList.remove('incorrect');
+                    input.classList.add('correct');
+                    correct++;
+                } else {
+                    input.classList.remove('correct');
+                    input.classList.add('incorrect');
+                }
+            });
+            
+            const feedback = document.getElementById('vg-feedback');
+            feedback.className = 'feedback show';
+            
+            if (correct === inputs.length) {
+                feedback.className = 'feedback show success';
+                feedback.textContent = `🎉 Hervorragend! Alle ${correct} Präpositionen sind korrekt!`;
+                updateScore('grammar', 5);
+            } else {
+                feedback.className = 'feedback show error';
+                feedback.textContent = `${correct} von ${inputs.length} richtig. Tipp: Achten Sie auf Akkusativ/Dativ!`;
+            }
+        }
+
+        function resetVerbgefaehrten() {
+            ['vg1', 'vg2', 'vg3', 'vg4', 'vg5'].forEach(id => {
+                const input = document.getElementById(id);
+                input.value = '';
+                input.classList.remove('correct', 'incorrect');
+            });
+            document.getElementById('vg-feedback').className = 'feedback';
+        }
+
+        // Sortable Exercise
+        let draggedElement = null;
+
+        function initSortable() {
+            const sortable = document.getElementById('sortable1');
+            const items = sortable.querySelectorAll('.sortable-item');
+            
+            items.forEach(item => {
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragover', handleDragOver);
+                item.addEventListener('drop', handleDrop);
+                item.addEventListener('dragend', handleDragEnd);
+            });
+        }
+
+        function handleDragStart(e) {
+            draggedElement = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+            
+            if (draggedElement !== this) {
+                const parent = this.parentNode;
+                const allItems = [...parent.children];
+                const draggedIndex = allItems.indexOf(draggedElement);
+                const targetIndex = allItems.indexOf(this);
+                
+                if (draggedIndex < targetIndex) {
+                    parent.insertBefore(draggedElement, this.nextSibling);
+                } else {
+                    parent.insertBefore(draggedElement, this);
+                }
+            }
+            
+            return false;
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+        }
+
+        function checkSortable() {
+            function checkSortable() {
+    const correctOrder = ['das Wetter', 'war', 'schlecht', ',', 'deshalb', 'haben', 'wir', 'die Wanderung', 'abgesaat', '.'];
+            const sortable = document.getElementById('sortable1');
+            const items = [...sortable.querySelectorAll('.sortable-item')];
+            const currentOrder = items.map(item => item.textContent.trim());
+            
+            const isCorrect = JSON.stringify(currentOrder) === JSON.stringify(correctOrder);
+            
+            const feedback = document.getElementById('sortable-feedback');
+            feedback.className = 'feedback show';
+            
+            if (isCorrect) {
+                feedback.className = 'feedback show success';
+                feedback.textContent = '🎉 Perfekt! Der Satz ist korrekt: "Das Wetter war schlecht, deshalb haben wir die Wanderung abgesagt."';
+                updateScore('grammar', 2);
+            } else {
+                feedback.className = 'feedback show error';
+                feedback.textContent = '❌ Noch nicht ganz richtig. Tipp: Hauptsatz, dann "deshalb", dann zweiter Hauptsatz mit Verb an Position 2.';
+            }
+        }
+
+        function shuffleSortable() {
+    const sortable = document.getElementById('sortable1');
+    const items = [...sortable.querySelectorAll('.sortable-item')];
+    
+    // Fisher-Yates shuffle
+    for (let i = items.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        sortable.appendChild(items[j]);
+    }
+    
+    document.getElementById('sortable-feedback').className = 'feedback';
+}
+
+function showSolution() {
+    const correctOrder = ['das Wetter', 'war', 'schlecht', ',', 'deshalb', 'haben', 'wir', 'die Wanderung', 'abgesagt', '.'];
+    const sortable = document.getElementById('sortable1');
+    const items = Array.from(sortable.children);
+    
+    // Sortiere die Elemente in die richtige Reihenfolge
+    const sortedItems = [];
+    correctOrder.forEach(correctText => {
+        const foundItem = items.find(item => item.textContent.trim() === correctText);
+        if (foundItem) {
+            sortedItems.push(foundItem);
+        }
+    });
+    
+    // Entferne alle Elemente und füge sie in der richtigen Reihenfolge hinzu
+    sortable.innerHTML = '';
+    sortedItems.forEach(item => sortable.appendChild(item));
+    
+    // Zeige Bestätigung
+    const feedback = document.getElementById('sortable-feedback');
+    feedback.className = 'feedback show success';
+    feedback.textContent = "Die Lösung wird angezeigt: 'Das Wetter war schlecht, deshalb haben wir die Wanderung abgesagt.'";
+}
+
+        // Conjunction Quiz
+        function selectQuizOption(element, answer) {
+            // Remove previous selection
+            document.querySelectorAll('#conjunction-quiz .quiz-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Add selection to clicked option
+            element.classList.add('selected');
+            selectedQuizAnswer = answer;
+        }
+
+        function checkConjunctionQuiz() {
+            const feedback = document.getElementById('conjunction-feedback');
+            
+            if (!selectedQuizAnswer) {
+                feedback.className = 'feedback show info';
+                feedback.textContent = '⚠️ Bitte wählen Sie zuerst eine Antwort aus.';
+                return;
+            }
+            
+            const options = document.querySelectorAll('#conjunction-quiz .quiz-option');
+            
+            if (selectedQuizAnswer === 'deshalb') {
+                feedback.className = 'feedback show success';
+                feedback.textContent = '🎉 Richtig! "Deshalb" drückt eine Folge aus: Er war unterwegs → Folge: er ist müde.';
+                options.forEach(opt => {
+                    if (opt.textContent.trim() === 'deshalb') {
+                        opt.classList.add('correct');
+                    }
+                });
+                updateScore('vocab', 2);
+            } else {
+                feedback.className = 'feedback show error';
+                feedback.textContent = '❌ Nicht ganz. Die richtige Antwort ist "deshalb" - es zeigt eine Folge/Konsequenz.';
+                options.forEach(opt => {
+                    if (opt.textContent.trim() === selectedQuizAnswer) {
+                        opt.classList.add('incorrect');
+                    }
+                    if (opt.textContent.trim() === 'deshalb') {
+                        opt.classList.add('correct');
+                    }
+                });
+            }
+        }
+
+        // Memory Game
+        const memoryPairs = [
+            { term: 'Ins Schwitzen kommen', meaning: 'Sich anstrengen' },
+            { term: 'Am Ball bleiben', meaning: 'Dranbleiben' },
+            { term: 'Die Muskeln spielen lassen', meaning: 'Stärke zeigen' },
+            { term: 'Einen langen Atem haben', meaning: 'Durchhalten' },
+            { term: 'In Topform sein', meaning: 'Sehr fit sein' },
+            { term: 'Die Nase vorn haben', meaning: 'Besser sein' },
+            { term: 'Einen kühlen Kopf bewahren', meaning: 'Ruhig bleiben' },
+            { term: 'Inneren Schweinehund überwinden', meaning: 'Bequemlichkeit besiegen' }
+        ];
+
+        let memoryCards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+
+        function initMemoryGame() {
+            const gameContainer = document.getElementById('memory-game');
+            memoryCards = [];
+            flippedCards = [];
+            matchedPairs = 0;
+            memoryAttempts = 0;
+            memoryFound = 0;
+            
+            // Create cards array
+            memoryPairs.forEach(pair => {
+                memoryCards.push({ type: 'term', value: pair.term, id: pair.term });
+                memoryCards.push({ type: 'meaning', value: pair.meaning, id: pair.term });
+            });
+            
+            // Shuffle cards
+            memoryCards.sort(() => Math.random() - 0.5);
+            
+            // Clear and populate game container
+            gameContainer.innerHTML = '';
+            memoryCards.forEach((card, index) => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'quiz-option';
+                cardElement.style.cursor = 'pointer';
+                cardElement.style.minHeight = '80px';
+                cardElement.style.display = 'flex';
+                cardElement.style.alignItems = 'center';
+                cardElement.style.justifyContent = 'center';
+                cardElement.style.textAlign = 'center';
+                cardElement.style.padding = '10px';
+                cardElement.textContent = '?';
+                cardElement.dataset.index = index;
+                cardElement.dataset.value = card.value;
+                cardElement.dataset.id = card.id;
+                cardElement.addEventListener('click', flipMemoryCard);
+                gameContainer.appendChild(cardElement);
+            });
+            
+            updateMemoryScore();
+        }
+
+        function flipMemoryCard() {
+            if (flippedCards.length >= 2) return;
+            if (this.classList.contains('correct')) return;
+            if (flippedCards.includes(this)) return;
+            
+            this.textContent = this.dataset.value;
+            this.classList.add('selected');
+            flippedCards.push(this);
+            
+            if (flippedCards.length === 2) {
+                memoryAttempts++;
+                updateMemoryScore();
+                setTimeout(checkMemoryMatch, 1000);
+            }
+        }
+
+        function checkMemoryMatch() {
+            const card1 = flippedCards[0];
+            const card2 = flippedCards[1];
+            
+            if (card1.dataset.id === card2.dataset.id) {
+                card1.classList.remove('selected');
+                card2.classList.remove('selected');
+                card1.classList.add('correct');
+                card2.classList.add('correct');
+                matchedPairs++;
+                memoryFound++;
+                
+                if (matchedPairs === memoryPairs.length) {
+                    setTimeout(() => {
+                        alert(`🎉 Glückwunsch! Sie haben alle Paare in ${memoryAttempts} Versuchen gefunden!`);
+                        updateScore('game', 8);
+                    }, 500);
+                }
+            } else {
+                card1.textContent = '?';
+                card2.textContent = '?';
+                card1.classList.remove('selected');
+                card2.classList.remove('selected');
+            }
+            
+            flippedCards = [];
+            updateMemoryScore();
+        }
+
+        function resetMemoryGame() {
+            initMemoryGame();
+        }
+
+        function updateMemoryScore() {
+            document.getElementById('memory-attempts').textContent = memoryAttempts;
+            document.getElementById('memory-found').textContent = memoryFound;
+        }
+
+        // Score tracking
+        function updateScore(category, points) {
+            if (category === 'grammar') {
+                grammarScore = Math.min(grammarScore + points, 15);
+                document.getElementById('grammar-score').textContent = grammarScore;
+            } else if (category === 'vocab') {
+                vocabScore = Math.min(vocabScore + points, 10);
+                document.getElementById('vocab-score').textContent = vocabScore;
+            } else if (category === 'game') {
+                gameScore = Math.min(gameScore + points, 8);
+                document.getElementById('game-score').textContent = gameScore;
+            }
+            
+            totalScore = grammarScore + vocabScore + gameScore;
+            maxScore = 33;
+            
+            document.getElementById('total-score').textContent = totalScore;
+            document.getElementById('max-score').textContent = maxScore;
+            
+            const percentage = Math.round((totalScore / maxScore) * 100);
+            const progressBar = document.getElementById('overall-progress');
+            progressBar.style.width = percentage + '%';
+            progressBar.textContent = percentage + '%';
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initSortable();
+            initMemoryGame();
+            shuffleSortable();
+            
+            // Set max scores
+            document.getElementById('max-score').textContent = '33';
+        });
+    </script>
+</body>
+</html>
