@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lese-Champion – Neue Wörter</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #ff8c00 0%, #ff5e00 30%, #9945ff 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: linear-gradient(145deg, #fff3e0 0%, #ffe6c7 100%);
+            border-radius: 55px;
+            padding: 40px;
+            box-shadow: 0 25px 65px rgba(128, 0, 255, 0.5);
+            text-align: center;
+            max-width: 720px;
+            width: 100%;
+            border: 3px solid #ffb347;
+        }
+        h1 {
+            background: linear-gradient(135deg, #ff8c42, #ffb347);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 3px 3px 0 #ffd966;
+            margin-bottom: 20px;
+            font-size: 3em;
+            letter-spacing: 2px;
+        }
+        .word-display {
+            background: linear-gradient(135deg, #ffefc0 0%, #ffe0a3 100%);
+            padding: 30px 30px 22px;
+            border-radius: 55px;
+            margin: 30px 0;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 18px 40px rgba(156, 0, 210, 0.4);
+            border: 3px solid #ffaa33;
+            transition: all 0.3s ease;
+            gap: 10px;
+        }
+        .word-display.highlight {
+            transform: scale(1.02);
+            box-shadow: 0 20px 50px rgba(255, 100, 0, 0.6);
+            background: #fff2c9;
+        }
+        .main-word {
+            font-weight: bold;
+            color: #5e2a8c;
+            letter-spacing: 2px;
+            line-height: 1.15;
+            word-break: break-word;
+            transition: font-size 0.2s;
+        }
+        .word-meta {
+            line-height: 1.7;
+            text-align: center;
+        }
+        .word-def {
+            display: block;
+            font-size: 0.92rem;
+            color: #7a3e9a;
+            font-style: normal;
+        }
+        .word-hu {
+            display: block;
+            font-size: 0.82rem;
+            color: #b06090;
+            font-style: italic;
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        button {
+            background: linear-gradient(95deg, #ff9142, #f27024);
+            color: #2e0a4a;
+            border: none;
+            padding: 18px 35px;
+            font-size: 1.3em;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 8px 0 #8b3c00;
+            font-family: inherit;
+        }
+        button:hover {
+            background: linear-gradient(95deg, #ffaa55, #ff7b2c);
+            transform: translateY(-3px);
+            box-shadow: 0 11px 0 #8b3c00;
+        }
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 5px 0 #8b3c00;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f5e5ff, #e2bdff);
+            border-radius: 48px;
+            border: 2px solid #ffad60;
+        }
+        .stat { text-align: center; }
+        .stat-label { color: #6b2e9e; font-size: 1.2em; margin-bottom: 8px; font-weight: bold; }
+        .stat-value { color: #c43b00; font-size: 2.5em; font-weight: bold; text-shadow: 2px 2px 0px #ffd58c; }
+        .speed-control {
+            margin: 25px 0;
+            padding: 20px;
+            background: #faebd2;
+            border-radius: 50px;
+            border: 2px dashed #ff9040;
+        }
+        .speed-control label { color: #aa4c1c; font-size: 1.2em; margin-right: 15px; font-weight: bold; }
+        .speed-control input { width: 250px; height: 8px; cursor: pointer; accent-color: #ff6a00; }
+        .speed-value { display: inline-block; margin-left: 15px; color: #a53f00; font-weight: bold; font-size: 1.2em; background: #ffe1b3; padding: 4px 12px; border-radius: 30px; }
+        .start-screen, .end-screen { padding: 40px 20px; }
+        .end-screen { display: none; }
+        .final-score { font-size: 4em; color: #ff6a00; font-weight: bold; margin: 30px 0; text-shadow: 3px 3px 0 #cd9cff; }
+        .hidden { display: none; }
+        .trophy { font-size: 5em; margin: 20px 0; animation: bounce 0.5s infinite alternate; }
+        @keyframes bounce {
+            from { transform: translateY(0px); }
+            to { transform: translateY(-20px); }
+        }
+        .stars { font-size: 3em; margin: 20px 0; }
+        .message { font-size: 1.5em; color: #d45500; margin: 20px 0; font-weight: bold; background: #fff2cf; display: inline-block; padding: 10px 25px; border-radius: 45px; }
+        .progress-bar { width: 100%; height: 30px; background: #fdd49c; border-radius: 30px; overflow: hidden; margin: 20px 0; border: 2px solid #ffa047; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #ff9142 0%, #a855f7 100%); width: 0%; transition: width 0.3s; border-radius: 30px; }
+        .celebration { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 8em; animation: celebrate 1s ease-out; pointer-events: none; z-index: 1000; }
+        @keyframes celebrate {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.3) rotate(10deg); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 0; }
+        }
+        button#pauseBtn { background: #a855f7; box-shadow: 0 8px 0 #6029a3; }
+        button#pauseBtn:hover { background: #c77dff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ LESE-CHAMP ⚡</h1>
+
+        <div id="startScreen" class="start-screen">
+            <p style="font-size:1.5em;color:#aa5511;margin-bottom:30px;background:#ffebc2;border-radius:50px;padding:12px;">
+                🚀 Echte Wörter für echte Lese-Profis!<br>
+                5 Minuten – lies so viele coole Wörter wie du kannst! 💪
+            </p>
+            <div class="speed-control">
+                <label>⏱️ Zeit pro Wort:</label>
+                <input type="range" id="speedSlider" min="1000" max="15000" value="3000" step="500">
+                <span class="speed-value" id="speedLabel">3 Sek.</span>
+            </div>
+            <button onclick="startGame()" style="font-size:1.8em;padding:25px 60px;">🔥 START 🔥</button>
+        </div>
+
+        <div id="gameScreen" class="hidden">
+            <div class="word-display" id="wordDisplay">
+                <div class="main-word" style="font-size:5em;">✨ LOS ✨</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            <div class="controls">
+                <button onclick="nextWord()">📖 Nächstes Wort</button>
+                <button onclick="pauseGame()" id="pauseBtn">⏸️ Pause</button>
+                <button onclick="endGame()">🛑 Stopp</button>
+            </div>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-label">🎯 Gelesen</div>
+                    <div class="stat-value" id="counter">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">⏰ Zeit</div>
+                    <div class="stat-value" id="timer">5:00</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="endScreen" class="end-screen">
+            <div class="trophy">🏆</div>
+            <h2 style="color:#fb8c2c;font-size:2.5em;text-shadow:2px 2px #b77eff;">SUPER GEMACHT!</h2>
+            <div class="stars" id="stars">⭐⭐⭐</div>
+            <div class="final-score" id="finalScore">0</div>
+            <p class="message" id="message">Wörter gelesen!</p>
+            <button onclick="resetGame()" style="font-size:1.5em;padding:20px 50px;margin-top:30px;">🔄 Nochmal spielen</button>
+        </div>
+    </div>
+
+    <script>
+    // Jedes Wort: { w: "Sil.ben.tren.nung", def: "kurze deutsche Erklärung", hu: "magyar fordítás" }
+    const finalWordList = [
+
+        // =========================================
+        // 🪲 KÄFER & INSEKTEN
+        // =========================================
+        { w: "Hirsch.kä.fer", def: "Großer Käfer mit zangenartigem Geweih", hu: "szarvasbogár" },
+        { w: "Ro.sen.kä.fer", def: "Glänzend grüner Käfer, liebt Blüten", hu: "rózsabogár" },
+        { w: "Lauf.kä.fer", def: "Schneller Käfer, läuft statt zu fliegen", hu: "futóbogár" },
+        { w: "Rüs.sel.kä.fer", def: "Käfer mit langem Rüssel wie ein Elefant", hu: "ormányosbogár" },
+        { w: "Gold.kä.fer", def: "Goldglänzender Käfer auf Wiesenpflanzen", hu: "aranybogár" },
+        { w: "Dung.kä.fer", def: "Käfer, der Tiermist zu Kugeln rollt und vergräbt", hu: "trágyabogár" },
+        { w: "Was.ser.kä.fer", def: "Käfer, der unter der Wasseroberfläche lebt", hu: "vízibogár" },
+        { w: "Leucht.kä.fer", def: "Käfer, der in der Nacht leuchtet", hu: "szentjánosbogár" },
+        { w: "Was.ser.läu.fer", def: "Insekt, das auf dem Wasser läuft", hu: "vízimolnár" },
+        { w: "Stab.schre.cke", def: "Insekt, das aussieht wie ein Ast", hu: "botsáska" },
+        { w: "Got.tes.an.be.te.rin", def: "Insekt, das die Vorderbeine wie beim Beten hält", hu: "imádkozó sáska" },
+        { w: "Heu.schre.cke", def: "Springendes Insekt auf Wiesen und Feldern", hu: "sáska" },
+        { w: "Gras.hüp.fer", def: "Kleines springendes Tier im Gras", hu: "ugri-bugri" },
+        { w: "Ohr.wurm", def: "Insekt mit Zangen am Hinterleib", hu: "fülbemászó" },
+        { w: "Tau.send.füß.ler", def: "Tier mit ganz vielen Beinpaaren", hu: "százlábú" },
+        { w: "Kel.ler.as.sel", def: "Kleines graues Tier in feuchten Kellern", hu: "pinceászka" },
+        { w: "Re.gen.wurm", def: "Rosa Wurm, der die Erde lockert", hu: "földigiliszta" },
+        { w: "Flor.flie.ge", def: "Zarte grüne Fliege mit durchsichtigen Netzflügeln", hu: "fátyolka" },
+        { w: "Holz.bie.ne", def: "Große blauschwarz glänzende Biene, die Holz bohrt", hu: "ácsméh" },
+        { w: "Hor.nis.se", def: "Große Wespe, scheu und nützlich", hu: "lódarázs" },
+        { w: "Blatt.laus", def: "Winziges Insekt, das an Pflanzenstängeln saugt", hu: "levéltetű" },
+        { w: "Spring.spin.ne", def: "Kleine Spinne, die riesige Sprünge macht", hu: "ugróspóka" },
+        { w: "Maul.wurfs.gril.le", def: "Große Grille, die unterirdisch gräbt", hu: "lótücsök" },
+        { w: "Rau.pe", def: "Larve eines Schmetterlings", hu: "hernyó" },
+        { w: "Ko.kon", def: "Seidenhülle der Raupe vor dem Schlüpfen", hu: "gubó" },
+        { w: "Lar.ve", def: "Junges Insekt, das noch kein Erwachsenes ist", hu: "lárva" },
+        { w: "Ge.spinst", def: "Gesponnenes Fadennetz von Insekten oder Spinnen", hu: "szövevény" },
+        { w: "A.mei.sen.hau.fen", def: "Hügel aus Erde und Nadeln – Ameisen-Heimat", hu: "hangyaboly" },
+        { w: "Bie.nen.wa.be", def: "Sechseckige Honigzelle im Bienenstock", hu: "méhsejt" },
+        { w: "Wes.pen.nest", def: "Nest der Wespen aus zerkauten Holzfasern", hu: "darázsfészek" },
+        { w: "Tag.pfau.en.au.ge", def: "Schmetterling mit Augenflecken auf den Flügeln", hu: "nappali pávaszem" },
+        { w: "Zi.tro.nen.fal.ter", def: "Zitronengelber Schmetterling, erster im Frühling", hu: "citromlepke" },
+        { w: "Kohl.weiß.ling", def: "Weißer Schmetterling auf Kohlfeldern", hu: "káposztalepke" },
+        { w: "Au.ro.ra.fal.ter", def: "Weißer Schmetterling mit orangenem Fleck", hu: "hajnallepke" },
+        { w: "Trau.er.man.tel", def: "Dunkler Schmetterling mit hellgelbem Rand", hu: "gyászlepke" },
+        { w: "Schmett.er.lings.flü.gel", def: "Zarte Flügel aus Farbschuppen", hu: "pillangószárny" },
+
+        // =========================================
+        // 🥾 WANDERN & NATUR
+        // =========================================
+        { w: "Berg.pfad", def: "Schmaler Weg auf den Berg hinauf", hu: "hegyi ösvény" },
+        { w: "Wald.weg", def: "Weg durch den Wald", hu: "erdei út" },
+        { w: "Aus.sichts.punkt", def: "Stelle mit weitem, schönem Ausblick", hu: "kilátópont" },
+        { w: "Gip.fel.kreuz", def: "Kreuz auf dem höchsten Punkt eines Berges", hu: "csúcskereszt" },
+        { w: "Weg.wei.ser", def: "Schild, das die Richtung anzeigt", hu: "útjelző tábla" },
+        { w: "Berg.bach", def: "Kleiner, schnell fließender Bach im Gebirge", hu: "hegyi patak" },
+        { w: "Ge.birgs.pass", def: "Weg zwischen zwei Berggipfeln hindurch", hu: "hegynyak / hágó" },
+        { w: "Fels.wand", def: "Steile, senkrechte Wand aus massivem Fels", hu: "sziklafal" },
+        { w: "Wald.lich.tung", def: "Freie, offene Stelle ohne Bäume mitten im Wald", hu: "erdei tisztás" },
+        { w: "Baum.wur.zel", def: "Unterirdischer Teil des Baums, der Wasser aufnimmt", hu: "gyökér" },
+        { w: "Moos.pol.ster", def: "Weiches, grünes Mooskissen auf Steinen", hu: "moha-párna" },
+        { w: "Was.ser.fall", def: "Wasser, das von einer Klippe herabstürzt", hu: "vízesés" },
+        { w: "Berg.hüt.te", def: "Kleines Haus hoch oben in den Bergen", hu: "menedékház" },
+        { w: "Fels.block", def: "Großer einzelner Felsstein mitten im Weg", hu: "sziklatömb" },
+        { w: "Klet.ter.steig", def: "Gesicherter Kletterweg am Fels mit Seilen", hu: "via ferrata" },
+        { w: "Gip.fel.buch", def: "Buch ganz oben am Berggipfel, wo man sich einträgt", hu: "csúcskönyv" },
+        { w: "Bach.bett", def: "Boden, in dem ein Bach fließt", hu: "meder" },
+        { w: "Ge.röll.feld", def: "Fläche voller kleiner loser Steine", hu: "kőtörmelék" },
+        { w: "Alm.wie.se", def: "Hochwiese im Gebirge, wo Kühe grasen", hu: "hegyi rét" },
+        { w: "Prei.sel.bee.re", def: "Kleine rote Beere im Gebirgswald", hu: "vörösáfonya" },
+        { w: "Wald.erd.bee.re", def: "Kleine, süße wilde Erdbeere im Wald", hu: "erdei szamóca" },
+        { w: "Pilz.korb", def: "Flechtkorb zum Pilzesammeln", hu: "gombáskas" },
+        { w: "Stein.pilz", def: "Edler brauner Pilz mit dickem Stiel", hu: "vargánya" },
+        { w: "Pfif.fer.ling", def: "Gelber Pilz mit trichterförmigem Hut", hu: "rókagomba" },
+        { w: "Flie.gen.pilz", def: "Roter Pilz mit weißen Punkten – giftig!", hu: "légyölő galóca" },
+        { w: "Tan.nen.zap.fen", def: "Zapfen der Tanne, in dem die Samen stecken", hu: "toboz" },
+        { w: "Farn.kraut", def: "Grüne gefiederte Pflanze im schattigen Wald", hu: "páfrány" },
+        { w: "Bach.kie.sel", def: "Glatter, runder Stein aus dem Bachbett", hu: "kavics" },
+        { w: "Ne.bel.schwa.den", def: "Weiche Nebelwolke, die über den Boden zieht", hu: "ködpamat" },
+        { w: "Ge.birgs.see", def: "Kleiner See hoch oben in den Bergen", hu: "hegyitó" },
+        { w: "Quell.was.ser", def: "Frisches, klares Wasser direkt aus der Quelle", hu: "forrásvíz" },
+
+        // =========================================
+        // 🏊 SCHWIMMEN
+        // =========================================
+        { w: "Schwimm.stre.cke", def: "Strecke, die man durchschwimmt", hu: "úszótáv" },
+        { w: "Start.block", def: "Erhöhter Block, von dem man ins Wasser springt", hu: "rajtblokk" },
+        { w: "Schwimm.flos.sen", def: "Gummiflossen für die Füße – schwimmen wie ein Fisch!", hu: "uszony" },
+        { w: "Tau.cher.bril.le", def: "Brille zum Tauchen – damit sieht man unter Wasser klar", hu: "búvárszemüveg" },
+        { w: "Ba.de.kap.pe", def: "Gummikappe für den Kopf beim Schwimmen", hu: "úszósapka" },
+        { w: "Wen.de.kan.te", def: "Wand am Ende der Schwimmbahn zum Abstoßen", hu: "fordulófal" },
+        { w: "Frei.be.cken", def: "Schwimmbecken draußen unter freiem Himmel", hu: "szabadtéri medence" },
+        { w: "Na.tur.bad", def: "Schwimmen in einem natürlichen See oder Teich", hu: "természetes fürdő" },
+        { w: "Fluss.strö.mung", def: "Kraft des fließenden Wassers im Fluss", hu: "folyóáramlat" },
+        { w: "Was.ser.wir.bel", def: "Drehender Strudel im Wasser", hu: "örvény" },
+        { w: "Luft.bla.se", def: "Kleine Blase voller Luft, die unter Wasser aufsteigt", hu: "légbuborék" },
+        { w: "Sprung.turm", def: "Hoher Turm, von dem man ins Wasser springt", hu: "ugróállvány" },
+        { w: "Wel.len.bad", def: "Schwimmbad mit künstlichen Wellen", hu: "hullámfürdő" },
+        { w: "Tauch.tie.fe", def: "Wie tief man unter Wasser taucht", hu: "merülési mélység" },
+        { w: "Schwimm.gür.tel", def: "Gürtel, der einen im Wasser oben hält", hu: "úszóöv" },
+
+        // =========================================
+        // 🥋 JUDO
+        // =========================================
+        { w: "Ju.do.an.zug", def: "Weißes Trainingsgewand für Judo", hu: "judoruha" },
+        { w: "Ju.do.gür.tel", def: "Gürtel, der den Rang beim Judo anzeigt", hu: "judóöv" },
+        { w: "Ju.do.mat.te", def: "Weiche Matte, auf der man kämpft und fällt", hu: "judómatrac" },
+        { w: "Wurf.ü.bung", def: "Übung, bei der man den Partner wirft", hu: "dobásgyakorlat" },
+        { w: "Bo.den.kampf", def: "Kampf auf der Matte, nicht im Stehen", hu: "talajharc" },
+        { w: "Hal.te.griff", def: "Griff, mit dem man den Partner festhält", hu: "fogástechnika" },
+        { w: "Fall.schu.le", def: "Lernen, sicher zu fallen ohne Verletzung", hu: "eséstechnika" },
+        { w: "Gleich.ge.wicht", def: "Das Gleichgewicht halten – beim Judo entscheidend!", hu: "egyensúly" },
+        { w: "Kampf.geist", def: "Mut und Wille, nicht aufzugeben", hu: "harci szellem" },
+        { w: "Ver.beu.gung", def: "Verneigung als Zeichen des Respekts", hu: "meghajlás" },
+        { w: "Bein.keh.re", def: "Wurftechnik mit dem Bein", hu: "lábsöprés" },
+        { w: "Hüft.wurf", def: "Wurfbewegung, bei der die Hüfte als Hebel dient", hu: "csípődobás" },
+        { w: "Schul.ter.wurf", def: "Wurfbewegung über die Schulter", hu: "válladobás" },
+        { w: "Schwung.kraft", def: "Kraft, die beim Ausschwingen entsteht", hu: "lendítőerő" },
+        { w: "Kraft.ü.bung", def: "Übung, um Muskeln und Ausdauer zu stärken", hu: "erőgyakorlat" },
+
+        // =========================================
+        // 🧶 STRICKEN & HÄKELN
+        // =========================================
+        { w: "Strick.na.del", def: "Lange, dünne Nadel zum Stricken", hu: "kötőtű" },
+        { w: "Hä.kel.na.del", def: "Kurze Nadel mit Haken zum Häkeln", hu: "horgolótű" },
+        { w: "Woll.knäu.el", def: "Zu einer Kugel aufgewickeltes Wollgarn", hu: "fonalgombolyag" },
+        { w: "Kett.ma.sche", def: "Einfachste Häkelmasche – verbindet alles", hu: "láncos öltés" },
+        { w: "Luft.ma.sche", def: "Erste Grundmasche beim Häkeln", hu: "légöltés" },
+        { w: "Strick.mus.ter", def: "Plan mit Zeichnungen, wie man strickt", hu: "kötésminta" },
+        { w: "Farb.wech.sel", def: "Wechsel von einer Wollfarbe zur anderen", hu: "színváltás" },
+        { w: "Schaf.wol.le", def: "Natürliche Wolle vom Schaf", hu: "juhgyapjú" },
+        { w: "Al.pa.ka.fa.ser", def: "Weiche Faser vom Alpaka – wärmer als Schafwolle", hu: "alpakagyapjú" },
+        { w: "Baum.woll.garn", def: "Garn aus der Baumwollpflanze", hu: "pamutfonal" },
+        { w: "Kreuz.stich", def: "Kleiner X-Stich auf Stoff beim Sticken", hu: "keresztöltés" },
+        { w: "Web.rah.men", def: "Rahmen zum Weben von Stoffen und Mustern", hu: "szövőkeret" },
+        { w: "Flecht.band", def: "Band aus geflochtenen Fäden", hu: "fonott szalag" },
+        { w: "Garn.spin.del", def: "Spindel zum Drehen und Spinnen von Garn", hu: "fonóorsó" },
+        { w: "Ma.schen.ring", def: "Kleiner Ring aus Maschen als Anfang einer Häkelarbeit", hu: "varázsgyűrű" },
+
+        // =========================================
+        // 🎨 BASTELN & WERKEN
+        // =========================================
+        { w: "Ton.er.de", def: "Weiche Erde zum Formen und Töpfern", hu: "agyag" },
+        { w: "Deck.far.be", def: "Dicke, deckende Farbe zum Malen", hu: "fedőfesték" },
+        { w: "Was.ser.far.be", def: "Farbe, die man mit Wasser verdünnt", hu: "vízfesték" },
+        { w: "Lein.wand", def: "Gespannte Fläche aus Stoff zum Malen", hu: "vászon" },
+        { w: "Scha.blo.ne", def: "Vorlage mit Ausschnitt zum Nachzeichnen", hu: "sablon" },
+        { w: "Li.nol.druck", def: "Drucken mit einer geschnitzten Linoleumplatte", hu: "linóleumnyomat" },
+        { w: "Gips.ab.druck", def: "Abdruck aus Gips, zum Beispiel von einer Hand", hu: "gipszlenyomat" },
+        { w: "Schnit.ze.rei", def: "Mit Messer oder Schnitzwerkzeug aus Holz geformtes Kunstwerk", hu: "fafaragás" },
+        { w: "Holz.ar.beit", def: "Arbeit mit Holz: Sägen, Feilen, Schnitzen", hu: "famunka" },
+        { w: "Falt.kunst", def: "Kunst, aus Papier Figuren zu falten", hu: "papírhajtogatás" },
+        { w: "Sche.ren.schnitt", def: "Kunstwerk, das man mit der Schere aus Papier ausschneidet", hu: "papírkivágás" },
+        { w: "Stem.pel.far.be", def: "Spezielle Farbe zum Stempeln auf Papier", hu: "bélyegzőfesték" },
+        { w: "Druck.stock", def: "Block oder Platte mit Muster zum Drucken", hu: "nyomódúc" },
+        { w: "Flecht.korb", def: "Korb aus geflochtenen Weidenästen", hu: "fonott kosár" },
+        { w: "Bas.tel.draht", def: "Biegsamer Draht für Bastelprojekte", hu: "kézimunka-drót" },
+        { w: "Per.len.ket.te", def: "Kette aus bunten Glasperlen oder Holzperlen", hu: "gyöngysor" },
+        { w: "Mo.sa.ik.stein", def: "Kleines farbiges Steinchen für ein Mosaikbild", hu: "mozaikdarab" },
+        { w: "Fa.den.bild", def: "Bild, das man mit Fäden auf Nagelbretter spannt", hu: "fonalkép" },
+        { w: "Rin.den.stück", def: "Stück Baumrinde – tolle Unterlage zum Basteln", hu: "kéregdarab" },
+        { w: "Ton.fi.gur", def: "Figur, die man aus weichem Ton geformt hat", hu: "agyagfigura" },
+
+        // =========================================
+        // 🦊 WILDTIERE
+        // =========================================
+        { w: "Fuchs", def: "Schlaues Raubtier mit rotem Fell und buschigem Schwanz", hu: "róka" },
+        { w: "Dachs", def: "Grau-schwarzes Tier, das tiefe Baue gräbt", hu: "borz" },
+        { w: "Luchs", def: "Wilde Katze mit Pinselohren, lebt im Gebirge", hu: "hiúz" },
+        { w: "Wild.kat.ze", def: "Wilde Katze des Waldes, scheu und selten", hu: "vadmacska" },
+        { w: "Reh.kitz", def: "Junges Reh mit weißen Punkten auf dem Rücken", hu: "őzgida" },
+        { w: "Elch", def: "Größtes Tier der Hirschfamilie mit riesigem Geweih", hu: "jávorszarvas" },
+        { w: "Wild.schwein", def: "Kräftiges Tier mit Stoßzähnen, lebt im Wald", hu: "vaddisznó" },
+        { w: "Fisch.ot.ter", def: "Geschickter Schwimmer mit glänzendem Fell", hu: "vidra" },
+        { w: "Bi.ber", def: "Tier, das Dämme und Burgen aus Holz baut", hu: "hód" },
+        { w: "Sie.ben.schläf.er", def: "Kleines Nagetier, das sieben Monate schläft!", hu: "pele" },
+        { w: "Mur.mel.tier", def: "Dickes Bergtier, das laut pfeift wenn Gefahr droht", hu: "mormota" },
+        { w: "Her.me.lin", def: "Kleines Wiesel, das im Winter weiß wird", hu: "hermelin" },
+        { w: "Wie.sel", def: "Kleinstes Raubtier der Welt – blitzschnell!", hu: "menyét" },
+        { w: "Mar.der", def: "Schlaues, wendiges Raubtier der Wälder", hu: "nyest" },
+        { w: "Il.tis", def: "Dunkelbraunes Raubtier, Verwandter des Marders", hu: "görény" },
+        { w: "Fle.der.maus", def: "Einziges fliegendes Säugetier, aktiv nur nachts", hu: "denevér" },
+        { w: "Maul.wurf", def: "Tier, das blind unter der Erde lebt und gräbt", hu: "vakond" },
+        { w: "I.gel", def: "Tier mit Stacheln auf dem Rücken, rollt sich ein", hu: "sün" },
+        { w: "Ha.sel.maus", def: "Kleine Maus, die Haselnüsse und Früchte sammelt", hu: "mogyorós pele" },
+        { w: "Spitz.maus", def: "Winziges Tier mit spitzer Schnauze, kein Nager!", hu: "cickány" },
+        { w: "Gäm.se", def: "Bergtier mit kurzen, gebogenen Hörnern", hu: "zerge" },
+        { w: "Eich.horn", def: "Flinkes rotes Tier mit buschigem Schwanz", hu: "mókus" },
+        { w: "Feld.maus", def: "Kleine Maus, die auf Feldern und Wiesen lebt", hu: "mezei egér" },
+
+        // =========================================
+        // 🦅 VÖGEL
+        // =========================================
+        { w: "Ha.bicht", def: "Schneller Greifvogel des Waldes", hu: "héja" },
+        { w: "Mäu.se.bus.sard", def: "Häufigster Greifvogel, frisst vor allem Mäuse", hu: "egerészölyv" },
+        { w: "Turm.fal.ke", def: "Kleiner Greifvogel, der in der Luft auf der Stelle steht", hu: "vörös vércse" },
+        { w: "See.ad.ler", def: "Größter Greifvogel Europas, lebt an Seen", hu: "rétisas" },
+        { w: "Wan.der.fal.ke", def: "Schnellstes Tier der Welt im Sturzflug (über 300 km/h!)", hu: "vándorsólyom" },
+        { w: "Stein.ad.ler", def: "Majestätischer Adler der Gebirge", hu: "szirti sas" },
+        { w: "Rot.mi.lan", def: "Roter Greifvogel mit gegabeltem Schwanz", hu: "vörös kánya" },
+        { w: "Schlei.er.eu.le", def: "Eule mit herzförmigem weißem Gesicht", hu: "gyöngybagoly" },
+        { w: "Wald.kauz", def: "Häufige Eule, ruft in der Nacht", hu: "macskabagoly" },
+        { w: "U.hu", def: "Größte Eule Europas, fast so groß wie ein Kind!", hu: "uhu" },
+        { w: "Käuz.chen", def: "Kleine Eule mit großen gelben Augen", hu: "kuvik" },
+        { w: "Eis.vo.gel", def: "Blau-orange Juwel, taucht senkrecht ins Wasser", hu: "jégmadár" },
+        { w: "Grau.rei.her", def: "Großer grauer Vogel, der reglos im Wasser steht", hu: "szürke gém" },
+        { w: "Weiß.storch", def: "Großer Vogel mit rotem Schnabel, bringt den Frühling", hu: "fehér gólya" },
+        { w: "Kra.nich", def: "Großer Vogel, der im Herbst in Gruppen wegfliegt", hu: "daru" },
+        { w: "Kie.bitz", def: "Vogel mit lustigem Schopf auf dem Kopf", hu: "bíbic" },
+        { w: "Haub.en.tau.cher", def: "Wasservogel mit Federschmuck auf dem Kopf", hu: "búbos vöcsök" },
+        { w: "Am.sel", def: "Schwarzer Vogel, der wunderschön singt", hu: "fekete rigó" },
+        { w: "Sing.dros.sel", def: "Brauner Vogel mit melodischem Gesang", hu: "énekes rigó" },
+        { w: "Zaun.kö.nig", def: "Kleinster Vogel Europas, riesengroße Stimme!", hu: "ökörszem" },
+        { w: "Klei.ber", def: "Einziger Vogel, der am Baum kopfüber nach unten läuft", hu: "csuszka" },
+        { w: "Gar.ten.rot.schwanz", def: "Vogel, der ständig mit dem Schwanz zittert", hu: "kerti rozsdafarkú" },
+        { w: "Wach.tel", def: "Kleiner Hühnervogel, der sich gut versteckt", hu: "fürj" },
+        { w: "Specht", def: "Vogel, der Löcher in Bäume hämmert", hu: "harkály" },
+        { w: "Kuk.kuck", def: "Ruft Kuckuck und legt Eier in fremde Nester", hu: "kakukk" },
+        { w: "Blau.mei.se", def: "Kleiner blau-gelber Vogel am Futterhaus", hu: "kék cinege" },
+        { w: "Gold.am.mer", def: "Gelber Vogel, der auf Getreidefeldern singt", hu: "sárga sármány" },
+
+        // =========================================
+        // 🐸 LURCHE & KRIECHTIERE
+        // =========================================
+        { w: "Laub.frosch", def: "Kleiner grüner Frosch, der auf Blättern sitzt", hu: "levelibéka" },
+        { w: "Gras.frosch", def: "Häufiger brauner Frosch auf Wiesen", hu: "gyepi béka" },
+        { w: "Erd.krö.te", def: "Braune Kröte mit warziger Haut", hu: "barna varangy" },
+        { w: "Feu.er.sa.la.man.der", def: "Schwarzer Salamander mit gelben Flecken", hu: "foltos szalamandra" },
+        { w: "Blind.schlei.che", def: "Sieht aus wie Schlange, ist aber eine Eidechse!", hu: "lábatlan gyík" },
+        { w: "Rin.gel.nat.ter", def: "Harmlose Wasserschlange mit gelbem Fleck am Hals", hu: "vízisikló" },
+        { w: "Zaun.ei.dech.se", def: "Grüne Eidechse, die gerne auf Zäunen sitzt", hu: "fürge gyík" },
+        { w: "Berg.molch", def: "Molch mit buntem Bauch, lebt in Gebirgsbächen", hu: "alpesi gőte" },
+        { w: "Kamm.molch", def: "Molch mit gezacktem Rückenkamm, sieht aus wie Mini-Drache!", hu: "tarajos gőte" },
+
+        // =========================================
+        // 📖 GESCHICHTENERZÄHLEN
+        // =========================================
+        { w: "Er.zäh.le.rin", def: "Person, die Geschichten erzählt", hu: "mesélő" },
+        { w: "Mär.chen.buch", def: "Buch voller Zaubermärchen", hu: "mesekönyv" },
+        { w: "A.ben.teu.er.ge.schich.te", def: "Geschichte voller spannender Abenteuer", hu: "kalandtörténet" },
+        { w: "Hel.din", def: "Mutige Hauptfigur in einer Geschichte", hu: "hősnő" },
+        { w: "Bö.se.wicht", def: "Der Schurke in einer Geschichte", hu: "gonosz" },
+        { w: "Wald.geist", def: "Geheimnisvoller Geist, der im Wald wohnt", hu: "erdőszellem" },
+        { w: "Fluss.nixe", def: "Wassergeist mit Fischschwanz", hu: "vízi tündér" },
+        { w: "Schatz.su.che", def: "Suche nach einem versteckten Schatz", hu: "kincsvadászat" },
+        { w: "Rät.sel.kam.mer", def: "Zimmer voller Rätsel und Geheimnisse", hu: "rejtélyterem" },
+        { w: "Ge.heim.gang", def: "Geheimer Gang hinter einer Wand", hu: "titkos folyosó" },
+        { w: "Zau.ber.spie.gel", def: "Spiegel mit Zauberkraft", hu: "varázstükör" },
+        { w: "Wunsch.brun.nen", def: "Brunnen, in den man eine Münze wirft und wünscht", hu: "kívánságkút" },
+        { w: "Kris.tall.ku.gel", def: "Glaskugel, in der man angeblich die Zukunft sieht", hu: "kristálygömb" },
+        { w: "Fee.en.ring", def: "Kreis im Gras, wo Feen in der Nacht tanzen", hu: "tündérgyűrű" },
+        { w: "Schreib.fe.der", def: "Feder zum Schreiben, früher aus Vogelfedern", hu: "tollszár" },
+        { w: "Per.ga.ment", def: "Altes Schreibmaterial aus Tierhaut", hu: "pergamen" },
+        { w: "Schrift.rol.le", def: "Aufgerolltes Pergament mit Text", hu: "pergamentekercs" },
+        { w: "Bil.der.ge.schich.te", def: "Geschichte, die in Bildern erzählt wird", hu: "képregény" },
+        { w: "Rei.se.ta.ge.buch", def: "Tagebuch, in dem man Reisen aufschreibt", hu: "útinapló" },
+        { w: "Sa.gen.welt", def: "Welt voller Sagen, Mythen und Legenden", hu: "mondavilág" },
+        { w: "Mond.schein.nacht", def: "Geheimnisvolle Nacht, die vom Mond erleuchtet wird", hu: "holdvilágos éjszaka" },
+        { w: "Flüs.ter.stim.me", def: "Ganz leise, geheimnisvolle Stimme", hu: "suttogó hang" },
+        { w: "Hel.den.mut", def: "Der Mut, etwas sehr Schwieriges zu wagen", hu: "hősiesség" },
+        { w: "Zau.ber.for.mel", def: "Geheimformel mit Zauberwirkung", hu: "varázslat" },
+
+        // =========================================
+        // 🌿 NATUR ALLGEMEIN
+        // =========================================
+        { w: "Mor.gen.grau.en", def: "Das erste Grau des Morgens vor dem Sonnenaufgang", hu: "hajnal pirkadata" },
+        { w: "A.bend.däm.me.rung", def: "Das sanfte Dunkelwerden des Abends", hu: "alkonyat" },
+        { w: "Mond.auf.gang", def: "Wenn der Mond über den Horizont steigt", hu: "holdkelte" },
+        { w: "Ster.nen.him.mel", def: "Klarer Nachthimmel mit tausenden Sternen", hu: "csillagos égbolt" },
+        { w: "Ge.wit.ter.sturm", def: "Kräftiger Sturm mit Blitz und Donner", hu: "vihar" },
+        { w: "Ha.gel.korn", def: "Kleines Eisstück, das vom Himmel fällt", hu: "jégeső szem" },
+        { w: "Schnee.flo.cke", def: "Winziges Eiskristall, das vom Himmel rieselt", hu: "hópehely" },
+        { w: "Eis.zap.fen", def: "Hängender Eiszapfen an Dächern und Felsen", hu: "jégcsap" },
+        { w: "Tau.trop.fen", def: "Winzige Wassertropfen auf Blättern am Morgen", hu: "harmatcsepp" },
+        { w: "Wind.hauch", def: "Ganz leichter, zarter Wind", hu: "szellőfuvallat" },
+        { w: "Blät.ter.ra.scheln", def: "Das leise Geräusch von Blättern im Wind", hu: "levelek susogása" },
+        { w: "Baum.kro.ne", def: "Oberer Teil des Baums mit allen Ästen und Blättern", hu: "lombkorona" },
+        { w: "Wur.zel.ge.flecht", def: "Dichtes Netz aus vielen Wurzeln unter der Erde", hu: "gyökérfonat" },
+        { w: "Quell.bach", def: "Bach, der direkt aus einer Quelle entspringt", hu: "forrásos patak" },
+        { w: "Teich.u.fer", def: "Rand und Ufer eines kleinen Teiches", hu: "tópart" },
+        { w: "Berg.hang", def: "Schräge Seite eines Berges", hu: "hegyoldal" },
+        { w: "Fich.ten.wald", def: "Wald aus Fichten – dunkel, dicht und still", hu: "lucfenyőerdő" },
+        { w: "Un.ter.holz", def: "Kleines Gebüsch und Strauchwerk unter den großen Bäumen", hu: "aljnövényzet" },
+        { w: "Dick.icht", def: "Sehr dichtes, kaum durchdringbares Gebüsch", hu: "sűrűség" },
+
+        // =========================================
+        // 🏃 VERBEN
+        // =========================================
+        { w: "klet.tern", def: "Mit Händen und Füßen nach oben gelangen", hu: "mászni" },
+        { w: "schlei.chen", def: "Ganz leise und langsam gehen", hu: "lopakodni" },
+        { w: "flat.tern", def: "Schnell und aufgeregt mit den Flügeln schlagen", hu: "szárnycsapkodni" },
+        { w: "tram.peln", def: "Mit den Füßen fest und laut aufstampfen", hu: "taposni" },
+        { w: "stap.fen", def: "Mit Mühe durch Schnee, Matsch oder Unterholz gehen", hu: "gázolni" },
+        { w: "schlend.ern", def: "Gemütlich und ohne Eile spazieren gehen", hu: "kószálni" },
+        { w: "schwe.ben", def: "In der Luft treiben ohne zu fallen", hu: "lebegni" },
+        { w: "wir.beln", def: "Sich schnell im Kreis drehen", hu: "örvényleni" },
+        { w: "grin.sen", def: "Breit lächeln bis zu den Ohren", hu: "vigyorogni" },
+        { w: "zwit.schern", def: "So singen wie ein Vogel im Frühling", hu: "csiripelni" },
+        { w: "knist.ern", def: "Das knackende Geräusch im Feuer oder in trockenem Laub", hu: "ropogni" },
+        { w: "ra.scheln", def: "Leises Geräusch von Blättern oder Papier", hu: "susogni" },
+        { w: "glit.zern", def: "Viele kleine Lichtpunkte gleichzeitig funkeln", hu: "csillogni" },
+        { w: "fun.keln", def: "Wie ein Stern leuchten und blitzen", hu: "szikrázni" },
+        { w: "schnat.tern", def: "Aufgeregt durcheinander reden wie Enten", hu: "csacsogni" },
+        { w: "brum.men", def: "Tiefer, summender Ton wie eine Hummel oder ein Motor", hu: "zümmögni" },
+        { w: "knur.ren", def: "Grummelnder Ton wie ein Hund oder ein Magen", hu: "morogni" },
+        { w: "stau.nen", def: "Vor Staunen den Mund offenstehen haben", hu: "ámulni" },
+        { w: "schnüf.feln", def: "Mit der Nase herumschnuppern", hu: "szimatolni" },
+        { w: "tap.sen", def: "Ungeschickt mit zu großen Schritten gehen", hu: "cammogni" },
+        { w: "hüp.fen", def: "In kleinen Sprüngen vorwärtskommen", hu: "ugrálni" },
+        { w: "ku.geln", def: "Sich rollend vorwärtsbewegen", hu: "gurulni" },
+        { w: "glei.ten", def: "Sanft und reibungslos über eine Fläche gleiten", hu: "csúszni" },
+        { w: "tau.chen", def: "Unter Wasser gehen und schwimmen", hu: "merülni" },
+        { w: "schnit.zen", def: "Figuren aus Holz mit einem Messer herausarbeiten", hu: "faragni" },
+        { w: "flech.ten", def: "Fäden oder Äste zu einem Muster verweben", hu: "fonni" },
+        { w: "kne.ten", def: "Weichen Teig oder Ton mit den Händen formen", hu: "gyúrni" },
+        { w: "prus.ten", def: "Plötzlich laut lachen, sodass Luft herausspritzt", hu: "prüszkölni" },
+        { w: "ki.chern", def: "Leise, vergnügt kichern", hu: "kuncogni" },
+        { w: "wie.hern", def: "So lachen wie ein Pferd – laut und schrill", hu: "nyeríteni" },
+        { w: "gäh.nen", def: "Müde den Mund weit aufreißen", hu: "ásítani" },
+        { w: "nie.sen", def: "Hatschi! – Luft schnell aus Nase und Mund ausstoßen", hu: "tüsszenteni" },
+        { w: "schnar.chen", def: "Im Schlaf laute Geräusche machen", hu: "horkolni" },
+        { w: "sum.men", def: "Ohne Worte eine Melodie singen", hu: "dúdolni" },
+        { w: "pfei.fen", def: "Durch Zähne oder Lippen einen Ton erzeugen", hu: "fütyülni" },
+        { w: "quiet.schen", def: "Heller, spitzer Laut wie eine ungeölte Tür", hu: "nyikorgani" },
+        { w: "pol.tern", def: "Lautes, rumpelndes Krachen", hu: "dörögni" },
+        { w: "plat.schen", def: "Ins Wasser fallen oder springen – Platsch!", hu: "csobbanni" },
+        { w: "rau.schen", def: "Das Geräusch von fließendem Wasser oder starkem Wind", hu: "zúgni" },
+        { w: "meck.ern", def: "So ruft eine Ziege – auch wenn jemand immer meckert!", hu: "bégetni" },
+        { w: "grun.zen", def: "Das satte Geräusch eines Schweins", hu: "röfögni" },
+        { w: "brül.len", def: "Ganz laut und kraftvoll schreien wie ein Löwe", hu: "ordítani" },
+        { w: "stol.pern", def: "Fast hinfallen, weil man über etwas gestolpert ist", hu: "botlani" },
+        { w: "zap.peln", def: "Nervös und unruhig hin und her zucken", hu: "ficánkolni" },
+        { w: "flit.zen", def: "Blitzschnell von einem Ort zum anderen huschen", hu: "surranní" },
+        { w: "schau.keln", def: "Auf und ab oder vor und zurück schwingen", hu: "hintázni" },
+        { w: "wab.beln", def: "Weich und wackelnd hin und her schwingen wie Götterspeise", hu: "rezegni" },
+        { w: "ta.sten", def: "Mit den Fingern vorsichtig etwas erkunden", hu: "tapogatni" },
+        { w: "glot.zen", def: "Mit weit aufgerissenen Augen anstarren", hu: "bámulni" },
+        { w: "lu.gern", def: "Vorsichtig durch einen Spalt oder Schlitz schauen", hu: "kukucskálni" },
+        { w: "schlen.kern", def: "Arme oder Beine locker hin und her schwingen", hu: "lóbálni" },
+
+        // =========================================
+        // 🌈 ADJEKTIVE
+        // =========================================
+        { w: "sta.che.lig", def: "Voller spitzer Stacheln wie ein Igel oder eine Kastanie", hu: "tüskés" },
+        { w: "moo.sig", def: "Mit weichem Moos bedeckt", hu: "mohás" },
+        { w: "sump.fig", def: "Feucht und schlammig wie ein Sumpf", hu: "mocsaras" },
+        { w: "glit.schig", def: "So glatt und nass, dass man ausrutscht", hu: "csúszós" },
+        { w: "ge.fie.dert", def: "Mit Federn bedeckt, wie Vögel es sind", hu: "tollas" },
+        { w: "mu.tig", def: "Keine Angst haben und trotzdem handeln", hu: "bátor" },
+        { w: "flink", def: "Sehr schnell und wendig", hu: "fürge" },
+        { w: "lis.tig", def: "Schlau, gerissen und pfiffig", hu: "ravasz" },
+        { w: "laut.los", def: "Ohne jedes Geräusch, vollkommen still", hu: "nesztelen" },
+        { w: "sanft", def: "Weich und zärtlich, ohne Druck oder Lärm", hu: "szelíd" },
+        { w: "tap.fer", def: "Mutig trotz Angst oder großer Schwierigkeit", hu: "bátor" },
+        { w: "knor.rig", def: "Verknorzt und rauh wie ein alter Baumstamm", hu: "görcsös" },
+        { w: "zot.te.lig", def: "Mit langen, zotteligen Haaren wie ein Yak", hu: "bozontos" },
+        { w: "flau.schig", def: "Weich und flauschig wie ein Küken", hu: "bolyhos" },
+        { w: "ku.sche.lig", def: "Wunderbar weich und angenehm zum Kuscheln", hu: "puha" },
+        { w: "strup.pig", def: "Zerzaust und ungekämmt wie ein Straßenhund", hu: "kócos" },
+        { w: "knuf.fig", def: "Zum Knuddeln – süß, rund und flauschig", hu: "cuki" },
+        { w: "ku.gel.rund", def: "Ganz rund wie eine Kugel", hu: "gömbölyű" },
+        { w: "blitz.schnell", def: "So schnell wie ein Blitz", hu: "villámgyors" },
+        { w: "tod.mü.de", def: "Unglaublich erschöpft und zum Einschlafen", hu: "holtra fáradt" },
+        { w: "hun.de.mü.de", def: "So müde wie ein alter Hund nach einer langen Wanderung", hu: "kutyafáradt" },
+        { w: "bä.ren.stark", def: "So stark wie ein Bär", hu: "medveerős" },
+        { w: "mäus.chen.still", def: "Ganz leise und still wie eine Maus", hu: "egérnyi csendben" },
+        { w: "pech.schwarz", def: "So tiefschwarz wie Pech", hu: "koromfekete" },
+        { w: "schnee.weiß", def: "So makellos weiß wie frischer Schnee", hu: "hófehér" },
+        { w: "ra.ben.schwarz", def: "Schwarz wie das Gefieder eines Raben", hu: "varjúfekete" },
+        { w: "him.mel.blau", def: "Hellblau wie der Himmel an einem schönen Sommertag", hu: "égkék" },
+        { w: "feu.er.rot", def: "Leuchtend rot wie Feuer", hu: "tűzpiros" },
+        { w: "gold.gelb", def: "Strahlend gelb wie Gold", hu: "aranysárga" },
+        { w: "schil.lernd", def: "In vielen Farben gleichzeitig schimmernd", hu: "irizáló" },
+        { w: "ge.heim.nis.voll", def: "Voller Geheimnisse und Rätsel", hu: "titokzatos" },
+        { w: "a.tem.be.rau.bend", def: "So schön, dass man den Atem anhält", hu: "lélegzetelállító" },
+        { w: "sa.gen.haft", def: "Unglaublich gut, fast wie aus einer Sage", hu: "mesés" },
+        { w: "fa.bel.haft", def: "Wunderbar und toll wie aus einer Fabel", hu: "mesebeli" },
+        { w: "win.zig", def: "Ganz ganz klein – kaum zu sehen", hu: "apró" },
+        { w: "rie.sig", def: "Riesig groß – größer als alles andere", hu: "óriási" },
+        { w: "kühn", def: "Mutig und wagemutig, traut sich viel", hu: "vakmerő" },
+        { w: "ge.schmei.dig", def: "Weich und beweglich wie eine Katze", hu: "hajlékony" },
+        { w: "un.er.schro.cken", def: "Gar keine Angst habend, völlig furchtlos", hu: "rettenthetetlen" },
+        { w: "neu.gie.rig", def: "Immer wissen wollen, was dahinter steckt", hu: "kíváncsi" },
+        { w: "ge.witzt", def: "Schlau, pfiffig und schnell im Denken", hu: "eszes" },
+        { w: "fin.dig", def: "Auf gute Ideen kommend, sehr erfinderisch", hu: "leleményes" },
+        { w: "hartnä.ckig", def: "Nicht aufgeben, auch wenn es sehr schwer ist", hu: "kitartó" },
+        { w: "sprit.zig", def: "Frisch, lebendig und voller Energie", hu: "élénk" },
+        { w: "ko.misch", def: "Seltsam und lustig zugleich", hu: "mulatságos" },
+        { w: "selt.sam", def: "Merkwürdig und ungewöhnlich", hu: "különös" },
+        { w: "merk.wür.dig", def: "Seltsam und auffällig, irgendwie komisch", hu: "furcsa" },
+        { w: "un.glaub.lich", def: "Kaum zu glauben – aber wahr!", hu: "hihetetlen" },
+        { w: "wun.der.sam", def: "Voller Wunder und schöner Überraschungen", hu: "csodálatos" },
+        { w: "pracht.voll", def: "Herrlich und beeindruckend schön", hu: "pompás" },
+        { w: "kna.cker.frisch", def: "Ganz frisch, knackig und lebendig", hu: "friss és rugalmas" },
+
+        // =========================================
+        // 😂 SPASSWÖRTER – LUSTIG & ÖSTERREICHISCH
+        // =========================================
+
+        // ~~ Hokuspokus & Zauberei ~~
+        { w: "Ho.kus.po.kus", def: "Zauberwort für Dinge, die man nicht erklären kann!", hu: "hokkuszpokkusz" },
+        { w: "A.bra.ka.da.bra", def: "Uraltes Zauberwort – zack, und weg ist es!", hu: "abrakadabra" },
+        { w: "Sim.sa.la.bim", def: "Zauberwort aus alten Märchen", hu: "szimszalabim" },
+        { w: "Zau.ber.trank", def: "Geheimnisvoller Trank mit Zauberwirkung", hu: "varázsital" },
+        { w: "Hexen.kes.sel", def: "Großer Topf, in dem Hexen ihren Brei kochen", hu: "boszorkányüst" },
+        { w: "Zau.ber.hut", def: "Hut des Zauberers, aus dem Dinge erscheinen", hu: "varázs.kalap" },
+        { w: "Dra.chen.feu.er", def: "Feuerstrahl, den ein Drache speit", hu: "sárkánytűz" },
+        { w: "Ein.horn.stern", def: "Stern, dem ein Einhorn entspringt", hu: "egyszarvú csillag" },
+        { w: "Mond.zau.ber", def: "Geheimnisvoller Zauber bei Mondlicht", hu: "holdvarázsát" },
+        { w: "El.fen.staub", def: "Glitzernder Staub, den Elfen hinterlassen", hu: "tündérpor" },
+        { w: "Geis.ter.stun.de", def: "Um Mitternacht – wenn Geister angeblich umgehen!", hu: "szellemóra" },
+        { w: "Feen.glanz", def: "Glitzerndes Licht rund um eine Fee", hu: "tündérragyogás" },
+
+        // ~~ Österreichisch & Deutsch Lustig ~~
+        { w: "Schmarrn", def: "Österreichisch für: Das ist totaler Unsinn!", hu: "marhaság" },
+        { w: "Tschap.perl", def: "Österreichisch für: Jemand ein bisschen tölpelhaft", hu: "fajankó" },
+        { w: "Wap.pler", def: "Österreichisch für: Sonderling oder Trottel", hu: "hóbortos" },
+        { w: "Kud.del.mud.del", def: "Totales Durcheinander und Gewusel", hu: "felfordulás" },
+        { w: "Wirr.warr", def: "Alles durcheinander – keiner blickt mehr durch!", hu: "zűrzavar" },
+        { w: "To.hu.wa.bo.hu", def: "Riesen-Chaos und Aufruhr – aus dem Hebräischen", hu: "teljes zűrzavar" },
+        { w: "Schla.mas.sel", def: "Eine verzwickte, unangenehme Lage", hu: "malőr" },
+        { w: "Heck.meck", def: "Aufhebens und Getue um nichts", hu: "felhajtás" },
+        { w: "Mum.pitz", def: "Albernes Zeug oder Unsinn", hu: "marhaság" },
+        { w: "Fi.rl.e.fanz", def: "Alberne Spielchen und unnützes Zeug", hu: "hülyéskedés" },
+        { w: "Schnick.schnack", def: "Kleinkram und unnützes Zeug", hu: "csecsebecsék" },
+        { w: "La.ri.fa.ri", def: "Leeres Gerede ohne Inhalt", hu: "mellébeszélés" },
+        { w: "Blöd.sinn", def: "Totaler Unsinn", hu: "hülyeség" },
+        { w: "Quat.sch", def: "Unsinn und Blödsinn", hu: "ostobaság" },
+        { w: "Kla.mauk", def: "Lustiger Lärm und Aufruhr", hu: "lárma / cirkusz" },
+        { w: "Krim.skrams", def: "Kleinkram und Gerümpel", hu: "limlom" },
+        { w: "Zick.zack", def: "Hin und her in spitzen Winkeln", hu: "cikkcakk" },
+        { w: "Durch.ein.an.der", def: "Alles völlig durcheinander", hu: "összevisszaság" },
+        { w: "Trub.bel", def: "Aufregung und Getrampel", hu: "sürgés-forgás" },
+        { w: "Ra.batz", def: "Lärm, Krach und Aufruhr machen", hu: "lárma / ribillió" },
+        { w: "Trat.sch", def: "Klatsch und Gerüchte – was alle so reden", hu: "pletyka" },
+        { w: "Ge.rum.pel", def: "Lautes Rumoren und Poltern", hu: "dörömbölés" },
+
+        // ~~ Lustige Charaktere ~~
+        { w: "Spaß.vo.gel", def: "Jemand, der immer Witze macht und alle zum Lachen bringt", hu: "tréfacsináló" },
+        { w: "Witz.bold", def: "Jemand, der ständig Witze erzählt", hu: "viccmester" },
+        { w: "Schla.wi.ner", def: "Ein frecher, gerissener Kerl", hu: "huncut" },
+        { w: "Frech.dachs", def: "Frecher Mensch – frech wie ein Dachs!", hu: "szemtelen alak" },
+        { w: "Strolch", def: "Kleiner Schelm und Herumtreiber", hu: "csibész" },
+        { w: "Schelm", def: "Jemand, der gerne Streiche spielt", hu: "pajkos alak" },
+        { w: "Tau.send.sas.sa", def: "Jemand, der alles kann und überall dabei ist", hu: "ezermester" },
+        { w: "Schlau.ber.ger", def: "Jemand, der meint, alles besser zu wissen", hu: "okoskodó" },
+        { w: "Na.se.weis", def: "Jemand, der immer alles besser weiß", hu: "mindentudó" },
+        { w: "Schlitz.ohr", def: "Gerissener, schlauer Mensch", hu: "ravasz alak" },
+        { w: "Traum.tän.zer", def: "Jemand, der immer träumt und in Wolken lebt", hu: "álmodozó" },
+        { w: "Nasch.kat.ze", def: "Jemand, der immer heimlich Süßes nascht", hu: "nassolós" },
+        { w: "Schleck.maul", def: "Jemand, der alles Süße liebt", hu: "nyalánk" },
+        { w: "Glücks.pilz", def: "Jemand, der immer Glück hat – wie ein Pilz!", hu: "szerencsefi" },
+        { w: "Pech.vo.gel", def: "Jemand, dem immer alles schiefgeht", hu: "szerencsétlen flótás" },
+        { w: "Angst.ha.se", def: "Jemand, der leicht Angst bekommt – mutlos wie ein Hase", hu: "nyúlszívű" },
+        { w: "Brumm.bär", def: "Jemand, der immer grummelt und brummt", hu: "mogorva medve" },
+        { w: "Gries.gram", def: "Mürrische Person, die nichts gut findet", hu: "mogorva" },
+        { w: "Mie.se.pe.ter", def: "Jemand, der immer schlechte Laune hat", hu: "nyafogó" },
+        { w: "Wun.der.kind", def: "Kind, das in etwas unglaublich begabt ist", hu: "csodagyerek" },
+        { w: "Drauf.gän.ger", def: "Jemand, der sich mutig in alles stürzt", hu: "merész" },
+
+        // ~~ Österreichische Speisen ~~
+        { w: "Kai.ser.schmarrn", def: "Zerrissener süßer Eierpfannkuchen – österreichische Spezialität!", hu: "császármorzsa" },
+        { w: "Gu.gel.hupf", def: "Runder Kuchen mit Loch in der Mitte", hu: "kuglóf" },
+        { w: "Pa.lat.schin.ken", def: "Dünner Eierpfannkuchen mit Füllung", hu: "palacsinta" },
+        { w: "Ma.ril.len.knö.del", def: "Knödel mit einer Marille (Aprikose) drin", hu: "barackos gombóc" },
+        { w: "Krap.fen", def: "Süßer Hefeteig-Ball, in Fett gebacken", hu: "fánk" },
+        { w: "Po.widl.ta.scher.l", def: "Kleines Teigtäschchen mit Pflaugenmus – österreichisch!", hu: "szilvásgombóc" },
+        { w: "Va.nil.le.kip.ferl", def: "Mondförmiges Gebäck mit Vanille und Staubzucker", hu: "vaníliás kifli" },
+        { w: "Top.fen.stru.del", def: "Strudel mit Topfen (Quark) gefüllt", hu: "túrós rétes" },
+        { w: "Erd.äp.fel.gu.lasch", def: "Österreichisch für Kartoffelgulasch", hu: "burgonyagulyás" },
+        { w: "Sem.mel.knö.del", def: "Knödel aus alten Semmeln gemacht", hu: "zsemlés gombóc" },
+
+        // ~~ Tier-Komposita (Lustige Tier-Kombinationen) ~~
+        { w: "Pa.vi.an.po.po", def: "Das farbige Hinterteil des Pavians – sehr auffällig!", hu: "pávián-fenék" },
+        { w: "Gi.raf.fen.hals", def: "Unglaublich langer Hals der Giraffe", hu: "zsiráfnyak" },
+        { w: "E.le.fan.ten.rüs.sel", def: "Langer biegsamer Nasen-Arm des Elefanten", hu: "elefántormány" },
+        { w: "Kro.ko.dils.trä.nen", def: "Unechte Tränen – so wie Krokodile es tun!", hu: "krokodilkönnyek" },
+        { w: "Af.fen.schau.kel", def: "Schaukel, an der man wie ein Affe baumelt", hu: "majomhinta" },
+        { w: "Af.fen.hit.ze", def: "Unglaublich heiß – so heiß wie im Dschungel!", hu: "majommeleg" },
+        { w: "Bä.ren.hun.ger", def: "Riesiger Hunger wie ein Bär nach dem Winterschlaf", hu: "farkasétvágy" },
+        { w: "Nil.pferd.gäh.nen", def: "Gähnen mit riesig aufgerissenem Mund wie ein Nilpferd", hu: "víziló-ásítás" },
+        { w: "E.sels.ohr", def: "Umgeknicktes Buchseiten-Eck – wie das Ohr eines Esels", hu: "szamárfül" },
+        { w: "Eu.len.spie.gel", def: "Schlauer Schalk aus einer alten deutschen Geschichte", hu: "Eulenspiegelül" },
+        { w: "Hunds.ta.ge", def: "Die heißesten Tage im Sommer", hu: "kutyameleg napok" },
+        { w: "Schmet.ter.lings.netz", def: "Netz zum sanften Fangen von Schmetterlingen", hu: "lepkehálió" },
+        { w: "Fuchsschwanz", def: "Buschiger Schwanz des Fuchses", hu: "rókafark" },
+        { w: "Maus.loch", def: "Kleines Loch, durch das eine Maus schlüpft", hu: "egérlyuk" },
+        { w: "Bi.ber.zahn", def: "Langer, starker Zahn des Bibers", hu: "hódfog" },
+        { w: "Ot.ter.fell", def: "Glänzendes, weiches Fell des Fischotters", hu: "vidrabőr" },
+        { w: "Wolf.ge.heul", def: "Das schauerliche Heulen eines Wolfes in der Nacht", hu: "farkasvonítás" },
+        { w: "Reh.gesprung", def: "Eleganter Sprung eines Rehs", hu: "őzugrás" },
+
+        // ~~ Wetter & Natur-Komik ~~
+        { w: "Don.ner.wet.ter", def: "Ausruf der Überraschung – und wirklich Gewitterwetter!", hu: "mennydörgős" },
+        { w: "Sau.wet.ter", def: "Richtig schlechtes, regnerisches Wetter", hu: "kutyaidő" },
+        { w: "Schmud.del.wet.ter", def: "Grau, feucht und ungemütlich", hu: "nyirkos idő" },
+        { w: "Ne.bel.sup.pe", def: "Dichter Nebel, so dick wie Suppe", hu: "sűrű köd" },
+        { w: "Eis.re.gen", def: "Gefrierender Regen, der alles glitschig macht", hu: "jégeső" },
+        { w: "Schnee.ge.stö.ber", def: "Wirbelnd fallender Schnee überall", hu: "szálló hó" },
+        { w: "Pftü.zen.sprin.gen", def: "In Pfützen springen – was Kinder gerne tun!", hu: "pocsolyaugrás" },
+        { w: "Mat.sch.hau.fen", def: "Haufen aus Schlamm und Matsch", hu: "sárrakás" },
+        { w: "Schlamm.bad", def: "Baden im warmen Schlamm – Tiere machen das gerne!", hu: "sárfürdő" },
+        { w: "Eis.bä.ren.käl.te", def: "So kalt, dass nur ein Eisbär sich wohl fühlt!", hu: "jegesmedve-hideg" },
+        { w: "Som.mer.re.gen", def: "Warmer Regen im Sommer, der sich angenehm anfühlt", hu: "nyári eső" },
+        { w: "Re.gen.bo.gen.far.ben", def: "Alle sieben Farben des Regenbogens", hu: "szivárvány színek" },
+
+        // ~~ Klingende Wörter / Onomatopoetisch ~~
+        { w: "Krach", def: "Lautes, abruptes Geräusch beim Brechen", hu: "roppanás" },
+        { w: "Bumm", def: "Dumpfer, lauter Schlag", hu: "bumm" },
+        { w: "Platsch", def: "Geräusch, wenn etwas ins Wasser fällt", hu: "csobbanás" },
+        { w: "Peng", def: "Scharfer, kurzer Knall", hu: "peng" },
+        { w: "Zisch", def: "Geräusch von Dampf oder einer Schlange", hu: "sziszeg" },
+        { w: "Rums", def: "Dumpfer Aufprall auf den Boden", hu: "bumm/dörrenés" },
+        { w: "Knack", def: "Knackendes Geräusch beim Brechen", hu: "reccsenés" },
+        { w: "Knall", def: "Lauter Knall wie ein Luftballon", hu: "durranás" },
+        { w: "Klirr", def: "Klingendes Geräusch von Glas oder Metall", hu: "csörömpölés" },
+        { w: "Wumm", def: "Tiefer, dumpfer Schlag", hu: "tompa ütés" },
+        { w: "Puff", def: "Weiches, kurzes Geräusch wie Luft", hu: "puff" },
+        { w: "Ratsch", def: "Reißendes Geräusch von Stoff", hu: "ropogás" },
+        { w: "Ki.ke.ri.ki", def: "So kräht der Hahn am Morgen", hu: "kukurikú" },
+        { w: "Wau.wau", def: "So bellt ein Hund", hu: "vau-vau" },
+        { w: "Mi.au", def: "So ruft eine Katze", hu: "miau" },
+        { w: "Muh", def: "So ruft eine Kuh", hu: "mú" },
+        { w: "Mäh", def: "So blökt ein Schaf", hu: "béé" },
+        { w: "Quak", def: "So ruft eine Ente", hu: "kvák" },
+        { w: "Zisch.laut", def: "Ein zischender Laut wie ein Schlauch", hu: "sziszegő hang" },
+        { w: "Quiek.ser", def: "Kleiner, hoher Quietscher", hu: "sivítás" },
+        { w: "Brumm.ton", def: "Tiefer, summender Dauerton", hu: "zümmögő hang" },
+
+        // ~~ Spaßiges Tun & Treiben ~~
+        { w: "Pur.zel.baum", def: "Vorwärtsrolle auf der Wiese!", hu: "bukfenc" },
+        { w: "Rad.schla.gen", def: "Seitwärts rollen wie ein Rad auf den Händen", hu: "kerékvetés" },
+        { w: "Kopf.stand", def: "Auf dem Kopf stehen – Beine in der Luft!", hu: "fejenállás" },
+        { w: "Ham.pel.mann", def: "Figur, die Arme und Beine gleichzeitig hebt", hu: "babaugrás" },
+        { w: "Kis.sen.schlacht", def: "Kampf mit Kissen – meist endet er im Kichern!", hu: "párnás csata" },
+        { w: "Was.ser.ball.schlacht", def: "Wildex Spritzen und Werfen im Wasser", hu: "vizes csata" },
+        { w: "Schlamm.ba.den", def: "Im Schlamm wühlen wie ein Wildschwein!", hu: "sárban fürdeni" },
+        { w: "Schatz.ver.ste.cken", def: "Schatz verstecken und den anderen suchen lassen", hu: "kincs elrejtése" },
+        { w: "Freu.den.sprung", def: "Sprung vor lauter Freude und Begeisterung", hu: "örömteli ugrás" },
+        { w: "Bau.ch.lan.dung", def: "Auf dem Bauch ins Wasser klatschen – Platsch!", hu: "hasraesés" },
+        { w: "Rut.sch.par.tie", def: "Gemeinsames Rutschen und Gleiten", hu: "csúszdázás" },
+        { w: "Wett.ren.nen", def: "Rennen, bei dem man gegeneinander kämpft", hu: "versenyfu tás" },
+        { w: "Fang.spiel", def: "Spielen, bei dem man sich gegenseitig fangen will", hu: "fogócska" },
+        { w: "Schlam.pelei", def: "Herumschmieren und Dreckigmachen", hu: "piszkosodás" },
+        { w: "Flitz.bo.gen", def: "Kleiner Bogen zum Pfeile schießen", hu: "nyíl és íj" },
+
+        // ~~ Lustige Zusammensetzungen ~~
+        { w: "Wa.ckel.zahn", def: "Loser Zahn, der wackelt bevor er rausfällt", hu: "tejfog" },
+        { w: "Strub.bel.haar", def: "Ganz zerzaustes, wirres Haar", hu: "kócos haj" },
+        { w: "Wa.ckel.kopf", def: "Kopf, der immer nickt und wackelt", hu: "bólogató fej" },
+        { w: "Wa.ckel.pud.ding", def: "Götterspeise, die wabbelt und wackelt", hu: "kocsonya" },
+        { w: "Knud.del.bär", def: "Jemand oder etwas zum Knuddeln", hu: "mackó" },
+        { w: "Schmu.se.kat.ze", def: "Jemand, der gerne kuschelt", hu: "simogató macska" },
+        { w: "Kra.kel.füß.chen", def: "Unleserliche, kritzelige Schrift", hu: "kacskaringós betűk" },
+        { w: "Schluck.auf", def: "Das lästige Hick! das plötzlich kommt", hu: "csuklás" },
+        { w: "Zun.gen.bre.cher", def: "Satz, den man kaum aussprechen kann", hu: "nyelvtörő" },
+        { w: "Gri.mas.se", def: "Verzerrtes Gesicht – lustige Fratze ziehen", hu: "grimasz" },
+        { w: "Au.gen.zwin.kern", def: "Blinzeln mit einem Auge als Zeichen", hu: "kacsintás" },
+        { w: "Na.se.rümp.fen", def: "Nase angewidert hochziehen", hu: "orrfintorítás" },
+        { w: "Dreck.spatz", def: "Kind, das immer voller Dreck ist", hu: "piszokfészek" },
+        { w: "Schmu.del.kind", def: "Immer ein bisschen schmutzig – macht nichts!", hu: "szutykos gyerek" },
+        { w: "Glitz.er.staub", def: "Glitzernder, bunter Staub wie von Feen", hu: "csillogó por" },
+        { w: "Fun.kel.stein", def: "Stein, der in der Sonne glitzert", hu: "csillogó kő" },
+        { w: "Knall.er.bse", def: "Kleine Erbse, die beim Aufschlagen knallt", hu: "petárda-borsó" },
+        { w: "Don.ner.stimme", def: "Sehr laute, tiefe Stimme", hu: "mennydörgő hang" },
+        { w: "Rie.sen.rad", def: "Großes Riesenrad auf dem Jahrmarkt", hu: "óriáskerék" },
+        { w: "Ra.ket.en.start", def: "Start einer Rakete – drei, zwei, eins, Zündung!", hu: "rakéta indulás" },
+
+        // ~~ Weitere lustige Nomen & Ausdrücke ~~
+        { w: "Spuk.haus", def: "Haus, in dem es spuken soll", hu: "kísértetház" },
+        { w: "Ge.spen.ster.nacht", def: "Nacht, in der Gespenster umgehen", hu: "szellemek éjjele" },
+        { w: "Zau.ber.pilz", def: "Kleiner Pilz, der angeblich Wünsche erfüllt", hu: "varázsló gomba" },
+        { w: "Hei.li.ger.Stroh.sack", def: "Österreichischer Ausruf der Überraschung!", hu: "istenem!" },
+        { w: "Gott.sei.dank", def: "Ausruf der Erleichterung", hu: "hála Istennek" },
+        { w: "Ber.ta", def: "Typischer österreichischer Name der Oma-Generation", hu: "Berta" },
+        { w: "Wasch.leit.chen", def: "Jemand, der sehr weinerlich ist", hu: "nyafka" },
+        { w: "Schlaf.mütze", def: "Jemand, der immer verschlafen und langsam ist", hu: "aluszékony" },
+        { w: "La.de.hem.mung", def: "Wenn jemand nichts sagt – stockende Sprache", hu: "szóakadás" },
+        { w: "Trö.del.hans", def: "Jemand, der immer trödelt und nicht fertig wird", hu: "lassúdi" },
+        { w: "Brems.klotz", def: "Jemand, der alles aufhält", hu: "fékező" },
+        { w: "Mus.ter.schü.ler", def: "Schüler, der immer alles perfekt macht", hu: "mintadiák" },
+        { w: "Zu.fa.ll", def: "Wenn etwas ohne Plan geschieht", hu: "véletlen" },
+        { w: "Glücks.fall", def: "Wenn etwas wunderbar gut läuft", hu: "szerencsés eset" },
+        { w: "Schatz", def: "Etwas oder jemand sehr Wertvolles und Geliebtes", hu: "kincs" },
+
+        // ~~ Tiere mit lustigen Namen ~~
+        { w: "Kra.kau.er", def: "Dicke, würzige Wurst – aber auch eine polnische Stadt!", hu: "krakói kolbász" },
+        { w: "Platt.fisch", def: "Platter Meeresfisch, der flach auf dem Boden liegt", hu: "laposhal" },
+        { w: "Klin.gen.fisch", def: "Fisch, der im Wasser elektrisch klingelt", hu: "villanó hal" },
+        { w: "Grub.loch", def: "Tiefes Loch, das jemand gegraben hat", hu: "ásott lyuk" },
+        { w: "Hupf.tier", def: "Lustiges Wort für Tiere, die hüpfen", hu: "ugrabugra állat" },
+        { w: "Schlep.per", def: "Jemand, der alles hinter sich herschleppt", hu: "húzó / vontató" },
+        { w: "Schlür.fer", def: "Jemand, der laut schlürft beim Trinken", hu: "szürcsölő" },
+        { w: "Rum.pler", def: "Jemand oder etwas, das immer rumpelt", hu: "dörömbölő" },
+        { w: "Knir.pse", def: "Ganz kleines Kind", hu: "apróság" },
+        { w: "Wicht.el", def: "Kleines Wesen aus dem Wald, hilft oder stört", hu: "manó" },
+        { w: "Kob.old", def: "Kleiner frecher Geist in alten Geschichten", hu: "kobold" },
+        { w: "Wich.tel.mann", def: "Kleiner Wichtel im roten Mantel", hu: "manócska" },
+        { w: "Rit.ter", def: "Gepanzerter Kämpfer auf einem Pferd", hu: "lovag" },
+        { w: "Rit.ter.bur.g", def: "Feste Burg aus Stein, in der Ritter lebten", hu: "lovagvár" },
+        { w: "Zinn.sol.dat", def: "Kleiner Soldat aus Zinn – Spielzeugfigur", hu: "ólomkatona" },
+        { w: "Rie.se", def: "Unglaublich großer Mensch aus Märchen", hu: "óriás" },
+        { w: "Zwerg", def: "Ganz kleines Märchenwesen", hu: "törpe" },
+        { w: "Ni.ckel.mann", def: "Schrulliger Wassergeist der alten Sage", hu: "vízi kísértet" },
+        { w: "Ru.bel.kind", def: "Kind, das immer Ärger macht aber trotzdem niedlich ist", hu: "rakoncátlan" },
+        { w: "Rauf.bold", def: "Jemand, der immer Streit sucht", hu: "verekedős" },
+        { w: "Schling.el", def: "Kleiner Frechdachs und Schalk", hu: "huncut kölyök" },
+        { w: "Gro.bi.an", def: "Jemand, der sehr grob und unhöflich ist", hu: "durva fickó" },
+        { w: "Groß.mau.l", def: "Jemand, der immer angibt", hu: "nagyszájú" },
+        { w: "Prah.l.hans", def: "Jemand, der immer angeben muss", hu: "dicsekvős" },
+
+        // ~~ Natur-Funwörter ~~
+        { w: "Moos.bär.chen", def: "Winziges Tier (Bärtierchen), das auf Moos lebt – fast unzerstörbar!", hu: "moha-medvécske" },
+        { w: "Wasser.floh", def: "Winziges Tier im Tümpelwasser", hu: "vízibolha" },
+        { w: "Sumpf.blu.me", def: "Blume, die mit den Füßen im Sumpf steht", hu: "mocsári virág" },
+        { w: "Regen.wurm.re.gen", def: "Wenn nach Regen überall Regenwürmer auf dem Weg liegen", hu: "gilisztaeső" },
+        { w: "Tau.wetter", def: "Wenn der Schnee schmilzt und es feucht wird", hu: "olvadás" },
+        { w: "Eis.zeit", def: "Riesenlange Kälteperiode mit Mammuts und Gletschern", hu: "jégkorszak" },
+        { w: "Mam.mut", def: "Großes haariges Tier aus der Eiszeit", hu: "mamut" },
+        { w: "Dino.sau.ri.er", def: "Riesige Tiere, die seit 65 Millionen Jahren verschwunden sind", hu: "dinoszaurusz" },
+        { w: "Fos.sil", def: "Versteinerte Überreste uralter Tiere oder Pflanzen", hu: "kövület" },
+        { w: "Kris.tall", def: "Glitzernder, gefrorener Stein aus geometrischen Formen", hu: "kristály" },
+        { w: "Staub.korns", def: "Winzigstes Staubkörnchen", hu: "porcikányi porszemcse" },
+        { w: "Stern.schnup.pe", def: "Meteorspur am Nachthimmel – Wunsch frei!", hu: "hullócsillag" },
+        { w: "Voll.mond", def: "Wenn der Mond als voller Kreis leuchtet", hu: "telihold" },
+        { w: "Nord.licht", def: "Bunte, tanzende Lichter am Nachthimmel im Norden", hu: "sarki fény" },
+        { w: "Don.ner.groll", def: "Dumpfes Grummeln des Donners", hu: "mennydörgés" },
+        { w: "Blitz.licht", def: "Kurzes, grelles Aufleuchten beim Gewitter", hu: "villanás" },
+        { w: "Re.gen.pfüt.ze", def: "Pfütze, die nach dem Regen auf der Straße steht", hu: "tócsa" },
+        { w: "Schnee.mann", def: "Figur aus zusammengerollten Schneebällen", hu: "hóember" },
+        { w: "Schlitt.schuh", def: "Schuh mit Klinge zum Schlittschuhlaufen", hu: "korcsolya" },
+        { w: "Bob.bahn", def: "Eisbahn für Bobs und Schlitten", hu: "bobpálya" },
+        { w: "Ski.hang", def: "Schneebedeckter Hang zum Skifahren", hu: "sísáv" },
+
+        // ~~ Schule & Klasse-Komik ~~
+        { w: "Stun.den.plan", def: "Plan, welche Fächer wann stattfinden", hu: "órarend" },
+        { w: "Haus.auf.ga.be", def: "Aufgabe, die man zuhause erledigen muss", hu: "házi feladat" },
+        { w: "Klas.sen.ar.beit", def: "Prüfung im Unterricht", hu: "dolgozat" },
+        { w: "Pau.sen.brot", def: "Brot, das man in der Pause isst", hu: "tízórai" },
+        { w: "Schul.ran.zen", def: "Rucksack für die Schule", hu: "iskolás táska" },
+        { w: "Tur.n.stun.de", def: "Sportunterricht in der Schule", hu: "tornaóra" },
+        { w: "Bib.lio.thek", def: "Gebäude oder Zimmer voller Bücher zum Ausleihen", hu: "könyvtár" },
+        { w: "Zeug.nis", def: "Bericht mit Noten am Ende des Schuljahres", hu: "bizonyítvány" },
+        { w: "Fe.ri.en", def: "Schulfreie Zeit – endlich Urlaub!", hu: "szünet / vakáció" },
+        { w: "Pau.se", def: "Kurze Unterbrechung zwischen den Stunden", hu: "szünet" },
+        { w: "Spick.zet.tel", def: "Verbotener Zettel mit Antworten beim Test!", hu: "puskacédula" },
+        { w: "Krei.de", def: "Weißes Stück zum Schreiben an die Tafel", hu: "kréta" },
+        { w: "Schwamm", def: "Schwamm zum Abwischen der Tafel", hu: "szivacs" },
+        { w: "Land.kar.te", def: "Gezeichnete Karte der Erde oder eines Landes", hu: "térkép" },
+
+        // ~~ Weitere Mix-Spaßwörter ~~
+        { w: "Wun.der.kram", def: "Viele tolle und wundersame Sachen", hu: "varázscuccok" },
+        { w: "Brim.bo.ri.um", def: "Viel Aufhebens um nichts", hu: "nagy felhajtás" },
+        { w: "Ku.ri.o.sum", def: "Etwas sehr Seltsames und Kuriosmes", hu: "kuriózum" },
+        { w: "Phan.ta.sie", def: "Die Kraft, sich Dinge auszudenken", hu: "fantázia" },
+        { w: "A.ben.teu.er", def: "Spannendes Erlebnis voller Aufregung", hu: "kaland" },
+        { w: "Ge.heim.nis", def: "Etwas, das nicht alle wissen dürfen", hu: "titok" },
+        { w: "Rät.sel", def: "Frage, die man zuerst lösen muss", hu: "rejtvény" },
+        { w: "Über.ra.schung", def: "Etwas Unerwartetes, das jemanden freut", hu: "meglepetés" },
+        { w: "Wun.der", def: "Etwas Erstaunliches, das nicht erklärbar ist", hu: "csoda" },
+        { w: "Schatz.tru.he", def: "Truhe voller Schätze und wertvoller Dinge", hu: "kincsesláda" },
+        { w: "Ver.lie.ß", def: "Dunkler Kerker tief unter einer Burg", hu: "tömlöc" },
+        { w: "Ge.spen.st", def: "Geist eines Toten, der als weißes Wesen erscheint", hu: "szellem" },
+        { w: "Dra.che", def: "Feuerspeiendes Wesen aus Märchen und Sagen", hu: "sárkány" },
+        { w: "Ein.horn", def: "Magisches Pferd mit einem Horn auf der Stirn", hu: "egyszarvú" },
+        { w: "Fee", def: "Kleines, magisches Wesen mit Flügeln", hu: "tündér" },
+        { w: "Zau.be.rer", def: "Person, die Zaubertricks vollführt", hu: "varázsló" },
+        { w: "He.xe", def: "Zauberin in alten Märchen, oft mit Besen", hu: "boszorkány" },
+        { w: "Mee.res.grund", def: "Tiefstes Stück des Meeresbodens", hu: "tengerfenék" },
+        { w: "U-Boot", def: "Schiff, das unter Wasser fährt", hu: "tengeralattjáró" },
+        { w: "Berg.werk", def: "Ort, wo man unter der Erde Rohstoffe abbaut", hu: "bánya" },
+        { w: "Schatz.in.sel", def: "Insel, auf der ein Schatz vergraben liegt", hu: "kincses sziget" },
+        { w: "Pi.rat", def: "Räuber auf hoher See", hu: "kalóz" },
+        { w: "Pi.ra.ten.schiff", def: "Schiff mit schwarzer Flagge und Totenkopf", hu: "kalózhajó" },
+        { w: "Fern.rohr", def: "Rohr zum Fernsehen – Piraten hatten immer eins!", hu: "teleszkóp" },
+        { w: "Kom.pass", def: "Gerät, das immer nach Norden zeigt", hu: "iránytű" },
+        { w: "Kar.te", def: "Zeichnung mit Wegen und Orten darauf", hu: "térkép" },
+
+        // ~~ Freudige Ausdrücke & Emotionen ~~
+        { w: "Freu.den.schrei", def: "Schreien vor lauter Freude und Begeisterung", hu: "örömkiáltás" },
+        { w: "Juhu", def: "Ausruf der Begeisterung und Freude", hu: "hurrá" },
+        { w: "Jupp", def: "Kurzer Ausruf der Zustimmung", hu: "jee" },
+        { w: "Hei.a", def: "Schlaflied-Ruf, österreichisch für Schlafengehen", hu: "hejja" },
+        { w: "Weh.we.he", def: "Kleiner Schmerz bei Kindern – ein Wehwehchen", hu: "kis fájdalom" },
+        { w: "Ku.cker", def: "Kleines Fernglas zum Schauen", hu: "látcső" },
+        { w: "Sau.stall", def: "Österreichisch für: Das ist ein riesen Durcheinander!", hu: "disznóól" },
+        { w: "Sau.kerl", def: "Österreichischer Schimpfausdruck, der aber oft scherzhaft ist", hu: "bitang" },
+
+        // ~~ Letzte Spaßwörter ~~
+        { w: "Zick.e", def: "Jemand, der immer nörgelt oder Zicken macht", hu: "nyafka" },
+        { w: "Bla.bla", def: "Leeres Gerede ohne Inhalt", hu: "szócséplés" },
+        { w: "Pa.pa.gei", def: "Bunter Vogel, der sprechen lernen kann", hu: "papagáj" },
+        { w: "Gur.gel", def: "Gurgeln mit Wasser im Hals – Blubb blubb!", hu: "toroköblítés" },
+        { w: "Blub.ber", def: "Blasen, die unter Wasser aufsteigen – blubb!", hu: "buborék" },
+        { w: "Schna.bel.tier", def: "Verrücktes Tier mit Entenschnabel und Biberschwanz", hu: "kacsacsőrű emlős" },
+        { w: "Streit.ham.mel", def: "Jemand, der immer Streit anfängt", hu: "veszekedős" },
+        { w: "Nichts.nut.z", def: "Jemand, der nichts tut und nichts leistet", hu: "semmittevő" },
+        { w: "Doo.fus", def: "Jemand, der sich gerade etwas Dummes geleistet hat", hu: "buta fickó" },
+        { w: "Wur.sch.tel", def: "Österreichisch für einen tolpatschigen Kerl", hu: "ügyes etlen" },
+        { w: "Klap.per.storch", def: "Der Storch, der angeblich die Babys bringt", hu: "klappercinke" },
+        { w: "Flun.ker.ei", def: "Kleines, harmloses Schwindeln", hu: "kis hazugság" },
+        { w: "Schwin.del", def: "Wenn man jemanden absichtlich täuscht", hu: "becsapás" },
+        { w: "Rit.zel.rat.zel", def: "Ein Rätsel, das man lösen muss", hu: "rixel-raxel" },
+        { w: "Ga.lop.p", def: "Schnellster Gang eines Pferdes", hu: "galopp" },
+        { w: "Trott", def: "Gemächlicher, gleichmäßiger Gang", hu: "poroszkálás" },
+        { w: "Stol.zer.gang", def: "Gehen mit gehobenem Kopf voller Stolz", hu: "büszke járás" },
+        { w: "Bom.be.nerfolg", def: "Riesiger Erfolg bei etwas", hu: "bombasiker" },
+        { w: "Voll.tref.fer", def: "Wenn man genau ins Schwarze trifft", hu: "telitalálat" },
+        { w: "Knül.ler", def: "Etwas, das alle begeistert und beeindruckt", hu: "szenzáció" },
+        { w: "Hau.ruck", def: "Gemeinsamer Kraftakt – alle ziehen zusammen!", hu: "hú rajta" },
+        { w: "Hops.sa", def: "Ausruf beim Hüpfen oder kleinen Missgeschick", hu: "hopsza" },
+        { w: "Rum.pum.pum", def: "Geräusch einer Trommel", hu: "bumm-bumm-bumm" },
+        { w: "Puf.fer", def: "Weiche Schicht, die Stöße abfängt", hu: "puffer" },
+        { w: "Stau.ner", def: "Jemand, der immer wieder staunt", hu: "ámuldozó" },
+        { w: "Knopf.na.se", def: "Kleine, runde Nase wie ein Knopf", hu: "gombocska orr" },
+        { w: "Mus.ter.knabe", def: "Jemand, der immer alles richtig macht", hu: "mintafiú" },
+        { w: "Pum.me.lig", def: "Rund und ein bisschen dicklich – aber niedlich!", hu: "kerek, mosolygós" },
+        { w: "Grins.ge.sicht", def: "Gesicht mit ganz breitem Grinsen", hu: "vigyorgó arc" },
+        { w: "Fal.ten.tier", def: "Tier mit vielen Hautfalten wie das Walross", hu: "ráncos állat" },
+        { w: "Oh.renschmaus", def: "Musik, die so schön ist, dass die Ohren jubeln", hu: "fülnek való csemege" },
+        { w: "Au.gen.schmaus", def: "Etwas so Schönes, dass die Augen strahlen", hu: "szemnek való csemege" },
+        { w: "Ku.gel.fisch", def: "Fisch, der sich zu einer runden Kugel aufbläst!", hu: "gömbhal" },
+        { w: "Bla.sen.bal.g", def: "Gerät, das Luft pustet wie ein Dudelsack", hu: "fújtatő" },
+        { w: "Rüb.chen", def: "Kleine Rübe – auch ein nettes Wort für Nasen", hu: "répácska" },
+        { w: "Stink.tier", def: "Tier, das sich mit einem schrecklichen Geruch verteidigt", hu: "szkunk" },
+        { w: "Stink.la.une", def: "Richtig schlechte Laune", hu: "mérges hangulat" },
+        { w: "Pur.zel.bäum.chen", def: "Kleines Purzelbaum-Drehen", hu: "kicsi bukfenc" },
+        { w: "Quacks.al.ber", def: "Jemand, der tut als wäre er Arzt, es aber nicht ist", hu: "kuruzslő" },
+        { w: "Wasch.lap.pen", def: "Wer immer zu feige ist – ein Waschlappentyp!", hu: "gyáva nyúl" },
+        { w: "Schluf.fi", def: "Jemand, der immer schlurft und schludert", hu: "lusta" },
+        { w: "Hupf.hupf", def: "Immer weiter hüpfen!", hu: "ugri-bugri" },
+        { w: "Dum.mer.chen", def: "Kleines, dummes Missgeschick – passiert jedem!", hu: "kis hülyeség" },
+        { w: "Krä.hen.nest", def: "Nest einer Krähe – auch der Ausguck auf einem Schiff!", hu: "varjúfészek" },
+        { w: "Ste.chap.fel", def: "Stacheliger Apfel – giftige Pflanze mit komischem Namen", hu: "maszlagos redőszirom" },
+        { w: "Wutz", def: "Österreichisch und mundartlich für kleines Schweinchen", hu: "malacka" },
+        { w: "Zic.ke.zack", def: "Zickzack in alle Richtungen", hu: "cikk-cakk" },
+        { w: "Klim.bim", def: "Kleinkram und Glöckchen", hu: "csecse-becse" },
+        { w: "Rum.mel", def: "Jahrmarkt oder großer Trubel", hu: "vásár / zaj" },
+        { w: "Jahr.markt", def: "Fest mit Karussells, Süßigkeiten und Spielen", hu: "vásár" },
+        { w: "Ka.rus.sell", def: "Rundes Fahrgeschäft, das sich dreht", hu: "körhinta" },
+        { w: "Zuck.er.watt.e", def: "Wolkiger, süßer Zucker am Stiel", hu: "vattacukor" },
+        { w: "Le.ber.käs", def: "Österreichische Fleischspezialität – kein Käse drin!", hu: "Leberkäse" },
+        { w: "Bre.zel", def: "Knuspriges Gebäck in Schleifenform", hu: "perec" },
+        { w: "Ols.chin.del", def: "Dachschindel aus Holz", hu: "fazsindely" },
+
+    ]; // Ende der Wortliste
+
+    // =========================================
+    // SPIELMECHANIK
+    // =========================================
+
+    let currentInterval = null;
+    let timerInterval = null;
+    let wordCount = 0;
+    let timeLeft = 300; // 5 Minuten
+    let speed = 3000;
+    let isPaused = false;
+    let shuffledList = [];
+    let currentIndex = 0;
+
+    document.getElementById('speedSlider').addEventListener('input', function() {
+        const sec = (this.value / 1000).toFixed(1);
+        document.getElementById('speedLabel').textContent = sec + ' Sek.';
+        speed = parseInt(this.value);
+    });
+
+    function shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    function getWordFontSize(word) {
+        const len = word.replace(/\./g, '').length;
+        if (len > 20) return '2.2em';
+        if (len > 16) return '2.8em';
+        if (len > 12) return '3.5em';
+        if (len > 8)  return '4.5em';
+        return '5.2em';
+    }
+
+    function renderWord(item) {
+        const rendered = item.w.replace(/\.(?=[a-zA-ZäöüÄÖÜßé])/g,
+            '<span style="font-size:0.35em;vertical-align:middle;color:#e07820;opacity:0.65;margin:0 1px;">·</span>');
+        const fs = getWordFontSize(item.w);
+        return `
+            <div class="main-word" style="font-size:${fs};">${rendered}</div>
+            <div class="word-meta">
+                <span class="word-def">📖 ${item.def}</span>
+                <span class="word-hu">🇭🇺 ${item.hu}</span>
+            </div>`;
+    }
+
+    function showNextWord() {
+        if (currentIndex >= shuffledList.length) {
+            shuffledList = shuffle(shuffledList);
+            currentIndex = 0;
+        }
+        const item = shuffledList[currentIndex++];
+        const wordDisplay = document.getElementById('wordDisplay');
+        wordDisplay.innerHTML = renderWord(item);
+        wordDisplay.classList.add('highlight');
+        setTimeout(() => wordDisplay.classList.remove('highlight'), 300);
+        wordCount++;
+        document.getElementById('counter').textContent = wordCount;
+        updateProgress();
+    }
+
+    function updateProgress() {
+        const pct = ((300 - timeLeft) / 300) * 100;
+        document.getElementById('progressBar').style.width = pct + '%';
+    }
+
+    function startGame() {
+        shuffledList = shuffle(finalWordList);
+        currentIndex = 0;
+        wordCount = 0;
+        timeLeft = 300;
+        isPaused = false;
+
+        document.getElementById('startScreen').classList.add('hidden');
+        document.getElementById('endScreen').style.display = 'none';
+        document.getElementById('gameScreen').classList.remove('hidden');
+        document.getElementById('counter').textContent = '0';
+        document.getElementById('pauseBtn').textContent = '⏸️ Pause';
+
+        showNextWord();
+
+        currentInterval = setInterval(() => {
+            if (!isPaused) showNextWord();
+        }, speed);
+
+        timerInterval = setInterval(() => {
+            if (!isPaused) {
+                timeLeft--;
+                const m = Math.floor(timeLeft / 60);
+                const s = timeLeft % 60;
+                document.getElementById('timer').textContent =
+                    m + ':' + (s < 10 ? '0' : '') + s;
+                if (timeLeft <= 0) endGame();
+            }
+        }, 1000);
+    }
+
+    function nextWord() {
+        showNextWord();
+        clearInterval(currentInterval);
+        currentInterval = setInterval(() => {
+            if (!isPaused) showNextWord();
+        }, speed);
+    }
+
+    function pauseGame() {
+        isPaused = !isPaused;
+        document.getElementById('pauseBtn').textContent =
+            isPaused ? '▶️ Weiter' : '⏸️ Pause';
+    }
+
+    function endGame() {
+        clearInterval(currentInterval);
+        clearInterval(timerInterval);
+
+        document.getElementById('gameScreen').classList.add('hidden');
+        const end = document.getElementById('endScreen');
+        end.style.display = 'block';
+
+        document.getElementById('finalScore').textContent = wordCount;
+
+        let stars = '⭐⭐⭐';
+        let msg = '🔥 Lese-Champion!';
+        if (wordCount < 20) { stars = '⭐'; msg = '🌱 Super Anfang!'; }
+        else if (wordCount < 50) { stars = '⭐⭐'; msg = '💪 Richtig gut!'; }
+        else if (wordCount >= 80) { stars = '⭐⭐⭐⭐⭐'; msg = '🚀 MEGA CHAMP!'; }
+        else if (wordCount >= 60) { stars = '⭐⭐⭐⭐'; msg = '🏆 Ausgezeichnet!'; }
+
+        document.getElementById('stars').textContent = stars;
+        document.getElementById('message').textContent = 'Wörter gelesen! ' + msg;
+
+        // Konfetti
+        for (let i = 0; i < 5; i++) {
+            setTimeout(() => {
+                const emojis = ['🎉','🌟','✨','🏆','🎊','💫','🦋','🐝'];
+                const el = document.createElement('div');
+                el.className = 'celebration';
+                el.style.left = (20 + Math.random() * 60) + '%';
+                el.style.top = (20 + Math.random() * 60) + '%';
+                el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 1200);
+            }, i * 300);
+        }
+    }
+
+    function resetGame() {
+        clearInterval(currentInterval);
+        clearInterval(timerInterval);
+        wordCount = 0;
+        timeLeft = 300;
+        isPaused = false;
+
+        document.getElementById('endScreen').style.display = 'none';
+        document.getElementById('gameScreen').classList.add('hidden');
+        document.getElementById('startScreen').classList.remove('hidden');
+        document.getElementById('progressBar').style.width = '0%';
+    }
+    </script>
+</body>
+</html>
