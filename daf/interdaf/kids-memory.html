@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎮 Wortschatz Memory – Supercharged!</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+  font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+  background:radial-gradient(ellipse at top,#1a0535 0%,#0d0020 60%,#000010 100%);
+  min-height:100vh;
+  color:white;
+  padding:12px 16px;
+  overflow-x:hidden;
+}
+
+h1{
+  text-align:center;
+  font-size:1.9em;
+  background:linear-gradient(90deg,#f72585,#ff8c42,#b5179e,#c084fc);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  margin-bottom:10px;
+  letter-spacing:1px;
+}
+
+/* MODE BANNER */
+.mode-banner{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:7px 22px;
+  border-radius:50px;
+  font-size:1em;
+  font-weight:bold;
+  margin:0 auto 12px;
+  width:fit-content;
+  max-width:98%;
+  transition:all 0.4s;
+}
+.mode-banner.normal{background:linear-gradient(135deg,#0d2750,#1c4a8a);border:2px solid #4a90ff;}
+.mode-banner.synonym{background:linear-gradient(135deg,#50100d,#9a2d1c);border:2px solid #ff6b42;}
+.mode-banner.opposite{background:linear-gradient(135deg,#1a0050,#5b1ba8);border:2px solid #c084fc;}
+
+/* CONTROLS */
+.controls{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin-bottom:12px;
+}
+select,.btn{
+  padding:9px 16px;
+  border:none;
+  border-radius:20px;
+  cursor:pointer;
+  font-size:13px;
+  font-weight:bold;
+  transition:all 0.2s;
+  outline:none;
+}
+select{
+  background:linear-gradient(135deg,#b5179e,#7209b7);
+  color:white;
+  appearance:none;
+  -webkit-appearance:none;
+  padding-right:28px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='white' d='M5 7L1 3h8z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 10px center;
+}
+select:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(181,23,158,0.5);}
+.btn-start{
+  background:linear-gradient(135deg,#ff8c42,#e85d00);
+  color:white;
+  font-size:15px;
+  padding:10px 22px;
+}
+.btn-start:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(255,140,66,0.6);}
+
+/* STATS */
+.stats{
+  display:flex;
+  justify-content:center;
+  gap:16px;
+  margin-bottom:12px;
+  flex-wrap:wrap;
+}
+.stat-box{
+  background:rgba(255,255,255,0.07);
+  border:2px solid rgba(192,132,252,0.35);
+  padding:8px 20px;
+  border-radius:14px;
+  text-align:center;
+  backdrop-filter:blur(4px);
+  min-width:80px;
+}
+.stat-value{font-size:1.7em;font-weight:bold;color:#c084fc;}
+.stat-label{font-size:0.72em;color:rgba(255,255,255,0.65);margin-top:2px;}
+
+/* GAME BOARD */
+.game-board{
+  display:grid;
+  gap:7px;
+  margin:0 auto 16px;
+  max-width:1280px;
+}
+
+/* CARD COLORS – vibrant palette */
+.cc0{background:linear-gradient(135deg,#f72585,#b5179e);}
+.cc1{background:linear-gradient(135deg,#ff6b35,#e85d00);}
+.cc2{background:linear-gradient(135deg,#9b5de5,#7209b7);}
+.cc3{background:linear-gradient(135deg,#00b4d8,#0077b6);}
+.cc4{background:linear-gradient(135deg,#f9c74f,#f4a261);}
+.cc5{background:linear-gradient(135deg,#43aa8b,#2a9d8f);}
+.cc6{background:linear-gradient(135deg,#ef233c,#d62828);}
+.cc7{background:linear-gradient(135deg,#7b2d8b,#560bad);}
+.cc8{background:linear-gradient(135deg,#ff85a1,#e91e8c);}
+.cc9{background:linear-gradient(135deg,#06d6a0,#118ab2);}
+.cc10{background:linear-gradient(135deg,#fb5607,#ff006e);}
+.cc11{background:linear-gradient(135deg,#8338ec,#3a0ca3);}
+.cc12{background:linear-gradient(135deg,#4361ee,#3f37c9);}
+.cc13{background:linear-gradient(135deg,#38b000,#70e000);}
+.cc14{background:linear-gradient(135deg,#e63946,#c1121f);}
+.cc15{background:linear-gradient(135deg,#0096c7,#48cae4);}
+.cc16{background:linear-gradient(135deg,#d62fd6,#9900cc);}
+.cc17{background:linear-gradient(135deg,#2dc653,#57cc99);}
+.cc18{background:linear-gradient(135deg,#ff9500,#ff6000);}
+.cc19{background:linear-gradient(135deg,#5c4dff,#240090);}
+
+/* CARDS */
+.card{
+  border-radius:11px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+  color:white;
+  position:relative;
+  min-height:75px;
+  transition:transform 0.18s,box-shadow 0.18s;
+  box-shadow:0 3px 10px rgba(0,0,0,0.45);
+  text-align:center;
+  padding:6px;
+  background:linear-gradient(135deg,#1f0845,#2e0f60); /* card BACK default */
+  overflow:hidden;
+  user-select:none;
+}
+.card::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:11px;
+  border:2px solid rgba(192,132,252,0.3);
+  pointer-events:none;
+}
+.card:hover:not(.matched):not(.locked){
+  transform:scale(1.06) translateY(-2px);
+  box-shadow:0 8px 20px rgba(192,132,252,0.4);
+}
+.card.matched{
+  animation:matchPop 0.5s ease;
+  cursor:default;
+  filter:brightness(1.1);
+}
+.card.matched::after{
+  content:'✓';
+  position:absolute;
+  top:4px;right:7px;
+  font-size:0.8em;
+  color:rgba(255,255,255,0.7);
+}
+@keyframes matchPop{
+  0%{transform:scale(1);}
+  35%{transform:scale(1.14);}
+  65%{transform:scale(0.94);}
+  100%{transform:scale(1);}
+}
+.card.wrong-flash{animation:wrongFlash 0.55s ease;}
+@keyframes wrongFlash{
+  0%,100%{filter:brightness(1);}
+  30%{filter:brightness(0.4) sepia(1) hue-rotate(300deg);}
+  60%{filter:brightness(0.5);}
+}
+
+.card-back{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:3px;
+  width:100%;height:100%;
+  pointer-events:none;
+}
+.back-icon{font-size:1.5em;line-height:1;}
+.back-label{font-size:0.48em;opacity:0.6;letter-spacing:0.5px;text-transform:uppercase;}
+
+.card-front{
+  display:none;
+  width:100%;height:100%;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  padding:5px;
+  text-align:center;
+  word-break:break-word;
+  hyphens:auto;
+  gap:3px;
+  pointer-events:none;
+}
+.front-mode-tag{
+  font-size:0.55em;
+  opacity:0.8;
+  background:rgba(0,0,0,0.25);
+  padding:1px 6px;
+  border-radius:8px;
+  margin-bottom:2px;
+}
+.front-word{font-size:0.95em;line-height:1.2;}
+
+.card.flipped .card-back{display:none;}
+.card.flipped .card-front{display:flex;}
+
+/* MATCH TOAST */
+.toast{
+  position:fixed;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%) scale(0);
+  background:rgba(10,0,30,0.92);
+  border:3px solid #c084fc;
+  border-radius:18px;
+  padding:16px 36px;
+  font-size:1.4em;
+  font-weight:bold;
+  z-index:600;
+  text-align:center;
+  pointer-events:none;
+  transition:transform 0.25s cubic-bezier(.34,1.56,.64,1),opacity 0.25s;
+  opacity:0;
+}
+.toast.show{transform:translate(-50%,-50%) scale(1);opacity:1;}
+.toast.hide{transform:translate(-50%,-50%) scale(0.7);opacity:0;}
+
+/* CONFETTI container */
+.confetti-wrap{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  pointer-events:none;z-index:800;overflow:hidden;
+}
+.confetti-piece{
+  position:absolute;
+  width:10px;height:12px;
+  border-radius:2px;
+  animation:confettiFall linear forwards;
+  top:-20px;
+}
+@keyframes confettiFall{
+  0%{transform:translateY(0) rotate(0deg) scaleX(1);opacity:1;}
+  80%{opacity:1;}
+  100%{transform:translateY(110vh) rotate(720deg) scaleX(-1);opacity:0;}
+}
+
+/* WIN MODAL */
+.modal{
+  display:none;
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(10,0,30,0.88);
+  z-index:900;
+  align-items:center;
+  justify-content:center;
+}
+.modal.active{display:flex;}
+.modal-box{
+  background:linear-gradient(145deg,#1f0845,#0d0028);
+  border:3px solid #f72585;
+  padding:36px 44px;
+  border-radius:22px;
+  text-align:center;
+  max-width:480px;
+  width:90%;
+  box-shadow:0 0 60px rgba(247,37,133,0.3);
+}
+.modal-box h2{font-size:2.3em;margin-bottom:14px;background:linear-gradient(90deg,#f72585,#ff8c42,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.modal-box p{font-size:1.15em;margin:10px 0;color:rgba(255,255,255,0.82);}
+.modal-box strong{color:#ff8c42;}
+#highscoreMessage{color:#f9c74f;font-size:1.3em;margin-top:10px;}
+
+/* HIGHSCORES */
+.hs-section{
+  background:rgba(255,255,255,0.04);
+  border:2px solid rgba(247,37,133,0.25);
+  border-radius:15px;
+  padding:18px;
+  margin-top:4px;
+  max-width:1280px;
+  margin-left:auto;
+  margin-right:auto;
+}
+.hs-section h3{color:#f72585;margin-bottom:12px;font-size:1.1em;}
+.hs-list{display:grid;gap:6px;}
+.hs-item{
+  background:rgba(255,255,255,0.07);
+  padding:8px 14px;
+  border-radius:9px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:0.88em;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.hs-rank{font-weight:bold;color:#ff8c42;min-width:28px;}
+</style>
+</head>
+<body>
+
+<h1>🌈 Wortschatz Memory – Supercharged! 🎮</h1>
+
+<div class="mode-banner normal" id="modeBanner">📖 Normal-Modus: Wort ↔ Erklärung</div>
+
+<div class="controls">
+  <select id="modeSelect" onchange="onModeChange()">
+    <option value="normal">📖 Normal (Wort ↔ Erklärung)</option>
+    <option value="synonym">≈ Synonyme (gleiche Bedeutung!)</option>
+    <option value="opposite">⟺ Antonyme (Gegenteile finden!)</option>
+  </select>
+  <select id="themeSelect"></select>
+  <select id="pairCount">
+    <option value="8">8 Paare (leicht)</option>
+    <option value="12">12 Paare (mittel)</option>
+    <option value="16">16 Paare (schwer)</option>
+    <option value="20">20 Paare (extrem)</option>
+  </select>
+  <button class="btn btn-start" onclick="startGame()">🎲 Neues Spiel!</button>
+</div>
+
+<div class="stats">
+  <div class="stat-box"><div class="stat-value" id="moves">0</div><div class="stat-label">Züge</div></div>
+  <div class="stat-box"><div class="stat-value" id="matches">0</div><div class="stat-label">Paare 🎉</div></div>
+  <div class="stat-box"><div class="stat-value" id="timer">0:00</div><div class="stat-label">Zeit ⏱️</div></div>
+</div>
+
+<div class="game-board" id="gameBoard"></div>
+
+<div class="toast" id="toast"></div>
+<div class="confetti-wrap" id="confettiWrap"></div>
+
+<div class="hs-section">
+  <h3>🏆 Bestenliste</h3>
+  <div class="hs-list" id="highscoreList"><p style="opacity:0.5;text-align:center">Noch keine Einträge – spiel los! 🚀</p></div>
+</div>
+
+<div class="modal" id="winModal">
+  <div class="modal-box">
+    <h2>🎉 Wow! Gewonnen!</h2>
+    <p>Alle Paare gefunden! Du bist super! 🌟</p>
+    <p>Züge: <strong id="finalMoves"></strong> &nbsp;|&nbsp; Zeit: <strong id="finalTime"></strong></p>
+    <p id="highscoreMessage"></p>
+    <br>
+    <button class="btn btn-start" onclick="closeModal()">🔄 Nochmal spielen!</button>
+  </div>
+</div>
+
+<script>
+// ====================================================================
+//  VOCABULARY
+// ====================================================================
+const vocab = {
+
+// ── NORMAL MODE ─────────────────────────────────────────────────────
+normal: {
+  essen: [
+    {word:'die Mahlzeit',pair:'Frühstück, Mittag- oder Abendessen'},
+    {word:'das Rezept',pair:'Anleitung zum Kochen'},
+    {word:'die Zutat',pair:'Was man zum Kochen braucht'},
+    {word:'würzen',pair:'Salz und Pfeffer hinzufügen'},
+    {word:'braten',pair:'In der Pfanne kochen'},
+    {word:'backen',pair:'Im Ofen zubereiten'},
+    {word:'rühren',pair:'Mit Löffel mischen'},
+    {word:'schmecken',pair:'Mit der Zunge probieren'},
+    {word:'das Besteck',pair:'Messer, Gabel, Löffel'},
+    {word:'die Portion',pair:'Menge Essen für eine Person'},
+    {word:'das Gewürz',pair:'Macht Essen schärfer oder aromatischer'},
+    {word:'die Pfanne',pair:'Flaches Kochgefäß auf dem Herd'},
+  ],
+  berufe: [
+    {word:'der Arbeitgeber',pair:'Chef, der Mitarbeiter einstellt'},
+    {word:'die Bewerbung',pair:'Dokumente für neuen Job'},
+    {word:'das Gehalt',pair:'Geld für geleistete Arbeit'},
+    {word:'die Ausbildung',pair:'Lernen eines Berufs'},
+    {word:'die Schicht',pair:'Arbeitszeit am Tag oder Nacht'},
+    {word:'der Kollege',pair:'Person, die mit mir arbeitet'},
+    {word:'kündigen',pair:'Den Job beenden'},
+    {word:'einstellen',pair:'Jemanden anstellen'},
+    {word:'die Karriere',pair:'Beruflicher Weg nach oben'},
+    {word:'die Beförderung',pair:'Aufstieg zu besserer Position'},
+    {word:'der Urlaub',pair:'Freie Tage von der Arbeit'},
+    {word:'die Überstunden',pair:'Länger als normal arbeiten'},
+  ],
+  hobbys: [
+    {word:'sammeln',pair:'Briefmarken oder Münzen anhäufen'},
+    {word:'basteln',pair:'Mit Händen etwas kreativ machen'},
+    {word:'der Verein',pair:'Gruppe mit gleichem Interesse'},
+    {word:'trainieren',pair:'Sport regelmäßig üben'},
+    {word:'wandern',pair:'Lange Spaziergänge in der Natur'},
+    {word:'tanzen',pair:'Sich zu Musik bewegen'},
+    {word:'malen',pair:'Mit Farben Bilder machen'},
+    {word:'fotografieren',pair:'Mit Kamera Bilder machen'},
+    {word:'angeln',pair:'Fische fangen am Wasser'},
+    {word:'zelten',pair:'Im Zelt übernachten in der Natur'},
+    {word:'stricken',pair:'Wolle mit Nadeln zu Kleidung machen'},
+    {word:'kochen',pair:'Essen mit Wärme zubereiten'},
+  ],
+  wetter: [
+    {word:'der Nebel',pair:'Man sieht nicht weit'},
+    {word:'das Gewitter',pair:'Blitz und Donner'},
+    {word:'die Wolke',pair:'Weiß oder grau am Himmel'},
+    {word:'der Regenbogen',pair:'Bunte Farben nach dem Regen'},
+    {word:'der Frost',pair:'Temperatur unter 0 Grad'},
+    {word:'tauen',pair:'Eis wird zu Wasser'},
+    {word:'stürmen',pair:'Sehr starker Wind weht'},
+    {word:'die Hitze',pair:'Sehr hohe Temperatur'},
+    {word:'feucht',pair:'Ein bisschen nass'},
+    {word:'trocken',pair:'Ohne Feuchtigkeit, kein Wasser'},
+    {word:'der Hagel',pair:'Kleine Eisbrocken fallen vom Himmel'},
+    {word:'die Brise',pair:'Leichter, angenehmer Wind'},
+  ],
+  koerper: [
+    {word:'die Stirn',pair:'Oberhalb der Augen'},
+    {word:'der Ellbogen',pair:'Gelenk in der Mitte des Arms'},
+    {word:'das Knie',pair:'Gelenk im Bein'},
+    {word:'die Ferse',pair:'Hinten am Fuß'},
+    {word:'atmen',pair:'Luft ein- und ausatmen'},
+    {word:'schlucken',pair:'Essen oder Trinken in den Hals'},
+    {word:'husten',pair:'Laut aus dem Hals stoßen'},
+    {word:'niesen',pair:'Plötzlich durch die Nase ausatmen'},
+    {word:'die Wunde',pair:'Verletzung der Haut'},
+    {word:'heilen',pair:'Krank werden wieder gesund'},
+    {word:'der Puls',pair:'Herzschlag, den man fühlen kann'},
+    {word:'schwitzen',pair:'Bei Hitze oder Sport Wasser aus der Haut'},
+  ],
+  kleidung: [
+    {word:'der Knopf',pair:'Zum Schließen von Hemden'},
+    {word:'der Reißverschluss',pair:'Zum Auf- und Zumachen'},
+    {word:'die Tasche',pair:'Für Geldbeutel und Handy'},
+    {word:'der Gürtel',pair:'Hält die Hose fest'},
+    {word:'anziehen',pair:'Kleidung anlegen, anziehen'},
+    {word:'ausziehen',pair:'Kleidung ablegen, ausziehen'},
+    {word:'passen',pair:'Die richtige Größe haben'},
+    {word:'bügeln',pair:'Falten aus der Kleidung entfernen'},
+    {word:'der Stoff',pair:'Das Material der Kleidung'},
+    {word:'die Wolle',pair:'Material von Schafen für warme Kleidung'},
+    {word:'waschen',pair:'Kleidung mit Wasser reinigen'},
+    {word:'nähen',pair:'Stoff mit Nadel und Faden verbinden'},
+  ],
+  reisen: [
+    {word:'der Bahnhof',pair:'Wo Züge ankommen und abfahren'},
+    {word:'der Flughafen',pair:'Wo Flugzeuge starten und landen'},
+    {word:'die Verspätung',pair:'Zug oder Bus kommt zu spät'},
+    {word:'umsteigen',pair:'In einen anderen Zug wechseln'},
+    {word:'der Reisepass',pair:'Dokument für Reisen ins Ausland'},
+    {word:'die Unterkunft',pair:'Wo man auf Reisen schläft'},
+    {word:'buchen',pair:'Einen Platz oder Hotel reservieren'},
+    {word:'packen',pair:'Koffer mit Sachen füllen'},
+    {word:'die Sehenswürdigkeit',pair:'Berühmter Ort für Touristen'},
+    {word:'erkunden',pair:'Neue Orte entdecken und erforschen'},
+    {word:'die Währung',pair:'Das Geld eines Landes'},
+    {word:'die Grenze',pair:'Linie zwischen zwei Ländern'},
+  ],
+  haus: [
+    {word:'der Keller',pair:'Raum unter dem Haus'},
+    {word:'der Dachboden',pair:'Raum ganz oben unter dem Dach'},
+    {word:'die Treppe',pair:'Stufen nach oben'},
+    {word:'der Schlüssel',pair:'Öffnet die Tür'},
+    {word:'die Heizung',pair:'Macht warm im Winter'},
+    {word:'der Wasserhahn',pair:'Wasser kommt raus'},
+    {word:'die Steckdose',pair:'Für elektrischen Strom'},
+    {word:'der Mülleimer',pair:'Für Abfall und Müll'},
+    {word:'aufräumen',pair:'Ordnung machen im Zimmer'},
+    {word:'putzen',pair:'Sauber machen, wischen'},
+    {word:'die Trennwand',pair:'Wand, die zwei Räume trennt'},
+    {word:'das Fensterbrett',pair:'Breites Brett unten am Fenster'},
+  ],
+  emotionen: [
+    {word:'erleichtert',pair:'Wenn ein Problem gelöst ist'},
+    {word:'aufgeregt',pair:'Nervös vor etwas Gutem'},
+    {word:'enttäuscht',pair:'Traurig über ein schlechtes Ergebnis'},
+    {word:'begeistert',pair:'Sehr enthusiastisch und froh'},
+    {word:'ängstlich',pair:'Voller Angst und Unsicherheit'},
+    {word:'verwirrt',pair:'Man versteht etwas nicht'},
+    {word:'zufrieden',pair:'Glücklich mit der Situation'},
+    {word:'neidisch',pair:'Will haben, was andere haben'},
+    {word:'überrascht',pair:'Hat das nicht erwartet'},
+    {word:'dankbar',pair:'Voller Dankbarkeit, froh über Hilfe'},
+    {word:'stolz',pair:'Froh über eine eigene Leistung'},
+    {word:'eifersüchtig',pair:'Hat Angst, jemanden zu verlieren'},
+  ],
+  verben: [
+    {word:'erklären',pair:'Etwas verständlich machen'},
+    {word:'überzeugen',pair:'Jemanden zu etwas bringen'},
+    {word:'vermuten',pair:'Glauben, aber nicht sicher sein'},
+    {word:'behaupten',pair:'Sagen, dass etwas wahr ist'},
+    {word:'vergleichen',pair:'Unterschiede zwischen Dingen finden'},
+    {word:'erreichen',pair:'Ein Ziel schaffen'},
+    {word:'verhindern',pair:'Stoppen, dass etwas passiert'},
+    {word:'unterstützen',pair:'Jemandem helfen'},
+    {word:'entwickeln',pair:'Etwas Neues erschaffen'},
+    {word:'verbessern',pair:'Etwas besser machen'},
+    {word:'beschreiben',pair:'Mit Worten erklären, wie etwas aussieht'},
+    {word:'entscheiden',pair:'Zwischen Möglichkeiten wählen'},
+  ],
+  adjektive: [
+    {word:'gründlich',pair:'Sehr genau und detailliert'},
+    {word:'zuverlässig',pair:'Man kann sich darauf verlassen'},
+    {word:'sorgfältig',pair:'Mit großer Aufmerksamkeit'},
+    {word:'kreativ',pair:'Voller neuer Ideen'},
+    {word:'praktisch',pair:'Nützlich im Alltag'},
+    {word:'kompliziert',pair:'Schwer zu verstehen'},
+    {word:'selbstständig',pair:'Ohne Hilfe von anderen'},
+    {word:'vielfältig',pair:'Sehr abwechslungsreich'},
+    {word:'genau',pair:'Präzise, ohne Fehler'},
+    {word:'ordentlich',pair:'Gut organisiert'},
+    {word:'mutig',pair:'Hat keine Angst'},
+    {word:'neugierig',pair:'Will alles wissen und verstehen'},
+  ],
+  tiere: [
+    {word:'der Elefant',pair:'Größtes Landtier mit Rüssel und Stoßzähnen'},
+    {word:'der Delfin',pair:'Cleveres Meerestier, spielt gern'},
+    {word:'der Adler',pair:'Großer Vogel, der sehr hoch fliegt'},
+    {word:'die Schildkröte',pair:'Tier mit hartem Panzer, lebt sehr lang'},
+    {word:'der Gepard',pair:'Schnellstes Tier der Welt'},
+    {word:'der Oktopus',pair:'Meerestier mit acht Armen'},
+    {word:'das Chamäleon',pair:'Eidechse, die die Farbe wechselt'},
+    {word:'der Pinguin',pair:'Vogel, der nicht fliegen kann, schwimmt gut'},
+    {word:'die Fledermaus',pair:'Fliegt in der Nacht, schläft kopfüber'},
+    {word:'der Biber',pair:'Tier, das mit Zähnen Bäume fällt und Dämme baut'},
+    {word:'das Känguru',pair:'Australisches Tier trägt Baby im Beutel'},
+    {word:'der Kolibri',pair:'Kleinster Vogel, fliegt auf der Stelle'},
+  ],
+  schule: [
+    {word:'die Hausaufgabe',pair:'Übung, die man zuhause machen muss'},
+    {word:'der Stundenplan',pair:'Tabelle mit allen Fächern und Zeiten'},
+    {word:'das Zeugnis',pair:'Dokument mit den Schulnoten'},
+    {word:'die Pause',pair:'Kurze Erholung zwischen dem Unterricht'},
+    {word:'der Klassenraum',pair:'Zimmer in der Schule zum Lernen'},
+    {word:'das Lineal',pair:'Zum Geradelziehen und Messen'},
+    {word:'der Radiergummi',pair:'Löscht Bleistiftfehler aus'},
+    {word:'der Zirkel',pair:'Zeichnet Kreise auf Papier'},
+    {word:'die Kreide',pair:'Schreibt auf der Tafel'},
+    {word:'der Rucksack',pair:'Trägt Bücher und Hefte zur Schule'},
+    {word:'die Bibliothek',pair:'Raum mit vielen Büchern zum Ausleihen'},
+    {word:'die Projektor',pair:'Zeigt Bilder an die Wand im Unterricht'},
+  ],
+},
+
+// ── SYNONYM MODE ────────────────────────────────────────────────────
+synonym: {
+  essen: [
+    {word:'lecker',pair:'köstlich'},{word:'hungrig',pair:'ausgehungert'},
+    {word:'satt',pair:'voll'},{word:'essen',pair:'speisen'},
+    {word:'trinken',pair:'schlürfen'},{word:'backen',pair:'zubereiten'},
+    {word:'scharf',pair:'würzig'},{word:'frisch',pair:'knackig'},
+    {word:'kochen',pair:'zubereiten'},{word:'Hunger',pair:'Appetit'},
+    {word:'Mahlzeit',pair:'Essen'},{word:'braten',pair:'grillen'},
+  ],
+  berufe: [
+    {word:'arbeiten',pair:'schaffen'},{word:'verdienen',pair:'einnehmen'},
+    {word:'Arbeit',pair:'Job'},{word:'Chef',pair:'Vorgesetzter'},
+    {word:'kündigen',pair:'aufhören'},{word:'fleißig',pair:'strebsam'},
+    {word:'Kollege',pair:'Mitarbeiter'},{word:'Aufgabe',pair:'Auftrag'},
+    {word:'Pause',pair:'Auszeit'},{word:'einstellen',pair:'anstellen'},
+    {word:'Karriere',pair:'Laufbahn'},{word:'Gehalt',pair:'Lohn'},
+  ],
+  hobbys: [
+    {word:'spielen',pair:'zocken'},{word:'lesen',pair:'schmökern'},
+    {word:'Spaß',pair:'Freude'},{word:'interessant',pair:'spannend'},
+    {word:'langweilig',pair:'öde'},{word:'tanzen',pair:'sich bewegen'},
+    {word:'wandern',pair:'spazieren'},{word:'basteln',pair:'werken'},
+    {word:'sammeln',pair:'horten'},{word:'malen',pair:'zeichnen'},
+    {word:'fotografieren',pair:'knipsen'},{word:'Wettbewerb',pair:'Turnier'},
+  ],
+  wetter: [
+    {word:'heiß',pair:'warm'},{word:'kalt',pair:'kühl'},
+    {word:'nass',pair:'feucht'},{word:'Regen',pair:'Niederschlag'},
+    {word:'Sonne',pair:'Sonnenschein'},{word:'stürmisch',pair:'windig'},
+    {word:'Schnee',pair:'Schneefall'},{word:'Nebel',pair:'Dunst'},
+    {word:'Frost',pair:'Eis'},{word:'schwül',pair:'tropisch'},
+    {word:'Gewitter',pair:'Unwetter'},{word:'heiter',pair:'sonnig'},
+  ],
+  koerper: [
+    {word:'krank',pair:'erkrankt'},{word:'gesund',pair:'fit'},
+    {word:'müde',pair:'erschöpft'},{word:'wach',pair:'munter'},
+    {word:'stark',pair:'kräftig'},{word:'schlank',pair:'rank'},
+    {word:'schnell',pair:'flink'},{word:'gelenkig',pair:'beweglich'},
+    {word:'energisch',pair:'lebhaft'},{word:'schmerzhaft',pair:'wehtuend'},
+    {word:'erholt',pair:'ausgeruht'},{word:'schwach',pair:'kraftlos'},
+  ],
+  kleidung: [
+    {word:'attraktiv',pair:'hübsch'},{word:'modern',pair:'trendy'},
+    {word:'alt',pair:'veraltet'},{word:'sauber',pair:'rein'},
+    {word:'dreckig',pair:'schmutzig'},{word:'elegant',pair:'schick'},
+    {word:'bequem',pair:'gemütlich'},{word:'warm',pair:'kuschelig'},
+    {word:'eng',pair:'knapp'},{word:'weit',pair:'locker'},
+    {word:'bunt',pair:'farbenfroh'},{word:'schlicht',pair:'einfach'},
+  ],
+  reisen: [
+    {word:'fahren',pair:'reisen'},{word:'schnell',pair:'zügig'},
+    {word:'langsam',pair:'gemächlich'},{word:'weit',pair:'fern'},
+    {word:'nah',pair:'nahe'},{word:'Urlaub',pair:'Ferien'},
+    {word:'Ausflug',pair:'Trip'},{word:'ankommen',pair:'eintreffen'},
+    {word:'Gepäck',pair:'Koffer'},{word:'erkunden',pair:'entdecken'},
+    {word:'buchen',pair:'reservieren'},{word:'Reise',pair:'Tour'},
+  ],
+  haus: [
+    {word:'sauber',pair:'ordentlich'},{word:'gemütlich',pair:'behaglich'},
+    {word:'groß',pair:'riesig'},{word:'klein',pair:'winzig'},
+    {word:'hell',pair:'licht'},{word:'warm',pair:'mollig'},
+    {word:'schön',pair:'hübsch'},{word:'aufräumen',pair:'ordnen'},
+    {word:'putzen',pair:'reinigen'},{word:'reparieren',pair:'ausbessern'},
+    {word:'wohnen',pair:'leben'},{word:'bauen',pair:'errichten'},
+  ],
+  emotionen: [
+    {word:'froh',pair:'glücklich'},{word:'traurig',pair:'betrübt'},
+    {word:'ärgerlich',pair:'wütend'},{word:'nervös',pair:'unruhig'},
+    {word:'ruhig',pair:'gelassen'},{word:'begeistert',pair:'enthusiastisch'},
+    {word:'überrascht',pair:'erstaunt'},{word:'neidisch',pair:'eifersüchtig'},
+    {word:'dankbar',pair:'erkenntlich'},{word:'stolz',pair:'selbstbewusst'},
+    {word:'mutig',pair:'furchtlos'},{word:'verwirrt',pair:'perplex'},
+  ],
+  verben: [
+    {word:'sagen',pair:'äußern'},{word:'machen',pair:'tun'},
+    {word:'sehen',pair:'erblicken'},{word:'hören',pair:'vernehmen'},
+    {word:'gehen',pair:'laufen'},{word:'denken',pair:'überlegen'},
+    {word:'verstehen',pair:'begreifen'},{word:'anfangen',pair:'beginnen'},
+    {word:'aufhören',pair:'beenden'},{word:'zeigen',pair:'demonstrieren'},
+    {word:'helfen',pair:'unterstützen'},{word:'suchen',pair:'schauen'},
+  ],
+  adjektive: [
+    {word:'gut',pair:'prima'},{word:'schlecht',pair:'übel'},
+    {word:'wichtig',pair:'bedeutend'},{word:'schwierig',pair:'kompliziert'},
+    {word:'einfach',pair:'leicht'},{word:'neu',pair:'frisch'},
+    {word:'richtig',pair:'korrekt'},{word:'schön',pair:'wunderschön'},
+    {word:'lustig',pair:'witzig'},{word:'klug',pair:'schlau'},
+    {word:'merkwürdig',pair:'seltsam'},{word:'wunderbar',pair:'herrlich'},
+  ],
+  tiere: [
+    {word:'Hund',pair:'Vierbeiner'},{word:'Katze',pair:'Mieze'},
+    {word:'Pferd',pair:'Gaul'},{word:'Vogel',pair:'Federvieh'},
+    {word:'Fisch',pair:'Wassertier'},{word:'groß',pair:'riesig'},
+    {word:'schnell',pair:'flink'},{word:'zahm',pair:'sanft'},
+    {word:'wild',pair:'ungezähmt'},{word:'süß',pair:'niedlich'},
+    {word:'laut',pair:'lärmend'},{word:'flauschig',pair:'weich'},
+  ],
+  schule: [
+    {word:'lernen',pair:'üben'},{word:'verstehen',pair:'begreifen'},
+    {word:'schreiben',pair:'notieren'},{word:'lesen',pair:'schmökern'},
+    {word:'fragen',pair:'nachfragen'},{word:'antworten',pair:'erwidern'},
+    {word:'prüfen',pair:'testen'},{word:'klug',pair:'intelligent'},
+    {word:'fleißig',pair:'strebsam'},{word:'Schüler',pair:'Lernender'},
+    {word:'Lehrer',pair:'Pädagoge'},{word:'Unterricht',pair:'Stunde'},
+  ],
+},
+
+// ── OPPOSITE MODE ── KOMPLETT NEU MIT EMOJIS ────────────────────────
+// WICHTIG: Das sind echte Gegenteile / Antonyme!
+opposite: {
+  natur: [
+    {word:'hell ☀️',pair:'dunkel 🌙'},{word:'heiß 🔥',pair:'kalt ❄️'},
+    {word:'nass ☔',pair:'trocken 🏜️'},{word:'Tag ☀️',pair:'Nacht 🌙'},
+    {word:'Sommer 🌻',pair:'Winter ⛄'},{word:'Feuer 🔥',pair:'Wasser 💧'},
+    {word:'Berg ⛰️',pair:'Tal 🏞️'},{word:'Regen 🌧️',pair:'Sonne ☀️'},
+    {word:'Eis ❄️',pair:'Dampf ♨️'},{word:'Sturm 🌪️',pair:'Stille 🍃'},
+    {word:'Morgen 🌅',pair:'Abend 🌆'},{word:'Frühling 🌸',pair:'Herbst 🍂'},
+  ],
+  groessen: [
+    {word:'groß 🐘',pair:'klein 🐭'},{word:'lang 📏',pair:'kurz ✂️'},
+    {word:'breit 🛣️',pair:'schmal 🪄'},{word:'hoch ⬆️',pair:'tief ⬇️'},
+    {word:'dick 🍩',pair:'dünn 🍃'},{word:'schwer 🏋️',pair:'leicht 🪶'},
+    {word:'voll 🍺',pair:'leer 🥤'},{word:'viel 💰',pair:'wenig 🪙'},
+    {word:'riesig 🏔️',pair:'winzig 🐜'},{word:'weit 🌍',pair:'nah 🏠'},
+    {word:'oben ⬆️',pair:'unten ⬇️'},{word:'innen 🏠',pair:'außen 🌳'},
+  ],
+  bewegung: [
+    {word:'schnell 🚀',pair:'langsam 🐌'},{word:'kommen 🏃',pair:'gehen 🚶'},
+    {word:'aufmachen 🔓',pair:'zumachen 🔒'},{word:'beginnen ▶️',pair:'aufhören ⏹️'},
+    {word:'steigen 📈',pair:'fallen 📉'},{word:'links ⬅️',pair:'rechts ➡️'},
+    {word:'ankommen 🏁',pair:'abfahren 🚂'},{word:'aufstehen 🧍',pair:'hinsetzen 🪑'},
+    {word:'kaufen 🛒',pair:'verkaufen 💰'},{word:'geben 🎁',pair:'nehmen 🤲'},
+    {word:'bauen 🏗️',pair:'zerstören 💥'},{word:'finden 🔍',pair:'verlieren 🤷'},
+  ],
+  gefuehle: [
+    {word:'glücklich 😄',pair:'traurig 😢'},{word:'mutig 🦁',pair:'ängstlich 😨'},
+    {word:'lachen 😂',pair:'weinen 😭'},{word:'lieben ❤️',pair:'hassen 💔'},
+    {word:'ruhig 😌',pair:'aufgeregt 😤'},{word:'freundlich 😊',pair:'unfreundlich 😠'},
+    {word:'froh 🥳',pair:'traurig 😔'},{word:'zufrieden 😊',pair:'unzufrieden 😒'},
+    {word:'mutig 💪',pair:'feige 🐣'},{word:'geduldig 🧘',pair:'ungeduldig ⏩'},
+    {word:'ehrlich 🤝',pair:'unehrlich 🤥'},{word:'großzügig 🎁',pair:'geizig 💸'},
+  ],
+  adjektive: [
+    {word:'gut 👍',pair:'schlecht 👎'},{word:'neu ✨',pair:'alt 🕰️'},
+    {word:'leicht 🪶',pair:'schwer 🏋️'},{word:'teuer 💎',pair:'billig 🏷️'},
+    {word:'schön 🌹',pair:'hässlich 👹'},{word:'sauber 🧼',pair:'dreckig 🪣'},
+    {word:'stark 💪',pair:'schwach 🌿'},{word:'reich 💰',pair:'arm 💸'},
+    {word:'laut 📢',pair:'leise 🤫'},{word:'jung 👶',pair:'alt 👴'},
+    {word:'klug 🧠',pair:'dumm 🙈'},{word:'früh 🌅',pair:'spät 🌙'},
+  ],
+  gegensaetze: [
+    {word:'Anfang 🚀',pair:'Ende 🏁'},{word:'Frage ❓',pair:'Antwort 💬'},
+    {word:'Sieg 🏆',pair:'Niederlage 😞'},{word:'Wahrheit ✅',pair:'Lüge ❌'},
+    {word:'Arbeit 💼',pair:'Freizeit 🎉'},{word:'Freund 🤝',pair:'Feind ⚔️'},
+    {word:'Leben 🌱',pair:'Tod 💀'},{word:'Chaos 🌀',pair:'Ordnung 📐'},
+    {word:'Vergangenheit ⏮️',pair:'Zukunft ⏭️'},{word:'Himmel ☁️',pair:'Erde 🌍'},
+    {word:'Frage ❓',pair:'Antwort 💬'},{word:'Licht 💡',pair:'Schatten 🌑'},
+  ],
+},
+};
+
+// ====================================================================
+//  THEME CONFIG
+// ====================================================================
+const themeConfig = {
+  normal:   ['essen','berufe','hobbys','wetter','koerper','kleidung','reisen','haus','emotionen','verben','adjektive','tiere','schule'],
+  synonym:  ['essen','berufe','hobbys','wetter','koerper','kleidung','reisen','haus','emotionen','verben','adjektive','tiere','schule'],
+  opposite: ['natur','groessen','bewegung','gefuehle','adjektive','gegensaetze'],
+};
+const themeLabels = {
+  all:'🎲 Alles gemischt',
+  essen:'🍽️ Essen & Trinken',
+  berufe:'💼 Berufe',
+  hobbys:'⚽ Hobbys & Freizeit',
+  wetter:'🌤️ Wetter & Natur',
+  koerper:'🏃 Körper & Gesundheit',
+  kleidung:'👕 Kleidung',
+  reisen:'✈️ Reisen & Verkehr',
+  haus:'🏠 Haus & Wohnung',
+  emotionen:'😊 Emotionen & Gefühle',
+  verben:'🏃 Verben',
+  adjektive:'✨ Adjektive',
+  tiere:'🐘 Tiere',
+  schule:'🎒 Schule',
+  natur:'🌿 Natur & Wetter',
+  groessen:'📏 Groß & Klein, Viel & Wenig',
+  bewegung:'🏃 Bewegung & Aktionen',
+  gefuehle:'❤️ Gefühle & Charakter',
+  gegensaetze:'⚡ Starke Gegensätze',
+};
+const modeBanner = {
+  normal:   {cls:'normal',  txt:'📖 Normal-Modus: Wort ↔ Erklärung'},
+  synonym:  {cls:'synonym', txt:'≈ Synonym-Modus: finde gleichbedeutende Wörter!'},
+  opposite: {cls:'opposite',txt:'⟺ Antonym-Modus: finde das GEGENTEIL! ↔'},
+};
+const cardBackConfig = {
+  normal:   {icon:'⭐',label:'Karte'},
+  synonym:  {icon:'≈',label:'Gleichbedeutend?'},
+  opposite: {icon:'⟺',label:'Gegenteil?'},
+};
+const matchMessages = {
+  normal:   ['Super! 🌟','Toll gemacht! 👏','Ja! Richtig! 🎉','Weiter so! 🚀','Perfekt! 💫'],
+  synonym:  ['Gleiche Bedeutung! 🔵','Synonyme gefunden! 🎉','Sehr gut! 🌟','Genau! ≈','Wunderbar! 🎊'],
+  opposite: ['Gegenteil gefunden! ⟺','Perfekte Antonyme! 🔥','Super! Das sind Gegenteile! ↕️','Richtig! Gegensätze! ⚡','Bravo! Entgegengesetzt! 🌈'],
+};
+
+// ====================================================================
+//  GAME STATE
+// ====================================================================
+let gameData=[], flippedCards=[], matchedPairs=0, moves=0;
+let timerInterval, seconds=0, locked=false;
+let currentMode='normal', currentTheme='all', currentPairCount=8;
+const CARD_COLORS=20;
+let colorAssignments=[];
+
+// ====================================================================
+//  AUDIO (Web Audio – Xylophon / Bambus, kein Furz-Geräusch!)
+// ====================================================================
+let audioCtx = null;
+function getAudioCtx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+function playNote(freq, startTime, duration, type='triangle', vol=0.28){
+  try{
+    const ctx=getAudioCtx();
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
+    const t=ctx.currentTime+startTime;
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type=type; osc.frequency.value=freq;
+    gain.gain.setValueAtTime(0,t);
+    gain.gain.linearRampToValueAtTime(vol,t+0.015);
+    gain.gain.exponentialRampToValueAtTime(0.001,t+duration);
+    osc.start(t); osc.stop(t+duration+0.05);
+  }catch(e){}
+}
+function playFlipSound(){
+  playNote(880,0,0.08,'sine',0.08);
+}
+function playMatchSound(){
+  // fröhliche aufsteigende Xylophon-Akkorde
+  const notes=[523.25,659.25,783.99,1046.50];
+  notes.forEach((f,i)=>playNote(f,i*0.11,0.3,'triangle',0.25));
+}
+function playWrongSound(){
+  playNote(220,0,0.15,'sawtooth',0.15);
+  playNote(196,0.12,0.2,'sawtooth',0.1);
+}
+function playWinSound(){
+  const fanfare=[523.25,587.33,659.25,783.99,1046.50,1318.51];
+  fanfare.forEach((f,i)=>playNote(f,i*0.13,0.45,'triangle',0.28));
+  setTimeout(()=>{
+    const chord=[523.25,659.25,783.99];
+    chord.forEach(f=>playNote(f,0,0.8,'triangle',0.2));
+  },900);
+}
+
+// ====================================================================
+//  UI HELPERS
+// ====================================================================
+function onModeChange(){
+  const mode=document.getElementById('modeSelect').value;
+  fillThemeSelect(mode);
+  const b=modeBanner[mode];
+  const el=document.getElementById('modeBanner');
+  el.className='mode-banner '+b.cls;
+  el.textContent=b.txt;
+}
+
+function fillThemeSelect(mode){
+  const sel=document.getElementById('themeSelect');
+  sel.innerHTML='<option value="all">'+themeLabels.all+'</option>';
+  themeConfig[mode].forEach(k=>{
+    const opt=document.createElement('option');
+    opt.value=k; opt.textContent=themeLabels[k]||k;
+    sel.appendChild(opt);
+  });
+}
+
+function showToast(msg, duration=1100){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast show';
+  setTimeout(()=>{t.className='toast hide';setTimeout(()=>t.className='toast',250);},duration);
+}
+
+// ====================================================================
+//  CONFETTI
+// ====================================================================
+function spawnConfetti(){
+  const wrap=document.getElementById('confettiWrap');
+  wrap.innerHTML='';
+  const colors=['#f72585','#ff8c42','#c084fc','#06d6a0','#f9c74f','#4361ee','#ff006e','#38b000'];
+  for(let i=0;i<80;i++){
+    const p=document.createElement('div');
+    p.className='confetti-piece';
+    const left=Math.random()*100;
+    const delay=Math.random()*1.5;
+    const dur=2+Math.random()*2;
+    const color=colors[Math.floor(Math.random()*colors.length)];
+    const size=6+Math.random()*10;
+    p.style.cssText=`left:${left}%;background:${color};width:${size}px;height:${size*1.3}px;`+
+      `animation-delay:${delay}s;animation-duration:${dur}s;border-radius:${Math.random()>0.5?'50%':'2px'}`;
+    wrap.appendChild(p);
+  }
+  setTimeout(()=>{wrap.innerHTML='';},5000);
+}
+
+// ====================================================================
+//  GAME LOGIC
+// ====================================================================
+function startGame(){
+  const mode=document.getElementById('modeSelect').value;
+  const theme=document.getElementById('themeSelect').value;
+  const pairCount=parseInt(document.getElementById('pairCount').value);
+  currentMode=mode; currentTheme=theme; currentPairCount=pairCount;
+
+  // Update banner
+  const b=modeBanner[mode];
+  const el=document.getElementById('modeBanner');
+  el.className='mode-banner '+b.cls;
+  el.textContent=b.txt;
+
+  resetState();
+
+  // Collect vocab
+  let pool=[];
+  if(theme==='all'){
+    themeConfig[mode].forEach(k=>{
+      if(vocab[mode][k]) pool=pool.concat(vocab[mode][k]);
+    });
+  } else {
+    pool=vocab[mode][theme]||[];
+    if(pool.length<pairCount){
+      themeConfig[mode].forEach(k=>{
+        if(vocab[mode][k]) pool=pool.concat(vocab[mode][k]);
+      });
+    }
+  }
+  // Shuffle & slice
+  pool=pool.sort(()=>Math.random()-0.5).slice(0,pairCount);
+
+  // Assign a random color to each PAIR (same color both cards = rainbow when done)
+  colorAssignments=[];
+  const usedColors=[];
+  for(let i=0;i<pairCount;i++){
+    let c;
+    do{ c=Math.floor(Math.random()*CARD_COLORS); }while(usedColors.includes(c)&&usedColors.length<CARD_COLORS);
+    usedColors.push(c); colorAssignments.push(c);
+  }
+
+  // Build game data
+  gameData=[];
+  pool.forEach((item,idx)=>{
+    gameData.push({id:idx,content:item.word,type:'word',colorIdx:colorAssignments[idx]});
+    gameData.push({id:idx,content:item.pair,type:'pair',colorIdx:colorAssignments[idx]});
+  });
+  gameData=gameData.sort(()=>Math.random()-0.5);
+
+  createBoard();
+  startTimer();
+}
+
+function resetState(){
+  clearInterval(timerInterval);
+  matchedPairs=0; moves=0; flippedCards=[]; seconds=0; locked=false;
+  document.getElementById('moves').textContent='0';
+  document.getElementById('matches').textContent='0';
+  document.getElementById('timer').textContent='0:00';
+}
+
+function createBoard(){
+  const board=document.getElementById('gameBoard');
+  board.innerHTML='';
+  const total=gameData.length;
+  // Responsive column count – wider is better!
+  let cols;
+  if(total<=16) cols=8;
+  else if(total<=24) cols=8;
+  else if(total<=32) cols=8;
+  else cols=10;
+  board.style.gridTemplateColumns=`repeat(${cols},1fr)`;
+
+  const mode=currentMode;
+  const backConf=cardBackConfig[mode];
+  const modTag={normal:'📖',synonym:'≈ Syn.',opposite:'⟺ Geg.'}[mode];
+
+  gameData.forEach((card,index)=>{
+    const el=document.createElement('div');
+    el.className='card';
+    el.dataset.id=card.id;
+    el.dataset.index=index;
+    el.dataset.colorIdx=card.colorIdx;
+    el.innerHTML=`
+      <div class="card-back">
+        <span class="back-icon">${backConf.icon}</span>
+        <span class="back-label">${backConf.label}</span>
+      </div>
+      <div class="card-front">
+        <span class="front-mode-tag">${modTag}</span>
+        <span class="front-word">${card.content}</span>
+      </div>`;
+    el.addEventListener('click',()=>flipCard(el));
+    board.appendChild(el);
+  });
+}
+
+function flipCard(card){
+  if(locked||flippedCards.length>=2||card.classList.contains('flipped')||card.classList.contains('matched')) return;
+  playFlipSound();
+  const ci=parseInt(card.dataset.colorIdx);
+  card.classList.add('flipped','cc'+ci);
+  flippedCards.push(card);
+  if(flippedCards.length===2){
+    moves++;
+    document.getElementById('moves').textContent=moves;
+    locked=true;
+    setTimeout(checkMatch,900);
+  }
+}
+
+function checkMatch(){
+  const [c1,c2]=flippedCards;
+  if(c1.dataset.id===c2.dataset.id){
+    // MATCH!
+    c1.classList.add('matched'); c2.classList.add('matched');
+    matchedPairs++;
+    document.getElementById('matches').textContent=matchedPairs;
+    playMatchSound();
+    const msgs=matchMessages[currentMode];
+    showToast(msgs[Math.floor(Math.random()*msgs.length)]);
+    flippedCards=[]; locked=false;
+    if(matchedPairs===currentPairCount) setTimeout(endGame,500);
+  } else {
+    // NO match
+    c2.classList.add('wrong-flash'); c1.classList.add('wrong-flash');
+    playWrongSound();
+    setTimeout(()=>{
+      c1.classList.remove('flipped','wrong-flash');
+      c2.classList.remove('flipped','wrong-flash');
+      for(let i=0;i<CARD_COLORS;i++){c1.classList.remove('cc'+i);c2.classList.remove('cc'+i);}
+      flippedCards=[]; locked=false;
+    },500);
+  }
+}
+
+// ====================================================================
+//  TIMER
+// ====================================================================
+function startTimer(){
+  clearInterval(timerInterval);
+  timerInterval=setInterval(()=>{
+    seconds++;
+    const m=Math.floor(seconds/60), s=seconds%60;
+    document.getElementById('timer').textContent=`${m}:${String(s).padStart(2,'0')}`;
+  },1000);
+}
+
+// ====================================================================
+//  END GAME
+// ====================================================================
+function endGame(){
+  clearInterval(timerInterval);
+  playWinSound();
+  spawnConfetti();
+  const m=Math.floor(seconds/60),s=seconds%60;
+  const timeStr=`${m}:${String(s).padStart(2,'0')}`;
+  document.getElementById('finalMoves').textContent=moves;
+  document.getElementById('finalTime').textContent=timeStr;
+  saveHighscore(currentMode,currentTheme,currentPairCount,moves,seconds);
+  document.getElementById('winModal').classList.add('active');
+}
+
+function closeModal(){
+  document.getElementById('winModal').classList.remove('active');
+  document.getElementById('highscoreMessage').textContent='';
+  startGame();
+}
+
+// ====================================================================
+//  HIGHSCORES
+// ====================================================================
+function saveHighscore(mode,theme,pairs,mv,sec){
+  let hs=JSON.parse(localStorage.getItem('memoryHS5')||'[]');
+  hs.push({mode,theme,pairs,moves:mv,time:sec,date:new Date().toISOString()});
+  hs.sort((a,b)=>a.time-b.time||a.moves-b.moves);
+  hs=hs.slice(0,10);
+  localStorage.setItem('memoryHS5',JSON.stringify(hs));
+  displayHighscores();
+  if(hs[0]&&hs[0].time===sec&&hs[0].moves===mv){
+    document.getElementById('highscoreMessage').innerHTML='🏆 Neuer Highscore! 🏆';
+  }
+}
+
+function displayHighscores(){
+  const hs=JSON.parse(localStorage.getItem('memoryHS5')||'[]');
+  const cont=document.getElementById('highscoreList');
+  if(!hs.length){
+    cont.innerHTML='<p style="opacity:0.5;text-align:center">Noch keine Einträge – spiel los! 🚀</p>';
+    return;
+  }
+  const modeIcon={normal:'📖',synonym:'≈',opposite:'⟺'};
+  cont.innerHTML=hs.map((s,i)=>{
+    const m=Math.floor(s.time/60), sec=s.time%60;
+    const ts=`${m}:${String(sec).padStart(2,'0')}`;
+    return `<div class="hs-item">
+      <span class="hs-rank">#${i+1}</span>
+      <span>${modeIcon[s.mode]||''} ${themeLabels[s.theme]||s.theme}</span>
+      <span>${s.pairs} Paare</span>
+      <span>⏱ ${ts} | 🎯 ${s.moves} Züge</span>
+    </div>`;
+  }).join('');
+}
+
+// ====================================================================
+//  INIT
+// ====================================================================
+onModeChange();
+startGame();
+displayHighscores();
+</script>
+</body>
+</html>
