@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Passiv Champion · C1/C2 · Vorgangs- & Zustandspassiv</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:      #1E1A3A;
+    --indigo:   #2D2A5E;
+    --sage:     #5C7F69;
+    --gold:     #B8922E;
+    --parch:    #F7F2E5;
+    --parch2:   #EDE7D3;
+    --burg:     #7C2633;
+    --sky:      #3B7EA1;
+    --correct:  #2E6B47;
+    --wrong:    #8B2020;
+    --neutral:  #5A5480;
+    --shadow:   rgba(30,26,58,0.12);
+    --card-bg:  #FDFAF3;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    background: var(--parch);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 0 0 80px;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    background: var(--indigo);
+    color: #fff;
+    padding: 36px 40px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 18px,
+      rgba(255,255,255,0.025) 18px,
+      rgba(255,255,255,0.025) 19px
+    );
+  }
+  .header-inner { position: relative; max-width: 900px; margin: 0 auto; }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.6rem, 4vw, 2.5rem);
+    line-height: 1.18;
+    margin-bottom: 12px;
+    color: #fff;
+  }
+  .subtitle {
+    font-size: 0.95rem;
+    color: rgba(255,255,255,0.72);
+    font-style: italic;
+    max-width: 620px;
+    line-height: 1.55;
+  }
+  .score-strip {
+    display: flex;
+    gap: 28px;
+    margin-top: 22px;
+    flex-wrap: wrap;
+  }
+  .score-item {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 8px;
+    padding: 8px 18px;
+    text-align: center;
+  }
+  .score-item .val {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--gold);
+    display: block;
+  }
+  .score-item .lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+  }
+
+  /* ─── COMPASS LEGEND ─── */
+  .compass-wrap {
+    max-width: 900px;
+    margin: 32px auto 0;
+    padding: 0 24px;
+  }
+  .compass {
+    background: var(--card-bg);
+    border: 1px solid var(--parch2);
+    border-radius: 14px;
+    padding: 24px 28px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    box-shadow: 0 2px 12px var(--shadow);
+  }
+  .compass-side {
+    padding: 16px 20px;
+    border-radius: 10px;
+  }
+  .compass-side.vp { background: rgba(44,42,94,0.07); border-left: 4px solid var(--indigo); }
+  .compass-side.zp { background: rgba(92,127,105,0.1); border-left: 4px solid var(--sage); }
+  .compass-side h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    margin-bottom: 6px;
+  }
+  .compass-side.vp h3 { color: var(--indigo); }
+  .compass-side.zp h3 { color: var(--sage); }
+  .compass-side p { font-size: 0.85rem; line-height: 1.55; color: #444; margin-bottom: 8px; }
+  .compass-side code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    background: rgba(0,0,0,0.05);
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: block;
+    margin: 4px 0;
+    color: var(--ink);
+  }
+
+  /* ─── MAIN ─── */
+  main { max-width: 900px; margin: 32px auto 0; padding: 0 24px; }
+
+  /* ─── SECTION HEADERS ─── */
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 36px 0 16px;
+  }
+  .section-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: var(--gold);
+    line-height: 1;
+    min-width: 36px;
+  }
+  .section-title-block h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.18rem;
+    color: var(--indigo);
+    line-height: 1.2;
+  }
+  .section-title-block .sec-desc {
+    font-size: 0.82rem;
+    color: #666;
+    font-style: italic;
+    margin-top: 2px;
+  }
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(to right, var(--parch2), transparent);
+    margin-bottom: 18px;
+  }
+
+  /* ─── CARDS ─── */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--parch2);
+    border-radius: 12px;
+    padding: 22px 26px;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 8px var(--shadow);
+    transition: box-shadow 0.2s;
+  }
+  .card:hover { box-shadow: 0 3px 16px var(--shadow); }
+
+  .q-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .q-text {
+    font-size: 1rem;
+    line-height: 1.62;
+    margin-bottom: 14px;
+    color: var(--ink);
+  }
+  .q-text em { font-style: italic; color: #555; }
+  .q-text strong { font-weight: 600; color: var(--indigo); }
+
+  /* ─── MULTIPLE CHOICE ─── */
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .opt-btn {
+    background: none;
+    border: 1.5px solid var(--parch2);
+    border-radius: 8px;
+    padding: 10px 16px;
+    text-align: left;
+    font-family: 'Source Serif 4', serif;
+    font-size: 0.92rem;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.18s;
+    line-height: 1.4;
+  }
+  .opt-btn:hover:not(:disabled) {
+    border-color: var(--indigo);
+    background: rgba(45,42,94,0.05);
+  }
+  .opt-btn.selected { border-color: var(--indigo); background: rgba(45,42,94,0.08); }
+  .opt-btn.correct  { border-color: var(--correct)!important; background: rgba(46,107,71,0.1)!important; color: var(--correct); font-weight: 600; }
+  .opt-btn.wrong    { border-color: var(--wrong)!important; background: rgba(139,32,32,0.08)!important; color: var(--wrong); }
+  .opt-btn:disabled { cursor: default; }
+
+  /* ─── INPUTS ─── */
+  .input-row { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; margin-top: 4px; }
+  input[type=text], textarea {
+    font-family: 'Source Serif 4', serif;
+    font-size: 0.95rem;
+    border: 1.5px solid var(--parch2);
+    border-radius: 8px;
+    padding: 9px 14px;
+    color: var(--ink);
+    background: #fff;
+    outline: none;
+    transition: border-color 0.18s;
+  }
+  input[type=text]:focus, textarea:focus { border-color: var(--indigo); }
+  input[type=text] { min-width: 220px; flex: 1; }
+  textarea { width: 100%; min-height: 80px; resize: vertical; }
+  input.correct-input { border-color: var(--correct)!important; background: rgba(46,107,71,0.07)!important; }
+  input.wrong-input   { border-color: var(--wrong)!important; background: rgba(139,32,32,0.07)!important; }
+
+  /* ─── BUTTONS ─── */
+  .check-btn {
+    background: var(--indigo);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 22px;
+    font-family: 'Source Serif 4', serif;
+    font-size: 0.92rem;
+    cursor: pointer;
+    transition: background 0.18s, transform 0.12s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .check-btn:hover:not(:disabled) { background: #3d3980; transform: translateY(-1px); }
+  .check-btn:disabled { opacity: 0.55; cursor: default; }
+  .check-btn.sage { background: var(--sage); }
+  .check-btn.sage:hover:not(:disabled) { background: #4a6b56; }
+
+  /* ─── FEEDBACK ─── */
+  .feedback {
+    margin-top: 12px;
+    padding: 11px 16px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.ok  { background: rgba(46,107,71,0.1); border-left: 3px solid var(--correct); color: #1a4a2e; }
+  .feedback.err { background: rgba(139,32,32,0.08); border-left: 3px solid var(--wrong); color: #5a1010; }
+  .feedback.info { background: rgba(59,126,161,0.1); border-left: 3px solid var(--sky); color: #1a4060; }
+  .solution { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--correct); margin-top: 5px; display: block; }
+
+  /* ─── GAP TEXT ─── */
+  .gap-text {
+    font-size: 0.97rem;
+    line-height: 2.1;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+  .gap-text .gap-input {
+    display: inline-block;
+    border: none;
+    border-bottom: 2px solid var(--indigo);
+    background: rgba(45,42,94,0.04);
+    border-radius: 4px 4px 0 0;
+    padding: 2px 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88rem;
+    min-width: 140px;
+    outline: none;
+    vertical-align: middle;
+    color: var(--indigo);
+    font-weight: 600;
+  }
+  .gap-input:focus { background: rgba(45,42,94,0.08); }
+  .gap-input.correct-input { border-bottom-color: var(--correct); background: rgba(46,107,71,0.07); color: var(--correct); }
+  .gap-input.wrong-input   { border-bottom-color: var(--wrong); background: rgba(139,32,32,0.06); color: var(--wrong); }
+
+  /* ─── DRAG & DROP (SORT) ─── */
+  .sort-container { display: flex; flex-direction: column; gap: 8px; }
+  .sort-item {
+    background: #fff;
+    border: 1.5px solid var(--parch2);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 0.92rem;
+    cursor: grab;
+    user-select: none;
+    transition: box-shadow 0.15s, border-color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .sort-item:active { cursor: grabbing; }
+  .sort-item.dragging { opacity: 0.4; }
+  .sort-item.drag-over { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(184,146,46,0.3); }
+  .sort-item.correct-sort { border-color: var(--correct); background: rgba(46,107,71,0.07); }
+  .sort-item.wrong-sort   { border-color: var(--wrong); background: rgba(139,32,32,0.07); }
+  .drag-handle { color: #bbb; font-size: 1.1rem; flex-shrink: 0; }
+
+  /* ─── HIGHLIGHT WORDS ─── */
+  .highlight-btn {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1.5px solid var(--parch2);
+    margin: 2px;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    background: #fff;
+    transition: all 0.15s;
+    color: var(--ink);
+  }
+  .highlight-btn:hover { border-color: var(--indigo); background: rgba(45,42,94,0.06); }
+  .highlight-btn.selected-vp { border-color: var(--indigo); background: rgba(45,42,94,0.12); color: var(--indigo); font-weight: 600; }
+  .highlight-btn.selected-zp { border-color: var(--sage); background: rgba(92,127,105,0.15); color: var(--sage); font-weight: 600; }
+  .highlight-btn.correct-hl { border-color: var(--correct); background: rgba(46,107,71,0.12); color: var(--correct); }
+  .highlight-btn.wrong-hl   { border-color: var(--wrong); background: rgba(139,32,32,0.1); color: var(--wrong); }
+
+  /* ─── TOGGLE CLASSIFIER ─── */
+  .classify-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+  .classify-sentence { flex: 1; min-width: 220px; font-size: 0.92rem; line-height: 1.55; font-style: italic; }
+  .type-toggle {
+    display: flex;
+    border: 1.5px solid var(--parch2);
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .type-toggle button {
+    background: none;
+    border: none;
+    padding: 7px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    color: #888;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+  .type-toggle button.active-vp { background: var(--indigo); color: #fff; }
+  .type-toggle button.active-zp { background: var(--sage); color: #fff; }
+  .type-toggle button:hover:not(.active-vp):not(.active-zp) { background: var(--parch2); }
+
+  /* ─── PROGRESS ─── */
+  .progress-wrap {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--indigo);
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 100;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 3px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  .progress-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.7);
+    white-space: nowrap;
+  }
+  .total-score {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+
+  /* ─── ERROR CORRECTION DIFF ─── */
+  .error-word { cursor: pointer; display: inline-block; padding: 1px 4px; border-radius: 3px; border: 1px solid transparent; transition: all 0.15s; }
+  .error-word:hover { border-color: var(--burg); background: rgba(124,38,51,0.08); }
+  .error-word.marked { background: rgba(124,38,51,0.15); border-color: var(--burg); color: var(--burg); font-weight: 600; }
+  .error-word.true-error { background: rgba(139,32,32,0.12); border-color: var(--wrong); color: var(--wrong); text-decoration: line-through; }
+  .error-word.false-alarm { background: rgba(59,126,161,0.1); border-color: var(--sky); }
+
+  /* ─── MISC ─── */
+  @media(max-width: 640px) {
+    .compass { grid-template-columns: 1fr; }
+    .input-row { flex-direction: column; }
+    input[type=text] { width: 100%; }
+  }
+
+  .badge {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .badge-vp { background: rgba(45,42,94,0.12); color: var(--indigo); }
+  .badge-zp { background: rgba(92,127,105,0.15); color: var(--sage); }
+  .badge-c2 { background: rgba(184,146,46,0.15); color: var(--gold); }
+
+  .hint-toggle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--sky);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-top: 6px;
+    display: block;
+    text-decoration: underline dotted;
+  }
+  .hint-box {
+    display: none;
+    background: rgba(59,126,161,0.08);
+    border-left: 3px solid var(--sky);
+    border-radius: 0 6px 6px 0;
+    padding: 8px 12px;
+    font-size: 0.83rem;
+    color: #1a4060;
+    margin-top: 8px;
+    line-height: 1.55;
+  }
+  .hint-box.show { display: block; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ HEADER ══════════════════ -->
+<header>
+  <div class="header-inner">
+    <p class="eyebrow">Deutsch C1 · C2 · Grammatik</p>
+    <h1>Vorgangs&shy;passiv &amp; Zustands&shy;passiv</h1>
+    <p class="subtitle">Acht Übungstypen — von der Identifikation über Lückentexte bis hin zur Fehlerkorrektur und Umformung. Niveau C1/C2 mit authentischen Sätzen aus Literatur, Presse und Wissenschaft.</p>
+    <div class="score-strip">
+      <div class="score-item"><span class="val" id="correct-count">0</span><span class="lbl">Richtig</span></div>
+      <div class="score-item"><span class="val" id="wrong-count">0</span><span class="lbl">Falsch</span></div>
+      <div class="score-item"><span class="val" id="total-count">0</span><span class="lbl">Gesamt</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════ COMPASS ══════════════════ -->
+<div class="compass-wrap">
+  <div class="compass">
+    <div class="compass-side vp">
+      <h3>Vorgangspassiv</h3>
+      <p>Beschreibt einen <strong>Prozess oder Vorgang</strong> — etwas geschieht, wird getan. Fokus auf die Handlung selbst.</p>
+      <code>werden + Partizip II</code>
+      <code>Das Fenster <em>wird geöffnet</em>. (Präsens)</code>
+      <code>Das Fenster <em>wurde geöffnet</em>. (Präteritum)</code>
+      <code>Das Fenster <em>ist geöffnet worden</em>. (Perfekt)</code>
+    </div>
+    <div class="compass-side zp">
+      <h3>Zustandspassiv</h3>
+      <p>Beschreibt einen <strong>Zustand oder ein Ergebnis</strong> — die Folge einer abgeschlossenen Handlung.</p>
+      <code>sein + Partizip II</code>
+      <code>Das Fenster <em>ist geöffnet</em>. (Zustand)</code>
+      <code>Das Fenster <em>war geöffnet</em>. (Vergangenheit)</code>
+      <code>Das Fenster <em>wird geöffnet sein</em>. (Futur II)</code>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<!-- ══════════════════════════════════════════════
+     ÜBUNG 1: KLASSIFIKATION (TOGGLE)
+══════════════════════════════════════════════ -->
+<div class="section-label">
+  <span class="section-num">1</span>
+  <div class="section-title-block">
+    <h2>Klassifikation — Vorgangs- oder Zustandspassiv?</h2>
+    <p class="sec-desc">Klicke auf VP oder ZP, um den Satztyp zu bestimmen. Authentische Sätze, viele mit Stolperfallen.</p>
+  </div>
+</div>
+<div class="section-divider"></div>
+
+<div class="card" id="classify-card">
+  <p class="q-text">Ordne jeden Satz dem richtigen Passivtyp zu. <em>Tipp: Ändert sich bei einem Zustandspassiv der Zustand, wenn du den Satz liest? Nein — er ist bereits das Ergebnis.</em></p>
+
+  <div id="classify-list"></div>
+
+  <button class="check-btn" onclick="checkClassify()" style="margin-top:14px;">Auswertung</button>
+  <div class="feedback" id="classify-feedback"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     ÜBUNG 2: LÜCKENTEXT — KORREKTE FORM EINSETZEN
+══════════════════════════════════════════════ -->
+<div class="section-label">
+  <span class="section-num">2</span>
+  <div class="section-title-block">
+    <h2>Lückentext — die richtige Passivform</h2>
+    <p class="sec-desc">Setze Vorgangs- oder Zustandspassiv in der angegebenen Zeitform ein. Achte auf Genus und Numerus.</p>
+  </div>
+</div>
+<div class="section-divider"></div>
+
+<div id="gap-cards"></div>
+
+<!-- ══════════════════════════════════════════════
+     ÜBUNG 3: FEHLERKORREKTUR
+══════════════════════════════════════════════ -->
+<div class="section-label">
+  <span class="section-num">3</span>
+  <div class="section-title-block">
+    <h2>Fehlerkorrektur — Passivfehler entlarven</h2>
+    <p class="sec-desc">Jeder Satz enthält <em>genau einen</em> grammatischen Fehler im Passiv. Klicke das falsche Wort an und gib die Korrektur ein.</p>
+  </div>
+</div>
+<div class="section-divider"></div>
+
+<div id="error-cards"></div>
+
+<!-- ══════════════════════════════════════════════
+     ÜBUNG 4: AKTIV → PASSIV UMFORMUNG
+══════════════════════════════════════════════ -->
+<div class="section-label">
+  <span class="section-num">4</span>
+  <div class="section-title-block">
+    <h2>Transformation — Aktiv → Passiv</h2>
+    <p class="sec-desc">Forme den Aktivsatz in den angegebenen Passivtyp um. Das Agens kann entfallen oder mit <em>von/durch</em> erhalten bleiben — entscheide kontextuell.</p>
+  </div>
+</div>
+<div class="section-divider"></div>
+
+<div id="transform-cards"></div>
+
+<!-- ══════════════════════════════════════════════
+     ÜBUNG 5: MODALPASSIV
+══════════════════════════════════════════════ -->
+<div class="section-label">
+  <span class="section-num">5</span>
+  <div class="section-title-block">
+    <h2>Modalpassiv <span class="badge badge-c2">C2</span></h2>
+    <p class="sec-desc">Passiv mit Modalverben — in verschiedenen Zeiten und mit unterschiedlichen Nuancen. Wähle die semantisch korrekte Variante.</p>
+  </div>
+</div>
+<div class="section-divider"></div>
+
+<div id="modal-cards"></div>
+
+<!-- ══════════════════════════════════════════════
+     ÜBUNG 6: PASSIVERSATZ
+══════════════════════════════════════════════ -->
+<div class="section-label">
+  <span class="section-num">6</span>
+  <div class="section-title-block">
+    <h2>Passiversatz — funktionale Äquivalente <span class="badge badge-c2">C2</span></h2>
+    <p class="sec-desc">Forme die Passivsätze in gleichwertige Konstruktionen um: <em>sein + zu-Infinitiv</em>, <em>sich lassen + Infinitiv</em>, <em>man-Satz</em> oder <em>Reflexivpassiv</em>.</p>
+  </div>
+</div>
+<div class="section-divider"></div>
+
+<div id="ersatz-cards"></div>
+
+<!-- ══════════════════════════════════════════════
+     ÜBUNG 7: KOHÄRENZTEXT — LÜCKENTEXT IM KONTEXT
+══════════════════════════════════════════════ -->
+<div class="section-label">
+  <span class="section-num">7</span>
+  <div class="section-title-block">
+    <h2>Kohärenztext — Passiv im Textzusammenhang <span class="badge badge-c2">C2</span></h2>
+    <p class="sec-desc">Ein zusammenhängender Text mit mehreren Lücken. Entscheide in jedem Fall, welche Passivform zum Kontext passt.</p>
+  </div>
+</div>
+<div class="section-divider"></div>
+
+<div class="card">
+  <p class="q-number">Übung 7 · Text: „Stadtumbau"</p>
+  <p class="q-text" style="margin-bottom:16px;"><em>Lies den Text und fülle alle Lücken mit der korrekten Passivform. Die Zeitform und der Typ (VP/ZP) sind angegeben.</em></p>
+
+  <div class="gap-text" id="kohärenz-text"></div>
+  <button class="check-btn" onclick="checkKohärenz()" style="margin-top:12px;">Text auswerten</button>
+  <div class="feedback" id="kohärenz-feedback"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     ÜBUNG 8: SATZSTELLUNG
+══════════════════════════════════════════════ -->
+<div class="section-label">
+  <span class="section-num">8</span>
+  <div class="section-title-block">
+    <h2>Satzpuzzle — Wortstellung im Passiv <span class="badge badge-c2">C2</span></h2>
+    <p class="sec-desc">Ordne die Wortgruppen per Drag &amp; Drop zum korrekten Passivsatz. Beachte die Verbklammer und die Stellung von Agens, Adverbial und Negation.</p>
+  </div>
+</div>
+<div class="section-divider"></div>
+
+<div id="sort-cards"></div>
+
+</main>
+
+<!-- ══════════════════ PROGRESS BAR ══════════════════ -->
+<div class="progress-wrap">
+  <span class="progress-label" id="prog-label">Fortschritt</span>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+  <span class="total-score" id="score-display">0 / 0</span>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  SCORE SYSTEM
+// ══════════════════════════════════════════
+let totalCorrect = 0, totalWrong = 0, totalAnswered = 0, totalQuestions = 0;
+
+function registerQuestion(n = 1) { totalQuestions += n; updateUI(); }
+function recordAnswer(correct, n = 1) {
+  totalAnswered += n;
+  if (correct) totalCorrect += n; else totalWrong += n;
+  updateUI();
+}
+function updateUI() {
+  document.getElementById('correct-count').textContent = totalCorrect;
+  document.getElementById('wrong-count').textContent = totalWrong;
+  document.getElementById('total-count').textContent = totalAnswered;
+  document.getElementById('score-display').textContent = `${totalCorrect} / ${totalQuestions}`;
+  const pct = totalQuestions > 0 ? (totalAnswered / totalQuestions) * 100 : 0;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = `${totalAnswered} von ${totalQuestions} bearbeitet`;
+}
+
+// ══════════════════════════════════════════
+//  ÜBUNG 1: KLASSIFIKATION
+// ══════════════════════════════════════════
+const classifyData = [
+  { s: "Das Manuskript war bereits korrigiert, als der Verlag anrief.", type: "ZP", exp: "Das Partizip II mit <em>war</em> beschreibt den Zustand des Manuskripts — Ergebnis einer vorausgegangenen Handlung." },
+  { s: "Die Brücke wird derzeit wegen Sicherheitsmängeln gesperrt.", type: "VP", exp: "<em>Wird … gesperrt</em> = Vorgang (werden + Partizip II): die Sperrung findet gerade statt." },
+  { s: "Die Akten wurden drei Jahre lang archiviert, bevor man sie vernichtete.", type: "VP", exp: "<em>Wurden archiviert</em> = Vorgangspassiv Präteritum — der Prozess des Archivierens ist gemeint." },
+  { s: "Nach der Renovierung waren alle Fenster neu eingebaut.", type: "ZP", exp: "<em>Waren eingebaut</em> = Zustand nach abgeschlossener Arbeit. Kein Prozess mehr erkennbar." },
+  { s: "Das Gesetz ist inzwischen dreimal geändert worden.", type: "VP", exp: "Vorgangspassiv Perfekt: <em>ist … worden</em>. Das Partizip II von <em>werden</em> im Perfekt lautet <em>worden</em> (nicht <em>geworden</em>)." },
+  { s: "Die Küste ist seit dem Sturm vollständig verändert.", type: "ZP", exp: "<em>Ist verändert</em> ohne <em>worden</em> = Zustandspassiv. Es liegt ein Nachzustand vor, kein beschriebener Prozess." },
+  { s: "Der Angeklagte war freigesprochen worden, noch bevor die Berufung eingelegt wurde.", type: "VP", exp: "Vorgangspassiv Plusquamperfekt: <em>war … worden</em>. Der Freispruch-Vorgang liegt zeitlich vor einem anderen Ereignis." },
+  { s: "Die Tür zum Labor ist zu allen Zeiten verschlossen.", type: "ZP", exp: "Dauerhafter Zustand — kein zeitlicher Bezug auf einen Verschließvorgang. Zustandspassiv mit Gegenwartsbedeutung." },
+  { s: "Es wurde intensiv über den Vertragsentwurf verhandelt.", type: "VP", exp: "Unpersönliches Vorgangspassiv mit <em>es</em> als Platzhalter. Das Verhandeln ist der laufende/stattgefundene Vorgang." },
+  { s: "Das Gebäude war zum Zeitpunkt des Einsturzes bereits evakuiert.", type: "ZP", exp: "Zustand zum Zeitpunkt des Einsturzes — <em>war evakuiert</em> beschreibt das Ergebnis einer vorherigen Evakuierungshandlung." },
+  { s: "Die Ergebnisse werden morgen früh bekanntgegeben.", type: "VP", exp: "Vorgangspassiv Präsens mit Futurverweis. Der Vorgang des Bekanntgebens steht bevor." },
+  { s: "Der Vertrag ist unterzeichnet — wir können beginnen.", type: "ZP", exp: "Kurzer Zustandsbericht: <em>ist unterzeichnet</em> signalisiert den abgeschlossenen Zustand als Voraussetzung für den nächsten Schritt." },
+];
+
+function buildClassify() {
+  registerQuestion(classifyData.length);
+  const list = document.getElementById('classify-list');
+  classifyData.forEach((item, i) => {
+    const row = document.createElement('div');
+    row.className = 'classify-row';
+    row.innerHTML = `
+      <div class="classify-sentence">„${item.s}"</div>
+      <div class="type-toggle" id="toggle-${i}">
+        <button onclick="setToggle(${i},'VP')" id="vp-${i}">VP</button>
+        <button onclick="setToggle(${i},'ZP')" id="zp-${i}">ZP</button>
+      </div>`;
+    list.appendChild(row);
+  });
+}
+const classifyAnswers = {};
+function setToggle(i, type) {
+  classifyAnswers[i] = type;
+  document.getElementById(`vp-${i}`).className = type === 'VP' ? 'active-vp' : '';
+  document.getElementById(`zp-${i}`).className = type === 'ZP' ? 'active-zp' : '';
+}
+function checkClassify() {
+  let c = 0, w = 0;
+  classifyData.forEach((item, i) => {
+    const chosen = classifyAnswers[i];
+    if (!chosen) return;
+    const vpBtn = document.getElementById(`vp-${i}`);
+    const zpBtn = document.getElementById(`zp-${i}`);
+    [vpBtn, zpBtn].forEach(b => b.disabled = true);
+    if (chosen === item.type) { c++; }
+    else { w++; }
+    // visual feedback
+    const correctBtn = item.type === 'VP' ? vpBtn : zpBtn;
+    const wrongBtn   = item.type === 'VP' ? zpBtn : vpBtn;
+    correctBtn.style.background = 'var(--correct)'; correctBtn.style.color = '#fff';
+    if (chosen !== item.type) { wrongBtn.style.background = 'var(--wrong)'; wrongBtn.style.color = '#fff'; }
+  });
+  recordAnswer(true, c); recordAnswer(false, w);
+  document.querySelector('#classify-card .check-btn').disabled = true;
+  const fb = document.getElementById('classify-feedback');
+  fb.className = 'feedback show ' + (w === 0 ? 'ok' : w <= 3 ? 'info' : 'err');
+  fb.innerHTML = `<strong>${c} von ${classifyData.length} richtig.</strong><br>
+  ${classifyData.map((d, i) => `<span style="display:block;margin-top:6px;"><strong>→ ${d.type}:</strong> <em>${d.s}</em><br><small>${d.exp}</small></span>`).join('')}`;
+}
+
+// ══════════════════════════════════════════
+//  ÜBUNG 2: LÜCKENTEXT
+// ══════════════════════════════════════════
+const gapData = [
+  {
+    id: 'g1',
+    label: 'Übung 2a · Vorgangspassiv Präteritum',
+    prompt: 'Fülle die Lücken mit <strong>Vorgangspassiv Präteritum</strong>.',
+    text: 'Im 19. Jahrhundert __VERB1__ die meisten Städte grundlegend __VERB1P__ [umstrukturieren]. Alte Gebäude __VERB2__ ohne Rücksicht auf historischen Wert __VERB2P__ [abreißen], und neue Straßen __VERB3__ durch gewachsene Viertel __VERB3P__ [schlagen].',
+    blanks: [
+      { key: '__VERB1__/__VERB1P__', answer: 'wurden … umstrukturiert', hint: 'wurden + Partizip II' },
+      { key: '__VERB2__/__VERB2P__', answer: 'wurden … abgerissen', hint: 'wurden + Partizip II' },
+      { key: '__VERB3__/__VERB3P__', answer: 'wurden … geschlagen', hint: 'wurden + Partizip II (unregelmäßig!)' },
+    ],
+    inputs: [
+      { id: 'g1a', before: 'Im 19. Jahrhundert', after: 'die meisten Städte grundlegend', placeholder: 'wurden … umstrukturiert', answer: ['wurden … umstrukturiert', 'wurden...umstrukturiert'] },
+      { id: 'g1b', before: 'Alte Gebäude', after: 'ohne Rücksicht auf historischen Wert', placeholder: 'wurden … abgerissen', answer: ['wurden … abgerissen', 'wurden...abgerissen'] },
+      { id: 'g1c', before: 'und neue Straßen', after: 'durch gewachsene Viertel.', placeholder: 'wurden … geschlagen', answer: ['wurden … geschlagen', 'wurden...geschlagen'] },
+    ]
+  },
+  {
+    id: 'g2',
+    label: 'Übung 2b · Zustandspassiv Präsens & Präteritum',
+    prompt: 'Forme Vorgangs- in <strong>Zustandspassiv</strong> um. Achte auf die Zeitform.',
+    inputs: [
+      { id: 'g2a', before: 'Das Archiv', after: 'seit letzter Woche — niemand kommt mehr hinein. (Präsens)', placeholder: 'ist gesperrt', answer: ['ist gesperrt'] },
+      { id: 'g2b', before: 'Die Wunden', after: 'als die Ärztin eintraf. (Präteritum)', placeholder: 'waren verbunden', answer: ['waren verbunden'] },
+      { id: 'g2c', before: 'Der Tisch', after: 'bereits festlich, als die Gäste kamen. (Zustandspassiv Pläteritum)', placeholder: 'war gedeckt', answer: ['war gedeckt'] },
+      { id: 'g2d', before: 'Bis übermorgen', after: 'alle Formulare vollständig. (Futur I — Zustandspassiv)', placeholder: 'werden … ausgefüllt sein', answer: ['werden … ausgefüllt sein', 'werden...ausgefüllt sein'] },
+    ]
+  },
+  {
+    id: 'g3',
+    label: 'Übung 2c · Vorgangspassiv Perfekt vs. Zustandspassiv — Unterscheidung',
+    prompt: 'Vorgangspassiv Perfekt oder Zustandspassiv? Setze die richtige Form ein.',
+    inputs: [
+      { id: 'g3a', before: 'Das Protokoll', after: 'von der Sekretärin — bitte lies es durch. [VP Perfekt]', placeholder: 'ist getippt worden', answer: ['ist getippt worden'] },
+      { id: 'g3b', before: 'Das Protokoll', after: 'und liegt auf dem Schreibtisch. [ZP]', placeholder: 'ist getippt', answer: ['ist getippt'] },
+      { id: 'g3c', before: 'Der Brief', after: 'bereits zweimal — ohne Antwort. [VP Perfekt]', placeholder: 'ist verschickt worden', answer: ['ist verschickt worden'] },
+      { id: 'g3d', before: 'Der Brief', after: 'noch — hier, siehst du? [ZP]', placeholder: 'ist nicht verschickt', answer: ['ist nicht verschickt'] },
+    ]
+  }
+];
+
+function buildGaps() {
+  const cont = document.getElementById('gap-cards');
+  gapData.forEach(group => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<p class="q-number">${group.label}</p>
+      <p class="q-text">${group.prompt}</p>`;
+    group.inputs.forEach(inp => {
+      const row = document.createElement('div');
+      row.style.cssText = 'margin-bottom:12px; font-size:0.95rem; line-height:2;';
+      row.innerHTML = `${inp.before} <input type="text" id="${inp.id}" placeholder="${inp.placeholder}" style="min-width:200px;"> ${inp.after}`;
+      card.appendChild(row);
+      registerQuestion();
+    });
+    const fb = document.createElement('div');
+    fb.className = 'feedback'; fb.id = group.id + '-fb';
+    const btn = document.createElement('button');
+    btn.className = 'check-btn'; btn.textContent = 'Prüfen';
+    btn.onclick = () => checkGapGroup(group, btn);
+    card.appendChild(btn); card.appendChild(fb);
+    cont.appendChild(card);
+  });
+}
+function normalize(s) { return s.trim().toLowerCase().replace(/\s*…\s*/g,'…').replace(/\s*\.\.\.\s*/g,'…'); }
+function checkGapGroup(group, btn) {
+  btn.disabled = true;
+  let c = 0, w = 0;
+  let lines = [];
+  group.inputs.forEach(inp => {
+    const el = document.getElementById(inp.id);
+    const val = normalize(el.value);
+    const ok = inp.answer.some(a => normalize(a) === val || val.replace(/…/g,'...') === normalize(a).replace(/…/g,'...') || val === normalize(a).replace(/\s…\s/g,' ... '));
+    if (ok) { el.classList.add('correct-input'); c++; }
+    else { el.classList.add('wrong-input'); el.disabled = true; w++; }
+    lines.push(`<span style="display:block;font-size:0.85rem;margin-top:4px;"><strong>${inp.before} <span style="color:var(--correct)">${inp.answer[0]}</span> ${inp.after}</strong></span>`);
+  });
+  recordAnswer(true, c); recordAnswer(false, w);
+  const fb = document.getElementById(group.id + '-fb');
+  fb.className = 'feedback show ' + (w === 0 ? 'ok' : 'info');
+  fb.innerHTML = `<strong>${c} von ${group.inputs.length} richtig.</strong> Lösungen:${lines.join('')}`;
+}
+
+// ══════════════════════════════════════════
+//  ÜBUNG 3: FEHLERKORREKTUR
+// ══════════════════════════════════════════
+const errorData = [
+  {
+    id: 'e1', label: 'Fehler 1',
+    words: ['Das','Kunstwerk','ist','von','einem','Restaurator','sorgfältig','restauriert','geworden.'],
+    error: 8, // "geworden" — Zustandspassiv braucht kein "geworden", oder: wenn VP Perfekt gemeint, dann "worden"
+    correction: 'worden',
+    explanation: 'Im Vorgangspassiv Perfekt heißt es <em>ist … worden</em> (nicht <em>geworden</em>). <em>Geworden</em> wäre das Vollverb „werden" im Perfekt, was hier sinnlos ist.',
+    hint: 'Unterscheide: VP Perfekt → <em>worden</em>; ZP → kein <em>worden/geworden</em>.'
+  },
+  {
+    id: 'e2', label: 'Fehler 2',
+    words: ['Zum','Zeitpunkt','der','Inspektion','war','das','gesamte','Inventar','erfasst','worden.'],
+    error: 9, // "worden" — das ist ZP (Zustand), daher kein "worden"
+    correction: '(worden entfernen)',
+    explanation: 'Mit Zeitangabe <em>„zum Zeitpunkt"</em> und ZP-Bedeutung (Zustand, kein Prozess): <em>war … erfasst</em> — kein <em>worden</em>.',
+    hint: 'ZP = sein + Partizip II (kein worden). Teste: Beschreibt der Satz einen Zustand oder einen Prozess?'
+  },
+  {
+    id: 'e3', label: 'Fehler 3',
+    words: ['Der','Staudamm','wird','seit','Jahren','von','Ingenieuren','überwacht','sein.'],
+    error: 8, // "sein" — VP Präsens braucht kein "sein"
+    correction: '(„sein" entfernen)',
+    explanation: 'Vorgangspassiv Präsens: <em>wird … überwacht</em> — fertig. Das Wort <em>sein</em> macht daraus fälschlich ein Futur-II-Konstrukt.',
+    hint: 'VP Präsens: nur <em>werden + Partizip II</em>. Futur II des Passivs wäre: <em>wird überwacht worden sein</em>.'
+  },
+  {
+    id: 'e4', label: 'Fehler 4',
+    words: ['Alle','Türen','sind','abends','automatisch','geschlossen','worden.'],
+    error: 6, // "geschlossen worden" — wenn ZP gemeint: nur "geschlossen"; wenn VP Perfekt: OK aber dann Bedeutung
+    correction: 'geschlossen (= ZP)',
+    explanation: 'Wenn ein dauerhafter Zustand am Abend beschrieben wird (Zustandspassiv), heißt es: <em>sind … geschlossen</em>. Mit <em>worden</em> würde VP Perfekt entstehen — semantisch möglich, aber ungewöhnlich für eine Routine.',
+    hint: 'Routinen und Dauerzustände → eher ZP. VP Perfekt betont das einmalige Ereignis.'
+  },
+  {
+    id: 'e5', label: 'Fehler 5',
+    words: ['Das','Konzept','hatte','vor','der','Abstimmung','überarbeitet','worden.'],
+    error: 2, // "hatte" — VP Plusquamperfekt = war + worden, nicht hatte
+    correction: 'war',
+    explanation: '<em>Hatte … worden</em> ist falsch: VP Plusquamperfekt bildet man mit <em>war … worden</em> (Hilfsverb <em>sein</em>, nicht <em>haben</em>).',
+    hint: 'Das Passiv bildet Perfekt und Plusquamperfekt immer mit <em>sein/war/war gewesen</em>, nie mit <em>haben/hatte</em>.'
+  },
+  {
+    id: 'e6', label: 'Fehler 6',
+    words: ['Die','Vorwürfe','werden','von','der','Öffentlichkeit','noch','immer','diskutiert','sein.'],
+    error: 9, // "sein" → fehlt hier: VP Präsens = werden diskutiert (ohne sein); Futur wäre: werden diskutiert werden
+    correction: '(„sein" entfernen — VP Präsens)',
+    explanation: 'VP Präsens lautet: <em>werden … diskutiert</em>. Das angehängte <em>sein</em> ergibt grammatisch keinen Sinn hier. Futur I wäre: <em>werden … diskutiert werden</em>.',
+    hint: 'VP Präsens: <em>werden + PII</em>. Das zweite „werden" (Futur) hat eine andere Funktion.'
+  },
+];
+
+function buildErrors() {
+  const cont = document.getElementById('error-cards');
+  errorData.forEach(item => {
+    registerQuestion();
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<p class="q-number">${item.label} <span class="badge badge-c2">Fehler finden</span></p>
+      <p class="q-text">Klicke das falsche Wort an:</p>`;
+    const sentence = document.createElement('p');
+    sentence.style.cssText = 'font-size:1rem;line-height:2;margin-bottom:12px;';
+    item.words.forEach((w, wi) => {
+      const span = document.createElement('span');
+      span.className = 'error-word';
+      span.textContent = w + (wi < item.words.length - 1 ? ' ' : '');
+      span.dataset.wi = wi;
+      span.onclick = () => toggleErrorWord(item.id, wi, span, item.error);
+      sentence.appendChild(span);
+    });
+    card.appendChild(sentence);
+    const hint = document.createElement('button');
+    hint.className = 'hint-toggle'; hint.textContent = '▸ Tipp anzeigen';
+    hint.onclick = () => {
+      const hb = card.querySelector('.hint-box');
+      hb.classList.toggle('show');
+      hint.textContent = hb.classList.contains('show') ? '▾ Tipp ausblenden' : '▸ Tipp anzeigen';
+    };
+    card.appendChild(hint);
+    const hintBox = document.createElement('div');
+    hintBox.className = 'hint-box'; hintBox.innerHTML = item.hint;
+    card.appendChild(hintBox);
+
+    const corrInput = document.createElement('div');
+    corrInput.style.cssText = 'margin-top:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;';
+    corrInput.innerHTML = `<label style="font-size:0.85rem;color:#666;">Korrektur:</label>
+      <input type="text" id="corr-${item.id}" placeholder="Richtige Form" style="min-width:180px;">
+      <button class="check-btn" id="btn-${item.id}" onclick="checkError('${item.id}', ${item.error})">Prüfen</button>`;
+    card.appendChild(corrInput);
+
+    const fb = document.createElement('div');
+    fb.className = 'feedback'; fb.id = 'fb-' + item.id;
+    card.appendChild(fb);
+    cont.appendChild(card);
+  });
+}
+const markedErrors = {};
+function toggleErrorWord(id, wi, span, correctIdx) {
+  if (markedErrors[id] !== undefined && markedErrors[id] === wi) {
+    span.classList.remove('marked');
+    delete markedErrors[id];
+  } else {
+    // unmark previous
+    document.querySelectorAll(`[data-wi]`).forEach(s => s.classList.remove('marked'));
+    span.classList.add('marked');
+    markedErrors[id] = wi;
+  }
+}
+function checkError(id, correctIdx) {
+  const item = errorData.find(e => e.id === id);
+  const marked = markedErrors[id];
+  const corrVal = document.getElementById('corr-' + id).value.trim().toLowerCase();
+  const btn = document.getElementById('btn-' + id);
+  btn.disabled = true;
+  const fb = document.getElementById('fb-' + id);
+  const wordCorrect = marked === correctIdx;
+  // We accept the correction somewhat loosely
+  const corrOk = corrVal.length > 1;
+  fb.className = 'feedback show ' + (wordCorrect ? 'ok' : 'err');
+  fb.innerHTML = `<strong>${wordCorrect ? '✓ Richtiges Wort gefunden!' : '✗ Falsches Wort markiert.'}</strong>
+  Fehlerwort: <span class="solution">${item.words[correctIdx]}</span>
+  Korrektur: <span class="solution">${item.correction}</span><br>
+  <em>${item.explanation}</em>`;
+  recordAnswer(wordCorrect);
+}
+
+// ══════════════════════════════════════════
+//  ÜBUNG 4: TRANSFORMATION
+// ══════════════════════════════════════════
+const transformData = [
+  {
+    id: 't1', label: 'Transformation 1',
+    task: 'Forme in <strong>Vorgangspassiv Präteritum</strong> um. Das Agens kann wegfallen.',
+    aktiv: 'Die Behörde genehmigte den Bauantrag erst nach drei Jahren.',
+    solution: 'Der Bauantrag wurde (von der Behörde) erst nach drei Jahren genehmigt.',
+    check: ['bauantrag wurde', 'genehmigt'],
+    hint: 'Akkusativobjekt (Bauantrag) wird Subjekt. Behörde: optional mit „von".'
+  },
+  {
+    id: 't2', label: 'Transformation 2',
+    task: 'Forme in <strong>Zustandspassiv Präsens</strong> um.',
+    aktiv: 'Jemand hat die Tür zur Terrasse verriegelt.',
+    solution: 'Die Tür zur Terrasse ist verriegelt.',
+    check: ['tür', 'ist verriegelt'],
+    hint: 'ZP: sein + Partizip II. Das Agens (jemand) entfällt vollständig.'
+  },
+  {
+    id: 't3', label: 'Transformation 3',
+    task: 'Forme in <strong>Vorgangspassiv Perfekt</strong> um. Behalte das Agens.',
+    aktiv: 'Drei internationale Gutachter haben den Bericht geprüft.',
+    solution: 'Der Bericht ist von drei internationalen Gutachtern geprüft worden.',
+    check: ['bericht ist', 'von drei', 'geprüft worden'],
+    hint: 'VP Perfekt: ist + Partizip II + worden.'
+  },
+  {
+    id: 't4', label: 'Transformation 4',
+    task: 'Forme in <strong>Zustandspassiv Plusquamperfekt</strong> um.',
+    aktiv: 'Man hatte alle Ausgänge blockiert, bevor der Alarm ausgelöst wurde.',
+    solution: 'Alle Ausgänge waren blockiert, bevor der Alarm ausgelöst wurde.',
+    check: ['ausgänge waren blockiert'],
+    hint: 'ZP Plusquamperfekt: war/waren + Partizip II. „Man" entfällt.'
+  },
+  {
+    id: 't5', label: 'Transformation 5 · komplex',
+    task: 'Forme in <strong>Vorgangspassiv mit Modalverb (Präteritum)</strong> um.',
+    aktiv: 'Die Kommission musste das Verfahren sofort einstellen.',
+    solution: 'Das Verfahren musste sofort eingestellt werden.',
+    check: ['verfahren musste', 'eingestellt werden'],
+    hint: 'Modalpassiv Präteritum: Modalverb (Prät.) + PII + werden (Infinitiv).'
+  },
+];
+
+function buildTransform() {
+  const cont = document.getElementById('transform-cards');
+  transformData.forEach(item => {
+    registerQuestion();
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<p class="q-number">${item.label}</p>
+      <p class="q-text">${item.task}</p>
+      <div style="background:var(--parch2);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.92rem;font-style:italic;">
+        <strong>Aktivsatz:</strong> ${item.aktiv}
+      </div>
+      <textarea id="ta-${item.id}" placeholder="Dein Passivsatz …" rows="2"></textarea>`;
+    const hint = document.createElement('button');
+    hint.className = 'hint-toggle'; hint.textContent = '▸ Tipp';
+    hint.onclick = () => { const hb = card.querySelector('.hint-box'); hb.classList.toggle('show'); hint.textContent = hb.classList.contains('show') ? '▾ Tipp' : '▸ Tipp'; };
+    card.appendChild(hint);
+    const hintBox = document.createElement('div');
+    hintBox.className = 'hint-box'; hintBox.textContent = item.hint;
+    card.appendChild(hintBox);
+    const btn = document.createElement('button');
+    btn.className = 'check-btn'; btn.style.marginTop = '10px'; btn.textContent = 'Prüfen';
+    btn.onclick = () => checkTransform(item, btn);
+    card.appendChild(btn);
+    const fb = document.createElement('div');
+    fb.className = 'feedback'; fb.id = 'fb-' + item.id;
+    card.appendChild(fb);
+    cont.appendChild(card);
+  });
+}
+function checkTransform(item, btn) {
+  btn.disabled = true;
+  const val = document.getElementById('ta-' + item.id).value.trim().toLowerCase();
+  const ok = item.check.every(part => val.includes(part.toLowerCase()));
+  recordAnswer(ok);
+  const fb = document.getElementById('fb-' + item.id);
+  fb.className = 'feedback show ' + (ok ? 'ok' : 'err');
+  fb.innerHTML = `<strong>${ok ? '✓ Sehr gut!' : '✗ Nicht ganz.'}</strong>
+  <span class="solution">Musterlösung: ${item.solution}</span>`;
+}
+
+// ══════════════════════════════════════════
+//  ÜBUNG 5: MODALPASSIV
+// ══════════════════════════════════════════
+const modalData = [
+  {
+    id: 'm1', label: 'Modalpassiv 1',
+    q: 'Die Berichte _____ bis Freitagmittag _____ _____. (müssen · einreichen · VP · Präsens)',
+    options: [
+      { t: 'müssen bis Freitagmittag eingereicht werden', correct: true },
+      { t: 'müssen bis Freitagmittag eingereicht worden sein', correct: false },
+      { t: 'müssen bis Freitagmittag einreichen werden', correct: false },
+      { t: 'sollen bis Freitagmittag eingereicht werden', correct: false },
+    ],
+    exp: 'VP Präsens + müssen: <em>müssen + PII + werden</em>. Die Verbklammer schließt den Satz: … eingereicht werden.'
+  },
+  {
+    id: 'm2', label: 'Modalpassiv 2',
+    q: 'Das Medikament _____ nicht ohne ärztliche Verschreibung _____ _____. (dürfen · abgeben · VP · Präsens)',
+    options: [
+      { t: 'darf nicht ohne ärztliche Verschreibung abgegeben werden', correct: true },
+      { t: 'darf nicht ohne ärztliche Verschreibung abgegeben sein', correct: false },
+      { t: 'kann nicht ohne ärztliche Verschreibung abgegeben werden', correct: false },
+      { t: 'darf nicht ohne ärztliche Verschreibung abzugeben werden', correct: false },
+    ],
+    exp: '<em>Darf</em> (nicht dürfen → Verbot) + PII + <em>werden</em>. Achtung: <em>abgegeben</em> (nicht abzugeben).'
+  },
+  {
+    id: 'm3', label: 'Modalpassiv 3 · Vergangenheit',
+    q: 'Das System _____ bereits vor Jahren _____ _____. (müssen · aktualisieren · VP · Präteritum)',
+    options: [
+      { t: 'musste bereits vor Jahren aktualisiert werden', correct: true },
+      { t: 'musste bereits vor Jahren aktualisiert worden sein', correct: false },
+      { t: 'müsste bereits vor Jahren aktualisiert werden', correct: false },
+      { t: 'hatte bereits vor Jahren aktualisiert werden müssen', correct: false },
+    ],
+    exp: 'VP Präteritum mit Modalverb: <em>musste + PII + werden</em>. Die letzte Option (Plusquamperfekt des Modalpassivs) wäre grammatisch, hat aber eine andere Bedeutung.'
+  },
+  {
+    id: 'm4', label: 'Modalpassiv 4 · Konjunktiv II',
+    q: 'Dieses Problem _____ eigentlich längst _____ _____. (sollen · lösen · Konjunktiv II Präteritum)',
+    options: [
+      { t: 'hätte eigentlich längst gelöst werden sollen', correct: true },
+      { t: 'sollte eigentlich längst gelöst werden', correct: false },
+      { t: 'hätte eigentlich längst gelöst werden müssen', correct: false },
+      { t: 'wäre eigentlich längst gelöst worden sollen', correct: false },
+    ],
+    exp: 'Konjunktiv II der Vergangenheit + Modalpassiv: <em>hätte + PII + werden + sollen</em>. Die Verbkette steht am Satzende. Option b wäre Indikativ Präteritum (andere Nuance).'
+  },
+  {
+    id: 'm5', label: 'Modalpassiv 5 · können / dürfen',
+    q: 'Wähle den Satz, der eine <strong>Erlaubnis</strong> (nicht eine Möglichkeit) ausdrückt:',
+    options: [
+      { t: 'Das Dokument kann online eingesehen werden.', correct: false },
+      { t: 'Das Dokument darf nur von autorisierten Personen eingesehen werden.', correct: true },
+      { t: 'Das Dokument muss online eingesehen werden.', correct: false },
+      { t: 'Das Dokument soll online eingesehen werden.', correct: false },
+    ],
+    exp: '<em>Dürfen</em> drückt Erlaubnis/Verbot aus, <em>können</em> drückt Möglichkeit aus. Beide bilden den Modalpassiv gleich: Modalverb + PII + werden.'
+  },
+];
+
+function buildModal() {
+  const cont = document.getElementById('modal-cards');
+  modalData.forEach(item => {
+    registerQuestion();
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<p class="q-number">${item.label}</p>
+      <p class="q-text">${item.q}</p>
+      <div class="options" id="opts-${item.id}"></div>
+      <div class="feedback" id="fb-${item.id}"></div>`;
+    cont.appendChild(card);
+    const opts = card.querySelector('.options');
+    item.options.forEach((o, oi) => {
+      const b = document.createElement('button');
+      b.className = 'opt-btn'; b.textContent = o.t;
+      b.onclick = () => {
+        opts.querySelectorAll('.opt-btn').forEach(btn => { btn.disabled = true; btn.classList.remove('selected'); });
+        b.classList.add(o.correct ? 'correct' : 'wrong');
+        item.options.forEach((oo, ooi) => { if (oo.correct) opts.children[ooi].classList.add('correct'); });
+        const fb = document.getElementById('fb-' + item.id);
+        fb.className = 'feedback show ' + (o.correct ? 'ok' : 'err');
+        fb.innerHTML = `<strong>${o.correct ? '✓ Richtig!' : '✗ Leider falsch.'}</strong> ${item.exp}`;
+        recordAnswer(o.correct);
+      };
+      opts.appendChild(b);
+    });
+  });
+}
+
+// ══════════════════════════════════════════
+//  ÜBUNG 6: PASSIVERSATZ
+// ══════════════════════════════════════════
+const ersatzData = [
+  {
+    id: 'er1', label: 'Passiversatz 1 · sein + zu-Infinitiv',
+    task: 'Forme um in <em>sein + zu-Infinitiv</em> (Bedeutung: Notwendigkeit/Möglichkeit).',
+    original: 'Das Ergebnis muss noch einmal überprüft werden.',
+    solution: 'Das Ergebnis ist noch einmal zu überprüfen.',
+    check: ['ist', 'zu überprüfen'],
+    exp: '<em>Sein + zu + Infinitiv</em> ersetzt <em>müssen/können</em> im Passiv. Nuance: eher objektive Notwendigkeit.'
+  },
+  {
+    id: 'er2', label: 'Passiversatz 2 · sich lassen + Infinitiv',
+    task: 'Forme um in <em>sich lassen + Infinitiv</em> (Bedeutung: Möglichkeit).',
+    original: 'Die Ergebnisse können nicht so einfach interpretiert werden.',
+    solution: 'Die Ergebnisse lassen sich nicht so einfach interpretieren.',
+    check: ['lassen sich', 'interpretieren'],
+    exp: '<em>Sich lassen + Infinitiv</em> drückt Möglichkeit aus. Das Reflexivpronomen richtet sich nach dem Subjekt.'
+  },
+  {
+    id: 'er3', label: 'Passiversatz 3 · man-Satz',
+    task: 'Forme um in einen <em>man-Satz</em> (Aktivform mit „man" als Subjekt).',
+    original: 'Hier wird nach 22 Uhr kein Lärm mehr geduldet.',
+    solution: 'Hier duldet man nach 22 Uhr keinen Lärm mehr.',
+    check: ['man', 'duldet', 'keinen lärm'],
+    exp: 'Mit <em>man</em> wird der Passivsatz zu einem Aktivsatz. Achtung: Kasusänderung — Passivsubjekt wird Akkusativobjekt.'
+  },
+  {
+    id: 'er4', label: 'Passiversatz 4 · Reflexivpassiv',
+    task: 'Forme um in ein <em>Reflexivpassiv</em> (Subjekt + sich + Verb).',
+    original: 'Das neue Modell kann kostengünstig produziert werden.',
+    solution: 'Das neue Modell produziert sich kostengünstig.',
+    check: ['modell produziert sich'],
+    exp: 'Das Reflexivpassiv wirkt natürlicher in bestimmten Kontexten (Werbung, Technik). Nicht alle Verben eignen sich dafür.'
+  },
+  {
+    id: 'er5', label: 'Passiversatz 5 · Rückumformung (Passiv → Aktiv)',
+    task: 'Forme den Passivsatz in den <em>Aktivsatz</em> zurück. Das Agens ist angegeben.',
+    original: 'Die Studie wurde von einem interdisziplinären Team über fünf Jahre durchgeführt.',
+    solution: 'Ein interdisziplinäres Team führte die Studie über fünf Jahre durch.',
+    check: ['team führte', 'studie', 'durch'],
+    exp: 'VP Präteritum → Aktiv Präteritum. Agens (von + Dativ) wird Subjekt im Nominativ. Akkusativobjekt: die Studie.'
+  },
+];
+
+function buildErsatz() {
+  const cont = document.getElementById('ersatz-cards');
+  ersatzData.forEach(item => {
+    registerQuestion();
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<p class="q-number">${item.label}</p>
+      <p class="q-text">${item.task}</p>
+      <div style="background:rgba(45,42,94,0.06);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.92rem;font-style:italic;">
+        ${item.original}
+      </div>
+      <textarea id="ta-${item.id}" placeholder="Deine Umformung …" rows="2"></textarea>`;
+    const btn = document.createElement('button');
+    btn.className = 'check-btn sage'; btn.style.marginTop = '10px'; btn.textContent = 'Prüfen';
+    btn.onclick = () => {
+      btn.disabled = true;
+      const val = document.getElementById('ta-' + item.id).value.trim().toLowerCase();
+      const ok = item.check.every(p => val.includes(p.toLowerCase()));
+      recordAnswer(ok);
+      const fb = document.getElementById('fb-' + item.id);
+      fb.className = 'feedback show ' + (ok ? 'ok' : 'err');
+      fb.innerHTML = `<strong>${ok ? '✓ Ausgezeichnet!' : '✗ Nicht ganz.'}</strong>
+        <span class="solution">Musterlösung: ${item.solution}</span>
+        <em style="display:block;margin-top:4px;font-size:0.82rem;">${item.exp}</em>`;
+    };
+    card.appendChild(btn);
+    const fb = document.createElement('div');
+    fb.className = 'feedback'; fb.id = 'fb-' + item.id;
+    card.appendChild(fb);
+    cont.appendChild(card);
+  });
+}
+
+// ══════════════════════════════════════════
+//  ÜBUNG 7: KOHÄRENZTEXT
+// ══════════════════════════════════════════
+const kohärenzBlanks = [
+  { id: 'k1', answer: 'wurden abgerissen', alt: ['wurden...abgerissen'], label: 'VP Prät.', hint: 'wurden + abgerissen' },
+  { id: 'k2', answer: 'war geplant', alt: [], label: 'ZP Prät.' },
+  { id: 'k3', answer: 'wurden umgesiedelt', alt: ['wurden...umgesiedelt'], label: 'VP Prät.' },
+  { id: 'k4', answer: 'ist errichtet worden', alt: [], label: 'VP Perf.' },
+  { id: 'k5', answer: 'sind begrünt', alt: [], label: 'ZP Präs.' },
+  { id: 'k6', answer: 'wird … bewertet werden', alt: ['wird bewertet werden'], label: 'VP Futur I' },
+];
+function buildKohärenz() {
+  const el = document.getElementById('kohärenz-text');
+  el.innerHTML = `
+    Anfang der 1970er Jahre <input class="gap-input" id="k1" placeholder="VP Prät." title="VP Präteritum: wurden + PII"> ganze Straßenzüge im Altstadtbereich, weil ein modernes Verwaltungszentrum entstehen sollte. Bereits zuvor <input class="gap-input" id="k2" placeholder="ZP Prät." title="ZP Präteritum: war + PII"> der Abriss für viele Jahrzehnte, ohne dass die Bewohnerinnen und Bewohner je gefragt worden wären. Hunderte von Mietern <input class="gap-input" id="k3" placeholder="VP Prät." title="VP Präteritum: wurden + PII"> in die Peripherie, fern ihrer sozialen Netzwerke. Das Verwaltungszentrum selbst <input class="gap-input" id="k4" placeholder="VP Perf." title="VP Perfekt: ist + PII + worden"> inzwischen, doch steht es heute unter Denkmalschutz — eine bittere Ironie des Stadtplanerlebens. Die Dächer der Gebäude <input class="gap-input" id="k5" placeholder="ZP Präs." title="ZP Präsens: sind + PII"> und dienen als Retentionsflächen. Wie das Projekt langfristig ökologisch und sozial <input class="gap-input" id="k6" placeholder="VP Futur I" title="VP Futur I: wird + PII + werden">, bleibt abzuwarten.
+  `;
+}
+function checkKohärenz() {
+  let c = 0, w = 0;
+  let lines = [];
+  kohärenzBlanks.forEach(b => {
+    const el = document.getElementById(b.id);
+    const val = normalize(el.value);
+    const ok = normalize(b.answer) === val || b.alt.some(a => normalize(a) === val);
+    if (ok) { el.classList.add('correct-input'); c++; }
+    else { el.classList.add('wrong-input'); w++; }
+    lines.push(`<span style="display:block;font-size:0.82rem;margin-top:3px;">[${b.label}] → <strong style="color:var(--correct)">${b.answer}</strong></span>`);
+    el.disabled = true;
+  });
+  recordAnswer(true, c); recordAnswer(false, w);
+  const fb = document.getElementById('kohärenz-feedback');
+  fb.className = 'feedback show ' + (w === 0 ? 'ok' : 'info');
+  fb.innerHTML = `<strong>${c} von ${kohärenzBlanks.length} richtig.</strong><br>Lösungen: ${lines.join('')}`;
+  document.querySelector('[onclick="checkKohärenz()"]').disabled = true;
+}
+
+// ══════════════════════════════════════════
+//  ÜBUNG 8: SATZPUZZLE (DRAG & DROP)
+// ══════════════════════════════════════════
+const sortData = [
+  {
+    id: 's1', label: 'Satzpuzzle 1 · VP Plusquamperfekt',
+    pieces: ['Sämtliche Unterlagen', 'bereits vor Beginn der Verhandlungen', 'waren', 'vernichtet worden.'],
+    correct: [0, 2, 1, 3],
+    solution: 'Sämtliche Unterlagen waren bereits vor Beginn der Verhandlungen vernichtet worden.',
+    exp: 'VP Plusquamperfekt: Subjekt – war/waren – Adverbial – Partizip II – worden.'
+  },
+  {
+    id: 's2', label: 'Satzpuzzle 2 · ZP mit Modalpartikel',
+    pieces: ['Die Wohnung', 'nach dem Einzug', 'offenbar', 'war', 'renoviert.'],
+    correct: [3, 0, 2, 4, 1],
+    solution: 'War die Wohnung nach dem Einzug offenbar renoviert?  → alternativ: Die Wohnung war nach dem Einzug offenbar renoviert.',
+    exp: 'ZP Präteritum: Subjekt – war – Modalpartikel – PII. Das Adverbial steht zentral im Mittelfeld.'
+  },
+  {
+    id: 's3', label: 'Satzpuzzle 3 · Modalpassiv Konjunktiv II',
+    pieces: ['Das Problem', 'hätte', 'längst', 'gelöst werden sollen.'],
+    correct: [0, 1, 2, 3],
+    solution: 'Das Problem hätte längst gelöst werden sollen.',
+    exp: 'KII Vergangenheit + Modalpassiv: hätte – Adverbial – PII – werden – sollen. Die gesamte Verbkette steht am Ende.'
+  },
+  {
+    id: 's4', label: 'Satzpuzzle 4 · Nebensatz im Passiv',
+    pieces: ['…, dass', 'die neuen Richtlinien', 'noch nicht', 'von allen Mitarbeitenden', 'gelesen worden sind.'],
+    correct: [0, 3, 2, 1, 4],
+    solution: '…, dass die neuen Richtlinien von allen Mitarbeitenden noch nicht gelesen worden sind.',
+    exp: 'Im Nebensatz steht das konjugierte Verb ganz am Ende: … gelesen worden sind. Das Agens (von + Dat.) steht im Vorfeld.'
+  },
+];
+
+function buildSort() {
+  const cont = document.getElementById('sort-cards');
+  sortData.forEach(item => {
+    registerQuestion();
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<p class="q-number">${item.label}</p>
+      <p class="q-text">Ordne die Wortgruppen zum richtigen Passivsatz:</p>
+      <div class="sort-container" id="sort-${item.id}"></div>`;
+    // shuffle
+    const shuffled = [...item.pieces].map((p, i) => ({p, i})).sort(() => Math.random() - 0.5);
+    const sc = card.querySelector('.sort-container');
+    shuffled.forEach(({p, i}) => {
+      const div = document.createElement('div');
+      div.className = 'sort-item';
+      div.draggable = true;
+      div.dataset.idx = i;
+      div.innerHTML = `<span class="drag-handle">⠿</span> ${p}`;
+      addDragHandlers(div, sc);
+      sc.appendChild(div);
+    });
+    const btn = document.createElement('button');
+    btn.className = 'check-btn'; btn.style.marginTop = '12px'; btn.textContent = 'Reihenfolge prüfen';
+    btn.onclick = () => checkSort(item, sc, btn);
+    card.appendChild(btn);
+    const fb = document.createElement('div');
+    fb.className = 'feedback'; fb.id = 'fb-' + item.id;
+    card.appendChild(fb);
+    cont.appendChild(card);
+  });
+}
+function addDragHandlers(el, container) {
+  let dragSrc = null;
+  el.addEventListener('dragstart', function() { dragSrc = this; this.classList.add('dragging'); });
+  el.addEventListener('dragend', function() { this.classList.remove('dragging'); container.querySelectorAll('.drag-over').forEach(e => e.classList.remove('drag-over')); });
+  el.addEventListener('dragover', function(e) { e.preventDefault(); this.classList.add('drag-over'); });
+  el.addEventListener('dragleave', function() { this.classList.remove('drag-over'); });
+  el.addEventListener('drop', function(e) {
+    e.preventDefault();
+    if (dragSrc && dragSrc !== this) {
+      const items = [...container.querySelectorAll('.sort-item')];
+      const srcIdx = items.indexOf(dragSrc);
+      const tgtIdx = items.indexOf(this);
+      if (srcIdx < tgtIdx) container.insertBefore(dragSrc, this.nextSibling);
+      else container.insertBefore(dragSrc, this);
+    }
+    this.classList.remove('drag-over');
+  });
+}
+function checkSort(item, sc, btn) {
+  btn.disabled = true;
+  const items = [...sc.querySelectorAll('.sort-item')];
+  const order = items.map(el => parseInt(el.dataset.idx));
+  const ok = item.correct.every((v, i) => v === order[i]);
+  items.forEach((el, i) => {
+    el.classList.add(item.correct[i] === order[i] ? 'correct-sort' : 'wrong-sort');
+  });
+  recordAnswer(ok);
+  const fb = document.getElementById('fb-' + item.id);
+  fb.className = 'feedback show ' + (ok ? 'ok' : 'err');
+  fb.innerHTML = `<strong>${ok ? '✓ Perfekte Reihenfolge!' : '✗ Nicht ganz.'}</strong>
+    <span class="solution">Lösung: ${item.solution}</span>
+    <em style="display:block;margin-top:4px;font-size:0.82rem;">${item.exp}</em>`;
+}
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+buildClassify();
+buildGaps();
+buildErrors();
+buildTransform();
+buildModal();
+buildErsatz();
+buildKohärenz();
+buildSort();
+// register kohärenz questions
+registerQuestion(kohärenzBlanks.length);
+updateUI();
+</script>
+</body>
+</html>
