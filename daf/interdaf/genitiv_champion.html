@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GENITIV CHAMPION 🌿</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark:       #04100a;
+            --bg-mid:        #081a0e;
+            --bg-card:       #0d2015;
+            --green-bright:  #5ecb00;
+            --green-mid:     #3ea000;
+            --green-soft:    #2a6e00;
+            --green-glow:    #a8ff60;
+            --pink-dark:     #a0004a;
+            --pink-mid:      #cc0060;
+            --pink-bright:   #f0007a;
+            --pink-glow:     #ff60b0;
+            --text:          #edfff2;
+            --text-muted:    #6dac80;
+            --gold:          #ffd700;
+            --success:       #5ecb00;
+            --error:         #f0007a;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(160deg, #04100a 0%, #081a0e 40%, #061408 70%, #04100a 100%);
+            min-height: 100vh;
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* ── Background animation ── */
+        .ripples { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
+        .ripple {
+            position: absolute; border-radius: 50%;
+            border: 1px solid rgba(94,203,0,0.12);
+            animation: rippleOut 10s ease-out infinite;
+        }
+        @keyframes rippleOut { 0% { transform: scale(0.2); opacity: 0.8; } 100% { transform: scale(3); opacity: 0; } }
+        .shimmer {
+            position: absolute; width: 200px; height: 3px;
+            background: linear-gradient(90deg, transparent, rgba(94,203,0,0.35), transparent);
+            animation: shimmerFlow 8s ease-in-out infinite;
+        }
+        @keyframes shimmerFlow {
+            0%   { transform: translateX(-200px) translateY(0) rotate(-8deg); opacity: 0; }
+            50%  { opacity: 1; }
+            100% { transform: translateX(110vw) translateY(40px) rotate(-8deg); opacity: 0; }
+        }
+        .star {
+            position: absolute; width: 5px; height: 5px;
+            background: rgba(94,203,0,0.45); border-radius: 50%;
+            animation: twinkle 4s ease-in-out infinite;
+        }
+        @keyframes twinkle { 0%,100%{opacity:0.15;transform:scale(1);}50%{opacity:0.9;transform:scale(1.7);} }
+
+        /* ── Layout ── */
+        .container { position: relative; z-index: 1; max-width: 950px; margin: 0 auto; padding: 20px; }
+        header { text-align: center; margin-bottom: 30px; padding-top: 10px; }
+        h1 {
+            font-family: 'Fredoka', sans-serif; font-size: 2.6rem;
+            background: linear-gradient(135deg, #3ea000 0%, #7aed00 25%, #a8ff60 45%, #edfff2 55%, #a8ff60 65%, #7aed00 80%, #3ea000 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            animation: shimmerText 4s linear infinite; margin-bottom: 8px;
+        }
+        @keyframes shimmerText { to { background-position: 200% center; } }
+        .subtitle { color: var(--text-muted); font-size: 1rem; letter-spacing: 0.03em; }
+
+        .screen { display: none; animation: fadeIn 0.45s ease; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);} }
+
+        /* ── Menu cards ── */
+        .menu-card {
+            background: linear-gradient(135deg, rgba(13,32,21,0.97) 0%, rgba(6,20,10,0.97) 100%);
+            border-radius: 20px; padding: 28px; margin-bottom: 18px;
+            border: 1px solid rgba(94,203,0,0.18);
+            box-shadow: 0 8px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(94,203,0,0.08);
+        }
+        .mode-title { font-family: 'Fredoka', sans-serif; font-size: 1.35rem; margin-bottom: 18px; color: var(--text); }
+        .mode-buttons { display: flex; flex-direction: column; gap: 11px; }
+        .mode-btn {
+            background: linear-gradient(135deg, #081a0e 0%, #0d2015 100%);
+            border: 1px solid rgba(94,203,0,0.18); border-radius: 14px;
+            padding: 17px 24px; color: var(--text);
+            font-family: 'Quicksand', sans-serif; font-size: 1rem; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease; text-align: left; position: relative;
+        }
+        .mode-btn:hover {
+            transform: translateX(8px);
+            box-shadow: 0 4px 22px rgba(94,203,0,0.25);
+            border-color: var(--green-bright);
+            background: linear-gradient(135deg, #0d2015 0%, #163020 100%);
+        }
+        .mode-btn .mode-icon { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 1.5rem; }
+        .mode-btn .mode-desc { font-size: 0.82rem; color: var(--text-muted); margin-top: 3px; font-weight: 400; }
+        .mode-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--pink-dark), var(--pink-bright));
+            color: white; padding: 2px 10px; border-radius: 20px;
+            font-size: 0.7rem; font-weight: 700; margin-left: 8px;
+        }
+
+        /* ── Game header ── */
+        .game-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+        .stats-bar { display: flex; gap: 14px; flex-wrap: wrap; }
+        .stat-item {
+            background: rgba(13,32,21,0.85); padding: 10px 18px; border-radius: 12px;
+            border: 1px solid rgba(94,203,0,0.18); text-align: center; min-width: 90px;
+        }
+        .stat-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .stat-value { font-family: 'Fredoka', sans-serif; font-size: 1.4rem; color: var(--text); }
+        .streak-fire { display: inline-block; animation: flame 0.5s ease infinite alternate; }
+        @keyframes flame { from{transform:scale(1);}to{transform:scale(1.2);} }
+
+        .progress-bar { background: rgba(13,32,21,0.9); border-radius: 10px; height: 16px; overflow: hidden; margin-bottom: 22px; border: 1px solid rgba(94,203,0,0.18); }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #2a6e00, #5ecb00, #a8ff60); transition: width 0.5s ease; box-shadow: 0 0 10px rgba(94,203,0,0.4); }
+        .progress-text { text-align: center; margin-top: 5px; color: var(--text-muted); font-size: 0.86rem; }
+
+        .mode-indicator {
+            padding: 8px 20px; border-radius: 20px; font-weight: 700; font-size: 0.88rem;
+            background: linear-gradient(135deg, var(--pink-dark), var(--pink-mid));
+            color: #fff;
+        }
+        .mode-indicator.definit   { background: linear-gradient(135deg, #2a6e00, #5ecb00); color: #04100a; }
+        .mode-indicator.indefinit { background: linear-gradient(135deg, #1a4e00, #3ea000); color: #edfff2; }
+        .mode-indicator.negation  { background: linear-gradient(135deg, var(--pink-dark), var(--pink-mid)); color: #fff; }
+        .mode-indicator.possessiv { background: linear-gradient(135deg, #7a0040, var(--pink-mid)); color: #fff; }
+        .mode-indicator.relativ   { background: linear-gradient(135deg, #3ea000, var(--pink-dark)); color: #fff; }
+
+        /* ── Sentence box ── */
+        .sentence-box {
+            background: linear-gradient(135deg, rgba(160,0,74,0.18), rgba(100,0,40,0.25));
+            border-radius: 20px; padding: 36px 30px; margin-bottom: 24px;
+            border: 1px solid rgba(94,203,0,0.22);
+            box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 60px rgba(94,203,0,0.04);
+            text-align: center;
+        }
+        .sentence { font-family: 'Fredoka', sans-serif; font-size: 1.7rem; line-height: 2.6; margin-bottom: 8px; }
+        .word { display: inline-block; margin: 0 3px; }
+        .article-slot {
+            display: inline-block; min-width: 100px; padding: 7px 14px;
+            background: rgba(4,16,10,0.85);
+            border: 2px solid rgba(94,203,0,0.3);
+            border-radius: 10px; cursor: pointer; transition: all 0.3s ease;
+            font-weight: 700; color: var(--text-muted);
+        }
+        .article-slot:hover { border-color: var(--green-bright); transform: scale(1.05); }
+        .article-slot.selected { background: rgba(94,203,0,0.12); border-color: var(--green-bright); color: var(--text); }
+        .article-slot.correct {
+            background: linear-gradient(135deg, rgba(94,203,0,0.28), rgba(94,203,0,0.08));
+            border-color: var(--green-bright); color: var(--green-bright);
+            animation: pulseSuccess 0.6s ease;
+        }
+        .article-slot.wrong {
+            background: linear-gradient(135deg, rgba(240,0,122,0.28), rgba(240,0,122,0.08));
+            border-color: var(--pink-bright); color: var(--pink-bright);
+            animation: shake 0.5s ease;
+        }
+        @keyframes pulseSuccess { 0%,100%{transform:scale(1);}50%{transform:scale(1.12);} }
+        @keyframes shake { 0%,100%{transform:translateX(0);}25%{transform:translateX(-8px);}75%{transform:translateX(8px);} }
+
+        .noun-hover { display: inline-block; position: relative; cursor: help; border-bottom: 1px dashed rgba(94,203,0,0.4); margin: 0 3px; }
+        .noun-tooltip {
+            display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+            background: #0d2015; border: 1px solid var(--green-bright);
+            color: var(--green-bright); padding: 5px 12px; border-radius: 8px;
+            font-size: 0.85rem; white-space: nowrap; font-family: 'Quicksand', sans-serif; font-weight: 700; z-index: 10;
+        }
+        .noun-hover:hover .noun-tooltip { display: block; }
+
+        .hint-box {
+            display: none; background: rgba(94,203,0,0.07);
+            border: 1px solid rgba(94,203,0,0.25); border-radius: 12px;
+            padding: 13px 20px; margin-top: 16px; color: var(--text); font-size: 0.95rem;
+        }
+
+        /* ── Options grid ── */
+        .options-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px; margin-bottom: 22px;
+        }
+        .option-btn {
+            background: linear-gradient(135deg, #081a0e 0%, #0d2015 100%);
+            border: 2px solid rgba(94,203,0,0.2); border-radius: 12px;
+            padding: 13px 18px; color: var(--text);
+            font-family: 'Quicksand', sans-serif; font-size: 1rem; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease;
+        }
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-3px); box-shadow: 0 6px 20px rgba(94,203,0,0.22);
+            border-color: var(--green-bright);
+            background: linear-gradient(135deg, #0d2015 0%, #163020 100%);
+        }
+        .option-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+        /* ── Buttons ── */
+        .control-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .control-btn {
+            background: linear-gradient(135deg, #081a0e 0%, #0d2015 100%);
+            border: 2px solid rgba(94,203,0,0.22); border-radius: 12px;
+            padding: 11px 24px; color: var(--text);
+            font-family: 'Quicksand', sans-serif; font-size: 0.93rem; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease;
+        }
+        .control-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(94,203,0,0.18); border-color: var(--green-bright); }
+        .control-btn.primary {
+            background: linear-gradient(135deg, var(--pink-dark) 0%, var(--pink-mid) 100%);
+            border-color: var(--pink-bright); color: #fff; font-weight: 700;
+        }
+        .control-btn.primary:hover { background: linear-gradient(135deg, var(--pink-mid) 0%, var(--pink-bright) 100%); box-shadow: 0 6px 25px rgba(240,0,122,0.3); }
+
+        .back-btn {
+            position: fixed; top: 20px; left: 20px; z-index: 100; display: none;
+            background: linear-gradient(135deg, rgba(13,32,21,0.97), rgba(6,20,10,0.97));
+            border: 1px solid rgba(94,203,0,0.22); border-radius: 12px;
+            padding: 10px 18px; color: var(--text);
+            font-family: 'Quicksand', sans-serif; font-size: 0.88rem; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease;
+        }
+        .back-btn:hover { border-color: var(--green-bright); box-shadow: 0 4px 14px rgba(94,203,0,0.2); }
+
+        /* ── Leaderboard ── */
+        .leaderboard-title { font-family: 'Fredoka', sans-serif; font-size: 1.15rem; color: var(--text); margin-bottom: 12px; }
+        .leaderboard-entry { display: flex; align-items: center; gap: 12px; padding: 9px 14px; border-radius: 10px; margin-bottom: 6px; background: rgba(13,32,21,0.7); border: 1px solid rgba(94,203,0,0.12); }
+        .leaderboard-rank { font-family: 'Fredoka', sans-serif; font-size: 1.1rem; min-width: 32px; }
+        .leaderboard-name { flex: 1; font-weight: 600; font-size: 0.93rem; }
+        .leaderboard-score { color: var(--green-bright); font-weight: 700; font-size: 0.93rem; }
+        .leaderboard-time { color: var(--text-muted); font-size: 0.8rem; min-width: 40px; text-align: right; }
+
+        /* ── Result screen ── */
+        .result-card {
+            background: linear-gradient(135deg, rgba(13,32,21,0.97), rgba(6,20,10,0.97));
+            border-radius: 20px; padding: 32px; margin-bottom: 18px;
+            border: 1px solid rgba(94,203,0,0.2); text-align: center;
+        }
+        .result-title { font-family: 'Fredoka', sans-serif; font-size: 2rem; color: var(--green-bright); margin-bottom: 20px; }
+        .result-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 24px; }
+        .result-stat { background: rgba(6,20,10,0.8); border-radius: 14px; padding: 18px; border: 1px solid rgba(94,203,0,0.15); }
+        .result-stat-label { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        .result-stat-value { font-family: 'Fredoka', sans-serif; font-size: 1.8rem; color: var(--text); }
+        .player-input { display: flex; gap: 10px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
+        .player-input input {
+            background: rgba(13,32,21,0.9); border: 1px solid rgba(94,203,0,0.25); border-radius: 10px;
+            padding: 10px 16px; color: var(--text); font-family: 'Quicksand', sans-serif;
+            font-size: 0.95rem; flex: 1; max-width: 240px; outline: none;
+        }
+        .player-input input:focus { border-color: var(--green-bright); }
+
+        /* ── Popups ── */
+        .points-popup {
+            position: fixed; font-family: 'Fredoka', sans-serif; font-size: 1.6rem;
+            color: var(--green-bright); font-weight: 700; pointer-events: none; z-index: 999;
+            animation: popFloat 1s ease-out forwards;
+        }
+        .points-popup.streak-bonus { color: var(--pink-bright); font-size: 1.9rem; }
+        @keyframes popFloat { 0%{opacity:1;transform:translateY(0);}100%{opacity:0;transform:translateY(-60px);} }
+
+        .milestone-overlay {
+            position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+            z-index: 998; background: rgba(4,16,10,0.7); animation: fadeIn 0.3s ease;
+        }
+        .milestone-content { text-align: center; }
+        .milestone-number {
+            font-family: 'Fredoka', sans-serif; font-size: 5rem; color: var(--green-bright);
+            text-shadow: 0 0 40px rgba(94,203,0,0.8); animation: popScale 0.5s ease;
+        }
+        .milestone-text { font-family: 'Fredoka', sans-serif; font-size: 1.6rem; color: var(--text); }
+        @keyframes popScale { from{transform:scale(0.4);}to{transform:scale(1);} }
+
+        .confetti { position: fixed; pointer-events: none; z-index: 997; }
+
+        /* ── Grammar tip box ── */
+        .tip-box {
+            background: linear-gradient(135deg, rgba(94,203,0,0.08), rgba(94,203,0,0.03));
+            border: 1px solid rgba(94,203,0,0.2); border-radius: 14px;
+            padding: 16px 22px; margin-bottom: 18px; font-size: 0.9rem; color: var(--text-muted);
+            line-height: 1.6;
+        }
+        .tip-box strong { color: var(--green-bright); }
+
+        /* ── Responsive ── */
+        @media (max-width: 600px) {
+            h1 { font-size: 1.9rem; }
+            .sentence { font-size: 1.25rem; }
+            .options-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+<div class="ripples" id="ripples"></div>
+<button class="back-btn" id="backBtn" onclick="goToMenu()">← Menü</button>
+
+<div class="container">
+    <header>
+        <h1>🌿 GENITIV CHAMPION</h1>
+        <p class="subtitle">Alle Genitiv-Formen auf B1 • Artikel · Possessiv · Relativpronomen</p>
+    </header>
+
+    <!-- ═══════════════ START SCREEN ═══════════════ -->
+    <div class="screen active" id="startScreen">
+        <div class="menu-card">
+            <div class="tip-box">
+                <strong>Genitiv im Überblick</strong><br>
+                maskulin / neutral: <strong>des</strong> · eines · keines · meines · <strong>dessen</strong><br>
+                feminin / Plural: <strong>der</strong> · einer · keiner · meiner · <strong>deren</strong><br>
+                Nach Präpositionen: <em>wegen, trotz, aufgrund, statt, während …</em>
+            </div>
+            <p class="mode-title">Welchen Genitiv möchtest du üben?</p>
+            <div class="mode-buttons">
+                <button class="mode-btn" onclick="startGame('definit')">
+                    🎯 Bestimmter Artikel im Genitiv
+                    <span class="mode-icon">🌿</span>
+                    <div class="mode-desc">des / der — nach Präpositionen &amp; in Nominalphrasen</div>
+                </button>
+                <button class="mode-btn" onclick="startGame('indefinit')">
+                    🔍 Unbestimmter Artikel im Genitiv
+                    <span class="mode-icon">🌱</span>
+                    <div class="mode-desc">eines / einer — in Genitivkonstruktionen</div>
+                </button>
+                <button class="mode-btn" onclick="startGame('negation')">
+                    ❌ Verneinung im Genitiv
+                    <span class="mode-icon">🚫</span>
+                    <div class="mode-desc">keines / keiner — trotz, wegen, aufgrund …</div>
+                </button>
+                <button class="mode-btn" onclick="startGame('possessiv')">
+                    👤 Possessivpronomen im Genitiv
+                    <span class="mode-icon">💎</span>
+                    <div class="mode-desc">meines / meiner / seines / ihrer / unseres …</div>
+                </button>
+                <button class="mode-btn" onclick="startGame('relativ')">
+                    🔗 Relativpronomen im Genitiv <span class="mode-badge">GENITIV</span>
+                    <span class="mode-icon">🧩</span>
+                    <div class="mode-desc">dessen / deren — eingebettete Relativsätze</div>
+                </button>
+            </div>
+        </div>
+        <div class="menu-card" id="menuLeaderboardCard">
+            <p class="leaderboard-title">🏅 Bestenliste</p>
+            <div id="menuLeaderboard"><p style="color:var(--text-muted);text-align:center;">Noch keine Einträge. Sei die Erste!</p></div>
+        </div>
+    </div>
+
+    <!-- ═══════════════ GAME SCREEN ═══════════════ -->
+    <div class="screen" id="gameScreen">
+        <div class="game-header">
+            <div id="modeIndicator" class="mode-indicator">Modus</div>
+            <div class="stats-bar">
+                <div class="stat-item"><div class="stat-label">Punkte</div><div class="stat-value" id="points">0</div></div>
+                <div class="stat-item"><div class="stat-label">Streak</div><div class="stat-value" id="streak">0</div></div>
+                <div class="stat-item"><div class="stat-label">Zeit</div><div class="stat-value" id="timer">0:00</div></div>
+            </div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="progress-text" id="progressText">0 / 0 Sätze gelöst</div>
+
+        <div class="sentence-box">
+            <div class="sentence" id="sentence"></div>
+            <div class="hint-box" id="hintBox"><span id="hintText"></span></div>
+        </div>
+
+        <div class="options-grid" id="optionsGrid"></div>
+
+        <div class="control-buttons">
+            <button class="control-btn" onclick="skipSentence()">⏭ Überspringen</button>
+            <button class="control-btn" onclick="goToMenu()">🏠 Menü</button>
+        </div>
+    </div>
+
+    <!-- ═══════════════ RESULT SCREEN ═══════════════ -->
+    <div class="screen" id="resultScreen">
+        <div class="result-card">
+            <div class="result-title">🎉 Runde beendet!</div>
+            <div class="result-grid">
+                <div class="result-stat"><div class="result-stat-label">Punkte</div><div class="result-stat-value" id="finalPoints">0</div></div>
+                <div class="result-stat"><div class="result-stat-label">Zeit</div><div class="result-stat-value" id="finalTime">0:00</div></div>
+                <div class="result-stat"><div class="result-stat-label">Beste Serie</div><div class="result-stat-value" id="bestStreak">0</div></div>
+                <div class="result-stat"><div class="result-stat-label">Genauigkeit</div><div class="result-stat-value" id="accuracy">0%</div></div>
+            </div>
+            <div class="player-input">
+                <input type="text" id="playerName" placeholder="Dein Name …" maxlength="20">
+                <button class="control-btn primary" onclick="saveScore()">💾 Speichern</button>
+            </div>
+            <div class="control-buttons">
+                <button class="control-btn primary" onclick="playAgain()">🔄 Nochmal</button>
+                <button class="control-btn" onclick="goToMenu()">🏠 Menü</button>
+            </div>
+        </div>
+        <div class="menu-card" id="resultLeaderboard"></div>
+    </div>
+</div>
+
+<script>
+    // ═══════════════════════════════════════════════
+    // SENTENCE DATA — ALL GENITIV
+    // ═══════════════════════════════════════════════
+    const sentenceData = {
+
+        // ── BESTIMMTER ARTIKEL IM GENITIV ──────────────────────────────────
+        definit: [
+            { text: "Das Auto [des] N{der|Nachbarn} parkt mal wieder vor meiner Einfahrt.", slots: [{art:'des'}] },
+            { text: "Die Stimme [der] N{die|Lehrerin} bleibt mir für immer im Gedächtnis.", slots: [{art:'der'}] },
+            { text: "Der Name [des] N{das|Restaurants} stand groß auf der Speisekarte.", slots: [{art:'des'}] },
+            { text: "Die Farbe [des] N{der|Himmels} wechselt heute minütlich.", slots: [{art:'des'}] },
+            { text: "Das Ende [der] N{die|Geschichte} überraschte alle im Raum.", slots: [{art:'der'}] },
+            { text: "Die Qualität [des] N{der|Kaffee} entscheidet über den ganzen Morgen.", slots: [{art:'des'}] },
+            { text: "Wegen [des] N{der|Regen} blieben wir lieber im Café sitzen.", slots: [{art:'des'}] },
+            { text: "Trotz [der] N{die|Kälte} gingen wir an die frische Luft.", slots: [{art:'der'}] },
+            { text: "Trotz [des] N{der|Lärm} schlief das Kind tief und fest.", slots: [{art:'des'}] },
+            { text: "Die Energie [des] N{der|Morgen} trägt mich durch den ganzen Tag.", slots: [{art:'des'}] },
+            { text: "Der Preis [der] N{die|Wohnung} steigt leider von Jahr zu Jahr.", slots: [{art:'der'}] },
+            { text: "Das Gewicht [des] N{der|Rucksack} wird mit jedem Kilometer schwerer.", slots: [{art:'des'}] },
+            { text: "Der Duft [der] N{die|Bäckerei} zieht mich jeden Morgen rein.", slots: [{art:'der'}] },
+            { text: "Wegen [des] N{der|Stau} kamen wir eine Stunde zu spät an.", slots: [{art:'des'}] },
+            { text: "Der Inhalt [der] N{die|Nachricht} überraschte uns alle sehr.", slots: [{art:'der'}] },
+            { text: "Das Ergebnis [der] N{die|Wahl} veränderte vieles in der Stadt.", slots: [{art:'der'}] },
+            { text: "Die Kraft [des] N{das|Lächeln} öffnet mehr Türen als viele Worte.", slots: [{art:'des'}] },
+            { text: "Das Ziel [der] N{die|Übung} ist das Verstehen – nicht die Perfektion.", slots: [{art:'der'}] },
+            { text: "Der Ton [des] N{das|Gespräch} bestimmt seinen Ausgang.", slots: [{art:'des'}] },
+            { text: "Aufgrund [der] N{die|Müdigkeit} macht sie heute früher Schluss.", slots: [{art:'der'}] },
+            { text: "Die Länge [des] N{der|Film} überraschte selbst den Regisseur.", slots: [{art:'des'}] },
+            { text: "Der Charme [des] N{das|Viertel} ist unvergleichlich und einmalig.", slots: [{art:'des'}] },
+            { text: "Während [des] N{das|Konzert} klingelte jemand zweimal hinten.", slots: [{art:'des'}] },
+            { text: "Statt [des] N{der|Kaffee} trank sie heute Tee – eine Premiere.", slots: [{art:'des'}] },
+            { text: "Das Schweigen [der] N{die|Mehrheit} sagt manchmal alles.", slots: [{art:'der'}] },
+            { text: "Der Beginn [des] N{das|Projekt} verzögerte sich um eine Woche.", slots: [{art:'des'}] },
+            { text: "Die Tiefe [des] N{der|See} spürt man auch im Sommer deutlich.", slots: [{art:'des'}] },
+            { text: "Wegen [der] N{die|Hitze} schliefen alle mit offenem Fenster.", slots: [{art:'der'}] },
+            { text: "Der Wert [der] N{die|Freundschaft} zeigt sich erst in der Krise.", slots: [{art:'der'}] },
+            { text: "Die Lösung [des] N{das|Problem} war einfacher als gedacht.", slots: [{art:'des'}] }
+        ],
+
+        // ── UNBESTIMMTER ARTIKEL IM GENITIV ────────────────────────────────
+        indefinit: [
+            { text: "Der Anfang [einer] N{die|Reise} ist immer der aufregendste Teil.", slots: [{art:'einer'}] },
+            { text: "Die Stimme [eines] N{der|Fremde} weckte mich mitten in der Nacht.", slots: [{art:'eines'}] },
+            { text: "Das Gefühl [einer] N{die|Chance} lässt sich nicht erklären.", slots: [{art:'einer'}] },
+            { text: "Der Preis [eines] N{der|Fehler} kann manchmal sehr hoch sein.", slots: [{art:'eines'}] },
+            { text: "Die Schönheit [eines] N{der|Moment} liegt genau in seiner Kürze.", slots: [{art:'eines'}] },
+            { text: "Das Ende [einer] N{die|Ära} beginnt immer leise und unbemerkt.", slots: [{art:'einer'}] },
+            { text: "Wegen [eines] N{das|Missverständnis} verloren sie sich aus den Augen.", slots: [{art:'eines'}] },
+            { text: "Trotz [eines] N{der|langer Tag} fand sie noch Energie zum Lachen.", slots: [{art:'eines'}] },
+            { text: "Die Kraft [einer] N{die|Umarmung} unterschätzt man leicht.", slots: [{art:'einer'}] },
+            { text: "Der Klang [eines] N{das|Lachen} im Haus ist das beste Zeichen.", slots: [{art:'eines'}] },
+            { text: "Die Wärme [eines] N{das|Gespräch} ist in dieser Zeit selten geworden.", slots: [{art:'eines'}] },
+            { text: "Aufgrund [eines] N{der|Fehler} mussten wir alles von vorne planen.", slots: [{art:'eines'}] },
+            { text: "Die Tiefe [einer] N{die|Freundschaft} zeigt sich erst in der Krise.", slots: [{art:'einer'}] },
+            { text: "Der Beginn [einer] N{die|neuen Gewohnheit} fühlt sich immer schwer an.", slots: [{art:'einer'}] },
+            { text: "Das Ergebnis [einer] N{die|gute Nacht} ist ein klarer, freier Kopf.", slots: [{art:'einer'}] },
+            { text: "Der Geruch [eines] N{das|frische Brot} macht jeden Morgen besser.", slots: [{art:'eines'}] },
+            { text: "Trotz [eines] N{das|Risiko} entschied sie sich für den ersten Schritt.", slots: [{art:'eines'}] },
+            { text: "Die Meinung [eines] N{das|Kind} ist oft klüger als die der Erwachsenen.", slots: [{art:'eines'}] },
+            { text: "Wegen [einer] N{die|Verspätung} verpasste er den letzten Zug nach Hause.", slots: [{art:'einer'}] },
+            { text: "Der Charme [eines] N{der|Anfänger} liegt in der echten Begeisterung.", slots: [{art:'eines'}] },
+            { text: "Das Lächeln [einer] N{die|Unbekannte} kann einen ganzen Tag retten.", slots: [{art:'einer'}] },
+            { text: "Die Energie [eines] N{das|Gespräch} zwischen Freunden ist unbezahlbar.", slots: [{art:'eines'}] },
+            { text: "Statt [eines] N{der|Plan} hatten sie nur eine vage Idee und Mut.", slots: [{art:'eines'}] },
+            { text: "Während [einer] N{die|Pause} hatte sie plötzlich die beste Idee.", slots: [{art:'einer'}] },
+            { text: "Das war der Beginn [einer] N{die|Freundschaft} fürs Leben.", slots: [{art:'einer'}] }
+        ],
+
+        // ── VERNEINUNG IM GENITIV ───────────────────────────────────────────
+        negation: [
+            { text: "Trotz [keiner] N{die|Vorbereitung} hielt sie eine beeindruckende Rede.", slots: [{art:'keiner'}] },
+            { text: "Wegen [keines] N{das|Ticket} wurde er am Eingang abgewiesen.", slots: [{art:'keines'}] },
+            { text: "Trotz [keines] N{der|Beweis} glaubte ihm kaum jemand wirklich.", slots: [{art:'keines'}] },
+            { text: "Aufgrund [keiner] N{die|Aussage} blieb die ganze Lage vollkommen unklar.", slots: [{art:'keiner'}] },
+            { text: "Trotz [keiner] N{die|Antwort} schickte sie ruhig eine zweite Nachricht.", slots: [{art:'keiner'}] },
+            { text: "Trotz [keines] N{der|Plan} lief der Abend überraschend gut.", slots: [{art:'keines'}] },
+            { text: "Wegen [keiner] N{die|freie Stelle} musste sie weiter pendeln.", slots: [{art:'keiner'}] },
+            { text: "Trotz [keines] N{der|Schlüssel} fand er irgendwie einen Weg rein.", slots: [{art:'keines'}] },
+            { text: "Aufgrund [keiner] N{die|Alternative} blieb nur dieser eine Weg offen.", slots: [{art:'keiner'}] },
+            { text: "Trotz [keines] N{das|Zeichen} blieb sie geduldig und wartete weiter.", slots: [{art:'keines'}] },
+            { text: "Wegen [keines] N{das|Interesse} am Thema schlief er fast ein.", slots: [{art:'keines'}] },
+            { text: "Trotz [keiner] N{die|Erfahrung} machte sie den Job besser als alle anderen.", slots: [{art:'keiner'}] },
+            { text: "Aufgrund [keines] N{der|Grund} wurde das Meeting einfach abgesagt.", slots: [{art:'keines'}] },
+            { text: "Trotz [keines] N{der|Erfolg} gab er nicht auf – das war mutig.", slots: [{art:'keines'}] },
+            { text: "Wegen [keiner] N{die|Reaktion} auf die Nachricht fragte sie nach.", slots: [{art:'keiner'}] },
+            { text: "Trotz [keiner] N{die|Einladung} tauchte er einfach auf – wie immer.", slots: [{art:'keiner'}] },
+            { text: "Statt [keines] N{der|Kommentar} nickte er nur kurz und schwieg.", slots: [{art:'keines'}] },
+            { text: "Wegen [keines] N{das|Wort} der Erklärung blieb alles im Dunkeln.", slots: [{art:'keines'}] },
+            { text: "Trotz [keiner] N{die|Garantie} kaufte sie das alte Fahrrad sofort.", slots: [{art:'keiner'}] },
+            { text: "Aufgrund [keines] N{der|klarer Hinweis} gingen sie in die falsche Richtung.", slots: [{art:'keines'}] }
+        ],
+
+        // ── POSSESSIVPRONOMEN IM GENITIV ────────────────────────────────────
+        possessiv: [
+            { text: "Die Stimme [meiner] N{die|Mutter} beruhigt mich auch heute noch.", slots: [{art:'meiner'}] },
+            { text: "Der Beginn [meines] N{das|Projekt} verzögert sich um eine Woche.", slots: [{art:'meines'}] },
+            { text: "Das Ziel [meines] N{das|Leben} wird täglich ein bisschen klarer.", slots: [{art:'meines'}] },
+            { text: "Die Kraft [seiner] N{die|Überzeugung} beeindruckte das ganze Team.", slots: [{art:'seiner'}] },
+            { text: "Der Name [unseres] N{das|Team} wurde sofort genehmigt.", slots: [{art:'unseres'}] },
+            { text: "Das Ergebnis [eures] N{das|Experiment} hat alle positiv überrascht.", slots: [{art:'eures'}] },
+            { text: "Der Duft [ihrer] N{die|Küche} zieht die Nachbarn regelmäßig an.", slots: [{art:'ihrer'}] },
+            { text: "Die Tiefe [seines] N{der|Blick} verrät mehr als seine ganzen Worte.", slots: [{art:'seines'}] },
+            { text: "Das Ende [unserer] N{die|Reise} fühlte sich viel zu früh an.", slots: [{art:'unserer'}] },
+            { text: "Die Geduld [meiner] N{die|Lehrerin} kannte absolut keine Grenzen.", slots: [{art:'meiner'}] },
+            { text: "Der Klang [ihres] N{das|Lachen} bleibt für immer in guter Erinnerung.", slots: [{art:'ihres'}] },
+            { text: "Trotz [meines] N{der|beste Wille} kam ich doch wieder zu spät.", slots: [{art:'meines'}] },
+            { text: "Wegen [seiner] N{die|Krankheit} fiel das wichtige Meeting aus.", slots: [{art:'seiner'}] },
+            { text: "Die Energie [deiner] N{die|Begeisterung} ist wirklich ansteckend.", slots: [{art:'deiner'}] },
+            { text: "Die Kraft [eurer] N{die|Gemeinschaft} überrascht mich immer wieder.", slots: [{art:'eurer'}] },
+            { text: "Das ist der Ton [meines] N{der|Lieblingsfilm} – sofort erkannt!", slots: [{art:'meines'}] },
+            { text: "Der Akku [meines] N{das|Handy} stirbt immer zur falschen Zeit.", slots: [{art:'meines'}] },
+            { text: "Aufgrund [ihrer] N{die|Erfahrung} bekam sie sofort die Stelle.", slots: [{art:'ihrer'}] },
+            { text: "Die Meinung [unserer] N{die|Gruppe} war eindeutig und klar.", slots: [{art:'unserer'}] },
+            { text: "Wegen [seines] N{das|Lachen} vergibt man ihm fast alles sofort.", slots: [{art:'seines'}] },
+            { text: "Trotz [ihrer] N{die|Müdigkeit} schaffte sie noch die letzte Runde.", slots: [{art:'ihrer'}] },
+            { text: "Der Anfang [meiner] N{die|Geschichte} ist noch nicht ganz klar.", slots: [{art:'meiner'}] },
+            { text: "Das Gewicht [unseres] N{das|Gepäck} überraschte den Flughafencheck.", slots: [{art:'unseres'}] },
+            { text: "Die Länge [eures] N{der|Vortrag} war für alle eine echte Überraschung.", slots: [{art:'eures'}] },
+            { text: "Statt [meines] N{der|Name} stand dort nur ein Fragezeichen.", slots: [{art:'meines'}] }
+        ],
+
+        // ── RELATIVPRONOMEN IM GENITIV ──────────────────────────────────────
+        relativ: [
+            { text: "Der Mann, [dessen] Hund jeden Morgen bellt, wohnt direkt nebenan.", slots: [{art:'dessen'}] },
+            { text: "Die Frau, [deren] Idee das war, steht jetzt im Mittelpunkt.", slots: [{art:'deren'}] },
+            { text: "Das Kind, [dessen] Stimme man überall hört, heißt Luca.", slots: [{art:'dessen'}] },
+            { text: "Die Leute, [deren] Meinung zählt, sagen oft am wenigsten.", slots: [{art:'deren'}] },
+            { text: "Der Kollege, [dessen] Humor alle begeistert, ist meistens der Ruhigste.", slots: [{art:'dessen'}] },
+            { text: "Die Stadt, [deren] Name ich vergessen habe, war wunderschön.", slots: [{art:'deren'}] },
+            { text: "Das Buch, [dessen] Inhalt mich fesselte, liegt noch immer hier.", slots: [{art:'dessen'}] },
+            { text: "Die Kinder, [deren] Eltern reisen, bleiben bei der Oma.", slots: [{art:'deren'}] },
+            { text: "Der Autor, [dessen] Stil ich sofort erkenne, schreibt seit zwanzig Jahren.", slots: [{art:'dessen'}] },
+            { text: "Die Sängerin, [deren] Stimme ich vergöttere, tritt leider selten auf.", slots: [{art:'deren'}] },
+            { text: "Das Café, [dessen] Kaffee legendär war, hat leider geschlossen.", slots: [{art:'dessen'}] },
+            { text: "Der Freund, [dessen] Rat ich immer schätze, meldet sich viel zu selten.", slots: [{art:'dessen'}] },
+            { text: "Die Projekte, [deren] Ziel unklar war, wurden still beendet.", slots: [{art:'deren'}] },
+            { text: "Das Haus, [dessen] Dach alt ist, braucht dringend eine Renovierung.", slots: [{art:'dessen'}] },
+            { text: "Die Sprache, [deren] Grammatik mich fasziniert, ist natürlich Deutsch.", slots: [{art:'deren'}] },
+            { text: "Der Hund, [dessen] Besitzer nie zu sehen ist, schläft auf der Treppe.", slots: [{art:'dessen'}] },
+            { text: "Die Studentin, [deren] Arbeit alle lasen, ist heute Professorin.", slots: [{art:'deren'}] },
+            { text: "Das Projekt, [dessen] Erfolg alle überraschte, war ein totaler Zufallstreffer.", slots: [{art:'dessen'}] },
+            { text: "Der Lehrer, [dessen] Unterricht nie langweilig war, ist in Rente gegangen.", slots: [{art:'dessen'}] },
+            { text: "Die Nachbarin, [deren] Katze immer in mein Zimmer schaut, ist sehr nett.", slots: [{art:'deren'}] },
+            { text: "Das Mädchen, [dessen] Lachen man im ganzen Haus hört, ist vier.", slots: [{art:'dessen'}] },
+            { text: "Der Schauspieler, [dessen] Name mir nicht einfällt, war großartig.", slots: [{art:'dessen'}] },
+            { text: "Die Firma, [deren] Produkte ich liebe, liefert leider nicht hierher.", slots: [{art:'deren'}] },
+            { text: "Das Hotel, [dessen] Frühstück legendär ist, ist immer ausgebucht.", slots: [{art:'dessen'}] },
+            { text: "Die Idee, [deren] Umsetzung Mut brauchte, war am Ende die beste.", slots: [{art:'deren'}] }
+        ]
+    };
+
+    // ═══════════════════════════════════════════════
+    // OPTIONS PER MODE
+    // ═══════════════════════════════════════════════
+    const optionsMap = {
+        definit:   ['des', 'der', 'dem', 'den', 'die', 'das'],
+        indefinit: ['eines', 'einer', 'einem', 'einen', 'eine', 'ein'],
+        negation:  ['keines', 'keiner', 'keinem', 'keinen', 'keine', 'kein'],
+        possessiv: null, // dynamic
+        relativ:   ['dessen', 'deren', 'des', 'der', 'dem', 'denen']
+    };
+
+    // ═══════════════════════════════════════════════
+    // GAME STATE
+    // ═══════════════════════════════════════════════
+    let gameState = {
+        mode: null, points: 0, streak: 0, bestStreak: 0,
+        correctAnswers: 0, totalAttempts: 0,
+        startTime: null, timerInterval: null,
+        allSentences: [], remainingSentences: [], solvedSentences: [],
+        currentSentence: null, basePointsPerSlot: 10
+    };
+    let selectedSlot = null;
+
+    // ═══════════════════════════════════════════════
+    // SOUNDS
+    // ═══════════════════════════════════════════════
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let ctx;
+    function getCtx() { if (!ctx) ctx = new AudioCtx(); return ctx; }
+    const sounds = {
+        correct() {
+            try {
+                const c = getCtx(), o = c.createOscillator(), g = c.createGain();
+                o.connect(g); g.connect(c.destination);
+                o.type = 'sine'; o.frequency.setValueAtTime(660, c.currentTime);
+                o.frequency.exponentialRampToValueAtTime(880, c.currentTime + 0.18);
+                g.gain.setValueAtTime(0.18, c.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.35);
+                o.start(); o.stop(c.currentTime + 0.35);
+            } catch(e){}
+        },
+        wrong() {
+            try {
+                const c = getCtx(), o = c.createOscillator(), g = c.createGain();
+                o.connect(g); g.connect(c.destination);
+                o.type = 'sawtooth'; o.frequency.setValueAtTime(220, c.currentTime);
+                g.gain.setValueAtTime(0.15, c.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.3);
+                o.start(); o.stop(c.currentTime + 0.3);
+            } catch(e){}
+        },
+        milestone() {
+            try {
+                const c = getCtx();
+                [440,550,660,880].forEach((f,i) => {
+                    const o = c.createOscillator(), g = c.createGain();
+                    o.connect(g); g.connect(c.destination);
+                    o.type = 'sine'; o.frequency.value = f;
+                    const t = c.currentTime + i * 0.12;
+                    g.gain.setValueAtTime(0.18, t);
+                    g.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+                    o.start(t); o.stop(t + 0.35);
+                });
+            } catch(e){}
+        }
+    };
+
+    // ═══════════════════════════════════════════════
+    // INIT
+    // ═══════════════════════════════════════════════
+    function init() {
+        createBackground();
+        updateMenuLeaderboard();
+        showScreen('startScreen');
+    }
+
+    function createBackground() {
+        const r = document.getElementById('ripples');
+        for (let i = 0; i < 8; i++) {
+            const el = document.createElement('div'); el.className = 'ripple';
+            el.style.width = el.style.height = (Math.random() * 300 + 200) + 'px';
+            el.style.left = Math.random() * 100 + '%'; el.style.top = Math.random() * 100 + '%';
+            el.style.animationDelay = (Math.random() * 9) + 's'; r.appendChild(el);
+        }
+        for (let i = 0; i < 6; i++) {
+            const s = document.createElement('div'); s.className = 'shimmer';
+            s.style.top = (Math.random() * 100) + '%';
+            s.style.animationDelay = (Math.random() * 8) + 's'; r.appendChild(s);
+        }
+        for (let i = 0; i < 28; i++) {
+            const st = document.createElement('div'); st.className = 'star';
+            st.style.left = Math.random() * 100 + '%'; st.style.top = Math.random() * 100 + '%';
+            st.style.animationDelay = (Math.random() * 4) + 's'; r.appendChild(st);
+        }
+    }
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    // ═══════════════════════════════════════════════
+    // GAME CONTROL
+    // ═══════════════════════════════════════════════
+    function startGame(mode) {
+        gameState.mode = mode;
+        gameState.points = 0; gameState.streak = 0; gameState.bestStreak = 0;
+        gameState.correctAnswers = 0; gameState.totalAttempts = 0;
+        gameState.startTime = Date.now();
+        gameState.allSentences = [...sentenceData[mode]];
+        gameState.remainingSentences = [...gameState.allSentences];
+        gameState.solvedSentences = [];
+        selectedSlot = null;
+
+        const modeNames = { definit:'Bestimmter Artikel', indefinit:'Unbestimmter Artikel', negation:'Verneinung', possessiv:'Possessivpronomen', relativ:'Relativpronomen' };
+        const ind = document.getElementById('modeIndicator');
+        ind.textContent = '🌿 ' + modeNames[mode] + ' — Genitiv';
+        ind.className = 'mode-indicator ' + mode;
+
+        clearInterval(gameState.timerInterval);
+        gameState.timerInterval = setInterval(() => {
+            const e = Math.floor((Date.now() - gameState.startTime) / 1000);
+            document.getElementById('timer').textContent = `${Math.floor(e/60)}:${(e%60).toString().padStart(2,'0')}`;
+        }, 1000);
+
+        updateStats(); updateProgress(); loadNextSentence();
+        showScreen('gameScreen');
+        document.getElementById('backBtn').style.display = 'block';
+    }
+
+    function loadNextSentence() {
+        if (gameState.remainingSentences.length === 0) { endGame(); return; }
+        const idx = Math.floor(Math.random() * gameState.remainingSentences.length);
+        gameState.currentSentence = gameState.remainingSentences[idx];
+        document.getElementById('hintBox').style.display = 'none';
+        renderSentence();
+        renderOptions();
+        const first = document.querySelector('.article-slot');
+        if (first) selectSlot(first);
+    }
+
+    // ═══════════════════════════════════════════════
+    // RENDER
+    // ═══════════════════════════════════════════════
+    function renderSentence() {
+        const s = gameState.currentSentence;
+        const container = document.getElementById('sentence');
+        container.innerHTML = '';
+        let text = s.text, slotIndex = 0;
+        const regex = /\[(.*?)\]|N\{([^|]+)\|([^}]+)\}/g;
+        let lastIndex = 0, match;
+        while ((match = regex.exec(text)) !== null) {
+            if (match.index > lastIndex) {
+                const w = document.createElement('span'); w.className = 'word';
+                w.textContent = text.substring(lastIndex, match.index);
+                container.appendChild(w);
+            }
+            if (match[0].charAt(0) === '[') {
+                const slot = document.createElement('span');
+                slot.className = 'article-slot';
+                slot.dataset.slotIndex = slotIndex;
+                slot.textContent = '___';
+                slot.onclick = () => selectSlot(slot);
+                container.appendChild(slot);
+                slotIndex++;
+            } else {
+                const wrap = document.createElement('span'); wrap.className = 'noun-hover';
+                wrap.textContent = match[3];
+                const tip = document.createElement('span'); tip.className = 'noun-tooltip';
+                tip.textContent = match[2] + ' ' + match[3];
+                wrap.appendChild(tip); container.appendChild(wrap);
+            }
+            lastIndex = regex.lastIndex;
+        }
+        if (lastIndex < text.length) {
+            const w = document.createElement('span'); w.className = 'word';
+            w.textContent = text.substring(lastIndex); container.appendChild(w);
+        }
+    }
+
+    function renderOptions() {
+        const grid = document.getElementById('optionsGrid');
+        grid.innerHTML = '';
+        let options = [];
+
+        if (gameState.mode === 'possessiv') {
+            // Determine base of correct answer for current slot
+            const slotIdx = selectedSlot ? parseInt(selectedSlot.dataset.slotIndex) : 0;
+            const correct = (gameState.currentSentence.slots[slotIdx]?.art || '').toLowerCase();
+            const bases = ['mein','dein','sein','ihr','unser','eur'];
+            let base = bases.find(b => correct.startsWith(b)) || 'mein';
+            if (base === 'eur') base = 'euer';
+            const forms = {
+                mein:  ['meines','meiner','meine','meinem'],
+                dein:  ['deines','deiner','deine','deinem'],
+                sein:  ['seines','seiner','seine','seinem'],
+                ihr:   ['ihres','ihrer','ihre','ihrem'],
+                unser: ['unseres','unserer','unsere','unserem'],
+                euer:  ['eures','eurer','eure','eurem']
+            };
+            options = forms[base] || forms['mein'];
+        } else {
+            options = [...(optionsMap[gameState.mode] || [])];
+        }
+
+        options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.textContent = opt;
+            btn.onclick = () => fillSlot(opt);
+            grid.appendChild(btn);
+        });
+    }
+
+    function selectSlot(slot) {
+        document.querySelectorAll('.article-slot').forEach(s => s.classList.remove('selected'));
+        slot.classList.add('selected');
+        selectedSlot = slot;
+        if (gameState.mode === 'possessiv') renderOptions();
+    }
+
+    // ═══════════════════════════════════════════════
+    // ANSWER LOGIC
+    // ═══════════════════════════════════════════════
+    function fillSlot(value) {
+        if (!selectedSlot) return;
+        const slotIdx = parseInt(selectedSlot.dataset.slotIndex);
+        const correct = (gameState.currentSentence.slots[slotIdx]?.art || '').toLowerCase();
+        const given = value.toLowerCase();
+
+        gameState.totalAttempts++;
+        document.getElementById('hintBox').style.display = 'none';
+
+        if (given === correct) {
+            selectedSlot.textContent = value;
+            selectedSlot.classList.remove('selected');
+            selectedSlot.classList.add('correct');
+            sounds.correct();
+            gameState.correctAnswers++;
+            gameState.streak++;
+            if (gameState.streak > gameState.bestStreak) gameState.bestStreak = gameState.streak;
+            const isStreak = gameState.streak > 2;
+            const pts = gameState.basePointsPerSlot * (isStreak ? Math.min(gameState.streak, 5) : 1);
+            gameState.points += pts;
+            showPointsPopup(pts, isStreak);
+            updateStats();
+
+            // Check if all slots in this sentence are solved
+            const allSlots = document.querySelectorAll('.article-slot');
+            const allCorrect = [...allSlots].every(s => s.classList.contains('correct'));
+            if (allCorrect) {
+                const total = gameState.solvedSentences.length + gameState.remainingSentences.length;
+                if (gameState.solvedSentences.length > 0 && gameState.solvedSentences.length % 10 === 0) showMilestone(gameState.solvedSentences.length);
+                gameState.remainingSentences = gameState.remainingSentences.filter(s => s !== gameState.currentSentence);
+                gameState.solvedSentences.push(gameState.currentSentence);
+                updateProgress();
+                setTimeout(loadNextSentence, 700);
+            } else {
+                // Move to next unsolved slot
+                const nextSlot = [...allSlots].find(s => !s.classList.contains('correct'));
+                if (nextSlot) selectSlot(nextSlot);
+            }
+        } else {
+            selectedSlot.classList.add('wrong');
+            sounds.wrong();
+            gameState.streak = 0;
+            updateStats();
+            const hintBox = document.getElementById('hintBox');
+            document.getElementById('hintText').textContent = `Richtig wäre: „${correct}"`;
+            hintBox.style.display = 'block';
+            setTimeout(() => {
+                selectedSlot.classList.remove('wrong', 'selected');
+                selectedSlot.textContent = '___';
+                selectedSlot = null;
+            }, 500);
+        }
+    }
+
+    function skipSentence() {
+        gameState.streak = 0; updateStats();
+        const s = gameState.remainingSentences.shift();
+        gameState.remainingSentences.push(s);
+        loadNextSentence();
+    }
+
+    function updateStats() {
+        document.getElementById('points').textContent = gameState.points;
+        const el = document.getElementById('streak');
+        el.innerHTML = gameState.streak > 2 ? `<span class="streak-fire">🔥</span>${gameState.streak}` : gameState.streak;
+    }
+
+    function updateProgress() {
+        const total = gameState.solvedSentences.length + gameState.remainingSentences.length;
+        const solved = gameState.solvedSentences.length;
+        const pct = total > 0 ? (solved / total) * 100 : 0;
+        document.getElementById('progressFill').style.width = pct + '%';
+        document.getElementById('progressText').textContent = `${solved} / ${total} Sätze gelöst`;
+    }
+
+    function showPointsPopup(pts, isStreak) {
+        const popup = document.createElement('div');
+        popup.className = 'points-popup' + (isStreak ? ' streak-bonus' : '');
+        popup.textContent = isStreak ? `+${pts} 🔥` : `+${pts}`;
+        popup.style.left = (Math.random() * 60 + 20) + '%';
+        popup.style.top = '38%';
+        document.body.appendChild(popup);
+        setTimeout(() => popup.remove(), 1000);
+    }
+
+    function showMilestone(n) {
+        const overlay = document.createElement('div'); overlay.className = 'milestone-overlay';
+        overlay.innerHTML = `<div class="milestone-content"><div class="milestone-number">${n}</div><div class="milestone-text">🌿 Wow, ${n} Sätze!</div></div>`;
+        document.body.appendChild(overlay); sounds.milestone(); createConfetti();
+        setTimeout(() => overlay.remove(), 2500);
+    }
+
+    function createConfetti() {
+        const colors = ['#5ecb00','#a8ff60','#f0007a','#ffd700','#cc0060','#edfff2','#ff60b0'];
+        for (let i = 0; i < 100; i++) {
+            const c = document.createElement('div'); c.className = 'confetti';
+            c.style.left = Math.random() * 100 + 'vw'; c.style.top = '-10px';
+            c.style.background = colors[Math.floor(Math.random() * colors.length)];
+            c.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+            const sz = (Math.random() * 10 + 5) + 'px'; c.style.width = c.style.height = sz;
+            document.body.appendChild(c);
+            const anim = c.animate([
+                { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+                { transform: `translateY(100vh) rotate(${Math.random()*720}deg)`, opacity: 0 }
+            ], { duration: Math.random() * 2000 + 2000, easing: 'ease-out' });
+            anim.onfinish = () => c.remove();
+        }
+    }
+
+    // ═══════════════════════════════════════════════
+    // END GAME & LEADERBOARD
+    // ═══════════════════════════════════════════════
+    function endGame() {
+        clearInterval(gameState.timerInterval);
+        const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+        document.getElementById('finalPoints').textContent = gameState.points;
+        document.getElementById('finalTime').textContent = `${Math.floor(elapsed/60)}:${(elapsed%60).toString().padStart(2,'0')}`;
+        document.getElementById('bestStreak').textContent = gameState.bestStreak;
+        document.getElementById('accuracy').textContent = gameState.totalAttempts > 0
+            ? Math.round((gameState.correctAnswers / gameState.totalAttempts) * 100) + '%' : '0%';
+        showScreen('resultScreen');
+        document.getElementById('backBtn').style.display = 'none';
+        updateResultLeaderboard(); sounds.milestone(); createConfetti();
+    }
+
+    function loadLeaderboard() { try { return JSON.parse(localStorage.getItem('genitivChampionBoard') || '[]'); } catch(e) { return []; } }
+    function saveLeaderboard(b) { try { localStorage.setItem('genitivChampionBoard', JSON.stringify(b)); } catch(e) {} }
+
+    function saveScore() {
+        const name = document.getElementById('playerName').value.trim() || 'Anonym';
+        const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+        const modeNames = { definit:'Best. Artikel', indefinit:'Unbest. Artikel', negation:'Verneinung', possessiv:'Possessiv', relativ:'Relativpronomen' };
+        const entry = { name, points: gameState.points, time: elapsed, mode: modeNames[gameState.mode], date: new Date().toLocaleDateString('de-DE') };
+        const board = loadLeaderboard(); board.push(entry); board.sort((a,b) => b.points - a.points);
+        saveLeaderboard(board.slice(0, 10));
+        updateResultLeaderboard(); updateMenuLeaderboard();
+        document.getElementById('playerName').disabled = true;
+        event.target.disabled = true; event.target.textContent = '✓ Gespeichert!';
+    }
+
+    function formatTime(s) { return `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`; }
+
+    function renderBoard(container, entries, limit) {
+        if (entries.length === 0) { container.innerHTML = '<p style="color:var(--text-muted);text-align:center;">Noch keine Einträge!</p>'; return; }
+        container.innerHTML = entries.slice(0, limit).map((e,i) =>
+            `<div class="leaderboard-entry">
+                <span class="leaderboard-rank">${i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.'}${'</span>'}
+                <span class="leaderboard-name">${e.name}</span>
+                <span class="leaderboard-score">${e.points} Pkt</span>
+                <span class="leaderboard-time">${formatTime(e.time)}</span>
+            </div>`
+        ).join('');
+    }
+
+    function updateMenuLeaderboard() { renderBoard(document.getElementById('menuLeaderboard'), loadLeaderboard(), 5); }
+    function updateResultLeaderboard() {
+        const c = document.getElementById('resultLeaderboard');
+        c.innerHTML = '<p class="leaderboard-title">🏅 Bestenliste</p>';
+        const inner = document.createElement('div'); renderBoard(inner, loadLeaderboard(), 5); c.appendChild(inner);
+    }
+
+    function playAgain() {
+        document.getElementById('playerName').disabled = false; document.getElementById('playerName').value = '';
+        const btn = document.querySelector('#resultScreen .control-btn.primary');
+        if (btn) { btn.disabled = false; btn.textContent = '💾 Speichern'; }
+        startGame(gameState.mode);
+    }
+
+    function goToMenu() {
+        clearInterval(gameState.timerInterval);
+        document.getElementById('backBtn').style.display = 'none';
+        document.getElementById('playerName').disabled = false; document.getElementById('playerName').value = '';
+        const btn = document.querySelector('#resultScreen .control-btn.primary');
+        if (btn) { btn.disabled = false; btn.textContent = '💾 Speichern'; }
+        showScreen('startScreen'); updateMenuLeaderboard();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
