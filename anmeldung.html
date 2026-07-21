@@ -297,6 +297,26 @@
             transform: translateY(-2px);
         }
 
+        .btn-skip {
+            flex: 1;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            background: rgba(212, 175, 55, 0.12);
+            color: #B8860B;
+            border: 2px dashed rgba(212, 175, 55, 0.6);
+        }
+
+        .btn-skip:hover {
+            background: rgba(212, 175, 55, 0.25);
+            transform: translateY(-2px);
+        }
+
         /* Success Section */
         .success-content {
             text-align: center;
@@ -417,17 +437,30 @@
             
             <div class="info-box">
                 <h3>📚 Unterricht</h3>
-                <p>Individueller Online-Unterricht von A1 bis C2. Meine Stunden sind strukturiert, abwechslungsreich und effektiv.</p>
+                <p>Individueller Online-Unterricht von A1 bis C2. Meine Einheiten sind strukturiert, abwechslungsreich und effektiv. Eine Trainingseinheit dauert 40 Minuten.</p>
             </div>
 
             <div class="info-box">
                 <h3>💰 Preise</h3>
+                <p style="margin-bottom: 10px;"><strong>Einzeltraining (40 Min. pro Einheit)</strong></p>
                 <ul>
-                    <li>Einzelstunde: 44€</li>
-                    <li>Ab 10 Stunden: 34€ pro Stunde</li>
-                    <li>Ab 20 Stunden: 30€ pro Stunde</li>
-                    <li>Sozialtarif für alle, die es brauchen</li>
+                    <li>Einzeleinheit: 33€</li>
+                    <li>Bei Buchung von 6 aufeinanderfolgenden Wochen: 30€ pro Einheit</li>
+                    <li>Bei Buchung von 12 aufeinanderfolgenden Wochen: 25€ pro Einheit</li>
                 </ul>
+                <p style="margin: 15px 0 10px;"><strong>Intensivtraining (2 Einheiten pro Woche)</strong></p>
+                <ul>
+                    <li>Flexibel: 55€ pro Woche</li>
+                    <li>Bei Buchung von 6 aufeinanderfolgenden Wochen: 50€ pro Woche</li>
+                    <li>Bei Buchung von 12 aufeinanderfolgenden Wochen: 42€ pro Woche</li>
+                </ul>
+                <p style="margin: 15px 0 10px;"><strong>Gruppenunterricht (online, ab 3 Personen)</strong></p>
+                <ul>
+                    <li>Ab 3 Personen: 15–20€ pro Person</li>
+                    <li>Ab 10 Einheiten: 12–17€ pro Person</li>
+                    <li>Ab mehr als 20 Einheiten: 10–15€ pro Person</li>
+                </ul>
+                <p style="margin-top: 15px;">Sozialtarif für alle, die es brauchen</p>
             </div>
 
             <div class="info-box">
@@ -597,6 +630,7 @@
 
             <div class="btn-container">
                 <button class="btn btn-secondary" onclick="nextStep(2)">← Zurück</button>
+                <button class="btn-skip" onclick="skipTest()" type="button">Test überspringen →</button>
                 <button class="btn btn-primary" onclick="calculateLevel(); nextStep(4)">Weiter zum Lerntyp-Quiz →</button>
             </div>
         </div>
@@ -643,6 +677,7 @@
 
             <div class="btn-container">
                 <button class="btn btn-secondary" onclick="nextStep(3)">← Zurück</button>
+                <button class="btn-skip" onclick="skipQuiz()" type="button">Quiz überspringen →</button>
                 <button class="btn btn-primary" onclick="submitForm()">Anmeldung abschließen ✓</button>
             </div>
         </div>
@@ -673,6 +708,19 @@
     <script>
         let currentStep = 1;
         let testScore = 0;
+
+        let testSkipped = false;
+        let quizSkipped = false;
+
+        window.skipTest = function() {
+            testSkipped = true;
+            nextStep(4);
+        }
+
+        window.skipQuiz = function() {
+            quizSkipped = true;
+            submitForm();
+        }
 
         window.nextStep = function(step) {
             document.getElementById('step' + currentStep).classList.remove('active');
@@ -752,24 +800,75 @@
         }
 
         window.submitForm = function() {
-            calculateLevel();
-            const level = getLevel(testScore);
-            const learningType = getLearningType();
-            
+            let level, learningType;
+
+            if (testSkipped) {
+                level = 'Nicht getestet (übersprungen)';
+            } else {
+                calculateLevel();
+                level = getLevel(testScore);
+            }
+
+            if (quizSkipped) {
+                learningType = 'Nicht getestet (übersprungen)';
+            } else {
+                learningType = getLearningType();
+            }
+
+            const nameVal = document.getElementById('name').value.trim();
+            const phoneVal = document.getElementById('phone').value.trim();
+            const emailVal = document.getElementById('email').value.trim();
+            const motherLanguageVal = document.getElementById('motherLanguage').value.trim();
+            const goalsVal = document.getElementById('goals').value.trim();
+            const priorKnowledgeVal = document.getElementById('priorKnowledge').value;
+            const registrationDate = new Date().toLocaleString('de-DE');
+
             const formData = new FormData();
-            formData.append('name', document.getElementById('name').value.trim());
-            formData.append('phone', document.getElementById('phone').value.trim());
-            formData.append('email', document.getElementById('email').value.trim());
-            formData.append('mother_language', document.getElementById('motherLanguage').value.trim());
-            formData.append('goals', document.getElementById('goals').value.trim());
-            formData.append('prior_knowledge', document.getElementById('priorKnowledge').value);
-            formData.append('test_score', testScore);
+            formData.append('name', nameVal);
+            formData.append('phone', phoneVal);
+            formData.append('email', emailVal);
+            formData.append('mother_language', motherLanguageVal);
+            formData.append('goals', goalsVal);
+            formData.append('prior_knowledge', priorKnowledgeVal);
+            formData.append('test_score', testSkipped ? 'übersprungen' : testScore);
             formData.append('level', level);
             formData.append('learning_type', learningType);
-            formData.append('registration_date', new Date().toLocaleString('de-DE'));
+            formData.append('registration_date', registrationDate);
+            formData.append('_subject', `Neue Anmeldung: ${nameVal}`);
 
-            // Schicke Daten zu FormSubmit.co (ersetze YOUR_EMAIL durch deine Email)
-            fetch('https://formspree.io/f/mykqvbja', {
+            function showSuccess() {
+                document.getElementById('levelText').textContent = level;
+                document.getElementById('learningTypeText').textContent = learningType;
+                document.getElementById('studentLink').innerHTML = `
+                    <strong>Deine Anmeldung wurde erfolgreich versendet!</strong><br><br>
+                    Du bekommst in Kürze eine Bestätigung per Email oder WhatsApp (${phoneVal}).
+                `;
+
+                document.getElementById('step4').classList.remove('active');
+                document.getElementById('success').classList.add('active');
+                document.getElementById('circle4').classList.remove('active');
+                document.getElementById('text4').classList.remove('active');
+                window.scrollTo(0, 0);
+            }
+
+            function openMailFallback() {
+                const body = encodeURIComponent(
+                    `Neue Anmeldung über die Website\n\n` +
+                    `Name: ${nameVal}\n` +
+                    `Telefon: ${phoneVal}\n` +
+                    `Email: ${emailVal}\n` +
+                    `Muttersprache: ${motherLanguageVal}\n` +
+                    `Ziele: ${goalsVal}\n` +
+                    `Vorkenntnisse: ${priorKnowledgeVal}\n` +
+                    `Testergebnis: ${testSkipped ? 'übersprungen' : testScore}\n` +
+                    `Niveau: ${level}\n` +
+                    `Lerntyp: ${learningType}\n` +
+                    `Datum: ${registrationDate}`
+                );
+                window.location.href = `mailto:amylan@ik.me?subject=${encodeURIComponent('Neue Anmeldung: ' + nameVal)}&body=${body}`;
+            }
+
+            fetch('https://formsubmit.co/ajax/amylan@ik.me', {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -778,23 +877,15 @@
             })
             .then(response => {
                 if (response.ok) {
-                    document.getElementById('levelText').textContent = level;
-                    document.getElementById('learningTypeText').textContent = learningType;
-                    document.getElementById('studentLink').innerHTML = `
-                        <strong>Deine Anmeldung wurde erfolgreich versendet!</strong><br><br>
-                        Du bekommst in Kürze eine Bestätigung per Email oder WhatsApp (${document.getElementById('phone').value.trim()}).
-                    `;
-                    
-                    document.getElementById('step4').classList.remove('active');
-                    document.getElementById('success').classList.add('active');
-                    document.getElementById('circle4').classList.remove('active');
-                    document.getElementById('text4').classList.remove('active');
+                    showSuccess();
                 } else {
-                    alert('Fehler beim Versenden. Bitte versuche es später erneut.');
+                    openMailFallback();
+                    showSuccess();
                 }
             })
             .catch(error => {
-                alert('Fehler beim Versenden: ' + error.message);
+                openMailFallback();
+                showSuccess();
             });
         }
 
