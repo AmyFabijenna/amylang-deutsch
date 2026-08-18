@@ -1,0 +1,569 @@
+
+<h2 class="sr-only">Deutsche Verben mit Präpositionalkasus – interaktives Nachschlagewerk für DaF</h2>
+<style>
+.ps{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px;margin-bottom:12px}
+.vr{padding:7px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.vr:last-child{border-bottom:none}
+.vn{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.tb{font-size:11px;padding:1px 6px;background:var(--color-background-danger);color:var(--color-text-danger);border:0.5px solid var(--color-border-danger);border-radius:var(--border-radius-md);white-space:nowrap;flex-shrink:0}
+.cb{font-size:12px;font-weight:500;padding:2px 9px;border-radius:var(--border-radius-md);white-space:nowrap;display:inline-block}
+.ak{background:var(--color-background-info);color:var(--color-text-info);border:0.5px solid var(--color-border-info)}
+.dt{background:var(--color-background-success);color:var(--color-text-success);border:0.5px solid var(--color-border-success)}
+.gn{background:var(--color-background-warning);color:var(--color-text-warning);border:0.5px solid var(--color-border-warning)}
+.fbn{font-size:12px;padding:4px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-secondary);cursor:pointer;white-space:nowrap}
+.fbn.fa{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-primary);font-weight:500}
+.ex{font-size:13px;color:var(--color-text-secondary);font-style:italic;margin-top:2px}
+</style>
+<div style="padding:0.5rem 0">
+<div style="display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:14px;font-size:12px;color:var(--color-text-secondary)">
+  <span style="font-weight:500">Kasus:</span>
+  <span class="cb ak">Akkusativ</span>
+  <span class="cb dt">Dativ</span>
+  <span class="cb gn">Genitiv</span>
+  <span class="tb" style="position:static">⚡ mehrere Präpositionen</span>
+</div>
+<div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+  <i class="ti ti-search" style="font-size:16px;color:var(--color-text-secondary)" aria-hidden="true"></i>
+  <input type="search" id="srch" placeholder="Verb oder Beispielsatz suchen …" oninput="render()" style="flex:1;font-size:14px">
+</div>
+<div id="filterBar" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:16px"></div>
+<div id="out"></div>
+</div>
+<script>
+const G=[
+  {id:"an-d",l:"AN + Dativ",c:"dt",e:[
+    {v:"arbeiten an",x:"Er arbeitet an einem neuen Projekt."},
+    {v:"erkranken an",x:"Sie ist an einer seltenen Krankheit erkrankt."},
+    {v:"sterben an",x:"Er ist an den Folgen gestorben."},
+    {v:"leiden an",x:"Sie leidet an Schlaflosigkeit.",t:1},
+    {v:"zweifeln an",x:"Ich zweifle an seiner Ehrlichkeit."},
+    {v:"scheitern an",x:"Das Projekt scheiterte an fehlendem Budget."},
+    {v:"festhalten an",x:"Sie hält hartnäckig an ihrer Überzeugung fest."},
+    {v:"hängen an",x:"Er hängt sehr an seiner Heimat."},
+    {v:"mangeln an",x:"Es mangelt hier an Transparenz."},
+    {v:"teilnehmen an",x:"Wir nehmen an einem Workshop teil."},
+    {v:"sich rächen an",x:"Er rächte sich an seinem Feind.",t:1},
+    {v:"erkennen an",x:"Man erkennt ihn an seiner Stimme."},
+    {v:"interessiert sein an",x:"Sie ist an einer Kooperation interessiert."},
+    {v:"beteiligt sein an",x:"Er ist am Projekt beteiligt."},
+    {v:"schuld sein an",x:"Wer ist daran schuld?"},
+    {v:"sich orientieren an",x:"Sie orientiert sich an einem Vorbild."},
+    {v:"sich reiben an",x:"Er reibt sich ständig an der Bürokratie."},
+    {v:"verzweifeln an",x:"Sie verzweifelt fast an dieser Aufgabe."},
+    {v:"sich abarbeiten an",x:"Er arbeitet sich am System ab."},
+  ]},
+  {id:"an-a",l:"AN + Akkusativ",c:"ak",e:[
+    {v:"denken an",x:"Ich denke oft an dich."},
+    {v:"sich erinnern an",x:"Ich erinnere mich an unsere erste Begegnung."},
+    {v:"sich gewöhnen an",x:"Sie gewöhnt sich langsam ans neue Klima."},
+    {v:"glauben an",x:"Er glaubt an die Kraft der Natur."},
+    {v:"sich wenden an",x:"Wende dich an die Beratungsstelle."},
+    {v:"appellieren an",x:"Er appellierte an das Gewissen der Politiker."},
+    {v:"sich anpassen an",x:"Sie hat sich an die neue Situation angepasst."},
+    {v:"sich klammern an",x:"Er klammert sich an jede Hoffnung."},
+    {v:"grenzen an",x:"Das grenzt schon an Wahnsinn."},
+    {v:"sich halten an",x:"Bitte haltet euch an die Regeln."},
+    {v:"sich herantasten an",x:"Sie tastete sich langsam an das Thema heran."},
+    {v:"sich wagen an",x:"Er wagt sich an eine neue Aufgabe."},
+    {v:"schreiben an",x:"Sie schreibt an ihre Vorgesetzte."},
+    {v:"mahnen an",x:"Das mahnt uns an vergangene Fehler."},
+    {v:"glauben an (sich selbst)",x:"Sie glaubt fest an sich selbst."},
+    {v:"denken an (Rücksicht)",x:"Denk auch an die anderen!"},
+    {v:"sich heranwagen an",x:"Er wagte sich nur zögernd an das Thema heran."},
+    {v:"stoßen an",x:"Wir stoßen hier an unsere Grenzen."},
+  ]},
+  {id:"auf-a",l:"AUF + Akkusativ",c:"ak",e:[
+    {v:"achten auf",x:"Achte auf deine Gesundheit."},
+    {v:"antworten auf",x:"Bitte antworten Sie auf meine E-Mail."},
+    {v:"sich auswirken auf",x:"Stress wirkt sich auf die Gesundheit aus."},
+    {v:"sich beziehen auf",x:"Worauf beziehst du dich genau?"},
+    {v:"sich freuen auf",x:"Ich freue mich auf das Konzert morgen.",t:1},
+    {v:"hoffen auf",x:"Wir hoffen auf bessere Zeiten."},
+    {v:"sich konzentrieren auf",x:"Konzentriere dich auf das Wesentliche."},
+    {v:"sich verlassen auf",x:"Auf sie kann man sich verlassen."},
+    {v:"verzichten auf",x:"Er verzichtet konsequent auf Zucker."},
+    {v:"warten auf",x:"Ich warte noch auf eine Antwort."},
+    {v:"hinweisen auf",x:"Sie wies auf einen wichtigen Fehler hin."},
+    {v:"sich vorbereiten auf",x:"Ich bereite mich auf die Prüfung vor."},
+    {v:"reagieren auf",x:"Wie hast du auf die Kritik reagiert?"},
+    {v:"sich stützen auf",x:"Die Theorie stützt sich auf Fakten."},
+    {v:"vertrauen auf",x:"Sie vertraut auf ihr Gefühl."},
+    {v:"sich spezialisieren auf",x:"Er hat sich auf Steuerrecht spezialisiert."},
+    {v:"bestehen auf",x:"Sie besteht auf ihrem Recht."},
+    {v:"drängen auf",x:"Er drängt auf eine schnelle Entscheidung."},
+    {v:"eingehen auf",x:"Gehst du auf meinen Vorschlag ein?"},
+    {v:"sich einlassen auf",x:"Ich lasse mich auf dieses Risiko nicht ein."},
+    {v:"pochen auf",x:"Sie pochte nachdrücklich auf ihr Recht."},
+    {v:"aufmerksam machen auf",x:"Er machte mich auf den Fehler aufmerksam."},
+    {v:"sich besinnen auf",x:"Es ist Zeit, sich auf seine Werte zu besinnen."},
+    {v:"sich beschränken auf",x:"Lass uns uns auf das Wesentliche beschränken."},
+    {v:"zählen auf",x:"Ich zähle auf deine Unterstützung."},
+    {v:"anstoßen auf",x:"Wir haben auf seinen Erfolg angestoßen."},
+    {v:"aufpassen auf",x:"Pass bitte auf die Kinder auf."},
+    {v:"angewiesen sein auf",x:"Er ist auf fremde Hilfe angewiesen."},
+    {v:"stolz sein auf",x:"Sie ist sehr stolz auf ihre Tochter.",t:0},
+    {v:"neugierig sein auf",x:"Ich bin neugierig auf die Antwort.",t:0},
+    {v:"gespannt sein auf",x:"Alle sind gespannt auf das Ergebnis.",t:0},
+    {v:"wütend sein auf",x:"Er ist wütend auf seinen Chef.",t:0},
+    {v:"eifersüchtig sein auf",x:"Sie ist eifersüchtig auf seinen Erfolg.",t:0},
+    {v:"sich bewerben auf",x:"Sie bewirbt sich auf die ausgeschriebene Stelle.",t:1},
+    {v:"sich spezialisieren auf",x:"Sie hat sich auf Sportmedizin spezialisiert."},
+    {v:"schwören auf",x:"Er schwört auf Natürlichkeit."},
+    {v:"sich freuen auf",x:"Ich freue mich schon sehr darauf.",t:1},
+  ]},
+  {id:"aus-d",l:"AUS + Dativ",c:"dt",e:[
+    {v:"bestehen aus",x:"Das Team besteht aus fünf Personen."},
+    {v:"entstehen aus",x:"Daraus entstand eine enge Freundschaft."},
+    {v:"schließen aus",x:"Was schließt du daraus?"},
+    {v:"sich zusammensetzen aus",x:"Das Gemisch setzt sich aus drei Elementen zusammen."},
+    {v:"folgen aus",x:"Was folgt daraus für unsere Planung?"},
+    {v:"hervorgehen aus",x:"Daraus geht hervor, dass er Recht hatte."},
+    {v:"resultieren aus",x:"Daraus resultierten erhebliche Probleme."},
+    {v:"sich ergeben aus",x:"Das ergibt sich logisch aus der Situation."},
+  ]},
+  {id:"bei-d",l:"BEI + Dativ",c:"dt",e:[
+    {v:"sich bedanken bei",x:"Ich bedanke mich herzlich bei dir.",t:1},
+    {v:"sich beschweren bei",x:"Sie beschwerte sich beim Direktor.",t:1},
+    {v:"sich entschuldigen bei",x:"Er entschuldigte sich aufrichtig bei ihr.",t:1},
+    {v:"helfen bei",x:"Kannst du mir bei der Aufgabe helfen?"},
+    {v:"bleiben bei",x:"Er bleibt standhaft bei seiner Aussage."},
+    {v:"sich informieren bei",x:"Informier dich bitte bei der Behörde."},
+    {v:"sich melden bei",x:"Melde dich bei mir, wenn du angekommen bist."},
+    {v:"sich bedienen bei",x:"Er bedient sich gerne bei anderen Ideen."},
+  ]},
+  {id:"durch-a",l:"DURCH + Akkusativ",c:"ak",e:[
+    {v:"sich auszeichnen durch",x:"Sie zeichnet sich durch außergewöhnliche Präzision aus."},
+    {v:"auffallen durch",x:"Er fällt durch seine Kreativität auf."},
+    {v:"sich unterscheiden durch",x:"Die Methoden unterscheiden sich durch ihre Effizienz.",t:1},
+    {v:"sich durchsetzen durch",x:"Sie setzte sich durch konsequentes Auftreten durch."},
+    {v:"glänzen durch",x:"Er glänzte – durch Abwesenheit."},
+    {v:"überzeugen durch",x:"Sie überzeugte durch Sachlichkeit."},
+  ]},
+  {id:"fur-a",l:"FÜR + Akkusativ",c:"ak",e:[
+    {v:"sich bedanken für",x:"Ich bedanke mich für deine Hilfe.",t:1},
+    {v:"sich begeistern für",x:"Sie begeistert sich für klassische Musik.",t:1},
+    {v:"sich einsetzen für",x:"Er setzt sich für die Umwelt ein."},
+    {v:"sich entscheiden für",x:"Sie hat sich für diese Stelle entschieden.",t:1},
+    {v:"sich entschuldigen für",x:"Er entschuldigte sich für sein Verhalten.",t:1},
+    {v:"sich interessieren für",x:"Sie interessiert sich sehr für Geschichte."},
+    {v:"kämpfen für",x:"Sie kämpft für Gerechtigkeit.",t:1},
+    {v:"sich schämen für",x:"Er schämt sich für sein Verhalten.",t:1},
+    {v:"sorgen für",x:"Sie sorgt liebevoll für ihre Mutter.",t:1},
+    {v:"stimmen für",x:"Wer hat für den Antrag gestimmt?"},
+    {v:"verantwortlich sein für",x:"Wer ist dafür verantwortlich?"},
+    {v:"sich verantworten für",x:"Er musste sich für seine Entscheidung verantworten.",t:1},
+    {v:"werben für",x:"Sie wirbt für ein neues Produkt.",t:1},
+    {v:"danken für",x:"Ich danke dir für deine Geduld."},
+    {v:"sich eignen für",x:"Sie eignet sich gut für diese Stelle."},
+    {v:"plädieren für",x:"Er plädierte für eine mildere Strafe."},
+    {v:"sich erwärmen für",x:"Ich kann mich nicht so recht dafür erwärmen."},
+    {v:"offen sein für",x:"Ich bin sehr offen für neue Ideen."},
+    {v:"haften für",x:"Der Vermieter haftet für Schäden."},
+    {v:"dankbar sein für",x:"Ich bin zutiefst dankbar für deine Unterstützung."},
+    {v:"empfänglich sein für",x:"Er ist für rationale Argumente empfänglich."},
+    {v:"geeignet sein für",x:"Diese Methode ist nicht für Anfänger geeignet."},
+    {v:"zuständig sein für",x:"Wer ist für das Projekt zuständig?"},
+  ]},
+  {id:"gegen-a",l:"GEGEN + Akkusativ",c:"ak",e:[
+    {v:"ankämpfen gegen",x:"Sie kämpft gegen Ungerechtigkeit an.",t:1},
+    {v:"sich aussprechen gegen",x:"Er sprach sich klar gegen den Plan aus."},
+    {v:"sich behaupten gegen",x:"Sie behauptete sich gegen starke Konkurrenz."},
+    {v:"demonstrieren gegen",x:"Tausende demonstrierten gegen das Gesetz."},
+    {v:"kämpfen gegen",x:"Er kämpft gegen chronische Erschöpfung.",t:1},
+    {v:"klagen gegen",x:"Das Unternehmen klagt gegen den Steuerbescheid.",t:1},
+    {v:"protestieren gegen",x:"Die Bürger protestierten gegen die Entscheidung."},
+    {v:"sich wehren gegen",x:"Sie wehrte sich gegen die Anschuldigungen."},
+    {v:"verstoßen gegen",x:"Das verstößt klar gegen die Regeln."},
+    {v:"vorgehen gegen",x:"Die Behörden gehen gegen Steuerbetrug vor."},
+    {v:"sich entscheiden gegen",x:"Sie entschied sich gegen das Angebot.",t:1},
+    {v:"sich sperren gegen",x:"Er sperrt sich gegen jede Veränderung."},
+    {v:"immun sein gegen",x:"Er scheint gegen jede Kritik immun."},
+    {v:"allergisch sein gegen",x:"Sie ist allergisch gegen Nüsse."},
+    {v:"rebellieren gegen",x:"Die Jugend rebelliert gegen Autorität."},
+    {v:"sich stemmen gegen",x:"Er stemmt sich gegen den Strom."},
+    {v:"ankommen gegen",x:"Gegen sie kommt niemand an."},
+    {v:"verstoßen gegen",x:"Das verstößt gegen das Gesetz."},
+  ]},
+  {id:"in-a",l:"IN + Akkusativ",c:"ak",e:[
+    {v:"sich verlieben in",x:"Sie hat sich in ihn verliebt."},
+    {v:"sich verwandeln in",x:"Die Raupe verwandelt sich in einen Schmetterling."},
+    {v:"einwilligen in",x:"Er willigte in die Operation ein."},
+    {v:"sich einmischen in",x:"Misch dich nicht in fremde Angelegenheiten ein."},
+    {v:"investieren in",x:"Sie investiert konsequent in ihre Ausbildung."},
+    {v:"sich fügen in",x:"Er fügte sich in sein Schicksal."},
+    {v:"übersetzen in",x:"Der Text wird ins Deutsche übersetzt."},
+    {v:"sich versetzen in",x:"Versuch dich in seine Lage zu versetzen."},
+    {v:"sich einleben in",x:"Sie hat sich schnell in die neue Stadt eingelebt."},
+    {v:"sich hineinsteigern in",x:"Er hat sich in eine Panik hineingesteigert."},
+    {v:"sich verbeißen in",x:"Sie verbiss sich in das Problem."},
+    {v:"münden in",x:"Das Gespräch mündete in einen Streit."},
+  ]},
+  {id:"in-d",l:"IN + Dativ",c:"dt",e:[
+    {v:"sich irren in",x:"Ich habe mich in ihr geirrt."},
+    {v:"sich täuschen in",x:"Sie hat sich in ihm schwer getäuscht."},
+    {v:"bestehen in",x:"Die Kunst besteht darin, gut zuzuhören."},
+    {v:"sich unterscheiden in",x:"Die Versionen unterscheiden sich in einem Punkt.",t:1},
+    {v:"stärken in",x:"Das stärkt mich in meiner Überzeugung."},
+    {v:"sich auskennen in",x:"Sie kennt sich in diesem Gebiet sehr gut aus."},
+    {v:"sich einig sein in",x:"Darin sind wir uns alle einig."},
+  ]},
+  {id:"mit-d",l:"MIT + Dativ",c:"dt",e:[
+    {v:"sich abfinden mit",x:"Er hat sich mit der Situation abgefunden."},
+    {v:"anfangen mit",x:"Wann fangen wir mit dem Training an?"},
+    {v:"aufhören mit",x:"Sie hat endlich mit dem Rauchen aufgehört."},
+    {v:"sich auseinandersetzen mit",x:"Ich setze mich intensiv mit dem Thema auseinander."},
+    {v:"beginnen mit",x:"Wir beginnen mit einer kurzen Einführung."},
+    {v:"sich befassen mit",x:"Sie befasst sich mit Quantenphysik."},
+    {v:"sich begnügen mit",x:"Er begnügt sich mit wenig."},
+    {v:"sich beschäftigen mit",x:"Ich beschäftige mich gerne mit Philosophie."},
+    {v:"drohen mit",x:"Er drohte mit einer Klage."},
+    {v:"sich einigen mit",x:"Wir haben uns mit dem Vermieter geeinigt.",t:1},
+    {v:"sich einverstanden erklären mit",x:"Ich erkläre mich damit einverstanden."},
+    {v:"sich identifizieren mit",x:"Sie identifiziert sich sehr mit der Figur."},
+    {v:"kämpfen mit",x:"Er kämpft täglich mit inneren Zweifeln.",t:1},
+    {v:"prahlen mit",x:"Er prahlt gerne mit seinen Kontakten."},
+    {v:"rechnen mit",x:"Wir müssen mit Verzögerungen rechnen."},
+    {v:"reden mit",x:"Ich muss dringend mit dir reden.",t:1},
+    {v:"sich solidarisieren mit",x:"Sie solidarisieren sich mit den Streikenden."},
+    {v:"sprechen mit",x:"Ich spreche gleich mit der Chefin.",t:1},
+    {v:"telefonieren mit",x:"Ich habe lange mit ihr telefoniert."},
+    {v:"übereinstimmen mit",x:"Das stimmt nicht mit meiner Einschätzung überein."},
+    {v:"umgehen mit",x:"Sie weiß gut mit Kritik umzugehen."},
+    {v:"verhandeln mit",x:"Sie verhandelt mit dem Investor."},
+    {v:"zusammenhängen mit",x:"Das hängt mit dem Stress zusammen."},
+    {v:"zufrieden sein mit",x:"Ich bin zufrieden mit dem Ergebnis."},
+    {v:"verheiratet sein mit",x:"Sie ist mit einem Musiker verheiratet."},
+    {v:"befreundet sein mit",x:"Er ist schon lange mit ihr befreundet."},
+    {v:"vertraut sein mit",x:"Ich bin mit dem System bestens vertraut."},
+    {v:"einverstanden sein mit",x:"Ich bin damit einverstanden."},
+    {v:"konfrontiert sein mit",x:"Sie ist täglich damit konfrontiert."},
+    {v:"aufräumen mit (fig.)",x:"Es ist Zeit, mit alten Mustern aufzuräumen."},
+    {v:"konkurrieren mit",x:"Wir konkurrieren mit großen Unternehmen.",t:1},
+    {v:"sympathisieren mit",x:"Er sympathisiert mit dieser Bewegung."},
+    {v:"sich abplagen mit",x:"Sie plagt sich wochenlang mit dieser Aufgabe ab."},
+    {v:"sich auskennen mit",x:"Er kennt sich gut mit alter Technik aus."},
+    {v:"liebäugeln mit",x:"Sie liebäugelt mit einem Jobwechsel."},
+  ]},
+  {id:"nach-d",l:"NACH + Dativ",c:"dt",e:[
+    {v:"fragen nach",x:"Sie fragte höflich nach dem Weg."},
+    {v:"sich richten nach",x:"Wir richten uns nach dem Wetter."},
+    {v:"streben nach",x:"Sie strebt unermüdlich nach Vollkommenheit."},
+    {v:"suchen nach",x:"Ich suche intensiv nach einer Lösung."},
+    {v:"sich sehnen nach",x:"Er sehnt sich nach Ruhe und Stille."},
+    {v:"verlangen nach",x:"Das Kind verlangt nach seiner Mutter."},
+    {v:"riechen nach",x:"Das riecht wunderbar nach Lavendel."},
+    {v:"schmecken nach",x:"Es schmeckt nach Zimt und Vanille."},
+    {v:"sich erkundigen nach",x:"Ich erkundigte mich nach dem aktuellen Stand."},
+    {v:"greifen nach",x:"Sie griff nach seinem Arm."},
+    {v:"urteilen nach",x:"Man soll nicht nach dem Äußeren urteilen."},
+    {v:"rufen nach",x:"Er rief laut nach der Polizei."},
+    {v:"hungern nach",x:"Sie hungert nach Anerkennung."},
+    {v:"dürsten nach (geh.)",x:"Er dürstet nach Gerechtigkeit."},
+    {v:"aussehen nach (ugs.)",x:"Das sieht stark nach Regen aus."},
+    {v:"Ausschau halten nach",x:"Sie hält Ausschau nach einer neuen Wohnung."},
+  ]},
+  {id:"uber-a",l:"ÜBER + Akkusativ",c:"ak",e:[
+    {v:"sich ärgern über",x:"Sie ärgert sich über die Verspätung."},
+    {v:"sich aufregen über",x:"Er regt sich über Kleinigkeiten auf."},
+    {v:"sich beklagen über",x:"Sie beklagt sich über den Lärm."},
+    {v:"berichten über",x:"Die Zeitung berichtet über den Vorfall.",t:1},
+    {v:"sich beschweren über",x:"Er beschwert sich über seinen Nachbarn."},
+    {v:"sich einigen über",x:"Wir haben uns über den Preis geeinigt.",t:1},
+    {v:"sich freuen über",x:"Ich freue mich über deine Nachricht.",t:1},
+    {v:"nachdenken über",x:"Ich denke ernsthaft über eine Veränderung nach."},
+    {v:"reden über",x:"Wir sollten offen darüber reden.",t:1},
+    {v:"sprechen über",x:"Können wir in Ruhe darüber sprechen?",t:1},
+    {v:"sich streiten über",x:"Sie streiten sich ständig über Geld."},
+    {v:"sich unterhalten über",x:"Wir haben uns über Gott und die Welt unterhalten."},
+    {v:"urteilen über",x:"Man soll nicht vorschnell über andere urteilen."},
+    {v:"sich wundern über",x:"Ich wundere mich sehr über seine Reaktion."},
+    {v:"diskutieren über",x:"Sie diskutieren intensiv über das neue Konzept."},
+    {v:"verfügen über",x:"Sie verfügt über jahrelange Erfahrung."},
+    {v:"klagen über",x:"Er klagt über chronische Rückenschmerzen.",t:1},
+    {v:"lachen über",x:"Alle lachten herzlich über seinen Witz."},
+    {v:"sich lustig machen über",x:"Man soll sich nicht über andere lustig machen."},
+    {v:"trauern über",x:"Sie trauert tief über diesen Verlust.",t:1},
+    {v:"schreiben über",x:"Sie schreibt leidenschaftlich über Klimawandel."},
+    {v:"entscheiden über",x:"Wer entscheidet letztlich darüber?"},
+    {v:"herrschen über",x:"Er herrscht über ein riesiges Reich."},
+    {v:"sich hinwegsetzen über",x:"Sie setzt sich einfach über die Regeln hinweg."},
+    {v:"stolpern über",x:"Ich bin über einen kleinen Fehler gestolpert."},
+    {v:"triumphieren über",x:"Sie triumphiert klar über ihren Gegner."},
+    {v:"empört sein über",x:"Wir sind empört über dieses Verhalten."},
+    {v:"informieren über",x:"Ich informiere dich über alle Neuigkeiten."},
+    {v:"nachgrübeln über",x:"Er grübelt immer noch darüber nach."},
+    {v:"schweigen über",x:"Darüber schweigt die Geschichte."},
+    {v:"enttäuscht sein über",x:"Ich bin über das Ergebnis enttäuscht.",t:1},
+    {v:"erschüttert sein über",x:"Sie ist über die Nachricht erschüttert."},
+  ]},
+  {id:"um-a",l:"UM + Akkusativ",c:"ak",e:[
+    {v:"sich bemühen um",x:"Er bemüht sich um einen Studienplatz."},
+    {v:"sich bewerben um",x:"Sie bewirbt sich um eine leitende Stelle.",t:1},
+    {v:"bitten um",x:"Ich bitte dich um einen Rat."},
+    {v:"kämpfen um",x:"Die Teams kämpfen erbittert um den Titel.",t:1},
+    {v:"sich kümmern um",x:"Ich kümmere mich darum."},
+    {v:"sich sorgen um",x:"Ich mache mir wirklich Sorgen um sie.",t:1},
+    {v:"trauern um",x:"Sie trauert um ihren geliebten Vater.",t:1},
+    {v:"es handelt sich um",x:"Es handelt sich um ein Missverständnis."},
+    {v:"es dreht sich um",x:"Es dreht sich im Grunde alles ums Geld."},
+    {v:"es geht um",x:"Worum geht es hier eigentlich?"},
+    {v:"werben um",x:"Er wirbt um ihre Gunst.",t:1},
+    {v:"bangen um",x:"Sie bangt um seinen Gesundheitszustand."},
+    {v:"fürchten um",x:"Ich fürchte um seine Sicherheit."},
+    {v:"beneiden um",x:"Alle beneiden ihn um seinen Erfolg."},
+    {v:"jdn bringen um",x:"Die Aufregung brachte ihn um den Schlaf."},
+    {v:"streiten um",x:"Sie streiten erbittert um das Erbe."},
+    {v:"konkurrieren um",x:"Mehrere Firmen konkurrieren um den Auftrag.",t:1},
+    {v:"ringen um",x:"Sie rang verzweifelt um Fassung."},
+    {v:"besorgt sein um",x:"Ich bin sehr um ihn besorgt."},
+    {v:"sich reißen um",x:"Alle reißen sich um die Karten."},
+  ]},
+  {id:"unter-d",l:"UNTER + Dativ",c:"dt",e:[
+    {v:"leiden unter",x:"Er leidet sehr unter dem Druck.",t:1},
+    {v:"sich vorstellen unter",x:"Was stellst du dir darunter vor?"},
+    {v:"zusammenbrechen unter",x:"Sie bricht fast unter der Last zusammen."},
+    {v:"stöhnen unter",x:"Die Bevölkerung stöhnt unter den hohen Preisen."},
+    {v:"verstehen unter",x:"Was verstehst du unter diesem Begriff?"},
+    {v:"sich distanzieren unter",x:"— (hier eher: von)"},
+  ]},
+  {id:"von-d",l:"VON + Dativ",c:"dt",e:[
+    {v:"abhängen von",x:"Es hängt von der Stimmung ab."},
+    {v:"sich befragen lassen von",x:"Er ließ sich von der Kommission befragen."},
+    {v:"berichten von",x:"Sie berichtete lebendig von ihrer Reise.",t:1},
+    {v:"sich erholen von",x:"Ich erhole mich gerade von der Krankheit."},
+    {v:"erzählen von",x:"Er erzählt gerne von seinen Abenteuern."},
+    {v:"sich fernhalten von",x:"Halt dich von diesem Streit fern."},
+    {v:"handeln von",x:"Wovon handelt das Buch?"},
+    {v:"sich lösen von",x:"Sie hat sich von alten Mustern gelöst."},
+    {v:"sich trennen von",x:"Er hat sich schließlich von ihr getrennt."},
+    {v:"träumen von",x:"Ich träume von einem freien Leben."},
+    {v:"überzeugt sein von",x:"Ich bin von dieser Idee überzeugt."},
+    {v:"sich unterscheiden von",x:"Wie unterscheidet sich das von der alten Version?",t:1},
+    {v:"sich verabschieden von",x:"Sie verabschiedete sich herzlich von allen."},
+    {v:"wissen von",x:"Er weiß bereits von dem Plan."},
+    {v:"sich freimachen von",x:"Sie befreite sich mutig von alten Ängsten."},
+    {v:"profitieren von",x:"Davon profitieren letztlich alle."},
+    {v:"enttäuscht sein von",x:"Ich bin wirklich von ihm enttäuscht.",t:1},
+    {v:"begeistert sein von",x:"Sie ist von der Idee begeistert.",t:1},
+    {v:"abhängig sein von",x:"Er ist emotional stark von ihr abhängig."},
+    {v:"beeindruckt sein von",x:"Wir sind von der Leistung sehr beeindruckt."},
+    {v:"sich distanzieren von",x:"Sie distanzierte sich öffentlich von der Aussage."},
+    {v:"sich abwenden von",x:"Er wandte sich langsam von ihr ab."},
+    {v:"überwältigt sein von",x:"Sie war von den Gefühlen überwältigt."},
+    {v:"überzeugen von",x:"Er konnte mich von seiner Idee überzeugen."},
+    {v:"handeln von",x:"Dieser Roman handelt von einer unmöglichen Liebe."},
+  ]},
+  {id:"vor-d",l:"VOR + Dativ",c:"dt",e:[
+    {v:"Angst haben vor",x:"Sie hat Angst vor dem Scheitern."},
+    {v:"sich fürchten vor",x:"Er fürchtet sich vor der Dunkelheit."},
+    {v:"sich hüten vor",x:"Hüte dich vor falschen Freunden."},
+    {v:"warnen vor",x:"Ich warne dich eindringlich vor den Risiken."},
+    {v:"sich schämen vor",x:"Sie schämt sich vor ihren Eltern.",t:1},
+    {v:"sich ekeln vor",x:"Ich ekel mich vor Spinnen."},
+    {v:"zurückschrecken vor",x:"Er schreckt vor keiner Aufgabe zurück."},
+    {v:"zittern vor",x:"Sie zitterte am ganzen Körper vor Aufregung."},
+    {v:"sich schützen vor",x:"Schütz dich vor zu viel Sonne."},
+    {v:"retten vor",x:"Er rettete sie mutig vor dem Ertrinken."},
+    {v:"kapitulieren vor",x:"Er will nicht vor dem Problem kapitulieren."},
+    {v:"fliehen vor",x:"Sie flieht vor der Verantwortung."},
+    {v:"erschrecken vor",x:"Ich bin vor dem Geräusch erschrocken."},
+    {v:"sich verbergen vor",x:"Sie verbirgt ihre wahren Gefühle vor anderen."},
+    {v:"sich verstecken vor",x:"Er versteckt sich vor der Wahrheit."},
+    {v:"strotzen vor",x:"Sie strotzt vor Energie."},
+    {v:"schützen vor",x:"Das Dach schützt uns vor dem Regen."},
+  ]},
+  {id:"wegen-g",l:"WEGEN + Genitiv",c:"gn",e:[
+    {v:"sich verantworten wegen",x:"Er musste sich wegen Betrugs verantworten.",t:1},
+    {v:"verurteilt werden wegen",x:"Sie wurde wegen Diebstahls verurteilt."},
+    {v:"verhaftet werden wegen",x:"Er wurde wegen Körperverletzung verhaftet."},
+    {v:"sich entschuldigen wegen",x:"Sie entschuldigte sich wegen der Verspätung.",t:1},
+    {v:"sich schämen wegen",x:"Er schämt sich wegen seines Fehlers.",t:1},
+    {v:"besorgt sein wegen",x:"Ich bin wegen seiner Gesundheit sehr besorgt."},
+    {v:"angeklagt werden wegen",x:"Er wurde wegen Steuerhinterziehung angeklagt."},
+    {v:"kritisiert werden wegen",x:"Sie wurde wegen ihres Verhaltens kritisiert."},
+  ]},
+  {id:"zu-d",l:"ZU + Dativ",c:"dt",e:[
+    {v:"beitragen zu",x:"Das trägt wesentlich zur Lösung bei."},
+    {v:"sich bekennen zu",x:"Sie bekennt sich mutig zu ihren Werten."},
+    {v:"sich entschließen zu",x:"Er hat sich zu einem Umzug entschlossen."},
+    {v:"führen zu",x:"Das führt unweigerlich zu Missverständnissen."},
+    {v:"gehören zu",x:"Das gehört einfach dazu."},
+    {v:"neigen zu",x:"Er neigt leider zu Übertreibungen."},
+    {v:"passen zu",x:"Das passt sehr gut zu dir."},
+    {v:"tendieren zu",x:"Ich tendiere eher zu Option B."},
+    {v:"sich verpflichten zu",x:"Sie verpflichtete sich zu regelmäßigen Zahlungen."},
+    {v:"zwingen zu",x:"Niemand zwingt dich dazu."},
+    {v:"einladen zu",x:"Wir laden euch herzlich zur Feier ein."},
+    {v:"gratulieren zu",x:"Ich gratuliere dir herzlich zum Erfolg."},
+    {v:"raten zu",x:"Ich rate dir dringend zu einer Pause."},
+    {v:"stehen zu",x:"Ich stehe zu meinem Wort."},
+    {v:"werden zu",x:"Das wird langsam zum Problem."},
+    {v:"dienen zu",x:"Wofür dient das eigentlich?"},
+    {v:"verhelfen zu",x:"Das verhilft ihm zu einem echten Neustart."},
+    {v:"sich durchringen zu",x:"Sie rang sich schließlich zu einer Entscheidung durch."},
+    {v:"fähig sein zu",x:"Zu so etwas wäre er nie fähig."},
+    {v:"bereit sein zu",x:"Bist du dazu wirklich bereit?"},
+    {v:"in der Lage sein zu",x:"Ich bin nicht in der Lage, das zu beurteilen."},
+    {v:"auffordern zu",x:"Die Polizei forderte ihn zur Kooperation auf."},
+    {v:"ermutigen zu",x:"Sie ermutigt ihn zu diesem mutigen Schritt."},
+    {v:"überreden zu",x:"Er überredete sie zur Teilnahme."},
+    {v:"verleiten zu",x:"Das verleitet leicht zu Fehlern."},
+    {v:"inspirieren zu",x:"Das Buch hat sie zu großen Taten inspiriert."},
+    {v:"berechtigen zu",x:"Das berechtigt zu einer Klage."},
+    {v:"aufrufen zu",x:"Er rief lautstark zum Widerstand auf."},
+    {v:"auffordern zu",x:"Er forderte alle zu mehr Disziplin auf."},
+    {v:"veranlassen zu",x:"Was hat dich dazu veranlasst?"},
+    {v:"bewegen zu",x:"Was bewegt dich zu dieser Entscheidung?"},
+  ]},
+  {id:"geg-d",l:"GEGENÜBER + Dativ",c:"dt",e:[
+    {v:"offen sein gegenüber",x:"Sei offen gegenüber neuen Ideen."},
+    {v:"misstrauisch sein gegenüber",x:"Sie ist ihm gegenüber sehr misstrauisch."},
+    {v:"feindlich eingestellt sein gegenüber",x:"Er ist Veränderungen gegenüber feindlich eingestellt."},
+    {v:"loyal sein gegenüber",x:"Sei deinen Kolleginnen gegenüber loyal."},
+    {v:"verantwortlich sein gegenüber",x:"Wir sind unseren Klienten gegenüber verantwortlich."},
+    {v:"gleichgültig sein gegenüber",x:"Er ist dem Problem gegenüber völlig gleichgültig."},
+    {v:"aufgeschlossen sein gegenüber",x:"Sie ist neuen Methoden gegenüber aufgeschlossen."},
+    {v:"sich behaupten gegenüber",x:"Sie behauptet sich souverän gegenüber Kritik."},
+    {v:"sensibel sein gegenüber",x:"Er ist gegenüber Ungerechtigkeit sehr sensibel."},
+    {v:"indifferent sein gegenüber",x:"Sie ist der Frage gegenüber indifferent."},
+  ]},
+];
+
+const TR=[
+  {v:"sich freuen",p:[
+    {p:"AUF + Akk",c:"ak",m:"Vorfreude (Zukunft/Erwartung)",x:"Ich freue mich auf das Konzert morgen."},
+    {p:"ÜBER + Akk",c:"ak",m:"Reaktion auf Erhaltenes / Vergangenes",x:"Ich freue mich über das Geschenk, das ich bekommen habe."},
+  ]},
+  {v:"kämpfen",p:[
+    {p:"FÜR + Akk",c:"ak",m:"sich einsetzen, verteidigen",x:"für Gerechtigkeit kämpfen"},
+    {p:"GEGEN + Akk",c:"ak",m:"bekämpfen, widerstehen",x:"gegen eine Krankheit kämpfen"},
+    {p:"UM + Akk",c:"ak",m:"ringen, konkurrieren",x:"um den ersten Platz kämpfen"},
+    {p:"MIT + Dat",c:"dt",m:"ringen mit (innerlich / gemeinsam)",x:"mit inneren Zweifeln kämpfen"},
+  ]},
+  {v:"sprechen / reden",p:[
+    {p:"MIT + Dat",c:"dt",m:"Gesprächspartner (Person)",x:"mit jemandem sprechen"},
+    {p:"ÜBER + Akk",c:"ak",m:"Gesprächsthema",x:"über ein Problem sprechen"},
+    {p:"VON + Dat",c:"dt",m:"erzählend erwähnen",x:"von einem Erlebnis sprechen"},
+  ]},
+  {v:"sich schämen",p:[
+    {p:"FÜR + Akk",c:"ak",m:"für eigenes Tun / stellvertretend",x:"sich für sein Verhalten schämen"},
+    {p:"VOR + Dat",c:"dt",m:"in Gegenwart einer Person",x:"sich vor seinen Eltern schämen"},
+    {p:"WEGEN + Gen",c:"gn",m:"aufgrund von etw. (formal / schriftlich)",x:"sich wegen eines Fehlers schämen"},
+  ]},
+  {v:"sich entscheiden",p:[
+    {p:"FÜR + Akk",c:"ak",m:"wählen / bejahen",x:"sich für eine Option entscheiden"},
+    {p:"GEGEN + Akk",c:"ak",m:"ablehnen / verneinen",x:"sich gegen ein Angebot entscheiden"},
+  ]},
+  {v:"sich entschuldigen",p:[
+    {p:"FÜR + Akk",c:"ak",m:"wofür (der Anlass)",x:"sich für sein Verhalten entschuldigen"},
+    {p:"BEI + Dat",c:"dt",m:"bei wem (die Person)",x:"sich bei jemandem entschuldigen"},
+    {p:"WEGEN + Gen",c:"gn",m:"weshalb (formal / schriftlich)",x:"sich wegen der Verspätung entschuldigen"},
+  ]},
+  {v:"sich bedanken",p:[
+    {p:"FÜR + Akk",c:"ak",m:"wofür (der Anlass)",x:"sich für die Hilfe bedanken"},
+    {p:"BEI + Dat",c:"dt",m:"bei wem (die Person)",x:"sich bei jemandem bedanken"},
+  ]},
+  {v:"klagen",p:[
+    {p:"ÜBER + Akk",c:"ak",m:"jammern, lamentieren",x:"über Rückenschmerzen klagen"},
+    {p:"GEGEN + Akk",c:"ak",m:"rechtlich Klage erheben",x:"gegen einen Bescheid klagen"},
+    {p:"UM + Akk",c:"ak",m:"trauern (geh.)",x:"um jemanden klagen"},
+  ]},
+  {v:"trauern",p:[
+    {p:"UM + Akk",c:"ak",m:"um eine Person (Verlust eines Menschen)",x:"um einen Verstorbenen trauern"},
+    {p:"ÜBER + Akk",c:"ak",m:"über eine Sache / Situation",x:"über einen schweren Verlust trauern"},
+  ]},
+  {v:"berichten",p:[
+    {p:"ÜBER + Akk",c:"ak",m:"ausführlich, journalistisch",x:"über ein Ereignis berichten"},
+    {p:"VON + Dat",c:"dt",m:"erzählend, persönlich",x:"von einem Erlebnis berichten"},
+  ]},
+  {v:"sich bewerben",p:[
+    {p:"UM + Akk",c:"ak",m:"klassisch (um die Stelle selbst)",x:"sich um eine Stelle bewerben"},
+    {p:"AUF + Akk",c:"ak",m:"auf eine konkrete Ausschreibung reagieren",x:"sich auf eine ausgeschriebene Stelle bewerben"},
+  ]},
+  {v:"sorgen",p:[
+    {p:"FÜR + Akk",c:"ak",m:"sich kümmern, versorgen",x:"für jemanden sorgen"},
+    {p:"UM + Akk (sich sorgen)",c:"ak",m:"sich Sorgen machen, ängstlich sein",x:"sich um jemanden sorgen"},
+  ]},
+  {v:"leiden",p:[
+    {p:"AN + Dat",c:"dt",m:"an einer (Krank-)heit",x:"an Asthma leiden"},
+    {p:"UNTER + Dat",c:"dt",m:"unter einem Zustand / einer Situation",x:"unter dem Druck leiden"},
+  ]},
+  {v:"sich unterscheiden",p:[
+    {p:"VON + Dat",c:"dt",m:"im Vergleich (wer/was anders ist)",x:"sich von anderen unterscheiden"},
+    {p:"DURCH + Akk",c:"ak",m:"wodurch (das Merkmal)",x:"sich durch die Methode unterscheiden"},
+    {p:"IN + Dat",c:"dt",m:"in welchem Punkt",x:"sich in einem Detail unterscheiden"},
+  ]},
+  {v:"werben",p:[
+    {p:"FÜR + Akk",c:"ak",m:"für ein Produkt / eine Idee",x:"für eine Partei werben"},
+    {p:"UM + Akk",c:"ak",m:"um jemandes Gunst / Zuneigung",x:"um jemanden werben"},
+  ]},
+  {v:"sich verantworten",p:[
+    {p:"FÜR + Akk",c:"ak",m:"Rechenschaft ablegen (allg.)",x:"sich für seine Entscheidungen verantworten"},
+    {p:"WEGEN + Gen",c:"gn",m:"vor Gericht / im rechtlichen Kontext",x:"sich wegen Betrugs verantworten"},
+  ]},
+  {v:"enttäuscht sein",p:[
+    {p:"VON + Dat",c:"dt",m:"von einer Person",x:"von jemandem enttäuscht sein"},
+    {p:"ÜBER + Akk",c:"ak",m:"über ein Ergebnis / eine Sache",x:"über das Ergebnis enttäuscht sein"},
+  ]},
+  {v:"begeistert sein / sich begeistern",p:[
+    {p:"VON + Dat",c:"dt",m:"passiv begeistert (Eindruck)",x:"von der Idee begeistert sein"},
+    {p:"FÜR + Akk (sich begeistern)",c:"ak",m:"aktiv begeistern, Leidenschaft entwickeln",x:"sich für klassische Musik begeistern"},
+  ]},
+  {v:"sich rächen",p:[
+    {p:"AN + Dat",c:"dt",m:"an wem (die Person / das Ziel)",x:"sich an seinem Feind rächen"},
+    {p:"FÜR + Akk",c:"ak",m:"wofür (der Anlass) — selten, eher umgangsspr.",x:"sich für eine Ungerechtigkeit rächen"},
+  ]},
+  {v:"konkurrieren",p:[
+    {p:"MIT + Dat",c:"dt",m:"mit wem (der Mitbewerber)",x:"mit anderen Unternehmen konkurrieren"},
+    {p:"UM + Akk",c:"ak",m:"um was (das Ziel / die Ressource)",x:"um den Auftrag konkurrieren"},
+  ]},
+];
+
+let af='all';
+
+function render(){
+  const q=document.getElementById('srch').value.toLowerCase().trim();
+  const o=document.getElementById('out');
+  if(af==='tricky'){o.innerHTML=renderTricky(q);return;}
+  const gs=af==='all'?G:G.filter(g=>g.id===af);
+  let h='',total=0;
+  for(const g of gs){
+    const es=g.e.filter(e=>!q||e.v.toLowerCase().includes(q)||e.x.toLowerCase().includes(q));
+    if(!es.length)continue;
+    total+=es.length;
+    h+=`<div class="ps"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><span class="cb ${g.c}">${g.l}</span><span style="font-size:12px;color:var(--color-text-secondary)">${es.length} Einträge</span></div>`;
+    for(const e of es){
+      h+=`<div class="vr"><div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap"><span class="vn">${e.v}</span>${e.t?'<span class="tb">⚡ mehrere Preps</span>':''}</div><div class="ex">${e.x}</div></div>`;
+    }
+    h+='</div>';
+  }
+  if(q&&total>0)h=`<p style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px">${total} Treffer für „${q}"</p>`+h;
+  o.innerHTML=h||`<p style="font-size:14px;color:var(--color-text-secondary)">Kein Treffer für „${q}".</p>`;
+}
+
+function renderTricky(q){
+  const ps=q?TR.filter(p=>p.v.toLowerCase().includes(q)):TR;
+  if(!ps.length)return`<p style="font-size:14px;color:var(--color-text-secondary)">Kein Treffer.</p>`;
+  let h=`<p style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px">Verben, die je nach Präposition verschiedene Bedeutungen haben (${ps.length} Gruppen)</p>`;
+  for(const p of ps){
+    h+=`<div class="ps"><div style="font-size:15px;font-weight:500;color:var(--color-text-primary);margin-bottom:10px">${p.v}</div>`;
+    for(const c of p.p){
+      h+=`<div class="vr"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="cb ${c.c}" style="font-size:11px">${c.p}</span><span style="font-size:13px;color:var(--color-text-secondary)">${c.m}</span></div><div class="ex">${c.x}</div></div>`;
+    }
+    h+='</div>';
+  }
+  return h;
+}
+
+function setFilter(id){
+  af=id;
+  document.querySelectorAll('.fbn').forEach(b=>b.classList.toggle('fa',b.dataset.id===id));
+  document.getElementById('srch').value='';
+  render();
+}
+
+const bar=document.getElementById('filterBar');
+const fi=[{id:'all',l:'Alle'},{id:'tricky',l:'⚡ Tückisch'},...G.map(g=>({id:g.id,l:g.l}))];
+bar.innerHTML=fi.map(f=>`<button class="fbn${f.id==='all'?' fa':''}" data-id="${f.id}" onclick="setFilter('${f.id}')">${f.l}</button>`).join('');
+render();
+</script>
