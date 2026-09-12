@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A1 Grammatik-Trainer – Altweibersommer 🍂</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#1b0f08; --bg2:#3a1d0d; --bg3:#6b3410; --bg4:#c1691f;
+  --primary:#3d2013; --primary-light:#5c3018;
+  --accent:#ff8c42; --accent-glow:#ffc169; --accent-dark:#d9691e;
+  --success:#8bc34a; --error:#e2725b; --text:#fff8ec; --muted:#e0bd93; --gold:#f4a300;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Quicksand',sans-serif;background:linear-gradient(180deg,var(--bg1) 0%,var(--bg2) 35%,var(--bg3) 70%,var(--bg4) 100%);min-height:100vh;color:var(--text);overflow-x:hidden}
+.container{max-width:960px;margin:0 auto;padding:20px;position:relative;z-index:2}
+header{text-align:center;margin-bottom:24px;padding-top:8px;position:relative}
+h1{font-family:'Fredoka',sans-serif;font-size:2.2rem;background:linear-gradient(135deg,var(--accent),var(--accent-glow),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+.subtitle{color:var(--muted);font-size:.98rem}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--gold));padding:5px 16px;border-radius:20px;font-size:.82rem;font-weight:700;color:#2a1608;margin-top:10px;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+
+.leaf{position:fixed;top:-40px;font-size:1.6rem;opacity:.55;animation:fall linear infinite;pointer-events:none;z-index:1}
+@keyframes fall{0%{transform:translateY(-5vh) rotate(0deg);opacity:.6}100%{transform:translateY(105vh) rotate(360deg);opacity:.15}}
+
+#confettiCanvas{position:fixed;top:0;left:0;pointer-events:none;z-index:200}
+
+.screen{display:none;animation:fadeIn .4s ease}
+.screen.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+.menu-intro{text-align:center;font-family:'Fredoka',sans-serif;font-size:1.2rem;color:var(--accent-glow);margin-bottom:18px}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.cat-card{background:linear-gradient(135deg,rgba(61,32,19,.95),rgba(92,48,24,.85));border-radius:16px;padding:20px;text-align:center;cursor:pointer;border:2px solid rgba(255,140,66,.35);transition:all .25s ease;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.cat-card:hover{transform:translateY(-4px);border-color:var(--accent-glow);box-shadow:0 10px 30px rgba(255,140,66,.3)}
+.cat-icon{font-size:2.1rem;margin-bottom:8px;display:block}
+.cat-title{font-family:'Fredoka',sans-serif;color:var(--accent-glow);margin-bottom:5px;font-size:1.05rem}
+.cat-count{font-size:.8rem;color:var(--muted)}
+.master{grid-column:1/-1;border:3px solid var(--gold);padding:24px;background:linear-gradient(135deg,rgba(244,163,0,.18),rgba(61,32,19,.9))}
+.master .cat-icon{font-size:2.6rem}
+
+.back-btn{position:fixed;top:16px;left:16px;width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));border:2px solid var(--accent);color:var(--accent-glow);font-size:1.3rem;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:100;transition:all .25s ease;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+.back-btn:hover{background:linear-gradient(135deg,var(--accent-dark),var(--accent));color:#2a1608;transform:scale(1.06)}
+
+.game-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.mode-indicator{background:linear-gradient(135deg,var(--accent-dark),var(--accent));color:#2a1608;padding:8px 18px;border-radius:20px;font-weight:700;font-size:.88rem;font-family:'Fredoka',sans-serif}
+.stats-bar{display:flex;gap:10px;flex-wrap:wrap}
+.stat-item{background:rgba(61,32,19,.75);padding:7px 14px;border-radius:10px;border:1px solid rgba(255,140,66,.3);text-align:center;min-width:64px}
+.stat-label{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.stat-value{font-family:'Fredoka',sans-serif;font-size:1.15rem;color:var(--accent-glow)}
+
+.progress-bar{background:rgba(61,32,19,.7);border-radius:10px;height:14px;overflow:hidden;margin-bottom:6px;border:1px solid rgba(255,140,66,.25)}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent-dark),var(--gold));transition:width .4s ease;width:0}
+.progress-text{text-align:center;color:var(--muted);font-size:.8rem;margin-bottom:16px}
+
+.ex-card{background:linear-gradient(135deg,rgba(61,32,19,.95),rgba(92,48,24,.88));border-radius:18px;padding:26px 22px;border:1px solid rgba(255,140,66,.3);box-shadow:0 8px 30px rgba(0,0,0,.3);margin-bottom:16px}
+.ex-type{display:inline-block;padding:5px 13px;border-radius:15px;font-size:.78rem;font-weight:700;color:#2a1608;background:linear-gradient(135deg,var(--gold),var(--accent-glow));margin-bottom:12px}
+.ex-instr{font-size:1rem;margin-bottom:14px;color:var(--accent-glow);font-weight:600}
+.sentence{background:linear-gradient(135deg,rgba(0,0,0,.2),rgba(0,0,0,.05));padding:16px;border-radius:12px;margin-bottom:16px;border-left:4px solid var(--accent);font-family:'Fredoka',sans-serif;font-size:1.15rem;line-height:1.8}
+.answer{background:rgba(255,140,66,.08);padding:15px;border-radius:12px;border:2px dashed var(--accent)}
+.answer-wrap{display:flex;flex-wrap:wrap;align-items:center;gap:6px;line-height:2}
+.input-slot{background:var(--primary);border:2px solid var(--accent);border-radius:8px;padding:7px 11px;color:var(--text);font-size:1rem;font-family:inherit;min-width:90px}
+.input-slot:focus{outline:none;border-color:var(--accent-glow);box-shadow:0 0 12px rgba(255,177,71,.5)}
+.input-slot.correct{border-color:var(--success);background:rgba(139,195,74,.25)}
+.input-slot.incorrect{border-color:var(--error);background:rgba(226,114,91,.25)}
+
+.mc-opts{display:grid;gap:10px}
+.mc-opt{display:flex;align-items:center;gap:12px;background:rgba(0,0,0,.22);padding:12px 15px;border-radius:12px;cursor:pointer;border:2px solid transparent;transition:all .25s ease}
+.mc-opt:hover{border-color:var(--accent)}
+.mc-opt.correct{border-color:var(--success);background:rgba(139,195,74,.25);animation:pulse .5s ease}
+.mc-opt.incorrect{border-color:var(--error);background:rgba(226,114,91,.25);pointer-events:none;opacity:.6}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.mc-letter{width:30px;height:30px;background:linear-gradient(135deg,var(--gold),var(--accent-glow));color:#2a1608;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
+
+.word-bank{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.word-chip{background:linear-gradient(135deg,var(--gold),var(--accent-glow));color:#2a1608;padding:8px 14px;border-radius:9px;cursor:pointer;font-weight:700;transition:all .2s ease;user-select:none}
+.word-chip:hover{transform:scale(1.06)}
+.word-chip.used{opacity:.25;cursor:not-allowed;transform:none}
+.answer-slots{min-height:50px;background:rgba(0,0,0,.18);border:2px dashed var(--accent);border-radius:12px;padding:10px;display:flex;flex-wrap:wrap;gap:8px}
+.placed-word{background:var(--accent-dark);color:#fff;padding:8px 14px;border-radius:9px;cursor:pointer;font-weight:700}
+
+.hint-box{background:rgba(244,163,0,.15);border:1px solid var(--gold);padding:12px;border-radius:10px;margin-bottom:12px;font-size:.9rem;display:none}
+.explain{background:rgba(139,195,74,.12);border:2px solid var(--success);padding:14px;border-radius:12px;margin-top:14px;display:none}
+.explain.wrong{background:rgba(226,114,91,.12);border-color:var(--error)}
+.explain.show{display:block}
+.explain-title{font-weight:700;margin-bottom:6px}
+
+.btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.btn{padding:10px 20px;border-radius:11px;font-size:.92rem;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all .25s ease}
+.btn.primary{background:linear-gradient(135deg,var(--accent-dark),var(--accent));color:#2a1608}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(255,140,66,.4)}
+.btn.secondary{background:rgba(61,32,19,.85);color:var(--text);border:2px solid rgba(255,140,66,.4)}
+.btn.secondary:hover{border-color:var(--accent-glow)}
+
+.result-card{background:linear-gradient(135deg,rgba(61,32,19,.95),rgba(92,48,24,.9));border-radius:18px;padding:32px;text-align:center;border:1px solid rgba(255,140,66,.3);box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.result-title{font-family:'Fredoka',sans-serif;font-size:1.8rem;color:var(--accent-glow);margin-bottom:22px}
+.result-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:26px}
+.result-stat{background:rgba(0,0,0,.2);padding:16px;border-radius:12px;border:1px solid rgba(255,140,66,.25)}
+.result-stat-label{font-size:.76rem;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px}
+.result-stat-value{font-family:'Fredoka',sans-serif;font-size:1.6rem;color:var(--accent-glow)}
+
+@media(max-width:768px){
+  h1{font-size:1.7rem}.sentence{font-size:1.02rem}
+  .master{grid-column:1/-1}
+  .result-stats{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<canvas id="confettiCanvas"></canvas>
+<button class="back-btn" id="backBtn" onclick="goMenu()">←</button>
+<div class="container">
+  <header>
+    <h1>🍂 A1 Grammatik-Trainer</h1>
+    <p class="subtitle">Altweibersommer-Edition – klicken, tippen, lernen. Es geht automatisch weiter!</p>
+    <span class="badge" id="totalBadge">Übungen</span>
+  </header>
+
+  <div id="menuScreen" class="screen active">
+    <p class="menu-intro">🎃 Wähle dein Training</p>
+    <div class="cat-grid">
+      <div class="cat-card" onclick="startGame('konj')"><span class="cat-icon">📝</span><div class="cat-title">Konjugation</div><span class="cat-count" id="cnt-konj"></span></div>
+      <div class="cat-card" onclick="startGame('pron')"><span class="cat-icon">👤</span><div class="cat-title">Pronomen</div><span class="cat-count" id="cnt-pron"></span></div>
+      <div class="cat-card" onclick="startGame('trenn')"><span class="cat-icon">🍂</span><div class="cat-title">Trennbare Verben</div><span class="cat-count" id="cnt-trenn"></span></div>
+      <div class="cat-card" onclick="startGame('imp')"><span class="cat-icon">📢</span><div class="cat-title">Imperativ</div><span class="cat-count" id="cnt-imp"></span></div>
+      <div class="cat-card" onclick="startGame('wfr')"><span class="cat-icon">❓</span><div class="cat-title">W-Fragen</div><span class="cat-count" id="cnt-wfr"></span></div>
+      <div class="cat-card" onclick="startGame('jn')"><span class="cat-icon">🎃</span><div class="cat-title">Ja/Nein-Fragen</div><span class="cat-count" id="cnt-jn"></span></div>
+      <div class="cat-card" onclick="startGame('mod')"><span class="cat-icon">🌰</span><div class="cat-title">Modalverben</div><span class="cat-count" id="cnt-mod"></span></div>
+      <div class="cat-card" onclick="startGame('sh')"><span class="cat-icon">🔄</span><div class="cat-title">sein &amp; haben</div><span class="cat-count" id="cnt-sh"></span></div>
+      <div class="cat-card" onclick="startGame('wo')"><span class="cat-icon">🧺</span><div class="cat-title">Wortstellung</div><span class="cat-count" id="cnt-wo"></span></div>
+      <div class="cat-card master" onclick="startGame('master')"><span class="cat-icon">🏆</span><div class="cat-title">MASTER-MODUS</div><span class="cat-count">Alle Übungen gemischt!</span></div>
+    </div>
+  </div>
+
+  <div id="gameScreen" class="screen">
+    <div class="game-header">
+      <div class="mode-indicator" id="modeIndicator">Modus</div>
+      <div class="stats-bar">
+        <div class="stat-item"><div class="stat-label">Punkte</div><div class="stat-value" id="points">0</div></div>
+        <div class="stat-item"><div class="stat-label">Serie</div><div class="stat-value" id="streak">0</div></div>
+        <div class="stat-item"><div class="stat-label">Richtig</div><div class="stat-value"><span id="correct">0</span>/<span id="total">0</span></div></div>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="counter">Übung 1/20</div>
+    <div id="exContainer"></div>
+    <div class="btns" id="btnRow"></div>
+  </div>
+
+  <div id="resultScreen" class="screen">
+    <div class="result-card">
+      <h2 class="result-title">🎉 Super gemacht!</h2>
+      <div class="result-stats">
+        <div class="result-stat"><div class="result-stat-label">Punkte</div><div class="result-stat-value" id="finalPts">0</div></div>
+        <div class="result-stat"><div class="result-stat-label">Richtig</div><div class="result-stat-value" id="finalCorr">0/0</div></div>
+        <div class="result-stat"><div class="result-stat-label">Beste Serie</div><div class="result-stat-value" id="finalStreak">0</div></div>
+      </div>
+      <div class="btns">
+        <button class="btn secondary" onclick="goMenu()">🏠 Menü</button>
+        <button class="btn primary" onclick="playAgain()">🔁 Nochmal (neue Auswahl)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ==================== ÜBUNGSDATEN ==================== */
+const E={
+konj:[
+{t:'f',i:'Konjugiere:',s:'Ich ___ (sammeln) bunte Blätter im Park.',a:[{cr:['sammle']}],h:'ich→-e',ex:'sammle'},
+{t:'f',i:'Konjugiere (a→ä):',s:'Du ___ (backen) einen Kürbiskuchen.',a:[{cr:['bäckst','backst']}],h:'a→ä (optional)',ex:'bäckst'},
+{t:'f',i:'Konjugiere:',s:'Er ___ (wandern) gern im Wald.',a:[{cr:['wandert']}],h:'er→-t',ex:'wandert'},
+{t:'f',i:'Konjugiere:',s:'Wir ___ (feiern) heute Abend.',a:[{cr:['feiern']}],h:'wir→-n',ex:'feiern'},
+{t:'f',i:'Konjugiere:',s:'Ihr ___ (tanzen) auf dem Fest.',a:[{cr:['tanzt']}],h:'ihr→-t',ex:'tanzt'},
+{t:'m',i:'Welche Form?',s:'Lena ___ jeden Tag Tee.',o:['trinkt','trinkst','trinke','trinken'],c:0,h:'sie→-t',ex:'trinkt'},
+{t:'f',i:'Konjugiere (e→ie):',s:'Er ___ (lesen) die Zeitung.',a:[{cr:['liest']}],h:'e→ie',ex:'liest'},
+{t:'f',i:'Konjugiere (a→ä):',s:'Sie ___ (fahren) mit dem Rad.',a:[{cr:['fährt']}],h:'a→ä',ex:'fährt'},
+{t:'m',i:'Welche Form?',s:'Du ___ sehr gut Deutsch.',o:['sprichst','sprecht','spreche','sprichest'],c:0,h:'e→i',ex:'sprichst'},
+{t:'f',i:'Konjugiere (e→i):',s:'Er ___ (geben) mir einen Tipp.',a:[{cr:['gibt']}],h:'e→i',ex:'gibt'},
+{t:'m',i:'Welche Form?',s:'Sie ___ den schweren Koffer.',o:['trägt','tragt','trägst','trage'],c:0,h:'a→ä',ex:'trägt'},
+{t:'f',i:'Konjugiere (e→ie):',s:'Du ___ (sehen) den Regenbogen.',a:[{cr:['siehst']}],h:'e→ie',ex:'siehst'},
+{t:'f',i:'Konjugiere:',s:'Du ___ (warten) auf den Bus.',a:[{cr:['wartest']}],h:'-t→-est',ex:'wartest'},
+{t:'f',i:'Konjugiere:',s:'Er ___ (arbeiten) im Garten.',a:[{cr:['arbeitet']}],h:'-t→-et',ex:'arbeitet'},
+{t:'m',i:'Welche Form?',s:'Es ___ heute stark.',o:['regnet','regnt','regne','regnest'],c:0,h:'-n→-et',ex:'regnet'},
+{t:'f',i:'Konjugiere (a→ä):',s:'Er ___ (waschen) das Geschirr.',a:[{cr:['wäscht']}],h:'a→ä',ex:'wäscht'},
+{t:'m',i:'Welche Form?',s:'Du ___ sehr schnell.',o:['läufst','laufst','läuft','laufe'],c:0,h:'au→äu',ex:'läufst'},
+{t:'f',i:'Konjugiere (e→i):',s:'Du ___ (helfen) deiner Oma.',a:[{cr:['hilfst']}],h:'e→i',ex:'hilfst'},
+{t:'f',i:'Konjugiere:',s:'Wir ___ (kochen) Kürbissuppe.',a:[{cr:['kochen']}],h:'wir→-en',ex:'kochen'},
+{t:'f',i:'Konjugiere:',s:'Ich ___ (kaufen) frisches Brot.',a:[{cr:['kaufe']}],h:'ich→-e',ex:'kaufe'},
+{t:'f',i:'Konjugiere:',s:'Ihr ___ (schreiben) eine Postkarte.',a:[{cr:['schreibt']}],h:'ihr→-t',ex:'schreibt'},
+{t:'m',i:'Welche Form?',s:'Er ___ das Café am Markt.',o:['empfiehlt','empfehlt','empfehlst','empfehle'],c:0,h:'e→ie',ex:'empfiehlt'},
+{t:'f',i:'Konjugiere:',s:'Du ___ (kennen) diese Stadt gut.',a:[{cr:['kennst']}],h:'du→-st',ex:'kennst'},
+{t:'f',i:'Konjugiere:',s:'Wir ___ (denken) oft an den Urlaub.',a:[{cr:['denken']}],h:'wir→-en',ex:'denken'},
+{t:'f',i:'Konjugiere:',s:'Ihr ___ (essen) heiße Maroni.',a:[{cr:['esst']}],h:'ihr→-t',ex:'esst'},
+{t:'m',i:'Welche Form?',s:'Das Baby ___ den ganzen Nachmittag.',o:['schläft','schlafen','schlaft','schläfst'],c:0,h:'a→ä',ex:'schläft'},
+{t:'f',i:'Konjugiere (e→i):',s:'Er ___ (treffen) seine Freunde im Café.',a:[{cr:['trifft']}],h:'e→i',ex:'trifft'},
+{t:'f',i:'Konjugiere:',s:'Ich ___ (machen) einen Spaziergang.',a:[{cr:['mache']}],h:'ich→-e',ex:'mache'},
+{t:'f',i:'Konjugiere (e→i):',s:'Du ___ (werfen) den Ball ins Tor.',a:[{cr:['wirfst']}],h:'e→i',ex:'wirfst'},
+{t:'f',i:'Konjugiere:',s:'Wir ___ (singen) ein Lied am Lagerfeuer.',a:[{cr:['singen']}],h:'wir→-en',ex:'singen'}
+],
+pron:[
+{t:'f',i:'Ersetze:',s:'Der Kürbis ist schwer. → ___ ist schwer.',a:[{cr:['Er']}],h:'der→er',ex:'Er'},
+{t:'f',i:'Ersetze:',s:'Die Kastanie fällt vom Baum. → ___ fällt vom Baum.',a:[{cr:['Sie']}],h:'die→sie',ex:'Sie'},
+{t:'f',i:'Ersetze:',s:'Das Blatt ist bunt. → ___ ist bunt.',a:[{cr:['Es']}],h:'das→es',ex:'Es'},
+{t:'m',i:'Welches Pronomen?',s:'Der Hund läuft im Park. → ___ läuft im Park.',o:['Er','Sie','Es','Wir'],c:0,h:'der→er',ex:'Er'},
+{t:'m',i:'Welches Pronomen?',s:'Die Katze schläft auf dem Sofa. → ___ schläft.',o:['Sie','Er','Es','Ihr'],c:0,h:'die→sie',ex:'Sie'},
+{t:'m',i:'Welches Pronomen?',s:'Das Buch liegt auf dem Tisch.',o:['Es','Er','Sie','Wir'],c:0,h:'das→es',ex:'Es'},
+{t:'f',i:'Ersetze:',s:'Tom und ich backen Kekse. → ___ backen Kekse.',a:[{cr:['Wir']}],h:'wir',ex:'Wir'},
+{t:'f',i:'Ersetze:',s:'Lisa und du tanzt gern. → ___ tanzt gern.',a:[{cr:['Ihr']}],h:'ihr',ex:'Ihr'},
+{t:'f',i:'Ersetze:',s:'Die Blätter fallen vom Baum. → ___ fallen vom Baum.',a:[{cr:['Sie']}],h:'sie (Plural)',ex:'Sie'},
+{t:'m',i:'Welches Pronomen?',s:'Anna und Paul wandern im Wald.',o:['Sie','Er','Wir','Ihr'],c:0,h:'sie (Plural)',ex:'Sie'},
+{t:'m',i:'Formal:',s:'Frau Berger, nehmen ___ bitte Platz!',o:['Sie','sie','du','ihr'],c:0,h:'formal',ex:'Sie'},
+{t:'f',i:'Ergänze:',s:'___ bin müde nach der Wanderung.',a:[{cr:['Ich']}],h:'1. Sg.',ex:'Ich'},
+{t:'f',i:'Ergänze:',s:'___ bist heute sehr fröhlich.',a:[{cr:['Du']}],h:'2. Sg.',ex:'Du'},
+{t:'f',i:'Ergänze:',s:'___ kommt aus Österreich.',a:[{cr:['Er','Sie','Es']}],h:'3. Sg.',ex:'Er/Sie/Es'},
+{t:'f',i:'Ergänze:',s:'___ sind schon zu Hause.',a:[{cr:['Wir']}],h:'1. Pl.',ex:'Wir'},
+{t:'f',i:'Ergänze:',s:'___ seid pünktlich gekommen.',a:[{cr:['Ihr']}],h:'2. Pl.',ex:'Ihr'},
+{t:'m',i:'Welches Pronomen?',s:'Der Tisch steht im Garten.',o:['Er','Sie','Es','Wir'],c:0,h:'der→er',ex:'Er'},
+{t:'m',i:'Welches Pronomen?',s:'Die Laterne leuchtet schön.',o:['Sie','Er','Es','Ihr'],c:0,h:'die→sie',ex:'Sie'},
+{t:'m',i:'Welches Pronomen?',s:'Das Fahrrad ist neu.',o:['Es','Er','Sie','Wir'],c:0,h:'das→es',ex:'Es'},
+{t:'f',i:'Ersetze:',s:'Mein Onkel sucht gern Pilze. → ___ sucht gern Pilze.',a:[{cr:['Er']}],h:'er',ex:'Er'},
+{t:'f',i:'Ersetze:',s:'Meine Tante backt jeden Herbst Zwetschkenkuchen. → ___ backt Zwetschkenkuchen.',a:[{cr:['Sie']}],h:'sie',ex:'Sie'},
+{t:'f',i:'Ersetze:',s:'Meine Großeltern wohnen am Land. → ___ wohnen am Land.',a:[{cr:['Sie']}],h:'sie (Plural)',ex:'Sie'},
+{t:'m',i:'Welches Pronomen?',s:'Die Kartoffeln sind noch nicht reif.',o:['Sie','Es','Er','Wir'],c:0,h:'sie (Plural)',ex:'Sie'},
+{t:'f',i:'Unpersönlich:',s:'___ nebelt heute Morgen.',a:[{cr:['Es']}],h:'Wetter',ex:'Es'},
+{t:'f',i:'Unpersönlich:',s:'___ dunkelt schon um 18 Uhr.',a:[{cr:['Es']}],h:'Wetter/Zeit',ex:'Es'},
+{t:'f',i:'Ersetze:',s:'Der Wanderweg ist steil. → ___ ist steil.',a:[{cr:['Er']}],h:'der→er',ex:'Er'}
+],
+trenn:[
+{t:'f',i:'Trenne:',s:'Ich ___ um 6 Uhr ___. (aufstehen)',a:[{cr:['stehe']},{cr:['auf']}],h:'stehe...auf',ex:'stehe...auf'},
+{t:'f',i:'Trenne:',s:'Er ___ am Markt Kürbisse ___. (einkaufen)',a:[{cr:['kauft']},{cr:['ein']}],h:'kauft...ein',ex:'kauft...ein'},
+{t:'f',i:'Trenne:',s:'Wir ___ heute den neuen Film ___. (fernsehen)',a:[{cr:['sehen']},{cr:['fern']}],h:'sehen...fern',ex:'sehen...fern'},
+{t:'m',i:'Richtig?',s:'anrufen',o:['Ich rufe meine Oma an.','Ich anrufe meine Oma.','Ich rufe an meine Oma.','An rufe ich Oma.'],c:0,h:'Präfix am Ende',ex:'rufe...an'},
+{t:'f',i:'Trenne:',s:'Sie ___ das Fenster ___, weil es kalt ist. (zumachen)',a:[{cr:['macht']},{cr:['zu']}],h:'macht...zu',ex:'macht...zu'},
+{t:'f',i:'Trenne:',s:'Du ___ die Kerzen ___. (anzünden)',a:[{cr:['zündest']},{cr:['an']}],h:'zündest...an',ex:'zündest...an'},
+{t:'m',i:'Richtig?',s:'mitbringen',o:['Bringst du Maroni mit?','Mitbringst du Maroni?','Bringst mit du Maroni?','Du mitbringst Maroni.'],c:0,h:'Präfix am Ende',ex:'bringst...mit'},
+{t:'f',i:'Trenne:',s:'Ihr ___ warme Jacken ___. (anziehen)',a:[{cr:['zieht']},{cr:['an']}],h:'zieht...an',ex:'zieht...an'},
+{t:'f',i:'Trenne:',s:'Er ___ die nassen Schuhe ___. (ausziehen)',a:[{cr:['zieht']},{cr:['aus']}],h:'zieht...aus',ex:'zieht...aus'},
+{t:'f',i:'Trenne:',s:'Wir ___ um 9 Uhr mit der Wanderung ___. (anfangen)',a:[{cr:['fangen']},{cr:['an']}],h:'fangen...an',ex:'fangen...an'},
+{t:'m',i:'Richtig?',s:'aufhören',o:['Der Regen hört bald auf.','Der Regen aufhört bald.','Der Regen hört bald auf um.','Auf hört der Regen bald.'],c:0,h:'Präfix am Ende',ex:'hört...auf'},
+{t:'f',i:'Trenne:',s:'Sie ___ ihre Freundin vom Bahnhof ___. (abholen)',a:[{cr:['holt']},{cr:['ab']}],h:'holt...ab',ex:'holt...ab'},
+{t:'f',i:'Trenne:',s:'Ich ___ das Licht auf der Terrasse ___. (anmachen)',a:[{cr:['mache']},{cr:['an']}],h:'mache...an',ex:'mache...an'},
+{t:'m',i:'Richtig?',s:'einladen',o:['Ich lade euch zum Erntedankfest ein.','Ich einlade euch.','Ich lade ein euch.','Ein lade ich euch.'],c:0,h:'Präfix am Ende',ex:'lade...ein'},
+{t:'f',i:'Trenne:',s:'Er ___ nach dem langen Spaziergang schnell ___. (einschlafen)',a:[{cr:['schläft']},{cr:['ein']}],h:'schläft...ein',ex:'schläft...ein'},
+{t:'f',i:'Trenne:',s:'Sie ___ am Sonntag spät ___. (aufwachen)',a:[{cr:['wacht']},{cr:['auf']}],h:'wacht...auf',ex:'wacht...auf'},
+{t:'m',i:'Richtig?',s:'zurückkommen',o:['Wann kommt ihr zurück?','Wann zurückkommt ihr?','Wann ihr kommt zurück?','Zurück kommt wann ihr?'],c:0,h:'Präfix am Ende',ex:'kommt...zurück'},
+{t:'f',i:'Trenne:',s:'Ich ___ dich heute Abend ___. (anrufen)',a:[{cr:['rufe']},{cr:['an']}],h:'rufe...an',ex:'rufe...an'},
+{t:'m',i:'Richtig?',s:'vorstellen (mit Modalverb)',o:['Darf ich dir meine Schwester vorstellen?','Darf ich vorstellen dir meine Schwester?','Darf ich dir vorstellen meine Schwester?','Vorstellen darf ich dir?'],c:0,h:'Mit Modalverb bleibt der Infinitiv ganz',ex:'vorstellen'},
+{t:'f',i:'Trenne:',s:'Du ___ das Formular für den Verein ___. (ausfüllen)',a:[{cr:['füllst']},{cr:['aus']}],h:'füllst...aus',ex:'füllst...aus'},
+{t:'m',i:'Richtig?',s:'aufräumen',o:['Ich räume mein Zimmer vor dem Fest auf.','Ich aufräume mein Zimmer.','Ich räume auf mein Zimmer.','Auf räume ich mein Zimmer.'],c:0,h:'Präfix am Ende',ex:'räume...auf'},
+{t:'f',i:'Trenne:',s:'Der Zug ___ pünktlich um 10 Uhr ___. (abfahren)',a:[{cr:['fährt']},{cr:['ab']}],h:'fährt...ab',ex:'fährt...ab'},
+{t:'m',i:'Richtig?',s:'ankommen',o:['Der Bus kommt um 9 Uhr an.','Der Bus ankommt um 9 Uhr.','Der Bus kommt an um 9 Uhr.','An kommt der Bus um 9 Uhr.'],c:0,h:'Präfix am Ende',ex:'kommt...an'},
+{t:'f',i:'Trenne:',s:'Er ___ nach dem Urlaub braun ___. (aussehen)',a:[{cr:['sieht']},{cr:['aus']}],h:'sieht...aus',ex:'sieht...aus'},
+{t:'f',i:'Trenne:',s:'Wir ___ früh am Morgen ___. (losfahren)',a:[{cr:['fahren']},{cr:['los']}],h:'fahren...los',ex:'fahren...los'},
+{t:'f',i:'Trenne:',s:'Sie ___ die Kastanien in den Korb ___. (einsammeln)',a:[{cr:['sammelt']},{cr:['ein']}],h:'sammelt...ein',ex:'sammelt...ein'}
+],
+imp:[
+{t:'f',i:'Imperativ (du):',s:'___ bitte ins Zimmer! (kommen)',a:[{cr:['Komm']}],h:'ohne -st',ex:'Komm!'},
+{t:'f',i:'Imperativ (ihr):',s:'___ bitte schnell! (kommen)',a:[{cr:['Kommt']}],h:'ihr-Form',ex:'Kommt!'},
+{t:'f',i:'Imperativ (Sie):',s:'___ ___ bitte herein! (kommen)',a:[{cr:['Kommen']},{cr:['Sie']}],h:'Infinitiv+Sie',ex:'Kommen Sie!'},
+{t:'f',i:'Imperativ (du):',s:'___ jetzt nach Hause! (gehen)',a:[{cr:['Geh']}],h:'du-Form',ex:'Geh!'},
+{t:'f',i:'Imperativ (ihr):',s:'___ vorsichtig über die Straße! (gehen)',a:[{cr:['Geht']}],h:'ihr-Form',ex:'Geht!'},
+{t:'f',i:'Imperativ (Sie):',s:'___ ___ bitte weiter! (gehen)',a:[{cr:['Gehen']},{cr:['Sie']}],h:'Infinitiv+Sie',ex:'Gehen Sie!'},
+{t:'f',i:'Imperativ (du) e→i:',s:'___ den Regenschirm mit! (nehmen)',a:[{cr:['Nimm']}],h:'e→i',ex:'Nimm!'},
+{t:'f',i:'Imperativ (ihr):',s:'___ warme Socken mit! (nehmen)',a:[{cr:['Nehmt']}],h:'ihr-Form',ex:'Nehmt!'},
+{t:'f',i:'Imperativ (Sie):',s:'___ ___ bitte Platz! (nehmen)',a:[{cr:['Nehmen']},{cr:['Sie']}],h:'Infinitiv+Sie',ex:'Nehmen Sie!'},
+{t:'f',i:'Imperativ (du) e→i:',s:'___ dein Gemüse auf! (essen)',a:[{cr:['Iss']}],h:'e→i',ex:'Iss!'},
+{t:'f',i:'Imperativ (ihr):',s:'___ die Suppe, solange sie warm ist! (essen)',a:[{cr:['Esst']}],h:'ihr-Form',ex:'Esst!'},
+{t:'f',i:'Imperativ (du) e→i:',s:'___ bitte lauter! (sprechen)',a:[{cr:['Sprich']}],h:'e→i',ex:'Sprich!'},
+{t:'f',i:'Imperativ (ihr):',s:'___ Deutsch im Unterricht! (sprechen)',a:[{cr:['Sprecht']}],h:'ihr-Form',ex:'Sprecht!'},
+{t:'f',i:'Imperativ (Sie):',s:'___ ___ bitte etwas langsamer! (sprechen)',a:[{cr:['Sprechen']},{cr:['Sie']}],h:'Infinitiv+Sie',ex:'Sprechen Sie!'},
+{t:'f',i:'Imperativ (du):',s:'___ bitte leise, das Baby schläft! (sein)',a:[{cr:['Sei']}],h:'unregelmäßig',ex:'Sei!'},
+{t:'f',i:'Imperativ (ihr):',s:'___ bitte vorsichtig auf der Leiter! (sein)',a:[{cr:['Seid']}],h:'unregelmäßig',ex:'Seid!'},
+{t:'f',i:'Imperativ (Sie):',s:'___ ___ bitte so nett! (sein)',a:[{cr:['Seien']},{cr:['Sie']}],h:'Seien Sie!',ex:'Seien Sie!'},
+{t:'f',i:'Imperativ (du):',s:'___ hier auf mich! (warten)',a:[{cr:['Warte','Wart']}],h:'-t→-e',ex:'Warte!'},
+{t:'f',i:'Imperativ (ihr):',s:'___ am Eingang auf uns! (warten)',a:[{cr:['Wartet']}],h:'ihr-Form',ex:'Wartet!'},
+{t:'f',i:'Imperativ (Sie):',s:'___ ___ bitte einen Moment! (warten)',a:[{cr:['Warten']},{cr:['Sie']}],h:'Infinitiv+Sie',ex:'Warten Sie!'},
+{t:'m',i:'Imperativ (du)?',s:'Es ist glatt draußen. (fahren)',o:['Fahr vorsichtig!','Fähr vorsichtig!','Fährst vorsichtig!','Fahre langsam vorsichtig, du!'],c:0,h:'KEIN Umlaut im Imperativ!',ex:'Fahr!'},
+{t:'f',i:'Imperativ (du) e→i:',s:'___ mir bitte das Salz! (geben)',a:[{cr:['Gib']}],h:'e→i',ex:'Gib!'},
+{t:'f',i:'Imperativ (ihr):',s:'___ mir eure Hefte! (geben)',a:[{cr:['Gebt']}],h:'ihr-Form',ex:'Gebt!'},
+{t:'f',i:'Imperativ (du) e→i:',s:'___ mir beim Tragen! (helfen)',a:[{cr:['Hilf']}],h:'e→i',ex:'Hilf!'}
+],
+wfr:[
+{t:'m',i:'Fragewort?',s:'___ heißt du?',o:['Wie','Was','Wer','Wo'],c:0,h:'Name=wie',ex:'Wie'},
+{t:'m',i:'Fragewort?',s:'___ wohnst du?',o:['Wo','Was','Wer','Wann'],c:0,h:'Ort=wo',ex:'Wo'},
+{t:'m',i:'Fragewort?',s:'___ kommst du?',o:['Woher','Wo','Wohin','Was'],c:0,h:'Herkunft=woher',ex:'Woher'},
+{t:'f',i:'Ergänze:',s:'___ alt ist deine Oma?',a:[{cr:['Wie']}],h:'wie alt',ex:'Wie'},
+{t:'f',i:'Ergänze:',s:'___ hat den Kuchen gebacken?',a:[{cr:['Wer']}],h:'Person=wer',ex:'Wer'},
+{t:'f',i:'Ergänze:',s:'___ machst du am Wochenende?',a:[{cr:['Was']}],h:'was',ex:'Was'},
+{t:'m',i:'Fragewort?',s:'___ beginnt das Erntedankfest?',o:['Wann','Was','Wo','Wie'],c:0,h:'Zeit=wann',ex:'Wann'},
+{t:'m',i:'Fragewort?',s:'___ fährt der Zug?',o:['Wohin','Wo','Woher','Wann'],c:0,h:'Ziel=wohin',ex:'Wohin'},
+{t:'f',i:'Ergänze:',s:'___ kosten die Kastanien?',a:[{cr:['Was','Wie viel','Wieviel']}],h:'Preis',ex:'Was/Wie viel'},
+{t:'m',i:'Fragewort?',s:'___ ist dein Lieblingsgericht im Herbst?',o:['Was','Wer','Wie','Wo'],c:0,h:'Sache=was',ex:'Was'},
+{t:'f',i:'Ergänze:',s:'___ spät ist es jetzt?',a:[{cr:['Wie']}],h:'Uhrzeit',ex:'Wie'},
+{t:'m',i:'Fragewort?',s:'___ geht es dir heute?',o:['Wie','Was','Wer','Wo'],c:0,h:'Befinden=wie',ex:'Wie'},
+{t:'f',i:'Ergänze:',s:'___ lange dauert die Wanderung?',a:[{cr:['Wie']}],h:'Dauer',ex:'Wie'},
+{t:'m',i:'Fragewort?',s:'___ arbeitest du?',o:['Wo','Was','Wer','Wie'],c:0,h:'Ort=wo',ex:'Wo'},
+{t:'f',i:'Ergänze:',s:'___ gehst du heute Nachmittag?',a:[{cr:['Wohin']}],h:'Ziel=wohin',ex:'Wohin'},
+{t:'m',i:'Fragewort?',s:'___ ziehst du eine warme Jacke an?',o:['Warum','Was','Wann','Wo'],c:0,h:'Grund=warum',ex:'Warum'},
+{t:'f',i:'Ergänze:',s:'___ Kürbis nimmst du?',a:[{cr:['Welchen']}],h:'Auswahl',ex:'Welchen'},
+{t:'m',i:'Fragewort?',s:'___ Farbe haben die Blätter im Herbst?',o:['Welche','Was','Wie','Wer'],c:0,h:'Auswahl',ex:'Welche'},
+{t:'f',i:'Ergänze:',s:'___ hast du Geburtstag?',a:[{cr:['Wann']}],h:'Datum=wann',ex:'Wann'},
+{t:'f',i:'Ergänze:',s:'___ oft gehst du im Herbst spazieren?',a:[{cr:['Wie']}],h:'Häufigkeit',ex:'Wie'},
+{t:'m',i:'Fragewort?',s:'___ ist das Problem mit dem Auto?',o:['Was','Wer','Wo','Wann'],c:0,h:'Sache=was',ex:'Was'},
+{t:'f',i:'Ergänze:',s:'___ viele Kastanien hast du gesammelt?',a:[{cr:['Wie']}],h:'Anzahl',ex:'Wie'},
+{t:'m',i:'Fragewort?',s:'___ Tag ist heute?',o:['Welcher','Was','Wann','Wie'],c:0,h:'Auswahl',ex:'Welcher'},
+{t:'f',i:'Ergänze:',s:'___ ist deine Adresse?',a:[{cr:['Was','Wie']}],h:'Information',ex:'Was/Wie'},
+{t:'m',i:'Fragewort?',s:'___ schreibt man "Kürbis"?',o:['Wie','Was','Wer','Wo'],c:0,h:'Art und Weise',ex:'Wie'},
+{t:'f',i:'Ergänze:',s:'___ ist der Junge neben dir im Park?',a:[{cr:['Wer']}],h:'Person=wer',ex:'Wer'}
+],
+jn:[
+{t:'w',i:'Bilde die Ja/Nein-Frage:',w:['Spielst','du','heute','Fußball','?'],cr:'Spielst du heute Fußball ?',h:'Verb Position 1',ex:'Spielst du heute Fußball?'},
+{t:'w',i:'Bilde die Ja/Nein-Frage:',w:['Sprechen','Sie','Französisch','?'],cr:'Sprechen Sie Französisch ?',h:'Verb Position 1',ex:'Sprechen Sie Französisch?'},
+{t:'w',i:'Bilde die Ja/Nein-Frage:',w:['Hast','du','morgen','Zeit','?'],cr:'Hast du morgen Zeit ?',h:'Verb Position 1',ex:'Hast du morgen Zeit?'},
+{t:'w',i:'Bilde die Ja/Nein-Frage:',w:['Ist','der Kürbis','schwer','?'],cr:'Ist der Kürbis schwer ?',h:'Verb Position 1',ex:'Ist der Kürbis schwer?'},
+{t:'w',i:'Bilde die Ja/Nein-Frage:',w:['Kann','ich','dir','helfen','?'],cr:'Kann ich dir helfen ?',h:'Modal Position 1',ex:'Kann ich dir helfen?'},
+{t:'w',i:'Bilde die Ja/Nein-Frage:',w:['Wohnt','ihr','am Land','?'],cr:'Wohnt ihr am Land ?',h:'Verb Position 1',ex:'Wohnt ihr am Land?'},
+{t:'w',i:'Bilde die Ja/Nein-Frage:',w:['Kommst','du','morgen','vorbei','?'],cr:'Kommst du morgen vorbei ?',h:'Verb Position 1',ex:'Kommst du morgen vorbei?'},
+{t:'w',i:'Bilde die Ja/Nein-Frage:',w:['Haben','Sie','einen','Termin','?'],cr:'Haben Sie einen Termin ?',h:'Verb Position 1',ex:'Haben Sie einen Termin?'},
+{t:'aq',i:'Schreibe die Frage zur Antwort:',s:'Ja, ich spreche fließend Deutsch.',a:[{cr:['Sprichst du fließend Deutsch?','Sprechen Sie fließend Deutsch?','Sprichst du Deutsch?','Sprechen Sie Deutsch?','Sprichst du fließend Deutsch','Sprechen Sie fließend Deutsch']}],h:'Verb an Position 1!',ex:'Sprichst du fließend Deutsch?'},
+{t:'aq',i:'Schreibe die Frage zur Antwort:',s:'Nein, ich habe heute keine Zeit.',a:[{cr:['Hast du heute Zeit?','Haben Sie heute Zeit?','Hast du Zeit?','Haben Sie Zeit?','Hast du heute Zeit','Haben Sie heute Zeit']}],h:'Verb an Position 1!',ex:'Hast du heute Zeit?'},
+{t:'aq',i:'Schreibe die Frage zur Antwort:',s:'Ja, ich komme aus Ungarn.',a:[{cr:['Kommst du aus Ungarn?','Kommen Sie aus Ungarn?','Kommst du aus Ungarn','Kommen Sie aus Ungarn']}],h:'Verb an Position 1!',ex:'Kommst du aus Ungarn?'},
+{t:'aq',i:'Schreibe die Frage zur Antwort:',s:'Nein, er ist nicht verheiratet.',a:[{cr:['Ist er verheiratet?','Ist er verheiratet']}],h:'Verb an Position 1!',ex:'Ist er verheiratet?'},
+{t:'aq',i:'Schreibe die Frage zur Antwort:',s:'Ja, wir wohnen in Graz.',a:[{cr:['Wohnt ihr in Graz?','Wohnen Sie in Graz?','Wohnt ihr in Graz','Wohnen Sie in Graz']}],h:'Verb an Position 1!',ex:'Wohnt ihr in Graz?'},
+{t:'aq',i:'Schreibe die Frage zur Antwort:',s:'Doch, ich mag Kürbissuppe!',a:[{cr:['Magst du keine Kürbissuppe?','Magst du Kürbissuppe nicht?','Mögen Sie keine Kürbissuppe?','Magst du keine Kürbissuppe','Magst du Kürbissuppe nicht']}],h:'Doch = negative Frage!',ex:'Magst du keine Kürbissuppe?'},
+{t:'aq',i:'Schreibe die Frage zur Antwort:',s:'Doch, sie kann sehr gut backen!',a:[{cr:['Kann sie nicht backen?','Kann sie nicht backen']}],h:'Doch = negative Frage!',ex:'Kann sie nicht backen?'},
+{t:'jnd',i:'Welche Antwort passt?',s:'Spielst du gern Karten?',o:['Ja, ich spiele sehr gern Karten.','Doch, ich spiele Karten.','Nein, ich spiele gern.','Ja, du spielst.'],c:0,h:'positive Frage → Ja/Nein',ex:'Ja, ich spiele sehr gern Karten.'},
+{t:'jnd',i:'Welche Antwort passt?',s:'Hast du keinen Hunger mehr?',o:['Doch, ich habe noch Hunger!','Ja, ich habe Hunger.','Nein, ich habe Hunger.','Ja, ich habe keinen.'],c:0,h:'negative Frage + positiv → Doch!',ex:'Doch, ich habe noch Hunger!'},
+{t:'jnd',i:'Welche Antwort passt?',s:'Bist du nicht erkältet?',o:['Doch, ich bin ziemlich erkältet.','Ja, ich bin erkältet.','Nein, ich bin erkältet.','Ja, ich bin nicht.'],c:0,h:'negative Frage + positiv → Doch!',ex:'Doch, ich bin ziemlich erkältet.'},
+{t:'jnd',i:'Welche Antwort passt?',s:'Kommst du morgen zur Feier?',o:['Nein, leider nicht.','Doch, leider nicht.','Ja, leider nicht.','Nein, ich komme.'],c:0,h:'positive Frage + negativ → Nein',ex:'Nein, leider nicht.'},
+{t:'jnd',i:'Welche Antwort passt?',s:'Kannst du nicht Rad fahren?',o:['Doch, ich kann sehr gut Rad fahren!','Ja, ich kann Rad fahren.','Nein, ich kann Rad fahren.','Ja, ich kann nicht.'],c:0,h:'negative Frage + positiv → Doch!',ex:'Doch, ich kann sehr gut Rad fahren!'},
+{t:'jnd',i:'Welche Antwort passt?',s:'Ist das nicht deine Jacke?',o:['Doch, das ist meine Jacke.','Ja, das ist meine Jacke.','Nein, das ist meine Jacke.','Ja, das ist nicht.'],c:0,h:'negative Frage + positiv → Doch!',ex:'Doch, das ist meine Jacke.'},
+{t:'jnd',i:'Welche Antwort passt?',s:'Magst du keinen Tee?',o:['Doch, ich trinke sehr gern Tee.','Ja, ich trinke Tee.','Nein, ich mag Tee.','Ja, ich mag keinen.'],c:0,h:'negative Frage + positiv → Doch!',ex:'Doch, ich trinke sehr gern Tee.'},
+{t:'jnd',i:'Welche Antwort passt?',s:'Hast du keine Geschwister?',o:['Doch, ich habe zwei Schwestern.','Ja, ich habe Schwestern.','Nein, ich habe Schwestern.','Ja, ich habe keine.'],c:0,h:'negative Frage + positiv → Doch!',ex:'Doch, ich habe zwei Schwestern.'},
+{t:'w',i:'Bilde die Ja/Nein-Frage:',w:['Regnet','es','morgen','wieder','?'],cr:'Regnet es morgen wieder ?',h:'Verb Position 1',ex:'Regnet es morgen wieder?'},
+{t:'w',i:'Bilde die Ja/Nein-Frage:',w:['Stehst','du','früh','auf','?'],cr:'Stehst du früh auf ?',h:'Trennbar: Präfix am Ende',ex:'Stehst du früh auf?'},
+{t:'w',i:'Bilde die Ja/Nein-Frage:',w:['Rufst','du','mich','später','an','?'],cr:'Rufst du mich später an ?',h:'Trennbar: Präfix am Ende',ex:'Rufst du mich später an?'}
+],
+mod:[
+{t:'f',i:'Ergänze das Modalverb:',s:'Ich ___ gut Fahrrad fahren. (Fähigkeit)',a:[{cr:['kann']}],h:'Fähigkeit = können',ex:'kann'},
+{t:'f',i:'Ergänze das Modalverb:',s:'Du ___ jetzt die Hausaufgaben machen. (Notwendigkeit)',a:[{cr:['musst']}],h:'Notwendigkeit = müssen',ex:'musst'},
+{t:'f',i:'Ergänze das Modalverb:',s:'Er ___ Lehrer werden. (Wunsch)',a:[{cr:['will','möchte']}],h:'Wunsch = wollen/möchten',ex:'will'},
+{t:'m',i:'Welches Modalverb passt?',s:'___ ich hier mein Fahrrad parken?',o:['Darf','Muss','Will','Soll'],c:0,h:'Erlaubnis fragen',ex:'Darf'},
+{t:'f',i:'Ergänze das Modalverb:',s:'Was ___ ich heute Abend kochen? (Rat fragen)',a:[{cr:['soll']}],h:'Rat = sollen',ex:'soll'},
+{t:'f',i:'Ergänze das Modalverb:',s:'Sie ___ warmen Kakao im Herbst. (Vorliebe)',a:[{cr:['mag']}],h:'Vorliebe = mögen',ex:'mag'},
+{t:'f',i:'Ergänze das Modalverb:',s:'Wir ___ am Wochenende wandern gehen. (Möglichkeit)',a:[{cr:['können']}],h:'Möglichkeit = können',ex:'können'},
+{t:'m',i:'Welches Modalverb passt?',s:'Du ___ mehr Wasser trinken.',o:['solltest','darfst','kannst','willst'],c:0,h:'Empfehlung/Rat',ex:'solltest'},
+{t:'f',i:'Ergänze das Modalverb:',s:'Ihr ___ die Blätter im Garten zusammenkehren.',a:[{cr:['müsst','sollt']}],h:'Pflicht',ex:'müsst'},
+{t:'f',i:'Ergänze das Modalverb:',s:'Kinder ___ nach 20 Uhr nicht mehr laut spielen.',a:[{cr:['dürfen']}],h:'Verbot = nicht dürfen',ex:'dürfen'},
+{t:'m',i:'Welches Modalverb passt?',s:'___ du am Wochenende Pilze suchen gehen?',o:['Willst','Darfst','Musst','Sollst'],c:0,h:'Wunsch/Absicht fragen',ex:'Willst'},
+{t:'m',i:'Welches Modalverb passt?',s:'Ich ___ sehr gut zeichnen.',o:['kann','darf','muss','soll'],c:0,h:'Fähigkeit',ex:'kann'},
+{t:'f',i:'Ergänze das Modalverb:',s:'Ich ___ einen Tee mit Honig, bitte.',a:[{cr:['möchte']}],h:'Höfliche Bitte',ex:'möchte'},
+{t:'m',i:'Welches Modalverb passt?',s:'___ Sie mir bitte den Weg zeigen?',o:['Können','Müssen','Wollen','Sollen'],c:0,h:'Höfliche Frage',ex:'Können'},
+{t:'m',i:'Welches Modalverb passt?',s:'Hier ___ man nicht rauchen!',o:['darf','kann','will','soll'],c:0,h:'Verbot',ex:'darf'},
+{t:'f',i:'Ergänze das Modalverb:',s:'Der Arzt sagt, ich ___ warme Kleidung tragen.',a:[{cr:['soll']}],h:'Empfehlung',ex:'soll'},
+{t:'m',i:'Welches Modalverb passt?',s:'Die Kinder ___ am Erntedankfest tanzen.',o:['wollen','sollen','müssen','dürfen'],c:0,h:'Wunsch',ex:'wollen'},
+{t:'m',i:'Welches Modalverb passt?',s:'___ ich das Fenster im Zug öffnen?',o:['Darf','Kann','Will','Muss'],c:0,h:'Um Erlaubnis bitten',ex:'Darf'},
+{t:'m',i:'Welches Modalverb passt?',s:'Ich ___ heute leider nicht zur Probe kommen.',o:['kann','darf','will','muss'],c:0,h:'Möglichkeit/Unmöglichkeit',ex:'kann'},
+{t:'m',i:'Welches Modalverb passt?',s:'___ du lieber Kürbis oder Kartoffeln?',o:['Magst','Willst','Kannst','Darfst'],c:0,h:'Vorliebe',ex:'Magst'},
+{t:'f',i:'Ergänze das Modalverb:',s:'Das Kind ___ schon bis 100 zählen. (Fähigkeit)',a:[{cr:['kann']}],h:'Fähigkeit = können',ex:'kann'},
+{t:'m',i:'Welches Modalverb passt?',s:'Wir ___ vor Sonnenuntergang zurück sein.',o:['müssen','wollen','dürfen','mögen'],c:0,h:'Notwendigkeit',ex:'müssen'},
+{t:'m',i:'Welches Modalverb passt?',s:'Was ___ du später einmal werden?',o:['willst','darfst','musst','sollst'],c:0,h:'Berufswunsch',ex:'willst'},
+{t:'m',i:'Welches Modalverb passt?',s:'___ ich dir die Tasche tragen?',o:['Soll','Muss','Will','Mag'],c:0,h:'Angebot/Frage',ex:'Soll'},
+{t:'m',i:'Welches Modalverb passt?',s:'Er ___ keinen Kaffee am Abend trinken.',o:['darf','kann','will','soll'],c:0,h:'Verbot (z.B. vom Arzt)',ex:'darf'},
+{t:'f',i:'Ergänze das Modalverb:',s:'Wir ___ am Samstag zum Kürbisfest fahren. (Plan)',a:[{cr:['wollen','möchten']}],h:'Plan = wollen/möchten',ex:'wollen'}
+],
+sh:[
+{t:'f',i:'sein:',s:'Ich ___ Sprachlehrerin.',a:[{cr:['bin']}],h:'ich bin',ex:'bin'},
+{t:'f',i:'sein:',s:'Du ___ heute sehr fröhlich.',a:[{cr:['bist']}],h:'du bist',ex:'bist'},
+{t:'f',i:'sein:',s:'Er ___ aus der Steiermark.',a:[{cr:['ist']}],h:'er ist',ex:'ist'},
+{t:'f',i:'sein:',s:'Wir ___ müde nach der Wanderung.',a:[{cr:['sind']}],h:'wir sind',ex:'sind'},
+{t:'f',i:'sein:',s:'Ihr ___ heute etwas spät.',a:[{cr:['seid']}],h:'ihr seid',ex:'seid'},
+{t:'m',i:'sein oder haben?',s:'Ich ___ großen Hunger nach der Wanderung.',o:['habe','bin','hat','ist'],c:0,h:'Hunger haben',ex:'habe'},
+{t:'f',i:'haben:',s:'Ich ___ einen alten Traktor.',a:[{cr:['habe']}],h:'ich habe',ex:'habe'},
+{t:'f',i:'haben:',s:'Du ___ eine schöne Stimme.',a:[{cr:['hast']}],h:'du hast',ex:'hast'},
+{t:'f',i:'haben:',s:'Er ___ heute keine Zeit.',a:[{cr:['hat']}],h:'er hat',ex:'hat'},
+{t:'f',i:'haben:',s:'Wir ___ zwei Katzen.',a:[{cr:['haben']}],h:'wir haben',ex:'haben'},
+{t:'f',i:'haben:',s:'Ihr ___ wirklich Glück mit dem Wetter!',a:[{cr:['habt']}],h:'ihr habt',ex:'habt'},
+{t:'m',i:'sein oder haben?',s:'Das Wetter ___ heute richtig herbstlich.',o:['ist','hat','sind','haben'],c:0,h:'Wetter=sein',ex:'ist'},
+{t:'f',i:'sein:',s:'Das ___ meine Nachbarin.',a:[{cr:['ist']}],h:'das ist',ex:'ist'},
+{t:'f',i:'sein:',s:'___ du schon fertig mit den Hausaufgaben?',a:[{cr:['Bist']}],h:'du bist',ex:'Bist'},
+{t:'f',i:'haben:',s:'___ Sie noch Fragen zum Kurs?',a:[{cr:['Haben']}],h:'Sie haben',ex:'Haben'},
+{t:'m',i:'sein oder haben?',s:'Ich ___ seit zwanzig Jahren Sprachlehrerin.',o:['bin','habe','ist','hat'],c:0,h:'Beruf=sein',ex:'bin'},
+{t:'f',i:'sein:',s:'Wie alt ___ deine Großmutter?',a:[{cr:['ist']}],h:'sie ist',ex:'ist'},
+{t:'f',i:'haben:',s:'___ du Lust auf einen Spaziergang?',a:[{cr:['Hast']}],h:'du hast',ex:'Hast'},
+{t:'m',i:'sein oder haben?',s:'Wir ___ heute wirklich Durst.',o:['haben','sind','hat','ist'],c:0,h:'Durst haben',ex:'haben'},
+{t:'f',i:'sein:',s:'Wo ___ der nächste Bahnhof?',a:[{cr:['ist']}],h:'Ort=sein',ex:'ist'},
+{t:'f',i:'haben:',s:'Das Kind ___ leichtes Fieber.',a:[{cr:['hat']}],h:'es hat',ex:'hat'},
+{t:'m',i:'sein oder haben?',s:'Ich ___ ein bisschen erkältet.',o:['bin','habe','ist','hat'],c:0,h:'Zustand=sein',ex:'bin'},
+{t:'f',i:'haben:',s:'Das Studio ___ zwei helle Räume.',a:[{cr:['hat']}],h:'es hat',ex:'hat'},
+{t:'m',i:'sein oder haben?',s:'___ du Lust auf Kürbissuppe?',o:['Hast','Bist','Ist','Hat'],c:0,h:'Lust haben',ex:'Hast'}
+],
+wo:[
+{t:'w',i:'Ordne die Wörter:',w:['Ich','lerne','heute','Deutsch.'],cr:'Ich lerne heute Deutsch.',h:'Verb Position 2',ex:'Ich lerne heute Deutsch.'},
+{t:'w',i:'Ordne die Wörter:',w:['Heute','lerne','ich','Deutsch.'],cr:'Heute lerne ich Deutsch.',h:'Verb Position 2',ex:'Heute lerne ich Deutsch.'},
+{t:'w',i:'Ordne die Wörter:',w:['Er','spielt','gern','Fußball.'],cr:'Er spielt gern Fußball.',h:'Verb Position 2',ex:'Er spielt gern Fußball.'},
+{t:'w',i:'Ordne die Wörter:',w:['Morgen','fahren','wir','nach Wien.'],cr:'Morgen fahren wir nach Wien.',h:'Verb Position 2',ex:'Morgen fahren wir nach Wien.'},
+{t:'w',i:'Ordne (Modalverb):',w:['Ich','kann','gut','schwimmen.'],cr:'Ich kann gut schwimmen.',h:'Infinitiv am Ende',ex:'Ich kann gut schwimmen.'},
+{t:'w',i:'Ordne (Modalverb):',w:['Du','musst','heute','arbeiten.'],cr:'Du musst heute arbeiten.',h:'Infinitiv am Ende',ex:'Du musst heute arbeiten.'},
+{t:'w',i:'Ordne die Wörter:',w:['In Graz','wohnt','meine Schwester.'],cr:'In Graz wohnt meine Schwester.',h:'Verb Position 2',ex:'In Graz wohnt meine Schwester.'},
+{t:'w',i:'Ordne (Trennbar):',w:['Ich','stehe','um 6 Uhr','auf.'],cr:'Ich stehe um 6 Uhr auf.',h:'Präfix am Ende',ex:'Ich stehe um 6 Uhr auf.'},
+{t:'w',i:'Ordne die Wörter:',w:['Jeden Morgen','trinkt','er','Kaffee.'],cr:'Jeden Morgen trinkt er Kaffee.',h:'Verb Position 2',ex:'Jeden Morgen trinkt er Kaffee.'},
+{t:'w',i:'Ordne (Modalverb):',w:['Sie','möchte','nach Italien','fahren.'],cr:'Sie möchte nach Italien fahren.',h:'Infinitiv am Ende',ex:'Sie möchte nach Italien fahren.'},
+{t:'w',i:'Ordne die Wörter:',w:['Am Wochenende','besuche','ich','meine Eltern.'],cr:'Am Wochenende besuche ich meine Eltern.',h:'Verb Position 2',ex:'Am Wochenende besuche ich meine Eltern.'},
+{t:'w',i:'Ordne die Wörter:',w:['Leider','kann','ich','nicht kommen.'],cr:'Leider kann ich nicht kommen.',h:'Verb Position 2',ex:'Leider kann ich nicht kommen.'},
+{t:'w',i:'Ordne (Trennbar):',w:['Der Zug','fährt','um 10 Uhr','ab.'],cr:'Der Zug fährt um 10 Uhr ab.',h:'Präfix am Ende',ex:'Der Zug fährt um 10 Uhr ab.'},
+{t:'w',i:'Ordne die Wörter:',w:['Im Herbst','sammeln','wir','Kastanien.'],cr:'Im Herbst sammeln wir Kastanien.',h:'Verb Position 2',ex:'Im Herbst sammeln wir Kastanien.'},
+{t:'w',i:'Ordne (Modalverb):',w:['Man','darf','hier nicht','rauchen.'],cr:'Man darf hier nicht rauchen.',h:'Infinitiv am Ende',ex:'Man darf hier nicht rauchen.'},
+{t:'w',i:'Ordne die Wörter:',w:['Heute','muss','ich','viel lernen.'],cr:'Heute muss ich viel lernen.',h:'Verb Position 2',ex:'Heute muss ich viel lernen.'},
+{t:'w',i:'Ordne (Trennbar):',w:['Sie','ruft','ihre Mutter','an.'],cr:'Sie ruft ihre Mutter an.',h:'Präfix am Ende',ex:'Sie ruft ihre Mutter an.'},
+{t:'w',i:'Ordne die Wörter:',w:['Nächste Woche','habe','ich','Urlaub.'],cr:'Nächste Woche habe ich Urlaub.',h:'Verb Position 2',ex:'Nächste Woche habe ich Urlaub.'},
+{t:'w',i:'Ordne die Wörter:',w:['Gestern','war','das Wetter','schön.'],cr:'Gestern war das Wetter schön.',h:'Verb Position 2',ex:'Gestern war das Wetter schön.'},
+{t:'w',i:'Ordne die Wörter:',w:['Manchmal','esse','ich','im Restaurant.'],cr:'Manchmal esse ich im Restaurant.',h:'Verb Position 2',ex:'Manchmal esse ich im Restaurant.'},
+{t:'w',i:'Ordne die Wörter:',w:['Am Sonntag','backen','wir','einen Kuchen.'],cr:'Am Sonntag backen wir einen Kuchen.',h:'Verb Position 2',ex:'Am Sonntag backen wir einen Kuchen.'},
+{t:'w',i:'Ordne (Trennbar):',w:['Wir','räumen','das Zimmer','auf.'],cr:'Wir räumen das Zimmer auf.',h:'Präfix am Ende',ex:'Wir räumen das Zimmer auf.'}
+]
+};
+
+const CAT_LABELS={konj:'Konjugation',pron:'Pronomen',trenn:'Trennbare Verben',imp:'Imperativ',wfr:'W-Fragen',jn:'Ja/Nein-Fragen',mod:'Modalverben',sh:'sein & haben',wo:'Wortstellung',master:'🏆 Master-Modus'};
+
+/* Übungszahlen im Menü anzeigen */
+let TOTAL_ALL=0;
+Object.keys(E).forEach(k=>{
+  TOTAL_ALL+=E[k].length;
+  const el=document.getElementById('cnt-'+k);
+  if(el)el.textContent=E[k].length+' Übungen';
+});
+document.getElementById('totalBadge').textContent=TOTAL_ALL+'+ Übungen';
+
+/* ==================== HERBSTBLÄTTER ==================== */
+(function(){
+  const leaves=['🍂','🍁','🌰'];
+  for(let i=0;i<10;i++){
+    const s=document.createElement('span');
+    s.className='leaf';
+    s.textContent=leaves[Math.floor(Math.random()*leaves.length)];
+    s.style.left=(Math.random()*100)+'vw';
+    s.style.animationDuration=(9+Math.random()*10)+'s';
+    s.style.animationDelay=(Math.random()*10)+'s';
+    s.style.fontSize=(1.1+Math.random()*1.3)+'rem';
+    document.body.appendChild(s);
+  }
+})();
+
+/* ==================== SOUND ==================== */
+function playDing(){
+  try{
+    const ctx=window._actx||(window._actx=new (window.AudioContext||window.webkitAudioContext)());
+    const now=ctx.currentTime;
+    const notes=[[659.25,0],[880,0.11]];
+    notes.forEach(([freq,delay])=>{
+      const o=ctx.createOscillator(), g=ctx.createGain();
+      o.type='sine'; o.frequency.setValueAtTime(freq, now+delay);
+      g.gain.setValueAtTime(0.0001, now+delay);
+      g.gain.exponentialRampToValueAtTime(0.16, now+delay+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, now+delay+0.35);
+      o.connect(g).connect(ctx.destination);
+      o.start(now+delay); o.stop(now+delay+0.36);
+    });
+  }catch(e){}
+}
+
+/* ==================== KONFETTI ==================== */
+function triggerConfetti(){
+  const canvas=document.getElementById('confettiCanvas');
+  const ctx=canvas.getContext('2d');
+  canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+  const colors=['#ff8c42','#ffc169','#f4a300','#e2725b','#c1691f','#8bc34a'];
+  const particles=[];
+  const originX=canvas.width/2, originY=canvas.height*0.25;
+  for(let i=0;i<80;i++){
+    particles.push({
+      x:originX,y:originY,
+      vx:(Math.random()-0.5)*9,
+      vy:Math.random()*-7-2,
+      size:4+Math.random()*5,
+      color:colors[Math.floor(Math.random()*colors.length)],
+      rot:Math.random()*360, vr:(Math.random()-0.5)*12
+    });
+  }
+  let start=null;
+  function frame(ts){
+    if(!start)start=ts;
+    const elapsed=ts-start;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p=>{
+      p.vy+=0.16; p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr;
+      ctx.save();
+      ctx.translate(p.x,p.y);
+      ctx.rotate(p.rot*Math.PI/180);
+      ctx.fillStyle=p.color;
+      ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size*0.6);
+      ctx.restore();
+    });
+    if(elapsed<1700){requestAnimationFrame(frame);}
+    else{ctx.clearRect(0,0,canvas.width,canvas.height);}
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ==================== SPIEL-LOGIK ==================== */
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+let G={mode:'',idx:0,ex:[],pts:0,corr:0,incorr:0,streak:0,best:0,ans:false,hint:false,placed:[]};
+
+function startGame(mode){
+  G={mode:mode,idx:0,ex:[],pts:0,corr:0,incorr:0,streak:0,best:0,ans:false,hint:false,placed:[]};
+  if(mode==='master'){
+    let all=[];
+    Object.keys(E).forEach(k=>all=all.concat(E[k]));
+    G.ex=shuffle(all).slice(0,35);
+  }else{
+    G.ex=shuffle([...E[mode]]).slice(0,25);
+  }
+  G.total=G.ex.length;
+  document.getElementById('modeIndicator').textContent=CAT_LABELS[mode]||mode;
+  document.getElementById('menuScreen').classList.remove('active');
+  document.getElementById('gameScreen').classList.add('active');
+  document.getElementById('backBtn').style.display='flex';
+  showEx();
+}
+
+function showEx(){
+  G.ans=false;G.hint=false;G.placed=[];
+  const e=G.ex[G.idx];
+  const c=document.getElementById('exContainer');
+  let h='<div class="ex-card">';
+  h+='<span class="ex-type">'+getType(e.t)+'</span>';
+  h+='<p class="ex-instr">'+e.i+'</p>';
+  if(e.s)h+='<div class="sentence">'+e.s+'</div>';
+  h+='<div id="hintBox" class="hint-box">💡 '+e.h+'</div>';
+  h+='<div class="answer" id="answerArea">';
+  if(e.t==='f')h+=renderFill(e);
+  else if(e.t==='m'||e.t==='jnd')h+=renderMC(e);
+  else if(e.t==='w')h+=renderWO(e);
+  else if(e.t==='aq')h+=renderAQ(e);
+  h+='</div>';
+  h+='<div class="explain" id="explain"><div class="explain-title" id="explainTitle">✓ Richtig:</div><span id="explainText">'+e.ex+'</span></div>';
+  h+='</div>';
+  c.innerHTML=h;
+  if(e.t==='m'||e.t==='jnd'||e.t==='w'){
+    document.getElementById('btnRow').innerHTML='<button class="btn secondary" onclick="showHint()">💡 Tipp</button>';
+  }else{
+    document.getElementById('btnRow').innerHTML='<button class="btn secondary" onclick="showHint()">💡 Tipp</button><button class="btn primary" onclick="checkAnswer()">↵ Prüfen</button>';
+  }
+  updateStats();updateProg();
+  const inp=document.querySelector('.input-slot');
+  if(inp){
+    inp.focus();
+    inp.addEventListener('keydown',ev=>{
+      if(ev.key==='Enter'&&!G.ans)checkAnswer();
+    });
+  }
+}
+
+function getType(t){
+  if(t==='f')return 'Lückentext';
+  if(t==='m')return 'Multiple Choice';
+  if(t==='w')return 'Wortstellung';
+  if(t==='aq')return 'Frage schreiben';
+  if(t==='jnd')return 'Ja/Nein/Doch';
+  return 'Übung';
+}
+
+function renderFill(e){
+  let h='<div class="answer-wrap">';
+  e.a.forEach((slot,idx)=>{
+    h+='<input type="text" class="input-slot" id="slot'+idx+'" autocomplete="off"> ';
+  });
+  return h+'</div>';
+}
+
+function renderMC(e){
+  let h='<div class="mc-opts">';
+  const opts=e.o.map((x,i)=>({x:x,idx:i}));
+  shuffle(opts);
+  opts.forEach((o,i)=>{
+    const isCorr=(o.idx===e.c);
+    h+='<div class="mc-opt" data-correct="'+isCorr+'" onclick="selectOpt(this)"><span class="mc-letter">'+String.fromCharCode(65+i)+'</span><span>'+o.x+'</span></div>';
+  });
+  return h+'</div>';
+}
+
+function renderWO(e){
+  const shuffled=shuffle([...e.w]);
+  let h='<p style="margin-bottom:10px;color:var(--muted)">Klicke die Wörter in der richtigen Reihenfolge:</p>';
+  h+='<div class="word-bank" id="wordBank">';
+  shuffled.forEach((w,i)=>{
+    h+='<span class="word-chip" data-idx="'+i+'" data-word="'+w+'" onclick="placeWord(this)">'+w+'</span>';
+  });
+  h+='</div><div class="answer-slots" id="answerSlots"></div>';
+  return h;
+}
+
+function renderAQ(e){
+  return '<div class="answer-wrap"><input type="text" class="input-slot" id="slot0" autocomplete="off" style="width:100%;min-width:250px" placeholder="Schreibe die Frage..."></div>';
+}
+
+function selectOpt(el){
+  if(G.ans)return;
+  if(el.dataset.correct==='true'){
+    G.ans=true;
+    el.classList.add('correct');
+    document.querySelectorAll('.mc-opt').forEach(o=>{if(o!==el)o.style.pointerEvents='none';});
+    finishCorrect();
+  }else{
+    el.classList.add('incorrect');
+  }
+}
+
+function placeWord(el){
+  if(G.ans||el.classList.contains('used'))return;
+  el.classList.add('used');
+  const w=el.dataset.word;
+  G.placed.push({word:w,el:el});
+  const slots=document.getElementById('answerSlots');
+  const span=document.createElement('span');
+  span.className='placed-word';
+  span.textContent=w;
+  span.onclick=function(){removeWord(this,el);};
+  slots.appendChild(span);
+  const e=G.ex[G.idx];
+  if(e.t==='w' && G.placed.length===e.w.length){
+    setTimeout(()=>checkAnswer(),300);
+  }
+}
+
+function removeWord(span,chip){
+  if(G.ans)return;
+  chip.classList.remove('used');
+  G.placed=G.placed.filter(p=>p.el!==chip);
+  span.remove();
+}
+
+function showHint(){
+  G.hint=true;
+  document.getElementById('hintBox').style.display='block';
+}
+
+function checkAnswer(){
+  if(G.ans)return;
+  G.ans=true;
+  const e=G.ex[G.idx];
+  let correct=false;
+
+  if(e.t==='f'){
+    correct=true;
+    e.a.forEach((slot,idx)=>{
+      const inp=document.getElementById('slot'+idx);
+      const val=inp.value.trim();
+      const isCorr=slot.cr.some(c=>c.toLowerCase()===val.toLowerCase());
+      if(isCorr)inp.classList.add('correct');
+      else{inp.classList.add('incorrect');correct=false;}
+    });
+  }else if(e.t==='w'){
+    const userAnswer=G.placed.map(p=>p.word).join(' ');
+    correct=(userAnswer===e.cr);
+    const slots=document.getElementById('answerSlots');
+    slots.style.borderColor=correct?'var(--success)':'var(--error)';
+    slots.style.background=correct?'rgba(139,195,74,.2)':'rgba(226,114,91,.2)';
+  }else if(e.t==='aq'){
+    const inp=document.getElementById('slot0');
+    const val=inp.value.trim();
+    correct=e.a[0].cr.some(c=>c.toLowerCase()===val.toLowerCase());
+    if(correct)inp.classList.add('correct');else inp.classList.add('incorrect');
+  }
+
+  if(correct){
+    finishCorrect();
+  }else{
+    finishWrong(e);
+  }
+}
+
+function finishCorrect(){
+  G.corr++;G.streak++;
+  if(G.streak>G.best)G.best=G.streak;
+  let pts=10;
+  if(G.hint)pts=5;
+  if(G.streak>=3)pts=Math.floor(pts*1.5);
+  G.pts+=pts;
+  playDing();
+  if(G.streak>0 && G.streak%5===0)triggerConfetti();
+  updateStats();
+  setTimeout(()=>{
+    G.idx++;
+    if(G.idx>=G.total)showResults();
+    else showEx();
+  },700);
+}
+
+function finishWrong(e){
+  G.incorr++;G.streak=0;
+  updateStats();
+  const explain=document.getElementById('explain');
+  const title=document.getElementById('explainTitle');
+  title.textContent='📖 Richtig wäre:';
+  explain.classList.add('show','wrong');
+  document.querySelectorAll('.input-slot').forEach(i=>i.disabled=true);
+  document.getElementById('btnRow').innerHTML='';
+  setTimeout(()=>{
+    G.idx++;
+    if(G.idx>=G.total)showResults();
+    else showEx();
+  },2200);
+}
+
+function updateStats(){
+  document.getElementById('points').textContent=G.pts;
+  document.getElementById('streak').textContent=G.streak;
+  document.getElementById('correct').textContent=G.corr;
+  document.getElementById('total').textContent=G.corr+G.incorr;
+}
+
+function updateProg(){
+  const p=(G.idx/G.total)*100;
+  document.getElementById('progressFill').style.width=p+'%';
+  document.getElementById('counter').textContent='Übung '+(G.idx+1)+'/'+G.total;
+}
+
+function showResults(){
+  document.getElementById('gameScreen').classList.remove('active');
+  document.getElementById('resultScreen').classList.add('active');
+  document.getElementById('backBtn').style.display='none';
+  const tot=G.corr+G.incorr;
+  const acc=tot>0?Math.round((G.corr/tot)*100):0;
+  document.getElementById('finalPts').textContent=G.pts;
+  document.getElementById('finalCorr').textContent=G.corr+'/'+tot+' ('+acc+'%)';
+  document.getElementById('finalStreak').textContent=G.best;
+  triggerConfetti();
+}
+
+function goMenu(){
+  document.getElementById('gameScreen').classList.remove('active');
+  document.getElementById('resultScreen').classList.remove('active');
+  document.getElementById('menuScreen').classList.add('active');
+  document.getElementById('backBtn').style.display='none';
+}
+
+function playAgain(){startGame(G.mode);}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    if(document.getElementById('gameScreen').classList.contains('active')){
+      if(!G.ans){
+        const active=document.activeElement;
+        if(active&&active.classList.contains('input-slot'))return;
+        checkAnswer();
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>
