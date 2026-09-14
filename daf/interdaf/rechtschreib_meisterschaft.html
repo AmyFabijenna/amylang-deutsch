@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RECHTSCHREIB-MEISTERSCHAFT</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Lora:ital,wght@0,500;0,600;1,500&family=JetBrains+Mono:wght@500;700&family=Cormorant+Garamond:ital,wght@0,600;1,500&display=swap" rel="stylesheet">
+<style>
+:root {
+    --parchment: #ece0c4;
+    --parchment-dim: #d9c99e;
+    --ink: #241c13;
+    --ink-light: #3a2e1c;
+    --burgundy: #6e2331;
+    --burgundy-glow: #a94656;
+    --forest: #2d4a34;
+    --forest-glow: #5c8a63;
+    --mustard: #b3862c;
+    --mustard-glow: #e0ac4a;
+    --teal: #1f4c4a;
+    --teal-glow: #4c9490;
+    --plum: #4a2e4f;
+    --plum-glow: #8a5f8f;
+    --success: #567a3f;
+    --error: #8a2f28;
+    --gold: #c9982f;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Cormorant Garamond', serif;
+    background:
+        radial-gradient(circle at 15% 20%, rgba(179,134,44,0.06), transparent 45%),
+        radial-gradient(circle at 85% 75%, rgba(110,35,49,0.10), transparent 50%),
+        linear-gradient(160deg, #1c150e 0%, #241c13 40%, #1e170f 100%);
+    min-height: 100vh;
+    color: var(--parchment);
+    overflow-x: hidden;
+}
+.motes { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
+.mote {
+    position: absolute; top: -30px; border-radius: 50%; opacity: 0.5;
+    background: radial-gradient(circle, rgba(224,172,74,0.55), transparent 70%);
+    animation-name: moteFall; animation-timing-function: ease-in-out; animation-iteration-count: infinite;
+}
+@keyframes moteFall {
+    0% { transform: translateY(-5vh) translateX(0); opacity: 0; }
+    10% { opacity: 0.6; }
+    90% { opacity: 0.4; }
+    100% { transform: translateY(105vh) translateX(40px); opacity: 0; }
+}
+.watermark {
+    position: fixed; top: -8%; right: -6%; width: 420px; height: 420px;
+    background: radial-gradient(circle, rgba(201,152,47,0.06), transparent 65%);
+    border-radius: 50%; pointer-events: none; z-index: 0;
+}
+.watermark.two { top: auto; bottom: -12%; left: -8%; right: auto; background: radial-gradient(circle, rgba(110,35,49,0.08), transparent 65%); }
+
+.container { position: relative; z-index: 1; max-width: 920px; margin: 0 auto; padding: 26px 20px 60px; }
+header { text-align: center; margin-bottom: 26px; padding-top: 8px; }
+.crest { font-size: 1.6rem; letter-spacing: 6px; color: var(--mustard); opacity: 0.85; margin-bottom: 4px; }
+h1 {
+    font-family: 'Playfair Display', serif; font-size: 2.35rem; font-weight: 800;
+    letter-spacing: 1px; color: var(--parchment);
+    text-shadow: 0 2px 18px rgba(201,152,47,0.25);
+}
+.rule {
+    width: 140px; height: 2px; margin: 14px auto 12px; position: relative;
+    background: linear-gradient(90deg, transparent, var(--mustard), transparent);
+}
+.rule::before, .rule::after {
+    content: '❧'; position: absolute; top: -11px; color: var(--mustard); font-size: 0.9rem;
+}
+.rule::before { left: -22px; } .rule::after { right: -22px; transform: scaleX(-1); }
+.subtitle { color: var(--parchment-dim); font-size: 1.08rem; font-style: italic; font-weight: 500; }
+
+.screen { display: none; animation: fadeIn 0.45s ease; }
+.screen.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+.panel {
+    background: linear-gradient(160deg, rgba(58,46,28,0.9), rgba(28,21,14,0.94));
+    border: 1px solid rgba(201,152,47,0.22);
+    border-radius: 6px;
+    padding: 28px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 34px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(0,0,0,0.3);
+    position: relative;
+}
+.panel::before {
+    content: ''; position: absolute; inset: 6px; border: 1px solid rgba(201,152,47,0.12); border-radius: 3px; pointer-events: none;
+}
+.panel-title {
+    font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: 20px; color: var(--mustard-glow);
+    display: flex; align-items: center; gap: 10px;
+}
+.mode-list { display: flex; flex-direction: column; gap: 10px; }
+.mode-tab {
+    display: flex; align-items: center; gap: 16px;
+    background: rgba(20,15,9,0.55);
+    border: 1px solid rgba(201,152,47,0.18);
+    border-left: 4px solid var(--tab-color, var(--mustard));
+    border-radius: 3px; padding: 15px 20px;
+    color: var(--parchment); font-family: 'Lora', serif; font-size: 1.05rem; font-weight: 600;
+    cursor: pointer; transition: all 0.25s ease; text-align: left; width: 100%;
+}
+.mode-tab:hover { transform: translateX(6px); background: rgba(30,23,14,0.85); box-shadow: -4px 4px 18px rgba(0,0,0,0.4); }
+.mode-tab .tab-mark { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--parchment-dim); min-width: 30px; }
+.mode-tab .tab-text { flex: 1; }
+.mode-tab .tab-desc { font-size: 0.82rem; color: var(--parchment-dim); font-weight: 400; margin-top: 3px; font-style: italic; }
+.mode-tab .tab-badge {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; letter-spacing: 1px;
+    background: rgba(201,152,47,0.18); color: var(--mustard-glow); padding: 3px 9px; border-radius: 3px; border: 1px solid rgba(201,152,47,0.35);
+}
+
+.game-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.stats-bar { display: flex; gap: 12px; flex-wrap: wrap; }
+.stat-item { background: rgba(20,15,9,0.6); padding: 9px 16px; border-radius: 4px; border: 1px solid rgba(201,152,47,0.2); text-align: center; min-width: 82px; }
+.stat-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--parchment-dim); text-transform: uppercase; letter-spacing: 1.5px; }
+.stat-value { font-family: 'JetBrains Mono', monospace; font-size: 1.25rem; color: var(--mustard-glow); font-weight: 700; }
+.streak-flame { display: inline-block; animation: flick 0.5s ease infinite alternate; }
+@keyframes flick { from { opacity: 0.7; } to { opacity: 1; } }
+
+.mode-indicator {
+    display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; letter-spacing: 1px;
+    color: var(--parchment); padding: 8px 16px; border-radius: 3px; border: 1px solid rgba(201,152,47,0.35);
+    background: var(--tab-color, var(--mustard)); text-transform: uppercase;
+}
+
+.progress-track { background: rgba(20,15,9,0.7); border-radius: 3px; height: 8px; overflow: hidden; margin-bottom: 8px; border: 1px solid rgba(201,152,47,0.2); }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--tab-color, var(--mustard)), var(--gold)); transition: width 0.5s ease; }
+.progress-text { text-align: center; margin-bottom: 22px; color: var(--parchment-dim); font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; }
+
+.page {
+    background: var(--parchment); color: var(--ink);
+    border-radius: 3px; padding: 40px 34px 32px; margin-bottom: 24px;
+    position: relative; box-shadow: 0 14px 40px rgba(0,0,0,0.5);
+    border-left: 6px solid var(--burgundy);
+}
+.page::before {
+    content: ''; position: absolute; left: 46px; top: 0; bottom: 0; width: 1px; background: rgba(110,35,49,0.18);
+}
+.page-kicker {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 2px;
+    color: var(--burgundy); margin-bottom: 16px; padding-left: 20px;
+}
+.sentence { font-family: 'Lora', serif; font-size: 1.45rem; line-height: 2; padding-left: 20px; font-weight: 500; }
+.blank {
+    display: inline-block; min-width: 100px; border-bottom: 2px solid var(--burgundy);
+    color: var(--burgundy); font-weight: 700; text-align: center;
+}
+.hint-box {
+    display: none; margin-top: 22px; margin-left: 20px; padding: 14px 18px;
+    background: rgba(110,35,49,0.06); border-left: 3px solid var(--burgundy); border-radius: 2px;
+    color: var(--ink-light); font-family: 'Lora', serif; font-size: 0.98rem; text-align: left;
+}
+.hint-box .hint-label { font-weight: 700; color: var(--burgundy); font-style: italic; }
+
+.options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 24px; }
+.card-btn {
+    position: relative;
+    background: linear-gradient(160deg, rgba(58,46,28,0.85), rgba(28,21,14,0.9));
+    border: 1px solid rgba(201,152,47,0.28); border-radius: 3px; padding: 16px 18px;
+    color: var(--parchment); font-family: 'JetBrains Mono', monospace; font-size: 1.02rem; font-weight: 700;
+    cursor: pointer; transition: all 0.22s ease; letter-spacing: 0.3px;
+}
+.card-btn::before {
+    content: ''; position: absolute; top: 0; right: 0; border-width: 0 12px 12px 0; border-style: solid;
+    border-color: transparent rgba(201,152,47,0.3) transparent transparent;
+}
+.card-btn:hover:not(:disabled) { transform: translateY(-3px); border-color: var(--mustard-glow); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+.card-btn:disabled { cursor: not-allowed; }
+.card-btn.correct { background: linear-gradient(160deg, rgba(86,122,63,0.4), rgba(28,21,14,0.9)); border-color: var(--success); color: #cfe3bd; animation: pulseOk 0.5s ease; }
+.card-btn.wrong { background: linear-gradient(160deg, rgba(138,47,40,0.4), rgba(28,21,14,0.9)); border-color: var(--error); color: #f0c3bd; animation: shakeX 0.45s ease; }
+.card-btn.faded { opacity: 0.3; }
+@keyframes pulseOk { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+@keyframes shakeX { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-7px); } 75% { transform: translateX(7px); } }
+
+.control-buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.ctrl-btn {
+    background: rgba(20,15,9,0.6); border: 1px solid rgba(201,152,47,0.3); border-radius: 3px; padding: 11px 22px;
+    color: var(--parchment); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700;
+    letter-spacing: 0.5px; text-transform: uppercase; cursor: pointer; transition: all 0.25s ease;
+}
+.ctrl-btn:hover { border-color: var(--mustard-glow); background: rgba(30,23,14,0.9); }
+.ctrl-btn.primary { background: linear-gradient(135deg, var(--burgundy), #8a3040); border-color: var(--burgundy-glow); color: var(--parchment); }
+.ctrl-btn.primary:hover { box-shadow: 0 6px 20px rgba(110,35,49,0.4); }
+
+.back-btn {
+    position: fixed; top: 18px; left: 18px; z-index: 100; display: none;
+    background: rgba(28,21,14,0.92); border: 1px solid rgba(201,152,47,0.3); border-radius: 3px; padding: 9px 16px;
+    color: var(--parchment); font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; letter-spacing: 0.5px;
+    cursor: pointer; transition: all 0.25s ease;
+}
+.back-btn:hover { border-color: var(--mustard-glow); }
+
+.result-title { font-family: 'Playfair Display', serif; font-size: 1.9rem; margin-bottom: 22px; color: var(--mustard-glow); text-align: center; }
+.result-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 26px; }
+.result-stat { background: rgba(20,15,9,0.55); padding: 16px; border-radius: 3px; border: 1px solid rgba(201,152,47,0.2); text-align: center; }
+.result-stat-label { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--parchment-dim); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+.result-stat-value { font-family: 'JetBrains Mono', monospace; font-size: 1.7rem; color: var(--mustard-glow); font-weight: 700; }
+.player-name-input {
+    width: 100%; max-width: 320px; background: rgba(20,15,9,0.6); border: 1px solid rgba(201,152,47,0.3);
+    border-radius: 3px; padding: 12px 16px; color: var(--parchment); font-family: 'Lora', serif; font-size: 1.02rem;
+    margin: 18px auto; display: block; text-align: center;
+}
+.player-name-input:focus { outline: none; border-color: var(--mustard-glow); }
+.leaderboard-container { background: rgba(20,15,9,0.4); border-radius: 3px; padding: 22px; margin-top: 22px; border: 1px solid rgba(201,152,47,0.2); }
+.leaderboard-title { font-family: 'Playfair Display', serif; font-size: 1.25rem; color: var(--mustard-glow); margin-bottom: 16px; text-align: center; }
+.leaderboard-entry {
+    display: grid; grid-template-columns: 42px 1fr auto auto; gap: 10px; padding: 10px 12px;
+    background: rgba(20,15,9,0.4); border-radius: 3px; margin-bottom: 7px; align-items: center;
+    border: 1px solid rgba(201,152,47,0.12); font-family: 'Lora', serif;
+}
+.leaderboard-rank { font-weight: 700; text-align: center; color: var(--mustard-glow); }
+.leaderboard-name { font-weight: 600; }
+.leaderboard-mode { color: var(--parchment-dim); font-size: 0.78rem; font-style: italic; }
+.leaderboard-score { color: var(--mustard-glow); font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+.leaderboard-time { color: var(--parchment-dim); font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; }
+
+.points-popup {
+    position: fixed; font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 700;
+    color: var(--forest-glow); pointer-events: none; z-index: 1000; animation: floatUp 1s ease-out forwards;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+.points-popup.streak-bonus { color: var(--mustard-glow); font-size: 1.8rem; }
+@keyframes floatUp { 0% { transform: translateY(0) scale(0.85); opacity: 1; } 100% { transform: translateY(-70px) scale(1.15); opacity: 0; } }
+
+.milestone-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20,15,9,0.92);
+    display: flex; align-items: center; justify-content: center; z-index: 2000; animation: fadeIn 0.3s ease;
+}
+.milestone-content { text-align: center; animation: scaleIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes scaleIn { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.milestone-number { font-family: 'Playfair Display', serif; font-size: 5rem; color: var(--mustard-glow); margin-bottom: 12px; }
+.milestone-text { font-family: 'Lora', serif; font-size: 1.6rem; color: var(--parchment); font-style: italic; }
+
+.confetti { position: fixed; pointer-events: none; z-index: 3000; }
+
+@media (max-width: 768px) {
+    h1 { font-size: 1.7rem; }
+    .sentence { font-size: 1.2rem; line-height: 1.8; padding-left: 12px; }
+    .page::before { left: 30px; }
+    .page-kicker, .hint-box { padding-left: 12px; margin-left: 0; }
+    .result-stats { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="motes" id="motes"></div>
+<div class="watermark"></div>
+<div class="watermark two"></div>
+<button class="back-btn" id="backBtn" onclick="goToMenu()">← ZURÜCK</button>
+
+<div class="container">
+    <header>
+        <div class="crest">❧ ❧ ❧</div>
+        <h1>RECHTSCHREIB-MEISTERSCHAFT</h1>
+        <div class="rule"></div>
+        <p class="subtitle">Für alle, denen die einfachen Fragen zu langweilig sind.</p>
+    </header>
+
+    <div id="startScreen" class="screen active">
+        <div class="panel">
+            <h2 class="panel-title">📖 Wähle deine Disziplin</h2>
+            <div class="mode-list">
+                <button class="mode-tab" style="--tab-color: var(--burgundy)" onclick="startGame('ll')">
+                    <span class="tab-mark">I.</span>
+                    <span class="tab-text">ll oder l<div class="tab-desc">Metall, Original, parallel – wo die Doppelung wirklich hingehört</div></span>
+                </button>
+                <button class="mode-tab" style="--tab-color: var(--forest)" onclick="startGame('kck')">
+                    <span class="tab-mark">II.</span>
+                    <span class="tab-text">k oder ck<div class="tab-desc">Akkusativ, Charakter, Diktatur – Fachbegriffe mit Tücken</div></span>
+                </button>
+                <button class="mode-tab" style="--tab-color: var(--teal)" onclick="startGame('ztz')">
+                    <span class="tab-mark">III.</span>
+                    <span class="tab-text">z oder tz<div class="tab-desc">Toleranz, Existenz, Sitzung – die feinen Unterschiede</div></span>
+                </button>
+                <button class="mode-tab" style="--tab-color: var(--plum)" onclick="startGame('sss')">
+                    <span class="tab-mark">IV.</span>
+                    <span class="tab-text">s, ss oder ß<div class="tab-desc">Prozess, Kompromiss – plus das/dass als Grammatikfalle</div></span>
+                </button>
+                <button class="mode-tab" style="--tab-color: var(--mustard)" onclick="startGame('fremd')">
+                    <span class="tab-mark">V.</span>
+                    <span class="tab-text">Fremdwörter &amp; gehobener Wortschatz<div class="tab-desc">Rendezvous, Bürokratie, Hypothese – Bildungssprache</div></span>
+                </button>
+                <button class="mode-tab" style="--tab-color: linear-gradient(135deg, var(--burgundy), var(--mustard))" onclick="startGame('master')">
+                    <span class="tab-mark">VI.</span>
+                    <span class="tab-text">Meisterprüfung <span class="tab-badge">ALLE DISZIPLINEN</span><div class="tab-desc">75 Wörter aus allen fünf Kategorien, gemischt</div></span>
+                </button>
+            </div>
+        </div>
+        <div class="panel">
+            <h2 class="panel-title">🏵 Bestenliste</h2>
+            <div id="menuLeaderboard"></div>
+        </div>
+    </div>
+
+    <div id="gameScreen" class="screen">
+        <div class="game-header">
+            <div class="mode-indicator" id="modeIndicator">Modus</div>
+            <div class="stats-bar">
+                <div class="stat-item"><div class="stat-label">Punkte</div><div class="stat-value" id="points">0</div></div>
+                <div class="stat-item"><div class="stat-label">Serie</div><div class="stat-value" id="streak">0</div></div>
+            </div>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
+        <div class="progress-text" id="progressText">0 / 0 Wörter gemeistert</div>
+
+        <div class="page">
+            <div class="page-kicker">Welche Schreibweise ist korrekt?</div>
+            <div class="sentence" id="sentence"></div>
+            <div class="hint-box" id="hintBox"><span class="hint-label">Erklärung — </span><span id="hintText"></span></div>
+        </div>
+
+        <div class="options-grid" id="optionsGrid"></div>
+
+        <div class="control-buttons">
+            <button class="ctrl-btn" onclick="skipWord()">Überspringen</button>
+            <button class="ctrl-btn primary" onclick="endGame()">Prüfung beenden</button>
+        </div>
+    </div>
+
+    <div id="resultScreen" class="screen">
+        <div class="panel">
+            <h2 class="result-title">Prüfung abgeschlossen</h2>
+            <div class="result-stats">
+                <div class="result-stat"><div class="result-stat-label">Punkte</div><div class="result-stat-value" id="finalPoints">0</div></div>
+                <div class="result-stat"><div class="result-stat-label">Zeit</div><div class="result-stat-value" id="finalTime">0:00</div></div>
+                <div class="result-stat"><div class="result-stat-label">Beste Serie</div><div class="result-stat-value" id="bestStreak">0</div></div>
+                <div class="result-stat"><div class="result-stat-label">Genauigkeit</div><div class="result-stat-value" id="accuracy">0%</div></div>
+            </div>
+            <input type="text" class="player-name-input" id="playerName" placeholder="Dein Name..." maxlength="20">
+            <div class="control-buttons">
+                <button class="ctrl-btn primary" onclick="saveScore()">Speichern</button>
+                <button class="ctrl-btn" onclick="playAgain()">Noch einmal</button>
+                <button class="ctrl-btn" onclick="goToMenu()">Zurück zur Übersicht</button>
+            </div>
+            <div id="resultLeaderboard" class="leaderboard-container"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+const sounds = {
+    correct: () => {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator(); const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value = 740; gain.gain.value = 0.12;
+        osc.start(); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.16);
+        setTimeout(() => ctx.close(), 200);
+    },
+    wrong: () => {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator(); const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value = 170; osc.type = 'triangle'; gain.gain.value = 0.1;
+        osc.start(); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.22);
+        setTimeout(() => ctx.close(), 260);
+    },
+    milestone: () => {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        [493, 587, 740, 987].forEach((f, i) => {
+            setTimeout(() => {
+                const osc = ctx.createOscillator(); const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.frequency.value = f; gain.gain.value = 0.11;
+                osc.start(); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.32);
+            }, i * 110);
+        });
+        setTimeout(() => ctx.close(), 620);
+    }
+};
+
+// ==================== WORTDATEN — echte Profi-Fallen, keine albernen Fantasieformen ====================
+const wordData = {
+    ll: [
+        { text: "Der Ring besteht aus einem seltenen ___.", options: ["Metal","Metall","Methall","Metahll"], correct: "Metall", hint: "Trotz kurzem a im Wortstamm: 'Metall' schreibt man immer mit Doppel-l. 'Metal' (ein l) ist nur die englische Genre-Bezeichnung für die Musikrichtung." },
+        { text: "Der Stein glänzt wie ein ___.", options: ["Kristal","Kristall","Christall","Kristahl"], correct: "Kristall", hint: "Wie bei 'Metall' steht auch hier am Ende Doppel-l." },
+        { text: "Das Gemälde ist ein echtes ___.", options: ["Originall","Original","Orriginal","Origenal"], correct: "Original", hint: "Falle: Anders als 'Metall' oder 'Kristall' hat 'Original' nur ein l – Endungen auf '-al' bleiben meist einfach." },
+        { text: "Sie sitzt abends gerne auf dem ___.", options: ["Ballkon","Balkon","Balkonn","Balcon"], correct: "Balkon", hint: "'Balkon' kommt aus dem Französischen/Italienischen und hat nur ein l." },
+        { text: "Die beiden Linien verlaufen ___.", options: ["paralell","parallel","parallell","parralel"], correct: "parallel", hint: "'Parallel' hat in der Mitte ein Doppel-l, am Wortende aber nur ein einfaches l – eine der trickreichsten Schreibweisen überhaupt." },
+        { text: "Im Deutschunterricht analysieren wir eine ___.", options: ["Balade","Ballade","Ballad","Bahllade"], correct: "Ballade", hint: "Kurzes a → Doppel-l, wie bei 'Ball'." },
+        { text: "Sie malt ein zartes ___.", options: ["Aquarel","Aquarell","Aquarelle","Akwarell"], correct: "Aquarell", hint: "Im Singular endet 'Aquarell' auf Doppel-l ohne e. 'Aquarelle' wäre der Plural – hier ist aber der Singular gefragt." },
+        { text: "Die Wand ist in einem sanften ___ton gestrichen.", options: ["Pastel","Pastell","Pastelll","Passtell"], correct: "Pastell", hint: "Kurzes e → Doppel-l am Wortende." },
+        { text: "Die Zeitung berichtet über einen politischen ___.", options: ["Skandall","Skandal","Scandal","Skandahl"], correct: "Skandal", hint: "Falle: 'Skandal' hat nur ein l, auch wenn 'Metall' und 'Kristall' verdoppeln." },
+        { text: "Das ist doch nur eine ___!", options: ["Bagatele","Bagatelle","Baggatelle","Bagattelle"], correct: "Bagatelle", hint: "Kurzes e → Doppel-l, wie bei 'Stelle'." },
+        { text: "Die Kühe stehen im ___.", options: ["Stal","Stall","Stahl","Stalle"], correct: "Stall", hint: "Achtung, Verwechslungsgefahr: 'Stall' (Gebäude, kurzes a, Doppel-l) klingt fast wie 'Stahl' (Metall, langes a mit Dehnungs-h) – zwei völlig verschiedene Wörter." },
+        { text: "Nach dem Spiel kam es zu einem ___ vor dem Stadion.", options: ["Krawal","Krawall","Grawall","Krawahl"], correct: "Krawall", hint: "Kurzes a → Doppel-l." },
+        { text: "Auf dem Friedhof steht eine kleine ___.", options: ["Kapele","Kapelle","Cappelle","Kapehlle"], correct: "Kapelle", hint: "Kurzes e → Doppel-l." },
+        { text: "Sie führt gerne ___e Gespräche.", options: ["intelektuelle","intellektuelle","intellektuele","intellecktuelle"], correct: "intellektuelle", hint: "'Intellektuell' hat zwei l hintereinander in der Wortmitte – ein Wort, das man sich einprägen muss." },
+        { text: "Die Künstler arbeiten als ___ zusammen.", options: ["Kolektiv","Kollektiv","Kollektif","Kollegtiv"], correct: "Kollektiv", hint: "'Kollektiv' hat Doppel-l und endet auf -tiv, nicht -tif." }
+    ],
+    kck: [
+        { text: "Im Satz 'Ich sehe den Hund' steht 'den Hund' im ___.", options: ["Akusativ","Akkusativ","Akkussativ","Ackusativ"], correct: "Akkusativ", hint: "Der Fachbegriff wird mit Doppel-k geschrieben: Ak-ku-sa-tiv." },
+        { text: "In einer ___ gibt es keine freien Wahlen.", options: ["Dicktatur","Diktatur","Diktathur","Dicktathur"], correct: "Diktatur", hint: "Obwohl das i kurz gesprochen wird, schreibt man 'Diktatur' mit einfachem k – eine Ausnahme, die man sich merken muss." },
+        { text: "Das ___ applaudiert lange.", options: ["Puplikum","Publikum","Publickum","Puplickum"], correct: "Publikum", hint: "'Publikum' hat ein einfaches k, auch wenn man bei kurzem i oft ck erwartet." },
+        { text: "Der Spieler startet eine schnelle ___.", options: ["Attake","Attacke","Attaccke","Atacke"], correct: "Attacke", hint: "Kurzes a → ck, wie bei 'Jacke'." },
+        { text: "Der Gitarrist spielt einen neuen ___.", options: ["Akord","Akkord","Ackord","Akkort"], correct: "Akkord", hint: "'Akkord' schreibt man mit Doppel-k, nicht mit ck." },
+        { text: "Der ___ eröffnet die Feier mit einer Rede.", options: ["Direktor","Direcktor","Direktorr","Direktohr"], correct: "Direktor", hint: "Langes e → nur ein k, kein ck." },
+        { text: "Seine ___ auf die Nachricht war heftig.", options: ["Reacktion","Reaktion","Reacktzion","Reaktsion"], correct: "Reaktion", hint: "Fremdwörter auf '-tion' schreibt man mit einfachem k vor dem t." },
+        { text: "Der Trick hat einen verblüffenden ___.", options: ["Effeckt","Effekt","Efekt","Effäckt"], correct: "Effekt", hint: "'Effekt' hat Doppel-f, aber nur ein k, kein ck." },
+        { text: "Das ___ schwebt geheimnisvoll über dem Tisch.", options: ["Objeckt","Objekt","Opjekt","Objäkt"], correct: "Objekt", hint: "Nach dem b steht ein einfaches k, kein ck." },
+        { text: "Die Hauptfigur hat einen komplizierten ___.", options: ["Karakter","Charakter","Charackter","Charakhter"], correct: "Charakter", hint: "'Charakter' beginnt mit 'Ch' und hat in der Mitte ein einfaches k – gleich zwei Fallen in einem Wort." },
+        { text: "Der ___ regiert mit harter Hand.", options: ["Dicktator","Diktator","Diktathor","Dicktathor"], correct: "Diktator", hint: "Wie bei 'Diktatur' steht auch hier ein einfaches k." },
+        { text: "Der Lehrer führt eine strenge ___ durch.", options: ["Controlle","Kontrolle","Kontrole","Konntrolle"], correct: "Kontrolle", hint: "'Kontrolle' beginnt mit K (nicht C) und hat am Ende Doppel-l." },
+        { text: "Zeit ist ein entscheidender ___ beim Wettkampf.", options: ["Facktor","Faktor","Faktorr","Fackthor"], correct: "Faktor", hint: "Einfaches k, kein ck, bei diesem Fremdwort." },
+        { text: "Der Text hat eine klare ___.", options: ["Strucktur","Struktur","Struktuhr","Strucktuhr"], correct: "Struktur", hint: "'Struktur' hat ein einfaches k nach dem u." },
+        { text: "Die Schülerin überzeugt durch ihre ___ Argumentation.", options: ["logische","logiscke","loggische","logisce"], correct: "logische", hint: "'Logisch' schreibt man mit einfachem g und 'sch', ganz ohne k." }
+    ],
+    ztz: [
+        { text: "Die Klasse übt gegenseitige ___.", options: ["Toleranz","Toleranc","Tolleranz","Toleranzt"], correct: "Toleranz", hint: "'Toleranz' endet auf -anz mit einem z, nicht tz." },
+        { text: "Er hält bewusst ___ zu seinen Mitschülern.", options: ["Distanz","Distants","Disstanz","Distanzt"], correct: "Distanz", hint: "Nach n steht z, nicht tz – wie bei 'Tanz'." },
+        { text: "Die ___ des Tieres wurde erst kürzlich bewiesen.", options: ["Existenz","Existens","Existentz","Exsistenz"], correct: "Existenz", hint: "'Existenz' endet auf -enz mit z, nicht mit s oder tz." },
+        { text: "Die chemische ___ reagiert heftig mit Wasser.", options: ["Substanz","Substans","Substantz","Subsstanz"], correct: "Substanz", hint: "Nach n steht z, nicht tz oder s." },
+        { text: "Sein Handeln hatte ernste ___en.", options: ["Konsequenz","Konsequens","Konsequentz","Konzequenz"], correct: "Konsequenz", hint: "Endung -enz mit z, kein s und kein tz." },
+        { text: "Das Team hat großes ___.", options: ["Potenzial","Potenzjal","Potensial","Potenziall"], correct: "Potenzial", hint: "'Potenzial' schreibt man mit z (nicht mit t), gefolgt von -ial." },
+        { text: "Er zeichnet eine erste ___ des Gebäudes.", options: ["Skize","Skizze","Sckizze","Schkizze"], correct: "Skizze", hint: "Kurzes i → tz-ähnliches Doppel-z: 'Skizze' hat zz." },
+        { text: "Sie macht sich eine kurze ___.", options: ["Notiz","Notitz","Nothiz","Notitzt"], correct: "Notiz", hint: "Langer i-Laut → nur z, kein tz." },
+        { text: "Er handelt nach einem festen ___.", options: ["Prinzip","Printzip","Prinsip","Prinzsip"], correct: "Prinzip", hint: "'Prinzip' beginnt mit Pr und hat ein einfaches z nach dem n." },
+        { text: "Die Stadt liegt in einer abgelegenen ___.", options: ["Provinz","Provintz","Provins","Provinzt"], correct: "Provinz", hint: "Nach n steht z, nicht tz oder s." },
+        { text: "Aus ___ verweigert er jede Hilfe.", options: ["Trotz","Trots","Trottz","Trohtz"], correct: "Trotz", hint: "Kurzes o → tz." },
+        { text: "Er fasst den Text in aller ___ zusammen.", options: ["Kürze","Kürtze","Kührze","Kürtse"], correct: "Kürze", hint: "Nach r steht z, nicht tz." },
+        { text: "Die ___ des Vereins dauert zwei Stunden.", options: ["Sizung","Sitzung","Sietzung","Sitsung"], correct: "Sitzung", hint: "Kurzes i → tz." },
+        { text: "Er ist ___ ehrlich, auch wenn es unangenehm ist.", options: ["grundsätzlich","grundsätslich","grundsähtzlich","grundsetzlich"], correct: "grundsätzlich", hint: "'Grundsätzlich' schreibt man mit tz nach dem ä." },
+        { text: "Die ___ am Knie heilt nur langsam.", options: ["Verletzung","Verlezung","Verlehtzung","Verletsung"], correct: "Verletzung", hint: "Nach dem kurzen e in 'verletzen' steht tz." }
+    ],
+    sss: [
+        { text: "Am Ende der ___ steht ein altes Haus.", options: ["Strasse","Straße","Strase","Sträße"], correct: "Straße", hint: "Langer a-Laut → ß, nicht ss." },
+        { text: "Der Gerichts___ dauert mehrere Wochen.", options: ["Prozess","Prozeß","Prozes","Prozzess"], correct: "Prozess", hint: "Nach der Rechtschreibreform schreibt man 'Prozess' nach kurzem e mit ss, nicht mit ß." },
+        { text: "Sie zeigt großes ___ an Naturwissenschaften.", options: ["Intresse","Interesse","Interesße","Interese"], correct: "Interesse", hint: "'Interesse' hat Doppel-s in der Mitte, nach dem kurzen e." },
+        { text: "Am Flughafen zeigt sie ihren ___ vor.", options: ["Reisepass","Reisepaß","Reisepas","Reisepahs"], correct: "Reisepass", hint: "Kurzes a im zweiten Wortteil → ss, nicht ß." },
+        { text: "Der neue ___ im Laptop ist sehr schnell.", options: ["Prozessor","Prozeßor","Prozesor","Prozzessor"], correct: "Prozessor", hint: "Wie bei 'Prozess': kurzes e → ss." },
+        { text: "Nach dem Training gönnt er sich eine ___.", options: ["Massage","Maßage","Masage","Masssage"], correct: "Massage", hint: "'Massage' hat Doppel-s nach dem kurzen a." },
+        { text: "Seine plötzliche ___ überrascht alle.", options: ["Aggression","Agression","Aggreßion","Agreßion"], correct: "Aggression", hint: "'Aggression' hat Doppel-g und Doppel-s." },
+        { text: "Der ___ entscheidet über das Budget.", options: ["Ausschuss","Ausschuß","Ausschus","Ausschuhss"], correct: "Ausschuss", hint: "Kurzes u → ss am Wortende, nach der Reform nicht mehr ß." },
+        { text: "Der Kuchen war ein wahrer ___.", options: ["Genuss","Genuß","Genus","Genuhss"], correct: "Genuss", hint: "Kurzes u → ss." },
+        { text: "Beide Seiten einigen sich auf einen ___.", options: ["Kompromiss","Kompromiß","Kompromis","Komprommiss"], correct: "Kompromiss", hint: "Kurzes i → ss am Wortende." },
+        { text: "Er ist ein sehr ___er Freund.", options: ["verlässlich","verläslich","verlähsslich","verläßlich"], correct: "verlässlich", hint: "'Verlässlich' hat nach dem kurzen ä ein Doppel-s." },
+        { text: "Das Mädchen, ___ dort steht, ist meine Schwester.", options: ["das","dass","dahs","dasz"], correct: "das", hint: "Hier ist 'das' ein Relativpronomen, das sich auf 'das Mädchen' bezieht – kein Nebensatz mit 'dass'." },
+        { text: "Ich freue mich, ___ du kommst.", options: ["das","dass","dahs","dasz"], correct: "dass", hint: "Hier leitet 'dass' einen Nebensatz ein – die Probe mit 'welches' funktioniert nicht." },
+        { text: "Das ist das Auto, ___ ihm gehört.", options: ["das","dass","dahs","dasz"], correct: "das", hint: "'das' bezieht sich hier als Relativpronomen auf 'das Auto' – Probe: 'welches ihm gehört' passt." },
+        { text: "Er hat das Gefühl, ___ ihm niemand glaubt.", options: ["das","dass","dahs","dasz"], correct: "dass", hint: "Nach 'das Gefühl, ...' folgt ein Nebensatz mit der Konjunktion 'dass'." }
+    ],
+    fremd: [
+        { text: "Sie haben ein romantisches ___ im Park.", options: ["Rendevous","Rendezvous","Rendezvou","Randevous"], correct: "Rendezvous", hint: "Aus dem Französischen – mit 'z' in der Mitte und stummem 's' am Ende." },
+        { text: "Der Regenbogen ist ein optisches ___.", options: ["Fenomen","Phänomen","Phänomän","Phaenomen"], correct: "Phänomen", hint: "Aus dem Griechischen – 'ph' statt 'f' und ä statt ae." },
+        { text: "Sie spricht mit großem ___ über ihr Projekt.", options: ["Entusiasmus","Enthusiasmus","Enthusiasmuß","Enthusiassmus"], correct: "Enthusiasmus", hint: "Mit 'th' – wie 'Theater' oder 'Rhythmus'." },
+        { text: "Die ___ in der Verwaltung nervt viele Bürger.", options: ["Bürokratie","Bürokratieh","Bürocratie","Bührokratie"], correct: "Bürokratie", hint: "Mit ü, ohne Dehnungs-h, und mit k statt c." },
+        { text: "Der Sturm verursachte eine echte ___.", options: ["Katastrofe","Katastrophe","Kathastrophe","Katastrophee"], correct: "Katastrophe", hint: "Aus dem Griechischen – mit 'ph' statt 'f'." },
+        { text: "Ein Hauch von ___ liegt über dem Herbsttag.", options: ["Melancholie","Melankolie","Melangcholie","Melancholi"], correct: "Melancholie", hint: "Mit 'ch' statt 'k' und einem 'ie' am Ende." },
+        { text: "Die Tänzerin entwickelt eine neue ___.", options: ["Choreografie","Choreograhie","Koreografie","Choreografy"], correct: "Choreografie", hint: "Beginnt mit 'Cho-', nicht 'Ko-', und endet auf -ie." },
+        { text: "Bei 'Petras Buch' braucht man im Deutschen keinen ___.", options: ["Apostroph","Apostrof","Apostrophe","Appostroph"], correct: "Apostroph", hint: "Mit 'ph' am Ende, nicht mit 'f' – und ohne e." },
+        { text: "Der Redner beherrscht die Kunst der ___ perfekt.", options: ["Rethorik","Rhetorik","Rhetorick","Retorik"], correct: "Rhetorik", hint: "Das 'h' steht direkt nach dem R: Rhe-to-rik." },
+        { text: "Er handelt völlig ohne ___.", options: ["Skrupel","Scrupel","Skrupell","Skrubel"], correct: "Skrupel", hint: "Mit 'Sk' am Anfang und nur einem l am Ende." },
+        { text: "Beim alten Foto überkommt sie ein Gefühl von ___.", options: ["Nostalgie","Nostalgy","Nosthalgie","Nostalgi"], correct: "Nostalgie", hint: "Endet auf -ie, nicht auf -y oder -i." },
+        { text: "Die Forscherin stellt eine neue ___ auf.", options: ["Hypothese","Hypotese","Hyphotese","Hypothähse"], correct: "Hypothese", hint: "Mit 'th' in der Mitte, wie bei 'Theorie'." },
+        { text: "Die Sportlerin meistert die Prüfung ganz ___.", options: ["Souverän","Suverän","Souveränn","Souverähn"], correct: "Souverän", hint: "Aus dem Französischen – beginnt mit 'Sou-', endet auf ein einfaches n." },
+        { text: "Der Arzt stellt eine eindeutige ___.", options: ["Diagnose","Diagnoße","Diaknose","Diagnohse"], correct: "Diagnose", hint: "Mit 'g' vor dem n, nicht mit 'k', und mit einfachem s." },
+        { text: "Die Universität genießt ein hohes ___.", options: ["Renommee","Renomee","Renomée","Renommeh"], correct: "Renommee", hint: "Aus dem Französischen – mit Doppel-m und doppeltem e am Ende, aber ohne Akzent." }
+    ]
+};
+wordData.master = [].concat(wordData.ll, wordData.kck, wordData.ztz, wordData.sss, wordData.fremd);
+
+const modeNames = { ll: 'll oder l', kck: 'k oder ck', ztz: 'z oder tz', sss: 's, ss oder ß', fremd: 'Fremdwörter', master: 'Meisterprüfung' };
+const modeColor = {
+    ll: 'var(--burgundy)', kck: 'var(--forest)', ztz: 'var(--teal)', sss: 'var(--plum)',
+    fremd: 'var(--mustard)', master: 'linear-gradient(135deg, var(--burgundy), var(--mustard))'
+};
+
+let gameState = {};
+let answered = false;
+
+function init() {
+    createMotes();
+    updateMenuLeaderboard();
+}
+
+function createMotes() {
+    const container = document.getElementById('motes');
+    for (let i = 0; i < 22; i++) {
+        const m = document.createElement('div');
+        m.className = 'mote';
+        const size = Math.random() * 5 + 3;
+        m.style.width = size + 'px'; m.style.height = size + 'px';
+        m.style.left = Math.random() * 100 + 'vw';
+        m.style.animationDuration = (Math.random() * 12 + 14) + 's';
+        m.style.animationDelay = (Math.random() * -20) + 's';
+        container.appendChild(m);
+    }
+}
+
+function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+function startGame(mode) {
+    gameState = {
+        mode, remaining: shuffle(wordData[mode]), solvedCount: 0, total: wordData[mode].length,
+        points: 0, streak: 0, bestStreak: 0, correctAnswers: 0, totalAttempts: 0,
+        startTime: Date.now(), timerInterval: null
+    };
+    const indicator = document.getElementById('modeIndicator');
+    indicator.textContent = modeNames[mode];
+    indicator.style.setProperty('--tab-color', modeColor[mode]);
+    indicator.style.background = modeColor[mode];
+    document.getElementById('progressFill').style.setProperty('--tab-color', modeColor[mode]);
+    document.getElementById('progressFill').style.background = mode === 'master'
+        ? 'linear-gradient(90deg, var(--burgundy), var(--mustard))'
+        : `linear-gradient(90deg, ${modeColor[mode]}, var(--gold))`;
+    document.getElementById('backBtn').style.display = 'block';
+    updateStats(); updateProgress();
+    showScreen('gameScreen');
+    loadNextWord();
+}
+
+function loadNextWord() {
+    answered = false;
+    document.getElementById('hintBox').style.display = 'none';
+    if (gameState.remaining.length === 0) gameState.remaining = shuffle(wordData[gameState.mode]);
+    const item = gameState.remaining.shift();
+    gameState.current = item;
+    document.getElementById('sentence').innerHTML = item.text.replace('___', '<span class="blank">___</span>');
+    const grid = document.getElementById('optionsGrid');
+    grid.innerHTML = '';
+    shuffle(item.options).forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'card-btn';
+        btn.textContent = opt;
+        btn.onclick = () => checkAnswer(btn, opt, item);
+        grid.appendChild(btn);
+    });
+}
+
+function checkAnswer(btn, chosen, item) {
+    if (answered) return;
+    answered = true;
+    gameState.totalAttempts++;
+    const allBtns = document.querySelectorAll('.card-btn');
+    document.getElementById('hintText').textContent = item.hint;
+    document.getElementById('hintBox').style.display = 'block';
+
+    if (chosen === item.correct) {
+        btn.classList.add('correct');
+        allBtns.forEach(b => { if (b !== btn) { b.classList.add('faded'); } b.disabled = true; });
+        gameState.streak++;
+        gameState.bestStreak = Math.max(gameState.bestStreak, gameState.streak);
+        gameState.correctAnswers++;
+        const bonus = gameState.streak > 2 ? 15 : 10;
+        gameState.points += bonus;
+        gameState.solvedCount++;
+        showPointsPopup(bonus, gameState.streak > 2);
+        sounds.correct();
+        if (gameState.solvedCount % 10 === 0) showMilestone(gameState.solvedCount);
+    } else {
+        btn.classList.add('wrong');
+        allBtns.forEach(b => {
+            b.disabled = true;
+            if (b.textContent === item.correct) b.classList.add('correct');
+            else if (b !== btn) b.classList.add('faded');
+        });
+        gameState.streak = 0;
+        sounds.wrong();
+    }
+    updateStats(); updateProgress();
+    setTimeout(loadNextWord, 2100);
+}
+
+function skipWord() { gameState.streak = 0; updateStats(); loadNextWord(); }
+
+function updateStats() {
+    document.getElementById('points').textContent = gameState.points;
+    const el = document.getElementById('streak');
+    el.innerHTML = gameState.streak > 2 ? `<span class="streak-flame">🔥</span>${gameState.streak}` : gameState.streak;
+}
+
+function updateProgress() {
+    const pct = gameState.total > 0 ? Math.min(100, (gameState.solvedCount / gameState.total) * 100) : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressText').textContent = `${gameState.solvedCount} / ${gameState.total} Wörter gemeistert`;
+}
+
+function showPointsPopup(pts, isStreak) {
+    const popup = document.createElement('div');
+    popup.className = 'points-popup' + (isStreak ? ' streak-bonus' : '');
+    popup.textContent = isStreak ? `+${pts} Serie!` : `+${pts}`;
+    popup.style.left = (Math.random() * 60 + 20) + '%';
+    popup.style.top = '40%';
+    document.body.appendChild(popup);
+    setTimeout(() => popup.remove(), 1000);
+}
+
+function showMilestone(n) {
+    const overlay = document.createElement('div');
+    overlay.className = 'milestone-overlay';
+    overlay.innerHTML = `<div class="milestone-content"><div class="milestone-number">${n}</div><div class="milestone-text">${n} Wörter gemeistert</div></div>`;
+    document.body.appendChild(overlay);
+    sounds.milestone();
+    createConfetti();
+    setTimeout(() => overlay.remove(), 2000);
+}
+
+function createConfetti() {
+    const colors = ['#6e2331','#b3862c','#2d4a34','#1f4c4a','#4a2e4f','#c9982f'];
+    for (let i = 0; i < 90; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.left = Math.random() * 100 + 'vw';
+        c.style.top = '-10px';
+        c.style.background = colors[Math.floor(Math.random() * colors.length)];
+        c.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+        const sz = (Math.random() * 9 + 5) + 'px';
+        c.style.width = c.style.height = sz;
+        document.body.appendChild(c);
+        const anim = c.animate([
+            { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+            { transform: `translateY(100vh) rotate(${Math.random()*720}deg)`, opacity: 0 }
+        ], { duration: Math.random() * 2000 + 2000, easing: 'ease-out' });
+        anim.onfinish = () => c.remove();
+    }
+}
+
+function endGame() {
+    clearInterval(gameState.timerInterval);
+    const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+    document.getElementById('finalPoints').textContent = gameState.points;
+    document.getElementById('finalTime').textContent = `${Math.floor(elapsed/60)}:${(elapsed%60).toString().padStart(2,'0')}`;
+    document.getElementById('bestStreak').textContent = gameState.bestStreak;
+    document.getElementById('accuracy').textContent = gameState.totalAttempts > 0
+        ? Math.round((gameState.correctAnswers / gameState.totalAttempts) * 100) + '%' : '0%';
+    showScreen('resultScreen');
+    document.getElementById('backBtn').style.display = 'none';
+    updateResultLeaderboard();
+    sounds.milestone();
+    createConfetti();
+}
+
+function loadLeaderboard() {
+    try { return JSON.parse(localStorage.getItem('rechtschreibMeisterschaftLeaderboard') || '[]'); } catch(e) { return []; }
+}
+function saveLeaderboard(b) {
+    try { localStorage.setItem('rechtschreibMeisterschaftLeaderboard', JSON.stringify(b)); } catch(e) {}
+}
+
+function saveScore() {
+    const name = document.getElementById('playerName').value.trim() || 'Anonym';
+    const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+    const entry = { name, points: gameState.points, time: elapsed, mode: modeNames[gameState.mode], date: new Date().toLocaleDateString('de-DE') };
+    const board = loadLeaderboard();
+    board.push(entry);
+    board.sort((a,b) => b.points - a.points);
+    saveLeaderboard(board.slice(0, 10));
+    updateResultLeaderboard();
+    updateMenuLeaderboard();
+    document.getElementById('playerName').disabled = true;
+    event.target.disabled = true;
+    event.target.textContent = 'Gespeichert';
+}
+
+function formatTime(s) { return `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`; }
+
+function renderBoard(container, entries, limit) {
+    if (entries.length === 0) {
+        container.innerHTML = '<p style="color:var(--parchment-dim);text-align:center;font-family:Lora,serif;">Noch keine Einträge.</p>';
+        return;
+    }
+    container.innerHTML = entries.slice(0, limit).map((e,i) =>
+        `<div class="leaderboard-entry">
+            <span class="leaderboard-rank">${i+1}.</span>
+            <span class="leaderboard-name">${e.name}<br><span class="leaderboard-mode">${e.mode}</span></span>
+            <span class="leaderboard-score">${e.points}</span>
+            <span class="leaderboard-time">${formatTime(e.time)}</span>
+        </div>`
+    ).join('');
+}
+
+function updateMenuLeaderboard() { renderBoard(document.getElementById('menuLeaderboard'), loadLeaderboard(), 5); }
+function updateResultLeaderboard() {
+    const c = document.getElementById('resultLeaderboard');
+    c.innerHTML = '<h3 class="leaderboard-title">Bestenliste</h3>';
+    const inner = document.createElement('div');
+    renderBoard(inner, loadLeaderboard(), 5);
+    c.appendChild(inner);
+}
+
+function playAgain() {
+    document.getElementById('playerName').disabled = false;
+    document.getElementById('playerName').value = '';
+    const btn = document.querySelector('#resultScreen .ctrl-btn.primary');
+    if (btn) { btn.disabled = false; btn.textContent = 'Speichern'; }
+    startGame(gameState.mode);
+}
+
+function goToMenu() {
+    clearInterval(gameState.timerInterval);
+    document.getElementById('backBtn').style.display = 'none';
+    document.getElementById('playerName').disabled = false;
+    document.getElementById('playerName').value = '';
+    const btn = document.querySelector('#resultScreen .ctrl-btn.primary');
+    if (btn) { btn.disabled = false; btn.textContent = 'Speichern'; }
+    showScreen('startScreen');
+    updateMenuLeaderboard();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
