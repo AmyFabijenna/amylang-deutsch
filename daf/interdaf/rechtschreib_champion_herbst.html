@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RECHTSCHREIB-CHAMPION 🍂</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --primary: #3b2413;
+    --primary-light: #4f3018;
+    --accent: #d97b3f;
+    --accent-glow: #f3b562;
+    --success: #7c9a52;
+    --error: #c1443b;
+    --gold: #f0b429;
+    --bg-dark: #2a160c;
+    --bg-card: #3a2013;
+    --text: #fdf1e2;
+    --text-muted: #cba07c;
+    --ll: #b5652f;      --ll-glow: #e0a35c;
+    --kck: #7a4420;     --kck-glow: #d99457;
+    --ztz: #9c4a2a;     --ztz-glow: #e08a54;
+    --sss: #6b3b46;     --sss-glow: #d69aa4;
+    --fremd: #5c7a3a;   --fremd-glow: #a3c47c;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Quicksand', sans-serif;
+    background: linear-gradient(160deg, #2a160c 0%, #3a2013 35%, #33190f 65%, #241209 100%);
+    min-height: 100vh;
+    color: var(--text);
+    overflow-x: hidden;
+}
+.leaves { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
+.leaf {
+    position: absolute; top: -60px; will-change: transform;
+    animation-name: leafFall; animation-timing-function: linear; animation-iteration-count: infinite;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.35));
+}
+@keyframes leafFall {
+    0% { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity: 0.95; }
+    25% { transform: translateY(25vh) translateX(30px) rotate(90deg); }
+    50% { transform: translateY(55vh) translateX(-25px) rotate(180deg); }
+    75% { transform: translateY(85vh) translateX(20px) rotate(270deg); }
+    100% { transform: translateY(115vh) translateX(0) rotate(360deg); opacity: 0.9; }
+}
+.glow-orb {
+    position: absolute; border-radius: 50%;
+    background: radial-gradient(circle, rgba(243,181,98,0.18), transparent 70%);
+    animation: orbFloat 12s ease-in-out infinite;
+}
+@keyframes orbFloat {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 0.5; }
+    50% { transform: translateY(-30px) scale(1.15); opacity: 0.9; }
+}
+.container { position: relative; z-index: 1; max-width: 950px; margin: 0 auto; padding: 20px; }
+header { text-align: center; margin-bottom: 30px; padding-top: 10px; }
+h1 {
+    font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 800;
+    background: linear-gradient(135deg, #b5652f 0%, #e0a35c 20%, #f3d9a8 40%, #fdf1e2 50%, #f3d9a8 60%, #e0a35c 80%, #b5652f 100%);
+    background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    animation: shimmerText 5s linear infinite; margin-bottom: 10px;
+}
+@keyframes shimmerText { to { background-position: 200% center; } }
+.subtitle { color: var(--text-muted); font-size: 1.02rem; font-style: italic; }
+.screen { display: none; animation: fadeIn 0.5s ease; }
+.screen.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.menu-card {
+    background: linear-gradient(135deg, rgba(58,32,19,0.97) 0%, rgba(42,22,12,0.97) 100%);
+    border-radius: 20px; padding: 30px; margin-bottom: 20px;
+    border: 1px solid rgba(240,180,98,0.2);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(243,181,98,0.08);
+}
+.mode-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 20px; color: #f3d9a8; }
+.mode-buttons { display: flex; flex-direction: column; gap: 12px; }
+.mode-btn {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    border: 1px solid rgba(240,180,98,0.2); border-radius: 15px; padding: 18px 25px;
+    color: var(--text); font-family: 'Quicksand', sans-serif; font-size: 1.05rem; font-weight: 600;
+    cursor: pointer; transition: all 0.3s ease; text-align: left; position: relative;
+}
+.mode-btn:hover {
+    transform: translateX(8px); box-shadow: 0 4px 20px rgba(240,180,98,0.25);
+    border-color: #f3b562; background: linear-gradient(135deg, var(--primary-light) 0%, #5c3a1e 100%);
+}
+.mode-btn .mode-icon { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 1.5rem; }
+.mode-btn .mode-desc { font-size: 0.83rem; color: var(--text-muted); margin-top: 4px; font-weight: 400; }
+.mode-badge { display: inline-block; background: linear-gradient(135deg, #9c4a2a, #e08a54); color: white; padding: 2px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; margin-left: 8px; }
+.game-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 12px; }
+.stats-bar { display: flex; gap: 15px; flex-wrap: wrap; }
+.stat-item { background: rgba(58,32,19,0.8); padding: 10px 18px; border-radius: 12px; border: 1px solid rgba(240,180,98,0.2); text-align: center; min-width: 90px; }
+.stat-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+.stat-value { font-family: 'Fredoka', sans-serif; font-size: 1.4rem; color: #f3d9a8; }
+.streak-fire { display: inline-block; animation: flame 0.5s ease infinite alternate; }
+@keyframes flame { from { transform: scale(1); } to { transform: scale(1.2); } }
+.progress-bar { background: rgba(42,22,12,0.8); border-radius: 10px; height: 18px; overflow: hidden; margin-bottom: 25px; border: 1px solid rgba(240,180,98,0.2); }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #9c4a2a, #d97b3f, #f3b562); transition: width 0.5s ease; box-shadow: 0 0 10px rgba(243,181,98,0.4); }
+.progress-text { text-align: center; margin-top: 6px; color: var(--text-muted); font-size: 0.88rem; }
+.mode-indicator { display:inline-block; color: #fdf1e2; padding: 8px 20px; border-radius: 20px; font-weight: 700; font-size: 0.88rem; }
+.mode-indicator.ll { background: linear-gradient(135deg, #4f3018, var(--ll)); }
+.mode-indicator.kck { background: linear-gradient(135deg, #3d2210, var(--kck)); }
+.mode-indicator.ztz { background: linear-gradient(135deg, #5c2e17, var(--ztz)); }
+.mode-indicator.sss { background: linear-gradient(135deg, #3f2530, var(--sss)); }
+.mode-indicator.fremd { background: linear-gradient(135deg, #2e3a1c, var(--fremd)); }
+.mode-indicator.master { background: linear-gradient(135deg, #9c4a2a, #f0b429, #7c9a52); background-size: 200% auto; animation: shimmerText 4s linear infinite; }
+.word-box {
+    background: linear-gradient(135deg, rgba(107,59,70,0.9), rgba(58,32,19,0.97));
+    border-radius: 20px; padding: 38px 30px; margin-bottom: 28px;
+    border: 1px solid rgba(240,180,98,0.25);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.45), 0 0 60px rgba(217,123,63,0.08);
+    text-align: center;
+}
+.word-box .kicker { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 14px; }
+.sentence { font-family: 'Fredoka', sans-serif; font-size: 1.5rem; line-height: 2.1; margin-bottom: 6px; }
+.blank { display: inline-block; min-width: 90px; border-bottom: 3px dashed rgba(240,180,98,0.6); color: var(--gold); font-weight: 700; }
+.hint-box {
+    display: none; background: rgba(243,181,98,0.1); border: 1px solid rgba(240,180,98,0.3);
+    border-radius: 12px; padding: 14px 20px; margin-top: 20px; color: var(--text); font-size: 0.95rem; text-align: left;
+}
+.hint-box .hint-label { font-weight: 700; color: #f3d9a8; }
+.options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 25px; }
+.option-btn {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    border: 2px solid rgba(240,180,98,0.25); border-radius: 12px; padding: 16px 20px;
+    color: var(--text); font-family: 'Fredoka', sans-serif; font-size: 1.1rem; font-weight: 600;
+    cursor: pointer; transition: all 0.3s ease;
+}
+.option-btn:hover:not(:disabled) {
+    transform: translateY(-3px); box-shadow: 0 6px 20px rgba(240,180,98,0.25);
+    border-color: #f3b562; background: linear-gradient(135deg, var(--primary-light) 0%, #5c3a1e 100%);
+}
+.option-btn:disabled { cursor: not-allowed; }
+.option-btn.correct {
+    background: linear-gradient(135deg, rgba(124,154,82,0.35), rgba(124,154,82,0.12));
+    border-color: var(--success); color: #d7ecb8; animation: pulseSuccess 0.6s ease; opacity: 1;
+}
+.option-btn.wrong {
+    background: linear-gradient(135deg, rgba(193,68,59,0.35), rgba(193,68,59,0.12));
+    border-color: var(--error); color: #f3c2bd; animation: shake 0.5s ease; opacity: 1;
+}
+.option-btn.faded { opacity: 0.35; }
+@keyframes pulseSuccess { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+.control-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.control-btn {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    border: 2px solid rgba(240,180,98,0.25); border-radius: 12px; padding: 12px 25px;
+    color: var(--text); font-family: 'Quicksand', sans-serif; font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; transition: all 0.3s ease;
+}
+.control-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(240,180,98,0.2); border-color: #f3b562; }
+.control-btn.primary { background: linear-gradient(135deg, #9c4a2a 0%, #e08a54 100%); border-color: #f3b562; color: #fdf1e2; font-weight: 700; }
+.control-btn.primary:hover { background: linear-gradient(135deg, #b5652f 0%, #f3b562 100%); box-shadow: 0 6px 25px rgba(240,180,98,0.35); }
+.back-btn {
+    position: fixed; top: 20px; left: 20px; z-index: 100; display: none;
+    background: linear-gradient(135deg, rgba(58,32,19,0.97) 0%, rgba(42,22,12,0.97) 100%);
+    border: 1px solid rgba(240,180,98,0.25); border-radius: 12px; padding: 10px 18px;
+    color: var(--text); font-family: 'Quicksand', sans-serif; font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; transition: all 0.3s ease;
+}
+.back-btn:hover { background: linear-gradient(135deg, var(--primary-light) 0%, #5c3a1e 100%); box-shadow: 0 4px 15px rgba(240,180,98,0.2); }
+.result-card {
+    background: linear-gradient(135deg, rgba(58,32,19,0.97) 0%, rgba(42,22,12,0.97) 100%);
+    border-radius: 20px; padding: 35px; margin-bottom: 20px;
+    border: 1px solid rgba(240,180,98,0.2); box-shadow: 0 8px 40px rgba(0,0,0,0.5); text-align: center;
+}
+.result-title { font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 25px; color: #f3d9a8; }
+.result-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 18px; margin-bottom: 28px; }
+.result-stat { background: rgba(107,59,70,0.45); padding: 18px; border-radius: 14px; border: 1px solid rgba(240,180,98,0.2); }
+.result-stat-label { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+.result-stat-value { font-family: 'Fredoka', sans-serif; font-size: 2rem; color: #f3d9a8; }
+.player-name-input {
+    width: 100%; max-width: 350px; background: rgba(42,22,12,0.9);
+    border: 2px solid rgba(240,180,98,0.25); border-radius: 12px; padding: 14px 18px;
+    color: var(--text); font-family: 'Quicksand', sans-serif; font-size: 1.05rem;
+    margin: 20px auto; display: block; text-align: center;
+}
+.player-name-input:focus { outline: none; border-color: #f3b562; box-shadow: 0 0 15px rgba(243,181,98,0.25); }
+.leaderboard-container { background: rgba(107,59,70,0.4); border-radius: 14px; padding: 25px; margin-top: 25px; border: 1px solid rgba(240,180,98,0.2); }
+.leaderboard-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #f3d9a8; margin-bottom: 18px; text-align: center; }
+.leaderboard-entry {
+    display: grid; grid-template-columns: 50px 1fr auto auto; gap: 12px; padding: 12px;
+    background: rgba(42,22,12,0.5); border-radius: 10px; margin-bottom: 8px; align-items: center;
+    border: 1px solid rgba(240,180,98,0.15);
+}
+.leaderboard-rank { font-size: 1.2rem; font-weight: 700; text-align: center; }
+.leaderboard-name { font-weight: 600; color: var(--text); }
+.leaderboard-score { color: #f3d9a8; font-weight: 700; }
+.leaderboard-mode { color: var(--text-muted); font-size: 0.82rem; }
+.points-popup {
+    position: fixed; font-family: 'Fredoka', sans-serif; font-size: 1.8rem; font-weight: 700;
+    color: var(--success); pointer-events: none; z-index: 1000; animation: floatUp 1s ease-out forwards;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+.points-popup.streak-bonus { color: var(--gold); font-size: 2.2rem; }
+@keyframes floatUp { 0% { transform: translateY(0) scale(0.8); opacity: 1; } 100% { transform: translateY(-80px) scale(1.2); opacity: 0; } }
+.milestone-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(42,22,12,0.9);
+    display: flex; align-items: center; justify-content: center; z-index: 2000; animation: fadeIn 0.3s ease;
+}
+.milestone-content { text-align: center; animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes scaleIn { from { transform: scale(0.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.milestone-number { font-family: 'Playfair Display', serif; font-size: 6rem; color: #f3d9a8; margin-bottom: 15px; filter: drop-shadow(0 0 20px rgba(243,181,98,0.5)); }
+.milestone-text { font-family: 'Fredoka', sans-serif; font-size: 2rem; color: var(--text); }
+.confetti { position: fixed; pointer-events: none; z-index: 3000; }
+@media (max-width: 768px) {
+    h1 { font-size: 1.9rem; }
+    .sentence { font-size: 1.25rem; line-height: 1.9; }
+    .mode-btn { padding: 14px 18px; }
+    .result-stats { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="leaves" id="leaves"></div>
+<button class="back-btn" id="backBtn" onclick="goToMenu()">← Zurück zum Menü</button>
+
+<div class="container">
+    <header>
+        <h1>🍂 RECHTSCHREIB-CHAMPION 🍁</h1>
+        <p class="subtitle">Knifflige Rechtschreibung im goldenen Herbstlicht – Buchstabe für Buchstabe zur sicheren Schreibweise.</p>
+    </header>
+
+    <div id="startScreen" class="screen active">
+        <div class="menu-card">
+            <h2 class="mode-title">🎯 Wähle deinen Trainingsmodus</h2>
+            <div class="mode-buttons">
+                <button class="mode-btn" onclick="startGame('ll')">
+                    <span class="mode-icon">🍁</span>
+                    ll oder l
+                    <div class="mode-desc">Doppelter oder einfacher Konsonant nach kurzem oder langem Vokal</div>
+                </button>
+                <button class="mode-btn" onclick="startGame('kck')">
+                    <span class="mode-icon">🍂</span>
+                    k oder ck
+                    <div class="mode-desc">Wann steht ck, wann reicht ein einfaches k?</div>
+                </button>
+                <button class="mode-btn" onclick="startGame('ztz')">
+                    <span class="mode-icon">🌰</span>
+                    z oder tz
+                    <div class="mode-desc">Wann steht tz, wann steht z allein?</div>
+                </button>
+                <button class="mode-btn" onclick="startGame('sss')">
+                    <span class="mode-icon">🍃</span>
+                    s, ss oder ß
+                    <div class="mode-desc">Die berühmteste Verwechslungsfalle – inklusive das/dass</div>
+                </button>
+                <button class="mode-btn" onclick="startGame('fremd')">
+                    <span class="mode-icon">🍄</span>
+                    Schwere Wörter &amp; Fremdwörter
+                    <div class="mode-desc">Restaurant, Rhythmus, Känguru &amp; Co. – zum Auswendiglernen</div>
+                </button>
+                <button class="mode-btn" onclick="startGame('master')">
+                    <span class="mode-icon">👑</span>
+                    Master-Modus <span class="mode-badge">ALLES GEMISCHT</span>
+                    <div class="mode-desc">Alle Rechtschreibfallen zusammen – für echte Profis</div>
+                </button>
+            </div>
+        </div>
+        <div class="menu-card">
+            <h2 class="mode-title">🏆 Bestenliste</h2>
+            <div id="menuLeaderboard"></div>
+        </div>
+    </div>
+
+    <div id="gameScreen" class="screen">
+        <div class="game-header">
+            <div class="mode-indicator" id="modeIndicator">Modus</div>
+            <div class="stats-bar">
+                <div class="stat-item"><div class="stat-label">Punkte</div><div class="stat-value" id="points">0</div></div>
+                <div class="stat-item"><div class="stat-label">Serie</div><div class="stat-value" id="streak">0</div></div>
+            </div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
+        <div class="progress-text" id="progressText">0 / 0 Wörter geschafft</div>
+
+        <div class="word-box">
+            <div class="kicker">Welche Schreibweise ist richtig?</div>
+            <div class="sentence" id="sentence"></div>
+            <div class="hint-box" id="hintBox"><span class="hint-label">Regel: </span><span id="hintText"></span></div>
+        </div>
+
+        <div class="options-grid" id="optionsGrid"></div>
+
+        <div class="control-buttons">
+            <button class="control-btn" onclick="skipWord()">⏭️ Überspringen</button>
+            <button class="control-btn primary" onclick="endGame()">🏁 Beenden</button>
+        </div>
+    </div>
+
+    <div id="resultScreen" class="screen">
+        <div class="result-card">
+            <h2 class="result-title">🍂 Geschafft!</h2>
+            <div class="result-stats">
+                <div class="result-stat"><div class="result-stat-label">Punkte</div><div class="result-stat-value" id="finalPoints">0</div></div>
+                <div class="result-stat"><div class="result-stat-label">Zeit</div><div class="result-stat-value" id="finalTime">0:00</div></div>
+                <div class="result-stat"><div class="result-stat-label">Beste Serie</div><div class="result-stat-value" id="bestStreak">0</div></div>
+                <div class="result-stat"><div class="result-stat-label">Genauigkeit</div><div class="result-stat-value" id="accuracy">0%</div></div>
+            </div>
+            <input type="text" class="player-name-input" id="playerName" placeholder="Dein Name..." maxlength="20">
+            <div class="control-buttons">
+                <button class="control-btn primary" onclick="saveScore()">💾 Speichern</button>
+                <button class="control-btn" onclick="playAgain()">🔄 Nochmal spielen</button>
+                <button class="control-btn" onclick="goToMenu()">🏠 Zurück zum Menü</button>
+            </div>
+            <div id="resultLeaderboard" class="leaderboard-container"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+const sounds = {
+    correct: () => {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator(); const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value = 880; gain.gain.value = 0.13;
+        osc.start(); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+        setTimeout(() => ctx.close(), 200);
+    },
+    wrong: () => {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator(); const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value = 200; osc.type = 'sawtooth'; gain.gain.value = 0.1;
+        osc.start(); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+        setTimeout(() => ctx.close(), 250);
+    },
+    milestone: () => {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        [523, 659, 784, 1047].forEach((f, i) => {
+            setTimeout(() => {
+                const osc = ctx.createOscillator(); const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.frequency.value = f; gain.gain.value = 0.12;
+                osc.start(); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+            }, i * 100);
+        });
+        setTimeout(() => ctx.close(), 600);
+    }
+};
+
+// ==================== WORTDATEN ====================
+// text: Satz mit ___ als Lücke (oder ohne Lücke bei reinen Wortfragen)
+// options: 4 Schreibweisen, correct: die richtige davon, hint: kurze Regel-Erklärung
+const wordData = {
+    ll: [
+        { text: "Er wirft den ___ ins Tor.", options: ["Bal","Ball","Bahl","Baal"], correct: "Ball", hint: "Nach kurzem Vokal verdoppelt man oft den Konsonanten: Ba-ll." },
+        { text: "Sie stellt den ___ auf den Tisch.", options: ["Teler","Teller","Tehler","Tellar"], correct: "Teller", hint: "Kurzes e → doppeltes l: Tel-ler." },
+        { text: "Wir ___ heute ins Kino gehen.", options: ["wolen","wollen","wohlen","wollhen"], correct: "wollen", hint: "Kurzes o → doppeltes l: wol-len." },
+        { text: "Sie hat eine offene ___ in der Firma gefunden.", options: ["Stele","Stelle","Stehle","Stellen"], correct: "Stelle", hint: "Kurzes e → doppeltes l. Nicht verwechseln mit 'Stele' (Steinsäule)." },
+        { text: "Das Zimmer ist sehr ___.", options: ["hel","hell","heel","hehl"], correct: "hell", hint: "Kurzes e → doppeltes l." },
+        { text: "Der Bus ist komplett ___.", options: ["vol","voll","vohl","voel"], correct: "voll", hint: "Kurzes o → doppeltes l." },
+        { text: "___ Schüler sind pünktlich gekommen.", options: ["Ale","alle","Ahle","Allee"], correct: "alle", hint: "Kurzes a → doppeltes l am Ende. Achtung: 'Allee' ist ein ganz anderes Wort (Baumreihe)." },
+        { text: "Das Boot fährt durch den ___.", options: ["Kanall","Kanal","Kannal","Canal"], correct: "Kanal", hint: "Langer a-Laut → nur ein l: Ka-nal." },
+        { text: "Er schlägt einen ___ in die Wand.", options: ["Nagell","Nagel","Naggel","Nahgel"], correct: "Nagel", hint: "Langer a-Laut → nur ein l." },
+        { text: "Der ___ taucht tief ins Meer.", options: ["Wal","Wall","Whal","Waal"], correct: "Wal", hint: "Achtung Verwechslungsgefahr: 'Wal' (Tier, langer Vokal, ein l) vs. 'Wall' (Mauer, kurzer Vokal, doppeltes l)." },
+        { text: "Das Konzert war wirklich ___.", options: ["tol","toll","tohl","towl"], correct: "toll", hint: "Kurzes o → doppeltes l." },
+        { text: "Die Kinder ___ im Garten.", options: ["spiellen","spielen","spihlen","spieln"], correct: "spielen", hint: "Langes ie → nur ein l." },
+        { text: "Die Bücher stehen im ___.", options: ["Regall","Regal","Reggal","Rehgal"], correct: "Regal", hint: "Langer a-Laut am Ende → nur ein l." },
+        { text: "Er rennt sehr ___ zur Schule.", options: ["schnel","schnell","schnehl","schnäll"], correct: "schnell", hint: "Kurzes e → doppeltes l." },
+        { text: "Sie verbringen den Urlaub auf einer ___.", options: ["Insell","Insel","Inssel","Inhsel"], correct: "Insel", hint: "Kurzes i, aber trotzdem nur ein l – das musst du dir hier einfach merken." }
+    ],
+    kck: [
+        { text: "Er tut ___ in den Tee.", options: ["Zuker","Zucker","Zuger","Zuckher"], correct: "Zucker", hint: "Kurzes u → ck." },
+        { text: "Der Tisch steht in der ___.", options: ["Eke","Ecke","Egge","Eecke"], correct: "Ecke", hint: "Kurzes e → ck." },
+        { text: "Sie trägt einen roten ___.", options: ["Rok","Rock","Rogg","Rohk"], correct: "Rock", hint: "Kurzes o → ck." },
+        { text: "Wir wollen einen Kuchen ___.", options: ["baken","backen","bagen","bahken"], correct: "backen", hint: "Kurzes a → ck." },
+        { text: "Der ___ verkauft frisches Brot.", options: ["Bäker","Bäcker","Bäkker","Behcker"], correct: "Bäcker", hint: "Kurzes ä → ck." },
+        { text: "Das Buch ist sehr ___.", options: ["dik","dick","digg","dihk"], correct: "dick", hint: "Kurzes i → ck." },
+        { text: "Sie wohnen im dritten ___.", options: ["Stok","Stock","Stog","Stohk"], correct: "Stock", hint: "Kurzes o → ck." },
+        { text: "Ich wünsche dir viel ___!", options: ["Glük","Glück","Glügg","Glühk"], correct: "Glück", hint: "Kurzes ü → ck." },
+        { text: "Von hier hat man einen tollen ___.", options: ["Blik","Blick","Bligg","Blihk"], correct: "Blick", hint: "Kurzes i → ck." },
+        { text: "Sie hört gerne laute ___.", options: ["Musick","Musik","Muzik","Musiek"], correct: "Musik", hint: "Langes i → nur ein k, kein ck!" },
+        { text: "Der Vater arbeitet in einer ___.", options: ["Fabrick","Fabrik","Fabrig","Vabrik"], correct: "Fabrik", hint: "Langes i → nur ein k." },
+        { text: "Er interessiert sich sehr für ___.", options: ["Politick","Politik","Poletik","Politiek"], correct: "Politik", hint: "Langes i → nur ein k." },
+        { text: "Zieh deine warme ___ an.", options: ["Jake","Jacke","Jagge","Jahke"], correct: "Jacke", hint: "Kurzes a → ck." },
+        { text: "Die ___ liegt auf dem Bett.", options: ["Deke","Decke","Degge","Dehke"], correct: "Decke", hint: "Kurzes e → ck." },
+        { text: "Er will als ___ berühmt werden.", options: ["Musiker","Musicker","Musieker","Muziker"], correct: "Musiker", hint: "Langes i → nur ein k." }
+    ],
+    ztz: [
+        { text: "Die ___ schläft auf dem Sofa.", options: ["Kaze","Katze","Katsche","Kahtze"], correct: "Katze", hint: "Kurzes a → tz." },
+        { text: "Der Ball fliegt ins ___.", options: ["Nez","Netz","Netzt","Nehz"], correct: "Netz", hint: "Kurzes e → tz." },
+        { text: "Gib etwas ___ in die Suppe.", options: ["Salz","Saltz","Sals","Sahlz"], correct: "Salz", hint: "Nach l steht z, nicht tz." },
+        { text: "Wir ___ ganz hinten im Bus.", options: ["sizen","sitzen","sietzen","sitsen"], correct: "sitzen", hint: "Kurzes i → tz." },
+        { text: "Ein ___ zuckt über den Himmel.", options: ["Bliz","Blitz","Blitzt","Blihz"], correct: "Blitz", hint: "Kurzes i → tz." },
+        { text: "Er hat starke ___en im Bein.", options: ["Schmertz","Schmerz","Schmärz","Schmehrz"], correct: "Schmerz", hint: "Nach r steht z, nicht tz." },
+        { text: "Wir treffen uns am ___ vor der Schule.", options: ["Plaz","Platz","Plahtz","Plaatz"], correct: "Platz", hint: "Kurzes a → tz." },
+        { text: "Sie übt einen neuen ___.", options: ["Tans","Tanz","Tantz","Tahnz"], correct: "Tanz", hint: "Nach n steht z, nicht tz." },
+        { text: "Mein ___ schlägt vor Aufregung ganz schnell.", options: ["Hertz","Herz","Herrz","Hörz"], correct: "Herz", hint: "Nach r steht z. Vorsicht: 'Hertz' ist eine Maßeinheit, kein Körperteil!" },
+        { text: "Sie zündet eine ___ an.", options: ["Kerze","Kertze","Kärze","Kehrze"], correct: "Kerze", hint: "Nach r steht z, nicht tz." },
+        { text: "Wir müssen ___ los.", options: ["jezt","jetzt","jettzt","jehzt"], correct: "jetzt", hint: "Kurzes e → tz." },
+        { text: "Der Helm bietet guten ___.", options: ["Schuz","Schutz","Schuhtz","Schutzt"], correct: "Schutz", hint: "Kurzes u → tz." },
+        { text: "Der Fluss bildet die ___ zwischen den Ländern.", options: ["Grenze","Grentze","Gränze","Grähnze"], correct: "Grenze", hint: "Nach n steht z, nicht tz." },
+        { text: "Im Wald findet sie einen großen ___.", options: ["Pilz","Piltz","Pihlz","Pillz"], correct: "Pilz", hint: "Nach l steht z, nicht tz." },
+        { text: "Wir haben nicht mehr viel ___.", options: ["Zeit","Tzeit","Zeid","Zeith"], correct: "Zeit", hint: "Am Wortanfang steht immer z, nie tz." }
+    ],
+    sss: [
+        { text: "Die ___ ist heute sehr voll.", options: ["Strasse","Straße","Strase","Sträße"], correct: "Straße", hint: "Langes a → ß." },
+        { text: "Sie schwimmen im ___.", options: ["Fluß","Fluss","Flus","Fluhs"], correct: "Fluss", hint: "Kurzes u → ss (seit der Rechtschreibreform)." },
+        { text: "Er hat sich am ___ verletzt.", options: ["Fuss","Fuß","Fus","Fuhß"], correct: "Fuß", hint: "Langes u → ß." },
+        { text: "Trink genug ___!", options: ["Waßer","Wasser","Waser","Wahser"], correct: "Wasser", hint: "Kurzes a → ss." },
+        { text: "Der Turm ist sehr ___.", options: ["gross","groß","gros","groos"], correct: "groß", hint: "Langes o → ß." },
+        { text: "Auf dem Berg steht ein altes ___.", options: ["Schloß","Schloss","Schlos","Schlohss"], correct: "Schloss", hint: "Kurzes o → ss." },
+        { text: "Sie schickt herzliche ___ aus dem Urlaub.", options: ["Grüsse","Grüße","Grühse","Grüs"], correct: "Grüße", hint: "Langes ü → ß." },
+        { text: "Die Wand ist frisch ___ gestrichen.", options: ["weiss","weiß","weis","weihss"], correct: "weiß", hint: "Nach ei (Diphthong) steht ß." },
+        { text: "Ich ___ jetzt los.", options: ["muß","muss","mus","muhss"], correct: "muss", hint: "Kurzes u → ss." },
+        { text: "Das Eichhörnchen versteckt eine ___.", options: ["Nuß","Nuss","Nus","Nuhss"], correct: "Nuss", hint: "Kurzes u → ss." },
+        { text: "Der Kuchen schmeckt sehr ___.", options: ["süss","süß","sühs","süs"], correct: "süß", hint: "Langes ü → ß." },
+        { text: "Der Wein reift in einem alten ___.", options: ["Faß","Fass","Fas","Fahss"], correct: "Fass", hint: "Kurzes a → ss." },
+        { text: "___ Buch liegt auf dem Tisch.", options: ["das","dass","dahs","dasz"], correct: "das", hint: "'das' ist Artikel oder Pronomen – probier, ob 'dieses' passt: 'Dieses Buch liegt...' – passt, also 'das'." },
+        { text: "Ich hoffe, ___ alles gut geht.", options: ["das","dass","dahs","dasz"], correct: "dass", hint: "'dass' leitet hier einen Nebensatz ein. Probe: 'welches' passt nicht, also 'dass'." },
+        { text: "Er sagt, ___ er heute keine Zeit hat.", options: ["das","dass","dasz","dahs"], correct: "dass", hint: "Nach 'sagen, ...' steht fast immer die Konjunktion 'dass', wenn ein ganzer Satz folgt." }
+    ],
+    fremd: [
+        { text: "Wir essen heute im ___.", options: ["Restorant","Restaurant","Restaurent","Resteraunt"], correct: "Restaurant", hint: "Aus dem Französischen – am Ende bleibt 'ant', nicht 'ent'." },
+        { text: "Der ___ des Liedes ist sehr eingängig.", options: ["Rytmus","Rhythmus","Rytmuss","Rhytmus"], correct: "Rhythmus", hint: "Aus dem Griechischen – mit 'th' und 'y'." },
+        { text: "Sie interessiert sich für ___.", options: ["Filosofie","Philosophie","Philosofie","Fillosophie"], correct: "Philosophie", hint: "Aus dem Griechischen – 'ph' statt 'f', 'ph' statt 'f' auch beim zweiten Teil." },
+        { text: "Im Zoo sehen wir ein ___.", options: ["Kenguru","Känguru","Kängeruh","Kenguruh"], correct: "Känguru", hint: "Kein 'h' vor dem u am Ende." },
+        { text: "Zum Frühstück isst sie ___.", options: ["Jogurt","Joghurt","Yoghurt","Jokurt"], correct: "Joghurt", hint: "Mit 'gh' in der Mitte." },
+        { text: "Sie hat ihr ___ verloren.", options: ["Portemonee","Portemonnaie","Potmonnaie","Portmonee"], correct: "Portemonnaie", hint: "Aus dem Französischen – schwierige Schreibweise, am besten auswendig lernen." },
+        { text: "Zum Abendessen gibt es ___.", options: ["Spagetti","Spaghetti","Spagethi","Schpaghetti"], correct: "Spaghetti", hint: "Aus dem Italienischen – mit 'gh'." },
+        { text: "Sie schneidet den ___ klein.", options: ["Champinjon","Champignon","Schampinjon","Champiljon"], correct: "Champignon", hint: "Aus dem Französischen – 'gn' klingt wie 'nj'." },
+        { text: "Diese Praline hat einen ___-Kern.", options: ["Nugat","Nougat","Nouga","Nugaat"], correct: "Nougat", hint: "Aus dem Französischen – mit 'ou'." },
+        { text: "Der Kurs hat ein hohes ___.", options: ["Niveu","Niveau","Nivaeu","Niveo"], correct: "Niveau", hint: "Aus dem Französischen – endet auf 'eau'." },
+        { text: "Im Film gibt es eine große ___.", options: ["Explotion","Explosion","Eksplosion","Explohsion"], correct: "Explosion", hint: "Mit 's', nicht mit 'z' oder 't'." },
+        { text: "Es gab eine hitzige ___ in der Klasse.", options: ["Diskusion","Diskussion","Diszkussion","Diskuzion"], correct: "Diskussion", hint: "Mit Doppel-s in der Mitte." },
+        { text: "Die ___ ist im ersten Stock.", options: ["Toilete","Toilette","Twalette","Toilett"], correct: "Toilette", hint: "Aus dem Französischen – mit Doppel-t am Ende." },
+        { text: "Kannst du mir deine ___ geben?", options: ["Addresse","Adresse","Adreße","Ardresse"], correct: "Adresse", hint: "Mit einem d, aber Doppel-s." },
+        { text: "Wie ist deine Telefon___?", options: ["Numer","Nummer","Nomer","Nummär"], correct: "Nummer", hint: "Mit Doppel-m." }
+    ]
+};
+wordData.master = [].concat(wordData.ll, wordData.kck, wordData.ztz, wordData.sss, wordData.fremd);
+
+const modeNames = { ll: 'll oder l', kck: 'k oder ck', ztz: 'z oder tz', sss: 's, ss oder ß', fremd: 'Fremdwörter', master: 'Master-Modus' };
+const modeClass = { ll: 'll', kck: 'kck', ztz: 'ztz', sss: 'sss', fremd: 'fremd', master: 'master' };
+
+let gameState = {};
+let answered = false;
+
+function init() {
+    createLeaves();
+    createOrbs();
+    updateMenuLeaderboard();
+}
+
+function createLeaves() {
+    const container = document.getElementById('leaves');
+    const emojis = ['🍁','🍂','🍃'];
+    for (let i = 0; i < 18; i++) {
+        const leaf = document.createElement('div');
+        leaf.className = 'leaf';
+        leaf.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        leaf.style.left = Math.random() * 100 + 'vw';
+        leaf.style.fontSize = (Math.random() * 14 + 14) + 'px';
+        leaf.style.animationDuration = (Math.random() * 10 + 12) + 's';
+        leaf.style.animationDelay = (Math.random() * -20) + 's';
+        container.appendChild(leaf);
+    }
+}
+function createOrbs() {
+    const container = document.getElementById('leaves');
+    for (let i = 0; i < 4; i++) {
+        const orb = document.createElement('div');
+        orb.className = 'glow-orb';
+        const size = Math.random() * 200 + 150;
+        orb.style.width = size + 'px'; orb.style.height = size + 'px';
+        orb.style.left = Math.random() * 100 + 'vw'; orb.style.top = Math.random() * 100 + 'vh';
+        orb.style.animationDelay = (Math.random() * -12) + 's';
+        container.appendChild(orb);
+    }
+}
+
+function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+function startGame(mode) {
+    gameState = {
+        mode: mode,
+        remaining: shuffle(wordData[mode]),
+        solvedCount: 0,
+        total: wordData[mode].length,
+        points: 0,
+        streak: 0,
+        bestStreak: 0,
+        correctAnswers: 0,
+        totalAttempts: 0,
+        startTime: Date.now(),
+        timerInterval: null
+    };
+    const indicator = document.getElementById('modeIndicator');
+    indicator.textContent = modeNames[mode];
+    indicator.className = 'mode-indicator ' + modeClass[mode];
+    document.getElementById('backBtn').style.display = 'block';
+    updateStats(); updateProgress();
+    showScreen('gameScreen');
+    loadNextWord();
+}
+
+function loadNextWord() {
+    answered = false;
+    document.getElementById('hintBox').style.display = 'none';
+    if (gameState.remaining.length === 0) {
+        gameState.remaining = shuffle(wordData[gameState.mode]);
+    }
+    const item = gameState.remaining.shift();
+    gameState.current = item;
+    document.getElementById('sentence').innerHTML = item.text.replace('___', '<span class="blank">___</span>');
+    const grid = document.getElementById('optionsGrid');
+    grid.innerHTML = '';
+    shuffle(item.options).forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = opt;
+        btn.onclick = () => checkAnswer(btn, opt, item);
+        grid.appendChild(btn);
+    });
+}
+
+function checkAnswer(btn, chosen, item) {
+    if (answered) return;
+    answered = true;
+    gameState.totalAttempts++;
+    const allBtns = document.querySelectorAll('.option-btn');
+    document.getElementById('hintText').textContent = item.hint;
+    document.getElementById('hintBox').style.display = 'block';
+
+    if (chosen === item.correct) {
+        btn.classList.add('correct');
+        allBtns.forEach(b => { if (b !== btn) b.classList.add('faded'); b.disabled = true; });
+        gameState.streak++;
+        gameState.bestStreak = Math.max(gameState.bestStreak, gameState.streak);
+        gameState.correctAnswers++;
+        const bonus = gameState.streak > 2 ? 15 : 10;
+        gameState.points += bonus;
+        gameState.solvedCount++;
+        showPointsPopup(bonus, gameState.streak > 2);
+        sounds.correct();
+        if (gameState.solvedCount % 10 === 0) showMilestone(gameState.solvedCount);
+    } else {
+        btn.classList.add('wrong');
+        allBtns.forEach(b => {
+            b.disabled = true;
+            if (b.textContent === item.correct) b.classList.add('correct');
+            else if (b !== btn) b.classList.add('faded');
+        });
+        gameState.streak = 0;
+        sounds.wrong();
+    }
+    updateStats(); updateProgress();
+    setTimeout(loadNextWord, 1900);
+}
+
+function skipWord() {
+    gameState.streak = 0;
+    updateStats();
+    loadNextWord();
+}
+
+function updateStats() {
+    document.getElementById('points').textContent = gameState.points;
+    const el = document.getElementById('streak');
+    el.innerHTML = gameState.streak > 2 ? `<span class="streak-fire">🔥</span>${gameState.streak}` : gameState.streak;
+}
+
+function updateProgress() {
+    const pct = gameState.total > 0 ? Math.min(100, (gameState.solvedCount / gameState.total) * 100) : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressText').textContent = `${gameState.solvedCount} / ${gameState.total} Wörter geschafft`;
+}
+
+function showPointsPopup(pts, isStreak) {
+    const popup = document.createElement('div');
+    popup.className = 'points-popup' + (isStreak ? ' streak-bonus' : '');
+    popup.textContent = isStreak ? `+${pts} 🔥 Combo!` : `+${pts}`;
+    popup.style.left = (Math.random() * 60 + 20) + '%';
+    popup.style.top = '40%';
+    document.body.appendChild(popup);
+    setTimeout(() => popup.remove(), 1000);
+}
+
+function showMilestone(n) {
+    const overlay = document.createElement('div');
+    overlay.className = 'milestone-overlay';
+    overlay.innerHTML = `<div class="milestone-content"><div class="milestone-number">${n}</div><div class="milestone-text">🍂 Wow, ${n} Wörter!</div></div>`;
+    document.body.appendChild(overlay);
+    sounds.milestone();
+    createConfetti();
+    setTimeout(() => overlay.remove(), 2200);
+}
+
+function createConfetti() {
+    const colors = ['#d97b3f','#f3b562','#e0a35c','#c1443b','#f0b429','#7c9a52','#8a4a2e'];
+    for (let i = 0; i < 100; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.left = Math.random() * 100 + 'vw';
+        c.style.top = '-10px';
+        c.style.background = colors[Math.floor(Math.random() * colors.length)];
+        c.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+        const sz = (Math.random() * 10 + 5) + 'px';
+        c.style.width = c.style.height = sz;
+        document.body.appendChild(c);
+        const anim = c.animate([
+            { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+            { transform: `translateY(100vh) rotate(${Math.random()*720}deg)`, opacity: 0 }
+        ], { duration: Math.random() * 2000 + 2000, easing: 'ease-out' });
+        anim.onfinish = () => c.remove();
+    }
+}
+
+function endGame() {
+    clearInterval(gameState.timerInterval);
+    const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+    document.getElementById('finalPoints').textContent = gameState.points;
+    document.getElementById('finalTime').textContent = `${Math.floor(elapsed/60)}:${(elapsed%60).toString().padStart(2,'0')}`;
+    document.getElementById('bestStreak').textContent = gameState.bestStreak;
+    document.getElementById('accuracy').textContent = gameState.totalAttempts > 0
+        ? Math.round((gameState.correctAnswers / gameState.totalAttempts) * 100) + '%' : '0%';
+    showScreen('resultScreen');
+    document.getElementById('backBtn').style.display = 'none';
+    updateResultLeaderboard();
+    sounds.milestone();
+    createConfetti();
+}
+
+function loadLeaderboard() {
+    try { return JSON.parse(localStorage.getItem('rechtschreibChampionLeaderboard') || '[]'); } catch(e) { return []; }
+}
+function saveLeaderboard(b) {
+    try { localStorage.setItem('rechtschreibChampionLeaderboard', JSON.stringify(b)); } catch(e) {}
+}
+
+function saveScore() {
+    const name = document.getElementById('playerName').value.trim() || 'Anonym';
+    const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+    const entry = { name, points: gameState.points, time: elapsed, mode: modeNames[gameState.mode], date: new Date().toLocaleDateString('de-DE') };
+    const board = loadLeaderboard();
+    board.push(entry);
+    board.sort((a,b) => b.points - a.points);
+    saveLeaderboard(board.slice(0, 10));
+    updateResultLeaderboard();
+    updateMenuLeaderboard();
+    document.getElementById('playerName').disabled = true;
+    event.target.disabled = true;
+    event.target.textContent = '✓ Gespeichert!';
+}
+
+function formatTime(s) { return `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`; }
+
+function renderBoard(container, entries, limit) {
+    if (entries.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted);text-align:center;">Noch keine Einträge. Sei die Erste!</p>';
+        return;
+    }
+    container.innerHTML = entries.slice(0, limit).map((e,i) =>
+        `<div class="leaderboard-entry">
+            <span class="leaderboard-rank">${i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.'}</span>
+            <span class="leaderboard-name">${e.name}<br><span class="leaderboard-mode">${e.mode}</span></span>
+            <span class="leaderboard-score">${e.points} Pkt</span>
+            <span class="leaderboard-time">${formatTime(e.time)}</span>
+        </div>`
+    ).join('');
+}
+
+function updateMenuLeaderboard() { renderBoard(document.getElementById('menuLeaderboard'), loadLeaderboard(), 5); }
+function updateResultLeaderboard() {
+    const c = document.getElementById('resultLeaderboard');
+    c.innerHTML = '<h3 class="leaderboard-title">🏅 Bestenliste</h3>';
+    const inner = document.createElement('div');
+    renderBoard(inner, loadLeaderboard(), 5);
+    c.appendChild(inner);
+}
+
+function playAgain() {
+    document.getElementById('playerName').disabled = false;
+    document.getElementById('playerName').value = '';
+    const btn = document.querySelector('#resultScreen .control-btn.primary');
+    if (btn) { btn.disabled = false; btn.textContent = '💾 Speichern'; }
+    startGame(gameState.mode);
+}
+
+function goToMenu() {
+    clearInterval(gameState.timerInterval);
+    document.getElementById('backBtn').style.display = 'none';
+    document.getElementById('playerName').disabled = false;
+    document.getElementById('playerName').value = '';
+    const btn = document.querySelector('#resultScreen .control-btn.primary');
+    if (btn) { btn.disabled = false; btn.textContent = '💾 Speichern'; }
+    showScreen('startScreen');
+    updateMenuLeaderboard();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
