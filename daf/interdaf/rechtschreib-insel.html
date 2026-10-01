@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Rechtschreib-Insel</title>
+<style>
+:root{--ink:#2d2a4a;--accent:#6c5ce7;--ok:#2ecc71;--bad:#ff6b6b;--sun:#ffd166}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;color:var(--ink);background:linear-gradient(#dff1ff 0%,#fff6e6 60%);min-height:100vh;user-select:none;-webkit-user-select:none}
+.wrap{max-width:980px;margin:0 auto;padding:14px 14px 60px}
+.card{background:#fff;border-radius:26px;box-shadow:0 6px 0 rgba(60,50,120,.10);padding:18px;margin-bottom:16px}
+h1,h2,h3{margin:0 0 8px}
+h2{font-size:24px}
+.btn{font:inherit;font-weight:800;font-size:20px;border:0;border-radius:20px;padding:14px 24px;cursor:pointer;background:var(--accent);color:#fff;box-shadow:0 5px 0 #4b3fb8}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 #4b3fb8}
+.btn.alt{background:var(--sun);color:#4a3b00;box-shadow:0 5px 0 #d9a93a}
+.btn.green{background:var(--ok);box-shadow:0 5px 0 #1e9c52}
+.btn.small{font-size:16px;padding:9px 16px;border-radius:16px}
+.btn:disabled{opacity:.45;cursor:default}
+.icon{font:inherit;font-size:20px;border:0;background:#fff;border-radius:14px;padding:8px 12px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.12)}
+.hidden{display:none!important}
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.owl{font-size:64px;line-height:1}
+.grow{flex:1;min-width:180px}
+.pill{background:#fff;border-radius:999px;padding:6px 14px;font-weight:800;box-shadow:0 3px 0 rgba(0,0,0,.10)}
+.bar{height:16px;border-radius:99px;background:#e6e2ff;overflow:hidden;flex:1}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,#8e7dff,#ff7ab8);border-radius:99px;transition:width .4s}
+.small{font-size:14px;opacity:.8}
+.grid{display:grid;gap:12px}
+.themes{grid-template-columns:repeat(auto-fill,minmax(155px,1fr))}
+.modes{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+.chip{border:4px solid transparent;border-radius:20px;padding:10px 8px;text-align:center;cursor:pointer;background:#fff;box-shadow:0 4px 0 rgba(0,0,0,.08);font-weight:800}
+.chip .ic{font-size:34px}
+.chip.sel{border-color:var(--accent);background:#f3f0ff}
+.chip .mini{height:8px;border-radius:9px;background:#eee;margin-top:6px;overflow:hidden}
+.chip .mini i{display:block;height:100%;background:var(--ok)}
+.mode{border:0;border-radius:22px;padding:16px;text-align:left;cursor:pointer;background:#fff;box-shadow:0 5px 0 rgba(0,0,0,.10);font:inherit}
+.mode:active{transform:translateY(3px)}
+.mode .mi{font-size:42px}
+.mode b{font-size:19px;display:block}
+.hl{color:#e8590c}
+.good .hl,.bad .hl{color:inherit;text-decoration:underline}
+.game{max-width:900px;margin:0 auto;padding:12px 14px 60px}
+.gtop{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.gstars{font-weight:900;font-size:20px;background:#fff;border-radius:99px;padding:4px 12px}
+.theme-chip{display:inline-block;color:#fff;font-weight:800;border-radius:99px;padding:4px 14px;margin-bottom:6px}
+.stage{background:#fff;border-radius:28px;box-shadow:0 6px 0 rgba(60,50,120,.10);padding:20px 14px 24px;text-align:center}
+.qemoji{font-size:clamp(60px,15vw,110px);line-height:1.1}
+.qword{font-size:clamp(40px,10vw,76px);font-weight:900;letter-spacing:2px;margin:6px 0 10px;word-break:break-word}
+.qsent{font-size:clamp(22px,5vw,34px);font-weight:700;margin:8px 0 6px;line-height:1.5}
+.gap{display:inline-block;min-width:1.5em;border-bottom:6px solid var(--accent);color:var(--accent);margin:0 4px;text-align:center}
+.gap.wide{min-width:3.2em}
+.gap.good{color:#fff;background:var(--ok);border-radius:10px;border-bottom-color:var(--ok);padding:0 8px}
+.gap.bad{color:#fff;background:var(--bad);border-radius:10px;border-bottom-color:var(--bad);padding:0 8px}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:8px 0}
+.speak,.tool{font:inherit;font-weight:800;font-size:18px;border:0;border-radius:16px;padding:10px 16px;cursor:pointer;background:#e9e5ff;color:#3d2fa0}
+.tool{background:#fff3cf;color:#6b4e00}
+.hintbox{min-height:26px;font-size:20px;font-weight:700;color:#6b4e00}
+.opts{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.opt{font:inherit;font-weight:900;font-size:clamp(34px,8vw,58px);min-width:110px;padding:12px 26px;border:0;border-radius:24px;background:#f0edff;color:#3d2fa0;cursor:pointer;box-shadow:0 6px 0 #cfc8ff}
+.opt:active{transform:translateY(3px)}
+.cards{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.wcard{font:inherit;font-weight:900;font-size:clamp(28px,6.5vw,46px);padding:14px 26px;border:0;border-radius:22px;background:#f0edff;color:#3d2fa0;cursor:pointer;box-shadow:0 6px 0 #cfc8ff}
+.wcard:active{transform:translateY(3px)}
+.opt.good,.wcard.good,.opt.bad,.wcard.bad{color:#fff}
+.opt.good,.wcard.good{background:var(--ok);box-shadow:0 6px 0 #1e9c52}
+.opt.bad,.wcard.bad{background:var(--bad);box-shadow:0 6px 0 #c94444;animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.fb{margin-top:16px;border-radius:20px;padding:14px;font-size:24px;font-weight:800}
+.fb.good{background:#d9f7e6;color:#13693a}
+.fb.bad{background:#ffe3e3;color:#9b2c2c}
+.fb .big{font-size:clamp(30px,7vw,48px);display:block;margin:6px 0}
+.next{margin-top:14px}
+.slots,.tiles{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+.slot,.tile{font:inherit;font-weight:900;font-size:clamp(28px,7vw,44px);width:clamp(40px,10vw,60px);height:clamp(52px,12vw,72px);border-radius:14px;border:0;cursor:pointer}
+.slot{background:#fff;border-bottom:6px solid var(--accent);color:var(--ink);box-shadow:inset 0 0 0 2px #e6e2ff}
+.slot.good{background:var(--ok);color:#fff}.slot.bad{background:var(--bad);color:#fff}
+.tile{background:#ffd166;color:#4a3b00;box-shadow:0 5px 0 #d9a93a}
+.tile.used{visibility:hidden}
+.mgrid{display:grid;gap:10px;margin-top:10px}
+.mcard{aspect-ratio:1/1.05;border-radius:18px;border:0;font:inherit;font-weight:900;cursor:pointer;background:linear-gradient(135deg,#8e7dff,#ff7ab8);color:#fff;font-size:34px;box-shadow:0 5px 0 rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;padding:4px;text-align:center}
+.mcard.up{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 4px #cfc8ff}
+.mcard.up.w{font-size:clamp(15px,3.6vw,26px)}
+.mcard.up.p{font-size:clamp(34px,8vw,60px)}
+.mcard.done{background:#d9f7e6;box-shadow:inset 0 0 0 4px var(--ok)}
+.sky{position:relative;height:min(62vh,540px);border-radius:26px;overflow:hidden;background:linear-gradient(#a9dcff,#f1fbff);box-shadow:0 6px 0 rgba(60,50,120,.10)}
+.balloon{position:absolute;bottom:-100px;padding:18px 24px 20px;border-radius:50% 50% 48% 48%/60% 60% 40% 40%;font-size:clamp(22px,5vw,32px);font-weight:900;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.25);animation:rise linear forwards;cursor:pointer;white-space:nowrap;box-shadow:inset -8px -10px 0 rgba(0,0,0,.12)}
+.balloon::after{content:"";position:absolute;left:50%;top:100%;width:2px;height:40px;background:#8a8aa8}
+.balloon.pop{animation:none;transform:scale(1.5);opacity:0;transition:.25s}
+@keyframes rise{to{transform:translateY(calc(-1 * (var(--h,520px) + 180px)))}}
+#overlay{position:fixed;inset:0;background:rgba(40,30,90,.55);display:flex;align-items:center;justify-content:center;padding:14px;z-index:50}
+#overlay .box{background:#fff;border-radius:28px;max-width:640px;width:100%;max-height:92vh;overflow:auto;padding:22px}
+.rule{font-size:20px;line-height:1.55}
+.ex{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+.ex span{background:#f3f0ff;border-radius:14px;padding:8px 14px;font-size:22px;font-weight:800}
+#toast{position:fixed;left:50%;top:14px;transform:translate(-50%,-120px);background:#fff;border-radius:20px;padding:12px 22px;font-weight:800;font-size:20px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:70;transition:transform .35s;max-width:92vw;text-align:center}
+#toast.show{transform:translate(-50%,0)}
+.conf{position:fixed;top:-40px;font-size:28px;z-index:60;pointer-events:none;animation:fall 2.4s linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
+.album{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:10px;text-align:center}
+.album div{font-size:42px;background:#f6f3ff;border-radius:16px;padding:8px}
+.album .lock{opacity:.25;filter:grayscale(1)}
+.trow{display:flex;align-items:center;gap:10px;margin:8px 0}
+.trow .nm{width:210px;font-weight:800}
+.wl{display:flex;flex-wrap:wrap;gap:8px}
+.wl span{background:#fff3cf;border-radius:14px;padding:6px 12px;font-weight:800;font-size:20px}
+input[type=text]{font:inherit;font-size:24px;padding:12px 16px;border-radius:16px;border:3px solid #cfc8ff;width:100%}
+label.set{display:flex;align-items:center;gap:10px;margin:12px 0;font-weight:700;font-size:18px}
+@media(max-width:560px){.trow .nm{width:120px;font-size:14px}.owl{font-size:48px}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="overlay" class="hidden"></div>
+<div id="toast"></div>
+<script>
+'use strict';
+//DATA-START
+const THEMES=[
+{id:'ck',name:'ck oder k?',icon:'🧥',color:'#ff8a65',opts:['ck','k','kk'],
+tip:'ck steht nur nach einem kurzen Vokal. Nach langem Vokal oder nach l, n, r, s steht k.',
+rule:'Hörst du einen <b>kurzen</b> Vokal (a, e, i, o, u), schreibst du <b>ck</b>: Jacke, Zucker, Brücke.<br>Nach einem <b>langen</b> Vokal oder nach l, n, r, s schreibst du nur <b>k</b>: Wolke, Bank, Park, Haken.<br>Tipp: Klatsche die Silben! In „Ja-cke“ ist das a kurz.',
+words:`
+Ja[ck]e|🧥|Im Herbst trage ich eine warme Jacke.
+Zu[ck]er|🍬|Im Tee ist ein Löffel Zucker.
+Brü[ck]e|🌉|Wir gehen über die Brücke.
+De[ck]e|🛏️|Das Kind liegt unter der Decke.
+E[ck]e||Der Ball liegt in der Ecke.
+Bä[ck]er|🥖|Der Bäcker backt frisches Brot.
+Ro[ck]|👗|Sie trägt einen roten Rock.
+Blo[ck]||Ich zeichne in meinen Block.
+Stü[ck]||Ich möchte ein Stück Kuchen.
+Glü[ck]|🍀|Ich wünsche dir viel Glück!
+So[ck]e|🧦|Ich habe ein Loch in der Socke.
+Mü[ck]e|🦟|Eine Mücke sitzt an der Wand.
+He[ck]e||Hinter der Hecke wohnt ein Igel.
+We[ck]er|⏰|Der Wecker klingelt um sieben Uhr.
+Na[ck]en||Der Schal wärmt meinen Nacken.
+Rü[ck]en||Die Tasche hängt auf meinem Rücken.
+Lo[ck]e||Sie hat eine lange Locke.
+Da[ck]el|🐕|Der Dackel bellt laut.
+Sto[ck]||Wir wandern mit einem Stock.
+Sa[ck]||Der Sack ist schwer.
+Bli[ck]|👀|Ich werfe einen Blick aus dem Fenster.
+Fle[ck]||Auf dem Hemd ist ein Fleck.
+tro[ck]en||Die Wäsche ist schon trocken.
+Wol[k]e|☁️|Am Himmel schwimmt eine Wolke.
+Ban[k]||Wir sitzen auf der Bank.
+Schran[k]||Die Kleider hängen im Schrank.
+On[k]el|👨|Mein Onkel wohnt in Wien.
+Dan[k]e||Danke für deine Hilfe!
+Ha[k]en||Der Mantel hängt am Haken.
+Tan[k]|⛽|Im Tank ist kein Benzin mehr.
+Gur[k]e|🥒|Die Gurke ist grün.
+Par[k]|🌳|Wir spielen im Park.
+Mar[k]t|🛒|Am Samstag gehen wir auf den Markt.
+dun[k]el||Im Keller ist es dunkel.
+Ra[k]ete|🚀|Die Rakete fliegt zum Mond.
+Mas[k]e|😷|Zum Fasching trage ich eine Maske.
+Pla[k]at||Das Plakat hängt an der Wand.
+kran[k]||Ich bin krank und bleibe im Bett.
+Geschen[k]|🎁|Ich bekomme ein Geschenk.
+Zir[k]us|🎪|Im Zirkus sehe ich Clowns.
+`},
+{id:'tz',name:'tz oder z?',icon:'🐱',color:'#f06292',opts:['tz','z','zz'],
+tip:'tz nach kurzem Vokal. Nach Konsonant (l, n, r) oder langem Vokal nur z.',
+rule:'Nach einem <b>kurzen</b> Vokal schreibst du <b>tz</b>: Katze, Mütze, Platz, Witz.<br>Nach einem Konsonanten (l, n, r) oder einem langen Vokal schreibst du nur <b>z</b>: Herz, Salz, Tanz, Kerze.<br>Pizza ist ein Fremdwort aus Italien: <b>zz</b>.',
+words:`
+Ka[tz]e|🐱|Die Katze schläft auf dem Sofa.
+Mü[tz]e|🧢|Im Winter trage ich eine Mütze.
+Si[tz]||Der Sitz im Bus ist frei.
+Pla[tz]||Hier ist noch ein Platz frei.
+Wi[tz]|😄|Er erzählt einen lustigen Witz.
+Spi[tz]e||Der Berg hat eine hohe Spitze.
+Pfü[tz]e|💧|Ich springe in die Pfütze.
+Bli[tz]|⚡|Ein Blitz leuchtet am Himmel.
+Ne[tz]|🥅|Der Fischer wirft das Netz aus.
+Hi[tz]e|☀️|Im Sommer ist die Hitze groß.
+Ta[tz]e|🐾|Die Katze hebt die Tatze.
+kra[tz]en||Die Katze will nicht kratzen.
+Schmu[tz]||Die Schuhe sind voll Schmutz.
+Sa[tz]|✏️|Das ist ein langer Satz.
+Scha[tz]|💎|Die Piraten suchen den Schatz.
+pu[tz]en||Ich muss mein Zimmer putzen.
+nü[tz]lich||Das Werkzeug ist sehr nützlich.
+si[tz]en||Wir sitzen am Tisch.
+schwi[tz]en||Beim Laufen muss ich schwitzen.
+Pi[zz]a|🍕|Ich esse gern Pizza.
+Her[z]|❤️|Mein Herz klopft schnell.
+Sal[z]|🧂|Die Suppe braucht Salz.
+Tan[z]|💃|Am Fest gibt es einen Tanz.
+Pil[z]|🍄|Im Wald wächst ein Pilz.
+Ker[z]e|🕯️|Auf dem Kuchen brennt eine Kerze.
+Kran[z]||Der Kranz ist aus Blumen.
+Schwan[z]||Der Hund wedelt mit dem Schwanz.
+Mün[z]e|🪙|Ich habe eine Münze im Geldbeutel.
+Pflan[z]e|🌱|Die Pflanze braucht Wasser.
+Gren[z]e||Die Grenze ist nicht weit.
+Wur[z]el|🥕|Die Wurzel des Baumes ist tief.
+Kreu[z]||Auf der Landkarte ist ein Kreuz.
+gan[z]e||Sie isst die ganze Torte.
+schwar[z]|⚫|Die Nacht ist schwarz.
+kur[z]||Das Kleid ist sehr kurz.
+`},
+{id:'eu',name:'eu oder äu?',icon:'🏠',color:'#ffb74d',opts:['eu','äu'],
+tip:'Gibt es ein verwandtes Wort mit au? Haus → Häuser. Dann schreibst du äu.',
+rule:'Wenn es ein verwandtes Wort mit <b>au</b> gibt, schreibst du <b>äu</b>: Haus → Häuser, Baum → Bäume, Maus → Mäuse.<br>Gibt es kein verwandtes Wort mit au, schreibst du <b>eu</b>: Freund, Feuer, neu, heute.',
+words:`
+H[äu]ser|🏠|In der Stadt stehen viele Häuser.
+B[äu]me|🌳|Im Park wachsen hohe Bäume.
+M[äu]se|🐭|Die Katze jagt die Mäuse.
+Tr[äu]me||Ich habe schöne Träume.
+R[äu]ber||Der Räuber versteckt den Schatz.
+Z[äu]ne||Um den Garten stehen zwei Zäune.
+L[äu]fer||Der Läufer rennt ins Ziel.
+Geb[äu]de|🏢|Das Gebäude ist sehr hoch.
+l[äu]ft|🏃|Der Hund läuft schnell.
+R[äu]me||Die Räume sind groß und hell.
+Kr[äu]ter|🌿|Ich pflücke frische Kräuter.
+Fr[eu]nd|👫|Mein Freund spielt Fußball.
+F[eu]er|🔥|Das Feuer brennt im Kamin.
+H[eu]|🌾|Die Kuh frisst Heu.
+n[eu]||Mein Fahrrad ist neu.
+L[eu]te||Viele Leute warten an der Haltestelle.
+h[eu]te|📅|Ich komme heute zu dir.
+B[eu]le||Er hat eine Beule am Knie.
+[Eu]le|🦉|Die Eule fliegt in der Nacht.
+Fr[eu]de|😊|Das Geschenk macht mir Freude.
+D[eu]tsch|🗣️|Wir lernen Deutsch.
+t[eu]er||Die Jacke ist teuer.
+[Eu]ro|💶|Das Eis kostet zwei Euro.
+n[eu]n|9️⃣|Ich bin neun Jahre alt.
+L[eu]chte|💡|Die Leuchte hängt an der Decke.
+Sch[eu]ne||Das Heu liegt in der Scheune.
+B[eu]tel|🛍️|Ich trage die Äpfel im Beutel.
+fr[eu]ndlich||Der Hund ist sehr freundlich.
+tr[eu]||Mein Hund ist treu.
+`},
+{id:'ae',name:'ä oder e?',icon:'🍎',color:'#e57373',opts:['ä','e'],
+tip:'Finde ein verwandtes Wort mit a: Hand → Hände. Dann schreibst du ä.',
+rule:'Wenn du ein verwandtes Wort mit <b>a</b> findest, schreibst du <b>ä</b>: Hand → Hände, Wald → Wälder, Apfel → Äpfel.<br>Sonst schreibst du <b>e</b>: Ente, Bett, Fenster.<br>Ein paar <b>Merkwörter</b> musst du dir einfach merken: Bär, Käse, Mädchen, März, spät, Käfer.',
+words:`
+[Ä]pfel|🍎|Ich esse zwei Äpfel.
+H[ä]nde|🙌|Wasch dir die Hände!
+G[ä]ste||Zum Fest kommen viele Gäste.
+L[ä]nder|🌍|Es gibt viele Länder auf der Welt.
+k[ä]lter||Im Winter wird es kälter.
+N[ä]chte|🌙|Im Winter sind die Nächte lang.
+W[ä]lder|🌲|In Österreich gibt es viele Wälder.
+Z[ä]hne|🦷|Ich putze meine Zähne.
+St[ä]dte|🏙️|Wien und Graz sind Städte.
+M[ä]nner||Zwei Männer arbeiten auf dem Dach.
+J[ä]ger||Der Jäger geht in den Wald.
+Bl[ä]tter|🍂|Im Herbst fallen die Blätter.
+W[ä]sche|🧺|Die Wäsche hängt auf der Leine.
+Gl[ä]ser|🥛|Die Gläser stehen auf dem Tisch.
+[Ä]ste||Die Äste biegen sich im Wind.
+N[ä]gel|🔨|Ich schlage Nägel in das Holz.
+B[ä]r|🐻|Der Bär schläft im Winter.
+K[ä]se|🧀|Ich esse Käse zum Brot.
+K[ä]fer|🐞|Der Käfer krabbelt auf dem Blatt.
+M[ä]dchen|👧|Das Mädchen spielt im Garten.
+M[ä]rz|📅|Im März beginnt der Frühling.
+sp[ä]t||Heute komme ich spät nach Hause.
+[E]nte|🦆|Die Ente schwimmt im Teich.
+B[e]tt|🛏️|Ich schlafe in meinem Bett.
+W[e]tter|☀️|Das Wetter ist heute schön.
+H[e]md|👕|Das Hemd ist zu groß.
+H[e]rbst|🍂|Im Herbst werden die Blätter bunt.
+Pf[e]rd|🐴|Das Pferd läuft über die Wiese.
+B[e]rg|⛰️|Wir wandern auf den Berg.
+B[e]sen|🧹|Die Hexe fliegt auf dem Besen.
+F[e]nster|🪟|Das Fenster ist offen.
+[E]lefant|🐘|Der Elefant hat einen langen Rüssel.
+Sch[e]re|✂️|Ich schneide mit der Schere.
+St[e]rn|⭐|Am Himmel leuchtet ein Stern.
+Z[e]lt|⛺|Wir schlafen im Zelt.
+F[e]der|🪶|Der Vogel hat eine blaue Feder.
+d[e]nn||Ich bleibe zu Hause, denn es regnet.
+`},
+{id:'ie',name:'ie, i oder ih?',icon:'🐝',color:'#fbc02d',opts:['ie','i','ih'],
+tip:'Langes i schreibt man meistens ie. Kurzes i schreibt man i.',
+rule:'Hörst du ein <b>langes</b> i, schreibst du meistens <b>ie</b>: Biene, Wiese, Tier, Spiel.<br>Hörst du ein <b>kurzes</b> i, schreibst du <b>i</b>: Wind, Tisch, Kind, Fisch.<br>Wenige Wörter haben ein langes i ohne e: <b>Igel, Tiger, Biber, Krokodil</b>. Und: <b>ihr</b> schreibt man mit h.',
+words:`
+B[ie]ne|🐝|Die Biene fliegt von Blume zu Blume.
+W[ie]se|🌼|Auf der Wiese blühen Blumen.
+Sp[ie]gel|🪞|Ich sehe mich im Spiegel.
+T[ie]r|🐾|Der Hund ist ein Tier.
+Z[ie]ge|🐐|Die Ziege frisst Gras.
+L[ie]be|❤️|Ich schicke dir viel Liebe.
+Fl[ie]ge|🪰|Eine Fliege sitzt am Fenster.
+Br[ie]f|✉️|Ich schreibe einen Brief.
+Sp[ie]l|🎲|Das Spiel dauert zehn Minuten.
+R[ie]se||Der Riese ist sehr groß.
+Z[ie]l|🎯|Wir laufen ins Ziel.
+Zw[ie]bel|🧅|Beim Schneiden der Zwiebel weine ich.
+L[ie]d|🎵|Wir singen ein Lied.
+v[ie]r|4️⃣|Das Auto hat vier Räder.
+Pap[ie]r|📄|Ich male auf Papier.
+St[ie]fel|🥾|Im Regen trage ich Stiefel.
+s[ie]ben|7️⃣|Ich stehe um sieben Uhr auf.
+t[ie]f||Der See ist tief.
+l[ie]gen||Wir liegen im Gras.
+W[i]nd|🌬️|Der Wind weht stark.
+T[i]sch|🪑|Der Tisch ist rund.
+K[i]nd|🧒|Das Kind spielt im Hof.
+F[i]sch|🐟|Der Fisch schwimmt im Teich.
+M[i]tte||In der Mitte steht ein Baum.
+R[i]tter|🛡️|Der Ritter trägt eine Rüstung.
+W[i]nter|❄️|Im Winter schneit es.
+Sch[i]ff|🚢|Das Schiff fährt über das Meer.
+B[i]ld|🖼️|Das Bild hängt an der Wand.
+M[i]lch|🥛|Ich trinke ein Glas Milch.
+Sp[i]nne|🕷️|Die Spinne baut ein Netz.
+St[i]ft|✏️|Mein Stift ist blau.
+L[i]cht|💡|Das Licht ist an.
+F[i]nger|☝️|Ich habe zehn Finger.
+H[i]mmel|🌤️|Der Himmel ist blau.
+K[i]ste|📦|In der Kiste liegt Spielzeug.
+K[i]rche|⛪|Die Kirche hat einen hohen Turm.
+M[i]nute|⏱️|Eine Minute hat sechzig Sekunden.
+[I]gel|🦔|Der Igel schläft im Laub.
+T[i]ger|🐯|Der Tiger ist ein Raubtier.
+B[i]ber|🦫|Der Biber baut einen Damm.
+Krokod[i]l|🐊|Das Krokodil lebt im Wasser.
+[ih]r||Ich gebe ihr ein Buch.
+`},
+{id:'dbl',name:'Doppelte Mitlaute',icon:'🥄',color:'#4db6ac',opts:'double',
+tip:'Kurzer Vokal → doppelter Konsonant. Langer Vokal → nur ein Konsonant.',
+rule:'Nach einem <b>kurzen</b> Vokal steht meistens ein <b>doppelter</b> Konsonant: Mutter, Sommer, Teller, Wolle.<br>Nach einem <b>langen</b> Vokal steht nur <b>ein</b> Konsonant: Name, Tafel, Boden.<br>Tipp: Sprich das Wort langsam in Silben: Mut-ter, Na-me.',
+words:`
+Mu[tt]er|👩|Meine Mutter kocht Suppe.
+Bu[tt]er|🧈|Ich esse Brot mit Butter.
+So[mm]er|🏖️|Im Sommer gehen wir schwimmen.
+Ha[mm]er|🔨|Ich schlage mit dem Hammer.
+Ta[ss]e|☕|Die Tasse ist voll Tee.
+Wo[ll]e|🧶|Die Wolle ist weich.
+Ke[ll]er||Im Keller ist es kühl.
+Te[ll]er|🍽️|Der Teller steht auf dem Tisch.
+A[ff]e|🐒|Der Affe klettert auf den Baum.
+Pu[pp]e|🧸|Das Mädchen spielt mit der Puppe.
+Su[pp]e|🍲|Die Suppe ist heiß.
+Lö[ff]el|🥄|Ich esse die Suppe mit dem Löffel.
+Ba[ll]|⚽|Der Ball rollt über die Wiese.
+Zi[mm]er|🛋️|Mein Zimmer ist klein.
+Nu[mm]er|🔢|Das Haus hat die Nummer fünf.
+So[nn]e|🌞|Die Sonne scheint.
+Bri[ll]e|👓|Opa trägt eine Brille.
+Pfa[nn]e|🍳|Das Ei brät in der Pfanne.
+Ka[nn]e||Die Kanne ist voll Tee.
+Sta[ll]|🐄|Die Kuh steht im Stall.
+Kna[ll]|💥|Es gab einen lauten Knall.
+Ze[tt]el|📝|Auf dem Zettel steht ein Wort.
+Ki[ss]en||Das Kissen ist weich.
+Fe[ll]||Der Hund hat weiches Fell.
+Tre[pp]e|🪜|Wir gehen die Treppe hinauf.
+Mü[ll]|🗑️|Den Müll werfe ich in die Tonne.
+he[ll]||Das Licht ist hell.
+Na[m]e||Mein Name ist Lena.
+Ta[f]el||Die Lehrerin schreibt an die Tafel.
+Ka[m]el|🐪|Das Kamel läuft durch die Wüste.
+Bo[d]en||Das Spielzeug liegt auf dem Boden.
+Ne[b]el|🌫️|Im Nebel sieht man kaum etwas.
+Wa[g]en|🚗|Der Wagen fährt schnell.
+Ro[b]oter|🤖|Der Roboter kann sprechen.
+Sa[l]at|🥗|Der Salat ist frisch.
+Mo[n]at|📅|Ein Monat hat dreißig Tage.
+`},
+{id:'ss',name:'ß, ss oder s?',icon:'🦶',color:'#7986cb',opts:['ß','ss','s'],
+tip:'Nach kurzem Vokal ss. Nach langem Vokal oder au, ei, eu steht ß. Weiches s schreibt man s.',
+rule:'Nach einem <b>kurzen</b> Vokal schreibst du <b>ss</b>: Fluss, Wasser, müssen, nass.<br>Nach einem <b>langen</b> Vokal oder nach au, ei, eu schreibst du <b>ß</b>: Fuß, Straße, groß, heiß, draußen.<br>Ein weiches s (wie in Hase, Rose, Nase) schreibst du als einfaches <b>s</b>. Auch am Wortende: Haus, Maus, Bus, Eis, Gras.',
+words:`
+Fu[ß]|🦶|Mein Fuß passt in den Schuh.
+Stra[ß]e|🛣️|Die Straße ist nass.
+Spa[ß]|😄|Das Lernen macht mir Spaß.
+gro[ß]||Der Elefant ist groß.
+hei[ß]|♨️|Die Suppe ist heiß.
+Gru[ß]||Ich schicke dir einen Gruß.
+wei[ß]|⚪|Der Schnee ist weiß.
+Fü[ß]e||Die Füße sind kalt.
+bei[ß]en||Der Hund will nicht beißen.
+hei[ß]t||Wie heißt du?
+Fu[ß]ball|⚽|Wir spielen Fußball im Park.
+drau[ß]en|🌳|Wir spielen draußen.
+Strau[ß]|🪶|Der Strauß ist ein sehr großer Vogel.
+Flu[ss]|🌊|Der Fluss ist breit.
+Ku[ss]|😘|Ich gebe dir einen Kuss.
+Nu[ss]|🌰|Das Eichhörnchen findet eine Nuss.
+Wa[ss]er|💧|Ich trinke Wasser.
+Schlo[ss]|🏰|Der König wohnt im Schloss.
+mü[ss]en||Wir müssen jetzt gehen.
+e[ss]en|🍽️|Wir essen zu Mittag.
+Schlu[ss]||Am Schluss gibt es Applaus.
+bi[ss]chen||Ich möchte ein bisschen Brot.
+na[ss]|💦|Der Hund ist nass.
+la[ss]en||Ich will die Katze nicht allein lassen.
+wi[ss]en||Ich möchte alles wissen.
+Ka[ss]e|🛒|An der Kasse bezahle ich.
+Ha[s]e|🐰|Der Hase hüpft über die Wiese.
+Ro[s]e|🌹|Die Rose duftet gut.
+Na[s]e|👃|Meine Nase ist kalt.
+Bu[s]|🚌|Der Bus fährt um acht Uhr.
+Hau[s]|🏠|Das Haus ist rot.
+Mau[s]|🐭|Die Maus isst Käse.
+Gra[s]|🌿|Das Gras ist grün.
+Ei[s]|🍦|Im Sommer esse ich Eis.
+Gla[s]|🥛|Ich trinke aus dem Glas.
+Va[s]e|🏺|Die Blumen stehen in der Vase.
+Mu[s]ik|🎵|Ich höre gern Musik.
+le[s]en|📖|Ich möchte lesen lernen.
+Ho[s]e|👖|Die Hose ist zu lang.
+`},
+{id:'dh',name:'Lange Vokale (h, aa, ee, oo)',icon:'🦷',color:'#9575cd',opts:'vowel',
+tip:'Lange Vokale: einfach (Hase), mit h (Zahn) oder doppelt (Haar, Tee, Moos).',
+rule:'Ein <b>langer</b> Vokal wird auf drei Arten geschrieben:<br>1) einfach: Hase, Name<br>2) mit <b>Dehnungs-h</b>: Zahn, Uhr, Kuh, Lehrer, wohnen<br>3) <b>doppelt</b> (nur aa, ee, oo): Haar, Paar, Schnee, Tee, Moos, Zoo.<br>Diese Wörter musst du dir merken. Übe sie oft!',
+words:`
+Z[ah]n|🦷|Der Zahn wackelt.
+Z[ah]l|🔢|Die Zahl vier ist gerade.
+B[ah]n|🚆|Die Bahn kommt gleich.
+J[ah]r|📅|Ein Jahr hat zwölf Monate.
+f[ah]ren|🚗|Wir fahren mit dem Zug.
+F[ah]ne|🚩|Die Fahne weht im Wind.
+S[ah]ne|🍦|Auf dem Kuchen ist Sahne.
+Gef[ah]r||Das ist eine große Gefahr.
+M[eh]l|🌾|Für den Kuchen brauche ich Mehl.
+L[eh]rer|🧑‍🏫|Der Lehrer schreibt an die Tafel.
+n[eh]men||Wir nehmen den Bus.
+s[eh]en||Wir sehen den Berg.
+z[eh]n|🔟|Ich zähle bis zehn.
+R[eh]|🦌|Im Wald steht ein Reh.
+s[eh]r||Ich freue mich sehr.
+B[oh]ne|🫘|Die Bohne wächst im Garten.
+S[oh]n||Der Sohn spielt mit dem Ball.
+M[oh]n||Der Mohn blüht rot.
+w[oh]nen|🏠|Wir wohnen in Graz.
+[Oh]r|👂|Ich höre mit dem Ohr.
+fr[oh]||Ich bin froh.
+[oh]ne||Ich gehe nicht ohne meine Jacke.
+H[uh]n|🐔|Das Huhn legt ein Ei.
+K[uh]|🐄|Die Kuh gibt Milch.
+[Uh]r|🕐|Die Uhr zeigt acht.
+St[uh]l|🪑|Der Stuhl steht am Tisch.
+Sch[uh]|👟|Der Schuh ist zu klein.
+R[uh]e|🤫|Ich brauche Ruhe.
+M[äh]ne|🦁|Der Löwe hat eine Mähne.
+K[üh]e||Die Kühe stehen auf der Weide.
+f[üh]len||Ich kann es fühlen.
+M[üh]e||Ich gebe mir Mühe.
+z[äh]len||Ich kann bis hundert zählen.
+k[üh]l||Das Wasser ist kühl.
+H[aa]r|💇|Ein Haar liegt auf dem Boden.
+P[aa]r|👫|Ich brauche ein Paar Schuhe.
+S[aa]l||Der Saal ist groß.
+[Aa]l||Der Aal lebt im Fluss.
+Schn[ee]|❄️|Im Winter fällt Schnee.
+T[ee]|🍵|Ich trinke Tee mit Honig.
+Id[ee]|💡|Ich habe eine gute Idee.
+Kaff[ee]|☕|Der Papa trinkt Kaffee.
+Kl[ee]|🍀|Der Klee wächst auf der Wiese.
+F[ee]|🧚|Die Fee zaubert.
+Erdb[ee]re|🍓|Ich esse eine Erdbeere.
+B[ee]re|🫐|Die Beere ist süß.
+l[ee]r||Die Flasche ist leer.
+M[oo]s||Auf dem Stein wächst Moos.
+Z[oo]|🦓|Wir sehen Tiere im Zoo.
+`},
+{id:'aus',name:'b/p · d/t · g/k am Ende',icon:'🐕',color:'#64b5f6',opts:'pair',
+tip:'Verlängere das Wort (Mehrzahl oder mit -e) und höre genau hin.',
+rule:'Am Wortende klingt <b>b</b> wie <b>p</b>, <b>d</b> wie <b>t</b> und <b>g</b> wie <b>k</b>. Wie schreibt man es richtig?<br><b>Verlängere das Wort!</b> Mehrzahl oder mit „-e“: Hund → Hun<b>d</b>e, Korb → Kör<b>b</b>e, Berg → Ber<b>g</b>e.<br>Wenn du das Ende deutlich hörst, siehst du den richtigen Buchstaben! Den Tipp-Knopf kannst du jederzeit drücken.',
+words:`
+Kor[b]|🧺||Mehrzahl: Körbe
+Die[b]||Der Dieb läuft weg.|Mehrzahl: Diebe
+Kal[b]|🐄|Das Kalb trinkt Milch.|Mehrzahl: Kälber
+gel[b]|🟡|Die Sonne ist gelb.|Verlängern: eine gelbe Blume
+hal[b]||Es ist halb acht.|Verlängern: ein halber Apfel
+lie[b]||Du bist lieb.|Verlängern: ein liebes Kind
+gro[b]||Der Stoff ist grob.|Verlängern: ein grober Stoff
+Sta[b]||Der Zauberer hält einen Stab.|Mehrzahl: Stäbe
+Hun[d]|🐕|Der Hund bellt laut.|Mehrzahl: Hunde
+Kin[d]|🧒|Das Kind lacht.|Mehrzahl: Kinder
+Wal[d]|🌲|Wir gehen in den Wald.|Mehrzahl: Wälder
+Han[d]|✋|Ich gebe dir die Hand.|Mehrzahl: Hände
+Ba[d]|🛁|Im Bad steht die Wanne.|Mehrzahl: Bäder
+Mun[d]|👄|Ich mache den Mund auf.|Mehrzahl: Münder
+Bil[d]|🖼️|Das Bild ist bunt.|Mehrzahl: Bilder
+Lan[d]|🌍|Österreich ist ein Land.|Mehrzahl: Länder
+Fel[d]|🌾|Der Bauer arbeitet auf dem Feld.|Mehrzahl: Felder
+Schil[d]|🪧|Das Schild zeigt den Weg.|Mehrzahl: Schilder
+Lie[d]|🎵|Wir singen ein Lied.|Mehrzahl: Lieder
+Mon[d]|🌙|Der Mond scheint hell.|Mehrzahl: Monde
+Hem[d]|👕|Das Hemd ist blau.|Mehrzahl: Hemden
+Freun[d]|👫|Mein Freund lacht.|Mehrzahl: Freunde
+Klei[d]|👗|Das Kleid ist neu.|Mehrzahl: Kleider
+Bro[t]|🍞|Ich esse Brot mit Butter.|Mehrzahl: Brote
+ro[t]|🔴|Der Apfel ist rot.|Verlängern: ein roter Apfel
+Zel[t]|⛺|Das Zelt steht am See.|Mehrzahl: Zelte
+Hef[t]|📓|Das Heft liegt auf dem Tisch.|Mehrzahl: Hefte
+Fes[t]|🎉|Wir feiern ein Fest.|Mehrzahl: Feste
+Gas[t]||Der Gast bleibt über Nacht.|Mehrzahl: Gäste
+Nes[t]|🪺|Im Nest liegen drei Eier.|Mehrzahl: Nester
+Mu[t]||Du hast viel Mut.|Verlängern: mutig
+Hu[t]|🎩|Der Mann trägt einen Hut.|Mehrzahl: Hüte
+gu[t]||Das Essen ist gut.|Verlängern: ein gutes Essen
+Ber[g]|⛰️|Wir wandern auf den Berg.|Mehrzahl: Berge
+We[g]|🛤️|Dieser Weg führt zum See.|Mehrzahl: Wege
+Ta[g]|🌞|Ein Tag hat vierundzwanzig Stunden.|Mehrzahl: Tage
+Zu[g]|🚆|Der Zug fährt ab.|Mehrzahl: Züge
+Flu[g]|✈️|Der Flug dauert eine Stunde.|Mehrzahl: Flüge
+Sie[g]|🏆|Das Team feiert den Sieg.|Mehrzahl: Siege
+Zwer[g]|🧙|Der Zwerg wohnt im Wald.|Mehrzahl: Zwerge
+klu[g]|🦉|Die Eule ist klug.|Verlängern: eine kluge Eule
+Ban[k]||Wir sitzen auf der Bank.|Mehrzahl: Bänke
+Schran[k]||Der Schrank ist voll.|Mehrzahl: Schränke
+kran[k]||Mein Opa ist krank.|Verlängern: ein krankes Kind
+star[k]|💪|Der Bär ist stark.|Verlängern: ein starker Bär
+Dan[k]||Vielen Dank!|Verlängern: danken
+Wer[k]||Das Werk ist fertig.|Mehrzahl: Werke
+`},
+{id:'ig',name:'-ig, -lich, -ich',icon:'🍯',color:'#ffd54f',opts:['ig','lich','ich'],
+tip:'Am Ende klingt -ig wie „ich“. -lich hat ein l davor. -ich ist selten.',
+rule:'Am Wortende klingt <b>-ig</b> wie „ich“: Honig, König, lustig, richtig, wichtig.<br>Die Endung <b>-lich</b> hat ein l davor: freundlich, glücklich, endlich.<br>Nur wenige Wörter enden auf <b>-ich</b>: Teppich, Pfirsich, Enterich.',
+words:`
+Hon[ig]|🍯|Ich esse Brot mit Honig.
+Kön[ig]|👑|Der König trägt eine Krone.
+wen[ig]||Ich habe wenig Zeit.
+ruh[ig]||Das Meer ist ruhig.
+lust[ig]|😄|Der Clown ist lustig.
+mut[ig]|💪|Das Mädchen ist mutig.
+wicht[ig]||Hausaufgaben sind wichtig.
+richt[ig]|✅|Die Antwort ist richtig.
+Zwanz[ig]||Zwanzig Kinder sind in der Klasse.
+durst[ig]||Ich bin durstig.
+hungr[ig]||Ich bin hungrig.
+schmutz[ig]||Die Schuhe sind schmutzig.
+sonn[ig]|🌞|Heute ist es sonnig.
+wind[ig]|🌬️|Heute ist es windig.
+wolk[ig]|☁️|Der Himmel ist wolkig.
+freund[lich]|😊|Die Lehrerin ist freundlich.
+glück[lich]|😃|Ich bin glücklich.
+täg[lich]||Ich übe täglich lesen.
+end[lich]||Jetzt sind endlich Ferien!
+fröh[lich]||Das Kind ist fröhlich.
+ehr[lich]||Sei bitte ehrlich zu mir.
+Tepp[ich]||Der Teppich ist weich.
+Pfirs[ich]|🍑|Der Pfirsich schmeckt süß.
+Enter[ich]|🦆|Der Enterich schwimmt im Teich.
+`},
+{id:'ung',name:'-ung, -heit, -keit',icon:'📰',color:'#a1887f',opts:['ung','heit','keit'],
+tip:'-ung, -heit und -keit machen Namenwörter. Sie werden großgeschrieben.',
+rule:'Die Endungen <b>-ung</b>, <b>-heit</b> und <b>-keit</b> machen aus Wörtern Namenwörter (Nomen). Sie werden <b>großgeschrieben</b>: Zeitung, Gesundheit, Möglichkeit.<br><b>-keit</b> steht nach -ig, -lich, -bar, -sam: Möglichkeit, Fröhlichkeit.<br><b>-heit</b> steht sonst: Freiheit, Wahrheit, Kindheit.',
+words:`
+Zeit[ung]|📰|Der Opa liest die Zeitung.
+Wohn[ung]|🏢|Unsere Wohnung hat drei Zimmer.
+Üb[ung]||Die Übung ist leicht.
+Pack[ung]|📦|Die Packung ist leer.
+Rechn[ung]|🧾|Die Rechnung ist bezahlt.
+Hoffn[ung]||Ich habe große Hoffnung.
+Erzähl[ung]|📖|Die Erzählung ist spannend.
+Richt[ung]|🧭|In welche Richtung gehen wir?
+Mein[ung]|💭|Das ist meine Meinung.
+Leist[ung]||Das ist eine tolle Leistung.
+Gesund[heit]||Gesundheit ist wichtig.
+Frei[heit]||Die Vögel lieben die Freiheit.
+Schön[heit]||Die Schönheit der Blumen ist groß.
+Wahr[heit]||Sag mir die Wahrheit!
+Dunkel[heit]||In der Dunkelheit sehe ich Sterne.
+Kind[heit]||In meiner Kindheit habe ich viel gespielt.
+Möglich[keit]||Das ist eine gute Möglichkeit.
+Schwierig[keit]||Das ist keine Schwierigkeit.
+Sauber[keit]||Sauberkeit ist wichtig.
+Fröhlich[keit]||Ihre Fröhlichkeit steckt an.
+Ehrlich[keit]||Ehrlichkeit ist wichtig.
+Neuig[keit]|📣|Ich habe eine Neuigkeit.
+Freundlich[keit]||Mit Freundlichkeit kommt man weit.
+`},
+{id:'st',name:'St und Sp',icon:'⭐',color:'#ba68c8',opts:'stsp',
+tip:'Du sagst „scht“ und „schp“, aber du schreibst St und Sp.',
+rule:'Am Anfang eines Wortes sprichst du „scht“ und „schp“. Du schreibst aber <b>St</b> und <b>Sp</b>: <b>St</b>ein, <b>St</b>ern, <b>Sp</b>iel, <b>Sp</b>inne.<br>Nie „Schtein“ und nie „Schpiel“!',
+words:`
+[St]ein|🪨|Der Stein liegt im Bach.
+[St]adt|🏙️|Graz ist eine Stadt.
+[St]rand|🏖️|Wir bauen eine Burg am Strand.
+[St]urm|🌪️|Der Sturm bricht Äste ab.
+[St]ufe||Pass auf die Stufe auf!
+[St]uhl|🪑|Ich sitze auf dem Stuhl.
+[St]ern|⭐|Der Stern leuchtet hell.
+[St]ift|✏️|Mit dem Stift male ich ein Bild.
+[St]all|🐴|Das Pferd steht im Stall.
+[St]ock||Der Opa geht mit dem Stock.
+[St]roh|🌾|Die Kühe liegen im Stroh.
+[St]art|🚀|Der Start der Rakete ist um zehn Uhr.
+[St]aub||Auf dem Regal liegt Staub.
+[st]ark|💪|Der Bär ist sehr stark.
+[st]ill||Es ist ganz still.
+[st]olz||Ich bin stolz auf dich.
+[st]ehen||Die Kinder stehen in einer Reihe.
+[Sp]ielplatz|🛝|Wir treffen uns am Spielplatz.
+[Sp]inne|🕷️|Die Spinne sitzt im Netz.
+[Sp]iegel|🪞|Im Bad hängt ein Spiegel.
+[Sp]ort|⚽|Ich mache gern Sport.
+[Sp]aten||Ich grabe mit dem Spaten.
+[Sp]rache|🗣️|Welche Sprache sprichst du?
+[Sp]atz|🐦|Der Spatz pickt Krümel.
+[Sp]ur|👣|Im Schnee ist eine Spur.
+[sp]ringen|🐸|Die Frösche springen ins Wasser.
+[sp]ielen|🎲|Wir spielen im Hof.
+[sp]rechen|🗣️|Ich möchte Deutsch sprechen.
+[sp]itz||Die Nadel ist spitz.
+[Sp]ielzeug|🧸|Das Spielzeug liegt im Zimmer.
+`},
+{id:'ch',name:'ch, sch, chs, x, ks',icon:'🍰',color:'#f48fb1',opts:'chsch',
+tip:'ch wie in Buch, sch wie in Tisch. „ks“ schreibt man chs, x oder ks.',
+rule:'<b>ch</b> hörst du wie in Buch, Kuchen, Licht. <b>sch</b> hörst du wie in Schule, Tisch, Fisch.<br>Das Geräusch „ks“ schreibt man auf drei Arten: <b>chs</b> (Fuchs, sechs, Wachs), <b>x</b> (Hexe, Taxi, Axt) oder <b>ks</b> (Keks).<br>Die Wörter mit chs und x musst du dir merken.',
+words:`
+Ku[ch]en|🍰|Der Kuchen riecht gut.
+Bu[ch]|📖|Das Buch liegt auf dem Tisch.
+Da[ch]|🏠|Die Katze sitzt auf dem Dach.
+Na[ch]t|🌙|In der Nacht schlafe ich.
+la[ch]en|😂|Wir lachen laut.
+Kir[ch]e|⛪|Die Kirche hat eine Glocke.
+Kü[ch]e|🍳|In der Küche steht ein Herd.
+Dra[ch]e|🐉|Der Drache speit Feuer.
+Ba[ch]|🏞️|Das Wasser im Bach ist klar.
+au[ch]||Ich komme auch mit.
+ko[ch]en|🍲|Wir kochen Nudeln.
+Bü[ch]er|📚|Die Bücher stehen im Regal.
+Wo[ch]e|📅|Eine Woche hat sieben Tage.
+Kir[sch]e|🍒|Die Kirsche ist rot.
+Ta[sch]e|👜|Die Tasche ist schwer.
+Fla[sch]e|🍼|Die Flasche ist leer.
+[Sch]ule|🏫|Ich gehe gern in die Schule.
+Fi[sch]|🐟|Der Fisch hat Flossen.
+[Sch]af|🐑|Das Schaf frisst Gras.
+wa[sch]en|🧼|Ich muss mir die Hände waschen.
+Fro[sch]|🐸|Der Frosch quakt am Teich.
+Men[sch]||Jeder Mensch ist besonders.
+Du[sch]e|🚿|Ich stehe unter der Dusche.
+Fu[chs]|🦊|Der Fuchs hat einen buschigen Schwanz.
+Wa[chs]||Die Kerze ist aus Wachs.
+se[chs]|6️⃣|Ich habe sechs Stifte.
+Da[chs]|🦡|Der Dachs schläft im Bau.
+O[chs]e|🐂|Der Ochse zieht den Wagen.
+La[chs]|🐟|Der Lachs schwimmt im Fluss.
+wa[chs]en||Die Blumen wachsen schnell.
+Ta[x]i|🚕|Wir fahren mit dem Taxi.
+He[x]e|🧙‍♀️|Die Hexe hat einen Zauberstab.
+A[x]t|🪓|Er schlägt Holz mit der Axt.
+Bo[x]|📦|Die Box ist leer.
+Te[x]t|📄|Der Text ist kurz.
+Mi[x]er|🥤|Der Mixer ist laut.
+Ke[ks]|🍪|Ich esse einen Keks.
+`},
+{id:'vf',name:'v, f, pf, w, qu',icon:'🐦',color:'#81c784',opts:'vfw',
+tip:'Gleiche Laute, verschiedene Buchstaben: v, f, pf, w, qu. Merken und üben!',
+rule:'Der Laut „f“ wird oft <b>v</b> geschrieben: Vogel, Vater, viel, vor.<br><b>pf</b> hörst du wie p+f: Apfel, Kopf, Topf, Pfeil.<br>Der Laut „w“ wird <b>w</b> geschrieben (Wurm, Löwe). In Fremdwörtern steht manchmal <b>v</b>: Vulkan, Klavier, Veilchen.<br><b>qu</b> spricht man „kw“: Quelle, Qualle, Quiz.',
+words:`
+[V]ogel|🐦|Der Vogel singt im Baum.
+[V]ater|👨|Mein Vater kocht gern.
+[v]iel||Ich habe viel Spaß.
+[V]ulkan|🌋|Der Vulkan spuckt Feuer.
+[V]eilchen|🌸|Das Veilchen ist violett.
+Kla[v]ier|🎹|Sie spielt Klavier.
+[V]ersteck||Das Versteck ist gut.
+[v]or||Ich stehe vor der Tür.
+[F]ahrrad|🚲|Ich fahre mit dem Fahrrad.
+[F]lugzeug|✈️|Das Flugzeug fliegt hoch.
+[F]rühling|🌷|Im Frühling blühen die Blumen.
+[F]erien|🌴|Im Sommer haben wir Ferien.
+[F]arbe|🎨|Welche Farbe magst du?
+[f]ünf|5️⃣|Ich habe fünf Finger.
+[F]ilm|🎬|Wir sehen einen Film.
+[F]amilie|👪|Meine Familie ist groß.
+A[pf]el|🍎|Der Apfel ist rot.
+Ko[pf]||Ich habe einen Hut auf dem Kopf.
+To[pf]|🍲|Die Suppe kocht im Topf.
+[Pf]eil|🏹|Der Pfeil fliegt weit.
+[Pf]laume||Die Pflaume ist blau.
+[Pf]ote|🐾|Der Hund gibt mir die Pfote.
+Strum[pf]|🧦|Ich habe nur einen Strumpf.
+[Pf]effer|🌶️|Der Pfeffer ist scharf.
+[W]urm|🪱|Der Wurm liegt im Garten.
+[W]ürfel|🎲|Ich werfe den Würfel.
+[w]ann||Sag mir, wann du kommst.
+[w]arum||Ich weiß nicht, warum.
+Lö[w]e|🦁|Der Löwe brüllt laut.
+Sch[w]ein|🐷|Das Schwein liegt im Stroh.
+Sch[w]an|🦢|Der Schwan schwimmt im See.
+Sch[w]albe||Die Schwalbe baut ein Nest.
+[Qu]elle||Das Wasser kommt aus der Quelle.
+[Qu]alle||Die Qualle schwimmt im Meer.
+[Qu]adrat|◼️|Ein Quadrat hat vier gleiche Seiten.
+[Qu]iz|❓|Wir machen ein Quiz.
+be[qu]em||Das Sofa ist bequem.
+[Qu]ark||Ich esse Quark mit Obst.
+[qu]aken|🐸|Die Frösche quaken laut.
+`},
+{id:'gk',name:'Groß oder klein?',icon:'🔠',color:'#4dd0e1',opts:'case',
+tip:'Kannst du „der, die, das“ davor setzen? Dann ist es ein Nomen und du schreibst groß!',
+rule:'<b>Namenwörter (Nomen)</b> schreibst du <b>groß</b>: der Tisch, die Katze, das Auto, Oma, Mama.<br><b>Tunwörter (Verben)</b> und <b>Wiewörter (Adjektive)</b> schreibst du <b>klein</b>: laufen, spielen, schnell, schön.<br>Test: Kannst du <i>der, die</i> oder <i>das</i> davor sagen? Dann ist es ein Nomen!',
+words:`
+[T]isch|🪑|Der Tisch ist rund.
+[H]und|🐕|Der Hund bellt im Garten.
+[K]atze|🐱|Die Katze trinkt Milch.
+[S]chule|🏫|Die Schule beginnt um acht.
+[A]uto|🚗|Das Auto ist rot.
+[B]aum|🌳|Der Baum ist sehr alt.
+[B]lume|🌸|Die Blume duftet gut.
+[B]uch|📖|Ich lese ein Buch.
+[H]aus|🏠|Unser Haus hat einen Garten.
+[M]utter|👩|Meine Mutter ist nett.
+[S]onne|☀️|Die Sonne scheint.
+[B]rot|🍞|Ich esse Brot.
+[G]arten|🌷|Im Garten blühen Blumen.
+[O]ma|👵|Meine Oma backt Kuchen.
+[O]pa|👴|Mein Opa liest die Zeitung.
+[V]ogel|🐦|Der Vogel singt.
+[W]olke|☁️|Die Wolke ist weiß.
+[Z]ug|🚆|Der Zug ist schnell.
+[F]isch|🐟|Der Fisch schwimmt.
+[K]uh|🐄|Die Kuh frisst Gras.
+[B]all|⚽|Der Ball ist rund.
+[B]erg|⛰️|Der Berg ist hoch.
+[U]hr|🕐|Die Uhr tickt.
+[A]pfel|🍎|Der Apfel ist süß.
+[l]aufen|🏃|Wir laufen um den Teich.
+[s]pielen|🎲|Die Kinder spielen im Park.
+[l]esen|📖|Ich möchte ein Buch lesen.
+[s]chreiben|✍️|Ich kann mit dem Stift schreiben.
+[m]alen|🎨|Wir malen ein Bild.
+[s]ingen|🎤|Alle singen ein Lied.
+[s]pringen|🐸|Die Hasen springen über die Wiese.
+[l]achen|😂|Wir lachen zusammen.
+[e]ssen|🍽️|Wir essen um zwölf Uhr.
+[t]rinken|🥤|Ich will Wasser trinken.
+[s]chlafen|😴|Ich möchte schlafen.
+[k]ochen|🍲|Papa will Suppe kochen.
+[t]anzen|💃|Sie tanzen auf dem Fest.
+[h]elfen|🤝|Ich möchte dir helfen.
+[l]ernen|🧠|Wir lernen Deutsch.
+[r]echnen|🔢|Ich kann schnell rechnen.
+[z]ählen||Ich kann bis zehn zählen.
+[s]chwimmen|🏊|Im Sommer schwimmen wir.
+[h]ören|👂|Ich kann dich gut hören.
+[s]ehen|👀|Ich kann den Berg sehen.
+[r]ufen|📣|Ich will dich rufen.
+[f]ragen|❓|Darf ich dich etwas fragen?
+[g]roß||Der Elefant ist groß.
+[k]lein|🐭|Die Maus ist klein.
+[s]chnell|⚡|Der Hase ist schnell.
+[l]angsam|🐌|Die Schnecke ist langsam.
+[l]ustig|😄|Der Clown ist lustig.
+[t]raurig|😢|Das Kind ist traurig.
+[s]chön|🌈|Der Regenbogen ist schön.
+[b]unt|🎨|Das Bild ist bunt.
+[l]aut|📢|Die Musik ist laut.
+[l]eise|🤫|Sei bitte leise.
+[w]arm|♨️|Der Tee ist warm.
+[k]alt|🧊|Das Eis ist kalt.
+[h]ell|💡|Das Zimmer ist hell.
+[a]lt||Der Opa ist alt.
+[j]ung||Das Kätzchen ist jung.
+[d]ick||Das Buch ist dick.
+[d]ünn||Das Heft ist dünn.
+[m]üde|😴|Ich bin müde.
+[s]üß|🍬|Der Kuchen ist süß.
+[s]auer|🍋|Die Zitrone ist sauer.
+[w]eich||Das Kissen ist weich.
+[h]art|🪨|Der Stein ist hart.
+[s]charf|🌶️|Der Pfeffer ist scharf.
+`}
+];
+//DATA-END
+
+// ---------- Hilfsfunktionen ----------
+const app=document.getElementById('app'), ov=document.getElementById('overlay');
+const rnd=n=>Math.floor(Math.random()*n);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pickOne=a=>a[rnd(a.length)];
+const LETTER=/[A-Za-zÄÖÜäöüß]/;
+
+function splitSent(e){
+  const s=e.sentence; if(!s) return null;
+  let from=0,i;
+  while((i=s.indexOf(e.full,from))>=0){
+    const b=i>0?s[i-1]:'', a=s[i+e.full.length]||'';
+    if(!(b&&LETTER.test(b))&&!(a&&LETTER.test(a))) return [s.slice(0,i),s.slice(i+e.full.length)];
+    from=i+1;
+  }
+  return null;
+}
+const ALL=[];
+THEMES.forEach(t=>{
+  t.entries=t.words.trim().split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{
+    const parts=l.split('|'); const m=parts[0].match(/^(.*?)\[(.*?)\](.*)$/);
+    const e={t,pre:m[1],mid:m[2],post:m[3],emoji:parts[1]||'',sentence:parts[2]||'',hint:parts[3]||''};
+    e.full=e.pre+e.mid+e.post; e.id=t.id+':'+e.full; e.sp=splitSent(e); return e;
+  });
+  ALL.push(...t.entries);
+});
+const BYID={}; ALL.forEach(e=>BYID[e.id]=e);
+
+function optionsFor(e){
+  const c=e.mid, lc=c.toLowerCase(), typ=e.t.opts; let L;
+  if(Array.isArray(typ)) L=typ.slice();
+  else if(typ==='double') L=(lc.length===2&&lc[0]===lc[1])?[lc,lc[0]]:[lc,lc+lc];
+  else if(typ==='vowel'){const v=lc[0]; L=[v,v+'h']; if('aeo'.includes(v)) L.push(v+v);}
+  else if(typ==='pair'){const m={b:'p',p:'b',d:'t',t:'d',g:'k',k:'g'}; L=[lc,m[lc]];}
+  else if(typ==='chsch'){const m={ch:['ch','sch'],sch:['sch','ch'],chs:['chs','x','ks'],x:['x','chs','ks'],ks:['ks','x','chs']}; L=m[lc].slice();}
+  else if(typ==='stsp') L=lc==='st'?['st','scht']:['sp','schp'];
+  else if(typ==='vfw'){const m={v:['v','f','w'],f:['f','v'],pf:['pf','f','p'],w:['w','v'],qu:['qu','kw']}; L=m[lc].slice();}
+  else if(typ==='case') return [c, c===c.toUpperCase()?c.toLowerCase():c.toUpperCase()];
+  const up=c[0]!==c[0].toLowerCase();
+  L=L.map(x=>up?x[0].toUpperCase()+x.slice(1):x);
+  if(!L.includes(c)) L.unshift(c);
+  return [...new Set(L)];
+}
+const wrongs=e=>optionsFor(e).filter(o=>o!==e.mid).map(o=>e.pre+o+e.post);
+const hl=e=>esc(e.pre)+'<b class="hl">'+esc(e.mid)+'</b>'+esc(e.post);
+function tipText(e){
+  if(e.hint){const h=e.hint.replace(/^(Mehrzahl|Verlängern): /,''); return 'Verlängere das Wort: <b>'+esc(h)+'</b> – hörst du den Buchstaben?';}
+  return esc(e.t.tip);
+}
+
+// ---------- Speicher ----------
+const KEY='rechtschreibinsel_v1';
+const defaults=()=>({name:'',stars:0,secs:0,p:{},seen:{},sound:true,rate:.8,qn:12,sel:'all'});
+function load(){try{const j=JSON.parse(localStorage.getItem(KEY));if(j&&j.p)return Object.assign(defaults(),j);}catch(e){}return defaults();}
+let S=load();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+// ---------- Ton & Sprache ----------
+let AC=null;
+function beep(f,d,type,vol,when){
+  if(!S.sound) return;
+  try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+(when||0);
+    o.type=type||'sine';o.frequency.value=f;g.gain.setValueAtTime(vol||.15,t);g.gain.exponentialRampToValueAtTime(.001,t+d);
+    o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d);}catch(e){}
+}
+const sfx={ok(){beep(660,.14,'sine',.15,0);beep(880,.2,'sine',.15,.13)},bad(){beep(220,.3,'triangle',.18,0)},pop(){beep(900,.08,'square',.08,0);beep(500,.1,'square',.06,.05)},win(){[523,659,784,1047].forEach((f,i)=>beep(f,.2,'sine',.15,i*.13))}};
+let VOICE=null;
+function pickVoice(){try{const vs=speechSynthesis.getVoices();VOICE=vs.find(v=>v.lang.replace('_','-')==='de-AT')||vs.find(v=>/^de/i.test(v.lang))||null;}catch(e){}}
+try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}catch(e){}
+function speak(t){
+  try{if(!('speechSynthesis' in window))return;speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(t);u.lang=VOICE?VOICE.lang:'de-DE';if(VOICE)u.voice=VOICE;u.rate=S.rate;
+    setTimeout(()=>speechSynthesis.speak(u),60);}catch(e){}
+}
+
+// ---------- Belohnungen ----------
+const STICKERS='🐶 🐱 🐭 🐹 🐰 🦊 🐻 🐼 🐨 🐯 🦁 🐮 🐷 🐸 🐵 🐔 🐧 🐦 🦆 🦉 🦄 🐝 🦋 🐞 🐢 🐙 🦀 🐠 🐬 🐳 🦈 🐊 🦒 🦓 🐘 🦘 🐿️ 🦔 🦜 🦚 🦩 🌸 🌼 🌻 🌷 🌹 🍀 🍄 🌈 ⭐ 🌙 ☀️ 🍎 🍌 🍓 🍒 🍑 🍍 🥝 🍉 🍇 🍪 🍰 🧁 🍩 🍭 🎈 🎁 🎀 🎨 🎸 🎺 🚀 🚲 🚂 ⛵ 🏰 🧸 🪁 ⚽ 🏀 🎯 🧩 🎲 🔮 💎 👑 🎩 🧚 🦸 🧙 🧜 🐉 🦕 🦖 🪐 🌍 🎠 🎡 🎢 🏖️ ⛺ 🗺️ 🔭 🎪'.split(' ');
+const PER_STICKER=40, PER_LEVEL=300;
+const TITLES=['Buchstaben-Küken','Silben-Spatz','Wörter-Entdeckerin','Lese-Fuchs','Rechtschreib-Biene','Wort-Detektivin','Sprach-Eule','Schreib-Löwin','Wörter-Zauberin','Rechtschreib-Königin'];
+const level=()=>Math.min(10,Math.floor(S.stars/PER_LEVEL)+1);
+let tt;
+function toast(m){const t=document.getElementById('toast');t.innerHTML=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2600);}
+function addStars(n){
+  const s0=Math.floor(S.stars/PER_STICKER), l0=Math.floor(S.stars/PER_LEVEL); S.stars+=n;
+  const s1=Math.floor(S.stars/PER_STICKER), l1=Math.floor(S.stars/PER_LEVEL);
+  if(s1>s0&&s1<=STICKERS.length){toast('🎁 Neuer Sticker: '+STICKERS[s1-1]);sfx.win();}
+  if(l1>l0&&l1<10){toast('🏅 Neue Stufe: '+TITLES[Math.min(l1,9)]+'!');confetti(24);}
+}
+function confetti(n){for(let i=0;i<n;i++){const s=document.createElement('span');s.className='conf';s.textContent=pickOne(['⭐','🎉','✨','🌟','🎈']);s.style.left=Math.random()*100+'vw';s.style.animationDelay=Math.random()*.6+'s';document.body.appendChild(s);setTimeout(()=>s.remove(),3200);}}
+
+// ---------- Lernstand ----------
+const MODES={
+ luecke:{name:'Lückenwörter',icon:'🧩',desc:'Welche Buchstaben fehlen?',cap:4},
+ detektiv:{name:'Wort-Detektiv',icon:'🔍',desc:'Finde das richtig geschriebene Wort!',cap:4},
+ hoeren:{name:'Hör-Detektiv',icon:'🎧',desc:'Hör zu und wähle die richtige Schreibweise.',cap:5},
+ saetze:{name:'Satz-Lücken',icon:'📝',desc:'Welches Wort passt in den Satz?',cap:5,filter:e=>!!e.sp},
+ salat:{name:'Buchstabensalat',icon:'🔤',desc:'Setze das Wort richtig zusammen.',cap:6,filter:e=>e.full.length<=12},
+ diktat:{name:'Klick-Diktat',icon:'🎤',desc:'Hör das Wort und baue es mit Buchstaben.',cap:6,filter:e=>e.full.length<=12},
+ ballon:{name:'Ballon-Pop',icon:'🎈',desc:'Platze nur die richtig geschriebenen Wörter!',cap:4},
+ memory:{name:'Memory',icon:'🃏',desc:'Finde Bild und Wort – und merke dir die Schreibweise.',cap:2,filter:e=>!!e.emoji}
+};
+function record(e,ok,m){
+  const p=S.p[e.id]||(S.p[e.id]={b:0,n:0,c:0,w:0});
+  p.n++; const cap=MODES[m]?MODES[m].cap:4;
+  if(ok){p.c++;if(p.b<cap)p.b++;}else{p.w++;p.b=Math.max(0,p.b-2);}
+  p.t=Date.now(); save();
+}
+const boxOf=e=>(S.p[e.id]||{b:0}).b;
+function weightOf(e){const p=S.p[e.id];if(!p)return 5;let w=Math.max(1,9-p.b*1.6);if(p.n>2&&p.c/p.n<.6)w+=3;return w;}
+function pickEntry(pool,recent){
+  const cand=pool.filter(e=>!recent.includes(e.id)); const L=cand.length>3?cand:pool;
+  let tot=0; const ws=L.map(e=>{const w=weightOf(e);tot+=w;return w;}); let r=Math.random()*tot;
+  for(let i=0;i<L.length;i++){r-=ws[i];if(r<=0)return L[i];} return L[L.length-1];
+}
+function poolFor(mode,sel){
+  let list=(!sel||sel==='all')?ALL:ALL.filter(e=>e.t.id===sel);
+  const f=MODES[mode]&&MODES[mode].filter; return f?list.filter(f):list;
+}
+function themeStats(t){
+  let m=0,sum=0; t.entries.forEach(e=>{const b=boxOf(e);if(b>=5)m++;sum+=Math.min(b,6);});
+  return {mastered:m,total:t.entries.length,pct:Math.round(sum/(6*t.entries.length)*100)};
+}
+function modeForWord(e){
+  const b=boxOf(e); const has=m=>!MODES[m].filter||MODES[m].filter(e);
+  const lists=b<2?['luecke','detektiv','luecke']:b<4?['saetze','hoeren','detektiv','salat']:['salat','diktat','hoeren','saetze'];
+  const ok=lists.filter(has); return pickOne(ok.length?ok:['luecke']);
+}
+const fmtTime=s=>{const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h+' Std. '+String(m).padStart(2,'0')+' Min.';};
+
+// ---------- Zeitmessung ----------
+let lastAct=Date.now();
+['pointerdown','keydown','touchstart'].forEach(ev=>addEventListener(ev,()=>lastAct=Date.now(),{passive:true}));
+setInterval(()=>{
+  if(S.name&&document.visibilityState==='visible'&&Date.now()-lastAct<45000){S.secs++;const el=document.getElementById('timeTxt');if(el)el.textContent=fmtTime(S.secs);const b=document.getElementById('timeBar');if(b)b.style.width=Math.min(100,S.secs/54000*100)+'%';if(S.secs%10===0)save();}
+},1000);
+addEventListener('visibilitychange',save); addEventListener('pagehide',save);
+
+// ---------- Bildschirme ----------
+let G=null, NT=null, timers=[];
+function cleanup(){clearTimeout(NT);timers.forEach(t=>{clearTimeout(t);clearInterval(t);});timers=[];try{speechSynthesis.cancel();}catch(e){}}
+function closeOv(){ov.classList.add('hidden');ov.innerHTML='';}
+function openOv(html){ov.innerHTML='<div class="box">'+html+'</div>';ov.classList.remove('hidden');}
+ov.addEventListener('click',ev=>{if(ev.target===ov)closeOv();});
+
+function showStart(){
+  cleanup();closeOv();
+  app.innerHTML=`<div class="wrap"><div class="card" style="text-align:center;margin-top:40px">
+  <div class="owl">🦉</div><h1>Hallo! Ich bin Eli, die Eule.</h1>
+  <p style="font-size:20px">Willkommen auf der <b>Rechtschreib-Insel</b>! Hier übst du spielend ck, tz, eu, äu und vieles mehr.<br>Wie heißt du?</p>
+  <input type="text" id="nm" maxlength="20" placeholder="Dein Vorname" autocomplete="off">
+  <p><button class="btn" id="go">Los geht's! 🚀</button></p></div></div>`;
+  document.getElementById('go').onclick=()=>{S.name=(document.getElementById('nm').value||'').trim()||'Freundin';save();showHub();};
+}
+
+function showHub(){
+  cleanup();closeOv();G=null;
+  if(!S.name)return showStart();
+  if(S.sel!=='all'&&!THEMES.some(t=>t.id===S.sel))S.sel='all';
+  const lv=level(), into=S.stars%PER_LEVEL, lvPct=lv>=10?100:Math.round(into/PER_LEVEL*100);
+  const nMast=ALL.filter(e=>boxOf(e)>=5).length;
+  const themeHtml=`<div class="chip ${S.sel==='all'?'sel':''}" data-t="all"><div class="ic">🌈</div>Alle Themen<div class="mini"><i style="width:${Math.round(ALL.reduce((a,e)=>a+Math.min(boxOf(e),6),0)/(6*ALL.length)*100)}%"></i></div></div>`+
+  THEMES.map(t=>`<div class="chip ${S.sel===t.id?'sel':''}" data-t="${t.id}"><div class="ic">${t.icon}</div>${esc(t.name)}<div class="mini"><i style="width:${themeStats(t).pct}%"></i></div></div>`).join('');
+  const modeHtml=Object.keys(MODES).map(k=>`<button class="mode" data-m="${k}"><span class="mi">${MODES[k].icon}</span><b>${MODES[k].name}</b><span class="small">${MODES[k].desc}</span></button>`).join('');
+  app.innerHTML=`<div class="wrap">
+  <div class="card top"><div class="owl">🦉</div>
+   <div class="grow"><h1 style="font-size:26px">Hallo, ${esc(S.name)}!</h1>
+   <div class="small">Stufe ${lv}: <b>${TITLES[lv-1]}</b></div>
+   <div class="trow"><div class="bar"><i style="width:${lvPct}%"></i></div></div></div>
+   <div class="pill">⭐ ${S.stars}</div>
+   <button class="icon" id="bAlb" title="Sticker">🏆</button><button class="icon" id="bPro" title="Fortschritt">📊</button><button class="icon" id="bSet" title="Einstellungen">⚙️</button></div>
+  <div class="card"><div class="trow"><b>Spielzeit</b><div class="bar"><i id="timeBar" style="width:${Math.min(100,S.secs/54000*100)}%"></i></div><span id="timeTxt" class="small">${fmtTime(S.secs)}</span></div>
+   <div class="small">Ziel: 15 Stunden Spielzeit. Sicher gekonnte Wörter: <b>${nMast} von ${ALL.length}</b></div></div>
+  <div class="card" style="text-align:center"><button class="btn alt" id="bTrain" style="font-size:24px;padding:18px 30px">▶ Mein Training</button>
+   <div class="small" style="margin-top:8px">Eli sucht die Wörter aus, die du jetzt am besten übst – mit wechselnden Aufgaben.</div></div>
+  <div class="card"><h2>1. Thema wählen</h2><div class="grid themes">${themeHtml}</div>
+   <p id="ruleP" style="margin:12px 0 0">${S.sel!=='all'?'<button class="btn small" id="bRule">📘 Regel zu diesem Thema</button>':'<span class="small">Wähle ein Thema, um die Regel dazu zu sehen – oder übe alle Themen gemischt.</span>'}</p></div>
+  <div class="card"><h2>2. Spiel wählen</h2><div class="grid modes">${modeHtml}</div></div></div>`;
+  app.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{S.sel=c.dataset.t;save();showHub();});
+  app.querySelectorAll('.mode').forEach(b=>b.onclick=()=>startGame(b.dataset.m,S.sel));
+  document.getElementById('bTrain').onclick=()=>startGame('train','all');
+  document.getElementById('bAlb').onclick=showAlbum;
+  document.getElementById('bPro').onclick=showProgress;
+  document.getElementById('bSet').onclick=showSettings;
+  const br=document.getElementById('bRule'); if(br)br.onclick=()=>showRule(S.sel);
+}
+
+function showRule(id,cb){
+  const t=THEMES.find(x=>x.id===id); if(!t)return;
+  const ex=t.entries.slice(0,5).concat(t.entries.slice(-3)).map(e=>`<span>${e.emoji||''} ${hl(e)}</span>`).join('');
+  openOv(`<h2>${t.icon} ${esc(t.name)}</h2><div class="rule">${t.rule}</div><div class="ex">${ex}</div>
+  <div class="row"><button class="btn green" id="okR">Verstanden ✔</button></div>`);
+  document.getElementById('okR').onclick=()=>{closeOv();S.seen[id]=1;save();if(cb)cb();};
+}
+
+function showAlbum(){
+  const n=Math.min(STICKERS.length,Math.floor(S.stars/PER_STICKER));
+  openOv(`<h2>🏆 Mein Sticker-Album</h2><p>Für je ${PER_STICKER} Sterne bekommst du einen neuen Sticker. Du hast <b>${n}</b> von ${STICKERS.length}!</p>
+  <div class="album">${STICKERS.map((s,i)=>`<div class="${i<n?'':'lock'}">${i<n?s:'❔'}</div>`).join('')}</div>
+  <div class="row"><button class="btn" id="cl">Schließen</button></div>`);
+  document.getElementById('cl').onclick=closeOv;
+}
+
+function showProgress(){
+  const rows=THEMES.map(t=>{const s=themeStats(t);return `<div class="trow"><span class="nm">${t.icon} ${esc(t.name)}</span><div class="bar"><i style="width:${s.pct}%"></i></div><span class="small" style="width:64px">${s.mastered}/${s.total}</span></div>`;}).join('');
+  const hard=ALL.filter(e=>(S.p[e.id]||{}).w>0&&boxOf(e)<5).sort((a,b)=>S.p[b.id].w-S.p[a.id].w).slice(0,18);
+  openOv(`<h2>📊 Fortschritt</h2><p class="small">Die Zahl zeigt, wie viele Wörter sicher sitzen (mehrmals richtig, auch in schweren Spielen).</p>${rows}
+  <h3 style="margin-top:14px">Diese Wörter sollten wir noch üben</h3>
+  <div class="wl">${hard.length?hard.map(e=>`<span>${hl(e)}</span>`).join(''):'<span class="small">Noch keine Fehlerwörter – super!</span>'}</div>
+  <p class="small">Spielzeit gesamt: ${fmtTime(S.secs)} · Sterne: ${S.stars}</p>
+  <div class="row"><button class="btn" id="cl">Schließen</button></div>`);
+  document.getElementById('cl').onclick=closeOv;
+}
+
+function showSettings(){
+  openOv(`<h2>⚙️ Einstellungen</h2>
+  <label class="set">Name <input type="text" id="sN" value="${esc(S.name)}" maxlength="20"></label>
+  <label class="set"><input type="checkbox" id="sS" ${S.sound?'checked':''}> Töne an</label>
+  <label class="set">Sprechtempo <input type="range" id="sR" min="0.5" max="1.1" step="0.05" value="${S.rate}"> <button class="btn small" id="sT">🔊 Test</button></label>
+  <label class="set">Fragen pro Runde <select id="sQ">${[8,12,16,20].map(n=>`<option ${S.qn===n?'selected':''}>${n}</option>`).join('')}</select></label>
+  <p class="small" id="vInfo"></p>
+  <div class="row"><button class="btn green" id="sOk">Speichern</button><button class="btn small" id="sRe" style="background:#ff6b6b;box-shadow:0 5px 0 #c94444">Alles zurücksetzen</button></div>`);
+  pickVoice(); document.getElementById('vInfo').textContent=VOICE?'Vorlese-Stimme: '+VOICE.name+' ('+VOICE.lang+')':'Hinweis: Auf diesem Gerät wurde keine deutsche Stimme gefunden. Das Vorlesen klingt dann evtl. fremd. Chrome, Edge und Safari haben meist eine deutsche Stimme.';
+  document.getElementById('sT').onclick=()=>{S.rate=parseFloat(document.getElementById('sR').value);speak('Die Jacke ist warm.');};
+  document.getElementById('sOk').onclick=()=>{S.name=document.getElementById('sN').value.trim()||S.name;S.sound=document.getElementById('sS').checked;S.rate=parseFloat(document.getElementById('sR').value);S.qn=parseInt(document.getElementById('sQ').value);save();closeOv();showHub();};
+  document.getElementById('sRe').onclick=()=>{if(confirm('Wirklich alle Sterne, Sticker und den Lernstand löschen?')){try{localStorage.removeItem(KEY);}catch(e){}S=defaults();showStart();}};
+}
+
+// ---------- Spiel-Ablauf ----------
+function startGame(mode,sel){
+  if(sel!=='all'&&!S.seen[sel]){showRule(sel,()=>startGame(mode,sel));return;}
+  cleanup();closeOv();
+  G={mode,sel,total:S.qn,i:0,ok:0,stars:0,wrong:[],recent:[],retry:[],rt:new Set(),streak:0,cur:null,extra:''};
+  if(mode==='ballon')return ballon();
+  if(mode==='memory')return memory();
+  nextQ();
+}
+const PRAISE=['Super!','Richtig!','Toll gemacht!','Genau!','Wunderbar!','Prima!','Klasse!','Stark!'];
+function shell(e,withStage){
+  app.innerHTML=`<div class="game"><div class="gtop"><button class="icon" id="quit">✖</button><div class="bar"><i id="pbar" style="width:${G.i/G.total*100}%"></i></div><div class="gstars" id="gst">⭐ ${G.stars}</div></div>
+  <span class="theme-chip" style="background:${e.t.color}">${e.t.icon} ${esc(e.t.name)}</span> <button class="icon" id="rl" style="padding:3px 10px;font-size:16px">📘 Regel</button>
+  <div class="stage" id="stage"></div><div id="fb"></div></div>`;
+  document.getElementById('quit').onclick=()=>{if(confirm('Spiel beenden?'))showHub();};
+  document.getElementById('rl').onclick=()=>showRule(e.t.id);
+}
+function updateTop(){const b=document.getElementById('pbar');if(b)b.style.width=Math.min(100,G.i/G.total*100)+'%';const s=document.getElementById('gst');if(s)s.textContent='⭐ '+G.stars;}
+function nextQ(){
+  clearTimeout(NT);
+  if(G.i>=G.total)return showResult();
+  let e;
+  if(G.retry.length&&(G.i-G.retry[0].at>=3||G.total-G.i<=G.retry.length)) e=G.retry.shift().e;
+  else e=pickEntry(poolFor(G.mode==='train'?'luecke':G.mode,G.sel),G.recent);
+  G.recent.push(e.id); if(G.recent.length>8)G.recent.shift();
+  const m=G.mode==='train'?modeForWord(e):G.mode;
+  G.cur={e,m,done:false};
+  shell(e); Q[m](e,document.getElementById('stage'));
+}
+function finishQ(ok){
+  const c=G.cur; if(!c||c.done)return; c.done=true; const e=c.e;
+  record(e,ok,c.m); G.i++;
+  if(ok){G.ok++;G.streak++;const n=G.streak%5===0?2:1;G.stars+=n;addStars(n);sfx.ok();if(G.streak%5===0){confetti(14);toast('🔥 '+G.streak+' richtig hintereinander!');}}
+  else{G.streak=0;G.wrong.push(e);sfx.bad();if(!G.rt.has(e.id)){G.rt.add(e.id);G.retry.push({e,at:G.i});G.total++;}}
+  updateTop();
+  const fb=document.getElementById('fb');
+  if(ok){fb.innerHTML='<div class="fb good">🎉 '+pickOne(PRAISE)+'</div>';NT=setTimeout(nextQ,1150);}
+  else{
+    fb.innerHTML=`<div class="fb bad">Fast! So schreibt man es:<span class="big">${e.emoji||''} ${hl(e)}</span><div style="font-size:18px">${tipText(e)}</div> <button class="speak" id="spk2">🔊 Hören</button></div><button class="btn next" id="nx">Weiter ▶</button>`;
+    document.getElementById('spk2').onclick=()=>speak(e.full);
+    document.getElementById('nx').onclick=nextQ; speak(e.full);
+  }
+  const st=document.getElementById('stage'); if(st){const em=st.querySelector('.reveal');if(em)em.classList.remove('hidden');}
+}
+
+// ---------- Fragetypen ----------
+const Q={};
+function headRow(e,st,speakText,hint){
+  st.querySelector('#spk').onclick=()=>speak(speakText);
+  const h=st.querySelector('#hint'); if(h)h.onclick=()=>{st.querySelector('#hb').innerHTML='💡 '+tipText(e);};
+}
+Q.luecke=(e,st)=>{
+  const opts=shuffle(optionsFor(e));
+  st.innerHTML=`${e.emoji?`<div class="qemoji">${e.emoji}</div>`:''}<div class="qword">${esc(e.pre)}<span class="gap" id="gap">?</span>${esc(e.post)}</div>
+  <div class="row"><button class="speak" id="spk">🔊 Hören</button><button class="tool" id="hint">💡 Tipp</button></div><div class="hintbox" id="hb"></div>
+  <div class="opts">${opts.map(o=>`<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div>`;
+  headRow(e,st,e.full); setTimeout(()=>speak(e.full),250);
+  st.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    if(G.cur.done)return; const ok=b.dataset.o===e.mid;
+    st.querySelectorAll('.opt').forEach(x=>{x.disabled=true;if(x.dataset.o===e.mid)x.classList.add('good');});
+    if(!ok)b.classList.add('bad');
+    const g=st.querySelector('#gap');g.textContent=e.mid;g.classList.add(ok?'good':'bad');
+    finishQ(ok);
+  });
+};
+function cardChoice(e,st,words){
+  const box=st.querySelector('.cards');
+  box.innerHTML=shuffle(words).map(w=>`<button class="wcard" data-w="${esc(w)}">${esc(w)}</button>`).join('');
+  box.querySelectorAll('.wcard').forEach(b=>b.onclick=()=>{
+    if(G.cur.done)return; const ok=b.dataset.w===e.full;
+    box.querySelectorAll('.wcard').forEach(x=>{x.disabled=true;if(x.dataset.w===e.full){x.classList.add('good');x.innerHTML=hl(e);}});
+    if(!ok)b.classList.add('bad'); finishQ(ok);
+  });
+}
+Q.detektiv=(e,st)=>{
+  if(Math.random()<.3)return tf(e,st);
+  st.innerHTML=`${e.emoji?`<div class="qemoji">${e.emoji}</div>`:''}<div class="qsent">Welches Wort ist richtig geschrieben?</div>
+  <div class="row"><button class="speak" id="spk">🔊 Hören</button><button class="tool" id="hint">💡 Tipp</button></div><div class="hintbox" id="hb"></div><div class="cards"></div>`;
+  headRow(e,st,e.full); setTimeout(()=>speak(e.full),250);
+  cardChoice(e,st,[e.full,...shuffle(wrongs(e)).slice(0,2)]);
+};
+function tf(e,st){
+  const right=Math.random()<.5, w=right?e.full:pickOne(wrongs(e));
+  st.innerHTML=`${e.emoji?`<div class="qemoji">${e.emoji}</div>`:''}<div class="qsent">Ist das Wort richtig geschrieben?</div>
+  <div class="qword">${esc(w)}</div><div class="row"><button class="speak" id="spk">🔊 Hören</button><button class="tool" id="hint">💡 Tipp</button></div><div class="hintbox" id="hb"></div>
+  <div class="opts"><button class="opt" data-a="r" style="font-size:28px">✅ richtig</button><button class="opt" data-a="f" style="font-size:28px">❌ falsch</button></div>`;
+  headRow(e,st,e.full); setTimeout(()=>speak(e.full),250);
+  st.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    if(G.cur.done)return; const ok=(b.dataset.a==='r')===right;
+    st.querySelectorAll('.opt').forEach(x=>x.disabled=true); b.classList.add(ok?'good':'bad'); finishQ(ok);
+  });
+}
+Q.hoeren=(e,st)=>{
+  st.innerHTML=`<div class="qemoji" style="font-size:90px">🎧</div><div class="qsent">Hör gut zu! Wie schreibt man das Wort?</div>
+  <div class="row"><button class="speak" id="spk" style="font-size:24px">🔊 Nochmal hören</button><button class="tool" id="hint">💡 Tipp</button></div><div class="hintbox" id="hb"></div><div class="cards"></div>
+  <div class="qemoji reveal hidden">${e.emoji}</div>`;
+  headRow(e,st,e.full); setTimeout(()=>speak(e.full),300);
+  cardChoice(e,st,[e.full,...shuffle(wrongs(e)).slice(0,2)]);
+};
+Q.saetze=(e,st)=>{
+  st.innerHTML=`${e.emoji?`<div class="qemoji">${e.emoji}</div>`:''}<div class="qsent">${esc(e.sp[0])}<span class="gap wide" id="gap">&nbsp;</span>${esc(e.sp[1])}</div>
+  <div class="row"><button class="speak" id="spk">🔊 Satz hören</button><button class="tool" id="hint">💡 Tipp</button></div><div class="hintbox" id="hb"></div><div class="cards"></div>`;
+  headRow(e,st,e.sentence); setTimeout(()=>speak(e.sentence),250);
+  cardChoice(e,st,[e.full,...shuffle(wrongs(e)).slice(0,2)]);
+  st.querySelectorAll('.wcard').forEach(b=>{const old=b.onclick;b.onclick=ev=>{const ok=b.dataset.w===e.full;const g=st.querySelector('#gap');if(!G.cur.done){g.textContent=e.full;g.classList.add(ok?'good':'bad');}old.call(b,ev);};});
+};
+const CONF={a:'ä',ä:'e',e:'ä',u:'ü',o:'ö',s:'ß',ß:'s',k:'c',c:'k',t:'d',d:'t',z:'t',b:'p',p:'b',g:'k',f:'v',v:'f',w:'v',h:'e',i:'y'};
+function distractors(e,n){
+  const have=new Set([...e.full.toLowerCase()]); const c=[];
+  [...e.full.toLowerCase()].forEach(ch=>{const x=CONF[ch];if(x&&!have.has(x)&&!c.includes(x))c.push(x);});
+  shuffle([...'aehkstzdfvwpbgl']).forEach(x=>{if(!have.has(x)&&!c.includes(x))c.push(x);});
+  return shuffle(c).slice(0,n);
+}
+function tilesGame(e,st,mode){
+  const chars=[...e.full]; let tiles=chars.map((c,i)=>({c,id:i,used:false}));
+  if(mode==='diktat')distractors(e,3).forEach((c,k)=>tiles.push({c,id:100+k,used:false}));
+  tiles=shuffle(tiles); if(mode==='salat'&&chars.length>2&&tiles.map(t=>t.c).join('')===e.full)tiles=shuffle(tiles);
+  const slots=Array(chars.length).fill(null);
+  const intro=mode==='salat'
+    ?`${e.emoji?`<div class="qemoji">${e.emoji}</div>`:''}${e.sp?`<div class="qsent" style="font-size:22px">${esc(e.sp[0])}<span class="gap wide">&nbsp;</span>${esc(e.sp[1])}</div>`:''}<div class="qsent" style="font-size:22px">Setze die Buchstaben zum Wort zusammen.</div>`
+    :`<div class="qemoji" style="font-size:80px">🎤</div><div class="qsent" style="font-size:22px">Hör zu und baue das Wort. Pass auf: Es sind zu viele Buchstaben da!</div>`;
+  st.innerHTML=`${intro}<div class="row"><button class="speak" id="spk">🔊 Hören</button><button class="tool" id="hint">💡 Tipp</button></div><div class="hintbox" id="hb"></div>
+  <div class="slots" id="slots"></div><div class="tiles" id="tiles"></div>
+  <div class="row"><button class="btn small" id="clr" style="background:#8a8aa8;box-shadow:0 5px 0 #66667f">↺ Neu</button><button class="btn green" id="chk" disabled>Prüfen ✔</button></div>
+  <div class="qemoji reveal hidden">${e.emoji}</div>`;
+  headRow(e,st,e.full); setTimeout(()=>speak(e.full),300);
+  const sl=st.querySelector('#slots'), tl=st.querySelector('#tiles'), chk=st.querySelector('#chk');
+  function draw(){
+    sl.innerHTML=slots.map((t,i)=>`<button class="slot" data-i="${i}">${t?esc(t.c):''}</button>`).join('');
+    tl.innerHTML=tiles.map(t=>`<button class="tile ${t.used?'used':''}" data-id="${t.id}">${esc(t.c)}</button>`).join('');
+    chk.disabled=slots.some(x=>!x);
+    if(G.cur.done)return;
+    sl.querySelectorAll('.slot').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;if(slots[i]){slots[i].used=false;slots[i]=null;draw();}});
+    tl.querySelectorAll('.tile').forEach(b=>b.onclick=()=>{const t=tiles.find(x=>x.id==b.dataset.id);if(t.used)return;const i=slots.indexOf(null);if(i<0)return;t.used=true;slots[i]=t;beep(500,.05,'sine',.08);draw();});
+  }
+  draw();
+  st.querySelector('#clr').onclick=()=>{if(G.cur.done)return;tiles.forEach(t=>t.used=false);slots.fill(null);draw();};
+  chk.onclick=()=>{
+    if(G.cur.done)return; const w=slots.map(t=>t.c).join(''), ok=w===e.full;
+    sl.querySelectorAll('.slot').forEach(b=>b.classList.add(ok?'good':'bad')); chk.disabled=true; finishQ(ok);
+  };
+}
+Q.salat=(e,st)=>tilesGame(e,st,'salat');
+Q.diktat=(e,st)=>tilesGame(e,st,'diktat');
+
+// ---------- Ballon-Pop ----------
+function ballon(){
+  cleanup(); G.total=0; G.title='Ballon-Pop';
+  let time=60,hearts=3,pops=0,over=false,spawned=0;
+  const pool=poolFor('ballon',G.sel).filter(e=>e.full.length<=13);
+  const colors=['#ff6b9d','#6c5ce7','#00b894','#e17055','#0984e3','#fdcb6e','#e84393','#00cec9'];
+  app.innerHTML=`<div class="game"><div class="gtop"><button class="icon" id="quit">✖</button><div class="gstars" id="tm">⏱ 60</div><div class="gstars" id="hr">❤️❤️❤️</div><div class="gstars" id="gst">⭐ 0</div></div>
+  <div class="card" style="text-align:center;padding:10px"><b>Platze nur die RICHTIG geschriebenen Wörter!</b> Fehlerhafte Wörter lässt du fliegen. 🎈</div><div class="sky" id="sky"></div></div>`;
+  const sky=document.getElementById('sky'); sky.style.setProperty('--h',sky.clientHeight+'px');
+  document.getElementById('quit').onclick=()=>{if(confirm('Spiel beenden?'))showHub();};
+  const upd=()=>{document.getElementById('tm').textContent='⏱ '+time;document.getElementById('hr').textContent='❤️'.repeat(hearts)+'🖤'.repeat(3-hearts);document.getElementById('gst').textContent='⭐ '+G.stars;};
+  function end(){if(over)return;over=true;cleanup();G.ok=pops;G.total=pops+G.wrong.length;showResult();}
+  function spawn(){
+    if(over)return;
+    const e=pickEntry(pool,G.recent); G.recent.push(e.id); if(G.recent.length>10)G.recent.shift();
+    const wrong=Math.random()<.5, txt=wrong?pickOne(wrongs(e)):e.full;
+    const b=document.createElement('div'); b.className='balloon'; b.textContent=txt;
+    b.style.left=(2+Math.random()*60)+'%'; b.style.background=pickOne(colors);
+    b.style.animationDuration=Math.max(5.5,10-spawned*.08)+'s'; spawned++;
+    b.addEventListener('animationend',()=>b.remove());
+    b.onpointerdown=()=>{
+      if(b.dataset.d||over)return; b.dataset.d=1;
+      if(!wrong){pops++;G.stars++;addStars(1);record(e,true,'ballon');sfx.pop();b.classList.add('pop');}
+      else{hearts--;record(e,false,'ballon');sfx.bad();G.wrong.push(e);b.classList.add('pop');toast('Oje! Richtig ist: <b>'+esc(e.full)+'</b>');speak(e.full);}
+      setTimeout(()=>b.remove(),260); upd(); if(hearts<=0)end();
+    };
+    sky.appendChild(b); timers.push(setTimeout(spawn,Math.max(650,1500-spawned*20)));
+  }
+  spawn();
+  timers.push(setInterval(()=>{time--;upd();if(time<=0)end();},1000));
+}
+
+// ---------- Memory ----------
+function memory(){
+  cleanup(); G.title='Memory';
+  const narrow=innerWidth<560, pairs=narrow?6:8, cols=narrow?3:4;
+  const pool=poolFor('memory',G.sel); const chosen=[],em=new Set(),rec=[];
+  while(chosen.length<pairs&&rec.length<400){const e=pickEntry(pool,rec);rec.push(e.id);if(!em.has(e.emoji)&&!chosen.includes(e)){em.add(e.emoji);chosen.push(e);}}
+  const cards=shuffle(chosen.flatMap(e=>[{e,k:'p'},{e,k:'w'}]));
+  G.total=chosen.length; let first=null,lock=false,matched=0,moves=0;
+  app.innerHTML=`<div class="game"><div class="gtop"><button class="icon" id="quit">✖</button><div class="bar"><i id="pbar" style="width:0%"></i></div><div class="gstars" id="gst">⭐ 0</div></div>
+  <div class="card" style="text-align:center;padding:10px"><b>Finde zu jedem Bild das passende Wort!</b> Schau genau, wie das Wort geschrieben wird.</div>
+  <div class="mgrid" id="mg" style="grid-template-columns:repeat(${cols},1fr)">${cards.map((c,i)=>`<button class="mcard" data-i="${i}">❓</button>`).join('')}</div></div>`;
+  document.getElementById('quit').onclick=()=>{if(confirm('Spiel beenden?'))showHub();};
+  const els=[...document.querySelectorAll('.mcard')];
+  function up(i){const c=cards[i],b=els[i];b.classList.add('up',c.k);b.innerHTML=c.k==='p'?c.e.emoji:hl(c.e);if(c.k==='w')speak(c.e.full);}
+  function down(i){els[i].classList.remove('up','p','w');els[i].textContent='❓';}
+  els.forEach((b,i)=>b.onclick=()=>{
+    if(lock||b.classList.contains('up'))return; up(i);
+    if(first===null){first=i;return;}
+    moves++; const a=first; first=null;
+    if(cards[a].e===cards[i].e){
+      matched++;G.stars++;addStars(1);record(cards[i].e,true,'memory');sfx.ok();
+      els[a].classList.add('done');els[i].classList.add('done');
+      document.getElementById('pbar').style.width=matched/pairs*100+'%';document.getElementById('gst').textContent='⭐ '+G.stars;
+      if(matched===pairs){G.ok=pairs;G.extra='Du hast '+moves+' Züge gebraucht.';timers.push(setTimeout(showResult,900));}
+    }else{lock=true;sfx.bad();timers.push(setTimeout(()=>{down(a);down(i);lock=false;},1000));}
+  });
+}
+
+// ---------- Ergebnis ----------
+function showResult(){
+  cleanup();
+  const total=Math.max(G.total,1), pct=Math.round(G.ok/total*100);
+  const msg=pct>=90?'Fantastisch!':pct>=70?'Sehr gut!':pct>=50?'Gut gemacht!':'Weiter so – Übung macht die Meisterin!';
+  const uniq=[...new Map(G.wrong.map(e=>[e.id,e])).values()];
+  if(pct>=70){confetti(30);sfx.win();}
+  const name=G.mode==='train'?'Mein Training':(G.title||MODES[G.mode].name);
+  app.innerHTML=`<div class="wrap"><div class="card" style="text-align:center;margin-top:30px"><div class="owl">${pct>=70?'🦉🎉':'🦉'}</div>
+  <h1>${msg}</h1><p style="font-size:22px">${esc(name)}: <b>${G.ok}</b> von <b>${G.total}</b> richtig (${pct}%)<br>⭐ ${G.stars} Sterne verdient ${G.extra?'<br><span class="small">'+G.extra+'</span>':''}</p>
+  ${uniq.length?`<h3>Diese Wörter üben wir bald wieder:</h3><div class="wl" style="justify-content:center">${uniq.map(e=>`<span>${e.emoji||''} ${hl(e)}</span>`).join('')}</div>`:'<p>🌟 Kein einziger Fehler!</p>'}
+  <p style="margin-top:18px"><button class="btn alt" id="again">Nochmal ▶</button> <button class="btn" id="home">Zur Startseite</button></p></div></div>`;
+  document.getElementById('again').onclick=()=>startGame(G.mode,G.sel);
+  document.getElementById('home').onclick=showHub;
+}
+
+// ---------- Start ----------
+if(S.name)showHub();else showStart();
+</script>
+</body>
+</html>
