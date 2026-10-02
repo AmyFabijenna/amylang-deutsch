@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vorstellungsgespräch Baukasten</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Young+Serif&display=swap">
+<style>
+/* Layout: feste Tab-Leiste oben, darunter eine ruhige Arbeitsspalte. Bausteine sind Chips, das Antwortfeld steht im Zentrum. */
+:root{
+  --bg:#f4f7f8; --surface:#ffffff; --surface2:#eaf0f2; --ink:#1b2a33; --muted:#51636e; --line:#d3dee3;
+  --accent:#0e5c6d; --on-accent:#ffffff; --accent-text:#0e5c6d; --accent-soft:#e0f0f3; --accent-ink:#08414e;
+  --warm-soft:#fdf0d9; --warm-line:#e8bd75; --warm-ink:#74410a;
+  --ok:#2c7a4b; --on-ok:#ffffff; --warn-soft:#fbe9d0; --warn-ink:#7a3f00; --focus:#1d6fd6;
+  --font-display:'Young Serif',Georgia,'Times New Roman',serif;
+  --font-body:'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --gutter:clamp(16px,4vw,32px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1a20; --surface:#15252d; --surface2:#1c313a; --ink:#e5edf0; --muted:#9db1bb; --line:#2b3f49;
+    --accent:#3fa8be; --on-accent:#04222a; --accent-text:#82d2e2; --accent-soft:#17353f; --accent-ink:#b3e6f1;
+    --warm-soft:#3a2b12; --warm-line:#7d5819; --warm-ink:#f2c987;
+    --ok:#5cbc84; --on-ok:#06220f; --warn-soft:#3f2b0d; --warn-ink:#f4c47c; --focus:#7db4ff; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1a20; --surface:#15252d; --surface2:#1c313a; --ink:#e5edf0; --muted:#9db1bb; --line:#2b3f49;
+  --accent:#3fa8be; --on-accent:#04222a; --accent-text:#82d2e2; --accent-soft:#17353f; --accent-ink:#b3e6f1;
+  --warm-soft:#3a2b12; --warm-line:#7d5819; --warm-ink:#f2c987;
+  --ok:#5cbc84; --on-ok:#06220f; --warn-soft:#3f2b0d; --warn-ink:#f4c47c; --focus:#7db4ff; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:1.0625rem;line-height:1.6}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+h1,h2,h3,h4{margin:0;text-wrap:balance}
+h1,h2{font-family:var(--font-display);font-weight:400;line-height:1.2}
+h1{font-size:clamp(1.65rem,4.6vw,2.4rem);margin-bottom:.7rem}
+h2{font-size:clamp(1.3rem,3.4vw,1.7rem)}
+h3{font-size:1.05rem}
+p{margin:0 0 .8rem}
+.muted{color:var(--muted)}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.top-in{max-width:1080px;margin:0 auto;padding:.7rem var(--gutter) 0;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.3rem 1rem}
+.brand{font-family:var(--font-display);font-size:1.2rem;line-height:1.2}
+.slow{display:inline-flex;align-items:center;gap:.5rem;font-size:.95rem;color:var(--muted);cursor:pointer}
+.slow input{width:1.15rem;height:1.15rem;accent-color:var(--accent)}
+.tabs{display:flex;gap:.2rem;overflow-x:auto;width:100%;scrollbar-width:thin}
+.tab{flex:none;background:transparent;border:0;border-bottom:3px solid transparent;padding:.65rem .85rem;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab:hover{color:var(--ink)}
+.tab[aria-current="page"]{color:var(--ink);font-weight:700;border-bottom-color:var(--accent)}
+
+main{max-width:1080px;margin:0 auto;padding:1.6rem var(--gutter) 4.5rem}
+.lead{font-size:1.15rem;max-width:62ch}
+.intro{margin-bottom:1.6rem}
+.sec{margin-top:2rem}
+.sec>h2{margin-bottom:.8rem}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.9rem}
+.cardlink{display:flex;flex-direction:column;gap:.3rem;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1rem 1.1rem;cursor:pointer;min-width:0}
+.cardlink:hover{border-color:var(--accent)}
+.cardlink b{font-size:1.1rem;color:var(--accent-text)}
+.cardlink span{color:var(--muted);font-size:.98rem}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1.1rem 1.25rem;min-width:0}
+.panel+.panel{margin-top:.9rem}
+.courage{margin:0;padding-left:1.2rem;display:grid;gap:.4rem}
+.courage li::marker{color:var(--accent)}
+
+.pform{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:.9rem 1.1rem}
+.pform label{display:flex;flex-direction:column;gap:.3rem;font-size:.95rem;color:var(--muted);min-width:0}
+.pform input{padding:.6rem .75rem;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);font-size:1.05rem;color:var(--ink);min-width:0}
+.pform input:focus-visible{border-color:var(--accent)}
+
+.prog{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:.2rem 1.5rem}
+.prog li{display:flex;align-items:center;gap:.6rem;padding:.35rem 0;border-bottom:1px solid var(--line);min-width:0}
+.prog .pn{flex:none;width:1.6rem;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+.prog .pt{flex:1;min-width:0}
+.pill{flex:none;font-size:.82rem;padding:.12rem .55rem;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
+.pill.r1{background:var(--warn-soft);color:var(--warn-ink);border-color:var(--warm-line)}
+.pill.r2{background:var(--accent-soft);color:var(--accent-ink);border-color:var(--accent)}
+.pill.r3{background:var(--ok);color:var(--on-ok);border-color:var(--ok)}
+.tick{flex:none;width:1.1rem;color:var(--ok);font-weight:700;text-align:center}
+
+.btn{display:inline-flex;align-items:center;gap:.45rem;border:1.5px solid var(--accent);background:var(--accent);color:var(--on-accent);padding:.55rem 1rem;border-radius:10px;cursor:pointer;font-weight:700}
+.btn:hover{filter:brightness(1.07)}
+.btn.ghost{background:transparent;color:var(--accent-text)}
+.btn.ghost:hover{background:var(--accent-soft);filter:none}
+.btn[disabled]{opacity:.45;cursor:default}
+.row{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
+.spk{flex:none;display:inline-grid;place-items:center;width:2.2rem;height:2.2rem;border-radius:50%;border:1.5px solid var(--accent);background:transparent;color:var(--accent-text);cursor:pointer}
+.spk:hover{background:var(--accent-soft)}
+body.nospeech .spk,body.nospeech .needs-speech{display:none}
+
+/* Ablauf */
+.stn{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:.7rem}
+.stn>summary{display:flex;align-items:center;gap:.8rem;padding:.85rem 1.1rem;cursor:pointer;list-style:none;font-weight:700}
+.stn>summary::-webkit-details-marker{display:none}
+.stn>summary::after{content:"+";margin-left:auto;font-size:1.4rem;color:var(--muted);line-height:1}
+.stn[open]>summary::after{content:"\2212"}
+.sn{flex:none;display:inline-grid;place-items:center;width:1.9rem;height:1.9rem;border-radius:50%;background:var(--accent-soft);color:var(--accent-ink);font-size:.95rem;font-variant-numeric:tabular-nums}
+.stn-body{padding:0 1.1rem 1.1rem}
+.pairs{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+.col{border-radius:10px;padding:.8rem .9rem;min-width:0}
+.col h4{font-size:.8rem;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.5rem;color:var(--muted)}
+.col.hear{background:var(--surface2)}
+.col.say{background:var(--accent-soft)}
+.col ul{list-style:none;margin:0;padding:0;display:grid;gap:.45rem}
+.col li{display:flex;align-items:flex-start;gap:.5rem;justify-content:space-between}
+.col li span{min-width:0}
+.tip{margin:.9rem 0 0;color:var(--muted)}
+.tip b{color:var(--ink)}
+.stn-body .row{margin-top:.8rem}
+
+/* Antworten */
+.split{display:grid;grid-template-columns:230px minmax(0,1fr);gap:1.6rem;align-items:start}
+.qnav{display:grid;gap:.15rem;position:sticky;top:calc(env(safe-area-inset-top,0px) + 7.2rem);max-height:calc(100vh - 9rem);overflow-y:auto}
+.qb{display:flex;align-items:center;gap:.6rem;width:100%;text-align:left;border:0;background:transparent;padding:.45rem .55rem;border-radius:10px;cursor:pointer;line-height:1.3}
+.qb:hover{background:var(--surface2)}
+.qb.on{background:var(--accent-soft);color:var(--accent-ink);font-weight:700}
+.qn{flex:none;display:inline-grid;place-items:center;width:1.7rem;height:1.7rem;border-radius:50%;border:1.5px solid var(--line);font-size:.85rem;font-variant-numeric:tabular-nums}
+.qb.done .qn{background:var(--ok);border-color:var(--ok);color:var(--on-ok)}
+.phase{font-size:.82rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.3rem}
+.qtext{display:flex;gap:.7rem;align-items:flex-start;justify-content:space-between;margin-bottom:.8rem}
+.want{background:var(--surface2);border-radius:10px;padding:.7rem .9rem;margin-bottom:1rem}
+.legend{color:var(--muted);font-size:.95rem;display:flex;flex-wrap:wrap;gap:.4rem .6rem;align-items:center;margin-bottom:.4rem}
+.grp{margin-top:1.1rem}
+.grp h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.45rem}
+.chips{display:flex;flex-wrap:wrap;gap:.45rem}
+.chip{border:1.5px solid var(--line);background:var(--surface);border-radius:10px;padding:.45rem .75rem;text-align:left;cursor:pointer;line-height:1.4;max-width:100%}
+.chip:hover{border-color:var(--accent)}
+.chip.sp{background:var(--warm-soft);border-color:var(--warm-line);color:var(--warm-ink)}
+.chip.sp::before{content:"+ ";font-weight:700}
+.chip.mini{padding:.1rem .55rem;font-size:.85rem;cursor:default}
+.chip.mini:hover{border-color:var(--line)}
+.chip.mini.sp:hover{border-color:var(--warm-line)}
+.chip.flash{animation:flash .5s}
+@keyframes flash{from{background:var(--accent);color:var(--on-accent)}}
+.blank{display:inline-block;width:2.2em;height:1em;border-bottom:2px solid currentColor;margin:0 .15em;vertical-align:baseline}
+.answer{margin-top:1.6rem}
+.answer label{display:block;font-weight:700;margin-bottom:.4rem}
+textarea{width:100%;min-height:9rem;resize:vertical;padding:.85rem 1rem;border:2px solid var(--line);border-radius:12px;background:var(--surface);line-height:1.65;font-size:1.08rem}
+textarea:focus-visible{border-color:var(--accent);outline:none}
+.tools{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-top:.6rem}
+.saved{margin-left:auto;font-size:.9rem;color:var(--muted)}
+.qstep{display:flex;justify-content:space-between;gap:.6rem;margin-top:1.4rem;flex-wrap:wrap}
+
+/* Üben */
+.ctrl{display:flex;flex-wrap:wrap;gap:1rem 2rem;margin-bottom:1.2rem}
+.lab{display:block;font-size:.8rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.3rem}
+.seg{display:flex;flex-wrap:wrap;gap:.35rem}
+.segb{border:1.5px solid var(--line);background:var(--surface);border-radius:10px;padding:.4rem .8rem;cursor:pointer}
+.segb[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:700}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:1.3rem 1.4rem;max-width:760px}
+.who{color:var(--muted);margin-bottom:.2rem}
+.bigq{font-family:var(--font-display);font-size:clamp(1.3rem,3.6vw,1.8rem);line-height:1.3;margin:0 0 1rem;text-wrap:balance}
+.steps{margin:0 0 1rem;padding-left:1.2rem;color:var(--muted)}
+.help{background:var(--surface2);border-radius:10px;padding:.8rem .95rem;margin-bottom:1rem}
+.help ul.starts{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:.4rem .5rem}
+.help ul.starts li{background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:.3rem .7rem}
+.revealed{border-left:4px solid var(--accent);padding:.2rem 0 .2rem .9rem;margin:0 0 1rem}
+.revealed .lab{margin-bottom:.1rem}
+.rate{margin:1rem 0 .4rem}
+.rate .segb[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)}
+.cnt{color:var(--muted);font-size:.95rem;margin-bottom:.8rem}
+
+/* Rettung, Wörter, Mappe */
+.rgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:.9rem}
+.rgrid .panel+.panel{margin-top:0}
+.rgrid h3{margin-bottom:.2rem}
+.rgrid .sub{color:var(--muted);font-size:.95rem;margin-bottom:.6rem}
+.rl{list-style:none;margin:0;padding:0;display:grid;gap:.45rem}
+.rl li{display:flex;align-items:center;gap:.5rem;justify-content:space-between;background:var(--accent-soft);border-radius:10px;padding:.5rem .7rem}
+.rl li span{min-width:0}
+.search{width:100%;max-width:26rem;padding:.6rem .8rem;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);margin-bottom:.8rem}
+.wex{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:.7rem 1rem;margin-bottom:1rem;min-height:3.4rem}
+.wex b{color:var(--accent-text)}
+.mappe-item h3{margin-bottom:.4rem}
+.mappe-item p{white-space:pre-wrap}
+.empty{max-width:46ch}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(1.1rem + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:.5rem 1rem;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10;max-width:calc(100vw - 32px)}
+.toast.on{opacity:1}
+
+@media (max-width:820px){
+  .split{grid-template-columns:minmax(0,1fr);gap:1rem}
+  .qnav{position:static;max-height:11.5rem;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:.3rem}
+  .pairs{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:reduce){.chip.flash{animation:none}.toast{transition:none}}
+</style>
+
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <div class="brand">Vorstellungsgespräch Baukasten</div>
+    <label class="slow needs-speech"><input type="checkbox" id="slow"> Langsamer sprechen lassen</label>
+    <nav class="tabs" id="tabs" aria-label="Bereiche"></nav>
+  </div>
+</header>
+<main id="view"></main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- Daten: Fragen und Bausteine ----------
+   Ein Eintrag beginnt mit * , wenn er mehr Ausdruck bietet (B1 und höher).
+   {name} {ausb} {land} {seit} {dseit} {mutter} kommen aus dem Profil, leere Felder werden zu ___ .
+   x:true  = Gruppe ist nicht Teil der Beispielantwort.   m:[…] = welche Einträge in die Beispielantwort kommen. */
+const QS=[
+{id:'vorstellen',short:'Vorstellung',phase:'Zu dir',q:'Erzählen Sie bitte etwas über sich.',
+ want:'Das ist meist die erste Frage. Die Interviewerin lernt Sie kennen und hört, wie Sie sprechen. Drei bis vier Sätze sind genug.',
+ keys:['Name','Herkunft','Ausbildung','Freude'],
+ groups:[
+ {t:'So fängst du an',i:['Mein Name ist {name}.','Ich heiße {name}.','*Vielen Dank für die Einladung. Mein Name ist {name}.']},
+ {t:'Woher du kommst',i:['Ich komme aus {land}.','Ich lebe seit {seit} in Österreich.','*Ursprünglich komme ich aus {land}, inzwischen ist Österreich mein Zuhause.'],m:[0,1]},
+ {t:'Was du beruflich machst',i:['Ich bin {ausb}.','Ich habe als {ausb} gearbeitet.','Ich arbeite gern mit Kindern.','*Die Arbeit mit Kindern und Jugendlichen liegt mir sehr am Herzen.'],m:[0,2]},
+ {t:'Etwas Persönliches',i:['In meiner Freizeit ___ ich gern.','Ich bin ein ruhiger, geduldiger Mensch.','*Mir ist wichtig, dass sich Menschen bei mir wohlfühlen.'],x:true},
+ {t:'So hörst du auf',i:['Ich freue mich, mehr über die Stelle zu erfahren.','Das ist eine kurze Vorstellung von mir.','*Ich freue mich auf das Gespräch und auf Ihre Fragen.']}
+ ]},
+{id:'deutsch',short:'Deutschkenntnisse',phase:'Zu dir',q:'Wie lange lernen Sie schon Deutsch, und wie geht es Ihnen damit?',
+ want:'Hier geht es um Ihr Deutsch bei der Arbeit. Ehrlichkeit und Lernwille kommen gut an.',
+ keys:['Dauer','Was ich kann','Nachfragen','Lernen'],
+ groups:[
+ {t:'Wie lange',i:['Ich lerne seit {dseit} Deutsch.','Ich habe Deutschunterricht und übe jede Woche.','*Ich lerne regelmäßig und besuche zusätzlich einen Kurs.'],m:[0,1]},
+ {t:'Was du schon kannst',i:['Ich verstehe schon viel und kann mich im Alltag gut verständigen.','Die Grammatik kann ich schon gut.','*Beim Lesen und Schreiben bin ich schon sicher, beim Sprechen werde ich jeden Tag sicherer.']},
+ {t:'Wenn dir ein Wort fehlt',i:['Wenn ich ein Wort nicht kenne, erkläre ich es mit anderen Wörtern.','Wenn ich etwas nicht verstehe, frage ich nach.','*Ich frage gern nach, damit nichts schiefgeht.'],m:[1]},
+ {t:'Deine Sprachen',i:['Meine Muttersprache ist {mutter}.','Ich spreche außerdem {mutter}. Das hilft mir bei Kindern aus anderen Ländern.','*Mehrere Sprachen zu sprechen ist für diese Arbeit ein Vorteil.']},
+ {t:'Ausblick',i:['Ich möchte mein Deutsch bei der Arbeit jeden Tag verbessern.','*Ich bin sicher, dass ich im Alltag mit den Kindern schnell dazulerne.']}
+ ]},
+{id:'ausbildung',short:'Ausbildung',phase:'Zu dir',q:'Welche Ausbildung haben Sie?',
+ want:'Die Interviewerin prüft, ob Ihre Ausbildung zur Stelle passt. Nennen Sie Abschluss, Dauer und ein bis zwei Inhalte.',
+ keys:['Abschluss','Dauer','Inhalte','Praktikum'],
+ groups:[
+ {t:'Dein Abschluss',i:['Ich habe eine Ausbildung als {ausb} abgeschlossen.','Ich habe in {land} die Ausbildung zur {ausb} gemacht.','Meine Ausbildung hat ___ Jahre gedauert.','*Mein Abschluss als {ausb} qualifiziert mich für die Arbeit mit Kindern und Jugendlichen.']},
+ {t:'Was du gelernt hast',i:['In der Ausbildung habe ich gelernt, Kinder und Jugendliche zu begleiten.','Wir hatten Fächer wie Pädagogik und Psychologie.','*Wir haben uns viel mit Entwicklung, Lernen und Verhalten von Kindern beschäftigt.']},
+ {t:'Praxis',i:['Ich habe auch Praktika gemacht, zum Beispiel in ___.','Dort habe ich viel Praxis gesammelt.','*Im Praktikum durfte ich schon Kinder in Gruppen begleiten.'],m:[1]},
+ {t:'Anerkennung in Österreich',i:['Ich lasse meinen Abschluss gerade in Österreich anerkennen.','Mein Abschluss ist in Österreich anerkannt.','Das Zeugnis habe ich zum Gespräch mitgebracht.'],x:true}
+ ]},
+{id:'erfahrung',short:'Berufserfahrung',phase:'Erfahrung',q:'Welche Berufserfahrung haben Sie?',
+ want:'Die Interviewerin möchte wissen, was Sie schon gemacht haben. Erzählen Sie ein bis zwei konkrete Aufgaben.',
+ keys:['Jahre','Aufgaben','Gelernt','Team'],
+ groups:[
+ {t:'Dein Einstieg',i:['Ich habe schon Erfahrung in der Arbeit mit Kindern.','Ich habe ___ Jahre als ___ gearbeitet.','*Meine Berufserfahrung liegt vor allem im sozialen und pädagogischen Bereich.']},
+ {t:'Deine Aufgaben',i:['Ich habe Kinder bei den Hausaufgaben unterstützt.','Ich habe Gruppen betreut und Aktivitäten geplant.','Ich habe mit Eltern und Kolleginnen zusammengearbeitet.','*Ich habe das Verhalten der Kinder beobachtet und im Team besprochen.'],m:[0,2]},
+ {t:'Was du gelernt hast',i:['Dabei habe ich gelernt, geduldig zu bleiben.','Ich habe gelernt, jedes Kind einzeln zu sehen.','*Die Arbeit hat mir gezeigt, wie wichtig klare Regeln und feste Routinen sind.']},
+ {t:'Wenn du in Österreich noch neu bist',i:['Ich bin neu im österreichischen System, aber ich lerne schnell.','Ich freue mich darauf, hier viel Neues zu lernen.','*Meine Erfahrung aus {land} kann ich gut einbringen.'],x:true}
+ ]},
+{id:'foerderbedarf',short:'Förderbedarf',phase:'Erfahrung',q:'Haben Sie schon mit Kindern mit besonderem Förderbedarf gearbeitet?',
+ want:'Die Interviewerin möchte wissen, ob Sie Kinder mit besonderen Bedürfnissen kennen. Auch kleine Erfahrungen zählen.',
+ keys:['Erfahrung','Beispiel','Fortschritt','Haltung'],
+ groups:[
+ {t:'Deine Antwort',i:['Ja, ich habe schon mit Kindern mit besonderem Förderbedarf gearbeitet.','Ich habe schon erste Erfahrungen gesammelt.','Ich habe in der Ausbildung viel darüber gelernt und möchte jetzt in der Praxis weiterlernen.','*In der Praxis habe ich Kinder mit ganz unterschiedlichen Bedürfnissen kennengelernt.']},
+ {t:'Ein Beispiel',i:['Ich habe zum Beispiel ein Kind begleitet, das ___.','Das Kind hat Unterstützung bei ___ gebraucht.','*Mit kleinen Schritten und viel Lob hat das Kind Fortschritte gemacht.'],m:[2]},
+ {t:'Deine Haltung',i:['Jedes Kind ist anders und braucht etwas anderes.','Ich möchte Kinder unterstützen, damit sie selbstständiger werden.','*Mir ist wichtig, dass sich jedes Kind in der Klasse dazugehörig fühlt.']},
+ {t:'Offen bleiben',i:['Ich möchte gern noch mehr lernen.','Ich besuche gern Weiterbildungen.','*Ich bin offen für Rückmeldungen von Lehrerinnen und Eltern.'],x:true}
+ ]},
+{id:'motivation',short:'Motivation',phase:'Motivation',q:'Warum möchten Sie als Integrationshelferin arbeiten?',
+ want:'Die Interviewerin möchte spüren, warum Ihnen die Arbeit wichtig ist. Ein persönlicher Grund wirkt am besten.',
+ keys:['Kinder','Freude','Inklusion','Ausbildung'],
+ groups:[
+ {t:'Dein Grund',i:['Ich möchte als Integrationshelferin arbeiten, weil ich gern mit Kindern arbeite.','Die Arbeit passt sehr gut zu meiner Ausbildung.','*Die Stelle verbindet meine Ausbildung mit dem, was mir wichtig ist.']},
+ {t:'Was dich freut',i:['Es macht mich glücklich, wenn ein Kind etwas Neues schafft.','Ich möchte Kindern helfen, am Schulalltag teilzunehmen.','*Inklusion ist mir wichtig, denn jedes Kind hat das Recht, dabei zu sein.']},
+ {t:'Dein Weg',i:['Ich möchte in Österreich in meinem Beruf arbeiten.','Ich suche eine Arbeit, die Sinn hat.','*Ich möchte mich hier beruflich weiterentwickeln.']},
+ {t:'Schluss',i:['Deshalb habe ich mich beworben.','*Darum freue ich mich sehr auf diese Aufgabe.']}
+ ]},
+{id:'warum-wir',short:'Warum wir?',phase:'Motivation',q:'Warum haben Sie sich bei uns beworben?',
+ want:'Die Interviewerin möchte sehen, dass Sie sich informiert haben. Ein Satz über die Einrichtung genügt.',
+ keys:['Einrichtung','Website','Stärken','Team'],
+ groups:[
+ {t:'Was dir gefällt',i:['Ich habe mich beworben, weil mir Ihre Einrichtung gut gefällt.','Ich habe auf Ihrer Website gelesen, dass ___.','*Mich hat besonders angesprochen, dass Sie Wert auf Inklusion legen.']},
+ {t:'Was du mitbringst',i:['Ich bringe Geduld und Erfahrung mit.','Ich spreche mehrere Sprachen.','*Ich kann gut zuhören und bleibe in schwierigen Situationen ruhig.'],m:[0,2]},
+ {t:'Dein Wunsch',i:['Ich möchte gern im Team arbeiten und etwas beitragen.','Ich möchte längere Zeit bei Ihnen arbeiten.','*Ich möchte mich bei Ihnen weiterentwickeln und Verantwortung übernehmen.']}
+ ]},
+{id:'situation',short:'Schwierige Situation',phase:'Im Berufsalltag',q:'Ein Kind will nicht mitarbeiten und wird wütend. Was machen Sie?',
+ want:'Bei Situationsfragen gibt es keine perfekte Antwort. Die Interviewerin möchte hören, wie Sie denken. Erzählen Sie in Schritten.',
+ keys:['ruhig bleiben','zuhören','Lösung suchen','Team'],
+ groups:[
+ {t:'Zuerst',i:['Zuerst bleibe ich ruhig.','Zuerst schaue ich, was los ist.','*Als Erstes versuche ich zu verstehen, was das Kind gerade braucht.']},
+ {t:'Dann',i:['Dann spreche ich ruhig und freundlich mit dem Kind.','Ich gebe dem Kind Zeit und einen ruhigen Platz.','Ich frage, was dem Kind hilft.','*Ich benenne das Gefühl, zum Beispiel: Du bist gerade wütend.'],m:[0,1]},
+ {t:'Danach',i:['Danach suche ich gemeinsam mit dem Kind eine Lösung.','Wir machen eine kleine Pause und versuchen es dann noch einmal.','Wenn nötig, hole ich die Lehrerin dazu.']},
+ {t:'Zum Schluss',i:['Zum Schluss spreche ich mit dem Team darüber.','Ich lobe das Kind, wenn es wieder mitarbeitet.','*Danach überlege ich, was gut funktioniert hat und was ich beim nächsten Mal anders mache.']}
+ ]},
+{id:'zusammenarbeit',short:'Zusammenarbeit',phase:'Im Berufsalltag',q:'Wie arbeiten Sie mit Lehrerinnen und Eltern zusammen?',
+ want:'Als Integrationshelferin arbeiten Sie im Team. Die Interviewerin möchte hören, dass Sie zuhören und Rückmeldung geben.',
+ keys:['Lehrerin','Eltern','Rückmeldung','Team'],
+ groups:[
+ {t:'Mit dem Team',i:['Ich spreche regelmäßig mit der Lehrerin.','Ich frage nach, wenn ich etwas nicht weiß.','*Ich halte mich an den Förderplan und gebe regelmäßig Rückmeldung.']},
+ {t:'Mit den Eltern',i:['Mit den Eltern spreche ich freundlich und respektvoll.','Ich erzähle, was das Kind gut gemacht hat.','*Ich nehme die Sorgen der Eltern ernst.'],m:[0,1]},
+ {t:'Deine Rolle',i:['Ich weiß, welche Aufgaben ich habe.','Bei Fragen wende ich mich an die Klassenlehrerin.','*Ich spreche offen an, wenn ich Unterstützung brauche.'],m:[1]},
+ {t:'Deine Haltung',i:['Ich arbeite gern im Team.','Gute Zusammenarbeit ist für mich sehr wichtig.','*Gemeinsam finden wir bessere Lösungen für das Kind.']}
+ ]},
+{id:'staerken',short:'Stärken',phase:'Persönlichkeit',q:'Was sind Ihre Stärken?',
+ want:'Die Interviewerin möchte wissen, was Sie gut können. Nennen Sie ein bis zwei Stärken und ein kleines Beispiel dazu.',
+ keys:['Geduld','zuverlässig','Beispiel','Team'],
+ groups:[
+ {t:'Deine Stärke',i:['Meine größte Stärke ist meine Geduld.','Ich bin zuverlässig und pünktlich.','*Ich bin einfühlsam und kann mich gut in andere hineinversetzen.']},
+ {t:'Ein Beispiel',i:['Zum Beispiel bleibe ich ruhig, wenn ein Kind laut wird.','Das haben mir Kolleginnen schon oft gesagt.','Das zeigt sich, wenn ___.','*Dadurch fühlen sich Kinder bei mir sicher.'],m:[0]},
+ {t:'Noch etwas',i:['Außerdem bin ich teamfähig und flexibel.','Außerdem spreche ich mehrere Sprachen.','*Außerdem bin ich belastbar und bleibe auch bei Stress freundlich.']}
+ ]},
+{id:'schwaechen',short:'Schwächen',phase:'Persönlichkeit',q:'Was ist Ihre Schwäche?',
+ want:'Die Interviewerin möchte Ehrlichkeit sehen. Wählen Sie etwas Kleines, an dem Sie schon arbeiten.',
+ keys:['ehrlich','Deutsch','üben','besser werden'],
+ groups:[
+ {t:'Deine Schwäche',i:['Mein Deutsch ist noch nicht perfekt.','Manchmal bin ich zu streng mit mir selbst.','*Ich möchte noch sicherer im Sprechen werden.']},
+ {t:'Was du dagegen tust',i:['Deshalb übe ich jede Woche das Sprechen.','Ich bitte oft um Rückmeldung.','*Ich sehe Fehler als Chance, besser zu werden.']},
+ {t:'Das Ergebnis',i:['Mit jedem Gespräch fühle ich mich ein bisschen sicherer.','*Ich lerne gern dazu und nehme Rückmeldungen dankbar an.']}
+ ]},
+{id:'stress',short:'Stress',phase:'Persönlichkeit',q:'Wie gehen Sie mit Stress um?',
+ want:'Die Arbeit mit Kindern kann anstrengend sein. Die Interviewerin möchte hören, wie Sie für sich sorgen.',
+ keys:['atmen','Team','Pause','Ausgleich'],
+ groups:[
+ {t:'In dem Moment',i:['Ich atme tief durch und ordne meine Gedanken.','Ich bleibe ruhig und mache einen Schritt nach dem anderen.','*Ich setze Prioritäten und überlege, was gerade am wichtigsten ist.']},
+ {t:'Mit anderen',i:['Ich spreche im Team über schwierige Situationen.','Ich bitte um Hilfe, wenn ich sie brauche.','*Ich tausche mich gern mit erfahrenen Kolleginnen aus.']},
+ {t:'Nach der Arbeit',i:['Nach der Arbeit gehe ich spazieren.','Ich bewege mich viel und schlafe genug.','Ich verbringe Zeit mit meiner Familie.','*Ich achte darauf, Pausen zu machen und wieder Kraft zu tanken.']}
+ ]},
+{id:'arbeitszeit',short:'Arbeitszeit',phase:'Zum Schluss',q:'Ab wann könnten Sie anfangen, und wie viele Stunden möchten Sie arbeiten?',
+ want:'Hier geht es um Organisation. Überlegen Sie vorher, was für Sie möglich ist, und tragen Sie es ein.',
+ keys:['Beginn','Stunden','flexibel','Vertrag'],
+ groups:[
+ {t:'Beginn',i:['Ich könnte ab ___ anfangen.','Ich kann sofort anfangen.','*Ich könnte nach einer Kündigungsfrist von ___ anfangen.']},
+ {t:'Stunden',i:['Ich möchte gern ___ Stunden pro Woche arbeiten.','Ich kann vormittags und nachmittags arbeiten.','*Ich bin bei den Zeiten flexibel und kann auch kurzfristig einspringen.']},
+ {t:'Bezahlung',i:['Ich richte mich gern nach dem Kollektivvertrag.','Wie ist die Bezahlung geregelt?','*Können Sie mir bitte sagen, wie die Einstufung erfolgt?'],x:true}
+ ]},
+{id:'fragen',short:'Deine Fragen',phase:'Zum Schluss',q:'Haben Sie noch Fragen an uns?',
+ want:'Diese Frage kommt fast immer am Ende. Stellen Sie mindestens eine Frage, das zeigt Interesse.',
+ keys:['Alltag','Einarbeitung','Ablauf','Danke'],
+ groups:[
+ {t:'Zur Arbeit',i:['Wie sieht ein typischer Tag aus?','Mit wie vielen Kindern würde ich arbeiten?','*Wie arbeiten Lehrerinnen und Integrationshelferinnen im Alltag zusammen?']},
+ {t:'Zum Anfang',i:['Gibt es eine Einarbeitungszeit?','Gibt es Fortbildungen?','*Gibt es eine Ansprechperson, an die ich mich wenden kann?']},
+ {t:'Zum Ablauf',i:['Wie geht es nach dem Gespräch weiter?','Bis wann bekomme ich eine Antwort?','Wie sind die Arbeitszeiten geplant?']},
+ {t:'Zum Schluss',i:['Vielen Dank, das war sehr hilfreich.','*Vielen Dank für Ihre Zeit und das nette Gespräch.']}
+ ]}
+];
+
+/* ---------- Daten: Ablauf ---------- */
+const STN=[
+{t:'Begrüßung',hear:['Guten Tag, ich bin Frau Berger. Schön, dass Sie da sind.','Bitte nehmen Sie Platz.','Möchten Sie etwas trinken?'],
+ say:['Guten Tag, Frau Berger. Mein Name ist {name}. Ich freue mich, hier zu sein.','Vielen Dank, ein Glas Wasser wäre schön.','Danke, sehr gern.'],
+ tip:'Ein Schluck Wasser gibt dir einen Moment zum Atmen und Nachdenken.'},
+{t:'Kleiner Smalltalk',hear:['Haben Sie gut hergefunden?','Wie war Ihre Anreise?','Wohnen Sie hier in der Nähe?'],
+ say:['Ja, danke, ich habe gut hergefunden.','Die Anreise war einfach, ich bin mit dem Bus gekommen.','Ich wohne in ___, das ist ungefähr ___ Minuten von hier.'],
+ tip:'Kurze, freundliche Antworten reichen. Dieser Teil dient nur zum Warmwerden.'},
+{t:'Der Rahmen',hear:['Wir haben etwa eine halbe Stunde Zeit.','Zuerst erzähle ich Ihnen etwas über die Stelle, dann stelle ich ein paar Fragen.','Am Ende haben Sie Zeit für Ihre Fragen.'],
+ say:['Das klingt gut, vielen Dank.','Gern. Ich habe auch ein paar Fragen vorbereitet.'],
+ tip:'Du darfst sagen, dass du Fragen vorbereitet hast. Das zeigt Interesse.'},
+{t:'Fragen zu dir',hear:['Erzählen Sie bitte etwas über sich.','Woher kommen Sie?','Wie lange lernen Sie schon Deutsch?'],
+ say:['Mein Name ist {name}. Ich komme aus {land} und lebe seit {seit} in Österreich.','Ich lerne seit {dseit} Deutsch und übe jede Woche.'],
+ tip:'Drei bis vier Sätze genügen. Du musst nicht dein ganzes Leben erzählen.',go:0},
+{t:'Ausbildung und Erfahrung',hear:['Welche Ausbildung haben Sie?','Welche Erfahrung haben Sie mit Kindern?'],
+ say:['Ich habe eine Ausbildung als {ausb} abgeschlossen.','Ich habe schon Erfahrung in der Arbeit mit Kindern.'],
+ tip:'Ein kleines Beispiel aus der Praxis bleibt besser im Gedächtnis als eine lange Liste.',go:2},
+{t:'Motivation und Situationen',hear:['Warum möchten Sie bei uns arbeiten?','Was machen Sie, wenn ein Kind nicht mitarbeiten will?'],
+ say:['Ich arbeite gern mit Kindern und möchte sie beim Lernen unterstützen.','Zuerst bleibe ich ruhig. Dann spreche ich freundlich mit dem Kind.'],
+ tip:'Bei Situationsfragen gibt es keine perfekte Antwort. Erzähle in Schritten: zuerst, dann, danach.',go:5},
+{t:'Organisatorisches',hear:['Ab wann könnten Sie anfangen?','Wie viele Stunden möchten Sie arbeiten?'],
+ say:['Ich könnte ab ___ anfangen.','Ich möchte gern ___ Stunden pro Woche arbeiten.'],
+ tip:'Überlege vorher, was für dich möglich ist, und schreibe es in deine Mappe.',go:12},
+{t:'Deine Fragen',hear:['Haben Sie noch Fragen an uns?'],
+ say:['Ja, wie sieht ein typischer Tag aus?','Gibt es eine Einarbeitungszeit?','Wie geht es nach dem Gespräch weiter?'],
+ tip:'Stelle mindestens eine Frage. Das wirkt interessiert.',go:13},
+{t:'Abschied',hear:['Vielen Dank für das Gespräch. Wir melden uns in den nächsten zwei Wochen bei Ihnen.','Dann wünsche ich Ihnen noch einen schönen Tag.'],
+ say:['Vielen Dank für das Gespräch. Ich freue mich auf Ihre Antwort.','Auf Wiedersehen, Frau Berger. Ihnen auch einen schönen Tag.'],
+ tip:'Hand geben, lächeln, danke sagen. Damit ist das Gespräch rund.'}
+];
+
+/* ---------- Daten: Rettungssätze ---------- */
+const RESC=[
+{t:'Ich habe etwas nicht verstanden',s:'Nachfragen ist erlaubt und wirkt professionell.',l:['Entschuldigung, das habe ich nicht ganz verstanden.','Könnten Sie das bitte noch einmal sagen?','Könnten Sie bitte etwas langsamer sprechen?','Was bedeutet das Wort ___?','Meinen Sie ___?']},
+{t:'Ich brauche einen Moment',s:'Ein kurzes Nachdenken ist normal.',l:['Moment, ich überlege kurz.','Das ist eine gute Frage. Ich denke kurz nach.','Darf ich einen Moment überlegen?']},
+{t:'Mir fehlt ein Wort',s:'Umschreiben zeigt, dass du dir zu helfen weißt.',l:['Mir fällt das Wort gerade nicht ein. Ich sage es anders.','Ich meine ___.','Wie sagt man ___ auf Deutsch?','Das ist ein bisschen schwer für mich zu erklären.']},
+{t:'Ich möchte sicher sein',s:'So kannst du prüfen, ob du die Frage richtig verstanden hast.',l:['Habe ich Ihre Frage richtig verstanden? Sie möchten wissen, ___.','Darf ich noch etwas ergänzen?','Habe ich Ihre Frage damit beantwortet?']},
+{t:'Wenn ich über mein Deutsch spreche',s:'Offen und freundlich über das eigene Deutsch zu sprechen, kommt gut an.',l:['Mein Deutsch ist noch nicht perfekt, aber ich lerne jede Woche dazu.','Ich verstehe schon viel und spreche jeden Tag mehr.','Wenn ich einen Fehler mache, korrigiere ich mich gern.']},
+{t:'Ich möchte neu ansetzen',s:'Ein Neustart mitten im Satz ist völlig in Ordnung.',l:['Entschuldigung, ich fange noch einmal an.','Ich versuche es noch einmal.','Darf ich den Satz noch einmal sagen?']}
+];
+
+/* ---------- Daten: Wörter ---------- */
+const WORDS=[
+{t:'Arbeit und Stelle',i:['die Integrationshelferin|Die Integrationshelferin begleitet ein Kind durch den Schultag.','die Schulassistenz|Für diese Arbeit sagt man auch Schulassistenz.','die Einrichtung|Ich möchte gern in Ihrer Einrichtung arbeiten.','das Team|Im Team besprechen wir jeden Tag, was wichtig ist.','die Bewerbung|Ich habe meine Bewerbung gestern geschickt.','der Lebenslauf|Mein Lebenslauf hat zwei Seiten.','das Vorstellungsgespräch|Am Montag habe ich ein Vorstellungsgespräch.','die Probezeit|Am Anfang gibt es eine Probezeit von einem Monat.','der Dienstplan|Im Dienstplan steht, wann ich arbeite.','*der Kollektivvertrag|Das Gehalt steht im Kollektivvertrag.','*die Einarbeitung|In der Einarbeitung lerne ich die Abläufe kennen.','*die Ansprechperson|Meine Ansprechperson ist die Klassenlehrerin.']},
+{t:'Kinder und Förderung',i:['das Kind|Das Kind braucht heute viel Ruhe.','die Klasse|In der Klasse sind zweiundzwanzig Kinder.','die Lehrerin|Die Lehrerin erklärt die Aufgabe.','die Eltern|Ich spreche oft mit den Eltern.','die Unterstützung|Das Kind braucht Unterstützung beim Schreiben.','die Begleitung|Die Begleitung gibt dem Kind Sicherheit.','der Förderbedarf|Das Kind hat einen besonderen Förderbedarf.','die Routine|Feste Routinen geben Kindern Sicherheit.','das Lob|Ein kleines Lob motiviert.','*die Inklusion|Bei Inklusion lernen alle Kinder gemeinsam.','*die Beeinträchtigung|Eine Beeinträchtigung kann das Hören, Sehen oder Lernen betreffen.','*der Förderplan|Im Förderplan stehen die Ziele für das Kind.','*die Selbstständigkeit|Ich möchte die Selbstständigkeit des Kindes stärken.','*die Struktur|Eine klare Struktur hilft dem Kind beim Lernen.','*der Fortschritt|Das Kind hat große Fortschritte gemacht.']},
+{t:'Ausbildung und Erfahrung',i:['die Ausbildung|Meine Ausbildung hat drei Jahre gedauert.','das Studium|Mein Studium hat vier Jahre gedauert.','der Abschluss|Mein Abschluss wird gerade anerkannt.','das Praktikum|Im Praktikum habe ich viel gelernt.','die Berufserfahrung|Ich habe fünf Jahre Berufserfahrung.','das Zeugnis|Das Zeugnis habe ich mitgebracht.','die Pädagogik|In der Pädagogik geht es um Erziehung und Lernen.','die Sozialpädagogik|Sozialpädagogik unterstützt Kinder, Jugendliche und Familien.','*die Weiterbildung|Ich mache gern Weiterbildungen.','*die Anerkennung|Die Anerkennung meines Abschlusses dauert einige Monate.']},
+{t:'Eigenschaften',i:['geduldig|Ich bin geduldig, auch wenn etwas länger dauert.','zuverlässig|Ich bin zuverlässig und immer pünktlich.','einfühlsam|Ich bin einfühlsam und höre gut zu.','ruhig|Auch bei Stress bleibe ich ruhig.','freundlich|Ich bin freundlich zu Kindern und Eltern.','teamfähig|Ich bin teamfähig und helfe gern.','flexibel|Ich bin bei den Arbeitszeiten flexibel.','*belastbar|Ich bin belastbar und gebe nicht schnell auf.','*aufmerksam|Ich bin aufmerksam und sehe, wenn ein Kind Hilfe braucht.','*lösungsorientiert|Ich bin lösungsorientiert und suche neue Wege.','*verantwortungsbewusst|Ich bin verantwortungsbewusst und halte Regeln ein.','*kreativ|Ich bin kreativ und habe oft Ideen für Spiele.']},
+{t:'Das tust du bei der Arbeit',i:['begleiten|Ich begleite das Kind durch den Schultag.','unterstützen|Ich unterstütze das Kind bei den Aufgaben.','erklären|Ich erkläre die Aufgabe noch einmal in einfachen Worten.','zuhören|Ich höre zu, wenn ein Kind etwas erzählt.','loben|Ich lobe das Kind, wenn es etwas schafft.','trösten|Ich tröste ein Kind, das traurig ist.','beobachten|Ich beobachte, was dem Kind hilft.','zusammenarbeiten|Ich arbeite eng mit der Lehrerin zusammen.','*fördern|Ich möchte jedes Kind nach seinen Stärken fördern.','*motivieren|Ich motiviere das Kind mit kleinen Zielen.','*ermutigen|Ich ermutige das Kind, es noch einmal zu versuchen.','*vermitteln|Ich vermittle, wenn es Streit gibt.','*dokumentieren|Ich dokumentiere die Fortschritte.']},
+{t:'Verbindungswörter',i:['zuerst|Zuerst bleibe ich ruhig.','dann|Dann spreche ich mit dem Kind.','danach|Danach suchen wir eine Lösung.','außerdem|Außerdem spreche ich zwei Sprachen.','deshalb|Ich lerne gern, deshalb mache ich Weiterbildungen.','weil|Ich möchte hier arbeiten, weil mir die Arbeit wichtig ist.','zum Beispiel|Ich helfe zum Beispiel bei den Hausaufgaben.','besonders|Besonders gern arbeite ich mit kleinen Gruppen.','*obwohl|Obwohl mein Deutsch noch nicht perfekt ist, verstehe ich schon viel.','*damit|Ich erkläre es langsam, damit das Kind mich versteht.','*trotzdem|Es war schwer, trotzdem habe ich nicht aufgegeben.']}
+];
+
+/* ---------- Hilfsfunktionen ---------- */
+const $=(s,r)=>(r||document).querySelector(s);
+const $$=(s,r)=>Array.from((r||document).querySelectorAll(s));
+const E=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const parseItem=raw=>{const sp=raw.charAt(0)==='*';if(sp)raw=raw.slice(1);const k=raw.indexOf('|');return k<0?{t:raw,e:'',sp:sp}:{t:raw.slice(0,k),e:raw.slice(k+1),sp:sp};};
+QS.forEach(q=>q.groups.forEach(g=>{g.p=g.i.map(parseItem);}));
+WORDS.forEach(g=>{g.p=g.i.map(parseItem);});
+
+const KEY='vorstellungsgespraech-baukasten-v1';
+let S={prof:{ausb:'Sozialpädagogin'},ans:{},rate:{},tab:'start',q:0,order:'reihe',help:1,slow:false};
+try{const raw=localStorage.getItem(KEY);if(raw){const o=JSON.parse(raw);if(o&&typeof o==='object')S=Object.assign(S,o);}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+if(!S.prof||typeof S.prof!=='object')S.prof={};
+if(!S.ans)S.ans={};
+if(!S.rate)S.rate={};
+if(!(S.q>=0&&S.q<QS.length))S.q=0;
+
+function fill(s){return s.replace(/\{(\w+)\}/g,(m,k)=>((S.prof[k]||'').trim()||'___'));}
+const blanks=s=>E(s).replace(/___/g,'<span class="blank" role="img" aria-label="Lücke"></span>');
+const model=q=>q.groups.filter(g=>!g.x).map(g=>(g.m||[0]).map(i=>g.p[i].t).map(fill).join(' ')).join(' ');
+const starters=q=>q.groups.filter(g=>!g.x).slice(0,4).map(g=>{const w=fill(g.p[0].t).split(' ');return w.length<=3?w.join(' '):w.slice(0,3).join(' ')+' …';});
+const RATES={1:'Noch wackelig',2:'Ging schon gut',3:'Fühlt sich sicher an'};
+
+const ICON='<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+const spk=t=>'<button type="button" class="spk" data-say="'+E(t)+'" aria-label="Anhören">'+ICON+'</button>';
+
+/* ---------- Sprachausgabe ---------- */
+let voice=null;
+const hasSpeech=('speechSynthesis' in window)&&typeof SpeechSynthesisUtterance!=='undefined';
+if(!hasSpeech)document.body.classList.add('nospeech');
+function pickVoice(){try{const v=speechSynthesis.getVoices();voice=v.find(x=>/^de[-_]AT/i.test(x.lang))||v.find(x=>/^de/i.test(x.lang))||null;}catch(e){}}
+if(hasSpeech){pickVoice();try{speechSynthesis.onvoiceschanged=pickVoice;}catch(e){}}
+function speak(t){
+  if(!hasSpeech)return;
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(t.replace(/_{3,}/g,' … ').replace(/\s+/g,' ').trim());
+    u.lang=voice?voice.lang:'de-DE';if(voice)u.voice=voice;
+    u.rate=S.slow?0.7:0.95;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+function stopSpeak(){if(hasSpeech){try{speechSynthesis.cancel();}catch(e){}}}
+
+/* ---------- Kleine Helfer ---------- */
+let toastT=0;
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),1900);}
+function copy(text){
+  const fb=()=>{try{const ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;opacity:0;top:0;left:0';document.body.appendChild(ta);ta.select();const r=document.execCommand('copy');ta.remove();toast(r?'Kopiert':'Markiere den Text und kopiere ihn selbst');}catch(e){toast('Markiere den Text und kopiere ihn selbst');}};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(()=>toast('Kopiert'),fb);}else fb();
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+/* ---------- Übungsrunde: Zustand ---------- */
+let P={list:[],i:0,lvl:1,show:false,done:false};
+function buildList(){const idx=QS.map((q,i)=>i);P.list=S.order==='zufall'?shuffle(idx):idx;P.i=0;P.lvl=S.help;P.show=false;P.done=false;}
+let resetAsk=false;
+
+/* ---------- Ansichten ---------- */
+const TABS=[['start','Start'],['ablauf','Ablauf'],['antworten','Antworten bauen'],['ueben','Üben'],['rettung','Rettungssätze'],['woerter','Wörter'],['mappe','Meine Mappe']];
+
+function vStart(){
+  const done=QS.filter(q=>(S.ans[q.id]||'').trim()).length;
+  const tried=QS.filter(q=>S.rate[q.id]).length;
+  const F=[['name','Dein Name','Anna Muster'],['ausb','Deine Ausbildung','Sozialpädagogin'],['land','Ich komme aus … (z. B. der Ukraine, Ungarn, Syrien)','der Ukraine'],['seit','Ich lebe seit … in Österreich','zwei Jahren'],['dseit','Ich lerne seit … Deutsch','drei Jahren'],['mutter','Meine Muttersprache','Russisch']];
+  return '<section class="intro"><h1>Ausprobieren, was man im Vorstellungsgespräch sagen kann</h1>'+
+  '<p class="lead">Hier probierst du in deinem Tempo aus, wie ein Gespräch für die Stelle als Integrationshelferin klingt. Du baust Antworten aus Satzbausteinen, hörst sie dir an und sprichst sie laut nach. Die Grammatik kannst du schon gut, jetzt kommt das Sprechen dazu.</p></section>'+
+  '<div class="cards">'+
+  [['ablauf','Ablauf','Wer sagt wann was? Neun Stationen eines Gesprächs mit Beispielsätzen.'],
+   ['antworten','Antworten bauen','14 typische Fragen. Du wählst Bausteine und formst deine eigene Antwort.'],
+   ['ueben','Üben','Eine Frage nach der anderen, mit viel oder wenig Hilfe und ohne Zeitdruck.'],
+   ['rettung','Rettungssätze','Sätze für den Moment, in dem du etwas nicht verstanden hast oder ein Wort fehlt.'],
+   ['woerter','Wörter','Wörter für den Berufsalltag zum Stöbern, mit Beispielsatz und Aussprache.'],
+   ['mappe','Meine Mappe','Alle deine Antworten an einem Ort, zum Anhören und Kopieren.']
+  ].map(c=>'<button type="button" class="cardlink" data-tab="'+c[0]+'"><b>'+c[1]+'</b><span>'+c[2]+'</span></button>').join('')+'</div>'+
+  '<section class="sec"><h2>Drei Dinge zum Mitnehmen</h2><div class="panel"><ul class="courage">'+
+  '<li>Im Gespräch zählt vor allem, dass dich die anderen verstehen. Ein Satz muss nicht perfekt sein.</li>'+
+  '<li>Nachfragen ist erlaubt und wirkt professionell. Dafür gibt es die Rettungssätze.</li>'+
+  '<li>Eine kurze Pause zum Nachdenken ist normal. Niemand erwartet sofort eine Antwort.</li></ul></div></section>'+
+  '<section class="sec"><h2>Mein Profil</h2><div class="panel"><p class="muted">Deine Angaben erscheinen automatisch in den Bausteinen. Leere Felder zeigen eine Lücke <span class="blank" role="img" aria-label="Lücke"></span>, die du später selbst füllst. Alles bleibt nur auf diesem Gerät.</p><div class="pform">'+
+  F.map(f=>'<label>'+E(f[1])+'<input type="text" data-p="'+f[0]+'" value="'+E(S.prof[f[0]]||'')+'" placeholder="z. B. '+E(f[2])+'" autocomplete="off"></label>').join('')+
+  '</div></div></section>'+
+  '<section class="sec"><h2>Mein Stand</h2><div class="panel"><p class="muted">'+done+' von '+QS.length+' Antworten geschrieben, '+tried+' Fragen geübt.</p><ul class="prog">'+
+  QS.map((q,i)=>{const r=S.rate[q.id]||0;return '<li><span class="pn">'+(i+1)+'</span><span class="pt">'+E(q.short)+'</span><span class="tick" title="Antwort geschrieben">'+((S.ans[q.id]||'').trim()?'✓':'')+'</span><span class="pill r'+r+'">'+(r?RATES[r]:'noch offen')+'</span></li>';}).join('')+
+  '</ul></div></section>'+
+  '<section class="sec"><div class="row">'+(resetAsk?'<span>Alle Antworten und Angaben löschen?</span><button type="button" class="btn" data-act="reset2">Ja, alles löschen</button><button type="button" class="btn ghost" data-act="reset0">Abbrechen</button>':'<button type="button" class="btn ghost" data-act="reset1">Alles zurücksetzen</button>')+'</div></section>';
+}
+
+function vAblauf(){
+  return '<h1>Der Ablauf eines Gesprächs</h1><p class="lead">So verläuft ein Vorstellungsgespräch meist. Links siehst du, was du hörst, rechts, was du antworten kannst. In Gesprächen dieser Art sprechen sich alle mit Sie an.</p><div class="sec">'+
+  STN.map((s,i)=>'<details class="stn"'+(i===0?' open':'')+'><summary><span class="sn">'+(i+1)+'</span><span>'+E(s.t)+'</span></summary><div class="stn-body"><div class="pairs">'+
+  '<div class="col hear"><h4>Das hörst du</h4><ul>'+s.hear.map(t=>'<li><span>'+blanks(fill(t))+'</span>'+spk(fill(t))+'</li>').join('')+'</ul></div>'+
+  '<div class="col say"><h4>Das kannst du sagen</h4><ul>'+s.say.map(t=>'<li><span>'+blanks(fill(t))+'</span>'+spk(fill(t))+'</li>').join('')+'</ul></div></div>'+
+  '<p class="tip"><b>Tipp.</b> '+E(s.tip)+'</p>'+
+  (s.go!==undefined?'<div class="row"><button type="button" class="btn ghost" data-qgo="'+s.go+'">Dazu Antworten bauen</button></div>':'')+
+  '</div></details>').join('')+'</div>';
+}
+
+function vAnt(){
+  const q=QS[S.q];const a=S.ans[q.id]||'';
+  return '<div class="split"><aside class="qnav" aria-label="Fragen">'+
+  QS.map((x,i)=>'<button type="button" class="qb'+(i===S.q?' on':'')+((S.ans[x.id]||'').trim()?' done':'')+'" data-q="'+i+'"'+(i===S.q?' aria-current="true"':'')+'><span class="qn">'+(i+1)+'</span><span>'+E(x.short)+'</span></button>').join('')+
+  '</aside><section class="work"><p class="phase">'+E(q.phase)+'</p>'+
+  '<h2 class="qtext"><span>'+E(q.q)+'</span>'+spk(q.q)+'</h2>'+
+  '<p class="want"><b>Was möchte die Interviewerin wissen?</b> '+E(q.want)+'</p>'+
+  '<p class="legend"><span class="chip mini">Einfach</span><span class="chip mini sp">Mehr Ausdruck</span><span>Tippe auf einen Baustein, er landet in deinem Antwortfeld. Nimm nur Sätze, die für dich stimmen. Eine Lücke <span class="blank" role="img" aria-label="Lücke"></span> füllst du selbst.</span></p>'+
+  q.groups.map((g,gi)=>'<div class="grp"><h3>'+E(g.t)+'</h3><div class="chips">'+g.p.map((it,ii)=>'<button type="button" class="chip'+(it.sp?' sp':'')+'" data-ins="'+gi+'.'+ii+'">'+blanks(fill(it.t))+'</button>').join('')+'</div></div>').join('')+
+  '<div class="answer"><label for="ans">Meine Antwort</label><textarea id="ans" placeholder="Hier entsteht deine Antwort. Du kannst Bausteine antippen oder selbst schreiben.">'+E(a)+'</textarea>'+
+  '<div class="tools"><button type="button" class="btn needs-speech" data-act="read">Vorlesen</button><button type="button" class="btn ghost needs-speech" data-act="stop">Stopp</button><button type="button" class="btn ghost" data-act="model">Beispielantwort einsetzen</button><button type="button" class="btn ghost" data-act="copyans">Kopieren</button><button type="button" class="btn ghost" data-act="clear">Leeren</button><span class="saved" id="saved">'+(a.trim()?'Gespeichert':'')+'</span></div></div>'+
+  '<div class="qstep"><button type="button" class="btn ghost" data-act="prevq"'+(S.q===0?' disabled':'')+'>Vorherige Frage</button><button type="button" class="btn" data-act="nextq"'+(S.q===QS.length-1?' disabled':'')+'>Nächste Frage</button></div></section></div>';
+}
+
+function vUeb(){
+  if(!P.list.length)buildList();
+  const seg=(items,cur,attr)=>items.map(it=>'<button type="button" class="segb" '+attr+'="'+it[0]+'" aria-pressed="'+(cur===it[0])+'">'+it[1]+'</button>').join('');
+  const ctrl='<div class="ctrl"><div><span class="lab">Reihenfolge</span><div class="seg">'+seg([['reihe','Wie im Gespräch'],['zufall','Zufällig']],S.order,'data-order')+'</div></div><div><span class="lab">Hilfe am Anfang</span><div class="seg">'+seg([[1,'Satzanfänge'],[2,'Stichwörter'],[3,'Ohne Hilfe']],S.help,'data-help')+'</div></div></div>';
+  const head='<h1>Üben</h1><p class="lead">Du hörst oder liest eine Frage und antwortest laut, auch wenn der Satz noch nicht perfekt ist. Es gibt keine Zeitmessung. Danach sagst du, wie es sich angefühlt hat.</p><div class="sec">'+ctrl;
+  if(P.done){
+    const c={1:0,2:0,3:0};QS.forEach(q=>{if(S.rate[q.id])c[S.rate[q.id]]++;});
+    return head+'<div class="card"><h2>Runde geschafft</h2><p>Du hast alle '+P.list.length+' Fragen durchgesprochen. Bei '+c[3]+' fühlst du dich sicher, '+c[2]+' gingen schon gut, '+c[1]+' sind noch wackelig.</p><div class="row"><button type="button" class="btn" data-act="again">Noch eine Runde</button><button type="button" class="btn ghost" data-tab="start">Zum Stand</button></div></div></div>';
+  }
+  const q=QS[P.list[P.i]];const n=P.list.length;const r=S.rate[q.id]||0;
+  let help;
+  if(P.lvl===1)help='<ul class="starts">'+starters(q).map(s=>'<li>'+blanks(s)+'</li>').join('')+'</ul>';
+  else if(P.lvl===2)help='<div class="chips">'+q.keys.map(k=>'<span class="chip mini">'+E(k)+'</span>').join('')+'</div>';
+  else help='<span class="muted">Du antwortest frei. Wenn du doch einen Anstoß möchtest, tippe auf Mehr Hilfe.</span>';
+  const mine=(S.ans[q.id]||'').trim();
+  const shown=mine||model(q);
+  return head+'<div class="card"><p class="cnt">Frage '+(P.i+1)+' von '+n+'</p><p class="who">Frau Berger fragt:</p>'+
+  '<p class="bigq">'+E(q.q)+'</p>'+
+  '<div class="row" style="margin-bottom:1rem"><button type="button" class="btn needs-speech" data-say="'+E(q.q)+'">Frage anhören</button></div>'+
+  '<ol class="steps"><li>Frage hören oder lesen.</li><li>Einmal ausatmen.</li><li>Laut antworten.</li></ol>'+
+  '<div class="help"><span class="lab">'+(P.lvl===1?'Satzanfänge':P.lvl===2?'Stichwörter':'Hilfe')+'</span>'+help+'</div>'+
+  '<div class="row" style="margin-bottom:1rem"><button type="button" class="btn ghost" data-act="more"'+(P.lvl===1?' disabled':'')+'>Mehr Hilfe</button><button type="button" class="btn ghost" data-act="show">'+(P.show?'Antwort verbergen':(mine?'Meine Antwort ansehen':'Beispielantwort ansehen'))+'</button></div>'+
+  (P.show?'<div class="revealed"><span class="lab">'+(mine?'Meine Antwort':'Beispielantwort')+'</span><p>'+E(shown)+'</p>'+spk(shown)+'</div>':'')+
+  '<div class="rate"><span class="lab">Wie war das?</span><div class="seg">'+[1,2,3].map(v=>'<button type="button" class="segb" data-rate="'+v+'" aria-pressed="'+(r===v)+'">'+RATES[v]+'</button>').join('')+'</div></div>'+
+  '<div class="row" style="margin-top:1.2rem"><button type="button" class="btn ghost" data-act="uprev"'+(P.i===0?' disabled':'')+'>Zurück</button><button type="button" class="btn" data-act="unext">'+(P.i===n-1?'Runde beenden':'Nächste Frage')+'</button></div></div></div>';
+}
+
+function vRett(){
+  return '<h1>Rettungssätze</h1><p class="lead">Diese Sätze helfen dir, wenn du etwas nicht verstanden hast, ein Wort fehlt oder du Zeit brauchst. Such dir drei Sätze aus und sprich sie ein paar Mal laut. Dann hast du immer ein Sicherheitsnetz.</p><div class="sec rgrid">'+
+  RESC.map(g=>'<div class="panel"><h3>'+E(g.t)+'</h3><p class="sub">'+E(g.s)+'</p><ul class="rl">'+g.l.map(t=>'<li><span>'+blanks(t)+'</span>'+spk(t)+'</li>').join('')+'</ul></div>').join('')+'</div>';
+}
+
+function vWort(){
+  return '<h1>Wörter für den Berufsalltag</h1><p class="lead">Tippe auf ein Wort. Du hörst es und siehst einen Beispielsatz. Die Wörter mit + gehören zu einem etwas höheren Niveau.</p><div class="sec">'+
+  '<input type="search" id="wsearch" class="search" placeholder="Wort suchen" aria-label="Wort suchen" autocomplete="off">'+
+  '<div class="wex" id="wex" aria-live="polite"><span class="muted">Hier erscheint der Beispielsatz.</span></div>'+
+  WORDS.map((g,gi)=>'<div class="grp" data-wg><h3>'+E(g.t)+'</h3><div class="chips">'+g.p.map((it,ii)=>'<button type="button" class="chip wchip'+(it.sp?' sp':'')+'" data-w="'+gi+'.'+ii+'" data-s="'+E(it.t.toLowerCase())+'">'+E(it.t)+'</button>').join('')+'</div></div>').join('')+'</div>';
+}
+
+function vMappe(){
+  const items=QS.filter(q=>(S.ans[q.id]||'').trim());
+  if(!items.length)return '<h1>Meine Mappe</h1><div class="empty"><p class="lead">Hier erscheinen deine Antworten, sobald du eine geschrieben hast.</p><button type="button" class="btn" data-tab="antworten">Antworten bauen</button></div>';
+  return '<h1>Meine Mappe</h1><p class="lead">Alle deine Antworten in der Reihenfolge eines Gesprächs. Lies sie laut, höre sie dir an oder kopiere sie.</p><div class="row" style="margin-bottom:1.2rem"><button type="button" class="btn" data-act="copyall">Alles kopieren</button></div>'+
+  items.map(q=>'<article class="panel mappe-item"><h3>'+E(q.q)+'</h3><p>'+E(S.ans[q.id])+'</p><div class="row">'+spk(S.ans[q.id])+'<button type="button" class="btn ghost" data-qgo="'+QS.indexOf(q)+'">Bearbeiten</button></div></article>').join('');
+}
+
+const VIEWS={start:vStart,ablauf:vAblauf,antworten:vAnt,ueben:vUeb,rettung:vRett,woerter:vWort,mappe:vMappe};
+
+function render(){
+  if(!VIEWS[S.tab])S.tab='start';
+  $$('.tab').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===S.tab?'page':'false'));
+  $('#view').innerHTML=VIEWS[S.tab]();
+}
+function go(tab){
+  stopSpeak();S.tab=tab;save();render();window.scrollTo(0,0);
+  try{history.replaceState(null,'','#'+tab);}catch(e){}
+}
+
+/* ---------- Ereignisse ---------- */
+function setAns(v){
+  const q=QS[S.q];S.ans[q.id]=v;save();
+  const b=$('.qb[data-q="'+S.q+'"]');if(b)b.classList.toggle('done',!!v.trim());
+  const s=$('#saved');if(s)s.textContent=v.trim()?'Gespeichert':'';
+}
+document.addEventListener('click',function(e){
+  const t=e.target.closest('[data-say],[data-tab],[data-q],[data-qgo],[data-ins],[data-act],[data-rate],[data-help],[data-order],[data-w]');
+  if(!t)return;
+  const d=t.dataset;
+  if(d.say!==undefined){speak(d.say);return;}
+  if(d.tab){go(d.tab);return;}
+  if(d.qgo!==undefined){S.q=+d.qgo;go('antworten');return;}
+  if(d.q!==undefined){S.q=+d.q;save();render();return;}
+  if(d.ins!==undefined){
+    const p=d.ins.split('.');const text=fill(QS[S.q].groups[+p[0]].p[+p[1]].t);
+    const ta=$('#ans');if(!ta)return;
+    const cur=ta.value.replace(/\s+$/,'');
+    ta.value=(cur?cur+' ':'')+text;setAns(ta.value);
+    t.classList.remove('flash');void t.offsetWidth;t.classList.add('flash');
+    return;
+  }
+  if(d.w!==undefined){
+    const p=d.w.split('.');const it=WORDS[+p[0]].p[+p[1]];
+    speak(it.t+'. '+it.e);
+    $('#wex').innerHTML='<b>'+E(it.t)+'</b><br>'+E(it.e);
+    return;
+  }
+  if(d.rate!==undefined){S.rate[QS[P.list[P.i]].id]=+d.rate;save();render();return;}
+  if(d.help!==undefined){S.help=+d.help;P.lvl=S.help;save();render();return;}
+  if(d.order!==undefined){S.order=d.order;save();buildList();render();return;}
+  switch(d.act){
+    case 'read':{const ta=$('#ans');if(ta&&ta.value.trim())speak(ta.value);else toast('Das Antwortfeld ist noch leer');break;}
+    case 'stop':stopSpeak();break;
+    case 'model':{const ta=$('#ans');const m=model(QS[S.q]);ta.value=ta.value.trim()?ta.value.replace(/\s+$/,'')+'\n\n'+m:m;setAns(ta.value);break;}
+    case 'copyans':{const ta=$('#ans');if(ta&&ta.value.trim())copy(ta.value);else toast('Das Antwortfeld ist noch leer');break;}
+    case 'clear':{const ta=$('#ans');ta.value='';setAns('');ta.focus();break;}
+    case 'prevq':if(S.q>0){S.q--;save();render();window.scrollTo(0,0);}break;
+    case 'nextq':if(S.q<QS.length-1){S.q++;save();render();window.scrollTo(0,0);}break;
+    case 'more':if(P.lvl>1){P.lvl--;render();}break;
+    case 'show':P.show=!P.show;render();break;
+    case 'uprev':if(P.i>0){P.i--;P.lvl=S.help;P.show=false;stopSpeak();render();}break;
+    case 'unext':stopSpeak();if(P.i<P.list.length-1){P.i++;P.lvl=S.help;P.show=false;}else{P.done=true;}render();window.scrollTo(0,0);break;
+    case 'again':buildList();render();window.scrollTo(0,0);break;
+    case 'copyall':copy(QS.filter(q=>(S.ans[q.id]||'').trim()).map(q=>q.q+'\n'+S.ans[q.id]).join('\n\n'));break;
+    case 'reset1':resetAsk=true;render();break;
+    case 'reset0':resetAsk=false;render();break;
+    case 'reset2':S.ans={};S.rate={};S.prof={ausb:'Sozialpädagogin'};S.q=0;resetAsk=false;save();buildList();render();toast('Zurückgesetzt');break;
+  }
+});
+document.addEventListener('input',function(e){
+  const t=e.target;
+  if(t.id==='ans'){setAns(t.value);return;}
+  if(t.dataset&&t.dataset.p){S.prof[t.dataset.p]=t.value;save();return;}
+  if(t.id==='wsearch'){
+    const v=t.value.trim().toLowerCase();
+    $$('.wchip').forEach(c=>{c.hidden=!!v&&c.dataset.s.indexOf(v)<0;});
+    $$('[data-wg]').forEach(g=>{g.hidden=!$$('.wchip:not([hidden])',g).length;});
+  }
+});
+$('#slow').addEventListener('change',function(e){S.slow=e.target.checked;save();});
+
+/* ---------- Start ---------- */
+$('#tabs').innerHTML=TABS.map(t=>'<button type="button" class="tab" data-tab="'+t[0]+'">'+t[1]+'</button>').join('');
+$('#slow').checked=!!S.slow;
+try{const h=(location.hash||'').replace('#','');if(VIEWS[h])S.tab=h;}catch(e){}
+buildList();
+render();
+})();
+</script>
+
+</body>
+</html>
