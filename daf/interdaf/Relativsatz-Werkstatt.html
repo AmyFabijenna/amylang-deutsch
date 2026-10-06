@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relativsatz-Werkstatt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Literata:opsz,wght@7..72,400;7..72,600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+body{margin:0}
+
+/* Layout: Arbeitsblatt-Werkbank – links die Übungskarte mit Schritt-für-Schritt-Umbau, rechts der Spickzettel (Schritte + Pronomentabelle) */
+:root{
+  --bg:#eef2f5; --paper:#ffffff; --ink:#1c2632; --muted:#586676; --line:#d3dce5;
+  --accent:#2c5a86; --accent-ink:#ffffff; --accent-soft:#e3edf6;
+  --noun:#ffe777; --noun-ink:#3a3000; --pron:#c6e6ff; --pron-ink:#0b3553;
+  --verb:#ffd5c7; --verb-ink:#5a1d08;
+  --ok:#22744a; --ok-soft:#e1f3e8; --err:#a9372f; --err-soft:#fbe7e4;
+  --f-sent:"Literata",Georgia,"Times New Roman",serif;
+  --f-ui:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141a21; --paper:#1d252f; --ink:#e6ecf2; --muted:#9aa8b6; --line:#2f3a47;
+  --accent:#7fb2e3; --accent-ink:#0e1822; --accent-soft:#22344a;
+  --noun:#5b4d0c; --noun-ink:#fff1a8; --pron:#173f5f; --pron-ink:#d3ecff;
+  --verb:#5a2a1c; --verb-ink:#ffd9cb;
+  --ok:#6fd39c; --ok-soft:#173a28; --err:#ff8f84; --err-soft:#43211e; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a21; --paper:#1d252f; --ink:#e6ecf2; --muted:#9aa8b6; --line:#2f3a47;
+  --accent:#7fb2e3; --accent-ink:#0e1822; --accent-soft:#22344a;
+  --noun:#5b4d0c; --noun-ink:#fff1a8; --pron:#173f5f; --pron-ink:#d3ecff;
+  --verb:#5a2a1c; --verb-ink:#ffd9cb;
+  --ok:#6fd39c; --ok-soft:#173a28; --err:#ff8f84; --err-soft:#43211e; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:16px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:24px 48px}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:20px}
+h1{font-family:var(--f-sent);font-weight:600;font-size:clamp(1.6rem,3.5vw,2.2rem);line-height:1.15;margin:0;text-wrap:balance}
+h1 em{font-style:normal;background:linear-gradient(transparent 55%,var(--noun) 55%);color:inherit;padding:0 .1em}
+.sub{color:var(--muted);margin:.35rem 0 0;max-width:60ch}
+.seg{display:inline-flex;border:1.5px solid var(--accent);border-radius:999px;overflow:hidden}
+.seg button{font:inherit;font-weight:700;border:0;background:transparent;color:var(--accent);padding:.5rem 1.1rem;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.seg button:focus-visible,.chip:focus-visible,.btn:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;align-items:center}
+.filters .lbl{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-right:4px}
+.chip{font:inherit;font-size:.92rem;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:.3rem .85rem;cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--ink);font-weight:700}
+.chip .n{font-family:var(--f-mono);font-size:.75rem;color:var(--muted);margin-left:.3rem}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start}
+@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:22px}
+.meta{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:center;margin-bottom:14px}
+.counter{font-family:var(--f-mono);font-size:.85rem;color:var(--muted)}
+.badge{font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.15rem .6rem;border-radius:6px;background:var(--accent-soft);color:var(--accent)}
+.sentences{display:grid;gap:10px;margin-bottom:18px}
+.sent{display:grid;grid-template-columns:3.2rem minmax(0,1fr);gap:10px;align-items:baseline}
+.sent .tag{font-family:var(--f-mono);font-size:.78rem;color:var(--muted)}
+.sent .txt{font-family:var(--f-sent);font-size:clamp(1.12rem,2.4vw,1.32rem);line-height:1.45}
+mark.n{background:var(--noun);color:var(--noun-ink);border-radius:3px;padding:0 .12em}
+mark.p{background:var(--pron);color:var(--pron-ink);border-radius:3px;padding:0 .12em}
+mark.v{background:var(--verb);color:var(--verb-ink);border-radius:3px;padding:0 .12em}
+label.ans{display:block;font-size:.85rem;font-weight:700;margin-bottom:6px}
+textarea{width:100%;min-height:86px;resize:vertical;font-family:var(--f-sent);font-size:1.1rem;line-height:1.45;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btn{font:inherit;font-weight:700;border-radius:10px;padding:.55rem 1rem;cursor:pointer;border:1.5px solid var(--accent);background:var(--paper);color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{border-color:var(--line);color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:default}
+.spacer{flex:1}
+.feedback{margin-top:14px;padding:10px 14px;border-radius:10px;display:none}
+.feedback.ok{display:block;background:var(--ok-soft);color:var(--ok)}
+.feedback.err{display:block;background:var(--err-soft);color:var(--err)}
+.feedback.hint{display:block;background:var(--accent-soft);color:var(--ink)}
+.steps{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:12px;counter-reset:st}
+.steps li{display:grid;grid-template-columns:2rem minmax(0,1fr);gap:10px;padding-top:12px;border-top:1px dashed var(--line);counter-increment:st}
+.steps li::before{content:counter(st);font-family:var(--f-mono);font-weight:500;width:1.7rem;height:1.7rem;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);font-size:.85rem}
+.steps h3{margin:0;font-size:.95rem}
+.steps .hu{font-size:.85rem;color:var(--muted);font-style:italic;margin:0}
+.steps .ex{font-family:var(--f-sent);font-size:1.08rem;margin:.3rem 0 0}
+.steps .why{font-size:.88rem;color:var(--muted);margin:.25rem 0 0}
+.steps li.final .ex{font-weight:600}
+aside .card{padding:18px}
+aside h2{font-family:var(--f-sent);font-size:1.15rem;margin:0 0 10px}
+aside ol{margin:0;padding-left:1.2rem;display:grid;gap:8px;font-size:.93rem}
+aside ol .hu{display:block;color:var(--muted);font-style:italic;font-size:.84rem}
+.tblwrap{overflow-x:auto;margin-top:6px}
+table{border-collapse:collapse;width:100%;font-size:.92rem;font-variant-numeric:tabular-nums}
+th,td{border-bottom:1px solid var(--line);padding:.35rem .4rem;text-align:left}
+th{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+td.hot{font-weight:700;color:var(--accent)}
+.tip{font-size:.88rem;color:var(--muted);margin:.8rem 0 0}
+aside{display:grid;gap:16px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:.85rem;margin-top:10px}
+.progress{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:6px}
+.progress > div{height:100%;background:var(--ok);width:0}
+.prog-txt{font-size:.85rem;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.steps li{animation:in .25s ease-out both}@keyframes in{from{transform:translateY(4px);opacity:.3}to{transform:none;opacity:1}}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Relativsatz-<em>Werkstatt</em></h1>
+      <p class="sub">Zwei Hauptsätze, ein gemeinsames Nomen: Verbinde sie zu einem Satz mit eingeschobenem Relativsatz.</p>
+    </div>
+    <div class="seg" role="group" aria-label="Niveau">
+      <button id="m-b1" data-mode="b1" aria-pressed="true">A2 / B1</button>
+      <button id="m-c1" data-mode="c1" aria-pressed="false">C1 / C2</button>
+    </div>
+  </header>
+
+  <div class="filters" id="filters"><span class="lbl">Fokus</span></div>
+
+  <div class="grid">
+    <main class="card" aria-live="polite">
+      <div class="meta">
+        <span class="counter" id="counter"></span>
+        <span class="badge" id="badge" hidden></span>
+      </div>
+      <div class="sentences">
+        <div class="sent"><span class="tag">Satz 1</span><span class="txt" id="s1"></span></div>
+        <div class="sent"><span class="tag">Satz 2</span><span class="txt" id="s2"></span></div>
+      </div>
+      <label class="ans" for="answer">Dein Satz</label>
+      <textarea id="answer" spellcheck="false" placeholder="Schreibe hier den verbundenen Satz …"></textarea>
+      <div class="actions">
+        <button class="btn primary" id="check">Prüfen</button>
+        <button class="btn" id="hint">Nächster Schritt</button>
+        <button class="btn" id="solve">Lösung zeigen</button>
+        <span class="spacer"></span>
+        <button class="btn ghost" id="prev" aria-label="Vorherige Übung">←</button>
+        <button class="btn ghost" id="rand">Zufall</button>
+        <button class="btn ghost" id="next" aria-label="Nächste Übung">→</button>
+      </div>
+      <div class="feedback" id="fb"></div>
+      <ol class="steps" id="steps"></ol>
+    </main>
+
+    <aside>
+      <section class="card">
+        <h2>So baust du den Satz um</h2>
+        <ol id="guide"></ol>
+        <div class="legend">
+          <span><mark class="n">Signal-Nomen</mark></span>
+          <span><mark class="p">Relativpronomen</mark></span>
+          <span><mark class="v">Verb am Ende</mark></span>
+        </div>
+      </section>
+      <section class="card">
+        <h2>Relativpronomen</h2>
+        <div class="tblwrap"><table>
+          <thead><tr><th></th><th>m</th><th>f</th><th>n</th><th>Pl</th></tr></thead>
+          <tbody>
+            <tr><th>Nom</th><td>der</td><td>die</td><td>das</td><td>die</td></tr>
+            <tr><th>Akk</th><td>den</td><td>die</td><td>das</td><td>die</td></tr>
+            <tr><th>Dat</th><td>dem</td><td>der</td><td>dem</td><td class="hot">denen</td></tr>
+            <tr><th>Gen</th><td class="hot">dessen</td><td class="hot">deren</td><td class="hot">dessen</td><td class="hot">deren</td></tr>
+          </tbody>
+        </table></div>
+        <p class="tip">Genus und Numerus kommen vom Signal-Nomen in Satz 1. Den Kasus bestimmt seine Rolle in Satz 2 (bzw. die Präposition).</p>
+      </section>
+      <section class="card">
+        <h2>Fortschritt</h2>
+        <div class="prog-txt" id="progtxt"></div>
+        <div class="progress"><div id="progbar"></div></div>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<script>
+// [Satz1, Anker (Signal-Nomen in Satz 1), Satz2, Bezugswort in Satz 2 (so wie es in der Verb-End-Fassung steht), Satz 2 mit Verb am Ende, Relativ-Ausdruck, Kasus, Genus, Hinweis?]
+// Kasus: N A D G | PA PD PG (Präposition + Akk/Dat/Gen)
+const B1 = [
+["Der Mann wohnt neben uns.","Der Mann","Der Mann arbeitet im Krankenhaus.","der Mann","der Mann im Krankenhaus arbeitet","der","N","m"],
+["Die Frau ist meine Nachbarin.","Die Frau","Die Frau trägt einen roten Mantel.","die Frau","die Frau einen roten Mantel trägt","die","N","f"],
+["Das Kind spielt im Garten.","Das Kind","Das Kind ist fünf Jahre alt.","das Kind","das Kind fünf Jahre alt ist","das","N","n"],
+["Die Studenten lernen in der Bibliothek.","Die Studenten","Die Studenten schreiben morgen eine Prüfung.","die Studenten","die Studenten morgen eine Prüfung schreiben","die","N","pl"],
+["Der Bus fährt zum Bahnhof.","Der Bus","Der Bus kommt jeden Morgen zu spät.","der Bus","der Bus jeden Morgen zu spät kommt","der","N","m"],
+["Die Bäckerei ist heute geschlossen.","Die Bäckerei","Die Bäckerei verkauft frisches Brot.","die Bäckerei","die Bäckerei frisches Brot verkauft","die","N","f"],
+["Das Restaurant ist sehr beliebt.","Das Restaurant","Das Restaurant liegt am Hauptplatz.","das Restaurant","das Restaurant am Hauptplatz liegt","das","N","n"],
+["Die Kollegen helfen mir oft.","Die Kollegen","Die Kollegen sitzen im Büro neben mir.","die Kollegen","die Kollegen im Büro neben mir sitzen","die","N","pl"],
+["Der Film war sehr spannend.","Der Film","Der Film lief gestern im Kino.","der Film","der Film gestern im Kino lief","der","N","m"],
+["Die Lehrerin erklärt die Grammatik gut.","Die Lehrerin","Die Lehrerin kommt aus Wien.","die Lehrerin","die Lehrerin aus Wien kommt","die","N","f"],
+["Das Auto gehört meinem Bruder.","Das Auto","Das Auto steht vor dem Haus.","das Auto","das Auto vor dem Haus steht","das","N","n"],
+["Die Kinder sind sehr laut.","Die Kinder","Die Kinder spielen im Hof.","die Kinder","die Kinder im Hof spielen","die","N","pl"],
+["Der Arzt hat mir Tabletten gegeben.","Der Arzt","Der Arzt ist sehr freundlich.","der Arzt","der Arzt sehr freundlich ist","der","N","m"],
+["Die Wohnung ist zu teuer.","Die Wohnung","Die Wohnung hat drei Zimmer.","die Wohnung","die Wohnung drei Zimmer hat","die","N","f"],
+["Das Hotel war sehr sauber.","Das Hotel","Das Hotel liegt direkt am See.","das Hotel","das Hotel direkt am See liegt","das","N","n"],
+["Die Touristen fotografieren die Kirche.","Die Touristen","Die Touristen kommen aus Japan.","die Touristen","die Touristen aus Japan kommen","die","N","pl"],
+["Der Zug ist pünktlich angekommen.","Der Zug","Der Zug fährt nach Budapest.","der Zug","der Zug nach Budapest fährt","der","N","m"],
+["Die Katze schläft auf dem Sofa.","Die Katze","Die Katze gehört meiner Tochter.","die Katze","die Katze meiner Tochter gehört","die","N","f"],
+["Das Mädchen hat den Preis gewonnen.","Das Mädchen","Das Mädchen singt im Chor.","das Mädchen","das Mädchen im Chor singt","das","N","n"],
+["Die Nachbarn haben uns zum Essen eingeladen.","Die Nachbarn","Die Nachbarn wohnen im ersten Stock.","die Nachbarn","die Nachbarn im ersten Stock wohnen","die","N","pl"],
+
+["Der Pullover ist sehr warm.","Der Pullover","Ich habe den Pullover gestern gekauft.","den Pullover","ich den Pullover gestern gekauft habe","den","A","m"],
+["Die Suppe schmeckt sehr gut.","Die Suppe","Meine Mutter kocht die Suppe.","die Suppe","meine Mutter die Suppe kocht","die","A","f"],
+["Das Buch ist sehr interessant.","Das Buch","Ich lese das Buch gerade.","das Buch","ich das Buch gerade lese","das","A","n"],
+["Die Schuhe waren sehr teuer.","Die Schuhe","Ich trage die Schuhe heute.","die Schuhe","ich die Schuhe heute trage","die","A","pl"],
+["Der Kuchen ist schon fertig.","Der Kuchen","Wir backen den Kuchen für Omas Geburtstag.","den Kuchen","wir den Kuchen für Omas Geburtstag backen","den","A","m"],
+["Die Stadt ist wunderschön.","Die Stadt","Wir besuchen die Stadt im Sommer.","die Stadt","wir die Stadt im Sommer besuchen","die","A","f"],
+["Das Fahrrad ist kaputt.","Das Fahrrad","Mein Sohn benutzt das Fahrrad jeden Tag.","das Fahrrad","mein Sohn das Fahrrad jeden Tag benutzt","das","A","n"],
+["Die Blumen sind für meine Mutter.","Die Blumen","Ich habe die Blumen auf dem Markt gekauft.","die Blumen","ich die Blumen auf dem Markt gekauft habe","die","A","pl"],
+["Der Lehrer ist sehr nett.","Der Lehrer","Wir haben den Lehrer im Kurs kennengelernt.","den Lehrer","wir den Lehrer im Kurs kennengelernt haben","den","A","m"],
+["Die Wohnung liegt im Zentrum.","Die Wohnung","Wir möchten die Wohnung mieten.","die Wohnung","wir die Wohnung mieten möchten","die","A","f","Mit Modalverb: Das konjugierte Modalverb (möchten) steht ganz am Ende."],
+["Das Geschenk war eine große Überraschung.","Das Geschenk","Mein Mann hat das Geschenk ausgesucht.","das Geschenk","mein Mann das Geschenk ausgesucht hat","das","A","n"],
+["Die Fotos sind sehr schön geworden.","Die Fotos","Du hast die Fotos im Urlaub gemacht.","die Fotos","du die Fotos im Urlaub gemacht hast","die","A","pl"],
+["Der Kaffee ist zu stark.","Der Kaffee","Der Kellner hat den Kaffee gebracht.","den Kaffee","der Kellner den Kaffee gebracht hat","den","A","m","Achtung: In Satz 2 ist der Kellner das Subjekt. Der Kaffee ist das Objekt, also Akkusativ."],
+["Die Ärztin ist sehr kompetent.","Die Ärztin","Ich besuche die Ärztin einmal im Jahr.","die Ärztin","ich die Ärztin einmal im Jahr besuche","die","A","f"],
+["Das Lied ist sehr bekannt.","Das Lied","Die Kinder singen das Lied im Kindergarten.","das Lied","die Kinder das Lied im Kindergarten singen","das","A","n"],
+["Die Kollegen sind sehr hilfsbereit.","Die Kollegen","Ich habe die Kollegen am ersten Tag kennengelernt.","die Kollegen","ich die Kollegen am ersten Tag kennengelernt habe","die","A","pl"],
+["Der Brief kommt aus Ungarn.","Der Brief","Ich habe den Brief heute bekommen.","den Brief","ich den Brief heute bekommen habe","den","A","m"],
+["Die Jacke hängt im Schrank.","Die Jacke","Ich brauche die Jacke im Winter.","die Jacke","ich die Jacke im Winter brauche","die","A","f"],
+["Das Haus ist sehr alt.","Das Haus","Meine Eltern haben das Haus renoviert.","das Haus","meine Eltern das Haus renoviert haben","das","A","n"],
+["Die Äpfel kommen aus dem Garten.","Die Äpfel","Wir essen die Äpfel zum Frühstück.","die Äpfel","wir die Äpfel zum Frühstück essen","die","A","pl"],
+
+["Der Freund ist sehr dankbar für die Unterstützung.","Der Freund","Ich helfe dem Freund.","dem Freund","ich dem Freund helfe","dem","D","m","helfen + Dativ: Ich helfe wem? → dem Freund."],
+["Die Kollegin hat heute Geburtstag.","Die Kollegin","Ich schenke der Kollegin Blumen.","der Kollegin","ich der Kollegin Blumen schenke","der","D","f"],
+["Das Kind weint.","Das Kind","Niemand hilft dem Kind.","dem Kind","niemand dem Kind hilft","dem","D","n"],
+["Die Gäste waren sehr zufrieden.","Die Gäste","Wir haben den Gästen das Hotel gezeigt.","den Gästen","wir den Gästen das Hotel gezeigt haben","denen","D","pl","Dativ Plural: das Relativpronomen heißt denen (nicht den!)."],
+["Der Mann wartet schon lange.","Der Mann","Ich habe dem Mann den Weg erklärt.","dem Mann","ich dem Mann den Weg erklärt habe","dem","D","m"],
+["Die Oma freut sich sehr.","Die Oma","Wir schreiben der Oma jede Woche eine Karte.","der Oma","wir der Oma jede Woche eine Karte schreiben","der","D","f"],
+["Das Mädchen lacht.","Das Mädchen","Der Clown gefällt dem Mädchen.","dem Mädchen","der Clown dem Mädchen gefällt","dem","D","n","gefallen + Dativ: Der Clown gefällt wem? → dem Mädchen."],
+["Die Schüler haben gute Noten bekommen.","Die Schüler","Die Lehrerin hat den Schülern viel geholfen.","den Schülern","die Lehrerin den Schülern viel geholfen hat","denen","D","pl","Dativ Plural → denen."],
+["Der Nachbar ist sehr freundlich.","Der Nachbar","Ich gebe dem Nachbarn unseren Schlüssel.","dem Nachbarn","ich dem Nachbarn unseren Schlüssel gebe","dem","D","m","n-Deklination: der Nachbar → dem Nachbarn. Das Relativpronomen ist trotzdem einfach dem."],
+["Die Verkäuferin war sehr geduldig.","Die Verkäuferin","Ich habe der Verkäuferin viele Fragen gestellt.","der Verkäuferin","ich der Verkäuferin viele Fragen gestellt habe","der","D","f"],
+["Das Baby schläft endlich.","Das Baby","Die Mutter singt dem Baby ein Lied.","dem Baby","die Mutter dem Baby ein Lied singt","dem","D","n"],
+["Die Freunde kommen aus Deutschland.","Die Freunde","Ich zeige den Freunden heute die Stadt.","den Freunden","ich den Freunden heute die Stadt zeige","denen","D","pl"],
+["Der Chef ist zufrieden.","Der Chef","Das Projekt gefällt dem Chef.","dem Chef","das Projekt dem Chef gefällt","dem","D","m"],
+["Die Frau hat ihre Tasche verloren.","Die Frau","Ein Polizist hilft der Frau.","der Frau","ein Polizist der Frau hilft","der","D","f"],
+["Das Team hat das Spiel gewonnen.","Das Team","Wir gratulieren dem Team.","dem Team","wir dem Team gratulieren","dem","D","n"],
+["Die Kinder kaufen sich ein Eis.","Die Kinder","Die Oma hat den Kindern Geld gegeben.","den Kindern","die Oma den Kindern Geld gegeben hat","denen","D","pl"],
+["Der Student hat die Prüfung bestanden.","Der Student","Ich habe dem Studenten beim Lernen geholfen.","dem Studenten","ich dem Studenten beim Lernen geholfen habe","dem","D","m","n-Deklination: der Student → dem Studenten."],
+["Die Nachbarin ist krank.","Die Nachbarin","Ich bringe der Nachbarin eine Suppe.","der Nachbarin","ich der Nachbarin eine Suppe bringe","der","D","f"],
+["Das Mädchen ist sehr traurig.","Das Mädchen","Niemand hat dem Mädchen zum Geburtstag gratuliert.","dem Mädchen","niemand dem Mädchen zum Geburtstag gratuliert hat","dem","D","n"],
+["Die Leute warten auf den Bus.","Die Leute","Ich erkläre den Leuten den Fahrplan.","den Leuten","ich den Leuten den Fahrplan erkläre","denen","D","pl"],
+
+["Der Schüler ist fleißig.","Der Schüler","Die Arbeit des Schülers ist gut.","die Arbeit des Schülers","die Arbeit des Schülers gut ist","dessen Arbeit","G","m","Genitiv: die Arbeit des Schülers → des Schülers Arbeit → dessen Arbeit. Das Nomen danach (Arbeit) verliert seinen Artikel."],
+["Die Frau ist Ärztin.","Die Frau","Der Mann der Frau ist Lehrer.","der Mann der Frau","der Mann der Frau Lehrer ist","deren Mann","G","f","der Mann der Frau → der Frau Mann → deren Mann."],
+["Das Kind ist krank.","Das Kind","Die Mutter des Kindes ruft den Arzt.","die Mutter des Kindes","die Mutter des Kindes den Arzt ruft","dessen Mutter","G","n","Achtung: Das Signal-Nomen (das Kind) bestimmt dessen, nicht die Mutter!"],
+["Die Nachbarn sind im Urlaub.","Die Nachbarn","Der Hund der Nachbarn bellt die ganze Nacht.","der Hund der Nachbarn","der Hund der Nachbarn die ganze Nacht bellt","deren Hund","G","pl"],
+["Der Freund wohnt in Graz.","Der Freund","Das Auto des Freundes ist kaputt.","das Auto des Freundes","das Auto des Freundes kaputt ist","dessen Auto","G","m"],
+["Die Kollegin ist heute nicht da.","Die Kollegin","Die Tochter der Kollegin ist krank.","die Tochter der Kollegin","die Tochter der Kollegin krank ist","deren Tochter","G","f"],
+["Das Haus steht am Waldrand.","Das Haus","Das Dach des Hauses ist undicht.","das Dach des Hauses","das Dach des Hauses undicht ist","dessen Dach","G","n"],
+["Die Studenten sind sehr motiviert.","Die Studenten","Die Noten der Studenten sind sehr gut.","die Noten der Studenten","die Noten der Studenten sehr gut sind","deren Noten","G","pl"],
+["Der Mann sucht eine größere Wohnung.","Der Mann","Die Frau des Mannes erwartet ein Baby.","die Frau des Mannes","die Frau des Mannes ein Baby erwartet","dessen Frau","G","m"],
+["Die Stadt ist sehr schön.","Die Stadt","Das Zentrum der Stadt ist ganz neu.","das Zentrum der Stadt","das Zentrum der Stadt ganz neu ist","deren Zentrum","G","f","Die Stadt ist feminin → deren, auch wenn das Zentrum neutral ist."],
+["Das Restaurant ist immer voll.","Das Restaurant","Der Koch des Restaurants kommt aus Italien.","der Koch des Restaurants","der Koch des Restaurants aus Italien kommt","dessen Koch","G","n"],
+["Die Familie wohnt neben uns.","Die Familie","Die Kinder der Familie gehen in meine Schule.","die Kinder der Familie","die Kinder der Familie in meine Schule gehen","deren Kinder","G","f"],
+["Die Touristen suchen ein Hotel.","Die Touristen","Das Gepäck der Touristen ist sehr schwer.","das Gepäck der Touristen","das Gepäck der Touristen sehr schwer ist","deren Gepäck","G","pl"],
+["Der Lehrer ist sehr beliebt.","Der Lehrer","Der Unterricht des Lehrers macht Spaß.","der Unterricht des Lehrers","der Unterricht des Lehrers Spaß macht","dessen Unterricht","G","m"],
+["Das Mädchen hat heute Geburtstag.","Das Mädchen","Die Freunde des Mädchens feiern eine Party.","die Freunde des Mädchens","die Freunde des Mädchens eine Party feiern","dessen Freunde","G","n"],
+
+["Der Freund wohnt jetzt in Berlin.","Der Freund","Ich spiele oft mit dem Freund Tennis.","mit dem Freund","ich oft mit dem Freund Tennis spiele","mit dem","PD","m","Die Präposition (mit) geht mit an den Anfang des Relativsatzes."],
+["Die Stadt ist sehr groß.","Die Stadt","Ich wohne in der Stadt.","in der Stadt","ich in der Stadt wohne","in der","PD","f"],
+["Das Haus hat einen großen Garten.","Das Haus","Wir wohnen in dem Haus.","in dem Haus","wir in dem Haus wohnen","in dem","PD","n"],
+["Die Freunde kommen morgen.","Die Freunde","Ich warte auf die Freunde.","auf die Freunde","ich auf die Freunde warte","auf die","PA","pl","warten auf + Akkusativ."],
+["Der Stuhl ist sehr bequem.","Der Stuhl","Ich sitze auf dem Stuhl.","auf dem Stuhl","ich auf dem Stuhl sitze","auf dem","PD","m","Wo? → Dativ."],
+["Die Firma ist sehr modern.","Die Firma","Mein Vater arbeitet bei der Firma.","bei der Firma","mein Vater bei der Firma arbeitet","bei der","PD","f"],
+["Das Thema ist sehr wichtig.","Das Thema","Wir sprechen heute über das Thema.","über das Thema","wir heute über das Thema sprechen","über das","PA","n","sprechen über + Akkusativ."],
+["Die Kollegen sind sehr nett.","Die Kollegen","Ich arbeite gern mit den Kollegen zusammen.","mit den Kollegen","ich gern mit den Kollegen zusammenarbeite","mit denen","PD","pl","Trennbares Verb: Im Nebensatz wird zusammen + arbeite wieder ein Wort. Dativ Plural → denen."],
+["Der Park liegt im Zentrum.","Der Park","Wir gehen jeden Sonntag in den Park.","in den Park","wir jeden Sonntag in den Park gehen","in den","PA","m","Wohin? → Akkusativ."],
+["Die Lehrerin heißt Frau Szabó.","Die Lehrerin","Ich habe gestern mit der Lehrerin gesprochen.","mit der Lehrerin","ich gestern mit der Lehrerin gesprochen habe","mit der","PD","f"],
+["Das Geschenk ist für meine Schwester.","Das Geschenk","Ich habe lange nach dem Geschenk gesucht.","nach dem Geschenk","ich lange nach dem Geschenk gesucht habe","nach dem","PD","n"],
+["Die Kinder spielen im Garten.","Die Kinder","Ich passe auf die Kinder auf.","auf die Kinder","ich auf die Kinder aufpasse","auf die","PA","pl","Trennbares Verb: auf + passe → aufpasse am Ende."],
+["Der Mann ist mein Onkel.","Der Mann","Ich habe von dem Mann ein Buch bekommen.","von dem Mann","ich von dem Mann ein Buch bekommen habe","von dem","PD","m"],
+["Die Party war sehr lustig.","Die Party","Wir haben uns auf die Party gefreut.","auf die Party","wir uns auf die Party gefreut haben","auf die","PA","f","sich freuen auf + Akkusativ."],
+["Das Fest findet im Juni statt.","Das Fest","Viele Leute kommen zu dem Fest.","zu dem Fest","viele Leute zu dem Fest kommen","zu dem","PD","n"],
+["Die Probleme sind nicht so groß.","Die Probleme","Du sprichst oft über die Probleme.","über die Probleme","du oft über die Probleme sprichst","über die","PA","pl"],
+["Der Urlaub war wunderschön.","Der Urlaub","Ich denke oft an den Urlaub.","an den Urlaub","ich oft an den Urlaub denke","an den","PA","m","denken an + Akkusativ."],
+["Die Frau ist meine Chefin.","Die Frau","Ich telefoniere jeden Tag mit der Frau.","mit der Frau","ich jeden Tag mit der Frau telefoniere","mit der","PD","f"],
+["Das Bett ist zu klein.","Das Bett","Mein Sohn schläft in dem Bett.","in dem Bett","mein Sohn in dem Bett schläft","in dem","PD","n"],
+["Die Nachbarn sind sehr freundlich.","Die Nachbarn","Wir haben uns gestern mit den Nachbarn unterhalten.","mit den Nachbarn","wir uns gestern mit den Nachbarn unterhalten haben","mit denen","PD","pl"],
+["Der Kurs beginnt im Oktober.","Der Kurs","Ich habe mich für den Kurs angemeldet.","für den Kurs","ich mich für den Kurs angemeldet habe","für den","PA","m"],
+["Die Prüfung war sehr schwer.","Die Prüfung","Ich habe lange für die Prüfung gelernt.","für die Prüfung","ich lange für die Prüfung gelernt habe","für die","PA","f"],
+["Das Café ist sehr gemütlich.","Das Café","Wir treffen uns oft in dem Café.","in dem Café","wir uns oft in dem Café treffen","in dem","PD","n"],
+["Die Geschwister leben in Ungarn.","Die Geschwister","Ich telefoniere oft mit den Geschwistern.","mit den Geschwistern","ich oft mit den Geschwistern telefoniere","mit denen","PD","pl"],
+["Der Tisch ist aus Holz.","Der Tisch","Wir essen jeden Abend an dem Tisch.","an dem Tisch","wir jeden Abend an dem Tisch essen","an dem","PD","m"]
+];
+
+const C1 = [
+["Die Ministerin hat das neue Gesetz im Parlament verteidigt.","Die Ministerin","Die Ministerin steht seit Wochen unter Druck.","die Ministerin","die Ministerin seit Wochen unter Druck steht","die","N","f"],
+["Der Bericht hat in der Öffentlichkeit für Empörung gesorgt.","Der Bericht","Der Bericht war vorzeitig an die Presse gelangt.","der Bericht","der Bericht vorzeitig an die Presse gelangt war","der","N","m"],
+["Das Unternehmen muss im kommenden Jahr mehrere Standorte schließen.","Das Unternehmen","Das Unternehmen hatte jahrelang Rekordgewinne erzielt.","das Unternehmen","das Unternehmen jahrelang Rekordgewinne erzielt hatte","das","N","n"],
+["Die Demonstranten haben sich vor dem Rathaus versammelt.","Die Demonstranten","Die Demonstranten fordern mehr Klimaschutz.","die Demonstranten","die Demonstranten mehr Klimaschutz fordern","die","N","pl"],
+["Der Wissenschaftler wurde für seine Forschung ausgezeichnet.","Der Wissenschaftler","Der Wissenschaftler hatte jahrzehntelang an dem Impfstoff gearbeitet.","der Wissenschaftler","der Wissenschaftler jahrzehntelang an dem Impfstoff gearbeitet hatte","der","N","m"],
+["Die Studie wird in Fachkreisen kontrovers diskutiert.","Die Studie","Die Studie wurde von einem Pharmakonzern finanziert.","die Studie","die Studie von einem Pharmakonzern finanziert wurde","die","N","f"],
+["Das Abkommen soll noch in diesem Jahr in Kraft treten.","Das Abkommen","Das Abkommen ist nach zähen Verhandlungen zustande gekommen.","das Abkommen","das Abkommen nach zähen Verhandlungen zustande gekommen ist","das","N","n"],
+["Die Maßnahmen haben sich als wirkungslos erwiesen.","Die Maßnahmen","Die Maßnahmen hätten die Inflation eindämmen sollen.","die Maßnahmen","die Maßnahmen die Inflation hätten eindämmen sollen","die","N","pl","Ersatzinfinitiv: Bei zwei Infinitiven (eindämmen sollen) steht das konjugierte Verb (hätten) vor ihnen, nicht am Ende."],
+["Der Angeklagte hat vor Gericht jede Schuld bestritten.","Der Angeklagte","Der Angeklagte soll Millionen veruntreut haben.","der Angeklagte","der Angeklagte Millionen veruntreut haben soll","der","N","m","Modalverb in subjektiver Bedeutung (soll = angeblich): im Nebensatz ganz am Ende."],
+["Die Autorin liest morgen in der Stadtbibliothek aus ihrem neuen Roman.","Die Autorin","Die Autorin ist mit dem Deutschen Buchpreis ausgezeichnet worden.","die Autorin","die Autorin mit dem Deutschen Buchpreis ausgezeichnet worden ist","die","N","f"],
+["Das Gesetz tritt erst im nächsten Frühjahr in Kraft.","Das Gesetz","Das Gesetz schützt Mieter vor überhöhten Nebenkosten.","das Gesetz","das Gesetz Mieter vor überhöhten Nebenkosten schützt","das","N","n"],
+["Die Bürgerinitiativen haben ein Volksbegehren eingeleitet.","Die Bürgerinitiativen","Die Bürgerinitiativen setzen sich gegen den Bau der Autobahn ein.","die Bürgerinitiativen","die Bürgerinitiativen sich gegen den Bau der Autobahn einsetzen","die","N","pl","Trennbares Verb: setzen … ein → einsetzen am Ende."],
+["Der Kompromiss wurde von allen Fraktionen begrüßt.","Der Kompromiss","Der Kompromiss war in letzter Minute ausgehandelt worden.","der Kompromiss","der Kompromiss in letzter Minute ausgehandelt worden war","der","N","m"],
+["Die Reform stößt bei den Gewerkschaften auf heftigen Widerstand.","Die Reform","Die Reform sieht eine Verlängerung der Lebensarbeitszeit vor.","die Reform","die Reform eine Verlängerung der Lebensarbeitszeit vorsieht","die","N","f"],
+["Das Projekt musste aus Kostengründen eingestellt werden.","Das Projekt","Das Projekt war als Vorzeigemodell gefeiert worden.","das Projekt","das Projekt als Vorzeigemodell gefeiert worden war","das","N","n"],
+["Die Flüchtlinge wurden in einer ehemaligen Kaserne untergebracht.","Die Flüchtlinge","Die Flüchtlinge waren tagelang auf dem Mittelmeer unterwegs gewesen.","die Flüchtlinge","die Flüchtlinge tagelang auf dem Mittelmeer unterwegs gewesen waren","die","N","pl"],
+["Der Regisseur hat bei der Preisverleihung eine bewegende Rede gehalten.","Der Regisseur","Der Regisseur galt lange als Außenseiter der Filmbranche.","der Regisseur","der Regisseur lange als Außenseiter der Filmbranche galt","der","N","m"],
+["Die Pandemie hat die Schwächen des Gesundheitssystems schonungslos offengelegt.","Die Pandemie","Die Pandemie hat das öffentliche Leben monatelang lahmgelegt.","die Pandemie","die Pandemie das öffentliche Leben monatelang lahmgelegt hat","die","N","f"],
+["Das Gutachten wird dem Ausschuss nächste Woche vorgelegt.","Das Gutachten","Das Gutachten dürfte die Debatte erneut anheizen.","das Gutachten","das Gutachten die Debatte erneut anheizen dürfte","das","N","n"],
+["Die Aktionäre haben auf der Hauptversammlung den Vorstand entlastet.","Die Aktionäre","Die Aktionäre hatten zuvor scharfe Kritik geübt.","die Aktionäre","die Aktionäre zuvor scharfe Kritik geübt hatten","die","N","pl"],
+
+["Der Vorschlag wurde vom Ausschuss einstimmig abgelehnt.","Der Vorschlag","Die Opposition hatte den Vorschlag eingebracht.","den Vorschlag","die Opposition den Vorschlag eingebracht hatte","den","A","m"],
+["Die Ausstellung zieht täglich Tausende Besucher an.","Die Ausstellung","Man hatte die Ausstellung ursprünglich nur für drei Monate geplant.","die Ausstellung","man die Ausstellung ursprünglich nur für drei Monate geplant hatte","die","A","f"],
+["Das Buch hat eine heftige Debatte ausgelöst.","Das Buch","Kritiker bezeichnen das Buch als populistisch.","das Buch","Kritiker das Buch als populistisch bezeichnen","das","A","n"],
+["Die Daten sind nicht ausreichend geschützt worden.","Die Daten","Das Unternehmen hatte die Daten jahrelang gesammelt.","die Daten","das Unternehmen die Daten jahrelang gesammelt hatte","die","A","pl"],
+["Der Vertrag muss bis Ende des Monats unterzeichnet werden.","Der Vertrag","Beide Seiten haben den Vertrag monatelang verhandelt.","den Vertrag","beide Seiten den Vertrag monatelang verhandelt haben","den","A","m"],
+["Die Rede wurde im ganzen Land live übertragen.","Die Rede","Der Präsident hielt die Rede anlässlich des Nationalfeiertags.","die Rede","der Präsident die Rede anlässlich des Nationalfeiertags hielt","die","A","f"],
+["Das Gebäude soll in ein Museum umgewandelt werden.","Das Gebäude","Die Stadt hat das Gebäude vor zwei Jahren erworben.","das Gebäude","die Stadt das Gebäude vor zwei Jahren erworben hat","das","A","n"],
+["Die Fehler hätten leicht vermieden werden können.","Die Fehler","Die Behörde hat die Fehler inzwischen eingeräumt.","die Fehler","die Behörde die Fehler inzwischen eingeräumt hat","die","A","pl"],
+["Der Kandidat konnte sich in der Stichwahl nicht durchsetzen.","Der Kandidat","Die Partei hatte den Kandidaten überraschend nominiert.","den Kandidaten","die Partei den Kandidaten überraschend nominiert hatte","den","A","m","n-Deklination: den Kandidaten – das Relativpronomen bleibt trotzdem den."],
+["Die Theorie gilt heute als widerlegt.","Die Theorie","Man hatte die Theorie jahrzehntelang für unumstößlich gehalten.","die Theorie","man die Theorie jahrzehntelang für unumstößlich gehalten hatte","die","A","f"],
+["Das Manuskript wurde erst nach dem Tod des Autors veröffentlicht.","Das Manuskript","Der Autor hatte das Manuskript zeitlebens geheim gehalten.","das Manuskript","der Autor das Manuskript zeitlebens geheim gehalten hatte","das","A","n"],
+["Die Vorwürfe haben sich als haltlos erwiesen.","Die Vorwürfe","Die Boulevardpresse hatte die Vorwürfe erhoben.","die Vorwürfe","die Boulevardpresse die Vorwürfe erhoben hatte","die","A","pl"],
+["Der Plan stößt in der Bevölkerung auf wenig Gegenliebe.","Der Plan","Die Regierung will den Plan noch vor der Wahl umsetzen.","den Plan","die Regierung den Plan noch vor der Wahl umsetzen will","den","A","m"],
+["Die Entscheidung wird erhebliche Konsequenzen haben.","Die Entscheidung","Der Vorstand hat die Entscheidung ohne Rücksprache getroffen.","die Entscheidung","der Vorstand die Entscheidung ohne Rücksprache getroffen hat","die","A","f"],
+["Das Medikament ist inzwischen vom Markt genommen worden.","Das Medikament","Ärzte hatten das Medikament jahrelang bedenkenlos verschrieben.","das Medikament","Ärzte das Medikament jahrelang bedenkenlos verschrieben hatten","das","A","n"],
+["Die Ergebnisse werden auf dem Kongress in Wien präsentiert.","Die Ergebnisse","Das Forschungsteam hat die Ergebnisse in einer Langzeitstudie gewonnen.","die Ergebnisse","das Forschungsteam die Ergebnisse in einer Langzeitstudie gewonnen hat","die","A","pl"],
+["Der Roman wurde in über dreißig Sprachen übersetzt.","Der Roman","Die Kritik hatte den Roman anfangs völlig ignoriert.","den Roman","die Kritik den Roman anfangs völlig ignoriert hatte","den","A","m"],
+["Die Petition wurde dem Landtag übergeben.","Die Petition","Mehr als 50.000 Menschen haben die Petition unterschrieben.","die Petition","mehr als 50.000 Menschen die Petition unterschrieben haben","die","A","f"],
+["Das Verfahren wurde mangels Beweisen eingestellt.","Das Verfahren","Die Staatsanwaltschaft hatte das Verfahren gegen den Bürgermeister eröffnet.","das Verfahren","die Staatsanwaltschaft das Verfahren gegen den Bürgermeister eröffnet hatte","das","A","n"],
+["Die Einwände wurden im Planungsverfahren nicht berücksichtigt.","Die Einwände","Die Anwohner hatten die Einwände fristgerecht vorgebracht.","die Einwände","die Anwohner die Einwände fristgerecht vorgebracht hatten","die","A","pl"],
+
+["Die Bürger waren verärgert.","Die Bürger","Man hatte den Bürgern vollständige Informationen versprochen.","den Bürgern","man den Bürgern vollständige Informationen versprochen hatte","denen","D","pl","Dativ Plural → denen."],
+["Der Zeuge hat seine Aussage widerrufen.","Der Zeuge","Das Gericht hatte dem Zeugen Schutz zugesichert.","dem Zeugen","das Gericht dem Zeugen Schutz zugesichert hatte","dem","D","m","n-Deklination: dem Zeugen."],
+["Die Mitarbeiterin wurde fristlos entlassen.","Die Mitarbeiterin","Man wirft der Mitarbeiterin Untreue vor.","der Mitarbeiterin","man der Mitarbeiterin Untreue vorwirft","der","D","f","jemandem etwas vorwerfen: Dativ der Person."],
+["Das Land steht vor dem wirtschaftlichen Kollaps.","Das Land","Der Internationale Währungsfonds hat dem Land einen Notkredit gewährt.","dem Land","der Internationale Währungsfonds dem Land einen Notkredit gewährt hat","dem","D","n"],
+["Der Politiker ist von seinem Amt zurückgetreten.","Der Politiker","Journalisten hatten dem Politiker Vetternwirtschaft nachgewiesen.","dem Politiker","Journalisten dem Politiker Vetternwirtschaft nachgewiesen hatten","dem","D","m"],
+["Die Firma hat Insolvenz angemeldet.","Die Firma","Die Bank hatte der Firma keine weiteren Kredite gewährt.","der Firma","die Bank der Firma keine weiteren Kredite gewährt hatte","der","D","f"],
+["Das Opfer konnte den Täter eindeutig identifizieren.","Das Opfer","Ein Passant war dem Opfer zu Hilfe gekommen.","dem Opfer","ein Passant dem Opfer zu Hilfe gekommen war","dem","D","n"],
+["Die Patienten müssen oft monatelang auf eine Operation warten.","Die Patienten","Den Patienten fehlt eine starke Lobby.","den Patienten","den Patienten eine starke Lobby fehlt","denen","D","pl","fehlen + Dativ: Wem fehlt etwas? → den Patienten → denen."],
+["Der Architekt hat den internationalen Wettbewerb gewonnen.","Der Architekt","Die Jury hat dem Architekten einstimmig den ersten Preis zuerkannt.","dem Architekten","die Jury dem Architekten einstimmig den ersten Preis zuerkannt hat","dem","D","m"],
+["Die Regierung hat ihre Pläne überraschend geändert.","Die Regierung","Die Opposition misstraut der Regierung zutiefst.","der Regierung","die Opposition der Regierung zutiefst misstraut","der","D","f"],
+["Das Kind hat einen schweren Schock erlitten.","Das Kind","Die Rettungskräfte konnten dem Kind gerade noch rechtzeitig helfen.","dem Kind","die Rettungskräfte dem Kind gerade noch rechtzeitig helfen konnten","dem","D","n"],
+["Die Unternehmen fürchten um ihre Wettbewerbsfähigkeit.","Die Unternehmen","Die neuen Auflagen bereiten den Unternehmen große Sorgen.","den Unternehmen","die neuen Auflagen den Unternehmen große Sorgen bereiten","denen","D","pl"],
+["Der Schriftsteller lebt seit Jahren im Exil.","Der Schriftsteller","Das Regime hatte dem Schriftsteller die Staatsbürgerschaft aberkannt.","dem Schriftsteller","das Regime dem Schriftsteller die Staatsbürgerschaft aberkannt hatte","dem","D","m"],
+["Die Sängerin musste ihre Tournee absagen.","Die Sängerin","Die Ärzte haben der Sängerin absolute Stimmruhe verordnet.","der Sängerin","die Ärzte der Sängerin absolute Stimmruhe verordnet haben","der","D","f"],
+["Das Museum kann endlich erweitert werden.","Das Museum","Ein Mäzen hat dem Museum zehn Millionen Euro vermacht.","dem Museum","ein Mäzen dem Museum zehn Millionen Euro vermacht hat","dem","D","n"],
+["Die Mieter wehren sich gegen die Kündigung.","Die Mieter","Der Eigentümer hat den Mietern zum Jahresende gekündigt.","den Mietern","der Eigentümer den Mietern zum Jahresende gekündigt hat","denen","D","pl"],
+["Der Spieler wurde für drei Spiele gesperrt.","Der Spieler","Der Schiedsrichter hatte dem Spieler die Rote Karte gezeigt.","dem Spieler","der Schiedsrichter dem Spieler die Rote Karte gezeigt hatte","dem","D","m"],
+["Die Expertin wird morgen vor dem Ausschuss aussagen.","Die Expertin","Viele Abgeordnete trauen der Expertin nicht über den Weg.","der Expertin","viele Abgeordnete der Expertin nicht über den Weg trauen","der","D","f","Redewendung: jemandem nicht über den Weg trauen (Dativ)."],
+["Das Team hat das Projekt fristgerecht abgeschlossen.","Das Team","Die Geschäftsleitung hatte dem Team freie Hand gelassen.","dem Team","die Geschäftsleitung dem Team freie Hand gelassen hatte","dem","D","n"],
+["Die Landwirte demonstrieren vor dem Ministerium.","Die Landwirte","Die Dürre hat den Landwirten schwere Ernteausfälle beschert.","den Landwirten","die Dürre den Landwirten schwere Ernteausfälle beschert hat","denen","D","pl"],
+
+["Der Konzern hat seine Prognose nach unten korrigiert.","Der Konzern","Die Aktien des Konzerns sind stark eingebrochen.","die Aktien des Konzerns","die Aktien des Konzerns stark eingebrochen sind","dessen Aktien","G","m","die Aktien des Konzerns → des Konzerns Aktien → dessen Aktien."],
+["Die Partei hat bei der Wahl dramatisch verloren.","Die Partei","Der Vorsitzende der Partei hat seinen Rücktritt angekündigt.","der Vorsitzende der Partei","der Vorsitzende der Partei seinen Rücktritt angekündigt hat","deren Vorsitzender","G","f","Stolperstein: Nach deren fällt der Artikel weg, deshalb wird das substantivierte Adjektiv stark dekliniert: der Vorsitzende → deren Vorsitzender."],
+["Das Dorf liegt malerisch an einem Bergsee.","Das Dorf","Die Einwohner des Dorfes leben überwiegend vom Tourismus.","die Einwohner des Dorfes","die Einwohner des Dorfes überwiegend vom Tourismus leben","dessen Einwohner","G","n"],
+["Die Forscher haben einen Durchbruch erzielt.","Die Forscher","Die Ergebnisse der Forscher wurden in einer renommierten Fachzeitschrift veröffentlicht.","die Ergebnisse der Forscher","die Ergebnisse der Forscher in einer renommierten Fachzeitschrift veröffentlicht wurden","deren Ergebnisse","G","pl"],
+["Der Dichter wird heute als Klassiker gefeiert.","Der Dichter","Die Werke des Dichters waren im Nationalsozialismus verboten.","die Werke des Dichters","die Werke des Dichters im Nationalsozialismus verboten waren","dessen Werke","G","m"],
+["Die Brücke muss dringend saniert werden.","Die Brücke","Die Tragfähigkeit der Brücke ist seit Jahren eingeschränkt.","die Tragfähigkeit der Brücke","die Tragfähigkeit der Brücke seit Jahren eingeschränkt ist","deren Tragfähigkeit","G","f"],
+["Das Gemälde wurde für eine Rekordsumme versteigert.","Das Gemälde","Die Herkunft des Gemäldes war lange ungeklärt.","die Herkunft des Gemäldes","die Herkunft des Gemäldes lange ungeklärt war","dessen Herkunft","G","n"],
+["Die Bewohner wurden in Notunterkünften untergebracht.","Die Bewohner","Die Häuser der Bewohner waren vom Hochwasser zerstört worden.","die Häuser der Bewohner","die Häuser der Bewohner vom Hochwasser zerstört worden waren","deren Häuser","G","pl"],
+["Der Nachbar ist leider letzte Woche weggezogen.","Der Nachbar","Mit der Hilfe des Nachbarn konnten wir das Dach rechtzeitig decken.","mit der Hilfe des Nachbarn","wir mit der Hilfe des Nachbarn das Dach rechtzeitig decken konnten","mit dessen Hilfe","PG","m","Präposition + Genitiv-Relativpronomen: mit der Hilfe des Nachbarn → mit dessen Hilfe. Die ganze Gruppe wandert an den Anfang."],
+["Die Stiftung wurde vor dreißig Jahren gegründet.","Die Stiftung","Dank der Unterstützung der Stiftung konnten zahlreiche Schulen gebaut werden.","dank der Unterstützung der Stiftung","dank der Unterstützung der Stiftung zahlreiche Schulen gebaut werden konnten","dank deren Unterstützung","PG","f","Passiv mit Modalverb im Nebensatz: gebaut werden konnten."],
+["Das Unternehmen hat seinen Sitz nach Irland verlegt.","Das Unternehmen","Die Steuerlast des Unternehmens war in Deutschland deutlich höher.","die Steuerlast des Unternehmens","die Steuerlast des Unternehmens in Deutschland deutlich höher war","dessen Steuerlast","G","n"],
+["Die Autoren haben sich öffentlich entschuldigt.","Die Autoren","Das Buch der Autoren musste wegen zahlreicher Plagiate zurückgezogen werden.","das Buch der Autoren","das Buch der Autoren wegen zahlreicher Plagiate zurückgezogen werden musste","deren Buch","G","pl"],
+["Der Bürgermeister tritt bei der nächsten Wahl nicht mehr an.","Der Bürgermeister","In der Amtszeit des Bürgermeisters ist die Verschuldung der Stadt massiv gestiegen.","in der Amtszeit des Bürgermeisters","in der Amtszeit des Bürgermeisters die Verschuldung der Stadt massiv gestiegen ist","in dessen Amtszeit","PG","m"],
+["Die Komponistin wird mit einem Festival geehrt.","Die Komponistin","Die Musik der Komponistin war jahrzehntelang in Vergessenheit geraten.","die Musik der Komponistin","die Musik der Komponistin jahrzehntelang in Vergessenheit geraten war","deren Musik","G","f"],
+["Das Theater muss vorübergehend schließen.","Das Theater","Über die Zukunft des Theaters wird im Gemeinderat seit Monaten gestritten.","über die Zukunft des Theaters","über die Zukunft des Theaters im Gemeinderat seit Monaten gestritten wird","über dessen Zukunft","PG","n"],
+
+["Die Ministerin hat auf einer Veranstaltung das neue Gesetz vorgestellt.","auf einer Veranstaltung","Zu der Veranstaltung sind mehr als tausend Bürger gekommen.","zu der Veranstaltung","zu der Veranstaltung mehr als tausend Bürger gekommen sind","zu der","PD","f","Der Relativsatz steht direkt hinter dem Signal-Nomen, also mitten im Hauptsatz, noch vor dem Partizip (vorgestellt)."],
+["Über das neue Gesetz ist heute im Parlament diskutiert worden.","Über das neue Gesetz","Gegen das Gesetz hatte es viele Demonstrationen gegeben.","gegen das Gesetz","gegen das Gesetz es viele Demonstrationen gegeben hatte","gegen das","PA","n","Steht in Satz 2 ein Pronominaladverb (dagegen), löse es zuerst auf: dagegen → gegen das Gesetz."],
+["Der Vorfall wird derzeit von der Polizei untersucht.","Der Vorfall","Über den Vorfall haben mehrere Zeitungen ausführlich berichtet.","über den Vorfall","über den Vorfall mehrere Zeitungen ausführlich berichtet haben","über den","PA","m","berichten über + Akkusativ."],
+["Die Verhandlungen sind vorerst gescheitert.","Die Verhandlungen","Man hatte große Hoffnungen in die Verhandlungen gesetzt.","in die Verhandlungen","man große Hoffnungen in die Verhandlungen gesetzt hatte","in die","PA","pl","Hoffnungen in etwas setzen (Akkusativ)."],
+["Das Problem lässt sich nicht kurzfristig lösen.","Das Problem","Die Experten weisen schon seit Jahren auf das Problem hin.","auf das Problem","die Experten schon seit Jahren auf das Problem hinweisen","auf das","PA","n","hinweisen auf + Akkusativ; trennbares Verb wird im Nebensatz wieder zusammengeschrieben."],
+["Die Kollegin geht nächsten Monat in Pension.","Die Kollegin","Ich habe fünfzehn Jahre lang eng mit der Kollegin zusammengearbeitet.","mit der Kollegin","ich fünfzehn Jahre lang eng mit der Kollegin zusammengearbeitet habe","mit der","PD","f"],
+["Der Vorwurf ist völlig aus der Luft gegriffen.","Der Vorwurf","Die Anwälte des Konzerns gehen juristisch gegen den Vorwurf vor.","gegen den Vorwurf","die Anwälte des Konzerns juristisch gegen den Vorwurf vorgehen","gegen den","PA","m"],
+["Die Krise hat viele Kleinbetriebe in den Ruin getrieben.","Die Krise","Von der Krise sind vor allem Gastronomen betroffen.","von der Krise","von der Krise vor allem Gastronomen betroffen sind","von der","PD","f"],
+["Das Ereignis jährt sich heuer zum fünfzigsten Mal.","Das Ereignis","An das Ereignis erinnert ein Denkmal auf dem Hauptplatz.","an das Ereignis","an das Ereignis ein Denkmal auf dem Hauptplatz erinnert","an das","PA","n","erinnern an + Akkusativ."],
+["Die Bedingungen sind für viele Bewerber inakzeptabel.","Die Bedingungen","Unter den Bedingungen müssten die Mitarbeiter auf einen Teil ihres Gehalts verzichten.","unter den Bedingungen","unter den Bedingungen die Mitarbeiter auf einen Teil ihres Gehalts verzichten müssten","unter denen","PD","pl","Präposition + Dativ Plural → unter denen."],
+["Der Wettbewerb wird alle zwei Jahre ausgetragen.","Der Wettbewerb","An dem Wettbewerb nehmen Nachwuchsmusiker aus ganz Europa teil.","an dem Wettbewerb","an dem Wettbewerb Nachwuchsmusiker aus ganz Europa teilnehmen","an dem","PD","m","teilnehmen an + Dativ."],
+["Die Frage lässt sich wissenschaftlich kaum beantworten.","Die Frage","Wir haben uns im Seminar ausführlich mit der Frage beschäftigt.","mit der Frage","wir uns im Seminar ausführlich mit der Frage beschäftigt haben","mit der","PD","f"],
+["Das Thema wird in den Medien kaum behandelt.","Das Thema","Ich habe meine Diplomarbeit über das Thema geschrieben.","über das Thema","ich meine Diplomarbeit über das Thema geschrieben habe","über das","PA","n"],
+["Die Kriterien sind nicht transparent.","Die Kriterien","Nach den Kriterien werden die Fördermittel vergeben.","nach den Kriterien","nach den Kriterien die Fördermittel vergeben werden","nach denen","PD","pl"],
+["Der Brief wurde erst nach Jahrzehnten entdeckt.","Der Brief","In dem Brief bittet die Dichterin ihren Bruder um Vergebung.","in dem Brief","in dem Brief die Dichterin ihren Bruder um Vergebung bittet","in dem","PD","m"],
+["Die Methode ist inzwischen weltweit verbreitet.","Die Methode","Mit der Methode lassen sich Krankheiten frühzeitig erkennen.","mit der Methode","sich mit der Methode Krankheiten frühzeitig erkennen lassen","mit der","PD","f","Das Reflexivpronomen sich rückt nach dem Umstellen direkt hinter den Relativausdruck: mit der sich …"],
+["Das Labor gehört zu den modernsten Europas.","Das Labor","In dem Labor wird an neuen Antibiotika geforscht.","in dem Labor","in dem Labor an neuen Antibiotika geforscht wird","in dem","PD","n","Unpersönliches Passiv: Das Platzhalter-es fällt im Nebensatz weg."],
+["Die Gesprächspartner haben um Anonymität gebeten.","Die Gesprächspartner","Ich habe mich für die Recherche mit den Gesprächspartnern getroffen.","mit den Gesprächspartnern","ich mich für die Recherche mit den Gesprächspartnern getroffen habe","mit denen","PD","pl"],
+["Der Kredit muss innerhalb von zehn Jahren zurückgezahlt werden.","Der Kredit","Mit dem Kredit wurde der Bau der neuen Schule finanziert.","mit dem Kredit","mit dem Kredit der Bau der neuen Schule finanziert wurde","mit dem","PD","m"],
+["Die Tradition reicht bis ins Mittelalter zurück.","Die Tradition","Die Dorfbewohner halten bis heute an der Tradition fest.","an der Tradition","die Dorfbewohner bis heute an der Tradition festhalten","an der","PD","f","festhalten an + Dativ."],
+["Das Gremium tagt nur zweimal im Jahr.","Das Gremium","In dem Gremium sind alle Bundesländer vertreten.","in dem Gremium","in dem Gremium alle Bundesländer vertreten sind","in dem","PD","n"],
+["Die Gründe sind bis heute nicht restlos geklärt.","Die Gründe","Aus den Gründen hat der Vorstand die Fusion abgesagt.","aus den Gründen","aus den Gründen der Vorstand die Fusion abgesagt hat","aus denen","PD","pl"],
+["Der Konflikt droht die gesamte Region zu destabilisieren.","Der Konflikt","In den Konflikt sind mehrere Nachbarstaaten verwickelt.","in den Konflikt","in den Konflikt mehrere Nachbarstaaten verwickelt sind","in den","PA","m","verwickelt sein in + Akkusativ."],
+["Die Konferenz findet nächstes Jahr in Budapest statt.","Die Konferenz","Auf der Konferenz werden Fachleute aus über vierzig Ländern erwartet.","auf der Konferenz","auf der Konferenz Fachleute aus über vierzig Ländern erwartet werden","auf der","PD","f"],
+["Die Zeiten sind glücklicherweise vorbei.","Die Zeiten","In den Zeiten durften Frauen ohne Zustimmung ihres Ehemannes kein Konto eröffnen.","in den Zeiten","in den Zeiten Frauen ohne Zustimmung ihres Ehemannes kein Konto eröffnen durften","in denen","PD","pl"]
+];
+
+const CASES = {N:"Nominativ",A:"Akkusativ",D:"Dativ",G:"Genitiv",PA:"Präposition + Akkusativ",PD:"Präposition + Dativ",PG:"Präposition + Genitiv"};
+const GEN = {m:"maskulin, Singular",f:"feminin, Singular",n:"neutral, Singular",pl:"Plural"};
+const FILTERS = [["all","Alle"],["N","Nominativ"],["A","Akkusativ"],["D","Dativ"],["G","Genitiv"],["P","mit Präposition"]];
+
+const GUIDE = [
+  ["Signal-Nomen finden","Welches Nomen steht in beiden Sätzen?","Keresd meg a közös főnevet (Signal-Nomen)!"],
+  ["Satz 2 hinter das Signal-Nomen einfügen","Satz 2 wird direkt hinter das Nomen in Satz 1 gesetzt, mit Kommas davor und danach.","Tedd a 2. mondatot közvetlenül a főnév mögé, vesszők közé."],
+  ["Hauptsatz → Nebensatz","Das konjugierte Verb geht ans Ende von Satz 2.","Az ige megy a mellékmondat végére."],
+  ["Signal-Nomen → Relativpronomen","Genus/Numerus vom Nomen, Kasus aus Satz 2. Eine Präposition bleibt dabei.","A főnévből vonatkozó névmás lesz (der/die/das …)."],
+  ["Relativpronomen an den Anfang","Das Relativpronomen (mit Präposition) steht ganz vorn im Relativsatz.","A vonatkozó névmás megy a mellékmondat elejére."]
+];
+
+let mode="b1", filter="all", pos=0, revealed=0, list=[];
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k)||"null");localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
+let solved = store("rs-solved")||{b1:[],c1:[]};
+
+function data(){return mode==="b1"?B1:C1}
+function matches(c,f){if(f==="all")return true;if(f==="P")return c[0]==="P";if(f==="G")return c==="G"||c==="PG";return c===f}
+function rebuild(){
+  list = data().map((x,i)=>i).filter(i=>matches(data()[i][6],filter));
+  pos = Math.min(pos,list.length-1); if(pos<0)pos=0;
+}
+function mark(text,sub,cls,ci){
+  const i = ci? text.toLowerCase().indexOf(sub.toLowerCase()) : text.indexOf(sub);
+  if(i<0) return esc(text);
+  return esc(text.slice(0,i))+`<mark class="${cls}">`+esc(text.slice(i,i+sub.length))+"</mark>"+esc(text.slice(i+sub.length));
+}
+function build(e){
+  const [s1,a,s2,r,v,p,c,g,note]=e;
+  const ai=s1.indexOf(a), end=ai+a.length, before=s1.slice(0,end), after=s1.slice(end);
+  const s2core=s2.replace(/\.$/,"");
+  const marker="\u0001";
+  const vm=v.replace(r,marker);
+  const step4=vm.replace(marker,p);
+  const rest=vm.replace(marker,"").replace(/\s+/g," ").trim();
+  const rel=p+" "+rest;
+  const closing = after.startsWith(".")?"":",";
+  const solution=before+", "+rel+closing+after;
+  // HTML versions
+  const bM=mark(before,a,"n");
+  const verbWords = lastVerbs(v);
+  const st2 = bM+", "+mark(s2core,r,"n",true)+closing+esc(after);
+  const st3 = esc(before)+", "+hlVerb(mark(v,r,"n"),verbWords)+closing+esc(after);
+  const st4 = esc(before)+", "+hlVerb(mark(step4,p,"p"),verbWords)+closing+esc(after);
+  const st5 = esc(before)+", <mark class=\"p\">"+esc(p)+"</mark> "+hlVerb(esc(rest),verbWords)+closing+esc(after);
+  return {s1,a,s2,r,v,p,c,g,note,solution,rel,st2,st3,st4,st5};
+}
+// the verb cluster at the end of v = words after last part that also appears... approximate: compare v with s2 to find moved words
+function lastVerbs(v){
+  const w=v.split(" "); let out=[w.pop()];
+  const stop=/^(den|dem|denen|einen|einem|jeden|allen|vielen|neuen|großen|anfangs|seit|nicht|jetzt|oft|zutiefst|zuerst|meist|gestern|heute|lang|gut|spät|kaputt|undicht|alt|inzwischen|fristgerecht|erneut|ungeklärt)$/;
+  while(w.length>2){const x=w[w.length-1];
+    if(/^[a-zäöüß]+(t|en|ern)$/.test(x) && !stop.test(x)) out.unshift(w.pop()); else break;}
+  return out.join(" ");
+}
+function hlVerb(html,vw){
+  if(!vw) return html;
+  const i=html.lastIndexOf(vw); if(i<0) return html;
+  return html.slice(0,i)+'<mark class="v">'+vw+"</mark>"+html.slice(i+vw.length);
+}
+function explain(x){
+  const caseTxt=CASES[x.c];
+  if(x.c==="G"||x.c==="PG") return `Signal-Nomen <b>${esc(x.a)}</b> ist ${GEN[x.g]}. In Satz 2 steht es im Genitiv (es ist der „Besitzer“) → <b>${x.g==="m"||x.g==="n"?"dessen":"deren"}</b>.`;
+  if(x.c[0]==="P") return `Signal-Nomen <b>${esc(x.a)}</b> ist ${GEN[x.g]}. In Satz 2 steht es nach einer Präposition: ${caseTxt} → <b>${esc(x.p)}</b>. Die Präposition kommt mit nach vorn.`;
+  return `Signal-Nomen <b>${esc(x.a)}</b> ist ${GEN[x.g]}. In Satz 2 ist es im ${caseTxt} → <b>${esc(x.p)}</b>.`;
+}
+function renderSteps(x){
+  const hu = mode==="b1";
+  const items=[
+    [GUIDE[0], `Satz 1: ${mark(x.s1,x.a,"n")}<br>Satz 2: ${mark(x.s2,x.r,"n",true)}`],
+    [GUIDE[1], x.st2],
+    [GUIDE[2], x.st3],
+    [GUIDE[3], x.st4, explain(x)],
+    [GUIDE[4], x.st5, x.note?esc(x.note):""]
+  ];
+  $("steps").innerHTML = items.slice(0,revealed).map((it,i)=>{
+    const [g,ex,why]=it;
+    return `<li class="${i===4?"final":""}"><div><h3>${g[0]}</h3>${hu?`<p class="hu">${g[2]}</p>`:""}<p class="ex">${ex}</p>${why?`<p class="why">${why}</p>`:""}</div></li>`;
+  }).join("");
+  $("badge").hidden = revealed<4;
+  $("badge").textContent = CASES[x.c];
+  $("hint").disabled = revealed>=5;
+}
+function norm(s){return s.toLowerCase().replace(/ß/g,"ss").replace(/[„“"]/g,"").replace(/\s*,\s*/g,", ").replace(/\s+/g," ").replace(/[.!]\s*$/,"").trim()}
+function render(){
+  rebuild();
+  const total=list.length;
+  if(!total){$("s1").textContent="";$("s2").textContent="";return}
+  const idx=list[pos], x=build(data()[idx]);
+  $("counter").textContent=`Übung ${pos+1} / ${total}`+(filter==="all"?"":` · gefiltert`);
+  $("s1").textContent=x.s1; $("s2").textContent=x.s2;
+  const fb=$("fb"); fb.className="feedback"; fb.textContent="";
+  renderSteps(x);
+  $("prev").disabled=pos===0; $("next").disabled=pos>=total-1;
+  progress();
+}
+function current(){return build(data()[list[pos]])}
+function progress(){
+  const n=(solved[mode]||[]).length, t=data().length;
+  $("progtxt").textContent=`${n} von ${t} Sätzen richtig gelöst (${mode==="b1"?"A2/B1":"C1/C2"})`;
+  $("progbar").style.width=(100*n/t)+"%";
+}
+function check(){
+  const x=current(), a=$("answer").value, fb=$("fb");
+  if(!a.trim()){fb.className="feedback hint";fb.textContent="Schreib zuerst deinen Satz ins Feld.";return}
+  const A=norm(a), S=norm(x.solution);
+  if(A===S){
+    fb.className="feedback ok"; fb.innerHTML="Richtig! <b>"+esc(x.solution)+"</b>";
+    const id=list[pos]; if(!solved[mode].includes(id)){solved[mode].push(id);store("rs-solved",solved)} progress();
+  } else if(A.replace(/,/g,"").replace(/\s+/g," ")===S.replace(/,/g,"").replace(/\s+/g," ")){
+    fb.className="feedback err"; fb.textContent="Die Wörter stimmen! Prüfe noch die Kommas: Der Relativsatz steht zwischen zwei Kommas.";
+  } else if(!A.includes(norm(x.p)+" ")&&!A.startsWith(norm(x.p))){
+    fb.className="feedback err"; fb.textContent="Noch nicht. Prüfe das Relativpronomen: Welches Genus hat das Signal-Nomen, welchen Kasus hat es in Satz 2?";
+  } else {
+    fb.className="feedback err"; fb.textContent="Fast. Das Relativpronomen passt – prüfe die Position des Verbs und die Stelle, an der der Relativsatz eingeschoben ist.";
+  }
+}
+function setMode(m){mode=m;pos=0;revealed=0;$("answer").value="";
+  document.querySelectorAll(".seg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.mode===m));
+  drawFilters(); drawGuide(); render(); store("rs-mode",m);}
+function drawFilters(){
+  const f=$("filters"); f.querySelectorAll(".chip").forEach(c=>c.remove());
+  FILTERS.forEach(([k,l])=>{const n=data().filter(e=>matches(e[6],k)).length;
+    const b=document.createElement("button"); b.className="chip"; b.id="f-"+k; b.setAttribute("aria-pressed",k===filter);
+    b.innerHTML=l+`<span class="n">${n}</span>`; b.onclick=()=>{filter=k;pos=0;revealed=0;$("answer").value="";drawFilters();render()}; f.appendChild(b)});
+}
+function drawGuide(){
+  $("guide").innerHTML=GUIDE.map(g=>`<li><b>${g[0]}.</b> ${g[1]}${mode==="b1"?`<span class="hu">${g[2]}</span>`:""}</li>`).join("");
+}
+function go(d){const t=list.length;pos=Math.max(0,Math.min(t-1,pos+d));revealed=0;$("answer").value="";render()}
+document.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+$("check").onclick=check;
+$("hint").onclick=()=>{revealed=Math.min(5,revealed+1);renderSteps(current())};
+$("solve").onclick=()=>{revealed=5;renderSteps(current())};
+$("prev").onclick=()=>go(-1); $("next").onclick=()=>go(1);
+$("rand").onclick=()=>{if(list.length<2)return;let n;do{n=Math.floor(Math.random()*list.length)}while(n===pos);pos=n;revealed=0;$("answer").value="";render()};
+$("answer").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();check()}});
+const saved=store("rs-mode"); setMode(saved==="c1"?"c1":"b1");
+</script>
+
+</body>
+</html>
