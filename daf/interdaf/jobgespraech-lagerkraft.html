@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mein Jobgespräch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gelb:#FFD60A; --gelb-tief:#FFC300; --creme:#FFFBE6;
+  --pink:#B0125B; --pink-d:#8A0A45; --pink-h:#F8D3E4; --pink-hh:#FCEAF2;
+  --gruen:#1E8E4E; --gruen-h:#DDF5E6; --rot:#C62828; --rot-h:#FDE3E3;
+  --text:#2B1A22; --muted:#6b4a58;
+  --sch:0 6px 0 rgba(138,10,69,.25);
+}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--gelb);color:var(--text);font-family:"Nunito",system-ui,sans-serif;font-size:17px;line-height:1.55;overflow-x:hidden;min-height:100vh}
+h1,h2,h3{font-family:"Fredoka",sans-serif;color:var(--pink);line-height:1.2}
+h1{font-size:2rem;margin:0 0 6px}
+h2{font-size:1.5rem;margin:0 0 10px}
+h3{font-size:1.15rem;margin:18px 0 8px}
+p{margin:0 0 12px}
+
+/* Bubbles */
+#bubbles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bubble{position:absolute;bottom:-160px;border-radius:50%;
+  background:radial-gradient(circle at 32% 30%,#E0457F 0%,var(--pink) 45%,var(--pink-d) 100%);
+  opacity:.8;animation:schweben linear infinite;box-shadow:inset -6px -8px 0 rgba(0,0,0,.12)}
+.bubble::after{content:"";position:absolute;top:16%;left:20%;width:22%;height:22%;border-radius:50%;background:rgba(255,255,255,.55)}
+.bubble .gesicht{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-family:"Fredoka";font-weight:700}
+@keyframes schweben{from{transform:translateY(0) rotate(0)}to{transform:translateY(-130vh) rotate(25deg)}}
+@media (prefers-reduced-motion:reduce){.bubble{animation:none;display:none}}
+
+.wrap{position:relative;z-index:1;max-width:940px;margin:0 auto;padding:18px 16px 70px}
+header.hero{background:var(--creme);border:3px solid var(--pink);border-radius:26px;padding:20px;box-shadow:var(--sch);margin-bottom:16px}
+.hero .sub{color:var(--muted);font-weight:700;margin:0}
+.hero .tools{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;align-items:center}
+.toggle{display:inline-flex;align-items:center;gap:8px;background:#fff;border:2px solid var(--pink);border-radius:999px;padding:6px 14px;font-weight:700;color:var(--pink-d);cursor:pointer;user-select:none}
+.toggle input{accent-color:var(--pink);width:18px;height:18px}
+
+nav.tabs{position:sticky;top:0;z-index:5;display:flex;gap:8px;overflow-x:auto;padding:10px 4px;margin:0 -4px 14px;background:var(--gelb);scrollbar-width:thin}
+nav.tabs button{flex:0 0 auto;font:700 15px "Nunito";background:#fff;color:var(--pink-d);border:2px solid var(--pink);border-radius:999px;padding:8px 14px;cursor:pointer}
+nav.tabs button[aria-selected="true"]{background:var(--pink);color:#fff;box-shadow:0 4px 0 var(--pink-d)}
+
+.card{background:var(--creme);border:3px solid var(--pink);border-radius:22px;padding:20px;box-shadow:var(--sch);margin-bottom:20px}
+.card.soft{border-width:2px;box-shadow:none;background:#fff}
+.tipp{background:var(--pink-hh);border-left:6px solid var(--pink);border-radius:12px;padding:10px 14px;margin:10px 0}
+.muted{color:var(--muted)}
+.btn{font:800 15px "Nunito";background:var(--pink);color:#fff;border:none;border-radius:999px;padding:10px 18px;cursor:pointer;box-shadow:0 4px 0 var(--pink-d);margin:4px 6px 4px 0}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--pink-d)}
+.btn.ghost{background:#fff;color:var(--pink);border:2px solid var(--pink);box-shadow:none}
+.btn.small{padding:6px 12px;font-size:14px}
+.spk{border:none;background:var(--pink-h);color:var(--pink-d);border-radius:50%;width:34px;height:34px;flex:0 0 34px;cursor:pointer;font-size:16px;line-height:34px;text-align:center;padding:0}
+.spk:hover{background:var(--pink);color:#fff}
+.zeile{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--pink-h)}
+.zeile:last-child{border-bottom:none}
+.zeile span{flex:1;padding-top:4px}
+.ph{background:var(--gelb);border-radius:6px;padding:0 4px;font-weight:800}
+
+/* Start */
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.form label{font-weight:800;color:var(--pink-d);font-size:15px;display:block}
+input[type=text],textarea{width:100%;font:inherit;border:2px solid var(--pink);border-radius:14px;padding:10px 12px;background:#fff;color:var(--text)}
+textarea{min-height:150px;resize:vertical}
+input:focus,textarea:focus{outline:3px solid var(--gelb-tief);outline-offset:1px}
+.schritte{counter-reset:s;list-style:none;padding:0;margin:0}
+.schritte li{counter-increment:s;position:relative;padding:6px 0 6px 46px}
+.schritte li::before{content:counter(s);position:absolute;left:0;top:4px;width:34px;height:34px;border-radius:50%;background:var(--pink);color:#fff;font:700 18px "Fredoka";display:flex;align-items:center;justify-content:center}
+
+/* Ablauf */
+.stufe{background:#fff;border:2px solid var(--pink);border-radius:18px;padding:14px 16px;margin-bottom:14px}
+.stufe h3{margin-top:0}
+.stufe .cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.box-h{font-weight:800;font-size:14px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.hoeren .box-h{color:var(--muted)} .sagen .box-h{color:var(--pink)}
+@media (max-width:640px){.stufe .cols{grid-template-columns:1fr}}
+
+/* Antworten */
+.ant-grid{display:grid;grid-template-columns:250px 1fr;gap:16px;align-items:start}
+@media (max-width:760px){.ant-grid{grid-template-columns:1fr}}
+.qliste{background:#fff;border:2px solid var(--pink);border-radius:18px;padding:10px;max-height:72vh;overflow:auto}
+@media (max-width:760px){.qliste{max-height:none}}
+.qliste .phase{font:600 13px "Fredoka";color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:10px 6px 4px}
+.qliste button{display:flex;justify-content:space-between;width:100%;text-align:left;font:700 15px "Nunito";background:none;border:none;border-radius:10px;padding:7px 10px;color:var(--text);cursor:pointer}
+.qliste button:hover{background:var(--pink-hh)}
+.qliste button.aktiv{background:var(--pink);color:#fff}
+.frage{display:flex;gap:10px;align-items:center;background:var(--pink);color:#fff;border-radius:18px;padding:14px 16px;font:600 1.2rem "Fredoka";margin-bottom:12px}
+.frage .spk{background:#fff}
+.keys span{display:inline-block;background:var(--gelb);border-radius:8px;padding:2px 10px;margin:3px 4px 3px 0;font-weight:800;font-size:15px}
+.gruppe{margin:12px 0}
+.gruppe .gt{font-weight:800;color:var(--pink-d);margin-bottom:2px}
+.chip{display:inline-block;text-align:left;font:600 15.5px "Nunito";background:#fff;border:2px solid var(--pink);color:var(--pink-d);border-radius:16px;padding:7px 13px;margin:4px 6px 4px 0;cursor:pointer;transition:transform .1s}
+.chip:hover{transform:translateY(-2px);background:var(--pink-hh)}
+.chip.plus{background:var(--pink-h);border-style:dashed}
+.chip.plus::before{content:"✨ "}
+.chip.flash{background:var(--gruen-h);border-color:var(--gruen)}
+.legende{font-size:14px;color:var(--muted);margin-top:4px}
+
+/* Üben */
+.modus{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.modus button{font:800 15px "Nunito";border-radius:999px;padding:8px 16px;border:2px solid var(--pink);background:#fff;color:var(--pink-d);cursor:pointer}
+.modus button.aktiv{background:var(--pink);color:#fff}
+.interview{background:#fff;border:3px solid var(--pink);border-radius:22px;padding:18px}
+.sprecher{font-weight:800;color:var(--muted);margin-bottom:6px}
+.blase{background:var(--pink);color:#fff;border-radius:20px 20px 20px 4px;padding:14px 18px;font:600 1.25rem "Fredoka";display:inline-block;max-width:100%}
+.hilfe{margin-top:12px;background:var(--creme);border:2px dashed var(--pink);border-radius:14px;padding:12px 14px}
+.bewertung{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.bewertung button{flex:1 1 140px;font:800 15px "Nunito";border:2px solid var(--pink);background:#fff;color:var(--pink-d);border-radius:14px;padding:10px;cursor:pointer}
+.bewertung button.gewaehlt{background:var(--pink);color:#fff}
+.stand{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;font-weight:800}
+.stand span{background:#fff;border-radius:999px;padding:4px 12px;border:2px solid var(--pink-h)}
+.timer{font-variant-numeric:tabular-nums}
+
+/* Mut */
+.qual{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.qual div{background:#fff;border:2px solid var(--pink);border-radius:16px;padding:12px 14px}
+.qual b{font-family:"Fredoka";color:var(--pink);font-size:1.1rem;font-weight:600}
+.check label{display:flex;gap:10px;align-items:flex-start;padding:7px 0;cursor:pointer}
+.check input{accent-color:var(--pink);width:22px;height:22px;flex:0 0 22px;margin-top:2px}
+.check input:checked + span{text-decoration:line-through;color:var(--muted)}
+.atem{display:flex;flex-direction:column;align-items:center;gap:14px;padding:10px 0}
+.atemkreis{width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 32% 30%,#E0457F 0%,var(--pink) 50%,var(--pink-d) 100%);display:flex;align-items:center;justify-content:center;color:#fff;font:600 1.1rem "Fredoka";text-align:center;transition:transform 4s ease-in-out;box-shadow:inset -8px -10px 0 rgba(0,0,0,.12)}
+
+/* Wörter */
+.wort{background:#fff;border:2px solid var(--pink-h);border-radius:14px;padding:10px 14px;margin-bottom:8px}
+.wort b{font-family:"Fredoka";color:var(--pink);font-size:1.1rem;font-weight:600}
+.wort .bsp{display:flex;gap:8px;align-items:center;margin-top:4px;font-style:italic}
+.quizopt{display:block;width:100%;text-align:left;font:700 16px "Nunito";background:#fff;border:2px solid var(--pink);border-radius:14px;padding:10px 14px;margin:8px 0;cursor:pointer;color:var(--text)}
+.quizopt:hover{background:var(--pink-hh)}
+.quizopt.richtig{background:var(--gruen-h);border-color:var(--gruen)}
+.quizopt.falsch{background:var(--rot-h);border-color:var(--rot)}
+.feedback{font-weight:800;margin-top:8px}
+.fortschritt{height:12px;background:#fff;border-radius:999px;border:2px solid var(--pink);overflow:hidden;margin:8px 0 14px}
+.fortschritt div{height:100%;background:var(--pink);transition:width .3s}
+
+/* Mappe */
+.mappe-item{background:#fff;border:2px solid var(--pink-h);border-radius:16px;padding:12px 16px;margin-bottom:12px}
+.mappe-item h3{margin:0 0 6px;font-size:1.05rem}
+.mappe-item .leer{color:var(--muted);font-style:italic}
+
+footer{text-align:center;color:var(--pink-d);font-weight:700;font-size:14px;margin-top:20px}
+@media print{
+  #bubbles,nav.tabs,.hero .tools,.btn,.spk,footer{display:none!important}
+  body{background:#fff} .card{box-shadow:none;border-width:1px}
+  section{display:none!important} section#t-mappe{display:block!important}
+}
+</style>
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<div class="wrap">
+  <header class="hero">
+    <h1>Mein Jobgespräch 💪</h1>
+    <p class="sub">Lagerkraft in Teilzeit bei NEW YORKER in Oberwart · Montag bis Freitag vormittags · 25 Stunden pro Woche</p>
+    <div class="tools">
+      <label class="toggle"><input type="checkbox" id="langsam"> 🐢 Langsam vorlesen</label>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" id="tabs"></nav>
+
+  <!-- START -->
+  <section id="t-start">
+    <div class="card">
+      <h2>Willkommen! Hier wirst du fit für dein Gespräch.</h2>
+      <p>Diese Seite begleitet dich Schritt für Schritt. Du lernst, wie so ein Vorstellungsgespräch abläuft, welche Fragen kommen und was du darauf antworten kannst. Du baust deine eigenen Antworten, übst sie laut und sammelst alles in deiner Mappe. Wenn du ein bisschen jeden Tag übst, gehst du ruhig und sicher in das Gespräch.</p>
+      <div class="tipp">🔊 Überall, wo du diesen Knopf siehst, kannst du dir den Satz vorlesen lassen. Sprich ihn danach laut nach – das ist das beste Training!</div>
+      <h3>So arbeitest du mit der Seite</h3>
+      <ol class="schritte">
+        <li><b>Über mich</b> ausfüllen (gleich hier unten). Deine Angaben erscheinen dann automatisch in allen Beispielsätzen.</li>
+        <li>Unter <b>Mut</b> liest du, was die Firma sucht – und warum du genau das mitbringst.</li>
+        <li>Unter <b>Ablauf</b> siehst du das ganze Gespräch von der Begrüßung bis zum Abschied.</li>
+        <li>Unter <b>Antworten</b> baust du dir zu jeder Frage deine eigene Antwort aus Satzbausteinen.</li>
+        <li>Unter <b>Üben</b> stellt dir die Seite die Fragen – du antwortest laut. Am Ende machst du ein ganzes Probegespräch.</li>
+        <li><b>Retter</b>, <b>Wörter</b> und deine <b>Mappe</b> helfen dir beim Wiederholen, auch kurz vor dem Termin.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h2>Über mich</h2>
+      <p class="muted">Alles bleibt nur auf diesem Gerät gespeichert. Du kannst Felder auch leer lassen – dann steht im Satz eine gelbe Lücke ___, die du selbst ausfüllst.</p>
+      <div class="form" id="profil"></div>
+    </div>
+    <div class="card soft">
+      <h3 style="margin-top:0">Neu anfangen?</h3>
+      <p class="muted">Löscht dein Profil, alle Antworten, Bewertungen und Häkchen auf diesem Gerät.</p>
+      <button class="btn ghost small" id="reset">Alles löschen</button>
+    </div>
+  </section>
+
+  <!-- MUT -->
+  <section id="t-mut" hidden>
+    <div class="card">
+      <h2>Das sucht NEW YORKER – und das bringst du mit</h2>
+      <p>In der Anzeige steht <b>keine</b> Ausbildung und <b>keine</b> Berufserfahrung als Bedingung. Gesucht werden vor allem Eigenschaften. Die kannst du im Gespräch zeigen – mit deinen Worten, deinem Lächeln und deiner Art.</p>
+      <div class="qual" id="qual"></div>
+    </div>
+    <div class="card">
+      <h2>Mut-Sätze 💖</h2>
+      <p>Lies dir diese Sätze vor dem Gespräch laut vor – am besten vor dem Spiegel. Sie stimmen alle.</p>
+      <div id="mutsaetze"></div>
+    </div>
+    <div class="card">
+      <h2>Ruhig atmen</h2>
+      <p>Kurz vor dem Gespräch, im Bus oder vor der Tür: Folge dem Kreis. Einatmen, wenn er wächst – langsam ausatmen, wenn er kleiner wird. Vier Runden reichen.</p>
+      <div class="atem">
+        <div class="atemkreis" id="atemkreis">Bereit?</div>
+        <button class="btn" id="atemstart">Atemübung starten</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Körpersprache – so wirkst du sicher</h2>
+      <div class="zeile"><span>😊 <b>Lächeln</b> beim Hereinkommen und beim Abschied. Freundlichkeit steht in der Anzeige ganz oben!</span></div>
+      <div class="zeile"><span>👀 <b>Blickkontakt</b>: Schau die Person an, wenn sie spricht und wenn du antwortest.</span></div>
+      <div class="zeile"><span>🪑 <b>Gerade sitzen</b>, beide Füße auf dem Boden, Hände ruhig auf dem Tisch oder auf den Knien.</span></div>
+      <div class="zeile"><span>🐢 <b>Langsam sprechen</b>. Langsam wirkt ruhig und überlegt – niemals unsicher.</span></div>
+      <div class="zeile"><span>🙂 <b>Nicken</b>, wenn du zuhörst. So sieht die Person: Du bist ganz dabei.</span></div>
+    </div>
+    <div class="card">
+      <h2>Checkliste für den großen Tag</h2>
+      <div class="check" id="checkliste"></div>
+    </div>
+    <div class="card">
+      <h2>Gut zu wissen</h2>
+      <p><b>Gehalt:</b> Die Anzeige nennt das KV-Gehalt ab 2.146 € brutto im Monat für Vollzeit. Bei 25 Stunden pro Woche bekommst du davon den entsprechenden Teil – das sind rund 1.390 € brutto im Monat. Wenn deine Vordienstzeiten angerechnet werden, kann es mehr sein. Netto (nach Abzügen) ist es weniger.</p>
+      <p><b>Du oder Sie?</b> In vielen Modefirmen duzen sich alle im Team. Am Anfang sagst du immer „Sie“. Wenn dir die Person das „Du“ anbietet, darfst du gern „du“ sagen.</p>
+      <p style="margin:0"><b>Kleidung:</b> NEW YORKER ist eine junge Modemarke. Du brauchst keinen Anzug und kein Kostüm. Sauber, ordentlich und gern ein bisschen modisch ist perfekt: zum Beispiel eine saubere Jeans oder Stoffhose, ein schlichtes Oberteil und saubere, bequeme Schuhe.</p>
+    </div>
+  </section>
+
+  <!-- ABLAUF -->
+  <section id="t-ablauf" hidden>
+    <div class="card">
+      <h2>So läuft das Gespräch ab</h2>
+      <p>Ein Vorstellungsgespräch für eine Lagerstelle dauert meistens 15 bis 30 Minuten. Oft führt es die Filialleitung, manchmal ist noch jemand aus dem Team dabei. Links siehst du, was du <b>hörst</b>, rechts, was du <b>sagen</b> kannst.</p>
+    </div>
+    <div id="ablauf"></div>
+  </section>
+
+  <!-- ANTWORTEN -->
+  <section id="t-antworten" hidden>
+    <div class="card">
+      <h2>Antworten bauen</h2>
+      <p>Wähle links eine Frage. Klick dann auf Satzbausteine – sie wandern in dein Antwortfeld. Dort kannst du alles ändern, ergänzen und die gelben Lücken ___ ausfüllen. Alles wird automatisch in deiner Mappe gespeichert.</p>
+      <p class="legende">Weiße Bausteine sind einfache, sichere Sätze. ✨ Rosa Bausteine sind etwas ausdrucksstärker – nimm sie, wenn du dich traust!</p>
+    </div>
+    <div class="ant-grid">
+      <div class="qliste" id="qliste"></div>
+      <div class="card" id="qdetail" style="margin-bottom:0"></div>
+    </div>
+  </section>
+
+  <!-- ÜBEN -->
+  <section id="t-ueben" hidden>
+    <div class="card">
+      <h2>Üben wie im echten Gespräch</h2>
+      <p>Die Seite stellt dir eine Frage. Hör sie dir an, denk kurz nach und <b>antworte laut</b>. Wenn du Hilfe brauchst, öffne die Stichwörter, die Satzanfänge oder deine eigene Antwort. Zum Schluss bewertest du dich selbst – Fragen, die noch wackeln, kommen öfter dran.</p>
+      <div class="modus">
+        <button data-m="zufall" class="aktiv">🎲 Zufallsfragen</button>
+        <button data-m="probe">🎬 Ganzes Probegespräch</button>
+      </div>
+      <div class="stand" id="stand"></div>
+    </div>
+    <div id="uebung"></div>
+  </section>
+
+  <!-- RETTER -->
+  <section id="t-retter" hidden>
+    <div class="card">
+      <h2>Rettungssätze 🛟</h2>
+      <p>Diese Sätze retten dich, wenn du etwas nicht verstehst, ein Wort fehlt oder du kurz Zeit brauchst. Jeder Mensch braucht sie manchmal – auch im Gespräch in der Muttersprache. Wer nachfragt, wirkt aufmerksam und professionell.</p>
+    </div>
+    <div id="retter"></div>
+  </section>
+
+  <!-- WÖRTER -->
+  <section id="t-woerter" hidden>
+    <div class="card">
+      <h2>Wörter aus der Anzeige und aus dem Lager</h2>
+      <p>Diese Wörter hörst du sehr wahrscheinlich im Gespräch. Lies die Erklärung, hör dir den Beispielsatz an und sprich ihn nach. Danach testest du dich im Quiz.</p>
+      <div id="woerter"></div>
+    </div>
+    <div class="card" id="quiz"></div>
+  </section>
+
+  <!-- MAPPE -->
+  <section id="t-mappe" hidden>
+    <div class="card">
+      <h2>Meine Mappe 📒</h2>
+      <p>Hier stehen alle deine Antworten. Lies sie am Abend vor dem Gespräch noch einmal laut durch. Du kannst sie auch kopieren oder ausdrucken.</p>
+      <button class="btn" id="kopieren">📋 Alles kopieren</button>
+      <button class="btn ghost" onclick="window.print()">🖨️ Drucken</button>
+      <span id="kopiert" class="muted"></span>
+    </div>
+    <div id="mappe"></div>
+  </section>
+
+  <footer>Du schaffst das! 💛💖</footer>
+</div>
+
+<script>
+/* ===================== DATEN ===================== */
+const TABS=[["start","🏠 Start"],["mut","💖 Mut"],["ablauf","🗺️ Ablauf"],["antworten","🧱 Antworten"],["ueben","🎤 Üben"],["retter","🛟 Retter"],["woerter","📚 Wörter"],["mappe","📒 Mappe"]];
+
+const PROFIL=[
+ ["name","Mein Vorname","z. B. Maria"],
+ ["wohnort","Ich wohne in …","z. B. Oberwart"],
+ ["herkunft","Ich komme aus … (freiwillig)","z. B. Rumänien"],
+ ["sprachen","Meine Sprachen","z. B. Rumänisch, Deutsch und etwas Englisch"],
+ ["beruf","Ich habe als … gearbeitet","z. B. Verkäuferin"],
+ ["erfahrung","Wo habe ich gearbeitet?","z. B. in einem Supermarkt"],
+ ["anfahrt","Wie komme ich zur Arbeit?","z. B. mit dem Bus"],
+ ["start","Ab wann kann ich anfangen?","z. B. Anfang November"]
+];
+
+const Q=[
+{id:"ueber",phase:"Einstieg",short:"Über mich",q:"Erzählen Sie doch bitte etwas über sich.",
+ want:"Die Person möchte dich kennenlernen. Vier bis sechs kurze Sätze reichen: wer du bist, was du gearbeitet hast und warum du hier bist.",
+ keys:["Name","Wohnort","Arbeit","Sprachen","Ziel"],
+ groups:[
+ {t:"Wer du bist",i:["Mein Name ist {name}.","Ich wohne in {wohnort}.","Ich komme aus {herkunft}.","*Ich lebe gern hier in der Region und fühle mich sehr wohl."]},
+ {t:"Deine Arbeit",i:["Ich habe als {beruf} gearbeitet.","Ich habe schon {erfahrung} gearbeitet.","*In meiner letzten Stelle war ich für ___ verantwortlich."]},
+ {t:"Deine Sprachen",i:["Ich spreche {sprachen}.","*Ich lerne jeden Tag Deutsch dazu und übe gern."]},
+ {t:"Warum du hier bist",i:["Jetzt suche ich eine Teilzeitstelle am Vormittag.","Ich möchte gern im Lager arbeiten.","*Die Stelle bei NEW YORKER passt sehr gut zu mir, weil ich gern aktiv und ordentlich arbeite."]}
+ ]},
+{id:"firma",phase:"Motivation",short:"Warum NEW YORKER?",q:"Warum möchten Sie bei NEW YORKER arbeiten?",
+ want:"Die Person möchte sehen, dass du die Firma kennst und dich wirklich für sie interessierst. Ein, zwei Dinge aus der Anzeige oder aus dem Geschäft reichen.",
+ keys:["Mode","bekannt","Team","Filiale"],
+ groups:[
+ {t:"Die Firma",i:["NEW YORKER ist ein bekanntes Modeunternehmen.","Ich kenne die Filiale in Oberwart und kaufe dort selbst gern ein.","*NEW YORKER ist in sehr vielen Ländern vertreten, das finde ich beeindruckend."]},
+ {t:"Was dir gefällt",i:["Mir gefällt die Mode.","Ich arbeite gern in einem jungen, lebendigen Umfeld.","*In der Anzeige steht, dass Ihnen ein freundschaftliches Miteinander wichtig ist. Das ist mir auch sehr wichtig."]},
+ {t:"Für dich",i:["Ein sicherer Arbeitsplatz ist mir wichtig.","*Ich möchte gern längere Zeit bei einem stabilen Unternehmen arbeiten."]}
+ ]},
+{id:"lager",phase:"Motivation",short:"Warum das Lager?",q:"Warum möchten Sie gerade im Lager arbeiten?",
+ want:"Die Person möchte wissen, ob dir diese Arbeit wirklich gefällt. Sag ehrlich, was dir daran Freude macht.",
+ keys:["Bewegung","Ordnung","mit den Händen","Ergebnis"],
+ groups:[
+ {t:"Was dir gefällt",i:["Ich arbeite gern mit den Händen.","Ich bin gern in Bewegung.","Ich mag Ordnung.","*Mir gefällt es, wenn ich am Ende des Tages sehe, was ich geschafft habe."]},
+ {t:"Deine Art",i:["Ich arbeite gern selbstständig.","Ich arbeite genau und sorgfältig.","*Ich behalte auch bei viel Ware den Überblick."]},
+ {t:"Die Arbeitszeit",i:["Die Arbeitszeit am Vormittag passt sehr gut für mich.","*25 Stunden pro Woche sind für mich genau richtig."]}
+ ]},
+{id:"erfahrung",phase:"Erfahrung & Können",short:"Erfahrung",q:"Haben Sie schon Erfahrung im Lager oder im Handel?",
+ want:"Antworte ehrlich. Auch Erfahrung aus anderen Jobs zählt: Ordnung halten, mit Ware arbeiten, mit Kunden sprechen, körperlich arbeiten.",
+ keys:["Lager","Geschäft","Ware","schnell lernen"],
+ groups:[
+ {t:"Wenn ja",i:["Ja, ich habe schon im Lager gearbeitet.","Ja, ich habe schon {erfahrung} gearbeitet.","*Dort habe ich Ware angenommen, sortiert und eingeräumt."]},
+ {t:"Wenn noch nicht",i:["Im Lager habe ich noch nicht gearbeitet, aber ich lerne schnell.","*Ich habe zwar noch keine Erfahrung im Lager, aber ähnliche Aufgaben kenne ich von ___."]},
+ {t:"Was du kannst",i:["Ich kann gut Ordnung halten.","Ich bin körperliche Arbeit gewohnt.","Ich arbeite schnell und genau."]},
+ {t:"Zum Schluss",i:["Ich freue mich darauf, Neues zu lernen.","*Ich bin sicher, dass ich mich schnell einarbeite."]}
+ ]},
+{id:"aufgaben",phase:"Erfahrung & Können",short:"Die Aufgaben",q:"Was glauben Sie, was sind Ihre Aufgaben bei uns?",
+ want:"Die Person prüft, ob du die Anzeige gelesen hast. Nenne zwei oder drei Aufgaben – das zeigt, dass du gut vorbereitet bist.",
+ keys:["nachfüllen","sortieren","auszeichnen","Lieferung","Reinigung"],
+ groups:[
+ {t:"Die Aufgaben",i:["Ich fülle die Ware nach und sortiere sie.","Ich nehme neue Lieferungen an.","Ich zeichne die Ware aus und sichere sie.","Ich bin für meine Lagerabteilung verantwortlich und halte sie in Ordnung.","Ich mache auch Reinigungsarbeiten."]},
+ {t:"Was dir wichtig ist",i:["*Es ist wichtig, dass die Ware schnell und ordentlich im Geschäft ist.","*So finden die Kundinnen und Kunden immer, was sie suchen."]},
+ {t:"Deine Haltung",i:["Das sind Aufgaben, die ich gern mache.","*Wenn etwas neu für mich ist, frage ich nach und lerne es schnell."]}
+ ]},
+{id:"koerper",phase:"Erfahrung & Können",short:"Körperliche Arbeit",q:"Die Arbeit ist körperlich anstrengend. Ist das ein Problem für Sie?",
+ want:"In der Anzeige steht „körperliche Belastbarkeit“. Antworte klar und ruhig – ein kleines Beispiel macht deine Antwort stark.",
+ keys:["fit","gewohnt","auf den Beinen","Rücken"],
+ groups:[
+ {t:"Deine Antwort",i:["Nein, das ist kein Problem für mich.","Ich bin körperliche Arbeit gewohnt.","*Ich bin fit und arbeite gern körperlich."]},
+ {t:"Ein Beispiel",i:["Ich bin viel zu Fuß unterwegs.","Ich mache gern Sport.","Ich habe auch schon schwere Kartons getragen.","*Bei meiner letzten Arbeit war ich den ganzen Tag auf den Beinen."]},
+ {t:"Sicher arbeiten",i:["*Beim Heben achte ich auf meinen Rücken und hole mir Hilfe, wenn etwas zu schwer ist."]}
+ ]},
+{id:"zeit",phase:"Rahmen",short:"Arbeitszeit",q:"Die Stelle ist von Montag bis Freitag am Vormittag, 25 Stunden pro Woche. Passt das für Sie?",
+ want:"Die Person möchte wissen, ob du zuverlässig zu diesen Zeiten da bist. Sag klar Ja – und zeig, dass du pünktlich bist.",
+ keys:["passt","jeden Vormittag","pünktlich"],
+ groups:[
+ {t:"Deine Antwort",i:["Ja, das passt sehr gut.","Ich kann jeden Vormittag arbeiten.","*Die Arbeitszeit passt perfekt zu meinem Alltag."]},
+ {t:"Pünktlich",i:["Ich kann um ___ Uhr anfangen.","Ich bin pünktlich und zuverlässig."]},
+ {t:"Eine Rückfrage",i:["Um wie viel Uhr beginnt die Arbeit am Morgen?","*Wie sind die 25 Stunden auf die Woche aufgeteilt?"]}
+ ]},
+{id:"flexibel",phase:"Rahmen",short:"Flexibilität",q:"Wären Sie flexibel, wenn zum Beispiel eine große Lieferung kommt oder jemand krank ist?",
+ want:"„Flexibilität“ steht in der Anzeige. Zeig, dass du hilfst, wenn es nötig ist – und sei dabei ehrlich, was für dich möglich ist.",
+ keys:["einspringen","länger bleiben","Team"],
+ groups:[
+ {t:"Deine Antwort",i:["Ja, ich bin flexibel.","Wenn es nötig ist, bleibe ich gern einmal länger.","*Wenn Sie mir rechtzeitig Bescheid geben, kann ich auch einmal einspringen."]},
+ {t:"Ehrlich bleiben",i:["*Am Nachmittag habe ich manchmal Termine, aber das kann ich meistens gut organisieren."]},
+ {t:"Deine Haltung",i:["Im Team hilft man sich gegenseitig.","*Mir ist wichtig, dass die Arbeit fertig wird."]}
+ ]},
+{id:"anfahrt",phase:"Rahmen",short:"Anfahrt",q:"Wie kommen Sie zur Arbeit?",
+ want:"Eine ganz einfache Frage: Die Person möchte wissen, ob du zuverlässig pünktlich da sein kannst.",
+ keys:["Wohnort","Bus / Zug / Auto / Rad","Minuten"],
+ groups:[
+ {t:"Dein Weg",i:["Ich wohne in {wohnort}.","Ich komme {anfahrt}.","Ich brauche ungefähr ___ Minuten."]},
+ {t:"Sicherheit geben",i:["Ich bin immer pünktlich.","*Den Weg habe ich schon ausprobiert, das funktioniert gut."]}
+ ]},
+{id:"staerken",phase:"Persönlichkeit",short:"Stärken",q:"Was sind Ihre Stärken?",
+ want:"Nenne zwei oder drei Stärken, die im Lager wichtig sind – und gib ein kurzes Beispiel. Du darfst ruhig stolz klingen!",
+ keys:["zuverlässig","ordentlich","fleißig","freundlich","Überblick"],
+ groups:[
+ {t:"Deine Stärken",i:["Ich bin zuverlässig.","Ich bin freundlich und hilfsbereit.","Ich arbeite ordentlich und genau.","Ich bin fleißig und pünktlich.","*Ich behalte den Überblick, auch wenn es stressig wird."]},
+ {t:"Ein Beispiel",i:["Zum Beispiel ___.","*Bei meiner letzten Arbeit hat meine Chefin gesagt, dass ich sehr ___ bin."]},
+ {t:"Warum das wichtig ist",i:["*Das ist im Lager wichtig, weil die Ware schnell und richtig ins Geschäft kommen muss."]}
+ ]},
+{id:"schwaechen",phase:"Persönlichkeit",short:"Schwächen",q:"Und was sind Ihre Schwächen?",
+ want:"Nenne eine kleine, ehrliche Schwäche – und dann sofort, was du dagegen tust. Das zeigt: Du kennst dich und arbeitest an dir.",
+ keys:["kleine Schwäche","daran arbeiten","lernen"],
+ groups:[
+ {t:"Eine Schwäche",i:["Manchmal bin ich ungeduldig.","Ich bin manchmal zu genau.","Mein Deutsch ist noch nicht perfekt.","*Am Anfang bin ich manchmal etwas zurückhaltend."]},
+ {t:"Was du dagegen tust",i:["Aber ich arbeite daran.","*Deshalb lerne ich jeden Tag dazu und frage nach, wenn ich etwas nicht verstehe.","*Ich habe gelernt, eine Aufgabe nach der anderen zu erledigen.","*Wenn ich jemanden besser kenne, bin ich sehr offen."]}
+ ]},
+{id:"team",phase:"Persönlichkeit",short:"Teamarbeit",q:"Wie arbeiten Sie im Team?",
+ want:"„Teamfähigkeit“ steht in der Anzeige. Erzähl, wie du mit Kolleginnen und Kollegen umgehst – auch wenn es einmal ein Problem gibt.",
+ keys:["helfen","absprechen","ruhig","Lösung"],
+ groups:[
+ {t:"Deine Antwort",i:["Ich arbeite gern im Team.","Ich helfe gern, wenn jemand Hilfe braucht.","*Gute Stimmung im Team ist mir sehr wichtig."]},
+ {t:"Im Alltag",i:["Ich spreche mit den Kolleginnen und Kollegen ab, wer was macht.","Wenn ich fertig bin, frage ich, ob ich helfen kann."]},
+ {t:"Wenn es ein Problem gibt",i:["Ich spreche ruhig und offen darüber.","*Ich höre zuerst zu und suche dann gemeinsam eine Lösung."]}
+ ]},
+{id:"lieferung",phase:"Situationen",short:"Große Lieferung",q:"Eine große Lieferung kommt, und es ist sehr viel zu tun. Wie gehen Sie vor?",
+ want:"Bei solchen Fragen gibt es keine perfekte Antwort. Die Person möchte hören, wie du denkst. Erzähl in Schritten: zuerst, dann, danach, zum Schluss.",
+ keys:["ruhig bleiben","kontrollieren","sortieren","nachfüllen","aufräumen"],
+ groups:[
+ {t:"Zuerst",i:["Zuerst bleibe ich ruhig.","Zuerst kontrolliere ich die Lieferung mit dem Lieferschein.","*Als Erstes verschaffe ich mir einen Überblick."]},
+ {t:"Dann",i:["Dann sortiere ich die Ware nach Abteilungen.","Ich frage, was am wichtigsten ist.","Dann zeichne ich die Ware aus und sichere sie."]},
+ {t:"Danach",i:["Danach bringe ich die Ware ins Geschäft und fülle nach.","Wenn ich Hilfe brauche, frage ich im Team."]},
+ {t:"Zum Schluss",i:["Zum Schluss räume ich auf und entsorge die Kartons.","*Am Ende kontrolliere ich, ob alles an seinem Platz ist."]}
+ ]},
+{id:"kundin",phase:"Situationen",short:"Eine Kundin fragt",q:"Sie räumen gerade Ware ein, und eine Kundin fragt Sie nach einer Hose in Größe M. Was machen Sie?",
+ want:"Auch im Lager triffst du Kundinnen und Kunden. Die Person möchte sehen, dass du freundlich bleibst und weißt, wo du Hilfe bekommst.",
+ keys:["freundlich","zeigen","nachschauen","Kollegin fragen"],
+ groups:[
+ {t:"Zuerst",i:["Ich lächle und sage: Ja, gern, ich schaue für Sie nach.","*Ich unterbreche meine Arbeit kurz, denn die Kundin ist wichtig."]},
+ {t:"Dann",i:["Ich zeige ihr, wo die Hosen hängen.","Ich schaue im Lager nach, ob es die Größe noch gibt.","Wenn ich es nicht weiß, frage ich eine Kollegin aus dem Verkauf."]},
+ {t:"Danach",i:["Danach mache ich mit meiner Arbeit weiter."]}
+ ]},
+{id:"gehalt",phase:"Abschluss",short:"Gehalt",q:"Bei uns gibt es das Gehalt nach Kollektivvertrag. Ist das für Sie in Ordnung?",
+ want:"Hier musst du nicht verhandeln. Sag klar, dass es passt. Wenn du willst, stell eine kurze Frage dazu.",
+ keys:["einverstanden","Vordienstzeiten"],
+ groups:[
+ {t:"Deine Antwort",i:["Ja, das ist für mich in Ordnung.","Ja, damit bin ich einverstanden."]},
+ {t:"Eine Frage",i:["*Werden meine Vordienstzeiten angerechnet?","Wie viel ist das ungefähr bei 25 Stunden?"]}
+ ]},
+{id:"start",phase:"Abschluss",short:"Beginn",q:"Ab wann könnten Sie anfangen?",
+ want:"Nenne ein klares Datum. Wenn du sofort anfangen kannst, ist das ein großes Plus.",
+ keys:["sofort","ab …","Kündigungsfrist"],
+ groups:[
+ {t:"Deine Antwort",i:["Ich kann sofort anfangen.","Ich kann ab {start} anfangen.","*Ich habe noch eine Kündigungsfrist von ___ Wochen, danach kann ich sofort beginnen."]}
+ ]},
+{id:"zukunft",phase:"Abschluss",short:"Zukunft",q:"Wo sehen Sie sich in ein paar Jahren?",
+ want:"Die Person möchte wissen, ob du länger bleiben möchtest. Zeig, dass du dich weiterentwickeln willst.",
+ keys:["bleiben","weiterentwickeln","Verantwortung"],
+ groups:[
+ {t:"Deine Antwort",i:["Ich möchte gern länger bei NEW YORKER bleiben.","Ich möchte im Team gut ankommen und viel lernen.","*Ich möchte mich weiterentwickeln und später vielleicht mehr Verantwortung übernehmen."]}
+ ]},
+{id:"fragen",phase:"Abschluss",short:"Deine Fragen",q:"Haben Sie noch Fragen an uns?",
+ want:"Sag immer Ja! Eine oder zwei Fragen zeigen, dass du dich wirklich für die Stelle interessierst.",
+ keys:["Arbeitstag","Einschulung","Kleidung","nächster Schritt"],
+ groups:[
+ {t:"Zur Arbeit",i:["Wie sieht ein typischer Arbeitstag im Lager aus?","Wie viele Personen arbeiten im Lager?","*Gibt es in den ersten Tagen eine Einschulung?"]},
+ {t:"Praktisches",i:["Gibt es Arbeitskleidung oder einen Dresscode?","Gibt es einen Mitarbeiterrabatt?","*Wie geht es nach unserem Gespräch weiter?"]},
+ {t:"Probetag",i:["Kann ich auch einen Probetag machen?"]}
+ ]}
+];
+
+const PROBE_ORDER=["ueber","firma","erfahrung","aufgaben","lager","koerper","zeit","flexibel","anfahrt","staerken","schwaechen","team","lieferung","kundin","gehalt","start","zukunft","fragen"];
+
+const ABLAUF=[
+{t:"1 · Ankommen",tip:"Sei etwa 10 Minuten vorher da. Geh in die Filiale und sprich eine Mitarbeiterin an der Kassa an.",hear:["Hallo! Kann ich Ihnen helfen?"],say:["Guten Tag! Mein Name ist {name}. Ich habe um ___ Uhr ein Vorstellungsgespräch.","Ich habe einen Termin mit der Filialleitung."]},
+{t:"2 · Begrüßung",tip:"Lächeln und Blickkontakt. Wenn dir jemand die Hand gibt, gib ihm auch die Hand – fest, aber nicht zu fest.",hear:["Guten Tag, schön, dass Sie da sind!","Kommen Sie bitte mit, wir gehen nach hinten.","Nehmen Sie bitte Platz."],say:["Guten Tag! Vielen Dank für die Einladung.","Danke, ich freue mich sehr."]},
+{t:"3 · Kurzer Small Talk",tip:"Kurze, freundliche Antworten genügen. Hier geht es nur ums Ankommen.",hear:["Haben Sie gut hergefunden?","Möchten Sie etwas trinken?","Dürfen wir Du sagen? Bei uns duzen sich alle."],say:["Ja, danke, das war kein Problem.","Ein Glas Wasser, gern.","Ja, natürlich, sehr gern. Ich bin {name}."]},
+{t:"4 · Die Firma stellt sich vor",tip:"Hör gut zu und nicke. Merk dir eine Sache – du kannst sie später in deiner eigenen Frage verwenden.",hear:["Ich erzähle Ihnen kurz etwas über uns und über die Stelle.","Im Lager kümmern Sie sich vor allem um die Ware."],say:["Ja, verstehe.","Das klingt interessant.","Das habe ich auch in der Anzeige gelesen."]},
+{t:"5 · Fragen an dich",tip:"Das ist der Hauptteil. Alle typischen Fragen findest du unter „Antworten“. Sprich ruhig und in kurzen Sätzen.",hear:["Erzählen Sie doch bitte etwas über sich.","Warum möchten Sie bei uns arbeiten?","Haben Sie schon Erfahrung im Lager?"],say:["Gern! Mein Name ist {name}, und ich wohne in {wohnort}.","Das ist eine gute Frage. Ich überlege kurz."]},
+{t:"6 · Arbeitszeit, Beginn und Gehalt",tip:"Jetzt wird es konkret. Wenn alles passt, sag es klar und freundlich.",hear:["Die Stelle ist von Montag bis Freitag vormittags, 25 Stunden pro Woche.","Bezahlt wird nach Kollektivvertrag.","Ab wann könnten Sie anfangen?"],say:["Das passt sehr gut für mich.","Ja, damit bin ich einverstanden.","Ich kann ab {start} anfangen."]},
+{t:"7 · Deine Fragen",tip:"Sag nie einfach „Nein“. Eine Frage zeigt, dass du dich wirklich interessierst.",hear:["Haben Sie noch Fragen an uns?"],say:["Ja, ich habe eine Frage: Wie sieht ein typischer Arbeitstag im Lager aus?","Gibt es am Anfang eine Einschulung?","Wie geht es nach unserem Gespräch weiter?"]},
+{t:"8 · Vielleicht: ein Probetag",tip:"Viele Firmen im Handel laden zu einem Probetag ein. Das ist ein sehr gutes Zeichen!",hear:["Hätten Sie Zeit für einen Probetag?","Können Sie nächste Woche einmal einen Vormittag mitarbeiten?"],say:["Ja, sehr gern! Wann passt es Ihnen?","Was soll ich zum Probetag anziehen oder mitbringen?"]},
+{t:"9 · Abschied",tip:"Bedank dich, lächle und geh ruhig hinaus. Du hast es geschafft!",hear:["Vielen Dank, wir melden uns bis Ende der Woche bei Ihnen."],say:["Vielen Dank für das Gespräch und für Ihre Zeit.","Ich freue mich auf Ihre Rückmeldung.","Auf Wiedersehen und noch einen schönen Tag!"]}
+];
+
+const RETTER=[
+{t:"🤔 Wenn du etwas nicht verstanden hast",i:["Entschuldigung, können Sie die Frage bitte wiederholen?","Können Sie bitte etwas langsamer sprechen?","Entschuldigung, was bedeutet das Wort ___?","Meinen Sie, ob ich ___?","Habe ich richtig verstanden, dass ___?"]},
+{t:"⏳ Wenn du kurz Zeit brauchst",i:["Das ist eine gute Frage. Moment, ich überlege kurz.","Lassen Sie mich kurz nachdenken.","Hm, wie soll ich sagen …","Darf ich darauf gleich zurückkommen?"]},
+{t:"🔎 Wenn dir ein Wort fehlt",i:["Ich weiß das Wort auf Deutsch gerade nicht, aber ich erkläre es.","Das ist so ein Ding, mit dem man ___.","Wie heißt das noch mal auf Deutsch?"]},
+{t:"✏️ Wenn du dich korrigieren möchtest",i:["Entschuldigung, ich meine ___.","Ich sage es noch einmal anders.","Nein, Moment – richtig ist ___."]},
+{t:"🌱 Wenn du etwas noch nicht kannst",i:["Damit habe ich noch keine Erfahrung, aber ich lerne schnell.","Das habe ich noch nicht gemacht, aber ich möchte es gern lernen.","Wenn mir das jemand einmal zeigt, kann ich es bald allein."]},
+{t:"💓 Wenn du nervös bist",i:["Entschuldigung, ich bin ein bisschen aufgeregt, weil mir die Stelle wichtig ist.","Darf ich kurz einen Schluck Wasser trinken?"]}
+];
+
+const WOERTER=[
+["die Filiale","ein Geschäft einer großen Firma an einem bestimmten Ort","Die Filiale in Oberwart sucht eine Lagerkraft."],
+["die Lagerkraft","eine Person, die im Lager arbeitet","Ich bewerbe mich als Lagerkraft."],
+["das Lager","der Raum hinter dem Geschäft, in dem die Ware liegt","Im Lager stehen viele Kartons."],
+["die Ware","alle Produkte, die das Geschäft verkauft – hier vor allem Kleidung","Die neue Ware ist heute gekommen."],
+["die Lieferung","neue Ware, die mit dem LKW ins Geschäft kommt","Am Montag kommt eine große Lieferung."],
+["Ware annehmen","die Lieferung entgegennehmen und kontrollieren, ob alles da ist","Ich nehme die Ware an und kontrolliere den Lieferschein."],
+["der Lieferschein","ein Zettel, auf dem steht, was in der Lieferung ist","Auf dem Lieferschein stehen zwanzig Kartons."],
+["nachfüllen","leere Plätze im Geschäft wieder mit Ware füllen","Am Vormittag fülle ich die T-Shirts nach."],
+["sortieren","Dinge ordnen, zum Beispiel nach Größe oder Farbe","Ich sortiere die Hosen nach Größen."],
+["auszeichnen","Preisschilder oder Etiketten an die Ware machen","Ich zeichne die neuen Jacken aus."],
+["sichern","ein Sicherungsetikett gegen Diebstahl an der Ware anbringen","Teure Ware muss man immer sichern."],
+["verschieben","Ware an einen anderen Ort bringen","Wir verschieben die Pullover nach vorne ins Geschäft."],
+["die Abteilung","ein Bereich, zum Beispiel Damen, Herren oder Accessoires","Ich bin für die Damenabteilung verantwortlich."],
+["der Kleiderbügel","darauf hängt man Hosen, Hemden und Jacken","Ich hänge die Blusen auf Kleiderbügel."],
+["Reinigungsarbeiten","sauber machen: kehren, wischen, Staub entfernen","Am Ende des Tages mache ich Reinigungsarbeiten."],
+["Teilzeit","weniger Stunden als Vollzeit, hier 25 Stunden pro Woche","Ich möchte in Teilzeit arbeiten."],
+["vormittags","am Morgen bis zu Mittag","Ich arbeite von Montag bis Freitag vormittags."],
+["brutto","das Gehalt vor den Abzügen für Steuer und Versicherung","Das Gehalt ist brutto, netto bekomme ich weniger."],
+["der Kollektivvertrag (KV)","ein Vertrag, der das Mindestgehalt für eine Branche festlegt","Ich bekomme das Gehalt nach Kollektivvertrag."],
+["die Vordienstzeiten","die Jahre, die man schon vorher gearbeitet hat","Meine Vordienstzeiten werden vielleicht angerechnet."],
+["körperlich belastbar","man kann auch lange und schwer körperlich arbeiten","Ich bin körperlich belastbar."],
+["teamfähig","man arbeitet gut mit anderen zusammen","Ich bin teamfähig und helfe gern."],
+["flexibel","man kann sich gut auf Änderungen einstellen","Wenn es nötig ist, bin ich flexibel."],
+["die Einsatzbereitschaft","man ist bereit, viel zu tun und mitzuhelfen","Einsatzbereitschaft ist mir wichtig."],
+["gepflegt","sauber und ordentlich angezogen","Ein gepflegtes Erscheinungsbild ist im Modegeschäft wichtig."],
+["die Filialleitung","die Chefin oder der Chef der Filiale","Das Gespräch führt die Filialleitung."],
+["der Probetag","ein Tag, an dem man zur Probe mitarbeitet","Ich komme gern zu einem Probetag."],
+["die Einschulung","am Anfang zeigt dir jemand die Arbeit (österreichisches Wort)","In der ersten Woche gibt es eine Einschulung."]
+];
+
+const QUIZ=[
+["Was heißt „Ware auszeichnen“?",["Preisschilder an die Ware machen","Die Ware mit einem Stift zeichnen","Die Ware an Kunden verkaufen"],0],
+["Was heißt „Ware sichern“ im Modegeschäft?",["Ein Sicherungsetikett gegen Diebstahl anbringen","Die Ware im Computer speichern","Die Ware in den Müll werfen"],0],
+["Was heißt „nachfüllen“?",["Leere Plätze im Regal wieder mit Ware füllen","Einen Fragebogen ausfüllen","Ein Glas Wasser trinken"],0],
+["Was macht man, wenn man „eine Lieferung annimmt“?",["Man nimmt die neue Ware entgegen und kontrolliert sie","Man bringt Ware zur Post","Man bestellt neue Ware im Internet"],0],
+["Was bedeutet „körperlich belastbar“?",["Man kann auch lange und schwer körperlich arbeiten","Man ist oft müde","Man arbeitet am liebsten am Computer"],0],
+["Was bedeutet „teamfähig“?",["Man arbeitet gut mit anderen zusammen","Man spielt gern Fußball","Man arbeitet am liebsten ganz allein"],0],
+["Was bedeutet „brutto“?",["Das Gehalt vor den Abzügen für Steuer und Versicherung","Das Gehalt nach allen Abzügen","Das Gehalt pro Stunde"],0],
+["Was sind „Vordienstzeiten“?",["Die Jahre, die man schon vorher gearbeitet hat","Die Zeit vor Dienstbeginn am Morgen","Die Pause am Vormittag"],0],
+["Die Stelle ist „Teilzeit, 25 Std./Woche“. Das bedeutet:",["Man arbeitet 25 Stunden in der Woche","Man arbeitet 25 Tage im Monat","Man arbeitet 25 Minuten pro Tag"],0],
+["Was ist eine „Filiale“?",["Ein Geschäft einer großen Firma an einem bestimmten Ort","Ein Lagerraum für Kartons","Eine Kollegin aus dem Verkauf"],0],
+["Die Chefin sagt: „Kannst du heute die Jeans-Abteilung übernehmen?“ Was antwortest du?",["Ja, gern! Wo soll ich anfangen?","Nein, das ist nicht meine Aufgabe.","Vielleicht morgen."],0],
+["Du hast eine Frage nicht verstanden. Was sagst du?",["Entschuldigung, können Sie die Frage bitte wiederholen?","Das weiß ich nicht.","Nächste Frage, bitte."],0],
+["Die Person fragt: „Haben Sie noch Fragen an uns?“ Was ist die beste Antwort?",["Ja, gern: Wie sieht ein typischer Arbeitstag aus?","Nein.","Wann ist Feierabend?"],0],
+["Eine Kundin fragt dich nach einer Größe, die du nicht kennst. Was machst du?",["Ich frage freundlich eine Kollegin aus dem Verkauf.","Ich sage, dass ich keine Zeit habe.","Ich arbeite einfach weiter."],0],
+["Was bedeutet „Einschulung“ in der Arbeit?",["Am Anfang zeigt dir jemand die Arbeit","Man muss wieder in die Schule gehen","Man macht eine Prüfung"],0]
+];
+
+const QUAL=[
+["Freundlichkeit","Lächeln, grüßen, „Danke“ sagen – das zeigst du schon in der ersten Minute."],
+["Gepflegtes Erscheinungsbild","Saubere, ordentliche Kleidung, gepflegte Haare und Hände. Gern modisch, aber nicht zu elegant."],
+["Teamfähigkeit","Erzähl ein kleines Beispiel, wie du anderen geholfen hast."],
+["Spaß an der Arbeit","Sag, was dir an der Arbeit Freude macht: Ordnung, Bewegung, ein fertiges Ergebnis."],
+["Einsatzbereitschaft","Ein Satz wie „Ich packe gern mit an“ sagt sehr viel."],
+["Körperliche Belastbarkeit","„Ich bin körperliche Arbeit gewohnt.“ – ruhig und klar gesagt."],
+["Flexibilität","„Wenn es nötig ist, bleibe ich auch einmal länger.“"]
+];
+
+const MUT=[
+"Ich bin gut vorbereitet.",
+"Ich darf langsam sprechen. Langsam wirkt ruhig und sicher.",
+"Wenn ich etwas nicht verstehe, frage ich nach. Das ist professionell.",
+"Ich bringe genau das mit, was in der Anzeige steht: Freundlichkeit, Fleiß und Teamgeist.",
+"Kleine Fehler sind normal. Man versteht mich trotzdem.",
+"Das Gespräch ist ein Kennenlernen. Auch ich schaue, ob die Stelle zu mir passt.",
+"Ich bin stolz auf mich, weil ich mich traue."
+];
+
+const CHECK=[
+"Die Anzeige noch einmal genau gelesen",
+"Die Filiale in Oberwart vorher einmal angeschaut",
+"Den Weg und die Fahrzeit geprüft – ich plane 10 Minuten Puffer ein",
+"Kleidung am Vorabend bereitgelegt: sauber, ordentlich, bequeme saubere Schuhe",
+"Lebenslauf und Bewerbung ausgedruckt und in eine Mappe gelegt",
+"Einen Ausweis eingepackt",
+"Zwei eigene Fragen auf einen Zettel geschrieben",
+"Meine Antworten aus der Mappe am Vorabend laut gelesen",
+"Ein ganzes Probegespräch unter „Üben“ gemacht",
+"Am Tag selbst: Handy auf lautlos, Wasser getrunken, Atemübung gemacht"
+];
+
+/* ===================== SPEICHER ===================== */
+const KEY="ny_lager_gespraech_v1";
+let S={profil:{},antw:{},bew:{},check:{},langsam:false};
+try{const raw=localStorage.getItem(KEY);if(raw)S=Object.assign(S,JSON.parse(raw));}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+/* ===================== HILFEN ===================== */
+const $=s=>document.querySelector(s);
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function wert(k){return ((S.profil[k]||"")+"").trim();}
+function fill(t){return t.replace(/\{(\w+)\}/g,(m,k)=>wert(k)||"___");}
+function fillHTML(t){
+  const PH='<span class="ph">___</span>';
+  return esc(t).replace(/_{3,}/g,PH).replace(/\{(\w+)\}/g,(m,k)=>wert(k)?esc(wert(k)):PH);
+}
+const isPlus=t=>t.startsWith("*");
+const clean=t=>t.replace(/^\*/,"");
+
+let stimmen=[];
+function ladeStimmen(){try{stimmen=speechSynthesis.getVoices();}catch(e){}}
+if("speechSynthesis" in window){ladeStimmen();speechSynthesis.onvoiceschanged=ladeStimmen;}
+function speak(t){
+  if(!("speechSynthesis" in window)){alert("Dein Browser kann leider nicht vorlesen. Probier Chrome oder Safari.");return;}
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(fill(clean(t)).replace(/_{3,}/g,"…"));
+  u.lang="de-AT";
+  const v=stimmen.find(v=>v.lang==="de-AT")||stimmen.find(v=>v.lang&&v.lang.startsWith("de"));
+  if(v)u.voice=v;
+  u.rate=S.langsam?0.72:0.95;
+  speechSynthesis.speak(u);
+}
+function spk(t){return `<button class="spk" title="Vorlesen" data-say="${esc(t)}">🔊</button>`;}
+function zeile(t){return `<div class="zeile">${spk(t)}<span>${fillHTML(clean(t))}</span></div>`;}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-say]");if(b)speak(b.dataset.say);});
+
+/* ===================== BUBBLES ===================== */
+(function(){
+  const box=$("#bubbles");const n=window.innerWidth<600?9:15;const g=["😊","♥","✓",""];
+  for(let i=0;i<n;i++){
+    const b=document.createElement("div");b.className="bubble";
+    const s=26+Math.random()*80;
+    b.style.width=b.style.height=s+"px";b.style.left=(Math.random()*100)+"vw";
+    b.style.animationDuration=(18+Math.random()*22)+"s";b.style.animationDelay=(-Math.random()*35)+"s";
+    if(s>60&&Math.random()<.5){const f=document.createElement("div");f.className="gesicht";f.style.fontSize=(s*.35)+"px";f.textContent=g[Math.floor(Math.random()*3)];b.appendChild(f);}
+    box.appendChild(b);
+  }
+})();
+
+/* ===================== TABS ===================== */
+function zeigeTab(id){
+  TABS.forEach(([t])=>{$("#t-"+t).hidden=(t!==id);});
+  document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.t===id));
+  if(id==="mappe")renderMappe();
+  if(id==="ablauf")renderAblauf();
+  if(id==="retter")renderRetter();
+  if(id==="mut")renderMut();
+  if(id==="ueben")renderStand();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+$("#tabs").innerHTML=TABS.map(([t,l],i)=>`<button role="tab" data-t="${t}" aria-selected="${i===0}">${l}</button>`).join("");
+$("#tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(b)zeigeTab(b.dataset.t);});
+
+/* Langsam */
+$("#langsam").checked=!!S.langsam;
+$("#langsam").addEventListener("change",e=>{S.langsam=e.target.checked;save();});
+
+/* ===================== START ===================== */
+$("#profil").innerHTML=PROFIL.map(([k,l,p])=>`<div><label for="p-${k}">${l}</label><input type="text" id="p-${k}" data-k="${k}" placeholder="${p}" value="${esc(S.profil[k]||"")}"></div>`).join("");
+$("#profil").addEventListener("input",e=>{const k=e.target.dataset.k;if(!k)return;S.profil[k]=e.target.value;save();});
+$("#reset").addEventListener("click",()=>{
+  if(!confirm("Wirklich alles löschen? Profil, Antworten, Bewertungen und Häkchen werden entfernt."))return;
+  S={profil:{},antw:{},bew:{},check:{},langsam:S.langsam};save();location.reload();
+});
+
+/* ===================== MUT ===================== */
+function renderMut(){
+  $("#qual").innerHTML=QUAL.map(([a,b])=>`<div><b>${a}</b><br>${b}</div>`).join("");
+  $("#mutsaetze").innerHTML=MUT.map(zeile).join("");
+  $("#checkliste").innerHTML=CHECK.map((c,i)=>`<label><input type="checkbox" data-c="${i}" ${S.check[i]?"checked":""}><span>${c}</span></label>`).join("");
+}
+$("#checkliste").addEventListener("change",e=>{const i=e.target.dataset.c;if(i===undefined)return;S.check[i]=e.target.checked;save();});
+let atemLaeuft=false;
+$("#atemstart").addEventListener("click",async()=>{
+  if(atemLaeuft)return;atemLaeuft=true;
+  const k=$("#atemkreis"),btn=$("#atemstart");btn.disabled=true;
+  const warte=ms=>new Promise(r=>setTimeout(r,ms));
+  for(let r=1;r<=4;r++){
+    k.style.transitionDuration="4s";k.style.transform="scale(1.6)";k.textContent="Einatmen …";await warte(4000);
+    k.textContent="Halten";await warte(1500);
+    k.style.transitionDuration="6s";k.style.transform="scale(1)";k.textContent="Langsam ausatmen …";await warte(6000);
+  }
+  k.textContent="Gut gemacht 💛";btn.disabled=false;btn.textContent="Noch einmal";atemLaeuft=false;
+});
+
+/* ===================== ABLAUF ===================== */
+function renderAblauf(){
+  $("#ablauf").innerHTML=ABLAUF.map(s=>`<div class="stufe"><h3>${s.t}</h3><div class="tipp">💡 ${s.tip}</div>
+    <div class="cols"><div class="hoeren"><div class="box-h">👂 Das hörst du</div>${s.hear.map(zeile).join("")}</div>
+    <div class="sagen"><div class="box-h">💬 Das kannst du sagen</div>${s.say.map(zeile).join("")}</div></div></div>`).join("");
+}
+
+/* ===================== ANTWORTEN ===================== */
+let aktQ=Q[0].id;
+function renderQListe(){
+  let html="",ph="";
+  Q.forEach(q=>{
+    if(q.phase!==ph){ph=q.phase;html+=`<div class="phase">${ph}</div>`;}
+    const fertig=(S.antw[q.id]||"").trim()?" ✓":"";
+    html+=`<button data-q="${q.id}" class="${q.id===aktQ?"aktiv":""}"><span>${q.short}</span><span>${fertig}</span></button>`;
+  });
+  $("#qliste").innerHTML=html;
+}
+function renderQ(){
+  const q=Q.find(x=>x.id===aktQ);
+  $("#qdetail").innerHTML=`
+    <div class="frage">${spk(q.q)}<span>${esc(q.q)}</span></div>
+    <div class="tipp">🎯 <b>Was will die Person wissen?</b> ${esc(q.want)}</div>
+    <div class="keys"><b>Stichwörter:</b> ${q.keys.map(k=>`<span>${esc(k)}</span>`).join("")}</div>
+    ${q.groups.map(g=>`<div class="gruppe"><div class="gt">${esc(g.t)}</div>${g.i.map(t=>`<button class="chip ${isPlus(t)?"plus":""}" data-chip="${esc(t)}">${fillHTML(clean(t))}</button>`).join("")}</div>`).join("")}
+    <h3>Meine Antwort</h3>
+    <textarea id="antwort" placeholder="Klick auf Bausteine oder schreib selbst …">${esc(S.antw[q.id]||"")}</textarea>
+    <div style="margin-top:8px">
+      <button class="btn" id="vorlesen">🔊 Meine Antwort vorlesen</button>
+      <button class="btn ghost" id="leeren">↺ Leeren</button>
+      <button class="btn ghost" id="naechste">Nächste Frage ➜</button>
+    </div>`;
+}
+$("#qliste").addEventListener("click",e=>{const b=e.target.closest("[data-q]");if(!b)return;aktQ=b.dataset.q;renderQListe();renderQ();if(window.innerWidth<760)$("#qdetail").scrollIntoView({behavior:"smooth"});});
+$("#qdetail").addEventListener("click",e=>{
+  const c=e.target.closest("[data-chip]");
+  const ta=$("#antwort");
+  if(c){
+    const t=fill(clean(c.dataset.chip));
+    ta.value+=(ta.value&&!/\s$/.test(ta.value)?" ":"")+t;
+    S.antw[aktQ]=ta.value;save();renderQListe();
+    c.classList.add("flash");setTimeout(()=>c.classList.remove("flash"),400);
+    return;
+  }
+  if(e.target.id==="vorlesen"){if(ta.value.trim())speak(ta.value);else alert("Dein Antwortfeld ist noch leer.");}
+  if(e.target.id==="leeren"){if(confirm("Antwort wirklich leeren?")){ta.value="";S.antw[aktQ]="";save();renderQListe();}}
+  if(e.target.id==="naechste"){const i=Q.findIndex(x=>x.id===aktQ);aktQ=Q[(i+1)%Q.length].id;renderQListe();renderQ();$("#qdetail").scrollIntoView({behavior:"smooth"});}
+});
+$("#qdetail").addEventListener("input",e=>{if(e.target.id==="antwort"){S.antw[aktQ]=e.target.value;save();renderQListe();}});
+
+/* ===================== ÜBEN ===================== */
+let modus="zufall",probeIdx=-1,letzteQ=null,timer=null;
+function renderStand(){
+  const z=[0,0,0];let offen=0;
+  Q.forEach(q=>{const b=S.bew[q.id];if(b===undefined)offen++;else z[b]++;});
+  $("#stand").innerHTML=`<span>😟 noch unsicher: ${z[0]}</span><span>🙂 geht schon: ${z[1]}</span><span>😎 sitzt: ${z[2]}</span><span>⚪ noch nicht geübt: ${offen}</span>`;
+}
+function zufallsFrage(){
+  const pool=[];
+  Q.forEach(q=>{if(q.id===letzteQ)return;const b=S.bew[q.id];const w=b===2?1:b===1?2:4;for(let i=0;i<w;i++)pool.push(q);});
+  const q=pool[Math.floor(Math.random()*pool.length)];letzteQ=q.id;return q;
+}
+function satzanfaenge(q){
+  return q.groups.map(g=>{const w=fill(clean(g.i[0])).split(" ");return w.slice(0,Math.min(4,w.length-1)).join(" ")+" …";});
+}
+function stoppeTimer(){if(timer){clearInterval(timer);timer=null;}}
+function renderKarte(q,info){
+  stoppeTimer();
+  const b=S.bew[q.id];
+  $("#uebung").innerHTML=`<div class="interview">
+    ${info?`<div class="muted" style="font-weight:800;margin-bottom:8px">${info}</div>`:""}
+    <div class="sprecher">👩‍💼 Die Person fragt:</div>
+    <div class="blase">${esc(q.q)}</div>
+    <div style="margin-top:12px">
+      <button class="btn" data-say="${esc(q.q)}">🔊 Frage hören</button>
+      <button class="btn ghost" id="tmr"><span class="timer">⏱ 45 Sekunden sprechen</span></button>
+    </div>
+    <div style="margin-top:6px">
+      <button class="btn ghost small" data-h="keys">🗝️ Stichwörter</button>
+      <button class="btn ghost small" data-h="anf">✍️ Satzanfänge</button>
+      <button class="btn ghost small" data-h="mein">📒 Meine Antwort</button>
+    </div>
+    <div class="hilfe" id="h-keys" hidden><b>Stichwörter:</b> ${q.keys.map(esc).join(" · ")}</div>
+    <div class="hilfe" id="h-anf" hidden>${satzanfaenge(q).map(t=>`<div>• ${fillHTML(t)}</div>`).join("")}</div>
+    <div class="hilfe" id="h-mein" hidden>${(S.antw[q.id]||"").trim()?`${esc(S.antw[q.id])}<div style="margin-top:6px"><button class="btn small" data-say="${esc(S.antw[q.id])}">🔊 Vorlesen</button></div>`:`<span class="muted">Hier gibt es noch keine Antwort. Bau sie dir unter „Antworten“ – dann erscheint sie hier.</span>`}</div>
+    <div class="sprecher" style="margin-top:16px">Wie gut konntest du antworten?</div>
+    <div class="bewertung" data-id="${q.id}">
+      <button data-b="0" class="${b===0?"gewaehlt":""}">😟 noch unsicher</button>
+      <button data-b="1" class="${b===1?"gewaehlt":""}">🙂 geht schon</button>
+      <button data-b="2" class="${b===2?"gewaehlt":""}">😎 sitzt!</button>
+    </div>
+    <div style="margin-top:14px"><button class="btn" id="weiter">${modus==="probe"?"Weiter im Gespräch ➜":"Nächste Frage ➜"}</button></div>
+  </div>`;
+  if(modus==="probe")speak(q.q);
+}
+function renderProbeText(titel,text,knopf){
+  stoppeTimer();
+  $("#uebung").innerHTML=`<div class="interview">
+    <div class="sprecher">👩‍💼 ${titel}</div><div class="blase">${esc(text)}</div>
+    <div style="margin-top:14px"><button class="btn" data-say="${esc(text)}">🔊 Hören</button><button class="btn" id="weiter">${knopf}</button></div></div>`;
+  speak(text);
+}
+function weiter(){
+  if(modus==="zufall"){renderKarte(zufallsFrage());return;}
+  probeIdx++;
+  if(probeIdx===0){renderProbeText("Die Person begrüßt dich:","Guten Tag! Schön, dass Sie da sind. Nehmen Sie bitte Platz. Haben Sie gut hergefunden?","Ich antworte und dann geht's los ➜");return;}
+  const i=probeIdx-1;
+  if(i<PROBE_ORDER.length){const q=Q.find(x=>x.id===PROBE_ORDER[i]);renderKarte(q,`Frage ${i+1} von ${PROBE_ORDER.length}`);return;}
+  if(i===PROBE_ORDER.length){renderProbeText("Zum Schluss sagt die Person:","Vielen Dank für das Gespräch. Wir melden uns bis Ende der Woche bei Ihnen.","Ich verabschiede mich ➜");return;}
+  probeIdx=-1;
+  $("#uebung").innerHTML=`<div class="interview" style="text-align:center"><h2>🎉 Geschafft!</h2><p>Du hast ein ganzes Vorstellungsgespräch geführt – von der Begrüßung bis zum Abschied. Genau so wird es auch im echten Gespräch sein. Sei stolz auf dich!</p><button class="btn" id="weiter">Noch einmal von vorn</button></div>`;
+  renderStand();
+}
+document.querySelector(".modus").addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;modus=b.dataset.m;
+  document.querySelectorAll(".modus button").forEach(x=>x.classList.toggle("aktiv",x===b));
+  probeIdx=-1;weiter();
+});
+$("#uebung").addEventListener("click",e=>{
+  const h=e.target.closest("[data-h]");if(h){const el=$("#h-"+h.dataset.h);el.hidden=!el.hidden;return;}
+  const bw=e.target.closest(".bewertung button");
+  if(bw){const id=bw.parentElement.dataset.id;S.bew[id]=+bw.dataset.b;save();bw.parentElement.querySelectorAll("button").forEach(x=>x.classList.toggle("gewaehlt",x===bw));renderStand();return;}
+  if(e.target.closest("#weiter")){weiter();return;}
+  const t=e.target.closest("#tmr");
+  if(t){
+    if(timer){stoppeTimer();t.querySelector(".timer").textContent="⏱ 45 Sekunden sprechen";return;}
+    let s=45;const sp=t.querySelector(".timer");sp.textContent="⏱ "+s+" s – sprich jetzt!";
+    timer=setInterval(()=>{s--;if(s<=0){stoppeTimer();sp.textContent="✅ Super, fertig!";}else sp.textContent="⏱ "+s+" s – sprich jetzt!";},1000);
+  }
+});
+
+/* ===================== RETTER ===================== */
+function renderRetter(){
+  $("#retter").innerHTML=RETTER.map(r=>`<div class="card"><h3 style="margin-top:0">${r.t}</h3>${r.i.map(zeile).join("")}</div>`).join("");
+}
+
+/* ===================== WÖRTER & QUIZ ===================== */
+$("#woerter").innerHTML=WOERTER.map(([w,d,b])=>`<div class="wort"><b>${esc(w)}</b> – ${esc(d)}<div class="bsp">${spk(b)}<span>${esc(b)}</span></div></div>`).join("");
+let quiz={reihe:[],i:0,punkte:0,falsch:[]};
+function mische(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function quizStart(nurFalsche){
+  const basis=nurFalsche&&quiz.falsch.length?quiz.falsch:QUIZ.map((_,i)=>i);
+  quiz={reihe:mische(basis),i:0,punkte:0,falsch:[]};renderQuiz();
+}
+function renderQuiz(){
+  const box=$("#quiz");
+  if(quiz.i>=quiz.reihe.length){
+    const alle=quiz.punkte===quiz.reihe.length;
+    box.innerHTML=`<h2>Wörter-Quiz</h2><div class="fortschritt"><div style="width:100%"></div></div>
+      <p style="font-size:1.2rem"><b>${quiz.punkte} von ${quiz.reihe.length}</b> richtig. ${alle?"Perfekt! 🎉 Du kennst alle wichtigen Wörter.":"Sehr gut gearbeitet! Übe die falschen Fragen noch einmal."}</p>
+      ${quiz.falsch.length?`<button class="btn" id="qfalsch">Nur die falschen wiederholen</button>`:""}<button class="btn ghost" id="qneu">Quiz neu starten</button>`;
+    return;
+  }
+  const [frage,opts,richtig]=QUIZ[quiz.reihe[quiz.i]];
+  const ord=mische(opts.map((o,i)=>i));
+  box.innerHTML=`<h2>Wörter-Quiz</h2><div class="muted"><b>Frage ${quiz.i+1} von ${quiz.reihe.length}</b> · ${quiz.punkte} richtig</div>
+    <div class="fortschritt"><div style="width:${quiz.i/quiz.reihe.length*100}%"></div></div>
+    <p style="font-size:1.15rem;font-weight:800">${esc(frage)}</p>
+    ${ord.map(i=>`<button class="quizopt" data-o="${i}">${esc(opts[i])}</button>`).join("")}
+    <div class="feedback" id="qfb"></div>`;
+  box.dataset.richtig=richtig;box.dataset.done="";
+}
+$("#quiz").addEventListener("click",e=>{
+  const box=$("#quiz");
+  if(e.target.id==="qneu"){quizStart(false);return;}
+  if(e.target.id==="qfalsch"){quizStart(true);return;}
+  if(e.target.id==="qweiter"){quiz.i++;renderQuiz();return;}
+  const o=e.target.closest(".quizopt");if(!o||box.dataset.done)return;
+  box.dataset.done="1";
+  const r=+box.dataset.richtig,gew=+o.dataset.o;
+  box.querySelectorAll(".quizopt").forEach(b=>{if(+b.dataset.o===r)b.classList.add("richtig");});
+  if(gew===r){quiz.punkte++;$("#qfb").innerHTML=`<span style="color:var(--gruen)">✓ Richtig, super!</span>`;}
+  else{o.classList.add("falsch");quiz.falsch.push(quiz.reihe[quiz.i]);$("#qfb").innerHTML=`<span style="color:var(--rot)">Noch nicht ganz – die grüne Antwort ist richtig.</span>`;}
+  $("#qfb").innerHTML+=` <button class="btn small" id="qweiter" style="margin-left:8px">Weiter ➜</button>`;
+});
+
+/* ===================== MAPPE ===================== */
+function renderMappe(){
+  $("#mappe").innerHTML=Q.map(q=>{const a=(S.antw[q.id]||"").trim();
+    return `<div class="mappe-item"><h3>${esc(q.q)}</h3>${a?`<div class="zeile">${spk(a)}<span>${esc(a).replace(/\n/g,"<br>")}</span></div>`:`<div class="leer">Noch keine Antwort – unter „Antworten“ kannst du sie bauen.</div>`}</div>`;}).join("");
+}
+$("#kopieren").addEventListener("click",async()=>{
+  const txt=Q.map(q=>q.q+"\n"+((S.antw[q.id]||"").trim()||"–")).join("\n\n");
+  try{await navigator.clipboard.writeText(txt);$("#kopiert").textContent=" ✓ Kopiert!";}
+  catch(e){$("#kopiert").textContent=" Kopieren hat nicht geklappt – du kannst stattdessen drucken.";}
+  setTimeout(()=>$("#kopiert").textContent="",3000);
+});
+
+/* ===================== INIT ===================== */
+renderQListe();renderQ();renderMut();quizStart(false);weiter();renderStand();
+</script>
+</body>
+</html>
