@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dabei, danach, darauf, auf ihn</title>
+<style>
+  :root { --text:#222; --bg:#fdfcf9; --accent:#7a2e5c; --ok:#1f7a3a; --bad:#b3261e; }
+  * { box-sizing:border-box; }
+  body { font-family: Georgia, "Times New Roman", serif; color:var(--text); background:var(--bg); max-width:820px; margin:0 auto; padding:24px 16px 60px; line-height:1.6; }
+  h1 { color:var(--accent); font-size:1.6rem; margin-bottom:.3rem; }
+  h2 { color:var(--accent); font-size:1.25rem; margin-top:2.4rem; border-bottom:2px solid var(--accent); padding-bottom:.2rem; }
+  .regel { background:#f3ecf0; border-left:4px solid var(--accent); padding:.6rem .9rem; margin:.8rem 0 1.2rem; font-size:.95rem; }
+  .beispiel { font-style:italic; color:#2a4d8f; }
+  ol { padding-left:1.6rem; }
+  li { margin:.8rem 0; }
+  .a, .b { display:block; }
+  .b { color:#444; }
+  .kurz { color:#444; }
+  .kurz::before { content:"→ "; color:var(--accent); font-weight:bold; }
+  input { font:inherit; width:7.5em; padding:.1rem .35rem; border:none; border-bottom:2px solid #999; background:transparent; text-align:center; }
+  input:focus { outline:none; border-bottom-color:var(--accent); }
+  input.ok { border-bottom-color:var(--ok); color:var(--ok); font-weight:bold; }
+  input.bad { border-bottom-color:var(--bad); color:var(--bad); }
+  .loesung { display:none; color:var(--ok); font-size:.9rem; margin-left:.4rem; }
+  .zeigen .loesung { display:inline; }
+  .knoepfe { margin-top:1rem; display:flex; gap:.6rem; flex-wrap:wrap; }
+  button { font:inherit; padding:.45rem 1rem; border:none; border-radius:6px; background:var(--accent); color:#fff; cursor:pointer; }
+  button.zweit { background:#fff; color:var(--accent); border:2px solid var(--accent); }
+  .ergebnis { margin-top:.6rem; font-weight:bold; }
+</style>
+</head>
+<body>
+
+<h1>Dabei, danach, darauf, auf ihn</h1>
+<p>Zeitangaben kürzer sagen, nachfragen und kurz antworten.</p>
+
+<h2>Teil 1: Zeitangaben. Sagen Sie es kürzer.</h2>
+<div class="regel">
+  <b>beim …</b> → <i>dabei</i> &nbsp;·&nbsp; <b>nach dem / nach der …</b> → <i>danach</i> &nbsp;·&nbsp; <b>vor dem …</b> → <i>vorher</i> oder <i>davor</i><br>
+  Das neue Wort steht an derselben Stelle wie die Zeitangabe.<br>
+  <span class="beispiel">Ich muss jetzt das Mittagessen kochen. Beim Kochen höre ich immer Musik. → Dabei höre ich immer Musik.</span>
+</div>
+<ol id="teil1"></ol>
+<div class="knoepfe">
+  <button onclick="pruefen('teil1')">Prüfen</button>
+  <button class="zweit" onclick="loesungen('teil1')">Lösungen zeigen</button>
+</div>
+<div class="ergebnis" id="teil1-erg"></div>
+
+<h2>Teil 2: Fragen Sie nach.</h2>
+<div class="regel">
+  <b>Sache</b> → wo(r)- + Präposition: <i>Worauf? Wovon? Worüber?</i><br>
+  <b>Person</b> → Präposition + Fragewort: <i>Auf wen? Mit wem? Von wem?</i>
+</div>
+<ol id="teil2"></ol>
+<div class="knoepfe">
+  <button onclick="pruefen('teil2')">Prüfen</button>
+  <button class="zweit" onclick="loesungen('teil2')">Lösungen zeigen</button>
+</div>
+<div class="ergebnis" id="teil2-erg"></div>
+
+<h2>Teil 3: Antworten Sie kurz.</h2>
+<div class="regel">
+  <b>Sache</b> → da(r)- + Präposition: <i>darauf, damit, dabei, dafür …</i><br>
+  <b>Person</b> → Präposition + Pronomen: <i>auf ihn, mit ihr, an sie …</i>
+</div>
+<ol id="teil3"></ol>
+<div class="knoepfe">
+  <button onclick="pruefen('teil3')">Prüfen</button>
+  <button class="zweit" onclick="loesungen('teil3')">Lösungen zeigen</button>
+</div>
+<div class="ergebnis" id="teil3-erg"></div>
+
+<script>
+// [Satz 1, Originalsatz 2, Text vor der Lücke, Text nach der Lücke, Lösung(en)]
+const teil1 = [
+  ["Ich gehe heute Nachmittag einkaufen.", "Beim Einkaufen vergesse ich immer etwas.", "", "vergesse ich immer etwas.", "dabei"],
+  ["Wir essen gleich zu Abend.", "Nach dem Essen machen wir einen Spaziergang.", "", "machen wir einen Spaziergang.", "danach"],
+  ["Ich stehe jeden Tag um sechs Uhr auf.", "Nach dem Aufstehen trinke ich ein Glas Wasser.", "", "trinke ich ein Glas Wasser.", "danach"],
+  ["Meine Schwester backt heute einen Kuchen.", "Beim Backen hilft ihr ihre Tochter.", "", "hilft ihr ihre Tochter.", "dabei"],
+  ["Ich will jetzt duschen.", "Vor dem Duschen mache ich noch ein paar Übungen.", "", "mache ich noch ein paar Übungen.", "vorher|davor"],
+  ["Wir sehen heute Abend fern.", "Beim Fernsehen essen wir oft Chips.", "", "essen wir oft Chips.", "dabei"],
+  ["Paul räumt sein Zimmer nicht gern auf.", "Nach dem Aufräumen ist er aber immer zufrieden.", "", "ist er aber immer zufrieden.", "danach"],
+  ["Sie schreibt gerade eine wichtige E-Mail.", "Beim Schreiben darf man sie nicht stören.", "", "darf man sie nicht stören.", "dabei"],
+  ["Ich gehe gleich schlafen.", "Vor dem Schlafengehen lese ich immer noch ein bisschen.", "", "lese ich immer noch ein bisschen.", "vorher|davor"],
+  ["Die Kinder spielen im Garten.", "Beim Spielen werden sie immer ganz schmutzig.", "", "werden sie immer ganz schmutzig.", "dabei"],
+  ["Wir wollen am Samstag wandern.", "Nach dem Wandern gehen wir in eine Hütte essen.", "", "gehen wir in eine Hütte essen.", "danach"],
+  ["Herr Berger telefoniert gerade.", "Beim Telefonieren läuft er immer im Büro herum.", "", "läuft er immer im Büro herum.", "dabei"],
+  ["Ich muss noch abwaschen.", "Nach dem Abwaschen können wir einen Film anschauen.", "", "können wir einen Film anschauen.", "danach"],
+  ["Lisa will heute Abend ausgehen.", "Vor dem Ausgehen schminkt sie sich lange.", "", "schminkt sie sich lange.", "vorher|davor"],
+  ["Ich lerne für die Prüfung.", "Beim Lernen trinke ich viel Tee.", "", "trinke ich viel Tee.", "dabei"],
+  ["Wir fahren morgen nach Salzburg.", "Vor dem Wegfahren müssen wir noch tanken.", "", "müssen wir noch tanken.", "vorher|davor"],
+  ["Mein Vater joggt jeden Morgen.", "Nach dem Joggen frühstückt er immer ausgiebig.", "", "frühstückt er immer ausgiebig.", "danach"],
+  ["Ich koche heute Gulasch.", "Kannst du mir beim Kochen ein bisschen helfen?", "Kannst du mir", "ein bisschen helfen?", "dabei"],
+  ["Anna arbeitet heute bis fünf Uhr.", "Nach der Arbeit geht sie ins Fitnessstudio.", "", "geht sie ins Fitnessstudio.", "danach"],
+  ["Wir essen in einer Stunde.", "Vor dem Essen sollst du dir die Hände waschen.", "", "sollst du dir die Hände waschen.", "vorher|davor"],
+  ["Ich fahre mit dem Rad zur Arbeit.", "Beim Radfahren denke ich über den Tag nach.", "", "denke ich über den Tag nach.", "dabei"],
+  ["Wir bekommen heute Besuch.", "Vor dem Besuch muss ich noch staubsaugen.", "", "muss ich noch staubsaugen.", "vorher|davor"],
+  ["Mia malt sehr gern.", "Beim Malen vergisst sie die Zeit.", "", "vergisst sie die Zeit.", "dabei"],
+  ["Ich bügle noch schnell die Hemden.", "Nach dem Bügeln rufe ich dich an.", "", "rufe ich dich an.", "danach"],
+  ["Wir machen heute ein Picknick.", "Vor dem Picknick kaufen wir noch Obst und Brot.", "", "kaufen wir noch Obst und Brot.", "vorher|davor"],
+  ["Ich schaue mir das Fußballspiel an.", "Beim Zuschauen werde ich immer nervös.", "", "werde ich immer nervös.", "dabei"],
+  ["Die Studenten schreiben morgen einen Test.", "Nach dem Test feiern sie in einer Bar.", "", "feiern sie in einer Bar.", "danach"],
+  ["Ich fahre mit dem Zug nach Wien.", "Ich kann beim Zugfahren gut lesen.", "Ich kann", "gut lesen.", "dabei"],
+  ["Leg dich doch hin und ruh dich aus.", "Nach dem Ausruhen geht es dir sicher besser.", "", "geht es dir sicher besser.", "danach"],
+  ["Ich muss noch die Koffer packen.", "Ich möchte beim Packen nicht gestört werden.", "Ich möchte", "nicht gestört werden.", "dabei"]
+];
+
+const teil2 = [
+  ["Ich warte schon seit zwanzig Minuten.", "wartest du?", "Auf den Bus.", "Worauf"],
+  ["Ich warte hier noch ein bisschen.", "wartest du?", "Auf meine Schwester.", "Auf wen"],
+  ["Ich freue mich schon so!", "freust du dich?", "Auf die Ferien.", "Worauf"],
+  ["Ich habe mich wirklich sehr gefreut.", "hast du dich gefreut?", "Über dein Geschenk.", "Worüber"],
+  ["Ich habe ein bisschen Angst.", "hast du Angst?", "Vor der Prüfung.", "Wovor"],
+  ["Ich habe richtig Angst.", "hast du Angst?", "Vor meinem neuen Chef.", "Vor wem"],
+  ["Ich habe mich heute so geärgert!", "hast du dich geärgert?", "Über meinen Kollegen.", "Über wen"],
+  ["Ich habe gerade eine Stunde telefoniert.", "hast du telefoniert?", "Mit meiner Mutter.", "Mit wem"],
+  ["Ich muss mich unbedingt noch bedanken.", "musst du dich bedanken?", "Bei Frau Huber.", "Bei wem"],
+  ["Ich habe mich gestern beschwert.", "hast du dich beschwert?", "Über den Lärm.", "Worüber"],
+  ["Ich träume fast jede Nacht.", "träumst du?", "Von einem Urlaub am Meer.", "Wovon"],
+  ["Ich mache mir große Sorgen.", "machst du dir Sorgen?", "Um meinen Sohn.", "Um wen"],
+  ["Ich bin total verliebt!", "bist du verliebt?", "In meinen Nachbarn.", "In wen"],
+  ["Ich habe den ganzen Morgen gesucht.", "hast du gesucht?", "Nach meinem Schlüssel.", "Wonach"],
+  ["Ich muss heute Abend aufpassen.", "musst du aufpassen?", "Auf die Kinder meiner Freundin.", "Auf wen"],
+  ["Ich habe schon lange nichts mehr gehört.", "hast du nichts gehört?", "Von Peter.", "Von wem"],
+  ["Ich bin so stolz!", "bist du stolz?", "Auf meine Tochter.", "Auf wen"],
+  ["Ich habe mich eine Woche lang vorbereitet.", "hast du dich vorbereitet?", "Auf das Vorstellungsgespräch.", "Worauf"],
+  ["Ich habe jetzt so Lust!", "hast du Lust?", "Auf ein Eis.", "Worauf"],
+  ["Ich habe lange nachgedacht.", "hast du nachgedacht?", "Über dein Angebot.", "Worüber"]
+];
+
+const teil3 = [
+  ["Wartest du auf den Bus?", "Ja, ich warte schon lange", ".", "darauf"],
+  ["Wartest du auf Lukas?", "Ja, ich warte schon lange", ".", "auf ihn"],
+  ["Hast du mit dem Chef gesprochen?", "Ja, ich habe gestern", "gesprochen.", "mit ihm"],
+  ["Bist du mit deinem neuen Handy zufrieden?", "Ja, ich bin sehr zufrieden", ".", "damit"],
+  ["Hilfst du mir beim Umzug?", "Klar, ich helfe dir gern", ".", "dabei"],
+  ["Interessierst du dich für Fußball?", "Nein, ich interessiere mich überhaupt nicht", ".", "dafür"],
+  ["Denkst du noch oft an deine Oma?", "Ja, ich denke jeden Tag", ".", "an sie"],
+  ["Hast du dich schon für das Geschenk bedankt?", "Ja, ich habe mich gestern", "bedankt.", "dafür"],
+  ["Freust du dich auf das Wochenende?", "Ja, ich freue mich sehr", ".", "darauf"],
+  ["Hast du Angst vor der Prüfung?", "Ja, ein bisschen Angst habe ich schon", ".", "davor"],
+  ["Ärgerst du dich über deine Nachbarn?", "Ja, ich ärgere mich oft", ".", "über sie"],
+  ["Sprecht ihr zu Hause oft über die Arbeit?", "Nein, wir sprechen selten", ".", "darüber"],
+  ["Kümmerst du dich um deinen kleinen Bruder?", "Ja, ich kümmere mich jeden Nachmittag", ".", "um ihn"],
+  ["Hast du etwas von Maria gehört?", "Nein, ich habe lange nichts", "gehört.", "von ihr"],
+  ["Hast du mit dem Rauchen aufgehört?", "Ja, ich habe letztes Jahr", "aufgehört.", "damit"],
+  ["Erinnerst du dich an deinen ersten Lehrer?", "Ja, ich erinnere mich gut", ".", "an ihn"],
+  ["Erinnerst du dich an deinen ersten Schultag?", "Ja, ich erinnere mich noch gut", ".", "daran"],
+  ["Träumst du von einem eigenen Haus?", "Ja, ich träume schon lange", ".", "davon"],
+  ["Bist du mit deinen Kollegen zufrieden?", "Ja, ich bin sehr zufrieden", ".", "mit ihnen"],
+  ["Hast du über mein Angebot nachgedacht?", "Ja, ich habe lange", "nachgedacht.", "darüber"]
+];
+
+function feld(loes) {
+  return '<input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" data-l="' + loes + '">' +
+         '<span class="loesung">(' + loes.split("|").join(" / ") + ')</span>';
+}
+
+document.getElementById("teil1").innerHTML = teil1.map(s =>
+  '<li><span class="a">' + s[0] + ' ' + s[1] + '</span>' +
+  '<span class="a kurz">' + s[0] + ' ' + (s[2] ? s[2] + ' ' : '') + feld(s[4]) + ' ' + s[3] + '</span></li>'
+).join("");
+
+document.getElementById("teil2").innerHTML = teil2.map(s =>
+  '<li><span class="a">A: ' + s[0] + '</span>' +
+  '<span class="b">B: ' + feld(s[3]) + ' ' + s[1] + '</span>' +
+  '<span class="a">A: ' + s[2] + '</span></li>'
+).join("");
+
+document.getElementById("teil3").innerHTML = teil3.map(s => {
+  const rest = s[2] === "." ? "." : " " + s[2];
+  return '<li><span class="a">' + s[0] + '</span>' +
+         '<span class="b">– ' + s[1] + ' ' + feld(s[3]) + rest + '</span></li>';
+}).join("");
+
+function norm(t) { return t.trim().replace(/\s+/g, " ").replace(/[?.!]/g, "").toLowerCase(); }
+
+function pruefen(id) {
+  const felder = document.querySelectorAll("#" + id + " input");
+  let richtig = 0;
+  felder.forEach(f => {
+    f.classList.remove("ok", "bad");
+    if (!f.value.trim()) return;
+    const erlaubt = f.dataset.l.split("|").map(norm);
+    if (erlaubt.includes(norm(f.value))) { f.classList.add("ok"); richtig++; }
+    else f.classList.add("bad");
+  });
+  document.getElementById(id + "-erg").textContent = richtig + " von " + felder.length + " richtig";
+}
+
+function loesungen(id) {
+  document.getElementById(id).classList.toggle("zeigen");
+}
+</script>
+</body>
+</html>
