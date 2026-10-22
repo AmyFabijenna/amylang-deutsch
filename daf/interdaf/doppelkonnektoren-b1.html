@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Doppelkonnektoren B1</title>
+<style>
+:root{
+  --bg:#faf7f8;--card:#ffffff;--ink:#2a2230;--muted:#6d6373;--accent:#8a1f4f;--accent-soft:#f5e3ec;
+  --line:#e2d8de;--ok:#1f7a4a;--ok-bg:#e3f4ea;--bad:#b3261e;--bad-bg:#fbe5e3;--sol:#f3eef6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1b171d;--card:#252028;--ink:#efe8f0;--muted:#b1a6b5;--accent:#e07aa8;--accent-soft:#3a2632;
+    --line:#3d3540;--ok:#7fd3a3;--ok-bg:#1f3a2b;--bad:#ff9a92;--bad-bg:#45231f;--sol:#2f2834;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1b171d;--card:#252028;--ink:#efe8f0;--muted:#b1a6b5;--accent:#e07aa8;--accent-soft:#3a2632;
+  --line:#3d3540;--ok:#7fd3a3;--ok-bg:#1f3a2b;--bad:#ff9a92;--bad-bg:#45231f;--sol:#2f2834;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:860px;margin:0 auto;padding:24px 16px 60px}
+h1{color:var(--accent);margin:0 0 4px;font-size:1.9rem}
+.sub{color:var(--muted);margin:0 0 20px}
+.regel{width:100%;border-collapse:collapse;background:var(--accent-soft);border-radius:12px;overflow:hidden;margin-bottom:28px;font-size:.95rem}
+.regel td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.regel tr:last-child td{border-bottom:none}
+.regel td:first-child{font-weight:700;white-space:nowrap}
+.regel b{color:var(--accent)}
+.sec{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 16px;margin-bottom:22px}
+.sec h2{margin:0 0 4px;font-size:1.15rem;color:var(--accent)}
+.sec h2 span{display:inline-block;min-width:1.6em}
+.instr{color:var(--muted);margin:0 0 14px}
+.item{padding:10px 0;border-top:1px dashed var(--line)}
+.item:first-of-type{border-top:none}
+.nr{font-weight:700;color:var(--accent);margin-right:6px}
+.cues{font-family:ui-monospace,Menlo,monospace;font-size:.95rem}
+select,input[type=text]{font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:8px;padding:4px 8px}
+input[type=text]{width:100%;margin-top:6px}
+input.inl{width:9.5em;margin:2px 2px}
+select{margin:2px 2px}
+.ok{border-color:var(--ok)!important;background:var(--ok-bg)!important}
+.bad{border-color:var(--bad)!important;background:var(--bad-bg)!important}
+.sol{display:none;background:var(--sol);border-radius:8px;padding:6px 10px;margin-top:6px;font-size:.95rem}
+.showsol .sol{display:block}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;align-items:center}
+button{font:inherit;border:none;border-radius:999px;padding:7px 16px;cursor:pointer;background:var(--accent);color:#fff}
+button.sec2{background:var(--accent-soft);color:var(--accent)}
+.score{font-weight:700;color:var(--accent)}
+.match{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px}
+.endings{background:var(--accent-soft);border-radius:10px;padding:10px 12px}
+.endings div{padding:3px 0}
+@media (max-width:620px){.match{grid-template-columns:1fr}}
+.example{background:var(--accent-soft);border-radius:10px;padding:8px 12px;margin-bottom:8px;font-style:italic}
+.pic{display:flex;flex-wrap:wrap;gap:10px;margin:4px 0 6px}
+.pic .p{background:var(--accent-soft);border-radius:10px;padding:6px 10px;text-align:center;min-width:90px}
+.pic .e{font-size:1.7rem;line-height:1.2}
+.pic .l{font-size:.85rem}
+.legend{font-size:.9rem;color:var(--muted);margin-bottom:10px}
+.text8{line-height:2.4}
+sup{color:var(--accent);font-weight:700}
+.tag{color:var(--muted);white-space:nowrap}
+</style>
+</head>
+<body>
+<main>
+<h1>Doppelkonnektoren</h1>
+<p class="sub">entweder … oder · weder … noch · sowohl … als auch · nicht nur … sondern auch · Niveau B1</p>
+
+<table class="regel">
+<tr><td>sowohl … als auch</td><td>+ + beides</td><td>Ich esse <b>sowohl</b> Brot <b>als auch</b> Käse.</td></tr>
+<tr><td>nicht nur …, sondern auch</td><td>+ + beides, das 2. betont</td><td>Sie isst <b>nicht nur</b> Brot, <b>sondern auch</b> viel Käse.</td></tr>
+<tr><td>weder … noch</td><td>− − beides nicht</td><td>Er isst <b>weder</b> Brot <b>noch</b> Käse.</td></tr>
+<tr><td>entweder … oder</td><td>a oder b (starkes „oder“)</td><td>Wir essen <b>entweder</b> Brot <b>oder</b> Käse.</td></tr>
+</table>
+
+<div id="app"></div>
+</main>
+
+<script>
+const enc = a => encodeURIComponent(JSON.stringify(a));
+const norm = s => (s||"").toLowerCase().replace(/[.,!?;:„“"»«‚‘']/g," ").replace(/\s+/g," ").trim();
+const app = document.getElementById("app");
+
+function section(n, title, instr, body){
+  const s = document.createElement("section");
+  s.className = "sec";
+  s.innerHTML = `<h2><span>${n}</span>${title}</h2><p class="instr">${instr}</p>${body}
+  <div class="btns"><button data-a="check">Prüfen</button><button class="sec2" data-a="sol">Lösungen zeigen</button><button class="sec2" data-a="reset">Zurücksetzen</button><span class="score"></span></div>`;
+  app.appendChild(s);
+  s.querySelector('[data-a=check]').onclick = () => check(s);
+  s.querySelector('[data-a=sol]').onclick = e => { s.classList.toggle("showsol"); e.target.textContent = s.classList.contains("showsol") ? "Lösungen ausblenden" : "Lösungen zeigen"; };
+  s.querySelector('[data-a=reset]').onclick = () => { s.querySelectorAll(".g,.pg").forEach(el=>{el.value="";el.classList.remove("ok","bad");}); s.querySelector(".score").textContent=""; };
+}
+
+function check(s){
+  let ok=0,total=0;
+  s.querySelectorAll(".g").forEach(el=>{
+    const ans = JSON.parse(decodeURIComponent(el.dataset.ans));
+    const good = el.value!=="" && ans.some(a=>norm(a)===norm(el.value));
+    el.classList.toggle("ok",good); el.classList.toggle("bad",!good); total++; if(good) ok++;
+  });
+  const groups = {};
+  s.querySelectorAll(".pg").forEach(el=>{(groups[el.dataset.p] ||= []).push(el);});
+  Object.values(groups).forEach(([a,b])=>{
+    const combos = JSON.parse(decodeURIComponent(a.dataset.combos));
+    const good = combos.some(c=>norm(c[0])===norm(a.value)&&norm(c[1])===norm(b.value));
+    [a,b].forEach(el=>{el.classList.toggle("ok",good);el.classList.toggle("bad",!good);});
+    total++; if(good) ok++;
+  });
+  s.querySelector(".score").textContent = `${ok} von ${total} richtig`;
+}
+
+/* ---------- 1 Zuordnen ---------- */
+const ex1 = {
+  starts:["In unserer Stadt gibt es sowohl ein Theater","Im Sommer kann man sowohl im See schwimmen","Das Museum ist nicht nur interessant,","Der Markt bietet nicht nur frisches Obst,","Am Sonntag haben weder die Geschäfte","Leider gibt es hier weder einen Zoo","Am Abend kann man entweder ins Konzert gehen","Zur Arbeit fahre ich entweder mit dem Bus"],
+  ends:{A:"noch die Banken geöffnet.",B:"oder mit dem Fahrrad.",C:"als auch ein großes Kino.",D:"sondern auch kostenlos.",E:"oder in einer Bar tanzen.",F:"als auch in den Bergen wandern.",G:"noch einen Freizeitpark.",H:"sondern auch selbst gemachten Käse."},
+  key:["C","F","D","H","A","G","E","B"]
+};
+{
+  const opts = `<option value="">–</option>`+Object.keys(ex1.ends).map(k=>`<option>${k}</option>`).join("");
+  let left = ex1.starts.map((t,i)=>`<div class="item"><span class="nr">${i+1}</span>${t} <select class="g" data-ans="${enc([ex1.key[i]])}">${opts}</select><div class="sol">${i+1} – ${ex1.key[i]}: ${t} ${ex1.ends[ex1.key[i]]}</div></div>`).join("");
+  let right = Object.entries(ex1.ends).map(([k,v])=>`<div><b>${k}</b> ${v}</div>`).join("");
+  section(1,"IN DER STADT. Was passt zusammen?","Ordnen Sie zu: Wählen Sie bei jedem Satzanfang den passenden Buchstaben.",`<div class="match"><div>${left}</div><div class="endings">${right}</div></div>`);
+}
+
+/* ---------- 2 Lückensätze mit Auswahl ---------- */
+const words = ["sowohl","als auch","nicht nur","sondern auch","entweder","oder","weder","noch"];
+const ex2 = [
+  ["Im Hotel gibt es {} ein Schwimmbad {} eine Sauna.","(+/+)",["sowohl","als auch"]],
+  ["Morgen fahren wir {} ans Meer {} in die Berge.","(a oder b)",["entweder","oder"]],
+  ["Das Zimmer ist {} sauber {} ruhig.","(−/−)",["weder","noch"]],
+  ["Der Ausflug war {} lustig, {} sehr lehrreich.","(+/+, das 2. betont)",["nicht nur","sondern auch"]],
+  ["Am Strand kann man {} Liegestühle {} Sonnenschirme mieten.","(+/+)",["sowohl","als auch"]],
+  ["Leider gab es im Restaurant {} vegetarische Gerichte {} frische Salate.","(−/−)",["weder","noch"]],
+  ["Zum Flughafen fahren wir {} mit dem Taxi {} mit dem Zug.","(a oder b)",["entweder","oder"]],
+  ["Unsere Reiseleiterin spricht {} Deutsch, {} fließend Japanisch.","(+/+, das 2. betont)",["nicht nur","sondern auch"]]
+];
+{
+  const opts = `<option value="">–</option>`+words.map(w=>`<option>${w}</option>`).join("");
+  let body = `<p class="endings" style="margin:0 0 10px">sowohl … als auch · nicht nur … sondern auch · entweder … oder · weder … noch</p>`;
+  body += ex2.map(([t,tag,ans],i)=>{
+    let k=0; const html = t.replace(/\{\}/g,()=>`<select class="g" data-ans="${enc([ans[k++]])}">${opts}</select>`);
+    let m=0; const sol = t.replace(/\{\}/g,()=>`<b>${ans[m++]}</b>`);
+    return `<div class="item"><span class="nr">${i+1}</span>${html} <span class="tag">${tag}</span><div class="sol">${sol}</div></div>`;
+  }).join("");
+  section(2,"IM URLAUB. Ergänzen Sie die Sätze mit dem passenden Konnektor.","(+/+) = sowohl … als auch · (+/+, das 2. betont) = nicht nur …, sondern auch · (−/−) = weder … noch · (a oder b) = entweder … oder",body);
+}
+
+/* ---------- 3 sowohl/nicht nur ---------- */
+const ex3 = [
+  ["Am Wochenende • besuchen • wir • unsere Großeltern • unsere Freunde • .",
+   ["Am Wochenende besuchen wir sowohl unsere Großeltern als auch unsere Freunde.","Wir besuchen am Wochenende sowohl unsere Großeltern als auch unsere Freunde."],
+   ["Am Wochenende besuchen wir nicht nur unsere Großeltern, sondern auch unsere Freunde.","Wir besuchen am Wochenende nicht nur unsere Großeltern, sondern auch unsere Freunde."]],
+  ["Der Film • lustig • spannend • ist • .",["Der Film ist sowohl lustig als auch spannend."],["Der Film ist nicht nur lustig, sondern auch spannend."]],
+  ["Mein Bruder • spielt • Gitarre • Klavier • .",["Mein Bruder spielt sowohl Gitarre als auch Klavier."],["Mein Bruder spielt nicht nur Gitarre, sondern auch Klavier."]],
+  ["Das Hotel • war • modern • gemütlich • .",["Das Hotel war sowohl modern als auch gemütlich."],["Das Hotel war nicht nur modern, sondern auch gemütlich."]],
+  ["Sara • spricht • Arabisch • Französisch • .",["Sara spricht sowohl Arabisch als auch Französisch."],["Sara spricht nicht nur Arabisch, sondern auch Französisch."]],
+  ["Im Garten • wachsen • Tomaten • Kräuter • .",["Im Garten wachsen sowohl Tomaten als auch Kräuter.","Sowohl Tomaten als auch Kräuter wachsen im Garten."],["Im Garten wachsen nicht nur Tomaten, sondern auch Kräuter.","Nicht nur Tomaten, sondern auch Kräuter wachsen im Garten."]]
+];
+{
+  let body = `<div class="example">Beispiel: Ich • trinke • Saft • Wasser • .<br>→ Ich trinke sowohl Saft als auch Wasser. Ich trinke nicht nur Saft, sondern auch Wasser.</div>`;
+  body += ex3.map(([c,s,n],i)=>`<div class="item"><span class="nr">${i+1}</span><span class="cues">${c}</span>
+  <input type="text" class="g" placeholder="mit sowohl … als auch" data-ans="${enc(s)}">
+  <input type="text" class="g" placeholder="mit nicht nur …, sondern auch" data-ans="${enc(n)}">
+  <div class="sol">${s[0]}<br>${n[0]}</div></div>`).join("");
+  section(3,"Schreiben Sie Sätze mit <i>sowohl … als auch</i> und <i>nicht nur … sondern auch</i>.","Schreiben Sie zu jeder Vorgabe zwei Sätze wie im Beispiel.",body);
+}
+
+/* ---------- Satzbau-Helfer ---------- */
+function sentenceSection(n,title,instr,items,example){
+  let body = example ? `<div class="example">${example}</div>` : "";
+  body += items.map(([c,a],i)=>`<div class="item"><span class="nr">${i+1}</span><span class="cues">${c}</span>
+  <input type="text" class="g" placeholder="Ihr Satz …" data-ans="${enc(a)}"><div class="sol">${a[0]}</div></div>`).join("");
+  section(n,title,instr,body);
+}
+
+/* ---------- 4 entweder … oder ---------- */
+sentenceSection(4,"Schreiben Sie Sätze mit <i>entweder … oder</i>.","Bilden Sie aus den Vorgaben einen Satz.",[
+  ["Lena • möchte • Ärztin • Tierärztin • werden • .",["Lena möchte entweder Ärztin oder Tierärztin werden."]],
+  ["Wir • kochen • heute Abend • Pizza • Pasta • .",["Wir kochen heute Abend entweder Pizza oder Pasta.","Heute Abend kochen wir entweder Pizza oder Pasta."]],
+  ["Max • fährt • im Sommer • nach Spanien • nach Portugal • .",["Max fährt im Sommer entweder nach Spanien oder nach Portugal.","Im Sommer fährt Max entweder nach Spanien oder nach Portugal."]],
+  ["Die Konferenz • findet • in Wien • in Salzburg • statt • .",["Die Konferenz findet entweder in Wien oder in Salzburg statt."]],
+  ["Ich • lerne • am Abend • Englisch • Italienisch • .",["Ich lerne am Abend entweder Englisch oder Italienisch.","Am Abend lerne ich entweder Englisch oder Italienisch."]],
+  ["Nora • ruft • ihre Mutter • ihre Schwester • an • .",["Nora ruft entweder ihre Mutter oder ihre Schwester an."]]
+],"Beispiel: Tom • möchte • Tee • Kakao • trinken • . → Tom möchte entweder Tee oder Kakao trinken.");
+
+/* ---------- 5 weder … noch ---------- */
+sentenceSection(5,"Schreiben Sie Sätze mit <i>weder … noch</i>.","Bilden Sie aus den Vorgaben einen Satz. Der Satz danach hilft Ihnen beim Verstehen.",[
+  ["Jonas • isst • Fleisch • Fisch • . Er ist Vegetarier.",["Jonas isst weder Fleisch noch Fisch."]],
+  ["Clara • Ski fahren • Snowboard fahren • kann • . Sie war noch nie im Schnee.",["Clara kann weder Ski fahren noch Snowboard fahren.","Clara kann weder Ski noch Snowboard fahren."]],
+  ["Herr Berger • hat • ein Handy • einen Computer • . Er schreibt noch Briefe.",["Herr Berger hat weder ein Handy noch einen Computer."]],
+  ["Die Kinder • wollen • aufräumen • abwaschen • . Sie wollen nur spielen.",["Die Kinder wollen weder aufräumen noch abwaschen."]],
+  ["Meine Nachbarin • mag • Hunde • Katzen • . Sie hat Angst vor Tieren.",["Meine Nachbarin mag weder Hunde noch Katzen."]],
+  ["Im Dorf • gibt es • einen Supermarkt • eine Apotheke • . Man muss in die Stadt fahren.",["Im Dorf gibt es weder einen Supermarkt noch eine Apotheke.","Es gibt im Dorf weder einen Supermarkt noch eine Apotheke."]]
+],"Beispiel: Anna • trinkt • Milch • Kakao • . Nur Wasser. → Anna trinkt weder Milch noch Kakao.");
+
+/* ---------- 6 Bilder ---------- */
+const mark = {"+":"✅","-":"❌","?":"❓"};
+const ex6 = [
+  [[["🐕","einen Hund","+"],["🐈","eine Katze","+"]],"Familie Huber hat",["sowohl einen Hund als auch eine Katze"]],
+  [[["📖","lesen","?"],["🎮","Computer spielen","?"]],"Tim kann heute nur eines machen: Er kann",["entweder lesen oder Computer spielen"]],
+  [[["🚆","den Zug","-"],["✈️","das Flugzeug","-"],["🚲","Fahrrad",""]],"Paula fährt mit dem Rad. Sie nimmt",["weder den Zug noch das Flugzeug"]],
+  [[["🌧️","Regen","+"],["❄️","Schnee","+"]],"Morgen gibt es",["sowohl Regen als auch Schnee"]],
+  [[["☕","Kaffee","-"],["🍵","Tee","-"]],"Herr Novak trinkt",["weder Kaffee noch Tee"]],
+  [[["🏊","schwimmen","?"],["🎾","Tennis spielen","?"]],"Lea hat am Samstag nur für eine Sache Zeit: Sie geht",["entweder schwimmen oder Tennis spielen"]],
+  [[["🎸","Gitarre","+"],["🥁","Schlagzeug","+"]],"Ben spielt",["sowohl Gitarre als auch Schlagzeug"]],
+  [[["🍕","Pizza","?"],["🍔","Burger","?"]],"Wir bestellen heute",["entweder Pizza oder Burger"]],
+  [[["📺","einen Fernseher","-"],["📻","ein Radio","-"]],"In der Berghütte gibt es",["weder einen Fernseher noch ein Radio"]],
+  [[["☀️","sonnig","+"],["🌡️","warm","+"]],"Am Wochenende wird es",["sowohl sonnig als auch warm"]]
+];
+{
+  let body = `<p class="legend">✅ ✅ = sowohl … als auch &nbsp;·&nbsp; ❌ ❌ = weder … noch &nbsp;·&nbsp; ❓ ❓ = entweder … oder</p>
+  <div class="example">Beispiel: 🍎 Äpfel ✅ &nbsp; 🍌 Bananen ✅ → Sie isst sowohl Äpfel als auch Bananen.</div>`;
+  body += ex6.map(([pics,start,a],i)=>`<div class="item"><span class="nr">${i+1}</span>
+  <div class="pic">${pics.map(([e,l,m])=>`<div class="p"><div class="e">${e}${m?" "+mark[m]:""}</div><div class="l">${l}</div></div>`).join("")}</div>
+  ${start} … <input type="text" class="g" placeholder="Ergänzen Sie …" data-ans="${enc(a)}">
+  <div class="sol">${start} ${a[0]}.</div></div>`).join("");
+  section(6,"Schreiben Sie Sätze wie im Beispiel.","Schauen Sie die Bilder an und ergänzen Sie den Satz. Die Zeichen sagen Ihnen, welchen Konnektor Sie brauchen.",body);
+}
+
+/* ---------- 7 weder/sowohl ---------- */
+const ex7 = [
+  ["Ich miete diese Wohnung, denn sie ist","ruhig / billig","sowohl ruhig als auch billig"],
+  ["Ich kaufe diese Schuhe nicht, denn sie sind","bequem / schön","weder bequem noch schön"],
+  ["Ich esse keine Süßigkeiten,","Schokolade / Kuchen","weder Schokolade noch Kuchen"],
+  ["Ich empfehle diesen Film, denn er ist","lustig / klug","sowohl lustig als auch klug"],
+  ["Ich fahre nicht mit diesem Bus, denn er ist","pünktlich / sauber","weder pünktlich noch sauber"],
+  ["Ich buche dieses Hotel, denn es ist","zentral / preiswert","sowohl zentral als auch preiswert"],
+  ["Ich kaufe diesen Laptop nicht, denn er ist","schnell / leicht","weder schnell noch leicht"],
+  ["Ich mag diese Lehrerin, denn sie ist","geduldig / freundlich","sowohl geduldig als auch freundlich"],
+  ["Ich trinke nichts Süßes,","Saft / Limonade","weder Saft noch Limonade"],
+  ["Ich gehe gern in dieses Café, denn es ist","gemütlich / günstig","sowohl gemütlich als auch günstig"]
+];
+{
+  let body = ex7.map(([s,h,a],i)=>`<div class="item"><span class="nr">${i+1}</span>${s} … <span class="tag">(${h})</span>
+  <input type="text" class="g" placeholder="Ergänzen Sie …" data-ans="${enc([a])}"><div class="sol">${s} ${a}.</div></div>`).join("");
+  section(7,"Schreiben Sie Sätze mit <i>weder … noch</i> oder <i>sowohl … als auch</i>.","Ergänzen Sie den Satz mit den Wörtern in Klammern.",body);
+}
+
+/* ---------- 8 Lückentext ---------- */
+const POS = [["sowohl","als auch"],["nicht nur","sondern auch"]];
+const NEG = [["weder","noch"]];
+const ALT = [["entweder","oder"]];
+const ex8 = [
+  "Am Samstag wollten wir einen Ausflug machen. Wir konnten uns",{c:ALT},"für die Berge",{},"für den See entscheiden. Am Ende sind wir an den See gefahren, denn dort kann man",{c:POS},"schwimmen",{},"Boot fahren. Leider hatten wir",{c:NEG},"Sonnencreme",{},"Hüte dabei. Wir mussten",{c:ALT},"im Kiosk teure Sonnencreme kaufen",{},"im Schatten bleiben. Wir sind im Schatten geblieben. Mittags hatten wir Hunger, aber dort gab es",{c:NEG},"ein Restaurant",{},"einen Imbiss. Zum Glück hatte meine Freundin",{c:POS},"Brot",{},"Obst eingepackt. Am Nachmittag haben wir",{c:POS},"Enten",{},"Schwäne gesehen. Dann hatten wir zwei Ideen: Wir konnten",{c:ALT},"noch eine Runde um den See gehen",{},"ein Eis essen. Wir haben uns für das Eis entschieden. Das Eis war",{c:POS},"billig",{},"richtig lecker. Danach wollten wir",{c:NEG},"wandern",{},"noch einmal schwimmen – wir waren zu müde. Auf dem Heimweg waren wir",{c:POS},"erschöpft",{},"sehr glücklich."
+];
+{
+  let html="", sol="", p=0, combos=null;
+  ex8.forEach(part=>{
+    if(typeof part==="string"){ html+=" "+part+" "; sol+=" "+part+" "; return; }
+    if(part.c){ p++; combos=part.c;
+      html+=`<input type="text" class="pg inl" data-p="${p}" data-combos="${enc(combos)}" placeholder="${p}a">`;
+      sol+=`<b>${combos.map(c=>c[0]).join(" / ")}</b>`;
+    } else {
+      html+=`<input type="text" class="pg inl" data-p="${p}" placeholder="${p}b"><sup>${p}</sup>`;
+      sol+=`<b>${combos.map(c=>c[1]).join(" / ")}</b><sup>${p}</sup>`;
+    }
+  });
+  section(8,"AUSFLUG AN DEN SEE. Ergänzen Sie die Doppelkonnektoren.","Es gibt manchmal mehrere Möglichkeiten. Jede Nummer ist ein Konnektorpaar (a + b). Kommas brauchen Sie nicht einzutippen.",
+    `<div class="text8">${html}</div><div class="sol">${sol}</div>`);
+}
+</script>
+</body>
+</html>
