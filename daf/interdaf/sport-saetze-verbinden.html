@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sport & Sätze verbinden</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --gelb:#FFD60A;
+    --gelb-tief:#FFC300;
+    --creme:#FFFBE6;
+    --pink:#B0125B;
+    --pink-dunkel:#8A0A45;
+    --pink-hell:#F8D3E4;
+    --gruen:#1E8E4E;
+    --gruen-hell:#DDF5E6;
+    --rot:#C62828;
+    --rot-hell:#FDE3E3;
+    --text:#2B1A22;
+    --schatten:0 6px 0 rgba(138,10,69,.25);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--gelb);
+    color:var(--text);
+    font-family:"Nunito",system-ui,sans-serif;
+    font-size:17px;
+    line-height:1.55;
+    overflow-x:hidden;
+    min-height:100vh;
+  }
+  /* ---------- Bubbles ---------- */
+  #bubbles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+  .bubble{
+    position:absolute;border-radius:50%;
+    background:radial-gradient(circle at 32% 30%, #E0457F 0%, var(--pink) 45%, var(--pink-dunkel) 100%);
+    opacity:.85;
+    animation:schweben linear infinite;
+    box-shadow:inset -6px -8px 0 rgba(0,0,0,.12);
+  }
+  .bubble::after{ /* Glanzpunkt */
+    content:"";position:absolute;top:16%;left:20%;width:22%;height:22%;
+    border-radius:50%;background:rgba(255,255,255,.55);
+  }
+  .bubble.face::before{ /* Augen + Mund */
+    content:"";position:absolute;left:50%;top:44%;
+    width:9%;height:9%;border-radius:50%;background:#fff;
+    transform:translateX(-170%);
+    box-shadow: calc(var(--s) * .26) 0 0 #fff;
+  }
+  .bubble.face .mund{
+    position:absolute;left:34%;top:56%;width:32%;height:16%;
+    border-bottom:3px solid #fff;border-radius:0 0 50% 50%;
+  }
+  .bubble.ring{background:transparent;border:6px solid var(--pink);box-shadow:none;opacity:.6}
+  .bubble.ring::after{display:none}
+  @keyframes schweben{
+    0%{transform:translateY(0) translateX(0) scale(1)}
+    25%{transform:translateY(-30px) translateX(12px) scale(1.04)}
+    50%{transform:translateY(-6px) translateX(-10px) scale(.97)}
+    75%{transform:translateY(-34px) translateX(6px) scale(1.03)}
+    100%{transform:translateY(0) translateX(0) scale(1)}
+  }
+  @media (prefers-reduced-motion: reduce){ .bubble{animation:none} }
+
+  /* ---------- Layout ---------- */
+  main{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:28px 16px 80px}
+  header{text-align:center;padding:24px 8px 10px}
+  h1{
+    font-family:"Fredoka",sans-serif;font-weight:700;
+    font-size:clamp(2.1rem,6vw,3.6rem);line-height:1.05;margin:0;
+    color:var(--pink-dunkel);
+    text-shadow:3px 3px 0 #fff, 6px 6px 0 rgba(138,10,69,.18);
+    letter-spacing:.5px;
+  }
+  .unter{
+    font-family:"Fredoka",sans-serif;font-size:clamp(1.05rem,2.6vw,1.35rem);
+    color:var(--pink-dunkel);margin:12px auto 0;max-width:720px;font-weight:500
+  }
+  .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:18px 0 6px}
+  .chip{
+    background:var(--pink);color:#fff;font-family:"Fredoka",sans-serif;font-weight:600;
+    padding:6px 14px;border-radius:999px;font-size:.95rem;box-shadow:0 3px 0 var(--pink-dunkel)
+  }
+  nav.tabs{
+    position:sticky;top:8px;z-index:5;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;
+    margin:22px auto 26px;padding:8px;background:rgba(255,251,230,.92);border-radius:999px;
+    border:3px solid var(--pink);max-width:max-content;box-shadow:var(--schatten)
+  }
+  nav.tabs button{
+    font-family:"Fredoka",sans-serif;font-weight:600;font-size:1rem;border:0;cursor:pointer;
+    padding:8px 16px;border-radius:999px;background:transparent;color:var(--pink-dunkel)
+  }
+  nav.tabs button.aktiv{background:var(--pink);color:#fff}
+  .ansicht{display:none}
+  .ansicht.aktiv{display:block}
+
+  .karte{
+    background:var(--creme);border:3px solid var(--pink);border-radius:26px;
+    padding:22px 22px;margin:0 0 22px;box-shadow:var(--schatten)
+  }
+  h2{font-family:"Fredoka",sans-serif;color:var(--pink-dunkel);font-size:1.7rem;margin:0 0 10px;line-height:1.2}
+  h3{font-family:"Fredoka",sans-serif;color:var(--pink-dunkel);font-size:1.25rem;margin:0 0 6px}
+  p{margin:0 0 10px}
+  .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;margin:14px 0}
+  .bed{
+    background:#fff;border-radius:20px;padding:16px 16px 12px;border:3px dashed var(--pink);position:relative
+  }
+  .bed .frage{
+    display:inline-block;background:var(--pink);color:#fff;font-family:"Fredoka",sans-serif;
+    border-radius:999px;padding:2px 12px;font-weight:600;margin-bottom:8px;font-size:.95rem
+  }
+  .paar{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+  .paar span{
+    flex:1 1 120px;background:var(--pink-hell);border-radius:14px;padding:8px 10px;font-size:.92rem
+  }
+  .paar b{display:block;color:var(--pink-dunkel);font-family:"Fredoka",sans-serif;font-size:1.05rem}
+  .bsp{font-size:.95rem;background:#FFF3B0;border-radius:12px;padding:8px 10px;margin-top:6px}
+  .bsp em{font-style:normal;font-weight:800;color:var(--pink-dunkel)}
+  .weg{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:10px}
+  .schritt{background:#fff;border-radius:18px;padding:12px 14px;border-left:8px solid var(--pink)}
+  .schritt .nr{
+    display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;
+    background:var(--pink);color:#fff;font-family:"Fredoka",sans-serif;font-weight:700;margin-right:6px
+  }
+  .fallen{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:12px;margin-top:10px}
+  .falle{background:#fff;border-radius:18px;padding:12px 14px;border:3px solid var(--gelb-tief)}
+  .falle h4{margin:0 0 4px;font-family:"Fredoka",sans-serif;color:var(--pink-dunkel);font-size:1.05rem}
+  .falle p{font-size:.95rem;margin:0 0 4px}
+  .pfeil{color:var(--pink);font-weight:800}
+
+  /* ---------- Fortschritt ---------- */
+  .fortschritt{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .balken{flex:1 1 240px;height:22px;background:#fff;border-radius:999px;border:3px solid var(--pink);overflow:hidden}
+  .balken div{height:100%;width:0;background:repeating-linear-gradient(45deg,var(--pink) 0 14px,#D1306F 14px 28px);transition:width .5s}
+  .zahl{font-family:"Fredoka",sans-serif;font-weight:700;color:var(--pink-dunkel);font-size:1.15rem}
+
+  /* ---------- Übungen ---------- */
+  .teil-kopf{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;justify-content:space-between}
+  .teil-kopf p{max-width:620px}
+  .item{
+    background:#fff;border-radius:20px;padding:14px 14px 12px;margin:12px 0;
+    border:2px solid #F3C6DA;transition:border-color .3s, background .3s
+  }
+  .item.ok{border-color:var(--gruen);background:#F6FFF9}
+  .item.falsch{border-color:var(--rot)}
+  .zeile{display:flex;gap:12px;align-items:flex-start}
+  .nummer{
+    flex:0 0 auto;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;
+    background:var(--pink);color:#fff;font-family:"Fredoka",sans-serif;font-weight:700;font-size:1rem
+  }
+  .item.ok .nummer{background:var(--gruen)}
+  .vorgabe{flex:1;font-weight:600;padding-top:6px}
+  .vorgabe .dot{color:var(--pink);font-weight:800;margin:0 6px}
+  textarea{
+    width:100%;margin-top:10px;border:3px solid #F3C6DA;border-radius:14px;padding:10px 12px;
+    font-family:inherit;font-size:1rem;resize:vertical;min-height:52px;background:#FFFEF7;color:var(--text)
+  }
+  textarea:focus{outline:none;border-color:var(--pink);box-shadow:0 0 0 4px rgba(176,18,91,.15)}
+  .knoepfe{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .btn{
+    font-family:"Fredoka",sans-serif;font-weight:600;font-size:.98rem;cursor:pointer;
+    border:0;border-radius:999px;padding:8px 16px;background:var(--pink);color:#fff;
+    box-shadow:0 4px 0 var(--pink-dunkel);transition:transform .08s
+  }
+  .btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--pink-dunkel)}
+  .btn.hell{background:#fff;color:var(--pink-dunkel);border:2px solid var(--pink);box-shadow:0 4px 0 #E8A8C4}
+  .btn.klein{font-size:.88rem;padding:6px 12px}
+  .feedback{margin-top:10px;border-radius:14px;padding:10px 12px;display:none;font-size:.97rem}
+  .feedback.zeigen{display:block}
+  .feedback.gut{background:var(--gruen-hell);color:#0E5A2F}
+  .feedback.schlecht{background:var(--rot-hell);color:#7A1414}
+  .feedback.info{background:var(--pink-hell);color:var(--pink-dunkel)}
+  .loesung{background:#FFF3B0;border-radius:12px;padding:6px 10px;margin:6px 0 0;color:var(--text)}
+  .loesung b{color:var(--pink-dunkel)}
+
+  /* ---------- Quiz ---------- */
+  .modus{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}
+  .modus .btn.aus{background:#fff;color:var(--pink-dunkel);border:2px solid var(--pink);box-shadow:0 4px 0 #E8A8C4}
+  .quiz-box{background:#fff;border-radius:22px;padding:18px;border:3px solid var(--pink)}
+  .quiz-top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-family:"Fredoka",sans-serif;color:var(--pink-dunkel);font-weight:600}
+  .quiz-vorgabe{background:var(--pink-hell);border-radius:14px;padding:10px 12px;margin:12px 0;font-size:.97rem}
+  .quiz-satz{font-size:1.2rem;font-weight:700;margin:10px 0 14px;line-height:1.5}
+  .gap{display:inline-block;min-width:90px;border-bottom:4px solid var(--pink);text-align:center;color:var(--pink-dunkel)}
+  .optionen{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+  .opt{
+    font-family:"Fredoka",sans-serif;font-weight:600;font-size:1.05rem;cursor:pointer;
+    border:3px solid var(--pink);background:#fff;color:var(--pink-dunkel);border-radius:16px;padding:12px 8px
+  }
+  .opt:hover:not(:disabled){background:var(--pink-hell)}
+  .opt.richtig{background:var(--gruen);border-color:var(--gruen);color:#fff}
+  .opt.falsch{background:var(--rot);border-color:var(--rot);color:#fff}
+  .opt:disabled{cursor:default}
+  .ende{text-align:center;padding:10px}
+  .ende .gross{font-family:"Fredoka",sans-serif;font-size:3rem;color:var(--pink-dunkel);font-weight:700}
+
+  footer{text-align:center;margin-top:30px;font-family:"Fredoka",sans-serif;color:var(--pink-dunkel)}
+  @media (max-width:560px){
+    body{font-size:16px}
+    .karte{padding:16px 14px;border-radius:20px}
+    nav.tabs{border-radius:22px}
+    .nummer{width:34px;height:34px;font-size:.9rem}
+  }
+</style>
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<main>
+  <header>
+    <h1>⚽ Sport &amp; Sätze verbinden 🚴‍♀️</h1>
+    <p class="unter">Üben Sie, bis es sitzt: Zweck, Ersatz und das, was nicht passiert – mit einem oder mit zwei Subjekten.</p>
+    <div class="chips">
+      <span class="chip">um … zu</span><span class="chip">damit</span>
+      <span class="chip">ohne … zu</span><span class="chip">ohne dass</span>
+      <span class="chip">anstatt … zu</span><span class="chip">anstatt dass</span>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="Bereiche">
+    <button data-ziel="regeln" class="aktiv">📘 Regeln</button>
+    <button data-ziel="uebungen">✍️ 150 Sätze</button>
+    <button data-ziel="quiz">⚡ Blitz-Quiz</button>
+  </nav>
+
+  <!-- ================== REGELN ================== -->
+  <section id="regeln" class="ansicht aktiv">
+    <div class="karte">
+      <h2>Drei Bedeutungen – sechs Formen</h2>
+      <p>Jedes Paar hat eine eigene Bedeutung. Innerhalb des Paares entscheidet nur eine Frage: <strong>Ist das Subjekt in beiden Sätzen gleich oder verschieden?</strong> Bei gleichem Subjekt nehmen Sie, wo es möglich ist, die Infinitivkonstruktion mit <em>zu</em>. Bei verschiedenen Subjekten brauchen Sie einen Nebensatz mit konjugiertem Verb am Ende.</p>
+
+      <div class="grid3">
+        <div class="bed">
+          <span class="frage">Wozu? Mit welchem Ziel?</span>
+          <h3>Zweck / Ziel</h3>
+          <div class="paar">
+            <span><b>um … zu</b>gleiches Subjekt</span>
+            <span><b>damit</b>verschiedene Subjekte</span>
+          </div>
+          <div class="bsp">Ich treibe Sport. Ich möchte fit bleiben.<br><span class="pfeil">→</span> Ich treibe Sport, <em>um</em> fit <em>zu</em> bleiben.</div>
+          <div class="bsp">Ich melde mein Kind an. Mein Kind soll Sport treiben.<br><span class="pfeil">→</span> …, <em>damit</em> mein Kind Sport treibt.</div>
+        </div>
+        <div class="bed">
+          <span class="frage">Was passiert (erwartet) NICHT?</span>
+          <h3>Fehlende Begleithandlung</h3>
+          <div class="paar">
+            <span><b>ohne … zu</b>gleiches Subjekt</span>
+            <span><b>ohne dass</b>verschiedene Subjekte</span>
+          </div>
+          <div class="bsp">Ich jogge. Ich mache keine Pause.<br><span class="pfeil">→</span> Ich jogge, <em>ohne</em> eine Pause <em>zu</em> machen.</div>
+          <div class="bsp">Das Rad steht im Keller. Mein Mann benutzt es nicht.<br><span class="pfeil">→</span> …, <em>ohne dass</em> mein Mann es benutzt.</div>
+        </div>
+        <div class="bed">
+          <span class="frage">Was passiert stattdessen?</span>
+          <h3>Ersatz / Alternative</h3>
+          <div class="paar">
+            <span><b>anstatt … zu</b>gleiches Subjekt</span>
+            <span><b>anstatt dass</b>verschiedene Subjekte</span>
+          </div>
+          <div class="bsp">Ich schwimme. Ich jogge nicht im Park.<br><span class="pfeil">→</span> Ich schwimme, <em>anstatt</em> im Park <em>zu</em> joggen.</div>
+          <div class="bsp">Ich trage die Tasche. Mein Mann trägt sie nicht.<br><span class="pfeil">→</span> …, <em>anstatt dass</em> mein Mann sie trägt.</div>
+        </div>
+      </div>
+      <p style="font-size:.95rem">💡 <strong>statt</strong> und <strong>anstatt</strong> bedeuten dasselbe – beide Formen sind richtig.</p>
+    </div>
+
+    <div class="karte">
+      <h2>Ihr Entscheidungsweg in drei Schritten</h2>
+      <div class="weg">
+        <div class="schritt"><span class="nr">1</span><strong>Bedeutung klären.</strong> Ist der zweite Satz ein Ziel (→ um/damit), etwas, das ausbleibt (→ ohne), oder die eigentlich erwartete Alternative (→ anstatt)?</div>
+        <div class="schritt"><span class="nr">2</span><strong>Subjekte vergleichen.</strong> Gleiches Subjekt → Infinitiv mit <em>zu</em>. Verschiedene Subjekte → <em>damit / ohne dass / anstatt dass</em> + Verb am Ende.</div>
+        <div class="schritt"><span class="nr">3</span><strong>Umbauen.</strong> Subjekt streichen (bei <em>zu</em>), Verneinung bei <em>ohne/anstatt</em> streichen, Modalverb prüfen, Komma setzen.</div>
+      </div>
+    </div>
+
+    <div class="karte">
+      <h2>Die typischen Fallen 🪤</h2>
+      <div class="fallen">
+        <div class="falle">
+          <h4>1. Die Verneinung verschwindet bei ohne und anstatt</h4>
+          <p>Das Wort <em>ohne</em> bzw. <em>anstatt</em> trägt die Verneinung schon in sich.</p>
+          <p><span class="pfeil">kein</span> → ein / nichts: ich mache <s>keine</s> Pause → ohne <strong>eine</strong> Pause zu machen</p>
+          <p><span class="pfeil">nie</span> → jemals · <span class="pfeil">niemand</span> → jemand · <span class="pfeil">nichts</span> → etwas</p>
+        </div>
+        <div class="falle">
+          <h4>2. Bei damit bleibt die Verneinung</h4>
+          <p>Ein negatives Ziel bleibt negativ: <em>Meine Füße sollen nicht wehtun.</em></p>
+          <p><span class="pfeil">→</span> Ich kaufe Laufschuhe, damit meine Füße <strong>nicht</strong> wehtun.</p>
+        </div>
+        <div class="falle">
+          <h4>3. wollen, möchten, sollen fallen weg</h4>
+          <p>Das Ziel steckt schon in <em>um/damit</em>: <em>Ich will stärker werden</em> → um stärker zu werden. <em>Er soll …</em> → damit er …</p>
+          <p><strong>können / müssen</strong> bleiben meist: um jederzeit trainieren <strong>zu können</strong>.</p>
+        </div>
+        <div class="falle">
+          <h4>4. Es ist vorher passiert? Infinitiv Perfekt!</h4>
+          <p>Er <em>hat</em> die Wetterbedingungen nicht geprüft → ohne die Wetterbedingungen <strong>geprüft zu haben</strong>.</p>
+          <p>Er <em>ist</em> nie stehen geblieben → ohne jemals <strong>stehen geblieben zu sein</strong>.</p>
+        </div>
+        <div class="falle">
+          <h4>5. Trennbare Verben: zu steht in der Mitte</h4>
+          <p>abnehmen → ab<strong>zu</strong>nehmen · teilnehmen → teil<strong>zu</strong>nehmen · aufbauen → auf<strong>zu</strong>bauen · vorbereiten → vor<strong>zu</strong>bereiten</p>
+        </div>
+        <div class="falle">
+          <h4>6. Das Komma</h4>
+          <p>Vor <em>um, damit, ohne, anstatt</em> steht ein Komma, wenn sie einen Satzteil mit Verb einleiten: Ich treibe Sport<strong>,</strong> um fit zu bleiben.</p>
+          <p>Und: <em>damit</em> geht auch bei gleichem Subjekt, aber <em>um … zu</em> ist dann die elegantere Wahl.</p>
+        </div>
+      </div>
+      <div class="knoepfe" style="margin-top:16px"><button class="btn" data-spring="uebungen">Los geht's mit den Sätzen →</button></div>
+    </div>
+  </section>
+
+  <!-- ================== ÜBUNGEN ================== -->
+  <section id="uebungen" class="ansicht">
+    <div class="karte">
+      <div class="fortschritt">
+        <span class="zahl" id="zaehler">0 / 150 richtig</span>
+        <div class="balken" aria-hidden="true"><div id="balken"></div></div>
+        <button class="btn hell klein" id="reset">Alles zurücksetzen</button>
+      </div>
+      <p style="margin-top:12px;font-size:.95rem">Verbinden Sie die Sätze. Benutzen Sie <strong>um … zu, ohne … zu, anstatt … zu</strong>, wo es möglich ist, sonst <strong>damit, ohne dass, anstatt dass</strong>. Schreiben Sie den ganzen Satz und drücken Sie <strong>Enter</strong> oder „Prüfen“. Haben Sie eine andere richtige Wortstellung gewählt (z. B. den Nebensatz am Anfang)? Dann vergleichen Sie mit der Lösung und markieren Sie Ihre Variante selbst als richtig.</p>
+    </div>
+    <div id="teile"></div>
+  </section>
+
+  <!-- ================== QUIZ ================== -->
+  <section id="quiz" class="ansicht">
+    <div class="karte">
+      <h2>⚡ Blitz-Quiz</h2>
+      <p>Zehn Fragen pro Runde, immer neu gemischt. Im Lücken-Modus wählen Sie das passende Verbindungswort, im Bedeutungs-Modus erkennen Sie, was der Satz ausdrückt.</p>
+      <div class="modus">
+        <button class="btn" id="m-luecke">Lücken-Blitz</button>
+        <button class="btn aus" id="m-bedeutung">Bedeutungs-Blitz</button>
+      </div>
+      <div class="quiz-box" id="quizbox"></div>
+    </div>
+  </section>
+
+  <footer>Viel Spaß beim Üben – und bleiben Sie sportlich! 💪</footer>
+</main>
+
+<script>
+/* ============ Daten ============ */
+const D = [];
+function I(n, s, a, c, o){ D.push(Object.assign({n, s:s.split(" • "), a, c}, o||{})); }
+
+// ---------- Teil A: Original-Beispiele 1–9 ----------
+I(1,"Mein Mann sieht Sport im Fernsehen • er treibt keinen Sport",["Mein Mann sieht Sport im Fernsehen, anstatt selbst Sport zu treiben.","Mein Mann sieht Sport im Fernsehen, anstatt Sport zu treiben.","Mein Mann sieht Sport im Fernsehen, ohne selbst Sport zu treiben.","Mein Mann sieht Sport im Fernsehen, ohne Sport zu treiben."],"anstatt",{nq:1,x:"Hier passen anstatt … zu und ohne … zu: Beides ist richtig."});
+I(2,"Ich treibe Sport • ich möchte fit bleiben",["Ich treibe Sport, um fit zu bleiben."],"um");
+I(3,"Ich mache jeden Tag Fitnesstraining • ich besuche kein Fitnessstudio",["Ich mache jeden Tag Fitnesstraining, ohne ein Fitnessstudio zu besuchen.","Ich mache jeden Tag Fitnesstraining, anstatt ein Fitnessstudio zu besuchen."],"ohne",{nq:1,x:"Aus „kein Fitnessstudio“ wird „ein Fitnessstudio“."});
+I(4,"Ich jogge seit 60 Minuten • ich mache keine Pause",["Ich jogge seit 60 Minuten, ohne eine Pause zu machen.","Ich jogge seit 60 Minuten, ohne Pause zu machen."],"ohne");
+I(5,"Morgens gehe ich schwimmen • ich jogge nicht im Park",["Morgens gehe ich schwimmen, anstatt im Park zu joggen."],"anstatt");
+I(6,"Ich melde mein Kind im Sportverein an • mein Kind soll Sport treiben",["Ich melde mein Kind im Sportverein an, damit es Sport treibt.","Ich melde mein Kind im Sportverein an, damit mein Kind Sport treibt."],"damit");
+I(7,"Ich kaufe meinem Mann ein Fahrrad • er fährt dann nicht jeden Tag mit dem Auto",["Ich kaufe meinem Mann ein Fahrrad, damit er nicht jeden Tag mit dem Auto fährt.","Ich kaufe meinem Mann ein Fahrrad, damit er dann nicht jeden Tag mit dem Auto fährt."],"damit",{x:"Bei damit bleibt das „nicht“ stehen!"});
+I(8,"Das neue Fahrrad steht im Keller • mein Mann benutzt es nicht",["Das neue Fahrrad steht im Keller, ohne dass mein Mann es benutzt."],"ohnedass");
+I(9,"Ich würde gern mal wieder mit meinem Mann tanzen • ich will Spaß haben",["Ich würde gern mal wieder mit meinem Mann tanzen, um Spaß zu haben."],"um");
+// ---------- Ähnlich wie Original 10–29 ----------
+I(10,"Ich schaue Fußball im Stadion • ich spiele nicht selber mit",["Ich schaue Fußball im Stadion, ohne selbst mitzuspielen.","Ich schaue Fußball im Stadion, anstatt selbst mitzuspielen.","Ich schaue Fußball im Stadion, ohne mitzuspielen.","Ich schaue Fußball im Stadion, anstatt mitzuspielen."],"ohne",{nq:1,x:"mitspielen ist trennbar: mitzuspielen."});
+I(11,"Wir gehen ins Fitnessstudio • wir wollen Muskeln aufbauen",["Wir gehen ins Fitnessstudio, um Muskeln aufzubauen."],"um",{x:"aufbauen ist trennbar: aufzubauen."});
+I(12,"Meine Frau macht Yoga • sie geht nicht ins Krafttraining",["Meine Frau macht Yoga, anstatt ins Krafttraining zu gehen."],"anstatt");
+I(13,"Ich spiele Tennis • ich trainiere nicht für Turniere",["Ich spiele Tennis, ohne für Turniere zu trainieren."],"ohne");
+I(14,"Die Kinder schwimmen im See • sie benutzen das Hallenbad nicht",["Die Kinder schwimmen im See, anstatt das Hallenbad zu benutzen.","Die Kinder schwimmen im See, ohne das Hallenbad zu benutzen."],"anstatt",{nq:1});
+I(15,"Er läuft Marathon • er möchte seine Ausdauer verbessern",["Er läuft Marathon, um seine Ausdauer zu verbessern."],"um");
+I(16,"Ich kaufe neue Laufschuhe • meine Füße sollen nicht wehtun",["Ich kaufe neue Laufschuhe, damit meine Füße nicht wehtun.","Ich kaufe neue Laufschuhe, damit mir die Füße nicht wehtun."],"damit");
+I(17,"Wir fahren Ski • wir nehmen keinen Skilehrer",["Wir fahren Ski, ohne einen Skilehrer zu nehmen."],"ohne");
+I(18,"Sie macht Pilates • sie will flexibler werden",["Sie macht Pilates, um flexibler zu werden."],"um");
+I(19,"Ich spiele Volleyball • ich gehe nicht zum Basketball",["Ich spiele Volleyball, anstatt zum Basketball zu gehen."],"anstatt");
+I(20,"Die Familie wandert in den Bergen • sie fährt nicht mit dem Auto hoch",["Die Familie wandert in den Bergen, anstatt mit dem Auto hochzufahren.","Die Familie wandert in den Bergen, ohne mit dem Auto hochzufahren."],"anstatt",{nq:1,x:"hochfahren ist trennbar: hochzufahren."});
+I(21,"Er trainiert im Verein • er möchte an Wettkämpfen teilnehmen",["Er trainiert im Verein, um an Wettkämpfen teilzunehmen."],"um");
+I(22,"Wir spielen Badminton • wir reservieren keinen Platz",["Wir spielen Badminton, ohne einen Platz zu reservieren."],"ohne");
+I(23,"Ich mache Krafttraining • ich will stärker werden",["Ich mache Krafttraining, um stärker zu werden."],"um");
+I(24,"Sie läuft jeden Morgen • sie frühstückt nicht vorher",["Sie läuft jeden Morgen, ohne vorher zu frühstücken."],"ohne");
+I(25,"Wir gehen klettern • wir benutzen keine Sicherung",["Wir gehen klettern, ohne eine Sicherung zu benutzen."],"ohne");
+I(26,"Er spielt Golf • er nimmt keinen Unterricht",["Er spielt Golf, ohne Unterricht zu nehmen."],"ohne");
+I(27,"Ich fahre mit dem Rad zur Arbeit • ich möchte umweltfreundlich sein",["Ich fahre mit dem Rad zur Arbeit, um umweltfreundlich zu sein."],"um");
+I(28,"Die Mannschaft trainiert hart • sie will das Finale erreichen",["Die Mannschaft trainiert hart, um das Finale zu erreichen."],"um");
+I(29,"Wir gehen segeln • wir chartern kein Boot",["Wir gehen segeln, ohne ein Boot zu chartern."],"ohne");
+// ---------- Längere Sätze 30–39 ----------
+I(30,"Meine Schwester geht dreimal pro Woche ins Fitnessstudio • sie möchte bis zum Sommer zehn Kilo abnehmen",["Meine Schwester geht dreimal pro Woche ins Fitnessstudio, um bis zum Sommer zehn Kilo abzunehmen."],"um");
+I(31,"Der Trainer erklärt die neuen Übungen sehr genau • die Spieler sollen keine Fehler machen",["Der Trainer erklärt die neuen Übungen sehr genau, damit die Spieler keine Fehler machen."],"damit");
+I(32,"Wir schauen uns das Spiel im Fernsehen an • wir fahren nicht extra ins Stadion",["Wir schauen uns das Spiel im Fernsehen an, anstatt extra ins Stadion zu fahren.","Wir schauen uns das Spiel im Fernsehen an, ohne extra ins Stadion zu fahren."],"anstatt",{nq:1});
+I(33,"Die Läuferin trainiert täglich zwei Stunden • sie bereitet sich auf den Marathon vor",["Die Läuferin trainiert täglich zwei Stunden, um sich auf den Marathon vorzubereiten."],"um");
+I(34,"Ich spiele seit Jahren regelmäßig Tennis • ich nehme keinen professionellen Unterricht",["Ich spiele seit Jahren regelmäßig Tennis, ohne professionellen Unterricht zu nehmen."],"ohne");
+I(35,"Die Kinder üben fleißig ihre Schwimmtechnik • sie wollen das Seepferdchen-Abzeichen bekommen",["Die Kinder üben fleißig ihre Schwimmtechnik, um das Seepferdchen-Abzeichen zu bekommen."],"um");
+I(36,"Er geht jeden Abend nach der Arbeit joggen • er entspannt sich nicht zu Hause",["Er geht jeden Abend nach der Arbeit joggen, anstatt sich zu Hause zu entspannen."],"anstatt");
+I(37,"Wir melden uns für den Tanzkurs an • wir möchten für unsere Hochzeit tanzen lernen",["Wir melden uns für den Tanzkurs an, um für unsere Hochzeit tanzen zu lernen."],"um");
+I(38,"Die Fußballmannschaft spielt ohne ihren besten Stürmer • der Trainer stellt die Taktik nicht um",["Die Fußballmannschaft spielt ohne ihren besten Stürmer, ohne dass der Trainer die Taktik umstellt."],"ohnedass");
+I(39,"Ich kaufe mir teure Sportkleidung • ich möchte beim Training gut aussehen",["Ich kaufe mir teure Sportkleidung, um beim Training gut auszusehen."],"um");
+// ---------- Komplexere Strukturen 40–50 ----------
+I(40,"Der Skifahrer fährt die schwierige Piste hinunter • er hat vorher nicht die Wetterbedingungen geprüft • er riskiert einen Unfall",["Der Skifahrer fährt die schwierige Piste hinunter, ohne vorher die Wetterbedingungen geprüft zu haben, und riskiert einen Unfall.","Der Skifahrer fährt die schwierige Piste hinunter, ohne vorher die Wetterbedingungen zu prüfen, und riskiert einen Unfall.","Der Skifahrer fährt die schwierige Piste hinunter, ohne die Wetterbedingungen vorher geprüft zu haben, und riskiert einen Unfall."],"ohne",{m:1,x:"„hat geprüft“ → Infinitiv Perfekt: geprüft zu haben. Den dritten Satz verbinden Sie mit „und“."});
+I(41,"Die Tennisspielerin nimmt an internationalen Turnieren teil • sie hat noch nie einen Profitrainer gehabt • sie will trotzdem erfolgreich sein",["Die Tennisspielerin nimmt an internationalen Turnieren teil, ohne jemals einen Profitrainer gehabt zu haben, und will trotzdem erfolgreich sein.","Die Tennisspielerin nimmt an internationalen Turnieren teil, um erfolgreich zu sein, ohne jemals einen Profitrainer gehabt zu haben.","Die Tennisspielerin nimmt an internationalen Turnieren teil, um erfolgreich zu sein, ohne je einen Profitrainer gehabt zu haben."],"ohne",{m:1,x:"„noch nie“ → „ohne jemals“; „hat gehabt“ → gehabt zu haben."});
+I(42,"Wir organisieren ein Fußballturnier für die ganze Familie • die Kinder sollen Teamgeist lernen • niemand soll sich ausgeschlossen fühlen",["Wir organisieren ein Fußballturnier für die ganze Familie, damit die Kinder Teamgeist lernen, ohne dass sich jemand ausgeschlossen fühlt.","Wir organisieren ein Fußballturnier für die ganze Familie, damit die Kinder Teamgeist lernen, ohne dass jemand sich ausgeschlossen fühlt.","Wir organisieren ein Fußballturnier für die ganze Familie, damit die Kinder Teamgeist lernen und sich niemand ausgeschlossen fühlt.","Wir organisieren ein Fußballturnier für die ganze Familie, damit die Kinder Teamgeist lernen und niemand sich ausgeschlossen fühlt."],"damit+ohnedass",{m:1,x:"Mit „ohne dass“ wird aus „niemand“ → „jemand“."});
+I(43,"Der Schwimmer trainiert für die Olympischen Spiele • er verzichtet auf alle Partys • er möchte seine Träume verwirklichen",["Der Schwimmer trainiert für die Olympischen Spiele und verzichtet auf alle Partys, um seine Träume zu verwirklichen.","Der Schwimmer verzichtet auf alle Partys und trainiert für die Olympischen Spiele, um seine Träume zu verwirklichen."],"um",{m:1,x:"Die ersten beiden Sätze verbinden Sie mit „und“, das Ziel mit „um … zu“."});
+I(44,"Die Wandergruppe startet früh am Morgen • sie will den Gipfel vor dem Gewitter erreichen • sie informiert sich nicht über die Wetterprognose",["Die Wandergruppe startet früh am Morgen, um den Gipfel vor dem Gewitter zu erreichen, ohne sich über die Wetterprognose zu informieren.","Die Wandergruppe startet früh am Morgen, um den Gipfel vor dem Gewitter zu erreichen, ohne sich über die Wetterprognose informiert zu haben."],"um+ohne",{m:1});
+I(45,"Ich gehe regelmäßig zum Yoga • ich entspanne mich nach der stressigen Arbeit • ich nehme keine Schmerzmittel gegen Rückenschmerzen",["Ich gehe regelmäßig zum Yoga, um mich nach der stressigen Arbeit zu entspannen, anstatt Schmerzmittel gegen Rückenschmerzen zu nehmen.","Ich gehe regelmäßig zum Yoga, um mich nach der stressigen Arbeit zu entspannen, ohne Schmerzmittel gegen Rückenschmerzen zu nehmen."],"um+anstatt",{m:1,x:"Reflexivpronomen anpassen: ich entspanne mich → um mich zu entspannen."});
+I(46,"Der Radfahrer fährt jeden Tag 50 Kilometer • er bereitet sich auf eine Fahrradtour durch Europa vor • er lässt sein Fahrrad nicht vom Mechaniker überprüfen",["Der Radfahrer fährt jeden Tag 50 Kilometer, um sich auf eine Fahrradtour durch Europa vorzubereiten, ohne sein Fahrrad vom Mechaniker überprüfen zu lassen."],"um+ohne",{m:1,x:"lassen + Infinitiv: überprüfen zu lassen."});
+I(47,"Die Volleyball-Mannschaft trainiert intensiv für die Meisterschaft • alle Spieler sollen ihre beste Leistung bringen • der Verein stellt keine zusätzlichen Trainer ein",["Die Volleyball-Mannschaft trainiert intensiv für die Meisterschaft, damit alle Spieler ihre beste Leistung bringen, ohne dass der Verein zusätzliche Trainer einstellt."],"damit+ohnedass",{m:1,x:"„keine zusätzlichen Trainer“ → „zusätzliche Trainer“; einstellen steht zusammen am Ende."});
+I(48,"Mein Nachbar baut sich ein Heimfitnessstudio • er kann jederzeit trainieren • er muss nicht ins überfüllte Fitnessstudio fahren",["Mein Nachbar baut sich ein Heimfitnessstudio, um jederzeit trainieren zu können, anstatt ins überfüllte Fitnessstudio fahren zu müssen.","Mein Nachbar baut sich ein Heimfitnessstudio, um jederzeit trainieren zu können und nicht ins überfüllte Fitnessstudio fahren zu müssen.","Mein Nachbar baut sich ein Heimfitnessstudio, damit er jederzeit trainieren kann und nicht ins überfüllte Fitnessstudio fahren muss."],"um+anstatt",{m:1,x:"können und müssen bleiben hier: trainieren zu können, fahren zu müssen."});
+I(49,"Die Basketballspielerin übt täglich Freiwürfe • sie will ihre Trefferquote verbessern • sie lässt sich nicht von einem Trainer korrigieren",["Die Basketballspielerin übt täglich Freiwürfe, um ihre Trefferquote zu verbessern, ohne sich von einem Trainer korrigieren zu lassen."],"um+ohne",{m:1});
+I(50,"Wir nehmen an einem Laufwettbewerb teil • wir wollen Geld für einen guten Zweck sammeln • wir erwarten keine Belohnung für uns selbst",["Wir nehmen an einem Laufwettbewerb teil, um Geld für einen guten Zweck zu sammeln, ohne eine Belohnung für uns selbst zu erwarten."],"um+ohne",{m:1,x:"„keine Belohnung“ → „eine Belohnung“."});
+
+// ---------- Teil B: um … zu oder damit? 51–75 ----------
+I(51,"Ich dehne mich nach dem Laufen • ich möchte keinen Muskelkater bekommen",["Ich dehne mich nach dem Laufen, um keinen Muskelkater zu bekommen."],"um",{x:"Bei um … zu bleibt „keinen“ stehen – es ist ja ein Ziel."});
+I(52,"Die Trainerin pfeift laut • die Spielerinnen sollen sie hören",["Die Trainerin pfeift laut, damit die Spielerinnen sie hören."],"damit");
+I(53,"Er trinkt beim Radfahren viel Wasser • er will nicht dehydrieren",["Er trinkt beim Radfahren viel Wasser, um nicht zu dehydrieren."],"um");
+I(54,"Wir stellen die Bälle in den Schrank • die Kinder sollen nicht darüber stolpern",["Wir stellen die Bälle in den Schrank, damit die Kinder nicht darüber stolpern."],"damit");
+I(55,"Die Läufer tragen Stirnlampen • sie sehen den Weg im Dunkeln",["Die Läufer tragen Stirnlampen, um den Weg im Dunkeln zu sehen."],"um",{x:"Vergleichen Sie mit Satz 56!"});
+I(56,"Die Läufer tragen Stirnlampen • die Autofahrer sehen sie im Dunkeln",["Die Läufer tragen Stirnlampen, damit die Autofahrer sie im Dunkeln sehen.","Die Läufer tragen Stirnlampen, damit sie die Autofahrer im Dunkeln sehen."],"damit",{x:"Gleicher Hauptsatz wie 55 – aber jetzt ein anderes Subjekt!"});
+I(57,"Meine Tochter übt jeden Tag Handstand • sie will ihn bald ohne Hilfe schaffen",["Meine Tochter übt jeden Tag Handstand, um ihn bald ohne Hilfe zu schaffen."],"um");
+I(58,"Ich halte meiner Tochter beim Handstand die Beine • sie fällt nicht um",["Ich halte meiner Tochter beim Handstand die Beine, damit sie nicht umfällt."],"damit");
+I(59,"Der Verein verkauft Kuchen beim Turnier • er möchte neue Trikots kaufen",["Der Verein verkauft Kuchen beim Turnier, um neue Trikots zu kaufen."],"um");
+I(60,"Der Verein verkauft Kuchen beim Turnier • die Mannschaft bekommt neue Trikots",["Der Verein verkauft Kuchen beim Turnier, damit die Mannschaft neue Trikots bekommt."],"damit");
+I(61,"Ich stehe um sechs Uhr auf • ich möchte vor der Arbeit eine Runde schwimmen",["Ich stehe um sechs Uhr auf, um vor der Arbeit eine Runde zu schwimmen."],"um");
+I(62,"Mein Mann stellt mir den Wecker • ich verschlafe das Training nicht",["Mein Mann stellt mir den Wecker, damit ich das Training nicht verschlafe."],"damit");
+I(63,"Die Skifahrer tragen Helme • sie wollen sich bei einem Sturz nicht verletzen",["Die Skifahrer tragen Helme, um sich bei einem Sturz nicht zu verletzen."],"um");
+I(64,"Die Skischule verleiht kostenlos Helme • alle Kinder fahren sicher",["Die Skischule verleiht kostenlos Helme, damit alle Kinder sicher fahren."],"damit");
+I(65,"Wir wärmen uns zehn Minuten auf • wir wollen Verletzungen vermeiden",["Wir wärmen uns zehn Minuten auf, um Verletzungen zu vermeiden."],"um");
+I(66,"Der Physiotherapeut massiert meinen Rücken • die Verspannungen lösen sich",["Der Physiotherapeut massiert meinen Rücken, damit sich die Verspannungen lösen.","Der Physiotherapeut massiert meinen Rücken, damit die Verspannungen sich lösen."],"damit");
+I(67,"Die Zuschauer klatschen laut • die Spieler sollen motiviert sein",["Die Zuschauer klatschen laut, damit die Spieler motiviert sind."],"damit");
+I(68,"Sie nimmt Schwimmunterricht • sie will endlich kraulen lernen",["Sie nimmt Schwimmunterricht, um endlich kraulen zu lernen."],"um");
+I(69,"Ich schreibe meine Trainingszeiten auf • ich möchte meine Fortschritte sehen",["Ich schreibe meine Trainingszeiten auf, um meine Fortschritte zu sehen."],"um");
+I(70,"Ich zeige meinem Trainer die Trainingszeiten • er kann meinen Plan anpassen",["Ich zeige meinem Trainer die Trainingszeiten, damit er meinen Plan anpassen kann."],"damit",{x:"können bleibt und steht am Ende: anpassen kann."});
+I(71,"Die Eltern fahren die Kinder zum Fußballplatz • die Kinder kommen pünktlich zum Spiel",["Die Eltern fahren die Kinder zum Fußballplatz, damit die Kinder pünktlich zum Spiel kommen.","Die Eltern fahren die Kinder zum Fußballplatz, damit sie pünktlich zum Spiel kommen."],"damit");
+I(72,"Er spart sein Taschengeld • er will sich ein Skateboard kaufen",["Er spart sein Taschengeld, um sich ein Skateboard zu kaufen."],"um");
+I(73,"Die Stadt baut einen neuen Radweg • mehr Menschen sollen mit dem Rad fahren",["Die Stadt baut einen neuen Radweg, damit mehr Menschen mit dem Rad fahren."],"damit");
+I(74,"Wir laufen langsamer • wir können uns beim Laufen unterhalten",["Wir laufen langsamer, um uns beim Laufen unterhalten zu können.","Wir laufen langsamer, damit wir uns beim Laufen unterhalten können."],"um",{x:"können bleibt: unterhalten zu können."});
+I(75,"Der Torwart ruft laut • die Verteidiger sollen ihm Platz machen",["Der Torwart ruft laut, damit die Verteidiger ihm Platz machen."],"damit");
+
+// ---------- Teil C: ohne … zu oder ohne dass? 76–100 ----------
+I(76,"Er springt ins kalte Wasser • er zögert nicht",["Er springt ins kalte Wasser, ohne zu zögern."],"ohne");
+I(77,"Sie gewinnt das Rennen • sie hat vorher nicht trainiert",["Sie gewinnt das Rennen, ohne vorher trainiert zu haben."],"ohne",{x:"„hat trainiert“ → trainiert zu haben."});
+I(78,"Die Kinder spielen im Garten Fußball • die Eltern merken es nicht",["Die Kinder spielen im Garten Fußball, ohne dass die Eltern es merken."],"ohnedass");
+I(79,"Ich laufe zehn Kilometer • ich bin danach nicht müde",["Ich laufe zehn Kilometer, ohne danach müde zu sein."],"ohne");
+I(80,"Der Spieler verlässt das Spielfeld • der Schiedsrichter hat es nicht erlaubt",["Der Spieler verlässt das Spielfeld, ohne dass der Schiedsrichter es erlaubt hat.","Der Spieler verlässt das Spielfeld, ohne dass es der Schiedsrichter erlaubt hat."],"ohnedass");
+I(81,"Wir fahren zum Training • wir rufen den Trainer nicht vorher an",["Wir fahren zum Training, ohne den Trainer vorher anzurufen.","Wir fahren zum Training, ohne vorher den Trainer anzurufen."],"ohne",{x:"anrufen ist trennbar: anzurufen."});
+I(82,"Mein Sohn leiht sich mein Fahrrad • er fragt mich nicht",["Mein Sohn leiht sich mein Fahrrad, ohne mich zu fragen."],"ohne");
+I(83,"Mein Sohn leiht sich mein Fahrrad • ich weiß davon nichts",["Mein Sohn leiht sich mein Fahrrad, ohne dass ich etwas davon weiß.","Mein Sohn leiht sich mein Fahrrad, ohne dass ich davon etwas weiß.","Mein Sohn leiht sich mein Fahrrad, ohne dass ich davon weiß."],"ohnedass",{x:"„nichts“ → „etwas“."});
+I(84,"Die Mannschaft verliert das Spiel • sie schießt kein einziges Tor",["Die Mannschaft verliert das Spiel, ohne ein einziges Tor zu schießen."],"ohne");
+I(85,"Die Mannschaft verliert das Spiel • die Fans sind nicht enttäuscht",["Die Mannschaft verliert das Spiel, ohne dass die Fans enttäuscht sind."],"ohnedass");
+I(86,"Sie klettert die Wand hoch • sie schaut nicht nach unten",["Sie klettert die Wand hoch, ohne nach unten zu schauen."],"ohne");
+I(87,"Er bestellt teure Laufschuhe im Internet • er hat sie vorher nicht anprobiert",["Er bestellt teure Laufschuhe im Internet, ohne sie vorher anprobiert zu haben.","Er bestellt teure Laufschuhe im Internet, ohne sie vorher anzuprobieren."],"ohne");
+I(88,"Das Training fällt aus • der Verein informiert die Mitglieder nicht",["Das Training fällt aus, ohne dass der Verein die Mitglieder informiert."],"ohnedass");
+I(89,"Ich schwimme 50 Bahnen • ich mache keine einzige Pause",["Ich schwimme 50 Bahnen, ohne eine einzige Pause zu machen."],"ohne");
+I(90,"Die Tür der Turnhalle bleibt die ganze Nacht offen • niemand schließt sie ab",["Die Tür der Turnhalle bleibt die ganze Nacht offen, ohne dass jemand sie abschließt.","Die Tür der Turnhalle bleibt die ganze Nacht offen, ohne dass sie jemand abschließt."],"ohnedass",{x:"„niemand“ → „jemand“."});
+I(91,"Der Marathonläufer kommt ins Ziel • er ist nie stehen geblieben",["Der Marathonläufer kommt ins Ziel, ohne jemals stehen geblieben zu sein.","Der Marathonläufer kommt ins Ziel, ohne je stehen geblieben zu sein.","Der Marathonläufer kommt ins Ziel, ohne einmal stehen geblieben zu sein."],"ohne",{x:"„ist stehen geblieben“ → stehen geblieben zu sein; „nie“ → „jemals“."});
+I(92,"Die Zuschauer verlassen das Stadion • sie warten nicht auf die Siegerehrung",["Die Zuschauer verlassen das Stadion, ohne auf die Siegerehrung zu warten."],"ohne");
+I(93,"Die Siegerin bekommt den Pokal • die Zuschauer klatschen nicht",["Die Siegerin bekommt den Pokal, ohne dass die Zuschauer klatschen."],"ohnedass");
+I(94,"Wir gehen wandern • wir nehmen keine Wanderkarte mit",["Wir gehen wandern, ohne eine Wanderkarte mitzunehmen."],"ohne");
+I(95,"Wir gehen wandern • unser Hund kommt nicht mit",["Wir gehen wandern, ohne dass unser Hund mitkommt."],"ohnedass");
+I(96,"Er trainiert monatelang • seine Freundin weiß es nicht",["Er trainiert monatelang, ohne dass seine Freundin es weiß.","Er trainiert monatelang, ohne dass es seine Freundin weiß."],"ohnedass");
+I(97,"Die Turnerin landet perfekt • sie wackelt nicht",["Die Turnerin landet perfekt, ohne zu wackeln."],"ohne");
+I(98,"Der Trainer stellt die Mannschaft auf • er hat mit den Spielern nicht gesprochen",["Der Trainer stellt die Mannschaft auf, ohne mit den Spielern gesprochen zu haben.","Der Trainer stellt die Mannschaft auf, ohne mit den Spielern zu sprechen."],"ohne");
+I(99,"Der Trainer stellt die Mannschaft auf • die Spieler dürfen nicht mitreden",["Der Trainer stellt die Mannschaft auf, ohne dass die Spieler mitreden dürfen."],"ohnedass");
+I(100,"Ich spiele seit zwei Stunden Tischtennis • mein Rücken tut nicht weh",["Ich spiele seit zwei Stunden Tischtennis, ohne dass mein Rücken wehtut.","Ich spiele seit zwei Stunden Tischtennis, ohne dass mir der Rücken wehtut."],"ohnedass");
+
+// ---------- Teil D: anstatt … zu oder anstatt dass? 101–125 ----------
+I(101,"Ich gehe zu Fuß zum Training • ich nehme nicht den Bus",["Ich gehe zu Fuß zum Training, anstatt den Bus zu nehmen.","Ich gehe zu Fuß zum Training, ohne den Bus zu nehmen."],"anstatt",{nq:1});
+I(102,"Er sitzt auf dem Sofa • er geht nicht zum Training",["Er sitzt auf dem Sofa, anstatt zum Training zu gehen."],"anstatt");
+I(103,"Der Trainer schreit die Spieler an • er lobt sie nicht",["Der Trainer schreit die Spieler an, anstatt sie zu loben."],"anstatt");
+I(104,"Ich trage die schwere Sporttasche selbst • mein Mann trägt sie nicht",["Ich trage die schwere Sporttasche selbst, anstatt dass mein Mann sie trägt.","Ich trage die schwere Sporttasche selbst, ohne dass mein Mann sie trägt."],"anstattdass",{nq:1});
+I(105,"Die Kinder spielen am Handy • sie spielen nicht draußen Fußball",["Die Kinder spielen am Handy, anstatt draußen Fußball zu spielen."],"anstatt");
+I(106,"Der Kapitän schießt den Elfmeter • der beste Schütze schießt ihn nicht",["Der Kapitän schießt den Elfmeter, anstatt dass der beste Schütze ihn schießt."],"anstattdass");
+I(107,"Wir machen zu Hause ein Online-Workout • wir fahren nicht ins Fitnessstudio",["Wir machen zu Hause ein Online-Workout, anstatt ins Fitnessstudio zu fahren.","Wir machen zu Hause ein Online-Workout, ohne ins Fitnessstudio zu fahren."],"anstatt",{nq:1});
+I(108,"Die Mutter packt die Sporttasche • ihr Sohn packt sie nicht selbst",["Die Mutter packt die Sporttasche, anstatt dass ihr Sohn sie selbst packt."],"anstattdass");
+I(109,"Sie nimmt die Treppe • sie fährt nicht mit dem Lift",["Sie nimmt die Treppe, anstatt mit dem Lift zu fahren.","Sie nimmt die Treppe, ohne mit dem Lift zu fahren."],"anstatt",{nq:1});
+I(110,"Der Verein kauft neue Trikots • er repariert die alten Tore nicht",["Der Verein kauft neue Trikots, anstatt die alten Tore zu reparieren."],"anstatt");
+I(111,"Der Schiedsrichter pfeift ein Foul • die Spieler regeln den Streit nicht untereinander",["Der Schiedsrichter pfeift ein Foul, anstatt dass die Spieler den Streit untereinander regeln."],"anstattdass");
+I(112,"Er schaut sich Trainingsvideos an • er trainiert nicht selbst",["Er schaut sich Trainingsvideos an, anstatt selbst zu trainieren.","Er schaut sich Trainingsvideos an, ohne selbst zu trainieren."],"anstatt",{nq:1});
+I(113,"Mein Freund fährt für mich zum Sportgeschäft • ich fahre nicht selbst hin",["Mein Freund fährt für mich zum Sportgeschäft, anstatt dass ich selbst hinfahre."],"anstattdass");
+I(114,"Wir grillen nach dem Spiel im Park • wir gehen nicht ins Restaurant",["Wir grillen nach dem Spiel im Park, anstatt ins Restaurant zu gehen."],"anstatt");
+I(115,"Die Großmutter geht täglich schwimmen • sie bleibt nicht den ganzen Tag zu Hause",["Die Großmutter geht täglich schwimmen, anstatt den ganzen Tag zu Hause zu bleiben."],"anstatt");
+I(116,"Die Trainerin zeigt die Übung selbst vor • die Teilnehmer probieren sie nicht einfach aus",["Die Trainerin zeigt die Übung selbst vor, anstatt dass die Teilnehmer sie einfach ausprobieren."],"anstattdass");
+I(117,"Die Spieler diskutieren mit dem Schiedsrichter • sie spielen nicht weiter",["Die Spieler diskutieren mit dem Schiedsrichter, anstatt weiterzuspielen."],"anstatt",{x:"weiterspielen ist trennbar: weiterzuspielen."});
+I(118,"Diesen Winter lerne ich Snowboarden • ich fahre nicht wie immer Ski",["Diesen Winter lerne ich Snowboarden, anstatt wie immer Ski zu fahren."],"anstatt");
+I(119,"Die Kinder bekommen in der Pause Wasser • die Eltern bringen keine Limonade mit",["Die Kinder bekommen in der Pause Wasser, anstatt dass die Eltern Limonade mitbringen."],"anstattdass",{x:"„keine Limonade“ → „Limonade“."});
+I(120,"Wir trainieren draußen im Schnee • wir bleiben nicht in der warmen Halle",["Wir trainieren draußen im Schnee, anstatt in der warmen Halle zu bleiben."],"anstatt");
+I(121,"Der Torwart bleibt im Tor stehen • er läuft dem Ball nicht entgegen",["Der Torwart bleibt im Tor stehen, anstatt dem Ball entgegenzulaufen."],"anstatt");
+I(122,"Meine Freundin organisiert das Lauftreffen • der Verein organisiert es nicht",["Meine Freundin organisiert das Lauftreffen, anstatt dass der Verein es organisiert."],"anstattdass");
+I(123,"Die Fans singen für ihre Mannschaft • sie pfeifen die Gegner nicht aus",["Die Fans singen für ihre Mannschaft, anstatt die Gegner auszupfeifen."],"anstatt");
+I(124,"Der Ersatzspieler spielt • der verletzte Kapitän spielt nicht",["Der Ersatzspieler spielt, anstatt dass der verletzte Kapitän spielt."],"anstattdass");
+I(125,"Wir nehmen das Fahrrad • Papa fährt uns nicht mit dem Auto zum See",["Wir nehmen das Fahrrad, anstatt dass Papa uns mit dem Auto zum See fährt."],"anstattdass");
+
+// ---------- Teil E: Alles gemischt 126–150 ----------
+I(126,"Sie trainiert jeden Tag • sie will in die Nationalmannschaft kommen",["Sie trainiert jeden Tag, um in die Nationalmannschaft zu kommen."],"um");
+I(127,"Er schießt aufs Tor • er hat vorher nicht geschaut",["Er schießt aufs Tor, ohne vorher geschaut zu haben.","Er schießt aufs Tor, ohne vorher zu schauen."],"ohne");
+I(128,"Der Vater trainiert die Kinder selbst • ein Trainer trainiert sie nicht",["Der Vater trainiert die Kinder selbst, anstatt dass ein Trainer sie trainiert."],"anstattdass");
+I(129,"Wir bauen eine Rampe • unsere Freunde können darauf Tricks üben",["Wir bauen eine Rampe, damit unsere Freunde darauf Tricks üben können."],"damit");
+I(130,"Ich fahre mit dem Fahrrad zur Arbeit • ich stehe nicht im Stau",["Ich fahre mit dem Fahrrad zur Arbeit, anstatt im Stau zu stehen.","Ich fahre mit dem Fahrrad zur Arbeit, ohne im Stau zu stehen."],"anstatt",{nq:1});
+I(131,"Die Kinder spielen Fangen • sie haben sich vorher nicht aufgewärmt",["Die Kinder spielen Fangen, ohne sich vorher aufgewärmt zu haben.","Die Kinder spielen Fangen, ohne sich vorher aufzuwärmen."],"ohne");
+I(132,"Der Coach erklärt die Regeln noch einmal • es gibt keine Missverständnisse",["Der Coach erklärt die Regeln noch einmal, damit es keine Missverständnisse gibt."],"damit");
+I(133,"Die Läuferin überholt alle • ihre Konkurrentinnen bemerken es nicht",["Die Läuferin überholt alle, ohne dass ihre Konkurrentinnen es bemerken.","Die Läuferin überholt alle, ohne dass es ihre Konkurrentinnen bemerken."],"ohnedass");
+I(134,"Er geht nach dem Training in die Sauna • er duscht nicht nur kurz",["Er geht nach dem Training in die Sauna, anstatt nur kurz zu duschen."],"anstatt");
+I(135,"Wir kaufen gebrauchte Ski • wir wollen Geld sparen",["Wir kaufen gebrauchte Ski, um Geld zu sparen."],"um");
+I(136,"Sie meldet sich für den Halbmarathon an • sie hat nicht mit ihrem Arzt gesprochen",["Sie meldet sich für den Halbmarathon an, ohne mit ihrem Arzt gesprochen zu haben.","Sie meldet sich für den Halbmarathon an, ohne mit ihrem Arzt zu sprechen.","Sie meldet sich für den Halbmarathon an, ohne vorher mit ihrem Arzt gesprochen zu haben."],"ohne");
+I(137,"Die Trainerin filmt das Training • die Spielerinnen können ihre Fehler sehen",["Die Trainerin filmt das Training, damit die Spielerinnen ihre Fehler sehen können."],"damit");
+I(138,"Mein Bruder spielt den ganzen Abend Fußball am Computer • er geht nicht selbst auf den Platz",["Mein Bruder spielt den ganzen Abend Fußball am Computer, anstatt selbst auf den Platz zu gehen."],"anstatt");
+I(139,"Die Mannschaft feiert den Sieg • der Trainer weiß nichts davon",["Die Mannschaft feiert den Sieg, ohne dass der Trainer etwas davon weiß.","Die Mannschaft feiert den Sieg, ohne dass der Trainer davon weiß.","Die Mannschaft feiert den Sieg, ohne dass der Trainer davon etwas weiß."],"ohnedass");
+I(140,"Der Hausmeister öffnet die Turnhalle am Sonntag • die Jugendlichen müssen nicht draußen trainieren",["Der Hausmeister öffnet die Turnhalle am Sonntag, damit die Jugendlichen nicht draußen trainieren müssen."],"damit");
+I(141,"Ich stehe früher auf • ich möchte vor der Arbeit noch Yoga machen",["Ich stehe früher auf, um vor der Arbeit noch Yoga zu machen."],"um");
+I(142,"Die Spielerin trifft ins Tor • der Ball berührt den Boden nicht",["Die Spielerin trifft ins Tor, ohne dass der Ball den Boden berührt."],"ohnedass");
+I(143,"Ich schaue mir das Spiel in der Bar an • meine Freunde kommen nicht zu mir nach Hause",["Ich schaue mir das Spiel in der Bar an, anstatt dass meine Freunde zu mir nach Hause kommen."],"anstattdass");
+I(144,"Der Trainer stellt Hütchen auf • die Kinder erkennen den Parcours",["Der Trainer stellt Hütchen auf, damit die Kinder den Parcours erkennen."],"damit");
+I(145,"Ich trinke einen Proteinshake • ich will schneller Muskeln aufbauen",["Ich trinke einen Proteinshake, um schneller Muskeln aufzubauen."],"um");
+I(146,"Die Schwimmerin taucht unter • sie holt vorher nicht tief Luft",["Die Schwimmerin taucht unter, ohne vorher tief Luft zu holen."],"ohne");
+I(147,"Der Ersatztorwart steht im Tor • der Trainer hat ihn nicht vorher informiert",["Der Ersatztorwart steht im Tor, ohne dass der Trainer ihn vorher informiert hat."],"ohnedass");
+I(148,"Wir trainieren am Wochenende • wir schlafen nicht lange aus",["Wir trainieren am Wochenende, anstatt lange auszuschlafen."],"anstatt");
+I(149,"Die Großeltern kommen zum Turnier • sie wollen ihre Enkelin anfeuern",["Die Großeltern kommen zum Turnier, um ihre Enkelin anzufeuern."],"um");
+I(150,"Der Kapitän beruhigt seine Mitspieler • niemand bekommt eine gelbe Karte",["Der Kapitän beruhigt seine Mitspieler, damit niemand eine gelbe Karte bekommt."],"damit",{x:"Bei damit bleibt „niemand“ stehen."});
+
+const TEILE = [
+  {von:1,bis:9,  t:"Original-Beispiele (1–9)", p:"Die Ausgangssätze vom Arbeitsblatt."},
+  {von:10,bis:29,t:"Ähnlich wie das Original (10–29)", p:"Kurze Sätze – achten Sie besonders darauf, dass die Verneinung bei ohne und anstatt verschwindet."},
+  {von:30,bis:39,t:"Leicht variiert – längere Sätze (30–39)", p:"Mehr Satzglieder, gleiche Regeln. Trennbare Verben nicht vergessen!"},
+  {von:40,bis:50,t:"Komplexere Strukturen (40–50)", p:"Drei Sätze werden zu einem. Manchmal brauchen Sie zwei Verbindungen oder zusätzlich „und“."},
+  {von:51,bis:75,t:"NEU: um … zu oder damit? (51–75)", p:"Immer geht es um ein Ziel. Ihre einzige Frage: Ist das Subjekt gleich oder verschieden? Achten Sie auf die Satzpaare 55/56 und 59/60."},
+  {von:76,bis:100,t:"NEU: ohne … zu oder ohne dass? (76–100)", p:"Etwas Erwartetes passiert nicht. Streichen Sie die Verneinung und prüfen Sie die Subjekte. Bei Vergangenem: Infinitiv Perfekt."},
+  {von:101,bis:125,t:"NEU: anstatt … zu oder anstatt dass? (101–125)", p:"Statt der erwarteten Handlung passiert etwas anderes. Gleiches Subjekt → anstatt … zu, verschiedene → anstatt dass."},
+  {von:126,bis:150,t:"NEU: Alles gemischt (126–150)", p:"Jetzt kommen alle sechs Formen durcheinander. Erst die Bedeutung, dann die Subjekte – und Sie haben es!"}
+];
+
+const NAMEN = {um:"um … zu", damit:"damit", ohne:"ohne … zu", ohnedass:"ohne dass", anstatt:"anstatt … zu", anstattdass:"anstatt dass"};
+const TIPPS = {
+  um:"Wozu? → Ziel. Gleiches Subjekt → <b>um … zu</b> + Infinitiv. wollen/möchten fallen weg.",
+  damit:"Wozu? → Ziel. Verschiedene Subjekte → <b>damit</b> + Verb am Ende. sollen fällt weg, eine Verneinung bleibt.",
+  ohne:"Etwas Erwartetes passiert nicht. Gleiches Subjekt → <b>ohne … zu</b>. Die Verneinung fällt weg!",
+  ohnedass:"Etwas Erwartetes passiert nicht. Verschiedene Subjekte → <b>ohne dass</b> + Verb am Ende. Die Verneinung fällt weg!",
+  anstatt:"Statt der erwarteten Handlung passiert etwas anderes. Gleiches Subjekt → <b>anstatt … zu</b>. Die Verneinung fällt weg!",
+  anstattdass:"Statt der erwarteten Handlung passiert etwas anderes. Verschiedene Subjekte → <b>anstatt dass</b> + Verb am Ende. Die Verneinung fällt weg!"
+};
+const LOB = ["Super! 🎉","Genau so! 💪","Treffer! ⚽","Bravo! 🌟","Perfekt! 🏅","Klasse gemacht! 🙌","Volltreffer! 🎯"];
+const zufall = arr => arr[Math.floor(Math.random()*arr.length)];
+
+/* ============ Hilfsfunktionen ============ */
+function norm(s){
+  return s.toLowerCase()
+    .replace(/[„“”"'.,!?;:–—]/g," ")
+    .replace(/-/g," ")
+    .replace(/\bstatt\b/g,"anstatt")
+    .replace(/\bselber\b/g,"selbst")
+    .replace(/\s+/g," ").trim();
+}
+const kommas = s => (s.match(/,/g)||[]).length;
+
+/* ============ Speicher ============ */
+let stand = {};
+try{ stand = JSON.parse(localStorage.getItem("sport-verbinden-stand")||"{}"); }catch(e){ stand = {}; }
+function speichern(){ try{ localStorage.setItem("sport-verbinden-stand", JSON.stringify(stand)); }catch(e){} }
+
+/* ============ Übungen rendern ============ */
+const teileBox = document.getElementById("teile");
+TEILE.forEach(T=>{
+  const k = document.createElement("div");
+  k.className="karte";
+  k.innerHTML = `<div class="teil-kopf"><div><h2>${T.t}</h2><p>${T.p}</p></div></div>`;
+  D.filter(d=>d.n>=T.von && d.n<=T.bis).forEach(d=>k.appendChild(itemEl(d)));
+  teileBox.appendChild(k);
+});
+
+function itemEl(d){
+  const el = document.createElement("div");
+  el.className = "item"; el.id = "i"+d.n;
+  el.innerHTML = `
+    <div class="zeile">
+      <div class="nummer">${d.n}</div>
+      <div class="vorgabe">${d.s.join('<span class="dot">•</span>')}</div>
+    </div>
+    <textarea rows="2" aria-label="Ihre Lösung für Satz ${d.n}" placeholder="Schreiben Sie hier den verbundenen Satz …"></textarea>
+    <div class="knoepfe">
+      <button class="btn klein" data-a="pruefen">Prüfen</button>
+      <button class="btn hell klein" data-a="tipp">💡 Tipp</button>
+      <button class="btn hell klein" data-a="loesung">Lösung</button>
+    </div>
+    <div class="feedback"></div>`;
+  const ta = el.querySelector("textarea"), fb = el.querySelector(".feedback");
+  if(stand[d.n]){ ta.value = stand[d.n].t||""; if(stand[d.n].ok) el.classList.add("ok"); }
+  ta.addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); pruefen(); } });
+  el.querySelector('[data-a="pruefen"]').onclick = pruefen;
+  el.querySelector('[data-a="tipp"]').onclick = ()=>{
+    const tipps = d.c.split("+").map(c=>TIPPS[c]).join("<br>");
+    zeige("info", `${tipps}${d.x?`<br>✨ ${d.x}`:""}`);
+  };
+  el.querySelector('[data-a="loesung"]').onclick = ()=> zeige("info", loesungHTML());
+
+  function loesungHTML(){
+    return `<div><b>Lösung${d.a.length>1?"en":""}:</b></div>` + d.a.map(x=>`<div class="loesung">${x}</div>`).join("") + (d.x?`<div style="margin-top:6px">✨ ${d.x}</div>`:"");
+  }
+  function zeige(art, html){ fb.className = "feedback zeigen "+art; fb.innerHTML = html; }
+  function pruefen(){
+    const eingabe = ta.value.trim();
+    if(!eingabe){ zeige("info","Schreiben Sie zuerst Ihren Satz in das Feld. 🙂"); return; }
+    const n = norm(eingabe);
+    const treffer = d.a.find(x=>norm(x)===n);
+    stand[d.n] = stand[d.n]||{}; stand[d.n].t = eingabe;
+    if(treffer){
+      el.classList.remove("falsch"); el.classList.add("ok"); stand[d.n].ok = true;
+      let txt = `<strong>${zufall(LOB)}</strong>`;
+      if(kommas(eingabe) < kommas(treffer)) txt += `<br>Fast perfekt – denken Sie noch an das Komma: <span class="loesung" style="display:inline-block">${treffer}</span>`;
+      if(!/[.!]$/.test(eingabe)) txt += `<br><span style="font-size:.9rem">Kleiner Hinweis: Ein Punkt am Satzende macht ihn komplett.</span>`;
+      zeige("gut", txt);
+    } else {
+      el.classList.add("falsch"); el.classList.remove("ok"); stand[d.n].ok = false;
+      zeige("schlecht", `<strong>Noch nicht ganz.</strong> Vergleichen Sie Ihren Satz mit der Lösung – oft liegt es an der Verneinung, am <em>zu</em> oder an der Stellung des Verbs.` + loesungHTML() +
+        `<div class="knoepfe"><button class="btn hell klein" data-a="selbst">✔ Meine Variante stimmt auch</button></div>`);
+      fb.querySelector('[data-a="selbst"]').onclick = ()=>{
+        el.classList.remove("falsch"); el.classList.add("ok"); stand[d.n].ok = true; speichern(); zaehlen();
+        zeige("gut", `<strong>Gut gemacht!</strong> Ihre Variante ist als richtig markiert. 🌟`);
+      };
+    }
+    speichern(); zaehlen();
+  }
+  return el;
+}
+
+function zaehlen(){
+  const ok = D.filter(d=>stand[d.n]&&stand[d.n].ok).length;
+  document.getElementById("zaehler").textContent = `${ok} / ${D.length} richtig`;
+  document.getElementById("balken").style.width = (ok/D.length*100)+"%";
+}
+zaehlen();
+document.getElementById("reset").onclick = ()=>{
+  if(!confirm("Wirklich alle Antworten löschen?")) return;
+  stand = {}; speichern();
+  document.querySelectorAll(".item").forEach(el=>{
+    el.classList.remove("ok","falsch"); el.querySelector("textarea").value="";
+    const fb = el.querySelector(".feedback"); fb.className="feedback"; fb.innerHTML="";
+  });
+  zaehlen();
+};
+
+/* ============ Tabs ============ */
+function oeffne(ziel){
+  document.querySelectorAll(".ansicht").forEach(s=>s.classList.toggle("aktiv", s.id===ziel));
+  document.querySelectorAll("nav.tabs button").forEach(b=>b.classList.toggle("aktiv", b.dataset.ziel===ziel));
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>oeffne(b.dataset.ziel));
+document.querySelectorAll("[data-spring]").forEach(b=>b.onclick=()=>oeffne(b.dataset.spring));
+
+/* ============ Quiz ============ */
+const RX = {
+  um:/, um /, damit:/, damit /, ohne:/, ohne (?!dass)/, ohnedass:/, ohne dass /,
+  anstatt:/, anstatt (?!dass)/, anstattdass:/, anstatt dass /
+};
+const OPT_LUECKE = [["um","um"],["damit","damit"],["ohne","ohne"],["ohnedass","ohne dass"],["anstatt","anstatt"],["anstattdass","anstatt dass"]];
+const BED = {um:"ziel",damit:"ziel",ohne:"fehlt",ohnedass:"fehlt",anstatt:"ersatz",anstattdass:"ersatz"};
+const OPT_BED = [["ziel","🎯 Ziel / Zweck"],["fehlt","🚫 Etwas passiert nicht"],["ersatz","🔄 Ersatz / Alternative"]];
+const BED_ERKL = {
+  ziel:"Der Nebensatz nennt das Ziel – man fragt „Wozu?“.",
+  fehlt:"Der Nebensatz nennt etwas, das man erwarten würde, das aber nicht passiert.",
+  ersatz:"Der Nebensatz nennt die erwartete Handlung, an deren Stelle etwas anderes passiert."
+};
+let modus = "luecke", runde = [], pos = 0, punkte = 0;
+const qbox = document.getElementById("quizbox");
+
+function mische(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function neueRunde(){
+  const pool = D.filter(d=>!d.m && (modus==="bedeutung" || !d.nq) && RX[d.c] && RX[d.c].test(d.a[0]));
+  runde = mische(pool).slice(0,10); pos = 0; punkte = 0; frage();
+}
+function frage(){
+  if(pos>=runde.length){ ende(); return; }
+  const d = runde[pos];
+  let satz, opts, richtig;
+  if(modus==="luecke"){
+    satz = d.a[0].replace(RX[d.c], ', <span class="gap">______</span> ');
+    opts = OPT_LUECKE; richtig = d.c;
+  } else {
+    satz = d.a[0]; opts = OPT_BED; richtig = BED[d.c];
+  }
+  qbox.innerHTML = `
+    <div class="quiz-top"><span>Frage ${pos+1} von ${runde.length}</span><span>⭐ ${punkte} Punkte</span></div>
+    ${modus==="luecke" ? `<div class="quiz-vorgabe">Ausgangssätze: <strong>${d.s.join(" • ")}</strong></div>` : `<div class="quiz-vorgabe">Was drückt der Nebensatz aus?</div>`}
+    <div class="quiz-satz">${satz}</div>
+    <div class="optionen">${opts.map(o=>`<button class="opt" data-w="${o[0]}">${o[1]}</button>`).join("")}</div>
+    <div class="feedback"></div>`;
+  qbox.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+    const ok = b.dataset.w===richtig;
+    qbox.querySelectorAll(".opt").forEach(x=>{ x.disabled=true; if(x.dataset.w===richtig) x.classList.add("richtig"); });
+    if(!ok) b.classList.add("falsch"); else punkte++;
+    const fb = qbox.querySelector(".feedback");
+    fb.className = "feedback zeigen " + (ok?"gut":"schlecht");
+    const erkl = modus==="luecke" ? TIPPS[d.c] : BED_ERKL[richtig] + ` (${NAMEN[d.c]})`;
+    fb.innerHTML = `<strong>${ok?zufall(LOB):"Leider nicht."}</strong> ${erkl}<div class="loesung">${d.a[0]}</div>
+      <div class="knoepfe"><button class="btn klein" id="weiter">${pos+1<runde.length?"Weiter →":"Ergebnis zeigen"}</button></div>`;
+    qbox.querySelector(".quiz-top span:last-child").textContent = `⭐ ${punkte} Punkte`;
+    document.getElementById("weiter").onclick = ()=>{ pos++; frage(); };
+  });
+}
+function ende(){
+  const anteil = punkte/runde.length;
+  const msg = anteil===1 ? "Fehlerfrei! Sie sind bereit fürs Finale! 🏆" :
+              anteil>=.8 ? "Starke Leistung – fast auf dem Siegertreppchen! 🥈" :
+              anteil>=.5 ? "Gut im Rennen! Noch eine Runde, und es sitzt. 🏃‍♀️" :
+                           "Aufwärmen gehört dazu! Schauen Sie noch einmal in die Regeln und starten Sie neu. 💪";
+  qbox.innerHTML = `<div class="ende"><div class="gross">${punkte} / ${runde.length}</div><p>${msg}</p>
+    <button class="btn" id="nochmal">Neue Runde 🔄</button></div>`;
+  document.getElementById("nochmal").onclick = neueRunde;
+}
+const mL = document.getElementById("m-luecke"), mB = document.getElementById("m-bedeutung");
+mL.onclick = ()=>{ modus="luecke"; mL.classList.remove("aus"); mB.classList.add("aus"); neueRunde(); };
+mB.onclick = ()=>{ modus="bedeutung"; mB.classList.remove("aus"); mL.classList.add("aus"); neueRunde(); };
+neueRunde();
+
+/* ============ Bubbles ============ */
+(function(){
+  const box = document.getElementById("bubbles");
+  const anzahl = window.innerWidth < 600 ? 12 : 22;
+  for(let i=0;i<anzahl;i++){
+    const b = document.createElement("div");
+    const s = 18 + Math.random()*90;
+    const typ = Math.random();
+    b.className = "bubble" + (typ<.28 && s>45 ? " face" : typ>.82 ? " ring" : "");
+    b.style.setProperty("--s", s+"px");
+    b.style.width = b.style.height = s+"px";
+    b.style.left = (Math.random()*100)+"%";
+    b.style.top = (Math.random()*100)+"%";
+    b.style.animationDuration = (7+Math.random()*10)+"s";
+    b.style.animationDelay = (-Math.random()*10)+"s";
+    if(b.classList.contains("face")){ const m=document.createElement("span"); m.className="mund"; b.appendChild(m); }
+    box.appendChild(b);
+  }
+})();
+</script>
+</body>
+</html>
