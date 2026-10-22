@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wortarten-Champion 🌻</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gelb:#ffd93d; --gelb-h:#fff3b0; --gelb-tief:#f5b800; --creme:#fffbea;
+  --pink:#c2185b; --pink-d:#880e4f; --pink-h:#fde4ef; --pink-hh:#fff0f6;
+  --text:#3b0f2a; --muted:#7a4a63; --ok:#2e9e57; --ok-h:#dff5e7; --bad:#d93a3a; --bad-h:#fde2e2;
+  --orange:#ef7d00; --sch:0 6px 0 var(--pink-d);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Nunito",sans-serif;background:var(--gelb);color:var(--text);min-height:100vh;
+  background-image:radial-gradient(circle at 12px 12px, rgba(255,255,255,.35) 3px, transparent 4px);background-size:44px 44px}
+.wrap{max-width:980px;margin:0 auto;padding:18px 16px 80px}
+h1,h2,h3{font-family:"Fredoka",sans-serif;color:var(--pink-d)}
+header.hero{background:var(--creme);border:3px solid var(--pink);border-radius:26px;padding:20px 22px;box-shadow:var(--sch);margin-bottom:16px;text-align:center}
+header.hero h1{font-size:clamp(1.8rem,5vw,2.7rem);letter-spacing:.02em}
+header.hero p{color:var(--muted);font-weight:700;margin-top:6px}
+nav.tabs{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:0 0 18px}
+nav.tabs button{font:700 16px "Nunito";background:#fff;color:var(--pink-d);border:2px solid var(--pink);border-radius:999px;padding:9px 18px;cursor:pointer}
+nav.tabs button.on{background:var(--pink);color:#fff;box-shadow:0 4px 0 var(--pink-d)}
+.screen{display:none}.screen.on{display:block}
+.card{background:var(--creme);border:3px solid var(--pink);border-radius:22px;padding:20px;box-shadow:var(--sch);margin-bottom:22px}
+.card h2{font-size:1.5rem;margin-bottom:10px}
+.card h3{font-size:1.15rem;margin:14px 0 6px}
+.card p,.card li{line-height:1.6;font-size:1.02rem}
+.card ul{padding-left:22px}
+.tipp{background:var(--pink-hh);border-left:6px solid var(--pink);border-radius:12px;padding:10px 14px;margin:12px 0}
+.merk{background:var(--gelb-h);border:2px dashed var(--gelb-tief);border-radius:14px;padding:10px 14px;margin:12px 0}
+table.t{border-collapse:collapse;width:100%;margin:10px 0;font-size:.98rem;background:#fff;border-radius:12px;overflow:hidden}
+table.t th{background:var(--pink);color:#fff;font-family:"Fredoka";font-weight:600;padding:8px}
+table.t td{border:1px solid var(--pink-h);padding:7px 8px;text-align:center}
+table.t td:first-child{font-weight:800;color:var(--pink-d);background:var(--pink-hh);text-align:left}
+.scroll{overflow-x:auto}
+.m{color:#1565c0;font-weight:800}.f{color:#d81b60;font-weight:800}.n{color:#2e7d32;font-weight:800}
+.end{background:var(--gelb);border-radius:5px;padding:0 3px;font-weight:800}
+
+/* Menü */
+.stufe{margin-bottom:24px}
+.stufe-kopf{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.stufe-kopf .nr{background:var(--pink);color:#fff;font:700 1.1rem "Fredoka";border-radius:14px;padding:6px 14px;box-shadow:0 4px 0 var(--pink-d)}
+.stufe-kopf h2{font-size:1.4rem}
+.modes{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.mode-btn{position:relative;text-align:left;background:#fff;border:3px solid var(--pink);border-radius:18px;padding:14px 14px 12px;cursor:pointer;font:800 1.05rem "Nunito";color:var(--pink-d);box-shadow:0 5px 0 var(--pink-d);transition:transform .1s}
+.mode-btn:hover{transform:translateY(-2px);background:var(--pink-hh)}
+.mode-btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--pink-d)}
+.mode-btn .ic{font-size:1.6rem;display:block;margin-bottom:4px}
+.mode-btn .d{display:block;font-weight:700;font-size:.9rem;color:var(--muted);margin-top:4px}
+.mode-btn .star{position:absolute;top:10px;right:12px;font-size:1.3rem}
+.urkunde{display:none;text-align:center;background:linear-gradient(135deg,#fff3b0,#fde4ef);border:4px double var(--pink);border-radius:22px;padding:22px;margin-bottom:22px;box-shadow:var(--sch)}
+.urkunde.on{display:block}
+.fortschritt{font-weight:800;color:var(--pink-d);text-align:center;margin:-6px 0 18px}
+
+/* Spiel */
+.game-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.mode-ind{background:var(--pink);color:#fff;font:600 1.1rem "Fredoka";border-radius:999px;padding:8px 18px;box-shadow:0 4px 0 var(--pink-d)}
+.stats{display:flex;gap:8px;flex-wrap:wrap}
+.stat{background:#fff;border:2px solid var(--pink);border-radius:14px;padding:4px 12px;text-align:center;min-width:70px}
+.stat .l{font-size:.75rem;color:var(--muted);font-weight:800;text-transform:uppercase}
+.stat .v{font:700 1.25rem "Fredoka";color:var(--pink-d)}
+.bar{height:16px;background:#fff;border:2px solid var(--pink);border-radius:999px;overflow:hidden}
+.bar div{height:100%;background:linear-gradient(90deg,var(--pink),#ec407a);width:0;transition:width .3s}
+.bar-t{text-align:center;font-weight:800;color:var(--pink-d);margin:6px 0 12px}
+.qbox{background:var(--creme);border:3px solid var(--pink);border-radius:22px;padding:22px 20px;box-shadow:var(--sch);margin-bottom:16px;text-align:center}
+.qbox .ask{font:600 1.05rem "Fredoka";color:var(--muted);margin-bottom:12px}
+.qbox .s{font-size:clamp(1.25rem,3.6vw,1.7rem);font-weight:800;line-height:1.6}
+.qbox mark{background:var(--gelb);color:var(--pink-d);border-radius:8px;padding:0 6px;box-shadow:0 3px 0 var(--gelb-tief)}
+.gap{display:inline-block;min-width:44px;border-bottom:4px solid var(--pink);color:var(--pink);margin:0 2px}
+.step{display:inline-block;background:var(--pink-h);color:var(--pink-d);border-radius:999px;padding:3px 12px;font-weight:800;font-size:.9rem;margin-bottom:10px}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:14px}
+.opt{font:800 1.12rem "Nunito";background:#fff;color:var(--text);border:3px solid var(--pink);border-radius:16px;padding:14px 10px;cursor:pointer;box-shadow:0 4px 0 var(--pink-d)}
+.opt:hover:not(:disabled){background:var(--pink-hh)}
+.opt:disabled{cursor:default}
+.opt.ok{background:var(--ok-h);border-color:var(--ok);box-shadow:0 4px 0 #1d6b3a;color:#1d6b3a}
+.opt.bad{background:var(--bad-h);border-color:var(--bad);box-shadow:0 4px 0 #8f2020;color:#8f2020}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:6px 0 4px}
+.chip{font:800 1.25rem "Nunito";background:#fff;border:3px solid var(--pink-h);border-radius:12px;padding:6px 12px;cursor:pointer;color:var(--text)}
+.chip.sel{background:var(--gelb);border-color:var(--pink)}
+.chip.ok{background:var(--ok-h);border-color:var(--ok)}
+.chip.bad{background:var(--bad-h);border-color:var(--bad);text-decoration:line-through}
+.chip.miss{border-color:var(--orange);border-style:dashed;background:#fff4e0}
+.feedback{display:none;border-radius:16px;padding:14px 16px;margin-bottom:14px;font-size:1.05rem;line-height:1.55;text-align:left}
+.feedback.on{display:block}
+.feedback.ok{background:var(--ok-h);border:3px solid var(--ok)}
+.feedback.bad{background:var(--bad-h);border:3px solid var(--bad)}
+.feedback b.k{font-family:"Fredoka";font-size:1.15rem}
+.ctrl{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.btn{font:800 1rem "Nunito";background:var(--pink);color:#fff;border:none;border-radius:999px;padding:11px 20px;cursor:pointer;box-shadow:0 4px 0 var(--pink-d)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--pink-d)}
+.btn.ghost{background:#fff;color:var(--pink-d);border:2px solid var(--pink);box-shadow:none}
+.btn.big{font-size:1.15rem;padding:13px 28px}
+.hintbox{display:none;background:var(--gelb-h);border:2px dashed var(--gelb-tief);border-radius:14px;padding:12px 14px;margin-bottom:14px;line-height:1.55;text-align:left}
+.hintbox.on{display:block}
+.res{text-align:center}
+.res-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:16px 0}
+.res-grid div{background:#fff;border:2px solid var(--pink);border-radius:16px;padding:10px}
+.res-grid .v{font:700 1.8rem "Fredoka";color:var(--pink-d)}
+.res-grid .l{font-weight:800;color:var(--muted);font-size:.85rem}
+input.name{font:800 1.05rem "Nunito";border:3px solid var(--pink);border-radius:999px;padding:10px 16px;width:min(320px,100%);margin:6px 0 12px;text-align:center;color:var(--text)}
+.lb{margin-top:14px;text-align:left}
+.lb ol{padding-left:26px}.lb li{padding:3px 0;font-weight:700}
+.popup{position:fixed;font:700 1.6rem "Fredoka";color:var(--pink);pointer-events:none;animation:up 1s ease-out forwards;z-index:50}
+@keyframes up{to{transform:translateY(-70px);opacity:0}}
+.conf{position:fixed;top:-30px;font-size:1.6rem;pointer-events:none;animation:fall 2.4s linear forwards;z-index:40}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+.toast{position:fixed;left:50%;top:22%;transform:translateX(-50%);background:var(--pink);color:#fff;font:700 1.6rem "Fredoka";padding:14px 26px;border-radius:20px;box-shadow:0 6px 0 var(--pink-d);z-index:60;animation:pop 1.6s ease forwards}
+@keyframes pop{0%{transform:translateX(-50%) scale(.5);opacity:0}15%{transform:translateX(-50%) scale(1.08);opacity:1}80%{opacity:1}100%{opacity:0}}
+.sound{position:fixed;right:14px;bottom:14px;background:#fff;border:2px solid var(--pink);border-radius:50%;width:46px;height:46px;font-size:1.3rem;cursor:pointer;z-index:30}
+@media(max-width:560px){.opts{grid-template-columns:1fr 1fr}.opt{font-size:1rem;padding:12px 6px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <h1>🌻 Wortarten-Champion 🌻</h1>
+    <p>Nomen · Adjektiv · Pronomen · Komposita – vom Anfänger zum Experten (5. Schulstufe)</p>
+  </header>
+  <nav class="tabs" id="tabs">
+    <button class="on" data-s="menu">🎮 Training</button>
+    <button data-s="wissen">📚 Wissen</button>
+  </nav>
+
+  <!-- MENÜ -->
+  <section id="menu" class="screen on">
+    <div class="urkunde" id="urkunde">
+      <div style="font-size:3rem">🏆</div>
+      <h2>Experten-Urkunde</h2>
+      <p style="font-weight:800;margin-top:6px">Du hast in allen Trainings mindestens 80 % geschafft. Du bist jetzt offiziell Wortarten-Expertin bzw. Wortarten-Experte!</p>
+    </div>
+    <p class="fortschritt" id="fortschritt"></p>
+    <div id="stufen"></div>
+  </section>
+
+  <!-- WISSEN -->
+  <section id="wissen" class="screen">
+    <div class="card">
+      <h2>🗺️ So wirst du zum Experten</h2>
+      <p>Lies zuerst hier im Wissensteil nach, was du über Nomen, Adjektive, Pronomen und Komposita wissen musst. Dann gehst du ins Training und arbeitest dich von <b>Stufe 1</b> bis <b>Stufe 4</b> hinauf. Wenn du in einem Training mindestens 80 % richtig hast, bekommst du einen ⭐, bei 100 % einen 🏆. Hast du überall einen Stern, wartet die Experten-Urkunde auf dich. Fehler sind übrigens erwünscht: Jede falsch beantwortete Aufgabe kommt am Ende der Runde noch einmal, damit du sie dir richtig merken kannst.</p>
+      <div class="tipp">💡 In jedem Training gibt es oben einen <b>Tipp-Knopf</b>. Dort steht die passende Regel – ganz kurz, damit du nicht zurückblättern musst.</div>
+    </div>
+
+    <div class="card">
+      <h2>🟦 Das Nomen (Namenwort)</h2>
+      <p>Nomen sind Namen für Menschen, Tiere, Pflanzen, Dinge – aber auch für Gefühle und Ideen. Wir schreiben sie immer <b>groß</b>. Oft haben sie einen <b>Begleiter</b> (Artikel) vor sich: <i>der, die, das, ein, eine</i>.</p>
+      <h3>Konkret oder abstrakt?</h3>
+      <p><b>Konkrete Nomen</b> kannst du sehen, hören, angreifen, riechen oder schmecken (Lebewesen und Dinge): <i>der Baum, die Biene, das Kind, der Ball</i>.<br>
+      <b>Abstrakte Nomen</b> kannst du nicht angreifen – es sind Gefühle, Gedanken, Ideen: <i>die Freude, die Angst, der Mut, die Freundschaft</i>.</p>
+      <div class="merk">✨ Nomen auf <b>-heit, -keit, -ung, -schaft, -nis</b> sind fast immer abstrakt: <i>die Freiheit, die Ehrlichkeit, die Hoffnung, die Freundschaft, das Erlebnis</i>.</div>
+      <h3>Das Geschlecht (Genus)</h3>
+      <p>Jedes Nomen hat ein grammatisches Geschlecht:</p>
+      <ul>
+        <li><span class="m">männlich = maskulin</span> → <b>der</b> Baum, <b>ein</b> Ball, der Gedanke</li>
+        <li><span class="f">weiblich = feminin</span> → <b>die</b> Biene, <b>eine</b> Frau, die Bienen­königin</li>
+        <li><span class="n">sächlich = neutral</span> → <b>das</b> Kind, <b>ein</b> Mädchen, das Essen, das Gymnasium</li>
+      </ul>
+      <div class="merk">✨ Kleine Helfer: <b>-chen, -lein</b> → immer <span class="n">das</span> (das Mädchen, das Büchlein). <b>-ung, -heit, -keit, -schaft, -in</b> → immer <span class="f">die</span> (die Zeitung, die Lehrerin). Aus Verben gemachte Nomen → <span class="n">das</span> (das Laufen, das Essen).</div>
+      <h3>Die Zahl (Numerus)</h3>
+      <p><b>Einzahl = Singular</b> (eins): das Kind. <b>Mehrzahl = Plural</b> (mehrere): die Kinder. In der Mehrzahl heißt der Artikel im 1. Fall immer <b>die</b> – egal welches Geschlecht.</p>
+      <div class="tipp">💡 Manche Nomen sehen in Einzahl und Mehrzahl gleich aus: <i>der Lehrer – die Lehrer, das Mädchen – die Mädchen, das Fenster – die Fenster</i>. Dann hilft dir der Artikel oder das Verb: „Die Mädchen <b>singen</b>“ (mehrere) – „Das Mädchen <b>singt</b>“ (eines).</div>
+      <h3>Mehrzahl-Endungen</h3>
+      <p>Die Mehrzahl wird ganz unterschiedlich gebildet: <i>der Hund → die Hund<span class="end">e</span></i>, <i>die Katze → die Katze<span class="end">n</span></i>, <i>das Kind → die Kind<span class="end">er</span></i>, <i>das Auto → die Auto<span class="end">s</span></i>, <i>der Lehrer → die Lehrer</i> (keine Endung). Oft kommt noch ein <b>Umlaut</b> dazu: <i>der Baum → die B<span class="end">ä</span>ume, das Buch → die B<span class="end">ü</span>cher, der Apfel → die <span class="end">Ä</span>pfel</i>.</p>
+      <h3>Die vier Fälle (Kasus)</h3>
+      <p>Mit der richtigen <b>Frage</b> findest du jeden Fall:</p>
+      <div class="scroll"><table class="t">
+        <tr><th>Fall</th><th>Frage</th><th><span style="color:#fff">maskulin</span></th><th>feminin</th><th>neutral</th><th>Mehrzahl</th></tr>
+        <tr><td>1. Fall – Nominativ</td><td>Wer oder was?</td><td>der Hund</td><td>die Katze</td><td>das Kind</td><td>die Kinder</td></tr>
+        <tr><td>2. Fall – Genitiv</td><td>Wessen?</td><td>des Hund<span class="end">es</span></td><td>der Katze</td><td>des Kind<span class="end">es</span></td><td>der Kinder</td></tr>
+        <tr><td>3. Fall – Dativ</td><td>Wem?</td><td>dem Hund</td><td>der Katze</td><td>dem Kind</td><td>den Kinder<span class="end">n</span></td></tr>
+        <tr><td>4. Fall – Akkusativ</td><td>Wen oder was?</td><td>den Hund</td><td>die Katze</td><td>das Kind</td><td>die Kinder</td></tr>
+      </table></div>
+      <div class="merk">✨ <b>Endungen am Nomen:</b> Im 2. Fall bekommen maskuline und neutrale Nomen ein <span class="end">-s</span> oder <span class="end">-es</span> (des Vaters, des Hauses). Im 3. Fall Mehrzahl bekommt das Nomen ein <span class="end">-n</span> (den Kindern), außer es endet schon auf -n oder -s (den Frauen, den Autos).</div>
+      <div class="tipp">💡 Nach <b>mit, bei, von, zu, aus, nach, seit</b> steht immer der 3. Fall. Bei <b>in, an, auf, unter, über, vor, hinter, neben, zwischen</b> fragst du „Wo?“ → 3. Fall, „Wohin?“ → 4. Fall.</div>
+    </div>
+
+    <div class="card">
+      <h2>🟩 Das Adjektiv (Eigenschaftswort)</h2>
+      <p>Adjektive beschreiben, <b>wie</b> etwas ist. Du findest sie mit der Frage <b>„Was für ein …?“</b> – „Was für ein Lied?“ → ein <b>schönes</b> Lied. Wir schreiben Adjektive <b>klein</b>.</p>
+      <h3>Das Adjektiv passt sich an</h3>
+      <p>Steht das Adjektiv vor einem Nomen, bekommt es eine Endung. Es <b>übernimmt Fall, Geschlecht und Zahl</b> seines Nomens und passt zum Artikel: <i>der nett<span class="end">e</span> Mann – dem nett<span class="end">en</span> Mann – ein nett<span class="end">er</span> Mann</i>.</p>
+      <div class="scroll"><table class="t">
+        <tr><th>mit der/die/das</th><th>maskulin</th><th>feminin</th><th>neutral</th><th>Mehrzahl</th></tr>
+        <tr><td>1. Fall</td><td>der klein<span class="end">e</span> Hund</td><td>die klein<span class="end">e</span> Katze</td><td>das klein<span class="end">e</span> Kind</td><td>die klein<span class="end">en</span> Kinder</td></tr>
+        <tr><td>2. Fall</td><td>des klein<span class="end">en</span> Hundes</td><td>der klein<span class="end">en</span> Katze</td><td>des klein<span class="end">en</span> Kindes</td><td>der klein<span class="end">en</span> Kinder</td></tr>
+        <tr><td>3. Fall</td><td>dem klein<span class="end">en</span> Hund</td><td>der klein<span class="end">en</span> Katze</td><td>dem klein<span class="end">en</span> Kind</td><td>den klein<span class="end">en</span> Kindern</td></tr>
+        <tr><td>4. Fall</td><td>den klein<span class="end">en</span> Hund</td><td>die klein<span class="end">e</span> Katze</td><td>das klein<span class="end">e</span> Kind</td><td>die klein<span class="end">en</span> Kinder</td></tr>
+      </table></div>
+      <div class="scroll"><table class="t">
+        <tr><th>mit ein/eine</th><th>maskulin</th><th>feminin</th><th>neutral</th></tr>
+        <tr><td>1. Fall</td><td>ein klein<span class="end">er</span> Hund</td><td>eine klein<span class="end">e</span> Katze</td><td>ein klein<span class="end">es</span> Kind</td></tr>
+        <tr><td>2. Fall</td><td>eines klein<span class="end">en</span> Hundes</td><td>einer klein<span class="end">en</span> Katze</td><td>eines klein<span class="end">en</span> Kindes</td></tr>
+        <tr><td>3. Fall</td><td>einem klein<span class="end">en</span> Hund</td><td>einer klein<span class="end">en</span> Katze</td><td>einem klein<span class="end">en</span> Kind</td></tr>
+        <tr><td>4. Fall</td><td>einen klein<span class="end">en</span> Hund</td><td>eine klein<span class="end">e</span> Katze</td><td>ein klein<span class="end">es</span> Kind</td></tr>
+      </table></div>
+      <div class="merk">✨ <b>Die drei goldenen Tricks:</b><br>
+      1. Im 2. und 3. Fall und in der Mehrzahl (mit Artikel) endet das Adjektiv fast immer auf <span class="end">-en</span>.<br>
+      2. Nach <b>ein</b> verrät das Adjektiv das Geschlecht: <span class="end">-er</span> wie d<b>er</b>, <span class="end">-es</span> wie da<b>s</b> (ein alt<b>er</b> Baum, ein schön<b>es</b> Lied).<br>
+      3. Ohne Artikel übernimmt das Adjektiv selbst die Endung des Artikels: kalt<b>e</b> Milch (die), frisch<b>es</b> Brot (das), mit warm<b>em</b> Wasser (dem).</div>
+      <h3>Die Steigerung – die Treppe hinauf</h3>
+      <div class="scroll"><table class="t">
+        <tr><th>Stufe</th><th>Name</th><th>Beispiel</th><th>Beispiel</th><th>Beispiel</th></tr>
+        <tr><td>Grundstufe</td><td>Positiv</td><td>laut</td><td>groß</td><td>gut</td></tr>
+        <tr><td>Mehrstufe</td><td>Komparativ</td><td>laut<span class="end">er</span></td><td>gr<span class="end">ö</span>ß<span class="end">er</span></td><td>besser</td></tr>
+        <tr><td>Meiststufe</td><td>Superlativ</td><td>am laut<span class="end">esten</span></td><td>am gr<span class="end">ö</span>ß<span class="end">ten</span></td><td>am besten</td></tr>
+      </table></div>
+      <div class="tipp">💡 Unregelmäßig und wichtig: <b>gut – besser – am besten</b>, <b>viel – mehr – am meisten</b>, <b>gern – lieber – am liebsten</b>, <b>nah – näher – am nächsten</b>, <b>hoch – höher – am höchsten</b>.<br>
+      ⚠️ Vorsicht Falle: „ein schön<b>er</b> Tag“ ist <b>Grundstufe</b>! Das -er ist hier nur die Endung (wie bei „ein alter Baum“). Mehrstufe erkennst du am Vergleich mit <b>als</b>: „schöner <b>als</b> gestern“.</div>
+      <h3>Nachsilben (Suffixe) machen Adjektive</h3>
+      <p>Mit <b>-lich, -ig, -bar, -los, -haft, -sam</b> werden aus Nomen und Verben Adjektive: <i>der Freund → freund<span class="end">lich</span>, die Lust → lust<span class="end">ig</span>, essen → ess<span class="end">bar</span>, die Kraft → kraft<span class="end">los</span>, das Gewissen → gewissen<span class="end">haft</span>, sparen → spar<span class="end">sam</span></i>.</p>
+      <div class="merk">✨ <b>-los</b> heißt „ohne“ (kraftlos = ohne Kraft). <b>-bar</b> heißt oft „kann man …“ (essbar = kann man essen). <b>-ig</b> heißt oft „mit viel …“ (sonnig = mit viel Sonne).</div>
+    </div>
+
+    <div class="card">
+      <h2>🟪 Das Pronomen (Fürwort)</h2>
+      <p>Das Pronomen ist ein <b>Für-Wort</b>: Es steht <b>für ein Nomen</b> und ersetzt es, damit wir nicht immer dasselbe Wort wiederholen müssen. „Der Hund bellt. <b>Er</b> hat Hunger.“ – „er“ steht für „der Hund“.</p>
+      <div class="tipp">💡 Für die Hausübung musst du Pronomen <b>erkennen</b> – du musst nicht sagen, welche Unterart es ist. Die Liste unten hilft dir trotzdem beim Wiedererkennen.</div>
+      <ul>
+        <li><b>ich, du, er, sie, es, wir, ihr, sie</b> und ihre Formen: <i>mich, mir, dich, dir, ihn, ihm, ihr, uns, euch, ihnen</i></li>
+        <li><b>sich</b> (und mich, dich, uns, euch, wenn sie sich auf dieselbe Person beziehen): <i>Ich wasche mich. Er freut sich.</i></li>
+        <li><b>der, die, das, welcher</b> als Satzanfang eines Nebensatzes: <i>der Bus, <b>der</b> zur Schule fährt</i></li>
+        <li><b>dieser, diese, dieses, jener</b> und <b>der, die, das</b> als „hinweisende“ Wörter: <i><b>Das</b> glaube ich nicht.</i></li>
+        <li><b>man, jemand, niemand, etwas, nichts</b>: <i><b>Man</b> darf hier nicht laufen.</i></li>
+      </ul>
+      <h3>Der, die, das – Artikel oder Pronomen?</h3>
+      <div class="merk">✨ Steht <b>der/die/das direkt vor einem Nomen</b> (oder vor Adjektiv + Nomen), ist es ein <b>Artikel</b>: „<b>Der</b> Hund bellt.“ Steht es <b>allein</b> und ersetzt ein Nomen, ist es ein <b>Pronomen</b>: „Der Hund, <b>der</b> bellt …“ – „<b>Das</b> ist toll!“</div>
+      <h3>Pronomen haben auch Fälle</h3>
+      <div class="scroll"><table class="t">
+        <tr><th>Fall</th><th>ich</th><th>du</th><th>er</th><th>sie</th><th>es</th><th>wir</th><th>ihr</th><th>sie (Mz.)</th></tr>
+        <tr><td>3. Fall (Wem?)</td><td>mir</td><td>dir</td><td>ihm</td><td>ihr</td><td>ihm</td><td>uns</td><td>euch</td><td>ihnen</td></tr>
+        <tr><td>4. Fall (Wen?)</td><td>mich</td><td>dich</td><td>ihn</td><td>sie</td><td>es</td><td>uns</td><td>euch</td><td>sie</td></tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <h2>🧩 Komposita (zusammengesetzte Nomen)</h2>
+      <p>Aus zwei (oder mehr) Wörtern wird ein neues Nomen: <b>Bestimmungswort + Grundwort</b>. Das Bestimmungswort steht vorne und sagt genauer, <i>was für ein</i> Grundwort gemeint ist. Das Grundwort steht hinten.</p>
+      <ul>
+        <li>das Gummi + das Bärchen → <span class="n">das</span> Gummibärchen</li>
+        <li>die Noten + der Schlüssel → <span class="m">der</span> Notenschlüssel</li>
+        <li>der Raub + die Katze → <span class="f">die</span> Raubkatze</li>
+      </ul>
+      <div class="merk">✨ Das <b>Grundwort (hinten) bestimmt den Artikel</b> des ganzen Wortes!</div>
+      <div class="tipp">💡 Manchmal braucht man ein <b>Fugen-s</b> dazwischen: Geburt<b>s</b>tag, Arbeit<b>s</b>zimmer, Weihnacht<b>s</b>baum. Und bei zwei Komposita mit gleichem Grundwort darfst du abkürzen: „Das Fahrrad hat ein Vorder- und ein Hinterrad.“ Das längste berühmte Kompositum? Die Donaudampfschifffahrtsgesellschaftskapitänskajüte!</div>
+    </div>
+    <div style="text-align:center"><button class="btn big" onclick="zeige('menu')">🎮 Jetzt trainieren!</button></div>
+  </section>
+
+  <!-- SPIEL -->
+  <section id="game" class="screen">
+    <div class="game-head">
+      <div class="mode-ind" id="modeInd">Modus</div>
+      <div class="stats">
+        <div class="stat"><div class="l">Punkte</div><div class="v" id="pts">0</div></div>
+        <div class="stat"><div class="l">Zeit</div><div class="v" id="time">0:00</div></div>
+        <div class="stat"><div class="l">Serie</div><div class="v" id="streak">0</div></div>
+      </div>
+    </div>
+    <div class="bar"><div id="barFill"></div></div>
+    <div class="bar-t" id="barT">0 / 0</div>
+    <div class="hintbox" id="hintbox"></div>
+    <div class="qbox" id="qbox"></div>
+    <div class="opts" id="opts"></div>
+    <div class="feedback" id="fb"></div>
+    <div class="ctrl">
+      <button class="btn ghost" onclick="toggleHint()">💡 Tipp</button>
+      <button class="btn" id="nextBtn" style="display:none" onclick="weiter()">Weiter ➜</button>
+      <button class="btn ghost" onclick="endGame()">🏁 Beenden</button>
+    </div>
+  </section>
+
+  <!-- ERGEBNIS -->
+  <section id="result" class="screen">
+    <div class="card res">
+      <h2 id="resTitle">🎉 Geschafft!</h2>
+      <p id="resMsg" style="font-weight:800"></p>
+      <div class="res-grid">
+        <div><div class="v" id="rPts">0</div><div class="l">Punkte</div></div>
+        <div><div class="v" id="rTime">0:00</div><div class="l">Zeit</div></div>
+        <div><div class="v" id="rStreak">0</div><div class="l">Beste Serie</div></div>
+        <div><div class="v" id="rAcc">0%</div><div class="l">Genauigkeit</div></div>
+      </div>
+      <input class="name" id="pname" maxlength="16" placeholder="Dein Spitzname …">
+      <div class="ctrl">
+        <button class="btn" onclick="saveScore()">💾 Speichern</button>
+        <button class="btn" onclick="startGame(state.mode)">🔄 Nochmal</button>
+        <button class="btn ghost" onclick="zeige('menu')">🏠 Menü</button>
+      </div>
+      <div class="lb" id="lb"></div>
+    </div>
+  </section>
+</div>
+<button class="sound" id="soundBtn" onclick="toggleSound()" title="Ton an/aus">🔊</button>
+
+<script>
+/* ================= DATEN ================= */
+const FALL=["1. Fall · Nominativ (Wer/Was?)","2. Fall · Genitiv (Wessen?)","3. Fall · Dativ (Wem?)","4. Fall · Akkusativ (Wen/Was?)"];
+const GENUS={m:"maskulin (männlich)",f:"feminin (weiblich)",n:"neutral (sächlich)"};
+const GOPTS=["maskulin (männlich) – der","feminin (weiblich) – die","neutral (sächlich) – das"];
+const GIDX={m:0,f:1,n:2};
+
+// [Satz mit {Wortgruppe}, Fall, Genus, Zahl, Grundform, Fragehilfe]
+const NOM=[
+["{Der Hund} bellt laut.",1,"m","s","der Hund","Wer oder was bellt laut? → der Hund"],
+["Die Kinder füttern {den Hund}.",4,"m","s","der Hund","Wen oder was füttern die Kinder? → den Hund"],
+["Ich gebe {dem Hund} einen Knochen.",3,"m","s","der Hund","Wem gebe ich einen Knochen? → dem Hund"],
+["Das ist der Napf {des Hundes}.",2,"m","s","der Hund","Wessen Napf ist das? → der Napf des Hundes"],
+["{Die Katze} schläft auf dem Sofa.",1,"f","s","die Katze","Wer oder was schläft? → die Katze"],
+["Der Bub streichelt {die Katze}.",4,"f","s","die Katze","Wen oder was streichelt der Bub? → die Katze"],
+["Wir bringen {der Katze} Milch.",3,"f","s","die Katze","Wem bringen wir Milch? → der Katze"],
+["Das Fell {der Katze} ist weich.",2,"f","s","die Katze","Wessen Fell ist weich? → das Fell der Katze"],
+["{Das Kind} spielt im Garten.",1,"n","s","das Kind","Wer oder was spielt im Garten? → das Kind"],
+["Der Lehrer lobt {das Kind}.",4,"n","s","das Kind","Wen oder was lobt der Lehrer? → das Kind"],
+["Die Oma liest {dem Kind} eine Geschichte vor.",3,"n","s","das Kind","Wem liest die Oma eine Geschichte vor? → dem Kind"],
+["Die Schultasche {des Kindes} ist rot.",2,"n","s","das Kind","Wessen Schultasche ist rot? → die Schultasche des Kindes"],
+["{Die Kinder} lachen laut.",1,"n","p","das Kind","Wer oder was lacht laut? → die Kinder"],
+["Der Clown begrüßt {die Kinder}.",4,"n","p","das Kind","Wen oder was begrüßt der Clown? → die Kinder"],
+["Der Lehrer hilft {den Kindern}.",3,"n","p","das Kind","Wem hilft der Lehrer? → den Kindern"],
+["Die Spiele {der Kinder} sind lustig.",2,"n","p","das Kind","Wessen Spiele sind lustig? → die Spiele der Kinder"],
+["{Die Bäume} verlieren im Herbst die Blätter.",1,"m","p","der Baum","Wer oder was verliert die Blätter? → die Bäume"],
+["Der Gärtner gießt {die Blumen}.",4,"f","p","die Blume","Wen oder was gießt der Gärtner? → die Blumen"],
+["Wir danken {den Lehrern}.",3,"m","p","der Lehrer","Wem danken wir? → den Lehrern"],
+["{Der Tormann} hält den Ball.",1,"m","s","der Tormann","Wer oder was hält den Ball? → der Tormann"],
+["Lena kauft {einen Apfel}.",4,"m","s","der Apfel","Wen oder was kauft Lena? → einen Apfel"],
+["Ich fahre mit {dem Fahrrad} zur Schule.",3,"n","s","das Fahrrad","Nach „mit“ steht immer der 3. Fall: Womit fahre ich? → mit dem Fahrrad"],
+["Wir wohnen in {einem Haus}.",3,"n","s","das Haus","Wo wohnen wir? → in einem Haus. Bei „in“ + Wo? steht der 3. Fall."],
+["Der Ball liegt unter {dem Tisch}.",3,"m","s","der Tisch","Wo liegt der Ball? → unter dem Tisch. Bei „unter“ + Wo? steht der 3. Fall."],
+["{Ein Vogel} singt im Baum.",1,"m","s","der Vogel","Wer oder was singt? → ein Vogel"],
+["Der Bäcker backt {ein Brot}.",4,"n","s","das Brot","Wen oder was backt der Bäcker? → ein Brot"],
+["Tim schenkt {seiner Oma} einen Kuchen.",3,"f","s","die Oma","Wem schenkt Tim einen Kuchen? → seiner Oma"],
+["Das Auto {des Vaters} ist blau.",2,"m","s","der Vater","Wessen Auto ist blau? → das Auto des Vaters"],
+["{Die Mädchen} singen ein Lied.",1,"n","p","das Mädchen","Wer oder was singt? → die Mädchen. Das Verb „singen“ zeigt: Es sind mehrere."],
+["{Der Lehrer} erklärt die Aufgabe.",1,"m","s","der Lehrer","Wer oder was erklärt die Aufgabe? → der Lehrer. Das Verb „erklärt“ zeigt: nur einer."],
+["Wir besuchen {den Zoo}.",4,"m","s","der Zoo","Wen oder was besuchen wir? → den Zoo"],
+["Der Hund spielt mit {den Bällen}.",3,"m","p","der Ball","Nach „mit“ steht immer der 3. Fall → mit den Bällen"],
+["{Die Schülerinnen} schreiben einen Test.",1,"f","p","die Schülerin","Wer oder was schreibt einen Test? → die Schülerinnen"],
+["Mit {den Freunden} gehe ich ins Kino.",3,"m","p","der Freund","Nach „mit“ steht immer der 3. Fall → mit den Freunden"],
+["Die Farbe {des Himmels} ist heute grau.",2,"m","s","der Himmel","Wessen Farbe ist grau? → die Farbe des Himmels"],
+["Papa repariert {das Fenster}.",4,"n","s","das Fenster","Wen oder was repariert Papa? → das Fenster"],
+["{Das Fenster} ist offen.",1,"n","s","das Fenster","Wer oder was ist offen? → das Fenster. Das Verb „ist“ zeigt: nur eines."],
+["Die Kinder malen {Bilder}.",4,"n","p","das Bild","Wen oder was malen die Kinder? → Bilder"],
+["Der Hut gehört {dem Zauberer}.",3,"m","s","der Zauberer","Wem gehört der Hut? → dem Zauberer"],
+["Ich rufe {meine Freundin} an.",4,"f","s","die Freundin","Wen oder was rufe ich an? → meine Freundin"],
+["{Die Ameisen} tragen Blätter.",1,"f","p","die Ameise","Wer oder was trägt Blätter? → die Ameisen"],
+["Wir helfen {der Nachbarin}.",3,"f","s","die Nachbarin","Wem helfen wir? → der Nachbarin"],
+["Die Ohren {des Hasen} sind lang.",2,"m","s","der Hase","Wessen Ohren sind lang? → die Ohren des Hasen"],
+["Ich esse {die Äpfel}.",4,"m","p","der Apfel","Wen oder was esse ich? → die Äpfel"],
+["{Der kleine Hund} bellt.",1,"m","s","der Hund","Wer oder was bellt? → der kleine Hund"],
+["Ich sehe {einen großen Elefanten}.",4,"m","s","der Elefant","Wen oder was sehe ich? → einen großen Elefanten"],
+["Wir helfen {dem netten Mann}.",3,"m","s","der Mann","Wem helfen wir? → dem netten Mann"],
+["Das ist das Haus {der alten Frau}.",2,"f","s","die Frau","Wessen Haus ist das? → das Haus der alten Frau"],
+["{Ein schönes Lied} klingt aus dem Radio.",1,"n","s","das Lied","Wer oder was klingt aus dem Radio? → ein schönes Lied"],
+["Ich trinke {kalte Milch}.",4,"f","s","die Milch","Wen oder was trinke ich? → kalte Milch"],
+["Der Lehrer lobt {die fleißigen Schüler}.",4,"m","p","der Schüler","Wen oder was lobt der Lehrer? → die fleißigen Schüler"],
+["Ich spiele mit {dem roten Ball}.",3,"m","s","der Ball","Nach „mit“ steht immer der 3. Fall → mit dem roten Ball"],
+["{Die bunten Blumen} blühen.",1,"f","p","die Blume","Wer oder was blüht? → die bunten Blumen"],
+["Der Verkäufer zeigt mir {ein neues Kleid}.",4,"n","s","das Kleid","Wen oder was zeigt mir der Verkäufer? → ein neues Kleid"],
+["Die Mutter {des kleinen Mädchens} winkt.",2,"n","s","das Mädchen","Wessen Mutter winkt? → die Mutter des kleinen Mädchens"]
+];
+
+// [Nomen, Genus, Erklärung]
+const GEN=[
+["Baum","m",""],["Biene","f",""],["Kind","n",""],["Mädchen","n","Wörter auf -chen sind immer neutral."],["Gedanke","m",""],
+["Essen","n","Aus einem Verb (essen) gemachte Nomen sind neutral."],["Gymnasium","n",""],["Ball","m",""],["Frau","f",""],
+["Freundschaft","f","Wörter auf -schaft sind immer feminin."],["Freiheit","f","Wörter auf -heit sind immer feminin."],
+["Ehrlichkeit","f","Wörter auf -keit sind immer feminin."],["Zeitung","f","Wörter auf -ung sind immer feminin."],
+["Büchlein","n","Wörter auf -lein sind immer neutral."],["Löffel","m",""],["Gabel","f",""],["Messer","n",""],["Sonne","f",""],
+["Mond","m",""],["Fenster","n",""],["Tisch","m",""],["Sessel","m",""],["Lehrerin","f","Wörter auf -in (weibliche Personen) sind feminin."],
+["Hose","f",""],["Hemd","n",""],["Schuh","m",""],["Laufen","n","Aus einem Verb (laufen) gemachte Nomen sind neutral."],
+["Liebe","f",""],["Mut","m",""],["Angst","f",""],["Glück","n",""],["Idee","f",""],["Wetter","n",""],["Regen","m",""],
+["Schnee","m",""],["Auto","n",""],["Zug","m",""],["Schiff","n",""],["Häuschen","n","Wörter auf -chen sind immer neutral."],["Hoffnung","f","Wörter auf -ung sind immer feminin."]
+];
+
+// [Nomen, k/a, Erklärung]
+const KA=[
+["der Tisch","k"],["die Freude","a"],["der Hund","k"],["die Angst","a"],["der Apfel","k"],["die Idee","a"],["der Mut","a"],
+["die Blume","k"],["die Freundschaft","a"],["das Fenster","k"],["das Glück","a"],["die Lehrerin","k"],["die Hoffnung","a"],
+["der Stein","k"],["die Wut","a"],["die Katze","k"],["der Gedanke","a"],["der Schuh","k"],["die Ehrlichkeit","a"],["das Brot","k"],
+["die Liebe","a"],["die Biene","k"],["die Freiheit","a"],["der Baum","k"],["das Wissen","a"],["die Geduld","a"],["das Fahrrad","k"],["die Traurigkeit","a"]
+];
+
+// Wortart: [Satz mit {Wort}, Antwort, Erklärung]
+const WA_OPTS=["Nomen","Adjektiv","Pronomen","Verb","Artikel"];
+const WA=[
+["Der {Hund} bellt.","Nomen","„Hund“ ist ein Lebewesen, wird großgeschrieben und hat einen Begleiter (der)."],
+["Der Hund {bellt}.","Verb","„bellt“ sagt, was der Hund tut – ein Tunwort (Verb)."],
+["{Der} Hund bellt.","Artikel","„Der“ steht direkt vor dem Nomen „Hund“ – das ist der Begleiter (Artikel)."],
+["Der {kleine} Hund bellt.","Adjektiv","Was für ein Hund? → ein kleiner. „klein“ beschreibt den Hund."],
+["{Er} bellt laut.","Pronomen","„Er“ steht für ein Nomen (z. B. der Hund) – ein Für-Wort."],
+["Die {Freude} ist groß.","Nomen","„Freude“ ist ein Gefühl (abstraktes Nomen) – großgeschrieben, mit Begleiter „die“."],
+["Die Freude ist {groß}.","Adjektiv","„groß“ beschreibt, wie die Freude ist."],
+["{Wir} gehen ins Kino.","Pronomen","„Wir“ steht für Personen – ein Für-Wort."],
+["Ich sehe {eine} Katze.","Artikel","„eine“ steht direkt vor dem Nomen „Katze“ – ein unbestimmter Artikel."],
+["Das {Laufen} macht Spaß.","Nomen","Achtung: „das Laufen“ ist hier ein Nomen! Es hat den Begleiter „das“ und wird großgeschrieben."],
+["Wir {laufen} schnell.","Verb","„laufen“ sagt, was wir tun – Verb."],
+["Das ist ein {wunderbarer} Tag.","Adjektiv","Was für ein Tag? → ein wunderbarer. Die Nachsilbe -bar zeigt oft ein Adjektiv."],
+["Kannst du {mir} helfen?","Pronomen","„mir“ ist die Form von „ich“ im 3. Fall – ein Pronomen."],
+["Der {Mut} des Ritters war groß.","Nomen","„Mut“ kann man nicht angreifen – ein abstraktes Nomen."],
+["Das Wasser ist {kalt}.","Adjektiv","„kalt“ beschreibt, wie das Wasser ist."],
+["{Man} darf hier nicht rauchen.","Pronomen","„man“ steht für irgendeine Person – ein Pronomen."],
+["Ich wasche {mich}.","Pronomen","„mich“ bezieht sich auf „ich“ zurück – ein Pronomen."],
+["Das ist der Bus, {der} zur Schule fährt.","Pronomen","Hier steht „der“ allein und ersetzt „der Bus“ – es beginnt einen Nebensatz. Pronomen!"],
+["{Der} Bus fährt zur Schule.","Artikel","„Der“ steht direkt vor dem Nomen „Bus“ – Artikel."],
+["Die {Freundschaft} hält ewig.","Nomen","-schaft zeigt ein Nomen. Freundschaft ist abstrakt."],
+["Der Tee ist {heißer} als der Kakao.","Adjektiv","„heißer“ ist die Mehrstufe von „heiß“ – ein gesteigertes Adjektiv."],
+["{Dieser} Kuchen schmeckt gut.","Pronomen","„dieser“ zeigt hin auf etwas – ein hinweisendes Pronomen."],
+["Wir {spielen} Fußball.","Verb","„spielen“ sagt, was wir tun – Verb."],
+["Am Abend wird es {dunkel}.","Adjektiv","„dunkel“ beschreibt, wie es wird – Adjektiv."],
+["{Niemand} war zu Hause.","Pronomen","„niemand“ = keine Person – ein Pronomen."],
+["Die Kinder {lachen} laut.","Verb","„lachen“ sagt, was die Kinder tun – Verb."],
+["Das Glück ist {kostbar}.","Adjektiv","„kostbar“ beschreibt das Glück. Nachsilbe -bar!"],
+["Ich habe {ihn} gesehen.","Pronomen","„ihn“ ist „er“ im 4. Fall – ein Pronomen."],
+["Die {Ehrlichkeit} ist wichtig.","Nomen","-keit zeigt ein Nomen (abstrakt)."],
+["{Die} Sonne scheint.","Artikel","„Die“ steht direkt vor dem Nomen „Sonne“ – Artikel."],
+["Die Kinder sind {fröhlich}.","Adjektiv","„fröhlich“ beschreibt, wie die Kinder sind. Nachsilbe -lich!"],
+["{Sie} kommt morgen.","Pronomen","„Sie“ steht für eine Person – Pronomen."]
+];
+
+// Pronomen finden: *Pronomen*
+const PF=[
+"*Ich* spiele gern Fußball.","Lisa ruft *mich* morgen an.","*Wir* gehen heute ins Schwimmbad.","Der Hund freut *sich* über den Knochen.",
+"Das ist das Buch, *das* *ich* gelesen habe.","*Man* soll nicht bei Rot über die Straße gehen.","*Dieses* Fahrrad gehört *ihm*.",
+"Kannst *du* *uns* helfen?","*Es* regnet schon den ganzen Tag.","*Niemand* hat den Schlüssel gefunden.","Die Oma backt *ihnen* einen Kuchen.",
+"*Er* wäscht *sich* die Hände.","Der Mann, *der* dort steht, ist der Bäcker.","*Jemand* hat an die Tür geklopft.","*Sie* schenkt *ihm* eine Blume.",
+"*Ich* habe *etwas* Schönes gefunden.","Tom und Anna spielen Schach.","Die Katze schläft auf dem Sofa.","*Ihr* seid heute sehr leise.",
+"Kennst *du* den Film, *den* *wir* gestern gesehen haben?","*Das* glaube *ich* nicht.","*Wir* treffen *uns* um drei Uhr.","Gib *mir* bitte den Ball!",
+"*Nichts* ist unmöglich.","Der Lehrer erklärt *es* *euch* noch einmal.","*Dieser* Weg ist kürzer als *jener*.",
+"Der Ball, *den* *du* *mir* geschenkt hast, ist kaputt.","Am Morgen putzt *sie* *sich* die Zähne.","Der Zug fährt pünktlich um acht Uhr ab.",
+"Die Kinder, *die* im Hof spielen, sind laut."
+];
+
+// Für-Wort: [Text mit {Pronomen}, [Optionen], richtige Option, Erklärung]
+const FW=[
+["Der Hund bellt. Dann frisst {er} sein Futter.",["der Hund","das Futter"],0,"Wer frisst? Der Hund. „er“ passt zu „der Hund“ (maskulin)."],
+["Anna hat eine neue Tasche. Sie trägt {sie} jeden Tag.",["Anna","die Tasche"],1,"Was trägt Anna jeden Tag? Die Tasche. Das erste „Sie“ ist Anna, das markierte „sie“ ist die Tasche."],
+["Max hilft dem Opa. Er trägt {ihm} die Einkäufe.",["Max","dem Opa","die Einkäufe"],1,"Wem trägt Max die Einkäufe? Dem Opa → ihm."],
+["Die Kinder spielen im Park. {Sie} haben viel Spaß.",["die Kinder","der Park","der Spaß"],0,"Wer hat Spaß? Die Kinder → sie (Mehrzahl)."],
+["Das Baby weint. Die Mama tröstet {es}.",["das Baby","die Mama"],0,"Wen tröstet die Mama? Das Baby → es (neutral)."],
+["Ich habe einen Apfel gekauft. {Er} ist sehr saftig.",["ich","der Apfel"],1,"Was ist saftig? Der Apfel → er (maskulin)."],
+["Der Lehrer bringt ein Buch mit. Er liest {es} der Klasse vor.",["der Lehrer","das Buch","die Klasse"],1,"Was liest er vor? Das Buch → es (neutral)."],
+["Opa sucht seine Brille. Er findet {sie} im Kühlschrank.",["Opa","die Brille","der Kühlschrank"],1,"Was findet Opa? Die Brille → sie (feminin)."],
+["Lukas und Mia gehen ins Kino. Die Mutter gibt {ihnen} Geld.",["Lukas und Mia","das Kino","die Mutter"],0,"Wem gibt die Mutter Geld? Lukas und Mia → ihnen (Mehrzahl, 3. Fall)."],
+["Das ist der Ball, {den} ich gefunden habe.",["der Ball","ich"],0,"Was habe ich gefunden? Den Ball. „den“ steht für „der Ball“."],
+["Die Katze sieht eine Maus. Sie jagt {sie} durch die Küche.",["die Katze","die Maus","die Küche"],1,"Wen jagt die Katze? Die Maus. Das erste „Sie“ ist die Katze."],
+["Der Bäcker backt Semmeln. {Sie} sind noch warm.",["der Bäcker","die Semmeln"],1,"Was ist warm? Die Semmeln → sie sind (Mehrzahl). Der Bäcker wäre „er ist“."],
+["Die Sonne scheint. {Sie} wärmt die Erde.",["die Sonne","die Erde"],0,"Wer wärmt die Erde? Die Sonne → sie."],
+["Paul hat Geburtstag. Ich schenke {ihm} ein Spiel.",["Paul","der Geburtstag","das Spiel"],0,"Wem schenke ich ein Spiel? Paul → ihm."],
+["Das Fahrrad ist neu. Papa hat {es} gestern gekauft.",["das Fahrrad","Papa"],0,"Was hat Papa gekauft? Das Fahrrad → es."],
+["Die Kinder, {die} im Garten spielen, sind meine Cousins.",["die Kinder","der Garten"],0,"Wer spielt im Garten? Die Kinder. „die“ steht für „die Kinder“."]
+];
+
+// Pronomen im richtigen Fall: [Lückensatz mit ___, [Optionen], richtig, Erklärung]
+const PFALL=[
+["Ich sehe den Mann. Ich winke ___.",["er","ihn","ihm","ihr"],"ihm","Wem winke ich? → dem Mann → ihm (3. Fall)."],
+["Das ist mein Bruder. ___ heißt Paul.",["Er","Ihn","Ihm","Es"],"Er","Wer heißt Paul? → 1. Fall → er."],
+["Ich habe den Film gesehen. ___ war spannend.",["Er","Ihn","Ihm","Es"],"Er","der Film → er (1. Fall)."],
+["Wo ist meine Jacke? Ich finde ___ nicht.",["sie","ihr","ihn","es"],"sie","Wen oder was finde ich nicht? → die Jacke → sie (4. Fall)."],
+["Lisa hat Geburtstag. Wir schenken ___ ein Buch.",["sie","ihr","ihm","ihn"],"ihr","Wem schenken wir ein Buch? → Lisa → ihr (3. Fall)."],
+["Der Hund hat Hunger. Ich gebe ___ Futter.",["er","ihn","ihm","ihr"],"ihm","Wem gebe ich Futter? → dem Hund → ihm (3. Fall)."],
+["Das Kind weint. Ich tröste ___.",["es","ihm","ihn","sie"],"es","Wen tröste ich? → das Kind → es (4. Fall)."],
+["Die Kinder warten. Der Bus holt ___ ab.",["sie","ihnen","ihr","euch"],"sie","Wen holt der Bus ab? → die Kinder → sie (4. Fall)."],
+["Unsere Großeltern kommen. Wir helfen ___ beim Tragen.",["sie","ihnen","ihr","ihn"],"ihnen","Wem helfen wir? → den Großeltern → ihnen (3. Fall)."],
+["Ich brauche einen Stift. Kannst du ___ mir leihen?",["er","ihn","ihm","es"],"ihn","Wen oder was leihst du mir? → den Stift → ihn (4. Fall)."],
+["Peter und ich gehen schwimmen. ___ treffen uns um zwei.",["Wir","Uns","Ihr","Sie"],"Wir","Peter und ich = wir (1. Fall)."],
+["Kommst du mit? Ich warte auf ___.",["dich","dir","du","mich"],"dich","„warten auf“ + 4. Fall → auf dich."],
+["Hallo Tom! Ich gratuliere ___ zum Geburtstag.",["dich","dir","du","ihn"],"dir","Ich spreche Tom direkt an. Wem gratuliere ich? → dir (3. Fall)."],
+["Mama, kannst du ___ bitte helfen? Ich schaffe es allein nicht.",["mich","mir","ich","dir"],"mir","Wem hilft Mama? → mir (3. Fall). „helfen“ will immer den 3. Fall."],
+["Ich wasche ___ jeden Morgen.",["mich","mir","sich","ich"],"mich","Ich wasche – wen? → mich selbst (4. Fall)."],
+["Tim freut ___ auf die Ferien.",["sich","ihm","ihn","mich"],"sich","Tim freut sich – „sich“ bezieht sich auf Tim zurück."],
+["Wir sehen ___ morgen in der Schule.",["uns","wir","unser","sich"],"uns","Wir sehen – wen? → uns (4. Fall)."],
+["Kinder, ich erkläre ___ die Aufgabe noch einmal.",["euch","ihr","ihnen","sie"],"euch","Ich spreche die Kinder direkt an (ihr). Wem erkläre ich? → euch (3. Fall)."]
+];
+
+// Adjektivendungen: [vor, nach, Endung, Erklärung]
+const AE_OPTS=["-e","-en","-er","-es","-em"];
+const AE=[
+["Der klein","Hund bellt.","e","der Hund · 1. Fall Einzahl · mit „der“ → -e: der kleine Hund."],
+["Ich sehe einen groß","Elefanten.","en","einen → 4. Fall maskulin → -en: einen großen Elefanten."],
+["Ein schön","Lied klingt aus dem Radio.","es","ein + das Lied (neutral) · 1. Fall → -es (wie das): ein schönes Lied."],
+["Das ist ein alt","Baum.","er","ein + der Baum (maskulin) · 1. Fall → -er (wie der): ein alter Baum."],
+["Wir helfen dem nett","Mann.","en","dem → 3. Fall → -en: dem netten Mann."],
+["Ich spiele mit dem rot","Ball.","en","mit dem → 3. Fall → -en: mit dem roten Ball."],
+["Die bunt","Blumen blühen.","en","Mehrzahl mit Artikel → -en: die bunten Blumen."],
+["Das klein","Kind lacht.","e","das Kind · 1. Fall Einzahl · mit „das“ → -e: das kleine Kind."],
+["Die neu","Lehrerin ist freundlich.","e","die Lehrerin · 1. Fall Einzahl → -e: die neue Lehrerin."],
+["Ich kaufe eine warm","Jacke.","e","eine + die Jacke · 4. Fall → -e (feminin bleibt wie im 1. Fall): eine warme Jacke."],
+["Er wohnt in einem groß","Haus.","en","in einem (Wo?) → 3. Fall → -en: in einem großen Haus."],
+["Sie trägt ein lang","Kleid.","es","ein + das Kleid · 4. Fall → -es: ein langes Kleid."],
+["Der Hund des nett","Nachbarn heißt Bello.","en","des → 2. Fall → -en: des netten Nachbarn."],
+["Ich gebe der klein","Katze Milch.","en","Wem gebe ich Milch? → der Katze = 3. Fall → -en: der kleinen Katze."],
+["Wir essen frisch","Brot.","es","Kein Artikel! Dann übernimmt das Adjektiv die Endung von „das“: frisches Brot."],
+["Ich trinke kalt","Milch.","e","Kein Artikel · die Milch → kalte Milch."],
+["Mit warm","Wasser waschen wir uns.","em","Kein Artikel · 3. Fall (mit dem Wasser) → -em wie dem: mit warmem Wasser."],
+["Ein freundlich","Mann hilft uns.","er","ein + der Mann · 1. Fall → -er: ein freundlicher Mann."],
+["Ich lese ein spannend","Buch.","es","ein + das Buch · 4. Fall → -es: ein spannendes Buch."],
+["Hast du den blau","Stift gesehen?","en","den → 4. Fall maskulin → -en: den blauen Stift."],
+["Das ist eine lustig","Geschichte.","e","eine + die Geschichte · 1. Fall → -e: eine lustige Geschichte."],
+["Viele Kinder spielen mit klein","Autos.","en","Kein Artikel · 3. Fall Mehrzahl (mit den Autos) → mit kleinen Autos."],
+["Gut","Freunde halten zusammen.","e","Kein Artikel · 1. Fall Mehrzahl (die Freunde) → gute Freunde."],
+["Die Farbe des neu","Autos gefällt mir.","en","des → 2. Fall → -en: des neuen Autos."],
+["Ich sehe die klein","Maus.","e","die Maus · 4. Fall feminin → -e: die kleine Maus."],
+["Die Kinder spielen auf der grün","Wiese.","en","auf der (Wo?) → 3. Fall → -en: auf der grünen Wiese."],
+["Das ist der Garten eines reich","Mannes.","en","eines → 2. Fall → -en: eines reichen Mannes."],
+["Wir wünschen dir ein schön","Wochenende!","es","ein + das Wochenende · 4. Fall → -es: ein schönes Wochenende."]
+];
+
+// Steigerung Stufe erkennen
+const ST_OPTS=["Grundstufe (Positiv)","Mehrstufe (Komparativ)","Meiststufe (Superlativ)"];
+const STS=[
+["Der Elefant ist {groß}.",0,"Keine Steigerung – das Adjektiv steht in der Grundform."],
+["Die Giraffe ist {größer} als das Pferd.",1,"Vergleich mit „als“ und Endung -er → Mehrstufe."],
+["Der Blauwal ist das {größte} Tier der Welt.",2,"„das größte“ – die höchste Stufe. Es gibt keines, das größer ist."],
+["Im Sommer ist es {am heißesten}.",2,"„am …sten“ → Meiststufe."],
+["Mein Rad ist {schneller} als deins.",1,"Vergleich mit „als“ → Mehrstufe."],
+["Heute ist ein {schöner} Tag.",0,"Falle! Hier gibt es keinen Vergleich. Das -er ist nur die Endung nach „ein“ (ein schöner Tag wie ein alter Baum). → Grundstufe."],
+["Dieser Kuchen schmeckt {besser} als der von gestern.",1,"gut – besser – am besten. „besser“ ist die Mehrstufe."],
+["Lisa läuft {am schnellsten}.",2,"„am …sten“ → Meiststufe."],
+["Der Tee ist {heiß}.",0,"Keine Steigerung → Grundstufe."],
+["Das ist der {beste} Witz!",2,"gut – besser – am besten. „der beste“ ist die Meiststufe."],
+["Ein {kleiner} Vogel sitzt auf dem Dach.",0,"Falle! Kein Vergleich – „ein kleiner Vogel“ wie „ein alter Baum“. → Grundstufe."],
+["Die Maus ist {kleiner} als die Katze.",1,"Vergleich mit „als“ → Mehrstufe."],
+["Im Winter sind die Tage {am kürzesten}.",2,"„am …sten“ → Meiststufe."],
+["Ich esse Äpfel {lieber} als Birnen.",1,"gern – lieber – am liebsten. „lieber“ ist die Mehrstufe."],
+["Er ist so {groß} wie sein Vater.",0,"Bei „so … wie“ steht die Grundstufe – die beiden sind gleich groß."],
+["Das ist der {höchste} Berg Österreichs.",2,"hoch – höher – am höchsten. „der höchste“ → Meiststufe."]
+];
+// Steigerung Form: [Grundform, gesuchte Stufe (1/2), [Optionen], richtig, Erklärung]
+const STF=[
+["groß",1,["größer","großer","grösser","am größten"],"größer","groß – größer – am größten (mit Umlaut ö)."],
+["alt",2,["am altesten","am ältesten","älter","am alten"],"am ältesten","alt – älter – am ältesten (mit Umlaut ä)."],
+["gut",1,["guter","besser","güter","am besten"],"besser","gut – besser – am besten (unregelmäßig!)."],
+["viel",1,["vieler","mehr","am meisten","mehrer"],"mehr","viel – mehr – am meisten (unregelmäßig!)."],
+["gern",2,["am gernsten","am liebsten","lieber","am meisten"],"am liebsten","gern – lieber – am liebsten (unregelmäßig!)."],
+["nah",1,["naher","näher","am nächsten","nächer"],"näher","nah – näher – am nächsten."],
+["laut",2,["am lautsten","am lautesten","lauter","am läutesten"],"am lautesten","laut – lauter – am lautesten (nach -t kommt ein -e- dazu)."],
+["hoch",1,["hocher","höher","höcher","am höchsten"],"höher","hoch – höher – am höchsten (das c fällt weg!)."],
+["klein",2,["am kleinsten","kleiner","am kleinesten","am klein"],"am kleinsten","klein – kleiner – am kleinsten."],
+["warm",1,["warmer","wärmer","am wärmsten","wärmerer"],"wärmer","warm – wärmer – am wärmsten (mit Umlaut ä)."],
+["jung",2,["am jungsten","am jüngsten","jünger","am jüngeren"],"am jüngsten","jung – jünger – am jüngsten (mit Umlaut ü)."],
+["dunkel",1,["dunkeler","dunkler","dünkler","am dunkelsten"],"dunkler","dunkel – dunkler – am dunkelsten (das e vor dem l fällt weg)."],
+["kurz",1,["kurzer","kürzer","am kürzesten","kürzerer"],"kürzer","kurz – kürzer – am kürzesten (mit Umlaut ü)."],
+["schnell",2,["am schnellsten","am schnellesten","schneller","am schnelleren"],"am schnellsten","schnell – schneller – am schnellsten."],
+["gut",2,["am gutesten","am besten","besser","am bessersten"],"am besten","gut – besser – am besten (unregelmäßig!)."],
+["viel",2,["am vielsten","am meisten","mehr","am mehrsten"],"am meisten","viel – mehr – am meisten (unregelmäßig!)."]
+];
+
+// Nachsilben: [Wortteil, Bedeutung, [Optionen], richtig, ganzes Wort]
+const SUF=[
+["der Freund → freund___","nett, wie ein Freund",["-lich","-ig","-los","-bar"],"-lich","freundlich"],
+["die Kraft → kraft___","ohne Kraft",["-los","-lich","-bar","-sam"],"-los","kraftlos"],
+["die Lust → lust___","witzig, zum Lachen",["-ig","-bar","-los","-haft"],"-ig","lustig"],
+["das Wunder → wunder___","herrlich, toll",["-bar","-los","-ig","-haft"],"-bar","wunderbar"],
+["das Herz → herz___","von Herzen, warm",["-lich","-bar","-sam","-ig"],"-lich","herzlich"],
+["das Gewissen → gewissen___","sehr genau und ordentlich",["-haft","-ig","-bar","-lich"],"-haft","gewissenhaft"],
+["essen → ess___","kann man essen",["-bar","-ig","-los","-haft"],"-bar","essbar"],
+["trinken → trink___","kann man trinken",["-bar","-lich","-sam","-ig"],"-bar","trinkbar"],
+["die Sonne → sonn___","mit viel Sonne",["-ig","-bar","-los","-haft"],"-ig","sonnig"],
+["der Schmutz → schmutz___","voller Schmutz",["-ig","-lich","-bar","-sam"],"-ig","schmutzig"],
+["der Sinn → sinn___","ohne Sinn",["-los","-ig","-bar","-haft"],"-los","sinnlos"],
+["die Furcht → furcht___","ganz schrecklich",["-bar","-ig","-haft","-lich"],"-bar","furchtbar"],
+["sparen → spar___","gibt wenig Geld aus",["-sam","-bar","-ig","-los"],"-sam","sparsam"],
+["die Mühe → müh___","macht viel Mühe",["-sam","-ig","-bar","-haft"],"-sam","mühsam"],
+["die Arbeit → arbeits___","ohne Arbeit",["-los","-ig","-bar","-sam"],"-los","arbeitslos"],
+["der Tag → täg___","jeden Tag",["-lich","-ig","-bar","-los"],"-lich","täglich"],
+["der Fleiß → fleiß___","arbeitet viel und gern",["-ig","-bar","-los","-haft"],"-ig","fleißig"],
+["der Ekel → ekel___","grauslich",["-haft","-bar","-sam","-los"],"-haft","ekelhaft"],
+["die Hilfe → hilf___","ohne Hilfe, weiß nicht weiter",["-los","-ig","-bar","-sam"],"-los","hilflos"],
+["waschen → wasch___","kann man waschen",["-bar","-ig","-lich","-haft"],"-bar","waschbar"],
+["das Kind → kind___","wie ein Kind, verspielt",["-lich","-bar","-los","-sam"],"-lich","kindlich"],
+["der Zauber → zauber___","wie verzaubert, märchenhaft",["-haft","-ig","-bar","-los"],"-haft","zauberhaft"]
+];
+
+// Komposita
+const KG=[ // Genus des Kompositums: [Bestimmungswort, Grundwort, Kompositum, genus]
+["der Fuß","der Ball","Fußball","m"],["das Haus","die Tür","Haustür","f"],["die Schule","das Heft","Schulheft","n"],
+["der Apfel","der Baum","Apfelbaum","m"],["die Sonne","die Brille","Sonnenbrille","f"],["das Spiel","der Platz","Spielplatz","m"],
+["der Schnee","der Mann","Schneemann","m"],["die Hand","der Schuh","Handschuh","m"],["das Gummi","das Bärchen","Gummibärchen","n"],
+["der Raub","die Katze","Raubkatze","f"],["die Noten","der Schlüssel","Notenschlüssel","m"],["der Zahn","die Bürste","Zahnbürste","f"],
+["das Wasser","die Flasche","Wasserflasche","f"],["das Kind","der Garten","Kindergarten","m"],["der Regen","der Schirm","Regenschirm","m"],
+["die Tomate","die Suppe","Tomatensuppe","f"],["der Ball","das Spiel","Ballspiel","n"],["die Hand","das Tuch","Handtuch","n"]
+];
+const KW=[ // Grund-/Bestimmungswort: [Kompositum, gefragt (g/b), [Optionen], richtig]
+["Sonnenblume","g",["Sonne","Blume"],"Blume"],["Schultasche","b",["Schule","Tasche"],"Schule"],["Fußball","g",["Fuß","Ball"],"Ball"],
+["Baumhaus","g",["Baum","Haus"],"Haus"],["Hausbaum","g",["Haus","Baum"],"Baum"],["Kirschkuchen","b",["Kirsche","Kuchen"],"Kirsche"],
+["Hundehütte","g",["Hund","Hütte"],"Hütte"],["Notenschlüssel","b",["Noten","Schlüssel"],"Noten"],["Fahrradhelm","g",["Fahrrad","Helm"],"Helm"],
+["Raubkatze","b",["Raub","Katze"],"Raub"]
+];
+const KF=[ // Fugen-s: [richtig, falsch]
+["Geburtstag","Geburttag"],["Arbeitszimmer","Arbeitzimmer"],["Weihnachtsbaum","Weihnachtbaum"],["Zeitungsartikel","Zeitungartikel"],
+["Bahnhof","Bahnshof"],["Kinderzimmer","Kinderszimmer"],["Liebesbrief","Liebebrief"],["Schulbus","Schulsbus"],["Hilfsbereitschaft","Hilfbereitschaft"],["Handtuch","Handstuch"]
+];
+
+// Endungen am Nomen
+const EN_PL=[ // [Einzahl, Mehrzahl richtig, Distraktoren]
+["der Baum","die Bäume",["die Baume","die Bäumen","die Baumer"]],["das Kind","die Kinder",["die Kinde","die Kinds","die Kindern"]],
+["die Frau","die Frauen",["die Fraue","die Frauer","die Fraus"]],["das Auto","die Autos",["die Autoen","die Autoe","die Autor"]],
+["der Lehrer","die Lehrer",["die Lehrern","die Lehrers","die Lehrere"]],["das Buch","die Bücher",["die Buche","die Büchern","die Buchs"]],
+["der Apfel","die Äpfel",["die Apfeln","die Äpfeln","die Apfels"]],["die Mutter","die Mütter",["die Muttern","die Mütters","die Mutters"]],
+["die Katze","die Katzen",["die Katzes","die Kätzen","die Katzer"]],["der Hund","die Hunde",["die Hunden","die Hünde","die Hunds"]],
+["die Maus","die Mäuse",["die Mausen","die Mäusen","die Mause"]],["die Blume","die Blumen",["die Blumes","die Blümen","die Blumer"]],
+["das Haus","die Häuser",["die Hause","die Häusen","die Hauser"]],["das Mädchen","die Mädchen",["die Mädchens","die Mädchenen","die Mädchener"]],
+["der Vogel","die Vögel",["die Vogeln","die Vögeln","die Vogels"]],["der Zug","die Züge",["die Zuge","die Zügen","die Zugs"]]
+];
+const EN_K_OPTS=["keine Endung","-s / -es","-n"];
+const EN_K=[ // [vor, nach, idx, Erklärung]
+["Das Auto des Vater","ist blau.",1,"2. Fall maskulin → -s: des Vaters."],
+["Der Garten des Haus","ist groß.",1,"2. Fall neutral → -es: des Hauses."],
+["Die Tasche der Lehrerin","liegt am Tisch.",0,"2. Fall feminin → das Nomen bekommt keine Endung: der Lehrerin."],
+["Ich spiele mit den Kinder","im Hof.",2,"3. Fall Mehrzahl → -n: mit den Kindern."],
+["Wir danken den Helfer",".",2,"3. Fall Mehrzahl → -n: den Helfern."],
+["Er spielt mit den Autos","im Sandkasten.",0,"3. Fall Mehrzahl – aber „Autos“ endet schon auf -s. Dann kommt kein -n dazu."],
+["Die Farbe des Himmel","ist blau.",1,"2. Fall maskulin → -s: des Himmels."],
+["Das Ende des Film","war spannend.",1,"2. Fall maskulin → -s: des Films (auch: des Filmes)."],
+["Der Name der Katze","ist Mimi.",0,"2. Fall feminin → keine Endung: der Katze."],
+["Ich gebe den Hunde","Futter.",2,"3. Fall Mehrzahl → -n: den Hunden."],
+["Das Spielzeug des Kind","liegt im Zimmer.",1,"2. Fall neutral → -es: des Kindes."],
+["Wir helfen den Frauen","beim Tragen.",0,"3. Fall Mehrzahl – „Frauen“ endet schon auf -n. Kein weiteres -n."],
+["Der Hut des Mann","ist schwarz.",1,"2. Fall maskulin → -es: des Mannes."],
+["Die Kinder spielen mit den Bälle",".",2,"3. Fall Mehrzahl → -n: mit den Bällen."],
+["Das Dach des Auto","ist kaputt.",1,"2. Fall neutral → -s: des Autos."],
+["Die Blätter der Blume","sind gelb.",0,"2. Fall feminin → keine Endung: der Blume."]
+];
+
+// Artikel oder Pronomen
+const AP=[
+["{Der} Hund bellt.",0,"„Der“ steht direkt vor dem Nomen „Hund“ → Artikel."],
+["Das ist der Hund, {der} immer bellt.",1,"„der“ steht allein und ersetzt „der Hund“ → Pronomen."],
+["{Das} ist mein Fahrrad.",1,"Nach „Das“ kommt kein Nomen, sondern „ist“. „Das“ zeigt hin → Pronomen."],
+["{Das} Fahrrad ist neu.",0,"„Das“ steht direkt vor dem Nomen „Fahrrad“ → Artikel."],
+["Kennst du die Frau? – Ja, {die} kenne ich.",1,"„die“ steht allein und ersetzt „die Frau“ → Pronomen."],
+["{Die} Frau wohnt nebenan.",0,"„Die“ steht direkt vor „Frau“ → Artikel."],
+["Ich lese das Buch, {das} du mir gegeben hast.",1,"„das“ beginnt einen Nebensatz und ersetzt „das Buch“ → Pronomen."],
+["Wo ist {der} Schlüssel?",0,"„der“ steht direkt vor „Schlüssel“ → Artikel."],
+["{Der} hat mir gerade noch gefehlt!",1,"Nach „Der“ kommt kein Nomen – es steht für eine Person → Pronomen."],
+["Die Kinder, {die} dort spielen, sind laut.",1,"„die“ ersetzt „die Kinder“ und beginnt einen Nebensatz → Pronomen."],
+["Ich mag {die} Blumen im Garten.",0,"„die“ steht direkt vor „Blumen“ → Artikel."],
+["{Das} glaube ich nicht!",1,"„Das“ steht allein und zeigt hin → Pronomen."],
+["Ich sehe {das} kleine Haus.",0,"„das“ steht vor Adjektiv + Nomen (kleine Haus) → Artikel."],
+["Der Mann, {dem} ich geholfen habe, war nett.",1,"„dem“ ersetzt „der Mann“ und beginnt einen Nebensatz → Pronomen."]
+];
+
+/* ================= HILFEN ================= */
+const HINTS={
+wortart:"<b>Nomen</b>: groß, oft mit Begleiter. <b>Adjektiv</b>: „Was für ein …?“ – beschreibt. <b>Pronomen</b>: Für-Wort, ersetzt ein Nomen (ich, er, mich, man, dieser …). <b>Verb</b>: Tunwort. <b>Artikel</b>: der, die, das, ein, eine direkt vor einem Nomen.",
+ka:"<b>Konkret</b>: kann man sehen, hören, angreifen, riechen, schmecken. <b>Abstrakt</b>: Gefühle, Gedanken, Ideen – nicht angreifbar. -heit, -keit, -ung, -schaft → meist abstrakt.",
+genus:"Setz <b>der, die</b> oder <b>das</b> vor das Wort. -chen/-lein → das. -ung/-heit/-keit/-schaft/-in → die. Aus Verben gemachte Nomen (das Laufen) → das.",
+numerus:"Einzahl = eins. Mehrzahl = mehrere. Schau auf den Artikel und auf das Verb: „Das Mädchen singt“ – „Die Mädchen singen“.",
+fall:"Frag nach dem markierten Teil:<br>1. Fall – <b>Wer oder was?</b><br>2. Fall – <b>Wessen?</b><br>3. Fall – <b>Wem?</b><br>4. Fall – <b>Wen oder was?</b><br>Nach <b>mit, bei, von, zu, aus, nach</b> immer 3. Fall.",
+pfind:"Pronomen sind Für-Wörter: ich, du, er, sie, es, wir, ihr · mich, mir, dich, dir, ihn, ihm, uns, euch, ihnen · sich · man, jemand, niemand, etwas, nichts · dieser, jener · der/die/das, wenn sie <b>allein</b> stehen. Manchmal gibt es <b>kein</b> Pronomen – dann einfach gleich auf „Prüfen“ klicken!",
+fw:"Frag dich: Wer oder was ist gemeint? Achte auf das Geschlecht: er → maskulin, sie → feminin oder Mehrzahl, es → neutral.",
+pfall:"3. Fall (Wem?): mir, dir, ihm, ihr, ihm, uns, euch, ihnen.<br>4. Fall (Wen?): mich, dich, ihn, sie, es, uns, euch, sie.<br>„helfen, danken, gratulieren, winken“ wollen den 3. Fall.",
+steck:"Schritt für Schritt: <b>1. Fall</b> mit der Frage finden. <b>2. Geschlecht</b> mit der Grundform in der Einzahl (der/die/das). <b>3. Zahl</b>: eins oder mehrere?",
+aend:"Mit der/die/das: 1. Fall Einzahl → -e; 2./3. Fall und Mehrzahl → -en; 4. Fall: den …-en, die …-e, das …-e.<br>Nach ein: ein …-er (der), ein …-es (das), eine …-e.<br>Ohne Artikel: Adjektiv nimmt die Artikelendung (kaltes Wasser, mit warmem Wasser).",
+steig:"<b>Grundstufe</b>: laut. <b>Mehrstufe</b>: lauter (als). <b>Meiststufe</b>: am lautesten / der lauteste.<br>gut – besser – am besten · viel – mehr – am meisten · gern – lieber – am liebsten.<br>Falle: „ein schöner Tag“ ist Grundstufe!",
+suf:"-lich, -ig, -bar, -los, -haft, -sam machen Adjektive. <b>-los</b> = ohne. <b>-bar</b> = kann man … . <b>-ig</b> = mit viel … . Lies die Bedeutung genau!",
+komp:"<b>Bestimmungswort</b> (vorne) + <b>Grundwort</b> (hinten). Das <b>Grundwort bestimmt den Artikel</b>! Manchmal braucht es ein Fugen-s: Geburt<b>s</b>tag.",
+endung:"<b>Mehrzahl</b>: -e, -en, -n, -er, -s oder keine Endung, oft mit Umlaut.<br><b>2. Fall</b> maskulin/neutral: -s oder -es (des Vaters, des Hauses); feminin: keine Endung.<br><b>3. Fall Mehrzahl</b>: -n (den Kindern), außer das Wort endet schon auf -n oder -s.",
+ap:"Steht der/die/das <b>direkt vor einem Nomen</b> (oder vor Adjektiv + Nomen) → <b>Artikel</b>. Steht es <b>allein</b> und ersetzt etwas → <b>Pronomen</b>.",
+mega:"Alles gemischt! Lies zuerst genau die Frage über dem Satz. Du schaffst das!"
+};
+
+/* ================= MODI ================= */
+const STUFEN=[
+ {nr:"Stufe 1",name:"Anfänger 🌱",modes:["wortart","ka","genus","numerus"]},
+ {nr:"Stufe 2",name:"Entdecker 🔍",modes:["fall","pfind","fw","endungP"]},
+ {nr:"Stufe 3",name:"Könner 💪",modes:["steck","aend","steig","suf","komp","pfall"]},
+ {nr:"Stufe 4",name:"Experte 🏆",modes:["endungK","ap","mega"]}
+];
+const MODES={
+wortart:{t:"Wortart-Detektiv",ic:"🕵️",d:"Nomen, Adjektiv, Pronomen, Verb oder Artikel?",h:"wortart"},
+ka:{t:"Konkret oder abstrakt?",ic:"🪨",d:"Kann man es angreifen – oder nicht?",h:"ka"},
+genus:{t:"Genus-Profi",ic:"🎨",d:"maskulin, feminin oder neutral?",h:"genus"},
+numerus:{t:"Einzahl oder Mehrzahl?",ic:"🔢",d:"Singular oder Plural – auch bei Fallen!",h:"numerus"},
+fall:{t:"Fall-Detektiv",ic:"❓",d:"Mit der richtigen Frage zum richtigen Fall",h:"fall"},
+pfind:{t:"Pronomen-Jagd",ic:"🎯",d:"Klicke alle Pronomen im Satz an",h:"pfind"},
+fw:{t:"Für-Wort-Rätsel",ic:"🧩",d:"Für welches Nomen steht das Pronomen?",h:"fw"},
+endungP:{t:"Mehrzahl-Meister",ic:"👯",d:"Die richtige Mehrzahl-Endung finden",h:"endung"},
+steck:{t:"Nomen-Steckbrief",ic:"📋",d:"Fall, Geschlecht und Zahl bestimmen",h:"steck"},
+aend:{t:"Adjektiv-Endungen",ic:"🔤",d:"-e, -en, -er, -es oder -em?",h:"aend"},
+steig:{t:"Steigerungs-Treppe",ic:"🪜",d:"Grundstufe, Mehrstufe, Meiststufe",h:"steig"},
+suf:{t:"Nachsilben-Werkstatt",ic:"🔧",d:"-lich, -ig, -bar, -los, -haft, -sam",h:"suf"},
+komp:{t:"Komposita-Baustelle",ic:"🏗️",d:"Grundwort, Bestimmungswort, Fugen-s",h:"komp"},
+pfall:{t:"Pronomen im richtigen Fall",ic:"🎭",d:"ihn oder ihm? mich oder mir?",h:"pfall"},
+endungK:{t:"Endungs-Detektiv",ic:"🔍",d:"Welche Endung braucht das Nomen im Fall?",h:"endung"},
+ap:{t:"Artikel oder Pronomen?",ic:"⚖️",d:"Die Profi-Frage bei der, die, das",h:"ap"},
+mega:{t:"MEGA-MIX",ic:"🌟",d:"Alles gemischt – die Experten-Prüfung (20 Aufgaben)",h:"mega"}
+};
+
+/* ================= HILFSFUNKTIONEN ================= */
+const $=id=>document.getElementById(id);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const pick=(a,n)=>shuffle(a).slice(0,n);
+const mk=s=>s.replace(/\{(.+?)\}/g,"<mark>$1</mark>");
+const gap='<span class="gap">&nbsp;</span>';
+function choice(q,ask,opts,a,ex,fixed){ // a = Index oder Text
+  let idx=typeof a==="number"?a:opts.indexOf(a);
+  if(!fixed){const o=shuffle(opts.map((t,i)=>({t,i})));opts=o.map(x=>x.t);idx=o.findIndex(x=>x.i===idx);}
+  return {type:"choice",q,ask,opts,a:idx,ex};
+}
+
+/* ================= AUFGABEN-GENERATOREN ================= */
+const GEN_FN={
+wortart:()=>WA.map(([s,a,ex])=>choice(mk(s),"Welche Wortart ist das markierte Wort?",WA_OPTS,a,ex,true)),
+ka:()=>KA.map(([w,k])=>choice(w,"Ist dieses Nomen konkret oder abstrakt?",["konkret (kann man wahrnehmen)","abstrakt (Gefühl, Idee, Gedanke)"],k==="k"?0:1,
+  k==="k"?`„${w}“ kann man sehen oder angreifen → konkret.`:`„${w}“ kann man nicht angreifen – es ist ein Gefühl, eine Eigenschaft oder ein Gedanke → abstrakt.`,true)),
+genus:()=>GEN.map(([w,g,e])=>choice(`<span style="font-size:1.25em">${w}</span>`,"Welches Geschlecht hat das Nomen?",GOPTS,GIDX[g],
+  `${["der","die","das"][GIDX[g]]} ${w} → ${GENUS[g]}. ${e}`,true)),
+numerus:()=>NOM.map(n=>choice(mk(n[0]),"Steht das markierte Nomen in der Einzahl oder Mehrzahl?",["Einzahl (Singular)","Mehrzahl (Plural)"],n[3]==="s"?0:1,
+  (n[3]==="s"?"Hier ist nur eins/einer gemeint → Einzahl.":"Hier sind mehrere gemeint → Mehrzahl.")+` (Grundform: ${n[4]})`,true)),
+fall:()=>NOM.map(n=>choice(mk(n[0]),"In welchem Fall steht der markierte Teil?",FALL,n[1]-1,n[5]+" → "+FALL[n[1]-1].split(" (")[0]+".",true)),
+pfind:()=>PF.map(s=>{const toks=s.split(" ").map(w=>{const m=w.match(/^\*(.+?)\*(.*)$/);return m?{t:m[1],r:m[2],p:true}:{t:w,r:"",p:false}});
+  const pr=toks.filter(t=>t.p).map(t=>"„"+t.t+"“");
+  return {type:"pick",toks,ask:"Klicke alle Pronomen an – dann auf „Prüfen“.",ex:pr.length?`Die Pronomen in diesem Satz: ${pr.join(", ")}.`:"In diesem Satz gibt es kein einziges Pronomen – nur Nomen, Verben, Artikel und andere Wörter."}}),
+fw:()=>FW.map(([s,o,a,ex])=>choice(mk(s),"Für wen oder was steht das markierte Pronomen?",o,a,ex)),
+pfall:()=>PFALL.map(([s,o,a,ex])=>choice(s.replace("___",gap),"Welches Pronomen passt in die Lücke?",o,a,ex)),
+endungP:()=>EN_PL.map(([e,r,d])=>choice(`${e} → die …?`,"Wie heißt die Mehrzahl im 1. Fall?",[r,...d],r,`${e} → ${r}`)),
+endungK:()=>EN_K.map(([v,n,i,ex])=>choice(`${v}${gap} ${n}`,"Welche Endung braucht das Nomen vor der Lücke?",EN_K_OPTS,i,ex,true)),
+steck:()=>NOM.map(n=>({type:"steps",q:mk(n[0]),steps:[
+  {ask:"Schritt 1 von 3: In welchem Fall steht der markierte Teil?",opts:FALL,a:n[1]-1,ex:n[5]+" → "+FALL[n[1]-1].split(" (")[0]+"."},
+  {ask:"Schritt 2 von 3: Welches Geschlecht hat das Nomen?"+(n[3]==="p"?" (Tipp: Denk an die Einzahl!)":""),opts:GOPTS,a:GIDX[n[2]],ex:`Grundform in der Einzahl: ${n[4]} → ${GENUS[n[2]]}.`},
+  {ask:"Schritt 3 von 3: Einzahl oder Mehrzahl?",opts:["Einzahl (Singular)","Mehrzahl (Plural)"],a:n[3]==="s"?0:1,ex:n[3]==="s"?"Nur eins/einer → Einzahl.":"Mehrere → Mehrzahl."}
+ ]})),
+aend:()=>AE.map(([v,n,e,ex])=>choice(`${v}${gap} ${n}`,"Welche Endung bekommt das Adjektiv?",AE_OPTS,"-"+e,ex,true)),
+steig:()=>[...STS.map(([s,i,ex])=>choice(mk(s),"Welche Steigerungsstufe ist das markierte Adjektiv?",ST_OPTS,i,ex,true)),
+  ...STF.map(([g,st,o,a,ex])=>choice(`${g} → ${st===1?"Mehrstufe":"Meiststufe"}?`,`Wie heißt die ${st===1?"Mehrstufe (Komparativ)":"Meiststufe (Superlativ)"} von „${g}“?`,o,a,ex))],
+suf:()=>SUF.map(([w,b,o,a,ganz])=>choice(`${w}<br><span style="font-size:.7em;color:var(--muted)">Bedeutung: ${b}</span>`,"Welche Nachsilbe passt?",o,a,`Das Adjektiv heißt „${ganz}“ (${b}).`)),
+komp:()=>[...KG.map(([b,g,k,ge])=>choice(`${b} + ${g} → ___ ${k}`,"Welchen Artikel hat das zusammengesetzte Nomen?",["der","die","das"],GIDX[ge],
+  `Das Grundwort ist „${g}“ – und das Grundwort bestimmt den Artikel: ${["der","die","das"][GIDX[ge]]} ${k}.`,true)),
+  ...KW.map(([k,t,o,a])=>choice(k,t==="g"?`Was ist das Grundwort in „${k}“?`:`Was ist das Bestimmungswort in „${k}“?`,o,a,
+    t==="g"?`Das Grundwort steht hinten: ${k} → „${a}“. Es bestimmt den Artikel.`:`Das Bestimmungswort steht vorne und sagt genauer, was gemeint ist: „${a}“.`,true)),
+  ...KF.map(([r,f])=>choice("Welches Wort ist richtig geschrieben?","Fugen-s oder nicht?",[r,f],r,`Richtig ist „${r}“.`))],
+ap:()=>AP.map(([s,i,ex])=>choice(mk(s),"Ist das markierte Wort ein Artikel oder ein Pronomen?",["Artikel (Begleiter)","Pronomen (Für-Wort)"],i,ex,true))
+};
+
+/* ================= SPIELZUSTAND ================= */
+let state={},timer=null,sound=true;
+function zeige(id){document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id===id));
+  document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.s===id));
+  if(id==="menu"){clearInterval(timer);renderMenu();} window.scrollTo(0,0);}
+document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>zeige(b.dataset.s));
+
+function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k)||"null");localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
+function stars(){return store("wc5_stars")||{}}
+
+function renderMenu(){
+  const st=stars();let html="",n=0,tot=0;
+  STUFEN.forEach(s=>{html+=`<div class="stufe"><div class="stufe-kopf"><span class="nr">${s.nr}</span><h2>${s.name}</h2></div><div class="modes">`;
+    s.modes.forEach(m=>{const M=MODES[m];tot++;const sc=st[m]||0;if(sc>=80)n++;
+      html+=`<button class="mode-btn" onclick="startGame('${m}')"><span class="star">${sc>=100?"🏆":sc>=80?"⭐":""}</span><span class="ic">${M.ic}</span>${M.t}<span class="d">${M.d}${sc?` · Bestwert ${sc} %`:""}</span></button>`});
+    html+="</div></div>"});
+  $("stufen").innerHTML=html;
+  $("fortschritt").textContent=`Dein Fortschritt: ${n} von ${tot} Trainings mit Stern ⭐`;
+  $("urkunde").classList.toggle("on",n===tot);
+}
+
+function startGame(mode){
+  let pool;
+  if(mode==="mega"){pool=[];Object.keys(GEN_FN).forEach(k=>pool.push(...pick(GEN_FN[k](),3)));pool=pick(pool,20);}
+  else pool=pick(GEN_FN[mode](),12);
+  state={mode,queue:pool,total:pool.length,done:0,pts:0,streak:0,best:0,right:0,answers:0,t0:Date.now(),retry:new Set(),cur:null,step:0,itemOk:true};
+  $("modeInd").textContent=MODES[mode].ic+" "+MODES[mode].t;
+  $("hintbox").innerHTML="💡 "+HINTS[MODES[mode].h];$("hintbox").classList.remove("on");
+  updStats();zeige("game");clearInterval(timer);timer=setInterval(()=>$("time").textContent=fmt(Date.now()-state.t0),1000);
+  next();
+}
+function fmt(ms){const s=Math.floor(ms/1000);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}
+function updStats(){$("pts").textContent=state.pts;$("streak").textContent=state.streak;
+  $("barFill").style.width=(state.done/state.total*100)+"%";$("barT").textContent=`${state.done} / ${state.total} Aufgaben gelöst`+(state.retry.size?` · ${state.queue.filter(q=>q._r).length} zum Wiederholen`:"");}
+function toggleHint(){$("hintbox").classList.toggle("on")}
+
+function next(){
+  $("fb").className="feedback";$("nextBtn").style.display="none";
+  if(!state.queue.length){endGame();return}
+  state.cur=state.queue.shift();state.step=0;state.itemOk=true;render();
+}
+function render(){
+  const it=state.cur;$("opts").innerHTML="";$("opts").style.display="";
+  if(it.type==="choice"){$("qbox").innerHTML=`<div class="ask">${it.ask}</div><div class="s">${it.q}</div>`;renderOpts(it.opts,it.a,it.ex);}
+  else if(it.type==="steps"){const s=it.steps[state.step];
+    $("qbox").innerHTML=`<span class="step">📋 ${s.ask.split(":")[0]}</span><div class="ask">${s.ask.split(": ").slice(1).join(": ")}</div><div class="s">${it.q}</div>`;renderOpts(s.opts,s.a,s.ex);}
+  else if(it.type==="pick"){
+    $("qbox").innerHTML=`<div class="ask">${it.ask}</div><div class="chips">${it.toks.map((t,i)=>`<button class="chip" data-i="${i}">${t.t}${t.r}</button>`).join("")}</div>`;
+    $("qbox").querySelectorAll(".chip").forEach(c=>c.onclick=()=>{if(state.locked)return;c.classList.toggle("sel")});
+    state.locked=false;
+    $("opts").innerHTML=`<button class="opt" style="grid-column:1/-1" id="pruef">✔️ Prüfen</button>`;$("pruef").onclick=checkPick;}
+}
+function renderOpts(opts,a,ex){
+  state.locked=false;
+  $("opts").innerHTML=opts.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join("");
+  $("opts").querySelectorAll(".opt").forEach(b=>b.onclick=()=>answer(+b.dataset.i,a,ex));
+}
+function answer(i,a,ex){
+  if(state.locked)return;state.locked=true;
+  const bs=$("opts").querySelectorAll(".opt");bs.forEach(b=>b.disabled=true);
+  const ok=i===a;bs[a].classList.add("ok");if(!ok)bs[i].classList.add("bad");
+  feedback(ok,ex,bs[i]);
+}
+function checkPick(){
+  if(state.locked)return;state.locked=true;
+  const it=state.cur;let ok=true;
+  $("qbox").querySelectorAll(".chip").forEach(c=>{const t=it.toks[+c.dataset.i],sel=c.classList.contains("sel");
+    c.classList.remove("sel");
+    if(t.p&&sel)c.classList.add("ok");else if(t.p&&!sel){c.classList.add("miss");ok=false}else if(!t.p&&sel){c.classList.add("bad");ok=false}});
+  $("pruef").disabled=true;
+  feedback(ok,it.ex+(ok?"":"<br><small>Grün = richtig gefunden · gestrichelt orange = übersehen · rot durchgestrichen = kein Pronomen</small>"),$("pruef"));
+}
+const LOB=["Super!","Richtig!","Bravo!","Genau!","Toll gemacht!","Stark!","Perfekt!","Ausgezeichnet!"];
+const TROST=["Fast!","Noch nicht ganz.","Kein Problem – merk dir:","Schau genau:"];
+function feedback(ok,ex,el){
+  state.answers++;
+  if(ok){state.right++;state.streak++;state.best=Math.max(state.best,state.streak);const p=10+Math.min(state.streak-1,10);state.pts+=p;popup("+"+p,el);beep(true);
+    if(state.streak%5===0){toast(`🔥 ${state.streak}er-Serie!`);confetti();beep("m");}}
+  else{state.streak=0;state.itemOk=false;beep(false);}
+  const fb=$("fb");fb.className="feedback on "+(ok?"ok":"bad");
+  fb.innerHTML=`<b class="k">${ok?"✅ "+LOB[Math.floor(Math.random()*LOB.length)]:"❌ "+TROST[Math.floor(Math.random()*TROST.length)]}</b><br>${ex}`;
+  $("nextBtn").style.display="";updStats();
+  setTimeout(()=>$("nextBtn").scrollIntoView({behavior:"smooth",block:"nearest"}),50);
+}
+function weiter(){
+  const it=state.cur;
+  if(it.type==="steps"&&state.step<it.steps.length-1){state.step++;$("fb").className="feedback";$("nextBtn").style.display="none";render();return}
+  if(!state.itemOk&&!it._r){it._r=true;state.retry.add(it);state.queue.push(it);state.total++;}
+  state.done++;updStats();next();
+}
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&$("nextBtn").style.display!=="none"&&$("game").classList.contains("on"))weiter();});
+
+function endGame(){
+  clearInterval(timer);
+  const acc=state.answers?Math.round(state.right/state.answers*100):0;
+  $("rPts").textContent=state.pts;$("rTime").textContent=fmt(Date.now()-state.t0);$("rStreak").textContent=state.best;$("rAcc").textContent=acc+"%";
+  const fertig=!state.queue.length&&state.answers>0;
+  if(fertig){const st=stars();if(acc>(st[state.mode]||0)){st[state.mode]=acc;store("wc5_stars",st)}}
+  $("resTitle").textContent=fertig?(acc>=100?"🏆 Fehlerfrei – Wahnsinn!":acc>=80?"⭐ Stern verdient!":"🎉 Runde geschafft!"):"🏁 Runde beendet";
+  $("resMsg").textContent=!fertig?"Du hast früher aufgehört – für einen Stern musst du die ganze Runde schaffen.":
+    acc>=80?"Großartig! Du hast dieses Thema richtig gut im Griff.":"Gut gekämpft! Schau dir den Tipp noch einmal an und probier es gleich nochmal – beim zweiten Mal geht es schon viel leichter.";
+  if(acc>=80&&fertig)confetti();
+  showLB();zeige("result");
+}
+function showLB(){const lb=store("wc5_lb_"+state.mode)||[];
+  $("lb").innerHTML=lb.length?`<h3>🏆 Bestenliste: ${MODES[state.mode].t}</h3><ol>${lb.map(e=>`<li>${e.n.replace(/</g,"")} – ${e.p} Punkte · ${e.a} % · ${e.t}</li>`).join("")}</ol>`:"";}
+function saveScore(){const n=$("pname").value.trim()||"Champion";const lb=store("wc5_lb_"+state.mode)||[];
+  lb.push({n,p:state.pts,a:$("rAcc").textContent.replace("%",""),t:$("rTime").textContent});lb.sort((a,b)=>b.p-a.p);store("wc5_lb_"+state.mode,lb.slice(0,10));showLB();toast("💾 Gespeichert!");}
+
+/* ================= EFFEKTE ================= */
+function popup(t,el){const r=el.getBoundingClientRect(),d=document.createElement("div");d.className="popup";d.textContent=t;d.style.left=(r.left+r.width/2-20)+"px";d.style.top=(r.top-10)+"px";document.body.appendChild(d);setTimeout(()=>d.remove(),1000)}
+function toast(t){const d=document.createElement("div");d.className="toast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),1600)}
+function confetti(){const e=["🌻","💖","⭐","🌸","✨","🏆"];for(let i=0;i<34;i++){const d=document.createElement("div");d.className="conf";d.textContent=e[i%e.length];d.style.left=Math.random()*100+"vw";d.style.animationDelay=Math.random()*.6+"s";document.body.appendChild(d);setTimeout(()=>d.remove(),3200)}}
+function beep(t){if(!sound)return;try{const c=new(window.AudioContext||window.webkitAudioContext)();
+  const fr=t==="m"?[523,659,784,1047]:t?[880]:[200];fr.forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=f;if(t===false)o.type="sawtooth";g.gain.value=.1;const s=c.currentTime+i*.1;o.start(s);g.gain.exponentialRampToValueAtTime(.01,s+.18);o.stop(s+.2)});setTimeout(()=>c.close(),900)}catch(e){}}
+function toggleSound(){sound=!sound;$("soundBtn").textContent=sound?"🔊":"🔇"}
+
+renderMenu();
+</script>
+</body>
+</html>
