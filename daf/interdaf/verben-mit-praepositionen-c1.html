@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verben mit Präpositionen · C1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gelb:#FFD60A; --gelb-tief:#FFC300; --gelb-h:#FFF3B0; --creme:#FFFBE6;
+  --pink:#B0125B; --pink-d:#8A0A45; --pink-h:#F8D3E4; --pink-hh:#FFF0F6;
+  --text:#2B1A22; --muted:#6E4A5C;
+  --ok:#1E8E4E; --ok-h:#DDF5E6; --bad:#C62828; --bad-h:#FDE3E3;
+  --sch:0 6px 0 rgba(138,10,69,.22);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--gelb);color:var(--text);font-family:"Nunito",system-ui,sans-serif;font-size:17px;line-height:1.55;min-height:100vh;overflow-x:hidden}
+#bubbles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bubble{position:absolute;border-radius:50%;background:radial-gradient(circle at 32% 30%,#E0457F 0%,var(--pink) 50%,var(--pink-d) 100%);opacity:.18;animation:schweben linear infinite}
+.bubble.ring{background:transparent;border:5px solid var(--pink);opacity:.22}
+@keyframes schweben{0%{transform:translateY(0)}50%{transform:translateY(-26px)}100%{transform:translateY(0)}}
+.wrap{position:relative;z-index:1;max-width:1020px;margin:0 auto;padding:20px 16px 90px}
+h1,h2,h3,h4{font-family:"Fredoka",sans-serif;color:var(--pink-d);line-height:1.2}
+header.hero{background:var(--creme);border:3px solid var(--pink);border-radius:26px;padding:22px 24px;box-shadow:var(--sch);margin-bottom:16px}
+.hero .kicker{display:inline-block;background:var(--pink);color:#fff;font:600 .9rem "Fredoka";border-radius:999px;padding:3px 14px;letter-spacing:.04em}
+.hero h1{font-size:clamp(1.8rem,5vw,2.6rem);margin:10px 0 6px}
+.hero p{margin:0;color:var(--muted);font-weight:700}
+.gesamt{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:14px}
+.balken{flex:1 1 240px;height:20px;background:#fff;border-radius:999px;border:3px solid var(--pink);overflow:hidden}
+.balken div{height:100%;width:0;background:repeating-linear-gradient(45deg,var(--pink) 0 14px,#D1306F 14px 28px);transition:width .5s}
+.zahl{font:700 1.05rem "Fredoka";color:var(--pink-d)}
+nav.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}
+nav.tabs button{font:700 15px "Nunito";background:#fff;color:var(--pink-d);border:2px solid var(--pink);border-radius:999px;padding:7px 15px;cursor:pointer;transition:transform .15s}
+nav.tabs button:hover{transform:translateY(-2px)}
+nav.tabs button.on{background:var(--pink);color:#fff;box-shadow:0 4px 0 var(--pink-d)}
+.screen{display:none}.screen.on{display:block;animation:auf .35s ease}
+@keyframes auf{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.card{background:var(--creme);border:3px solid var(--pink);border-radius:22px;padding:20px 22px;box-shadow:var(--sch);margin-bottom:22px}
+.card h2{font-size:1.55rem;margin:0 0 8px}
+.card h3{font-size:1.2rem;margin:18px 0 6px}
+.intro{color:var(--muted);font-weight:600;margin:0 0 6px}
+.regeln{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:12px;margin-top:10px}
+.regel{background:#fff;border-radius:18px;padding:12px 14px;border-left:8px solid var(--pink)}
+.regel h4{margin:0 0 4px;font-size:1.05rem}
+.regel p{margin:0 0 6px;font-size:.96rem}
+.bsp{background:var(--gelb-h);border-radius:12px;padding:7px 10px;font-size:.94rem;margin-top:6px}
+.bsp b,.hl{color:var(--pink-d)}
+.kasustab{width:100%;border-collapse:separate;border-spacing:0 6px;font-size:.96rem}
+.kasustab td{background:#fff;padding:8px 12px}
+.kasustab td:first-child{border-radius:12px 0 0 12px;font-weight:800;color:var(--pink-d);width:160px}
+.kasustab td:last-child{border-radius:0 12px 12px 0}
+.badge{display:inline-block;font:700 .78rem "Nunito";border-radius:999px;padding:1px 9px;vertical-align:middle}
+.b-A{background:var(--pink);color:#fff}
+.b-D{background:var(--gelb-tief);color:var(--text)}
+/* Nachschlagen */
+.filterzeile{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0}
+input[type=search],select.fsel{font:inherit;border:2px solid var(--pink);border-radius:14px;padding:8px 12px;background:#fff;color:var(--text)}
+input[type=search]{flex:1 1 220px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:700 14px "Nunito";background:#fff;border:2px solid var(--pink);color:var(--pink-d);border-radius:999px;padding:3px 11px;cursor:pointer}
+.chip.on{background:var(--pink);color:#fff}
+.reftab{width:100%;border-collapse:collapse;font-size:.95rem;background:#fff;border-radius:16px;overflow:hidden}
+.reftab th{background:var(--pink);color:#fff;text-align:left;padding:8px 10px;font-family:"Fredoka";font-weight:600}
+.reftab td{padding:7px 10px;border-bottom:1px solid #F3C6DA;vertical-align:top}
+.reftab tr:nth-child(even) td{background:var(--pink-hh)}
+.reftab td.v{font-weight:800}
+.reftab td.p{font-weight:800;color:var(--pink-d);white-space:nowrap}
+.tabwrap{overflow-x:auto;border-radius:16px;border:2px solid var(--pink)}
+.anzahl{font-weight:700;color:var(--muted);font-size:.92rem}
+/* Lernkarten */
+.lk-bühne{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:10px}
+.lk{width:min(520px,100%);min-height:210px;background:#fff;border:3px solid var(--pink);border-radius:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:22px;cursor:pointer;box-shadow:var(--sch);transition:transform .2s}
+.lk:hover{transform:translateY(-3px)}
+.lk .gross{font:700 1.9rem "Fredoka";color:var(--pink-d)}
+.lk .klein{color:var(--muted);font-weight:700;margin-top:6px}
+.lk .loes{font:700 1.5rem "Fredoka";color:var(--pink)}
+.lk .ex{background:var(--gelb-h);border-radius:12px;padding:8px 12px;margin-top:10px}
+.knoepfe{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.btn{font:700 15px "Nunito";border:none;border-radius:999px;padding:9px 18px;cursor:pointer;background:var(--pink);color:#fff;box-shadow:0 4px 0 var(--pink-d);transition:transform .12s}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 var(--pink-d)}
+.btn.hell{background:#fff;color:var(--pink-d);border:2px solid var(--pink);box-shadow:0 4px 0 #E6A8C4}
+.btn.gruen{background:var(--ok);box-shadow:0 4px 0 #136036}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+/* Übungen */
+.kopf{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start}
+.kopf .txt{flex:1 1 420px}
+.stand{background:#fff;border:2px solid var(--pink);border-radius:16px;padding:8px 14px;font-weight:800;color:var(--pink-d);white-space:nowrap}
+.item{background:#fff;border-radius:20px;padding:14px 16px 12px;margin:12px 0;border:2px solid #F3C6DA;transition:border-color .3s,background .3s}
+.item.richtig{border-color:var(--ok);background:#FBFFFC}
+.item.falsch{border-color:var(--bad);background:#FFFBFB}
+.item .q{margin:0 0 10px;font-weight:700;display:flex;gap:10px}
+.item .nr{flex:0 0 auto;display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--pink);color:#fff;font:700 .95rem "Fredoka"}
+.luecke{display:inline-block;min-width:70px;border-bottom:3px dashed var(--pink);text-align:center;color:var(--pink-d);font-weight:800;padding:0 4px}
+.luecke.voll{border-bottom-style:solid}
+.opts{display:flex;gap:8px;flex-wrap:wrap}
+.opts.lang{flex-direction:column}
+.opt{font:700 15px "Nunito";background:var(--pink-hh);border:2px solid #E6A8C4;color:var(--text);border-radius:14px;padding:7px 14px;cursor:pointer;text-align:left;transition:background .15s,border-color .15s}
+.opt:hover:not(:disabled){border-color:var(--pink);background:var(--pink-h)}
+.opt:disabled{cursor:default}
+.opt.ok{background:var(--ok-h);border-color:var(--ok);color:#0E5A2F}
+.opt.no{background:var(--bad-h);border-color:var(--bad);color:#8E1B1B;text-decoration:line-through}
+.erk{display:none;margin-top:10px;font-size:.95rem;border-radius:12px;padding:8px 12px;background:var(--gelb-h)}
+.erk.zeigen{display:block}
+.erk b.r{color:var(--ok)} .erk b.f{color:var(--bad)}
+.fusszeile{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.fazit{display:none;margin-top:14px;background:var(--pink);color:#fff;border-radius:18px;padding:14px 16px;font-weight:700}
+.fazit.zeigen{display:block}
+/* Lückentext */
+.ltext{background:#fff;border-radius:18px;padding:16px 18px;line-height:2.25;border:2px solid #F3C6DA}
+.ltext select{font:700 15px "Nunito";border:2px solid var(--pink);border-radius:10px;padding:2px 6px;background:var(--pink-hh);color:var(--text);max-width:100%}
+.ltext select.ok{border-color:var(--ok);background:var(--ok-h)}
+.ltext select.no{border-color:var(--bad);background:var(--bad-h)}
+.korr{font-weight:800;color:var(--ok);font-size:.9rem;margin-left:3px}
+/* Sprechtraining */
+.redemittel{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin:10px 0 4px}
+.rm{background:#fff;border-radius:18px;padding:12px 14px;border:2px solid var(--gelb-tief)}
+.rm h4{margin:0 0 6px}
+.rm ul{margin:0;padding-left:18px;font-size:.95rem}
+.rm li{margin-bottom:3px}
+.sp{background:#fff;border-radius:20px;padding:14px 16px;margin:12px 0;border-left:8px solid var(--pink)}
+.sp .tag{display:inline-block;background:var(--gelb);border-radius:999px;padding:1px 10px;font-weight:800;font-size:.85rem;margin-bottom:6px}
+.sp .verben span{display:inline-block;background:var(--pink-h);color:var(--pink-d);border-radius:8px;padding:1px 9px;margin:3px 4px 3px 0;font-weight:800;font-size:.9rem}
+.sp textarea{width:100%;min-height:90px;font:inherit;border:2px solid #E6A8C4;border-radius:14px;padding:8px 10px;margin-top:8px;resize:vertical}
+.sp textarea:focus{outline:3px solid var(--gelb-tief);border-color:var(--pink)}
+.muster{display:none;background:var(--gelb-h);border-radius:14px;padding:10px 12px;margin-top:8px;font-size:.96rem}
+.muster.zeigen{display:block}
+.hinweis{background:var(--pink-hh);border:2px dashed var(--pink);border-radius:16px;padding:10px 14px;font-size:.95rem;margin-top:10px}
+footer{text-align:center;color:var(--pink-d);font-weight:700;margin-top:26px;font-size:.92rem}
+@media (max-width:600px){
+  .card{padding:16px 14px}
+  .kasustab td:first-child{width:auto}
+  body{font-size:16px}
+}
+</style>
+</head>
+<body>
+<div id="bubbles"></div>
+<div class="wrap">
+
+<header class="hero">
+  <span class="kicker">ÖSD C1 · Grammatik-Intensivtraining</span>
+  <h1>Verben mit Präpositionen</h1>
+  <p>Präposition, Kasus, Pronominaladverb, Bedeutung – alles, was du für eine souveräne C1-Prüfung brauchst.</p>
+  <div class="gesamt">
+    <div class="balken"><div id="gesamtBalken"></div></div>
+    <span class="zahl" id="gesamtZahl">0 richtig</span>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button data-s="start" class="on">Start &amp; Regeln</button>
+  <button data-s="liste">Nachschlagen</button>
+  <button data-s="karten">Lernkarten</button>
+  <button data-s="u1">1 · Präposition</button>
+  <button data-s="u2">2 · Kasus</button>
+  <button data-s="u3">3 · da(r)- / wo(r)-</button>
+  <button data-s="u4">4 · Bedeutung</button>
+  <button data-s="u5">5 · Nomen &amp; Adjektive</button>
+  <button data-s="u6">6 · Fehlerjagd</button>
+  <button data-s="u7">7 · Lückentexte</button>
+  <button data-s="u8">8 · Sprechtraining</button>
+  <button data-s="u9">9 · Prüfungsmix</button>
+</nav>
+
+<!-- START -->
+<section class="screen on" id="start">
+  <div class="card">
+    <h2>Warum dieses Kapitel in der Prüfung so viel bringt</h2>
+    <p>Auf C1-Niveau erwartet man von dir, dass du Präpositionalverben nicht nur kennst, sondern sie spontan und korrekt einsetzt – mit dem richtigen Kasus, mit <span class="hl">darauf, daran, damit</span> vor einem dass-Satz und mit Nomen-Verb-Verbindungen wie <span class="hl">Bezug nehmen auf</span> oder <span class="hl">Kritik üben an</span>. Genau diese Strukturen machen dein Sprechen in der Diskussion und im Kurzreferat präzise und elegant, und genau hier verlieren viele Kandidatinnen und Kandidaten Punkte, obwohl sie sonst sehr gut sprechen.</p>
+    <p>Arbeite die Übungen am besten in der Reihenfolge durch. Lerne jedes Verb immer als Paket: <b>Verb + Präposition + Kasus + Beispielsatz</b>. Sprich die Lösungssätze nach dem Klicken einmal laut aus – so wandert die Struktur vom Kopf in den Mund.</p>
+  </div>
+
+  <div class="card">
+    <h2>Kasus auf einen Blick</h2>
+    <table class="kasustab">
+      <tr><td>immer Dativ</td><td><b>aus, bei, mit, nach, von, vor, zu</b> – und <b>unter</b> (leiden unter, verstehen unter) sowie <b>zwischen</b> (unterscheiden zwischen) bei Verben</td></tr>
+      <tr><td>immer Akkusativ</td><td><b>für, gegen, um</b> – und bei Präpositionalverben auch <b>über</b> (sich ärgern über, nachdenken über …)</td></tr>
+      <tr><td>auf</td><td>fast immer <span class="badge b-A">Akk</span> – Ausnahmen mit <span class="badge b-D">Dat</span>: <b>bestehen auf, beruhen auf, basieren auf, beharren auf</b></td></tr>
+      <tr><td>an</td><td><span class="badge b-A">Akk</span> bei gedanklicher Hinwendung: denken, sich erinnern, glauben, sich gewöhnen, sich wenden, sich halten, sich anpassen<br><span class="badge b-D">Dat</span> bei Tätigkeit, Beteiligung, Mangel, Krankheit, Zweifel: arbeiten, teilnehmen, sich beteiligen, leiden, zweifeln, scheitern, es mangelt</td></tr>
+      <tr><td>in</td><td><span class="badge b-A">Akk</span> bei „Hineingehen“: sich verlieben, einwilligen, sich einmischen, sich vertiefen, geraten<br><span class="badge b-D">Dat</span> bei Zustand: bestehen in, sich irren in, sich täuschen in, sich unterscheiden in</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Die fünf goldenen Regeln</h2>
+    <div class="regeln">
+      <div class="regel"><h4>1 · Sachen: da(r)- und wo(r)-</h4><p>Bei Dingen, Ideen und Sachverhalten ersetzt du Präposition + Pronomen durch ein Pronominaladverb.</p><div class="bsp">Wartest du auf den Bus? – Ja, ich warte <b>darauf</b>. <b>Worauf</b> wartest du?</div></div>
+      <div class="regel"><h4>2 · Personen: Präposition + Pronomen</h4><p>Bei Menschen (und meist auch Tieren) bleibt die Präposition stehen.</p><div class="bsp">Wartest du auf deine Schwester? – Ja, ich warte <b>auf sie</b>. <b>Auf wen</b> wartest du?</div></div>
+      <div class="regel"><h4>3 · Das -r- bei Vokalen</h4><p>Beginnt die Präposition mit Vokal, schiebst du ein -r- ein: dar-auf, dar-an, wor-über. Bei Konsonanten nicht: da-mit, da-für, wo-von.</p><div class="bsp"><b>darüber, daran, worum</b> – aber <b>dafür, davon, womit</b></div></div>
+      <div class="regel"><h4>4 · Korrelat vor dass / zu + Infinitiv</h4><p>Folgt ein Nebensatz oder eine Infinitivgruppe, kündigst du sie im Hauptsatz mit dem Pronominaladverb an.</p><div class="bsp">Ich bestehe <b>darauf</b>, dass du dich entschuldigst. Es kommt <b>darauf</b> an, ob …</div></div>
+      <div class="regel"><h4>5 · Gleiches Verb, andere Bedeutung</h4><p>Die Präposition kann die Bedeutung komplett verändern – lerne die Paare gemeinsam.</p><div class="bsp">bestehen <b>aus</b> / <b>auf</b> / <b>in</b> · sich halten <b>an</b> / <b>für</b> · leiden <b>an</b> / <b>unter</b></div></div>
+      <div class="regel"><h4>Bonus · Stil für C1</h4><p>Nomen-Verb-Verbindungen klingen in Diskussion und Referat besonders gehoben.</p><div class="bsp"><b>Bezug nehmen auf</b> · <b>Einfluss haben auf</b> · <b>Kritik üben an</b> · <b>in Verbindung stehen mit</b></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- NACHSCHLAGEN -->
+<section class="screen" id="liste">
+  <div class="card">
+    <h2>Nachschlageliste</h2>
+    <p class="intro">Rund 200 prüfungsrelevante Verben und Wendungen mit Kasus und Beispielsatz. Suche nach einem Verb oder filtere nach Präposition.</p>
+    <div class="filterzeile">
+      <input type="search" id="suche" placeholder="Verb suchen, z. B. „verzichten“ …">
+      <span class="anzahl" id="refAnzahl"></span>
+    </div>
+    <div class="chips" id="refChips"></div>
+    <div class="tabwrap" style="margin-top:12px">
+      <table class="reftab"><thead><tr><th>Verb</th><th>Präp.</th><th>Kasus</th><th>Beispiel</th></tr></thead><tbody id="refBody"></tbody></table>
+    </div>
+  </div>
+</section>
+
+<!-- LERNKARTEN -->
+<section class="screen" id="karten">
+  <div class="card">
+    <h2>Lernkarten</h2>
+    <p class="intro">Überlege zuerst laut: Welche Präposition, welcher Kasus? Dann klick auf die Karte. Was du noch nicht sicher weißt, kommt später wieder.</p>
+    <div class="filterzeile">
+      <label for="lkFilter"><b>Präposition:</b></label>
+      <select class="fsel" id="lkFilter"></select>
+      <span class="anzahl" id="lkStand"></span>
+    </div>
+    <div class="lk-bühne">
+      <div class="lk" id="lk"></div>
+      <div class="knoepfe">
+        <button class="btn gruen" id="lkGewusst">Gewusst ✓</button>
+        <button class="btn hell" id="lkNochmal">Noch üben ↻</button>
+        <button class="btn hell" id="lkNeu">Neu mischen</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ÜBUNGEN 1–6 -->
+<section class="screen" id="u1"><div class="card">
+  <div class="kopf"><div class="txt"><h2>Übung 1 · Welche Präposition passt?</h2><p class="intro">Typische C1-Sätze aus Medien, Beruf und Gesellschaft. Achte auf den Kasus nach der Lücke – er verrät dir oft schon die Lösung.</p></div><div class="stand" id="u1-stand"></div></div>
+  <div id="u1-liste"></div>
+  <div class="fazit" id="u1-fazit"></div>
+  <div class="fusszeile"><button class="btn hell" data-neu="u1">Neu mischen</button><button class="btn" data-fehler="u1" disabled>Nur Fehler wiederholen</button></div>
+</div></section>
+
+<section class="screen" id="u2"><div class="card">
+  <div class="kopf"><div class="txt"><h2>Übung 2 · Akkusativ oder Dativ?</h2><p class="intro">Hier steckt die Falle nicht in der Präposition, sondern im Artikel. Besonders bei <b>an, auf</b> und <b>in</b> musst du wissen, welcher Fall verlangt wird.</p></div><div class="stand" id="u2-stand"></div></div>
+  <div id="u2-liste"></div>
+  <div class="fazit" id="u2-fazit"></div>
+  <div class="fusszeile"><button class="btn hell" data-neu="u2">Neu mischen</button><button class="btn" data-fehler="u2" disabled>Nur Fehler wiederholen</button></div>
+</div></section>
+
+<section class="screen" id="u3"><div class="card">
+  <div class="kopf"><div class="txt"><h2>Übung 3 · Pronominaladverb oder Präposition + Pronomen?</h2><p class="intro">Sache oder Person? Frage oder Antwort? Steht ein dass-Satz oder eine Infinitivgruppe dahinter? Entscheide dich für die Form, die im Standarddeutschen korrekt ist.</p></div><div class="stand" id="u3-stand"></div></div>
+  <div id="u3-liste"></div>
+  <div class="fazit" id="u3-fazit"></div>
+  <div class="fusszeile"><button class="btn hell" data-neu="u3">Neu mischen</button><button class="btn" data-fehler="u3" disabled>Nur Fehler wiederholen</button></div>
+</div></section>
+
+<section class="screen" id="u4"><div class="card">
+  <div class="kopf"><div class="txt"><h2>Übung 4 · Gleiches Verb – andere Bedeutung</h2><p class="intro">Die Bedeutung in Klammern zeigt dir, was gemeint ist. Wähle die Präposition, die genau diese Bedeutung erzeugt.</p></div><div class="stand" id="u4-stand"></div></div>
+  <div id="u4-liste"></div>
+  <div class="fazit" id="u4-fazit"></div>
+  <div class="fusszeile"><button class="btn hell" data-neu="u4">Neu mischen</button><button class="btn" data-fehler="u4" disabled>Nur Fehler wiederholen</button></div>
+</div></section>
+
+<section class="screen" id="u5"><div class="card">
+  <div class="kopf"><div class="txt"><h2>Übung 5 · Nomen und Adjektive mit Präposition</h2><p class="intro">Im Nominalstil und in festen Wendungen behalten Nomen und Adjektive meist die Präposition des Verbs – aber nicht immer. Gerade diese Strukturen heben dein Sprechen auf C1.</p></div><div class="stand" id="u5-stand"></div></div>
+  <div id="u5-liste"></div>
+  <div class="fazit" id="u5-fazit"></div>
+  <div class="fusszeile"><button class="btn hell" data-neu="u5">Neu mischen</button><button class="btn" data-fehler="u5" disabled>Nur Fehler wiederholen</button></div>
+</div></section>
+
+<section class="screen" id="u6"><div class="card">
+  <div class="kopf"><div class="txt"><h2>Übung 6 · Fehlerjagd: Welcher Satz ist korrekt?</h2><p class="intro">Jeweils nur ein Satz ist richtig. Die anderen enthalten genau die Fehler, die man in der Prüfung typischerweise hört.</p></div><div class="stand" id="u6-stand"></div></div>
+  <div id="u6-liste"></div>
+  <div class="fazit" id="u6-fazit"></div>
+  <div class="fusszeile"><button class="btn hell" data-neu="u6">Neu mischen</button><button class="btn" data-fehler="u6" disabled>Nur Fehler wiederholen</button></div>
+</div></section>
+
+<!-- LÜCKENTEXTE -->
+<section class="screen" id="u7">
+  <div class="card">
+    <h2>Übung 7 · Lückentexte im Prüfungsstil</h2>
+    <p class="intro">Drei Sachtexte zu typischen ÖSD-Themen. Wähle in jeder Lücke die richtige Form und klick dann auf „Prüfen“. Lies den fertigen Text anschließend einmal laut – er ist zugleich ein Vorrat an Formulierungen für deine Diskussion.</p>
+  </div>
+  <div id="texte"></div>
+</section>
+
+<!-- SPRECHTRAINING -->
+<section class="screen" id="u8">
+  <div class="card">
+    <h2>Übung 8 · Sprechtraining für die mündliche Prüfung</h2>
+    <p class="intro">Hier wird die Grammatik zum Werkzeug. Lies die Situation, sprich deine Antwort laut (nimm dich am besten mit dem Handy auf) und notiere dir danach die Sätze. Erst dann schaust du dir die Musterformulierung an und vergleichst.</p>
+    <div class="redemittel">
+      <div class="rm"><h4>Aufgabe 1 · Telefonat</h4><ul>
+        <li>Ich möchte mich <b>nach</b> … erkundigen.</li>
+        <li>Ich rufe <b>wegen</b> … an / Es geht <b>um</b> …</li>
+        <li>Ich muss mich leider <b>über</b> … beschweren.</li>
+        <li>Ich bestehe <b>darauf</b>, dass …</li>
+        <li>Ich bitte Sie <b>um</b> Verständnis / <b>um</b> eine Lösung.</li>
+        <li>Kann ich mich <b>darauf</b> verlassen, dass …?</li>
+      </ul></div>
+      <div class="rm"><h4>Aufgabe 2 · Diskussion</h4><ul>
+        <li>Ich spreche mich klar <b>für / gegen</b> … aus.</li>
+        <li>Ich bin fest <b>davon</b> überzeugt, dass …</li>
+        <li>Ich zweifle allerdings <b>daran</b>, dass …</li>
+        <li>Man sollte <b>Rücksicht auf</b> … nehmen.</li>
+        <li>Das wirkt sich negativ <b>auf</b> … aus / führt <b>zu</b> …</li>
+        <li>Es kommt letztlich <b>darauf</b> an, ob …</li>
+      </ul></div>
+      <div class="rm"><h4>Aufgabe 3 · Kurzreferat</h4><ul>
+        <li>Ich möchte mich heute <b>mit</b> der Frage befassen, …</li>
+        <li>Zunächst gehe ich <b>auf</b> … ein.</li>
+        <li>Ich beziehe mich dabei <b>auf</b> …</li>
+        <li>In meinem Heimatland legt man großen Wert <b>auf</b> …</li>
+        <li>Das hängt stark <b>davon</b> ab, …</li>
+        <li>Abschließend möchte ich <b>darauf</b> hinweisen, dass …</li>
+      </ul></div>
+    </div>
+  </div>
+  <div class="card"><div id="sprech"></div></div>
+</section>
+
+<!-- PRÜFUNGSMIX -->
+<section class="screen" id="u9"><div class="card">
+  <div class="kopf"><div class="txt"><h2>Übung 9 · Prüfungsmix</h2><p class="intro">25 zufällig gezogene Aufgaben aus allen Übungen – ideal als Generalprobe. Jedes Mal, wenn du neu startest, bekommst du eine andere Mischung.</p></div><div class="stand" id="u9-stand"></div></div>
+  <div id="u9-liste"></div>
+  <div class="fazit" id="u9-fazit"></div>
+  <div class="fusszeile"><button class="btn" id="mixNeu">Neue Mischung ziehen</button></div>
+</div></section>
+
+<footer>Viel Erfolg – du schaffst das! ✦</footer>
+</div>
+
+<script>
+/* ================= NACHSCHLAGE-DATEN ================= */
+const REF = `denken|an|A|Ich denke oft an meine Studienzeit.
+sich erinnern|an|A|Erinnerst du dich an unser erstes Treffen?
+jdn. erinnern|an|A|Erinnere mich bitte an den Termin.
+sich gewöhnen|an|A|Man gewöhnt sich an fast alles.
+glauben|an|A|Sie glaubt an das Gute im Menschen.
+sich wenden|an|A|Wenden Sie sich bitte an den Kundendienst.
+sich halten|an|A|Bitte halten Sie sich an die Regeln.
+sich anpassen|an|A|Wir passen uns an die neuen Bedingungen an.
+appellieren|an|A|Die Polizei appelliert an die Vernunft der Autofahrer.
+grenzen|an|A|Österreich grenzt an acht Staaten.
+sich richten|an|A|Das Angebot richtet sich an Berufseinsteiger.
+schreiben (Adressat)|an|A|Ich schreibe einen Brief an die Behörde.
+arbeiten|an|D|Sie arbeitet an einem neuen Roman.
+schreiben (Text)|an|D|Er schreibt an seiner Masterarbeit.
+teilnehmen|an|D|Ich nehme an der Besprechung teil.
+sich beteiligen|an|D|Viele beteiligten sich an der Umfrage.
+leiden (Krankheit)|an|D|Er leidet an einer Allergie.
+erkranken|an|D|Sie ist an Grippe erkrankt.
+sterben|an|D|Er starb an den Folgen des Unfalls.
+zweifeln|an|D|Niemand zweifelt an ihrer Kompetenz.
+hängen|an|D|Sie hängt sehr an ihrer Heimat.
+scheitern|an|D|Das Projekt scheiterte an der Finanzierung.
+sich orientieren|an|D|Wir orientieren uns an den Vorgaben.
+es mangelt|an|D|Es mangelt an Fachkräften.
+es fehlt|an|D|Es fehlt an Geld und Personal.
+erkennen|an|D|Ich erkenne ihn an seiner Stimme.
+jdn. hindern|an|D|Der Lärm hindert mich am Schlafen.
+Kritik üben|an|D|Die Opposition übt Kritik an dem Gesetz.
+Interesse haben|an|D|Wir haben großes Interesse an einer Zusammenarbeit.
+achten|auf|A|Achte auf deine Aussprache.
+antworten|auf|A|Bitte antworten Sie auf meine E-Mail.
+sich beziehen|auf|A|Ich beziehe mich auf Ihr Schreiben vom 3. Mai.
+sich konzentrieren|auf|A|Konzentrier dich auf das Wesentliche.
+sich verlassen|auf|A|Auf sie kann man sich verlassen.
+sich freuen (Zukunft)|auf|A|Ich freue mich auf den Urlaub.
+hoffen|auf|A|Wir hoffen auf besseres Wetter.
+warten|auf|A|Ich warte auf deine Antwort.
+verzichten|auf|A|Er verzichtet auf Zucker.
+sich vorbereiten|auf|A|Sie bereitet sich auf die Prüfung vor.
+reagieren|auf|A|Wie hat er auf die Kritik reagiert?
+sich einstellen|auf|A|Wir müssen uns auf Veränderungen einstellen.
+sich einigen|auf|A|Wir haben uns auf einen Kompromiss geeinigt.
+sich berufen|auf|A|Er beruft sich auf ein Gutachten.
+hinweisen|auf|A|Sie wies auf die Risiken hin.
+aufmerksam machen|auf|A|Er machte uns auf den Fehler aufmerksam.
+sich auswirken|auf|A|Stress wirkt sich auf die Gesundheit aus.
+zurückführen|auf|A|Der Unfall ist auf Übermüdung zurückzuführen.
+es kommt an|auf|A|Es kommt auf die Qualität an.
+stoßen|auf|A|Der Vorschlag stieß auf Ablehnung.
+setzen|auf|A|Das Unternehmen setzt auf Nachhaltigkeit.
+sich spezialisieren|auf|A|Die Kanzlei hat sich auf Arbeitsrecht spezialisiert.
+verweisen|auf|A|Der Autor verweist auf frühere Studien.
+sich beschränken|auf|A|Ich beschränke mich auf zwei Beispiele.
+sich belaufen|auf|A|Die Kosten belaufen sich auf 500 Euro.
+zurückgreifen|auf|A|Wir greifen auf bewährte Methoden zurück.
+eingehen|auf|A|Ich möchte kurz auf Ihre Frage eingehen.
+Einfluss haben|auf|A|Eltern haben großen Einfluss auf ihre Kinder.
+Rücksicht nehmen|auf|A|Bitte nehmt Rücksicht auf die Nachbarn.
+Wert legen|auf|A|Wir legen großen Wert auf Pünktlichkeit.
+Bezug nehmen|auf|A|Ich nehme Bezug auf unser Telefonat.
+angewiesen sein|auf|A|Viele sind auf Hilfe angewiesen.
+bestehen (fordern)|auf|D|Ich bestehe auf einer Entschuldigung.
+beruhen|auf|D|Das beruht auf einem Missverständnis.
+basieren|auf|D|Der Film basiert auf einer wahren Geschichte.
+beharren|auf|D|Er beharrt auf seinem Standpunkt.
+bestehen (Teile)|aus|D|Das Team besteht aus fünf Personen.
+sich ergeben|aus|D|Aus den Daten ergibt sich ein klares Bild.
+folgen|aus|D|Was folgt aus dieser Erkenntnis?
+stammen|aus|D|Die Idee stammt aus Japan.
+lernen|aus|D|Wir sollten aus unseren Fehlern lernen.
+sich zusammensetzen|aus|D|Die Jury setzt sich aus sieben Mitgliedern zusammen.
+sich bedanken (Person)|bei|D|Ich bedanke mich bei allen Helfern.
+sich beschweren (Person)|bei|D|Er beschwerte sich beim Hausverwalter.
+sich entschuldigen (Person)|bei|D|Entschuldige dich bei ihr!
+helfen|bei|D|Kannst du mir bei der Übersetzung helfen?
+sich erkundigen (Stelle)|bei|D|Erkundigen Sie sich bei der Gemeinde.
+sich bewerben (Firma)|bei|D|Sie bewirbt sich bei einer Bank.
+sich bedanken (Grund)|für|A|Ich bedanke mich für die Einladung.
+sich entschuldigen (Grund)|für|A|Ich entschuldige mich für die Verspätung.
+sich eignen|für|A|Das Buch eignet sich für Anfänger.
+sich einsetzen|für|A|Sie setzt sich für den Tierschutz ein.
+sich engagieren|für|A|Er engagiert sich für Geflüchtete.
+sich entscheiden|für|A|Ich habe mich für die günstigere Variante entschieden.
+sich interessieren|für|A|Interessierst du dich für Kunst?
+sorgen|für|A|Wer sorgt für die Kinder?
+halten (einschätzen)|für|A|Ich halte ihn für einen Experten.
+sich schämen|für|A|Er schämt sich für sein Verhalten.
+plädieren|für|A|Sie plädiert für mehr Transparenz.
+werben|für|A|Die Kampagne wirbt für gesunde Ernährung.
+haften|für|A|Eltern haften für ihre Kinder.
+sprechen (Argument)|für|A|Vieles spricht für diese Lösung.
+sich aussprechen|für|A|Die Mehrheit sprach sich für das Projekt aus.
+verantwortlich sein|für|A|Wer ist für die Planung verantwortlich?
+sich wehren|gegen|A|Die Anrainer wehren sich gegen den Bau.
+protestieren|gegen|A|Tausende protestierten gegen das Gesetz.
+verstoßen|gegen|A|Das verstößt gegen die Hausordnung.
+kämpfen (Gegner)|gegen|A|Wir kämpfen gegen Ungerechtigkeit.
+sich aussprechen|gegen|A|Der Gemeinderat sprach sich gegen den Plan aus.
+stimmen|gegen|A|Zwei Abgeordnete stimmten gegen den Antrag.
+sich verlieben|in|A|Sie hat sich in einen Musiker verliebt.
+einwilligen|in|A|Der Patient willigte in die Operation ein.
+sich einmischen|in|A|Misch dich nicht in meine Angelegenheiten ein!
+sich vertiefen|in|A|Er vertiefte sich in die Lektüre.
+geraten|in|A|Wir gerieten in einen Stau.
+einteilen|in|A|Wir teilen die Klasse in Gruppen ein.
+übersetzen|in|A|Sie übersetzt den Text ins Ungarische.
+investieren|in|A|Wir investieren in Bildung.
+sich hineinversetzen|in|A|Versuch, dich in seine Lage hineinzuversetzen.
+einführen|in|A|Der Kurs führt in die Statistik ein.
+bestehen (Wesen)|in|D|Das Problem besteht in der fehlenden Kommunikation.
+sich irren|in|D|Sie hat sich im Datum geirrt.
+sich täuschen|in|D|Ich habe mich in ihm getäuscht.
+sich unterscheiden (Merkmal)|in|D|Die Modelle unterscheiden sich im Preis.
+übereinstimmen (Punkt)|in|D|Wir stimmen in diesem Punkt überein.
+sich auskennen|in|D|Kennst du dich in Wien aus?
+liegen|in|D|Die Ursache liegt in der schlechten Planung.
+anfangen|mit|D|Wir fangen mit der Grammatik an.
+aufhören|mit|D|Er hat mit dem Rauchen aufgehört.
+sich auseinandersetzen|mit|D|Wir setzen uns mit der Kritik auseinander.
+sich befassen|mit|D|Die Studie befasst sich mit Migration.
+sich beschäftigen|mit|D|Ich beschäftige mich mit Philosophie.
+sich abfinden|mit|D|Sie hat sich mit der Situation abgefunden.
+rechnen|mit|D|Mit so viel Erfolg hat niemand gerechnet.
+sich begnügen|mit|D|Er begnügt sich mit wenig.
+übereinstimmen (Person)|mit|D|Ich stimme mit dir völlig überein.
+vergleichen|mit|D|Vergleich dich nicht ständig mit anderen.
+telefonieren|mit|D|Ich habe mit dem Arzt telefoniert.
+zusammenhängen|mit|D|Das hängt mit dem Wetter zusammen.
+umgehen|mit|D|Sie kann gut mit Kritik umgehen.
+sich zufriedengeben|mit|D|Gib dich nicht mit der ersten Antwort zufrieden.
+handeln (Handel)|mit|D|Die Firma handelt mit Holz.
+sich identifizieren|mit|D|Ich identifiziere mich mit diesen Werten.
+konfrontieren|mit|D|Er wurde mit den Vorwürfen konfrontiert.
+sich anfreunden|mit|D|Ich habe mich mit dem Gedanken angefreundet.
+einverstanden sein|mit|D|Bist du mit dem Plan einverstanden?
+in Verbindung stehen|mit|D|Der Vorfall steht in Verbindung mit dem Streik.
+fragen|nach|D|Er fragte nach dem Weg.
+sich erkundigen (Sache)|nach|D|Ich erkundige mich nach den Öffnungszeiten.
+streben|nach|D|Viele streben nach Anerkennung.
+sich sehnen|nach|D|Sie sehnt sich nach Ruhe.
+suchen|nach|D|Wir suchen nach einer Lösung.
+riechen|nach|D|Hier riecht es nach frischem Brot.
+schmecken|nach|D|Das schmeckt nach Zimt.
+sich richten|nach|D|Wir richten uns nach Ihren Wünschen.
+verlangen|nach|D|Das Publikum verlangte nach einer Zugabe.
+sich ärgern|über|A|Ich ärgere mich über meinen Fehler.
+sich aufregen|über|A|Reg dich nicht über Kleinigkeiten auf!
+berichten|über|A|Die Zeitung berichtet über den Skandal.
+diskutieren|über|A|Wir diskutieren über Klimapolitik.
+sich freuen (Erhaltenes)|über|A|Ich freue mich über dein Geschenk.
+nachdenken|über|A|Denk in Ruhe über das Angebot nach.
+sich informieren|über|A|Informier dich vorher über die Kosten.
+klagen|über|A|Sie klagt über Kopfschmerzen.
+sich beschweren (Grund)|über|A|Er beschwert sich über den Lärm.
+verfügen|über|A|Das Hotel verfügt über einen Wellnessbereich.
+sich wundern|über|A|Ich wundere mich über seine Reaktion.
+urteilen|über|A|Urteile nicht vorschnell über andere.
+sich hinwegsetzen|über|A|Er setzte sich über alle Bedenken hinweg.
+sich im Klaren sein|über|A|Bist du dir über die Folgen im Klaren?
+sprechen (Thema)|über|A|Lass uns über deine Pläne sprechen.
+lachen|über|A|Wir haben über den Witz gelacht.
+sich lustig machen|über|A|Mach dich nicht über ihn lustig.
+sich bemühen|um|A|Wir bemühen uns um eine schnelle Lösung.
+sich bewerben (Stelle)|um|A|Er bewirbt sich um ein Stipendium.
+bitten|um|A|Darf ich Sie um Ihre Hilfe bitten?
+es handelt sich|um|A|Es handelt sich um ein Missverständnis.
+es geht|um|A|Worum geht es in dem Film?
+sich kümmern|um|A|Wer kümmert sich um die Katze?
+sich sorgen|um|A|Ich sorge mich um deine Gesundheit.
+kämpfen (Ziel)|um|A|Sie kämpft um ihr Recht.
+beneiden|um|A|Ich beneide dich um deine Gelassenheit.
+trauern|um|A|Die Stadt trauert um ihren Bürgermeister.
+sich drehen|um|A|Alles dreht sich um Geld.
+ringen|um|A|Die Parteien ringen um einen Kompromiss.
+sich streiten|um|A|Die Kinder streiten sich um das Spielzeug.
+leiden (Umstand)|unter|D|Viele leiden unter der Hitze.
+verstehen (Definition)|unter|D|Was verstehst du unter Glück?
+abhängen|von|D|Das hängt vom Wetter ab.
+sich erholen|von|D|Hast du dich vom Stress erholt?
+halten (Meinung)|von|D|Was hältst du von meinem Vorschlag?
+träumen|von|D|Sie träumt von einer Weltreise.
+überzeugen|von|D|Er hat mich von seiner Idee überzeugt.
+sich verabschieden|von|D|Wir verabschieden uns von den Gästen.
+ausgehen|von|D|Wir gehen von steigenden Preisen aus.
+absehen|von|D|Wir sehen von einer Anzeige ab.
+profitieren|von|D|Alle profitieren von der Reform.
+sich distanzieren|von|D|Die Partei distanziert sich von den Aussagen.
+abraten|von|D|Ich rate dir von diesem Kauf ab.
+zeugen|von|D|Seine Arbeit zeugt von großem Talent.
+handeln (Inhalt)|von|D|Der Roman handelt von einer Flucht.
+sich unterscheiden|von|D|Dialekte unterscheiden sich stark von der Standardsprache.
+schwärmen|von|D|Sie schwärmt von ihrem Urlaub.
+abweichen|von|D|Wir weichen nicht vom Plan ab.
+sich trennen|von|D|Sie hat sich von ihrem Partner getrennt.
+Gebrauch machen|von|D|Machen Sie von Ihrem Recht Gebrauch.
+Angst haben|vor|D|Sie hat Angst vor Spinnen.
+sich fürchten|vor|D|Er fürchtet sich vor der Dunkelheit.
+warnen|vor|D|Experten warnen vor den Risiken.
+schützen|vor|D|Sonnencreme schützt vor Sonnenbrand.
+sich hüten|vor|D|Hüte dich vor falschen Versprechungen.
+fliehen|vor|D|Sie flohen vor dem Krieg.
+Respekt haben|vor|D|Ich habe großen Respekt vor dieser Leistung.
+zurückschrecken|vor|D|Er schreckt vor keiner Herausforderung zurück.
+sich ekeln|vor|D|Sie ekelt sich vor Insekten.
+beitragen|zu|D|Jeder kann zum Klimaschutz beitragen.
+gehören|zu|D|Sie gehört zu den besten Spielerinnen.
+führen|zu|D|Das führt zu Missverständnissen.
+neigen|zu|D|Er neigt zu Übertreibungen.
+raten|zu|D|Der Arzt rät zu mehr Bewegung.
+sich entschließen|zu|D|Sie entschloss sich zu einem Neuanfang.
+überreden|zu|D|Er hat mich zu einem Ausflug überredet.
+auffordern|zu|D|Die Polizei forderte die Menge zum Gehen auf.
+gratulieren|zu|D|Ich gratuliere dir zum Geburtstag.
+passen|zu|D|Die Farbe passt gut zu dir.
+zwingen|zu|D|Niemand zwingt dich zu dieser Entscheidung.
+sich äußern|zu|D|Der Minister äußerte sich nicht zu den Vorwürfen.
+Stellung nehmen|zu|D|Bitte nehmen Sie zu diesem Punkt Stellung.
+ermutigen|zu|D|Sie ermutigte ihn zu einem Studium.
+sich bekennen|zu|D|Er bekennt sich zu seinen Fehlern.
+verpflichten|zu|D|Der Vertrag verpflichtet uns zur Verschwiegenheit.
+einladen|zu|D|Wir laden euch zu unserer Hochzeit ein.
+unterscheiden|zwischen|D|Man muss zwischen Meinung und Fakten unterscheiden.
+vermitteln|zwischen|D|Sie vermittelt zwischen den Parteien.`.split("\n").map(z=>{const [v,p,k,b]=z.split("|");return {v,p,k,b}});
+
+/* ================= ÜBUNGSDATEN =================
+   Format: [Satz mit ___, richtige Antwort, Distraktoren …, Erklärung] */
+const U1 = [
+["Die Studie beruht ___ Daten aus über zwanzig Ländern.","auf","an","über","aus","beruhen auf + Dativ – eine der wenigen Dativ-Ausnahmen bei „auf“."],
+["Viele Arbeitnehmer leiden ___ dem ständigen Zeitdruck.","unter","an","von","mit","leiden unter + D für belastende Umstände; leiden an + D nur für Krankheiten."],
+["Der Erfolg des Projekts hängt maßgeblich ___ der Finanzierung ab.","von","an","aus","zu","abhängen von + D."],
+["Die Ministerin wies ___ die steigenden Kosten hin.","auf","an","über","zu","hinweisen auf + A."],
+["Ich möchte mich ___ Ihnen für die Verspätung entschuldigen.","bei","an","zu","für","sich entschuldigen bei + D (Person) für + A (Grund)."],
+["Wir mussten uns rasch ___ die neuen Arbeitsbedingungen anpassen.","an","auf","nach","mit","sich anpassen an + A."],
+["Der Vertrag verstößt eindeutig ___ geltendes EU-Recht.","gegen","auf","an","mit","verstoßen gegen + A."],
+["In ihrem Vortrag setzte sie sich kritisch ___ der Frage auseinander, wer die Kosten trägt.","mit","über","an","zu","sich auseinandersetzen mit + D."],
+["Die Kosten belaufen sich ___ rund 3.000 Euro.","auf","an","um","zu","sich belaufen auf + A."],
+["Unser Team besteht ___ sechs Expertinnen und Experten.","aus","in","auf","von","bestehen aus + D = sich zusammensetzen aus."],
+["Er bewirbt sich ___ eine Stelle als Projektleiter.","um","auf","nach","an","sich bewerben um + A (die Stelle), bei + D (die Firma)."],
+["Viele Eltern sorgen sich ___ die Zukunft ihrer Kinder.","um","für","über","an","sich sorgen um + A = sich Sorgen machen."],
+["Die Firma verfügt ___ ein weltweites Vertriebsnetz.","über","an","mit","von","verfügen über + A."],
+["Wir sollten ___ einer Verschiebung des Termins rechnen.","mit","auf","an","für","rechnen mit + D."],
+["Der Minister wollte ___ den Vorwürfen nicht Stellung nehmen.","zu","über","auf","an","Stellung nehmen zu + D."],
+["Die Bevölkerung wurde rechtzeitig ___ dem Unwetter gewarnt.","vor","gegen","über","von","warnen vor + D."],
+["Ich kann mich ___ diesen Lärm einfach nicht gewöhnen.","an","auf","mit","zu","sich gewöhnen an + A."],
+["Die Entscheidung wirkt sich unmittelbar ___ die Belegschaft aus.","auf","an","für","über","sich auswirken auf + A."],
+["Kinder neigen ___ Übertreibungen, wenn sie aufgeregt sind.","zu","an","auf","nach","neigen zu + D."],
+["Sie träumt schon lange ___ einer eigenen Praxis.","von","über","nach","an","träumen von + D."],
+["Er hat sich erstaunlich schnell ___ der Operation erholt.","von","aus","nach","an","sich erholen von + D."],
+["Wir distanzieren uns ausdrücklich ___ diesen Aussagen.","von","gegen","aus","vor","sich distanzieren von + D."],
+["Die Ergebnisse lassen sich ___ mehrere Ursachen zurückführen.","auf","an","zu","aus","zurückführen auf + A."],
+["Ich habe mich ___ der Hotline nach dem Stand meiner Bestellung erkundigt.","bei","an","mit","von","sich erkundigen bei + D (Stelle) nach + D (Sache)."],
+["Es mangelt in vielen Branchen ___ qualifizierten Fachkräften.","an","von","mit","nach","es mangelt an + D."],
+["Die Direktorin appellierte ___ die Vernunft der Eltern.","an","auf","zu","für","appellieren an + A."],
+["Der Roman handelt ___ einer Familie im Wien der Zwischenkriegszeit.","von","über","um","mit","handeln von + D – „handeln über“ ist ein häufiger Fehler."],
+["Bitte halten Sie sich ___ die vereinbarten Fristen.","an","auf","zu","nach","sich halten an + A = befolgen."],
+["Die Partei plädiert ___ eine Senkung der Lohnnebenkosten.","für","um","auf","zu","plädieren für + A."],
+["Sie hat sich jahrelang ___ die Rechte von Geflüchteten eingesetzt.","für","um","an","auf","sich einsetzen für + A."],
+["Wir müssen ___ der Tatsache ausgehen, dass die Preise weiter steigen.","von","aus","an","mit","ausgehen von + D = annehmen."],
+["Die Kommission hat ___ einer Veröffentlichung des Berichts abgesehen.","von","aus","ab","vor","absehen von + D = verzichten."],
+["Viele Konsumenten greifen ___ günstigere Eigenmarken zurück.","auf","an","zu","nach","zurückgreifen auf + A."],
+["Ich beneide dich ___ deine Gelassenheit.","um","für","auf","über","beneiden um + A."],
+["Das neue Gesetz trägt hoffentlich ___ einer gerechteren Verteilung bei.","zu","an","für","auf","beitragen zu + D."],
+["Ich habe lange ___ deinen Vorschlag nachgedacht.","über","an","von","um","nachdenken über + A."],
+["Wir haben uns schließlich ___ das Angebot eines anderen Anbieters entschieden.","für","zu","auf","an","sich entscheiden für + A."],
+["Der Patient ist ___ einer seltenen Lungenkrankheit erkrankt.","an","unter","mit","von","erkranken an + D."],
+["Das Leben in der Stadt unterscheidet sich erheblich ___ dem Leben auf dem Land.","von","mit","aus","zu","sich unterscheiden von + D."],
+["Das Unternehmen hat sich ___ nachhaltige Verpackungen spezialisiert.","auf","an","für","in","sich spezialisieren auf + A."],
+["Der Abgeordnete beruft sich ___ ein Gutachten der Universität.","auf","an","zu","mit","sich berufen auf + A."],
+["Mit der Zeit habe ich mich ___ dem Gedanken angefreundet, umzuziehen.","mit","an","zu","für","sich anfreunden mit + D."],
+["Die Gewerkschaft protestiert ___ die geplanten Kürzungen.","gegen","über","an","auf","protestieren gegen + A."],
+["Nach langem Zögern willigte er schließlich ___ den Kompromiss ein.","in","auf","an","zu","einwilligen in + A."]
+];
+
+const U2 = [
+["Ich denke oft ___ Urlaub in Sizilien.","an den","an dem","an das","denken an + A → der Urlaub → an den Urlaub."],
+["Sie nimmt regelmäßig ___ Weiterbildungskurs teil.","an einem","an einen","teilnehmen an + D."],
+["Er zweifelt ___ Ehrlichkeit seines Partners.","an der","an die","zweifeln an + D."],
+["Wir arbeiten seit Monaten ___ neuen Konzept.","am","ans","arbeiten an + D → an dem = am."],
+["Ich kann mich nicht mehr ___ Namen des Hotels erinnern.","an den","an dem","sich erinnern an + A."],
+["Er besteht ___ sofortigen Rückzahlung des Geldes.","auf der","auf die","bestehen auf + D (= fordern) – Dativ-Ausnahme!"],
+["Die ganze Theorie basiert ___ falschen Annahme.","auf einer","auf eine","basieren auf + D – Dativ-Ausnahme!"],
+["Du kannst dich voll und ganz ___ Kollegin verlassen.","auf meine","auf meiner","sich verlassen auf + A."],
+["Wir warten noch ___ Antwort der Behörde.","auf die","auf der","warten auf + A."],
+["Der wesentliche Unterschied besteht ___ Preis.","im","in den","bestehen in + D (= liegen in) → in dem = im."],
+["Sie hat sich ___ jüngeren Kollegen verliebt.","in einen","in einem","sich verlieben in + A."],
+["Er hat sich leider ___ Datum geirrt.","im","ins","sich irren in + D → in dem = im."],
+["Misch dich bitte nicht ___ Angelegenheiten ein!","in meine","in meinen","sich einmischen in + A (Plural: meine)."],
+["Die Firma investiert verstärkt ___ Energien.","in erneuerbare","in erneuerbaren","investieren in + A (Plural ohne Artikel: erneuerbare)."],
+["Sie leidet seit Jahren ___ chronischen Erkrankung.","an einer","an eine","leiden an + D (Krankheit)."],
+["Viele haben Angst ___ sozialen Abstieg.","vor dem","vor den","Angst haben vor + D."],
+["Bitte achte in der Prüfung ___ Formulierungen.","auf deine","auf deinen","achten auf + A (Plural: deine)."],
+["Ich habe mich über ___ Bericht in der Zeitung sehr geärgert.","den","dem","sich ärgern über + A."],
+["Er orientiert sich streng ___ Vorgaben der EU.","an den","an die","sich orientieren an + D (Plural: den)."],
+["Die Studierenden beteiligten sich aktiv ___ Diskussion.","an der","an die","sich beteiligen an + D."],
+["Sie hat sich schnell ___ neue Umgebung gewöhnt.","an die","an der","sich gewöhnen an + A."],
+["Das Projekt scheiterte ___ Widerstand der Anrainer.","am","ans","scheitern an + D → an dem = am."],
+["Wir müssen uns gründlich ___ Prüfung vorbereiten.","auf die","auf der","sich vorbereiten auf + A."],
+["Die Kinder freuen sich schon ___ Ferien.","auf die","auf den","sich freuen auf + A (Plural: die Ferien)."],
+["Er hat sich stundenlang ___ Thema vertieft.","ins","im","sich vertiefen in + A → in das = ins."],
+["Nach langem Gespräch willigte sie ___ Operation ein.","in die","in der","einwilligen in + A."],
+["Er fürchtet sich ___ Hunden.","vor großen","vor große","sich fürchten vor + D (Plural ohne Artikel: großen)."],
+["Er hat lange ___ Lösung des Problems gesucht.","nach einer","nach eine","suchen nach + D."],
+["Wir beschäftigen uns heute ___ Ursachen der Krise.","mit den","mit die","sich beschäftigen mit + D (Plural: den)."],
+["Er hängt sehr ___ alten Haus.","an seinem","an sein","hängen an + D = emotional verbunden sein."],
+["Ich glaube fest ___ Gerechtigkeit.","an die","an der","glauben an + A."],
+["Sie schreibt seit zwei Jahren ___ Dissertation.","an ihrer","an ihre","schreiben an + D = an einem Text arbeiten."],
+["Wende dich bitte ___ zuständige Sachbearbeiterin.","an die","an der","sich wenden an + A."]
+];
+
+const U3 = [
+["Hast du schon mit deinem Chef gesprochen? – Ja, ich habe gestern ___ gesprochen.","mit ihm","damit","womit","mit es","Person → Präposition + Personalpronomen."],
+["Hast du schon von der neuen Regelung gehört? – Nein, ___ habe ich noch nichts gehört.","davon","von ihr","wovon","von es","Sache → Pronominaladverb da(r)- + Präposition."],
+["___ denkst du gerade? – An meine Großmutter.","An wen","Woran","Wovon","An wem","Frage nach einer Person → Präposition + wen/wem (an + A → wen)."],
+["___ denkst du gerade? – An die Prüfung morgen.","Woran","An wen","Worauf","An was","Frage nach einer Sache → wo(r)- + Präposition. „An was“ ist umgangssprachlich – in der Prüfung: woran."],
+["___ wartest du? – Auf den Bus.","Worauf","Auf wen","Darauf","Auf was","Sache → worauf."],
+["___ wartest du? – Auf meine Schwester.","Auf wen","Worauf","Auf wem","Darauf","Person → auf wen (auf + A)."],
+["Ich freue mich schon sehr ___, nächste Woche endlich Urlaub zu haben.","darauf","daran","worauf","dafür","Vorfreude auf Zukünftiges: sich freuen auf → darauf als Korrelat vor der Infinitivgruppe."],
+["Interessierst du dich für Politik? – Nein, ___ interessiere ich mich überhaupt nicht.","dafür","für sie","wofür","für es","Sache → dafür."],
+["Kümmert sich jemand um die alte Dame? – Ja, ihr Sohn kümmert sich ___.","um sie","darum","worum","um ihr","Person → um sie (um + A)."],
+["___ habt ihr in der Sitzung diskutiert? – Über das Budget.","Worüber","Über wen","Darüber","Über was","Sache → worüber. „Über was“ ist umgangssprachlich."],
+["___ hast du so lange telefoniert? – Mit dem Vermieter.","Mit wem","Womit","Mit wen","Damit","Person → mit wem (mit + D)."],
+["Er hat lange ___ nachgedacht, ob er die Stelle annehmen soll.","darüber","darauf","daran","worüber","nachdenken über → Korrelat darüber vor dem ob-Satz."],
+["Sie hat leider nicht ___ gedacht, die Tür abzuschließen.","daran","darauf","damit","woran","denken an → daran vor der Infinitivgruppe."],
+["Ich bin nicht ___ einverstanden, dass das Meeting verschoben wird.","damit","dafür","daran","darüber","einverstanden sein mit → damit."],
+["Es kommt ganz ___ an, wie viel Zeit wir zur Verfügung haben.","darauf","daran","davon","darin","es kommt an auf → darauf."],
+["Der Erfolg hängt ___ ab, ob alle mitmachen.","davon","daran","darauf","dafür","abhängen von → davon."],
+["Er hat sich bei der Hausverwaltung ___ beschwert, dass die Heizung nicht funktioniert.","darüber","darauf","daran","davon","sich beschweren über → darüber."],
+["Ich habe bewusst ___ verzichtet, eine Antwort zu schreiben.","darauf","davon","daran","dafür","verzichten auf → darauf."],
+["Sie bat ihn ___, das Fenster zu schließen.","darum","dafür","danach","darauf","bitten um → darum."],
+["Die größte Schwierigkeit besteht ___, die richtigen Leute zu finden.","darin","daraus","daran","darauf","bestehen in (= liegen in) → darin."],
+["Wir müssen ___ rechnen, dass der Zug Verspätung hat.","damit","darauf","dafür","daran","rechnen mit → damit."],
+["Ich erinnere mich noch gut ___, wie wir uns kennengelernt haben.","daran","darauf","davon","darüber","sich erinnern an → daran."],
+["___ sind Sie in der Firma verantwortlich? – Für die Buchhaltung.","Wofür","Für was","Dafür","Für wen","Sache → wofür."],
+["___ bist du so stolz? – Auf meine Tochter.","Auf wen","Worauf","Auf wem","Darauf","Person → auf wen."],
+["Hast du Angst vor der Prüfung? – Nein, ___ habe ich keine Angst.","davor","vor ihr","wovor","dafür","Sache → davor."],
+["Der neue Kollege? ___ halte ich ehrlich gesagt nicht viel.","Von ihm","Davon","Wovon","Von ihn","Person → von ihm (von + D)."]
+];
+
+const U4 = [
+["Die mündliche Prüfung besteht ___ drei Teilen. (= setzt sich zusammen)","aus","auf","in","bestehen aus + D = sich zusammensetzen aus."],
+["Der Kunde besteht ___ einer schriftlichen Bestätigung. (= verlangt nachdrücklich)","auf","aus","in","bestehen auf + D = nachdrücklich fordern."],
+["Der Reiz dieser Arbeit besteht ___ der Abwechslung. (= liegt in)","in","aus","auf","bestehen in + D = ausmachen, liegen in."],
+["Sie hält sich genau ___ die Anweisungen. (= befolgt sie)","an","für","zu","sich halten an + A = befolgen."],
+["Er hält sich ___ einen großen Künstler. (= glaubt, er sei einer)","für","an","von","sich halten für + A = sich einschätzen als."],
+["Was hältst du ___ dem neuen Kollegen? (= deine Meinung)","von","für","über","halten von + D = eine Meinung haben."],
+["Die Großmutter sorgt ___ die Enkel, solange die Eltern arbeiten. (= betreut sie)","für","um","über","sorgen für + A (ohne „sich“) = sich kümmern um."],
+["Seit dem Unfall sorgt sie sich ständig ___ ihren Sohn. (= macht sich Sorgen)","um","für","über","sich sorgen um + A = sich Sorgen machen."],
+["Er leidet seit seiner Kindheit ___ Asthma. (= Krankheit)","an","unter","von","leiden an + D für Krankheiten."],
+["Viele Städter leiden ___ dem Verkehrslärm. (= belastender Umstand)","unter","an","von","leiden unter + D für belastende Umstände."],
+["Der Film handelt ___ einer jungen Ärztin in Wien. (= Inhalt)","von","mit","um","handeln von + D = zum Inhalt haben."],
+["Das Familienunternehmen handelt ___ Antiquitäten. (= kauft und verkauft)","mit","von","um","handeln mit + D = Handel treiben."],
+["Bei dem Vorfall handelt es sich ___ ein Missverständnis. (= es ist …)","um","von","mit","es handelt sich um + A."],
+["Wie bist du nur ___ diese verrückte Idee gekommen? (= Einfall)","auf","zu","um","kommen auf + A = einen Einfall haben."],
+["Bei dem Lawinenabgang sind zwei Skitourengeher ___ Leben gekommen. (= gestorben)","ums","zum","aufs","ums Leben kommen = sterben."],
+["Nach dem stressigen Monat bin ich endlich ___ Ruhe gekommen. (= Ruhe finden)","zur","um die","auf die","zur Ruhe kommen."],
+["Was denkst du ___ den Vorschlag der Direktorin? (= deine Meinung)","über","an","auf","denken über + A = eine Meinung haben."],
+["Denk bitte ___ den Termin beim Notar morgen! (= nicht vergessen)","an","über","auf","denken an + A = sich erinnern, nicht vergessen."],
+["Ich habe mich ___ der Hausverwaltung beschwert. (= Adressat)","bei","über","an","sich beschweren bei + D (Person/Stelle)."],
+["Ich habe mich ___ die defekte Heizung beschwert. (= Grund)","über","bei","an","sich beschweren über + A (Grund)."],
+["Was verstehst du eigentlich ___ Erfolg? (= Definition)","unter","von","über","verstehen unter + D = definieren."],
+["Ich verstehe mich hervorragend ___ meiner Schwiegermutter. (= gute Beziehung)","mit","unter","bei","sich verstehen mit + D."],
+["Sie schreibt seit zwei Jahren ___ ihrer Dissertation. (= arbeitet daran)","an","über","von","schreiben an + D = an einem Text arbeiten."],
+["Er hat einen Artikel ___ die Wohnungsnot in Wien geschrieben. (= Thema)","über","an","von","schreiben über + A = Thema."],
+["Die Zahlen sprechen ___ sich. (= sind eindeutig)","für","von","mit","für sich sprechen = keiner Erklärung bedürfen."],
+["Die Kollegin fragte ___ dem Stand des Projekts. (= wollte wissen)","nach","um","über","fragen nach + D."],
+["Darf ich Sie ___ etwas Geduld bitten? (= ersuchen)","um","nach","für","bitten um + A."],
+["Ich habe sie sofort ___ ihrem Lachen erkannt. (= Merkmal)","an","von","bei","erkennen an + D."],
+["Sie freut sich schon sehr ___ ihren Urlaub im Dezember. (= Vorfreude)","auf","über","an","sich freuen auf + A = Vorfreude auf Zukünftiges."],
+["Danke für die Blumen – ich habe mich riesig ___ gefreut! (= schon erhalten)","darüber","darauf","dafür","sich freuen über + A = Freude über etwas Erhaltenes."]
+];
+
+const U5 = [
+["Die Angst ___ Arbeitslosigkeit wächst.","vor","um","von","an","die Angst vor + D."],
+["Der Verzicht ___ Plastik fällt vielen schwer.","auf","an","von","über","der Verzicht auf + A."],
+["Die Teilnahme ___ dem Seminar ist kostenlos.","an","bei","zu","von","die Teilnahme an + D."],
+["Die Nachfrage ___ Elektroautos steigt.","nach","an","auf","für","die Nachfrage nach + D."],
+["Die Abhängigkeit ___ fossilen Brennstoffen nimmt nur langsam ab.","von","an","zu","nach","die Abhängigkeit von + D."],
+["Ihr Beitrag ___ dieser Debatte war entscheidend.","zu","an","für","auf","der Beitrag zu + D."],
+["Die Kritik ___ der Regierung wird lauter.","an","über","zu","von","die Kritik an + D."],
+["Er hat keinen Anspruch ___ Arbeitslosengeld.","auf","an","für","um","der Anspruch auf + A."],
+["Ein Abschluss ist Voraussetzung ___ die Zulassung.","für","zu","an","auf","die Voraussetzung für + A."],
+["Die Auseinandersetzung ___ der eigenen Vergangenheit fällt vielen schwer.","mit","an","über","zu","die Auseinandersetzung mit + D."],
+["Die Sehnsucht ___ Ruhe wird immer größer.","nach","an","auf","um","die Sehnsucht nach + D."],
+["Der Glaube ___ das Gute hat ihr in dieser Zeit geholfen.","an","auf","für","in","der Glaube an + A."],
+["Die Reaktion ___ den Vorschlag fiel überraschend positiv aus.","auf","an","über","zu","die Reaktion auf + A."],
+["Der Einfluss sozialer Medien ___ Jugendliche wird oft unterschätzt.","auf","an","über","für","der Einfluss auf + A."],
+["Die Erinnerung ___ seine Kindheit verblasst allmählich.","an","auf","von","über","die Erinnerung an + A."],
+["Die Bitte ___ Unterstützung wurde abgelehnt.","um","nach","für","auf","die Bitte um + A."],
+["Der Zusammenhang ___ Armut und Gesundheit ist gut belegt.","zwischen","von","mit","an","der Zusammenhang zwischen + D."],
+["Die Sorge ___ ihre kranke Mutter raubt ihr den Schlaf.","um","für","an","nach","die Sorge um + A."],
+["Die Suche ___ einer bezahlbaren Wohnung dauert oft Monate.","nach","um","für","an","die Suche nach + D."],
+["Das Interesse ___ Weiterbildung ist deutlich gestiegen.","an","auf","über","nach","das Interesse an + D."],
+["Sie ist zu Recht stolz ___ ihre Leistung.","auf","über","an","für","stolz auf + A."],
+["Er ist finanziell noch abhängig ___ seinen Eltern.","von","an","aus","zu","abhängig von + D."],
+["Bist du zufrieden ___ dem Ergebnis?","mit","über","an","von","zufrieden mit + D."],
+["Wer ist verantwortlich ___ diesen Fehler?","für","an","über","um","verantwortlich für + A."],
+["Ich bin von Anfang an überzeugt ___ seiner Unschuld.","von","an","über","aus","überzeugt von + D."],
+["Sie ist sehr interessiert ___ zeitgenössischer Kunst.","an","für","auf","mit","interessiert an + D – aber: sich interessieren für + A!"],
+["Wir sind alle gespannt ___ die Ergebnisse.","auf","über","an","für","gespannt auf + A."],
+["Er ist neidisch ___ den Erfolg seines Bruders.","auf","an","über","um","neidisch auf + A."],
+["Diese Reaktion ist typisch ___ ihn.","für","an","zu","von","typisch für + A."],
+["Sie ist seit der Schulzeit befreundet ___ ihm.","mit","zu","bei","an","befreundet mit + D."],
+["Ich bin wirklich froh ___ deine Hilfe.","über","auf","für","an","froh über + A."],
+["Er ist böse ___ mich, weil ich ihn nicht eingeladen habe.","auf","an","gegen","mit","böse auf + A."],
+["Das Land ist reich ___ Bodenschätzen.","an","mit","von","aus","reich an + D."],
+["Wien ist bekannt ___ seine Kaffeehäuser.","für","um","auf","an","bekannt für + A."],
+["Beide Seiten sind bereit ___ einem Kompromiss.","zu","für","auf","an","bereit zu + D."],
+["Ich bin dir sehr dankbar ___ deine Geduld.","für","über","um","auf","dankbar für + A."]
+];
+
+/* Übung 6: [richtiger Satz, falsch, falsch, Erklärung] */
+const U6 = [
+["Ich interessiere mich für die neue Stelle.","Ich interessiere mich an der neuen Stelle.","Ich bin interessiert für die neue Stelle.","sich interessieren für + A, aber: interessiert sein an + D."],
+["Wir haben lange über das Problem diskutiert.","Wir haben lange über dem Problem diskutiert.","Wir haben lange von dem Problem diskutiert.","diskutieren über + A."],
+["Sie hat sich bei ihrem Chef für den Fehler entschuldigt.","Sie hat sich an ihren Chef für den Fehler entschuldigt.","Sie hat sich bei ihrem Chef über den Fehler entschuldigt.","sich entschuldigen bei + D (Person) für + A (Grund)."],
+["Ich warte schon seit einer Stunde auf dich.","Ich warte schon seit einer Stunde für dich.","Ich warte schon seit einer Stunde an dich.","warten auf + A."],
+["Er konnte sich nicht mehr an das Gespräch erinnern.","Er konnte sich nicht mehr an dem Gespräch erinnern.","Er konnte sich nicht mehr von dem Gespräch erinnern.","sich erinnern an + A."],
+["Wir haben uns darüber gefreut, dass alle gekommen sind.","Wir haben uns über es gefreut, dass alle gekommen sind.","Wir haben uns worüber gefreut, dass alle gekommen sind.","Korrelat vor dem dass-Satz: darüber."],
+["Ich habe mich an ihn gewandt, weil er Experte ist.","Ich habe mich an ihm gewandt, weil er Experte ist.","Ich habe mich bei ihm gewandt, weil er Experte ist.","sich wenden an + A."],
+["Die Lösung besteht darin, mehr Personal einzustellen.","Die Lösung besteht daraus, mehr Personal einzustellen.","Die Lösung besteht darauf, mehr Personal einzustellen.","bestehen in (= liegen in) → darin."],
+["Sie hat an der Konferenz teilgenommen.","Sie hat die Konferenz teilgenommen.","Sie hat an die Konferenz teilgenommen.","teilnehmen an + D."],
+["Wer kümmert sich um die Organisation?","Wer kümmert sich für die Organisation?","Wer kümmert sich über die Organisation?","sich kümmern um + A."],
+["Ich halte nicht viel von dieser Idee.","Ich halte nicht viel über diese Idee.","Ich halte nicht viel für diese Idee.","halten von + D = Meinung."],
+["Der Erfolg hängt davon ab, wie gut wir zusammenarbeiten.","Der Erfolg hängt daran ab, wie gut wir zusammenarbeiten.","Der Erfolg hängt von es ab, wie gut wir zusammenarbeiten.","abhängen von → davon."],
+["Woran liegt es, dass die Zahlen sinken?","Worauf liegt es, dass die Zahlen sinken?","Wovon liegt es, dass die Zahlen sinken?","es liegt an + D → woran / daran."],
+["Ich habe mich sehr über deinen Besuch gefreut.","Ich habe mich sehr über deinem Besuch gefreut.","Ich habe mich sehr für deinen Besuch gefreut.","sich freuen über + A."],
+["Er hat sich für ein Medizinstudium entschieden.","Er hat sich zu einem Medizinstudium entschieden.","Er hat sich auf ein Medizinstudium entschieden.","sich entscheiden für + A (aber: sich entschließen zu + D)."],
+["In dem Artikel geht es um die Wohnungsnot.","In dem Artikel geht es über die Wohnungsnot.","In dem Artikel handelt es um die Wohnungsnot.","es geht um + A; es handelt sich um + A (mit „sich“!)."],
+["Wir sind auf Ihre Unterstützung angewiesen.","Wir sind von Ihrer Unterstützung angewiesen.","Wir sind an Ihre Unterstützung angewiesen.","angewiesen sein auf + A."],
+["Sie hat ihn dazu überredet mitzukommen.","Sie hat ihn dafür überredet mitzukommen.","Sie hat ihn darauf überredet mitzukommen.","überreden zu → dazu."],
+["Ich beschäftige mich gerade mit der Frage, wie es weitergeht.","Ich beschäftige mich gerade an der Frage, wie es weitergeht.","Ich beschäftige mich gerade über die Frage, wie es weitergeht.","sich beschäftigen mit + D."],
+["Das Konzert war wunderbar – ich denke noch oft daran.","Das Konzert war wunderbar – ich denke noch oft an es.","Das Konzert war wunderbar – ich denke noch oft darauf.","Sache → Pronominaladverb: daran."],
+["Er hat sich über die schlechte Bezahlung beklagt.","Er hat sich auf die schlechte Bezahlung beklagt.","Er hat sich an der schlechten Bezahlung beklagt.","sich beklagen über + A."],
+["Viele zweifeln an der Wirksamkeit der Maßnahme.","Viele zweifeln an die Wirksamkeit der Maßnahme.","Viele zweifeln über die Wirksamkeit der Maßnahme.","zweifeln an + D."]
+];
+
+/* ================= LÜCKENTEXTE ================= */
+const TEXTE = [
+{t:"Text A · Arbeitswelt im Wandel", teile:[
+"Die Arbeitswelt befindet sich im Umbruch. Immer mehr Beschäftigte klagen ",["über den","über dem","auf den"]," wachsenden Leistungsdruck, und viele Unternehmen reagieren ",["darauf","daran","darüber"],", indem sie flexible Arbeitszeitmodelle anbieten. Expertinnen weisen jedoch ",["darauf","daran","dafür"]," hin, dass Flexibilität allein nicht genügt. Entscheidend ist vielmehr, ob Führungskräfte Rücksicht ",["auf die","auf der","an die"]," Bedürfnisse ihrer Teams nehmen. Eine aktuelle Studie, die ",["auf einer","auf eine","an einer"]," Befragung von 5.000 Angestellten beruht, kommt ",["zu dem","zu den","auf das"]," Ergebnis, dass Mitarbeitende, die sich ",["mit ihrem","an ihrem","für ihr"]," Unternehmen identifizieren, seltener krank sind. Wer hingegen ständig ",["unter dem","an dem","unter den"]," Gefühl leidet, nicht wertgeschätzt zu werden, denkt häufiger ",["über einen","über einem","an einem"]," Jobwechsel nach. Besonders jüngere Arbeitnehmerinnen und Arbeitnehmer legen Wert ",["auf eine","auf einer","an eine"]," sinnvolle Tätigkeit. Sie entscheiden sich nicht nur ",["für ein","für einen","zu einem"]," Unternehmen, weil das Gehalt stimmt, sondern achten auch ",["darauf","darüber","daran"],", wie es mit seinen Ressourcen umgeht. Langfristig wird der Erfolg vieler Firmen ",["davon","daran","darauf"]," abhängen, ob es ihnen gelingt, sich ",["an die","an den","auf die"]," veränderten Erwartungen anzupassen."]},
+{t:"Text B · Ehrenamt in Österreich", teile:[
+"Rund die Hälfte der Menschen in Österreich engagiert sich ",["für","an","um"]," gemeinnützige Zwecke. Viele beteiligen sich ",["an der","an die","bei die"]," Nachbarschaftshilfe, andere kümmern sich ",["um ältere","für ältere","um älteren"]," Menschen oder setzen sich ",["für den","für dem","um den"]," Schutz der Umwelt ein. Fragt man sie ",["nach ihren","nach ihre","um ihre"]," Motiven, so verweisen die meisten ",["auf das","auf dem","an das"]," gute Gefühl, gebraucht zu werden. Doch das Ehrenamt steht ",["vor großen","vor große","für große"]," Herausforderungen: Vereine klagen ",["über einen","über einem","auf einen"]," Mangel ",["an jungen","von jungen","an junge"]," Freiwilligen. Kritikerinnen warnen zudem ",["davor","davon","dagegen"],", dass sich der Staat zu sehr ",["auf das","auf dem","an das"]," unbezahlte Engagement seiner Bürgerinnen und Bürger verlässt. Es kommt also ",["darauf","daran","dazu"]," an, Ehrenamtliche besser zu unterstützen und sie nicht ",["mit ihren","mit ihre","bei ihren"]," Problemen allein zu lassen."]},
+{t:"Text C · Leben mit dem Smartphone", teile:[
+"Kaum jemand kann sich heute noch vorstellen, ",["auf das","auf dem","an das"]," Smartphone zu verzichten. Viele Menschen sind regelrecht ",["davon","dafür","daran"]," abhängig. Psychologinnen und Psychologen beschäftigen sich deshalb zunehmend ",["mit der","mit die","an der"]," Frage, wie sich die ständige Erreichbarkeit ",["auf unsere","auf unserer","an unsere"]," Konzentrationsfähigkeit auswirkt. Erste Untersuchungen deuten ",["darauf","daran","darüber"]," hin, dass häufige Unterbrechungen ",["zu einer","zu eine","für eine"]," deutlich geringeren Produktivität führen. Gleichzeitig profitieren wir enorm ",["von den","von die","aus den"]," digitalen Möglichkeiten: Wir können uns jederzeit ",["über das","über dem","von dem"]," Weltgeschehen informieren und ",["mit Menschen","an Menschen","bei Menschen"]," auf der ganzen Welt in Kontakt treten. Entscheidend ist letztlich, ob es uns gelingt, bewusst ",["mit diesen","mit diese","an diesen"]," Werkzeugen umzugehen."]}
+];
+
+/* ================= SPRECHTRAINING ================= */
+const SPRECH = [
+{a:"Aufgabe 1 · Telefonat", s:"Du hast dich vor zwei Wochen für einen Kurs angemeldet, aber noch keine Bestätigung bekommen. Ruf an und erkundige dich höflich.", v:["sich erkundigen nach","sich anmelden für","liegen an"], m:"Guten Tag, ich möchte mich <b>nach dem Stand</b> meiner Anmeldung erkundigen. Ich habe mich vor zwei Wochen <b>für den</b> Abendkurs angemeldet, habe aber bisher noch keine Bestätigung erhalten. Könnten Sie bitte nachsehen, <b>woran</b> das liegt?"},
+{a:"Aufgabe 1 · Telefonat", s:"Die bestellte Ware ist beschädigt angekommen. Beschwere dich sachlich und fordere eine Lösung.", v:["sich beschweren über","bestehen auf","rechnen mit"], m:"Ich muss mich leider <b>über die</b> Lieferung beschweren, die gestern angekommen ist – das Gerät war beschädigt. Ich bestehe <b>darauf</b>, dass Sie mir kostenlos Ersatz schicken. Mit wie viel Wartezeit muss ich <b>dabei</b> rechnen? (oder: <b>Womit</b> darf ich rechnen?)"},
+{a:"Aufgabe 1 · Telefonat", s:"Du kannst einen vereinbarten Termin nicht wahrnehmen. Entschuldige dich und bitte um einen neuen Termin.", v:["sich entschuldigen für","bitten um","Rücksicht nehmen auf"], m:"Ich möchte mich vielmals <b>für die</b> kurzfristige Absage entschuldigen. Darf ich Sie <b>um einen</b> neuen Termin bitten? Ich würde mich selbstverständlich ganz <b>nach Ihnen</b> richten – vielen Dank, dass Sie <b>darauf</b> Rücksicht nehmen."},
+{a:"Aufgabe 2 · Diskussion", s:"Thema: „Sollte Homeoffice gesetzlich garantiert werden?“ Bezieh klar Position.", v:["sich aussprechen für/gegen","überzeugt sein von","beitragen zu"], m:"Ich spreche mich klar <b>für ein</b> Recht auf Homeoffice aus. Ich bin fest <b>davon</b> überzeugt, dass flexible Arbeitsorte <b>zu einer</b> besseren Vereinbarkeit von Beruf und Familie beitragen."},
+{a:"Aufgabe 2 · Diskussion", s:"Äußere vorsichtig Zweifel an einem verbreiteten Argument.", v:["zweifeln an","nicht überzeugt sein von","außer Acht lassen"], m:"Ich zweifle allerdings <b>daran</b>, dass sich dieses Modell in allen Branchen umsetzen lässt. Ich bin auch nicht ganz <b>davon</b> überzeugt, dass alle Beschäftigten <b>davon</b> profitieren würden."},
+{a:"Aufgabe 2 · Diskussion", s:"Nimm Bezug auf ein Argument, das in der Aufgabe genannt wird, und entkräfte es.", v:["eingehen auf","Bezug nehmen auf","hinweisen auf"], m:"Ich möchte kurz <b>auf das</b> Argument eingehen, Homeoffice mache einsam. Dazu muss man <b>darauf</b> hinweisen, dass viele Firmen bereits regelmäßige Teamtage einführen."},
+{a:"Aufgabe 2 · Diskussion", s:"Beschreibe die Folgen einer Entwicklung für die Gesellschaft.", v:["sich auswirken auf","führen zu","leiden unter"], m:"Diese Entwicklung wirkt sich langfristig <b>auf den</b> gesellschaftlichen Zusammenhalt aus. Sie kann <b>zu einer</b> Spaltung führen, unter <b>der</b> vor allem ältere Menschen leiden."},
+{a:"Aufgabe 2 · Diskussion", s:"Wäge ab und formuliere ein differenziertes Fazit.", v:["abhängen von","ankommen auf","rechnen mit"], m:"Letztlich hängt es <b>davon</b> ab, wie die Regeln gestaltet werden. Es kommt vor allem <b>darauf</b> an, dass niemand benachteiligt wird – und wir müssen <b>damit</b> rechnen, dass es eine Übergangszeit braucht."},
+{a:"Aufgabe 3 · Kurzreferat", s:"Leite dein Referat ein und gib einen Überblick über die Gliederung.", v:["sich befassen mit","eingehen auf","kommen zu"], m:"In meinem Vortrag möchte ich mich <b>mit der</b> Frage befassen, wie sich unser Konsumverhalten verändert hat. Zunächst gehe ich <b>auf die</b> Ursachen ein, danach <b>auf die</b> Folgen, und zum Schluss komme ich <b>zu meiner</b> persönlichen Einschätzung."},
+{a:"Aufgabe 3 · Kurzreferat", s:"Bring ein persönliches Beispiel oder eine Erfahrung ein.", v:["sich erinnern an","erleben","zeugen von"], m:"Ich erinnere mich noch gut <b>daran</b>, wie ich zum ersten Mal … erlebt habe. Diese Erfahrung zeugt <b>davon</b>, wie sehr sich unser Alltag in kurzer Zeit gewandelt hat."},
+{a:"Aufgabe 3 · Kurzreferat", s:"Vergleiche die Situation in Österreich mit deinem Heimatland.", v:["sich unterscheiden von","Wert legen auf","übereinstimmen in"], m:"Mein Heimatland unterscheidet sich in diesem Punkt deutlich <b>von</b> Österreich. Bei uns legt man traditionell großen Wert <b>auf die</b> Familie, in anderen Punkten stimmen beide Länder <b>darin</b> überein, dass …"},
+{a:"Aufgabe 3 · Kurzreferat", s:"Schließe dein Referat mit einer Zusammenfassung und einem Ausblick ab.", v:["hinweisen auf","ankommen auf","sich einstellen auf"], m:"Abschließend möchte ich <b>darauf</b> hinweisen, dass dieses Thema uns noch lange beschäftigen wird. Zusammenfassend lässt sich sagen: Es kommt vor allem <b>darauf</b> an, dass wir uns rechtzeitig <b>auf die</b> Veränderungen einstellen."}
+];
+
+/* ================= HILFSFUNKTIONEN ================= */
+const $ = s => document.querySelector(s);
+const mische = a => {const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b};
+const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+
+/* Bubbles */
+(function(){const c=$("#bubbles");for(let i=0;i<16;i++){const b=document.createElement("div");const s=30+Math.random()*90;b.className="bubble"+(Math.random()<.35?" ring":"");b.style.width=b.style.height=s+"px";b.style.left=Math.random()*100+"%";b.style.top=Math.random()*100+"%";b.style.animationDuration=(6+Math.random()*8)+"s";b.style.animationDelay=(-Math.random()*8)+"s";c.appendChild(b)}})();
+
+/* Tabs */
+document.querySelectorAll("#tabs button").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("#tabs button").forEach(x=>x.classList.toggle("on",x===b));
+  document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id===b.dataset.s));
+  window.scrollTo({top:0,behavior:"smooth"});
+}));
+
+/* ================= MC-ÜBUNGEN ================= */
+const SEK = {u1:{d:U1,typ:"luecke"},u2:{d:U2,typ:"luecke"},u3:{d:U3,typ:"luecke"},u4:{d:U4,typ:"luecke"},u5:{d:U5,typ:"luecke"},u6:{d:U6,typ:"satz"}};
+const besteErg = {}; // pro Übung: Menge richtig gelöster Indizes
+
+function zerlege(d,typ){
+  if(typ==="satz") return {q:"Welcher Satz ist korrekt?", richtig:d[0], opts:d.slice(0,d.length-1), e:d[d.length-1]};
+  return {q:d[0], richtig:d[1], opts:d.slice(1,d.length-1), e:d[d.length-1]};
+}
+
+function baueItem(d,typ,nr,callback){
+  const x = zerlege(d,typ);
+  const div = document.createElement("div"); div.className="item";
+  const qhtml = typ==="satz" ? esc(x.q) : esc(x.q).replace("___",'<span class="luecke">&nbsp;?&nbsp;</span>');
+  div.innerHTML = `<p class="q"><span class="nr">${nr}</span><span>${qhtml}</span></p><div class="opts ${typ==="satz"?"lang":""}"></div><div class="erk"></div>`;
+  const box = div.querySelector(".opts");
+  mische(x.opts).forEach(o=>{
+    const b=document.createElement("button"); b.className="opt"; b.textContent=o;
+    b.addEventListener("click",()=>{
+      const ok = o===x.richtig;
+      box.querySelectorAll(".opt").forEach(z=>{z.disabled=true; if(z.textContent===x.richtig) z.classList.add("ok");});
+      if(!ok) b.classList.add("no");
+      div.classList.add(ok?"richtig":"falsch");
+      const l=div.querySelector(".luecke"); if(l){l.textContent=x.richtig; l.classList.add("voll")}
+      const e=div.querySelector(".erk"); e.classList.add("zeigen");
+      e.innerHTML = (ok?'<b class="r">✓ Richtig!</b> ':'<b class="f">✗ Leider nicht.</b> Richtig: <b>'+esc(x.richtig)+'</b>. ')+esc(x.e);
+      callback(ok);
+    });
+    box.appendChild(b);
+  });
+  return div;
+}
+
+function zeigeUebung(key, nurIdx){
+  const s = SEK[key];
+  const idx = nurIdx || mische(s.d.map((_,i)=>i));
+  s.akt = idx; s.res = {};
+  const liste = $("#"+key+"-liste"); liste.innerHTML="";
+  $("#"+key+"-fazit").classList.remove("zeigen");
+  document.querySelector(`[data-fehler="${key}"]`).disabled = true;
+  idx.forEach((i,n)=>{
+    liste.appendChild(baueItem(s.d[i], s.typ, n+1, ok=>{
+      s.res[i]=ok;
+      if(ok){besteErg[key]=besteErg[key]||new Set(); besteErg[key].add(i)}
+      standUpdate(key); gesamtUpdate();
+    }));
+  });
+  standUpdate(key);
+}
+
+function standUpdate(key){
+  const s=SEK[key]; const n=s.akt.length; const beantw=Object.keys(s.res).length; const r=Object.values(s.res).filter(Boolean).length;
+  $("#"+key+"-stand").textContent = `${r} / ${n} richtig`;
+  if(beantw===n){
+    const f=$("#"+key+"-fazit"); const p=Math.round(r/n*100);
+    let t = p===100 ? "Perfekt – du beherrschst diesen Bereich prüfungssicher!" : p>=85 ? "Sehr stark! Wiederhole die wenigen Fehler noch einmal, dann sitzt alles." : p>=65 ? "Gute Basis. Übe die Fehler gezielt und lies die Erklärungen laut." : "Hier lohnt sich eine zweite Runde – schau dir vorher die Nachschlageliste an.";
+    f.innerHTML = `${r} von ${n} richtig (${p} %). ${t}`; f.classList.add("zeigen");
+    document.querySelector(`[data-fehler="${key}"]`).disabled = (r===n);
+  }
+}
+
+document.querySelectorAll("[data-neu]").forEach(b=>b.addEventListener("click",()=>zeigeUebung(b.dataset.neu)));
+document.querySelectorAll("[data-fehler]").forEach(b=>b.addEventListener("click",()=>{
+  const key=b.dataset.fehler; const s=SEK[key];
+  const fehler = s.akt.filter(i=>s.res[i]===false);
+  if(fehler.length) zeigeUebung(key, mische(fehler));
+}));
+
+/* ================= LÜCKENTEXTE ================= */
+const lueckenOk = {};
+function baueTexte(){
+  const wrap=$("#texte"); wrap.innerHTML="";
+  TEXTE.forEach((tx,ti)=>{
+    const card=document.createElement("div"); card.className="card";
+    let html=`<div class="kopf"><div class="txt"><h2>${tx.t}</h2></div><div class="stand" id="ts${ti}"></div></div><div class="ltext">`;
+    let g=0;
+    tx.teile.forEach(p=>{
+      if(typeof p==="string") html+=esc(p);
+      else { html+=`<select data-r="${esc(p[0])}"><option value="">–––</option>${mische(p).map(o=>`<option>${esc(o)}</option>`).join("")}</select>`; g++; }
+    });
+    html+=`</div><div class="fusszeile"><button class="btn" data-pruef="${ti}">Prüfen</button><button class="btn hell" data-reset="${ti}">Zurücksetzen</button></div><div class="fazit" id="tf${ti}"></div>`;
+    card.innerHTML=html; wrap.appendChild(card);
+    card.querySelector(".stand").textContent=`${g} Lücken`;
+    card.querySelector("[data-pruef]").addEventListener("click",()=>{
+      card.querySelectorAll(".korr").forEach(k=>k.remove());
+      let r=0; const sel=card.querySelectorAll("select");
+      sel.forEach(s=>{ s.classList.remove("ok","no");
+        if(s.value===s.dataset.r){s.classList.add("ok");r++}
+        else {s.classList.add("no"); const k=document.createElement("span"); k.className="korr"; k.textContent="→ "+s.dataset.r; s.after(k);}
+      });
+      lueckenOk[ti]=Math.max(lueckenOk[ti]||0,r);
+      card.querySelector(".stand").textContent=`${r} / ${sel.length} richtig`;
+      const f=card.querySelector(".fazit"); f.classList.add("zeigen");
+      f.textContent = r===sel.length ? "Alles richtig – lies den Text jetzt einmal laut als Sprechübung!" : `${r} von ${sel.length} richtig. Die grünen Hinweise zeigen dir die korrekte Form.`;
+      gesamtUpdate();
+    });
+    card.querySelector("[data-reset]").addEventListener("click",()=>{
+      card.querySelectorAll("select").forEach(s=>{s.value="";s.classList.remove("ok","no")});
+      card.querySelectorAll(".korr").forEach(k=>k.remove());
+      card.querySelector(".fazit").classList.remove("zeigen");
+      card.querySelector(".stand").textContent=`${card.querySelectorAll("select").length} Lücken`;
+    });
+  });
+}
+
+/* ================= SPRECHTRAINING ================= */
+function baueSprech(){
+  const w=$("#sprech");
+  SPRECH.forEach((x,i)=>{
+    const d=document.createElement("div"); d.className="sp";
+    d.innerHTML=`<span class="tag">${x.a}</span><p style="margin:2px 0 6px;font-weight:700">${i+1}. ${x.s}</p>
+    <div class="verben">Verwende: ${x.v.map(v=>`<span>${v}</span>`).join("")}</div>
+    <textarea placeholder="Erst laut sprechen, dann hier notieren …"></textarea>
+    <div class="fusszeile"><button class="btn hell">Musterformulierung zeigen</button></div>
+    <div class="muster">${x.m}</div>`;
+    const b=d.querySelector("button"), m=d.querySelector(".muster");
+    b.addEventListener("click",()=>{m.classList.toggle("zeigen"); b.textContent=m.classList.contains("zeigen")?"Muster ausblenden":"Musterformulierung zeigen"});
+    w.appendChild(d);
+  });
+  const h=document.createElement("div"); h.className="hinweis";
+  h.innerHTML="<b>Tipp für die Prüfung:</b> Nimm dir pro Teil zwei bis drei dieser Strukturen fest vor und baue sie bewusst ein. Prüferinnen und Prüfer hören sofort, ob du Präpositionalverben sicher und abwechslungsreich verwendest – das zahlt direkt auf Spektrum und Korrektheit ein.";
+  w.appendChild(h);
+}
+
+/* ================= PRÜFUNGSMIX ================= */
+const mix = {res:{},n:25};
+function neuerMix(){
+  const pool=[]; ["u1","u2","u3","u4","u5","u6"].forEach(k=>SEK[k].d.forEach((d,i)=>pool.push({k,d})));
+  const auswahl=mische(pool).slice(0,mix.n);
+  mix.res={}; const l=$("#u9-liste"); l.innerHTML=""; $("#u9-fazit").classList.remove("zeigen");
+  auswahl.forEach((x,n)=>l.appendChild(baueItem(x.d,SEK[x.k].typ,n+1,ok=>{mix.res[n]=ok;mixStand()})));
+  mixStand();
+}
+function mixStand(){
+  const b=Object.keys(mix.res).length, r=Object.values(mix.res).filter(Boolean).length;
+  $("#u9-stand").textContent=`${r} / ${mix.n} richtig`;
+  if(b===mix.n){const p=Math.round(r/mix.n*100);const f=$("#u9-fazit");
+    f.innerHTML=`Ergebnis: ${r} von ${mix.n} (${p} %). `+(p>=90?"Prüfungsreif – großartig!":p>=75?"Sehr solide. Noch eine Runde, und du bist auf der sicheren Seite.":"Wiederhole die Übungen, bei denen dir die Fehler passiert sind, und zieh dann eine neue Mischung.");
+    f.classList.add("zeigen");}
+}
+$("#mixNeu").addEventListener("click",neuerMix);
+
+/* ================= GESAMTFORTSCHRITT ================= */
+const GESAMT = U1.length+U2.length+U3.length+U4.length+U5.length+U6.length + TEXTE.reduce((s,t)=>s+t.teile.filter(p=>typeof p!=="string").length,0);
+function gesamtUpdate(){
+  let r=0; Object.values(besteErg).forEach(s=>r+=s.size); Object.values(lueckenOk).forEach(v=>r+=v);
+  $("#gesamtBalken").style.width=(r/GESAMT*100)+"%";
+  $("#gesamtZahl").textContent=`${r} von ${GESAMT} Aufgaben richtig gelöst`;
+}
+
+/* ================= NACHSCHLAGEN ================= */
+const PRAEP=["alle","an","auf","aus","bei","für","gegen","in","mit","nach","über","um","unter","von","vor","zu","zwischen"];
+let refP="alle";
+function refZeigen(){
+  const q=$("#suche").value.trim().toLowerCase();
+  const rows=REF.filter(r=>(refP==="alle"||r.p===refP)&&(!q||r.v.toLowerCase().includes(q)||r.b.toLowerCase().includes(q)));
+  $("#refBody").innerHTML=rows.map(r=>`<tr><td class="v">${esc(r.v)}</td><td class="p">${r.p}</td><td><span class="badge b-${r.k}">${r.k==="A"?"Akk":"Dat"}</span></td><td>${esc(r.b)}</td></tr>`).join("");
+  $("#refAnzahl").textContent=`${rows.length} Einträge`;
+}
+$("#refChips").innerHTML=PRAEP.map(p=>`<button class="chip${p==="alle"?" on":""}" data-p="${p}">${p}</button>`).join("");
+$("#refChips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;refP=b.dataset.p;document.querySelectorAll("#refChips .chip").forEach(c=>c.classList.toggle("on",c===b));refZeigen()});
+$("#suche").addEventListener("input",refZeigen);
+
+/* ================= LERNKARTEN ================= */
+let deck=[], karte=null, gedreht=false, gewusst=0;
+$("#lkFilter").innerHTML=PRAEP.map(p=>`<option value="${p}">${p==="alle"?"alle Präpositionen":p}</option>`).join("");
+function neuesDeck(){
+  const f=$("#lkFilter").value;
+  deck=mische(REF.filter(r=>f==="alle"||r.p===f)); gewusst=0; naechste();
+}
+function naechste(){
+  gedreht=false; karte=deck.shift();
+  const lk=$("#lk");
+  if(!karte){lk.innerHTML=`<div class="gross">Geschafft! 🎉</div><div class="klein">Alle Karten dieses Stapels sitzen. Klick auf „Neu mischen“.</div>`;$("#lkStand").textContent=`${gewusst} gewusst`;return}
+  lk.innerHTML=`<div class="gross">${esc(karte.v)} … ?</div><div class="klein">Präposition + Kasus? Klick zum Umdrehen</div>`;
+  $("#lkStand").textContent=`${gewusst} gewusst · ${deck.length+1} übrig`;
+}
+$("#lk").addEventListener("click",()=>{
+  if(!karte||gedreht)return; gedreht=true;
+  $("#lk").innerHTML=`<div class="gross">${esc(karte.v)}</div><div class="loes">${karte.p} + ${karte.k==="A"?"Akkusativ":"Dativ"}</div><div class="ex">${esc(karte.b)}</div>`;
+});
+$("#lkGewusst").addEventListener("click",()=>{if(!karte)return;gewusst++;naechste()});
+$("#lkNochmal").addEventListener("click",()=>{if(!karte)return;const pos=Math.min(deck.length,3+Math.floor(Math.random()*4));deck.splice(pos,0,karte);naechste()});
+$("#lkNeu").addEventListener("click",neuesDeck);
+$("#lkFilter").addEventListener("change",neuesDeck);
+
+/* ================= START ================= */
+Object.keys(SEK).forEach(k=>zeigeUebung(k));
+baueTexte(); baueSprech(); neuerMix(); refZeigen(); neuesDeck(); gesamtUpdate();
+</script>
+</body>
+</html>
