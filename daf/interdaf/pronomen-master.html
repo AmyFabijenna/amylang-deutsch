@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pronomen-Master</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: Sätze links untereinander, Pronomen-Tabelle rechts immer im Vordergrund (Handy: unten fixiert) */
+:root{
+  --sky1:#121a2e; --sky2:#223252; --sky3:#3d4d70;
+  --card:#fbfaf7; --line:#e6e2d8;
+  --ink:#151515; --muted:#5a5d68;
+  --nom:#151515; --nom-soft:#efeeea;
+  --akk:#14707a; --akk-soft:#e2f0f0;
+  --dat:#76508c; --dat-soft:#efe7f3;
+  --da:#9a5634; --da-soft:#f5e6dc;
+  --rose:#cf5679; --rose-soft:#fbe7ed;
+  --sun:#f0c548; --gold:#b48528; --gold-soft:#fbf0d3;
+  --font:"Lexend", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;color:var(--ink);font-family:var(--font);font-size:18px;line-height:1.55;
+  background:
+    radial-gradient(120% 60% at 50% 115%, rgba(224,148,132,.30), transparent 60%),
+    radial-gradient(80% 50% at 85% 0%, rgba(120,140,190,.25), transparent 70%),
+    linear-gradient(180deg,var(--sky1) 0%,var(--sky2) 50%,var(--sky3) 100%);
+  background-color:var(--sky2);background-attachment:fixed}
+#bubbles{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:1260px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:24px;align-items:start}
+.main{min-width:0;display:flex;flex-direction:column;gap:12px}
+
+/* Kopf mit Punktestand */
+.head{background:var(--card);border-radius:26px;padding:26px 28px 22px;box-shadow:0 20px 50px rgba(5,10,30,.35)}
+.eyebrow{font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.head h1{font-weight:700;font-size:clamp(30px,4.4vw,44px);line-height:1.05;letter-spacing:-.02em;margin:6px 0 10px}
+.head h1 em{font-style:normal;color:var(--rose)}
+.head p{margin:0;color:var(--muted);max-width:62ch;font-size:16px}
+.score{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:18px}
+.stat{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:10px 14px}
+.stat small{display:block;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.stat b{display:block;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2}
+.stat.pts{background:var(--gold-soft);border-color:#ecd697}
+.stat.pts b{color:#7a5612}
+.stat.streak b{color:var(--rose)}
+.bump{animation:bump .35s}
+@keyframes bump{40%{transform:scale(1.15)}}
+.tools{margin-top:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.bar{flex:1;min-width:140px;height:10px;border-radius:99px;background:#ece8dd;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--sun),var(--gold));border-radius:99px;transition:width .5s}
+.count{font-size:15px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--muted)}
+.count b{color:var(--ink)}
+.btn{font:inherit;font-size:15px;font-weight:600;background:#fff;border:1.5px solid var(--line);border-radius:99px;padding:8px 16px;cursor:pointer;color:var(--ink)}
+.btn.armed{background:var(--rose-soft);border-color:var(--rose)}
+.btn.primary{background:var(--ink);border-color:var(--ink);color:#fff}
+
+/* Satzkarten */
+.list{display:flex;flex-direction:column;gap:10px}
+.card{background:var(--card);border-radius:20px;box-shadow:0 6px 20px rgba(5,10,30,.22);overflow:hidden}
+.row{all:unset;box-sizing:border-box;display:flex;gap:14px;align-items:flex-start;width:100%;padding:16px 20px;cursor:pointer}
+.row:focus-visible{outline:3px solid var(--sun);outline-offset:-3px;border-radius:20px}
+.num{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#f0ede4;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:-2px}
+.card.ok .num{background:var(--gold-soft);color:var(--gold)}
+.card.bad .num{background:var(--rose-soft);color:var(--rose)}
+.orig{flex:1;min-width:0;font-size:20px}
+.state{flex:none;font-size:13px;font-weight:600;padding:4px 10px;border-radius:99px;margin-top:2px;font-variant-numeric:tabular-nums}
+.card.ok .state{background:var(--gold-soft);color:#7a5612}
+.card.bad .state{background:var(--rose-soft);color:#a83558}
+.np{font-weight:600;text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:5px}
+.np.N{text-decoration-color:var(--nom)}
+.np.A{color:var(--akk);text-decoration-color:var(--akk)}
+.np.D{color:var(--dat);text-decoration-color:var(--dat)}
+.np.P{color:var(--da);text-decoration-color:var(--da)}
+
+.review{padding:0 20px 16px 72px;font-size:18px;display:flex;flex-wrap:wrap;column-gap:.32em;row-gap:6px;align-items:baseline;color:var(--muted)}
+.review .lab{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-right:6px}
+.review .meta{flex-basis:100%;font-size:14px;font-weight:500;font-variant-numeric:tabular-nums}
+.rw{font-weight:600;color:var(--ink)}
+.rw.A{color:var(--akk)} .rw.D{color:var(--dat)} .rw.P{color:var(--da)}
+.rw.wrong{background:var(--rose-soft);border-radius:8px;padding:0 6px;box-shadow:inset 0 -2px 0 var(--rose)}
+.rw.wrong s{color:var(--rose);font-weight:500;font-size:.85em;margin-right:5px}
+
+.card.active{box-shadow:0 0 0 3px var(--sun),0 24px 50px rgba(5,10,30,.45)}
+.card.active .row{cursor:default;padding-top:22px}
+.card.active .orig{font-size:25px;line-height:1.5}
+.card.active .num{background:var(--sun);color:var(--ink)}
+.work{padding:2px 24px 22px 72px;position:relative}
+.clock{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.clock .tbar{flex:1;height:8px;border-radius:99px;background:#ece8dd;overflow:hidden}
+.clock .tbar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--gold),var(--sun));transform-origin:left}
+.clock.over .tbar i{background:var(--rose)}
+.clock .sec{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;min-width:4.4em;text-align:right}
+.clock.over .sec{color:var(--rose)}
+.sol{font-size:25px;display:flex;flex-wrap:wrap;align-items:center;column-gap:.35em;row-gap:10px;padding-top:12px}
+.slot{display:inline-flex;align-items:center;justify-content:center;min-width:86px;height:54px;padding:0 16px;border:2px dashed #b9b5aa;border-radius:14px;background:#fff;font:inherit;font-size:24px;font-weight:600;cursor:pointer;position:relative;color:var(--ink)}
+.slot.next{border-color:var(--gold);border-style:solid;background:var(--gold-soft);animation:pulse 1.2s ease-in-out infinite}
+.slot.filled{border-style:solid;border-color:var(--line)}
+.slot.N{color:var(--nom)} .slot.A{color:var(--akk)} .slot.D{color:var(--dat)} .slot.P{color:var(--da)}
+.slot.right{border-style:solid;border-color:var(--gold);background:var(--gold-soft)}
+.slot.fixed{border-style:solid;border-color:var(--rose);background:var(--rose-soft)}
+.slot .was{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:15px;line-height:1;color:var(--rose);text-decoration:line-through;white-space:nowrap;font-weight:600}
+.slot.whirl{animation:whirl .6s cubic-bezier(.5,0,.3,1)}
+@keyframes whirl{0%{transform:rotate(0) scale(1);filter:blur(0)}45%{transform:rotate(380deg) scale(.55);filter:blur(2px)}100%{transform:rotate(720deg) scale(1);filter:blur(0)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(180,133,40,.4)}50%{box-shadow:0 0 0 7px rgba(180,133,40,0)}}
+.ctrl{display:flex;align-items:center;gap:14px;margin-top:20px;flex-wrap:wrap;min-height:48px}
+.msg{font-weight:600;font-size:17px;flex:1;min-width:200px}
+.msg.good{color:#7a5612} .msg.bad{color:#a83558}
+.skip{font:inherit;font-size:15px;font-weight:600;background:var(--gold);color:#fff;border:0;border-radius:99px;padding:10px 18px;cursor:pointer}
+.float{position:absolute;right:24px;bottom:72px;font-size:30px;font-weight:700;pointer-events:none;animation:float 1.1s ease-out forwards;font-variant-numeric:tabular-nums}
+.float.plus{color:var(--gold)} .float.minus{color:var(--rose)}
+@keyframes float{0%{opacity:0;transform:translateY(12px) scale(.8)}20%{opacity:1;transform:translateY(0) scale(1.1)}100%{opacity:0;transform:translateY(-30px) scale(1)}}
+.startbox{display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:6px 0 4px}
+.startbox p{margin:0;color:var(--muted);font-size:16px}
+.go{font:inherit;font-size:20px;font-weight:700;background:var(--rose);color:#fff;border:0;border-radius:99px;padding:14px 34px;cursor:pointer;box-shadow:0 10px 22px rgba(207,86,121,.35)}
+.done{background:var(--card);border-radius:20px;padding:22px 24px;text-align:center;font-size:19px;font-weight:600;box-shadow:0 6px 20px rgba(5,10,30,.22)}
+:is(.btn,.cell,.go,.skip,.slot):focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+
+/* Pronomen-Tabelle */
+.side{position:sticky;top:max(20px,env(safe-area-inset-top,0px))}
+.table{background:var(--card);border-radius:26px;padding:18px;box-shadow:0 24px 60px rgba(5,10,30,.5);display:flex;flex-direction:column;gap:12px}
+.table h2{font-size:14px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.colh{font-size:13px;font-weight:600;text-align:center;padding:6px 2px;border-radius:10px}
+.colh.N{background:var(--nom-soft);color:var(--nom)} .colh.A{background:var(--akk-soft);color:var(--akk)} .colh.D{background:var(--dat-soft);color:var(--dat)} .colh.P{background:var(--da-soft);color:var(--da)}
+.cell{font:inherit;font-weight:600;font-size:19px;height:42px;border-radius:12px;background:#fff;cursor:pointer;border:1.5px solid var(--line);transition:transform .08s,background .15s,border-color .15s;padding:0 4px}
+.cell.N{color:var(--nom)} .cell.A{color:var(--akk)} .cell.D{color:var(--dat)} .cell.P{color:var(--da);font-size:16px}
+.cell.N:hover{background:var(--nom-soft)} .cell.A:hover{background:var(--akk-soft);border-color:var(--akk)} .cell.D:hover{background:var(--dat-soft);border-color:var(--dat)} .cell.P:hover{background:var(--da-soft);border-color:var(--da)}
+.cell:active{transform:scale(.93)}
+.cell.formal{font-size:16px}
+.cell:disabled{opacity:.45;cursor:default;transform:none}
+.sep{grid-column:1/-1;height:1px;background:var(--line);margin:2px 0}
+.gridwrap{display:flex;flex-direction:column;gap:12px}
+.dagrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.dagrid .colh{grid-column:1/-1}
+
+@media (max-width:900px){
+  .wrap{grid-template-columns:minmax(0,1fr);padding-bottom:250px}
+  .side{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:5}
+  .table{border-radius:22px 22px 0 0;gap:6px;padding:10px max(10px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px))}
+  .table h2{display:none}
+  .gridwrap{overflow-x:auto;gap:5px}
+  .grid{grid-template-columns:44px repeat(9,minmax(48px,1fr));min-width:520px;gap:5px}
+  .grid .sep{display:none}
+  .dagrid{display:flex;gap:5px;min-width:max-content}
+  .dagrid .colh{width:44px;flex:none;display:grid;place-items:center}
+  .dagrid .cell{flex:none;padding:0 10px}
+  .colh{font-size:11px;padding:4px 2px;display:grid;place-items:center}
+  .cell{font-size:16px;height:38px}
+  .cell.P{font-size:15px}
+  .cell.formal{font-size:14px}
+  .head{padding:22px 20px 18px}
+  .score{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .orig{font-size:18px}
+  .card.active .orig{font-size:20px}
+  .review{padding-left:20px}
+  .work{padding:2px 18px 20px}
+  .sol{font-size:20px}
+  .slot{min-width:66px;height:46px;font-size:20px;padding:0 12px}
+}
+@media (prefers-reduced-motion:reduce){.slot.next,.slot.whirl,.float,.bump{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="bubbles" aria-hidden="true"></canvas>
+<div class="wrap">
+  <main class="main">
+    <header class="head">
+      <div class="eyebrow">Deutsch C1 · Reaktionstraining</div>
+      <h1>Pronomen-<em>Master</em></h1>
+      <p>Ersetze die unterstrichenen Wörter so schnell wie möglich durch Pronomen oder da-Wörter. Wenn alle Lücken voll sind, wird sofort geprüft. Schnelle Antworten bringen Bonuspunkte, Fehler und Zögern kosten Punkte. Eine Serie fehlerfreier Sätze erhöht den Multiplikator.</p>
+      <div class="score">
+        <div class="stat pts"><small>Punkte</small><b id="sPts">0</b></div>
+        <div class="stat streak"><small>Serie</small><b id="sStreak">0</b></div>
+        <div class="stat"><small>Rekord</small><b id="sBest">0</b></div>
+        <div class="stat"><small>Ø Zeit</small><b id="sAvg">–</b></div>
+      </div>
+      <div class="tools">
+        <div class="bar"><i id="pbar"></i></div>
+        <span class="count"><b id="sDone">0</b> / 300 · <b id="sOk">0</b> richtig</span>
+        <button class="btn" id="pause" type="button">Pause</button>
+        <button class="btn" id="reset" type="button">Fortschritt löschen</button>
+      </div>
+    </header>
+    <div class="list" id="list"></div>
+  </main>
+
+  <aside class="side">
+    <div class="table">
+      <h2>Pronomen</h2>
+      <div class="gridwrap"><div class="grid" id="grid"></div><div class="dagrid" id="dagrid"></div></div>
+    </div>
+  </aside>
+</div>
+
+<script type="text/plain" id="data">
+{N:Der Architekt} hat {D:den Bauherren} {A:den Plan} präsentiert. | [N:er] hat [A:ihn] [D:ihnen] präsentiert.
+{N:Die Lehrerin} hat sich nach {D:dem kranken Schüler} erkundigt. | [N:sie] hat sich nach [D:ihm] erkundigt.
+{N:Die Mutter} hat {D:dem Baby} {A:den Schnuller} weggenommen. | [N:sie] hat [A:ihn] [D:ihm] weggenommen.
+{N:Das Mädchen} hat {D:seinem Großvater} {A:das Gedicht} auswendig vorgetragen. | [N:es] hat [A:es] [D:ihm] auswendig vorgetragen.
+Sie versuchte, {D:dem Kunden} {A:das teure Modell} zu verkaufen. | Sie versuchte, [A:es] [D:ihm] zu verkaufen.
+{N:Der Patient} hat sich {A:das Bein} gebrochen. | [N:er] hat [A:es] sich gebrochen.
+{N:Der Steuerberater} hat {D:meinem Mann und mir} {A:die Unterlagen} geschickt. | [N:er] hat [A:sie] [D:uns] geschickt.
+{N:Die Moderatorin} hat {D:dem Publikum} {A:den Gast} vorgestellt. | [N:sie] hat [A:ihn] [D:ihm] vorgestellt.
+Heute hat der Briefträger {D:meiner Nachbarin} {A:das Paket} gebracht. | Heute hat [A:es] [D:ihr] der Briefträger gebracht.
+{N:Der Vermieter} hätte {D:den Mietern} {A:die Kaution} längst zurückzahlen müssen. | [N:er] hätte [A:sie] [D:ihnen] längst zurückzahlen müssen.
+{N:Die Großmutter} hat oft von {D:ihrem Bruder} erzählt. | [N:sie] hat oft von [D:ihm] erzählt.
+Im Notfall würde {N:der Nachbar} uns {A:sein Auto} leihen. | Im Notfall würde [N:er] [A:es] uns leihen.
+Dieses Mal hat {N:das Orchester} {D:dem Dirigenten} {A:das Konzert} gewidmet. | Dieses Mal hat [N:es] [A:es] [D:ihm] gewidmet.
+Wenn {N:die Uni} {D:den Studierenden} {A:das Semesterticket} streicht, gibt es Proteste. | Wenn [N:sie] [A:es] [D:ihnen] streicht, gibt es Proteste.
+Sie hat vergessen, {D:dem Vermieter} {A:die Miete} zu überweisen. | Sie hat vergessen, [A:sie] [D:ihm] zu überweisen.
+Obwohl {N:der Lehrer} {D:den Schülern} {A:die Regel} dreimal erklärt hatte, machten sie Fehler. | Obwohl [N:er] [A:sie] [D:ihnen] dreimal erklärt hatte, machten sie Fehler.
+{N:Mein Vater} hat {A:meinen Bruder} {P:von dem Plan} überzeugt. | [N:er] hat [A:ihn] [P:davon] überzeugt.
+Angeblich hat {N:der Politiker} {D:dem Journalisten} {A:die Dokumente} zugespielt. | Angeblich hat [N:er] [A:sie] [D:ihm] zugespielt.
+Weil {N:die Eltern} {D:der Tochter} {A:das Studium} nicht finanzieren konnten, jobbte sie nebenbei. | Weil [N:sie] [A:es] [D:ihr] nicht finanzieren konnten, jobbte sie nebenbei.
+{N:Der Pilot} hat {D:den Passagieren} {A:die Verspätung} erklärt. | [N:er] hat [A:sie] [D:ihnen] erklärt.
+{N:Meine Freundin} hat sich an {A:ihre Schwiegermutter} gewöhnt. | [N:sie] hat sich an [A:sie] gewöhnt.
+Bis heute hat {N:der Verkäufer} mir {A:das Geld} nicht zurückgegeben. | Bis heute hat [N:er] [A:es] mir nicht zurückgegeben.
+Kaum hatte {N:der Bote} {D:der Sekretärin} {A:den Umschlag} übergeben, verschwand er. | Kaum hatte [N:er] [A:ihn] [D:ihr] übergeben, verschwand er.
+Vermutlich wird {N:das Amt} {D:der Familie} {A:den Zuschuss} kürzen. | Vermutlich wird [N:es] [A:ihn] [D:ihr] kürzen.
+Kurz vor Weihnachten hat {N:der Chef} {D:den Mitarbeitern} {A:die Kündigungen} geschickt. | Kurz vor Weihnachten hat [N:er] [A:sie] [D:ihnen] geschickt.
+Die Firma plant, {D:den Kunden} {A:die Gebühren} zu erlassen. | Die Firma plant, [A:sie] [D:ihnen] zu erlassen.
+Ich frage mich, ob {N:das Gericht} {D:dem Kläger} {A:die Entschädigung} zusprechen wird. | Ich frage mich, ob [N:es] [A:sie] [D:ihm] zusprechen wird.
+Jeden Abend liest {N:die Mutter} {D:den Kindern} {A:die Geschichte} vor. | Jeden Abend liest [N:sie] [A:sie] [D:ihnen] vor.
+{N:Der Junge} hat Angst {P:vor der Prüfung}. | [N:er] hat Angst [P:davor].
+{N:Der Verkäufer} hat {A:die Kundin} {P:auf den Fehler} hingewiesen. | [N:er] hat [A:sie] [P:darauf] hingewiesen.
+{N:Meine Eltern} haben sich {A:das Wohnmobil} endlich gekauft. | [N:sie] haben [A:es] sich endlich gekauft.
+Der Kollege, dem {N:die Chefin} {A:die Leitung} übertragen hat, ist neu. | Der Kollege, dem [N:sie] [A:sie] übertragen hat, ist neu.
+Ich habe lange {P:über deinen Vorschlag} nachgedacht. | Ich habe lange [P:darüber] nachgedacht.
+Damals hatte {N:der Großvater} {D:dem Enkel} {A:die Uhr} vererbt. | Damals hatte [N:er] [A:sie] [D:ihm] vererbt.
+{N:Die Sekretärin} hat {D:dem Direktor} {A:die Post} auf den Tisch gelegt. | [N:sie] hat [A:sie] [D:ihm] auf den Tisch gelegt.
+{N:Die Schüler} haben {P:über das Thema} ein Referat gehalten. | [N:sie] haben [P:darüber] ein Referat gehalten.
+Sie fragte, ob {N:der Lieferant} {D:dem Restaurant} {A:den Fisch} schon gebracht habe. | Sie fragte, ob [N:er] [A:ihn] [D:ihm] schon gebracht habe.
+Sie behauptet, dass {N:ihr Ex-Mann} {D:den Kindern} {A:den Unterhalt} nie bezahlt hat. | Sie behauptet, dass [N:er] [A:ihn] [D:ihnen] nie bezahlt hat.
+{N:Die Jury} hat {D:den Finalisten} {A:die Medaillen} umgehängt. | [N:sie] hat [A:sie] [D:ihnen] umgehängt.
+Statt {D:den Mitarbeitern} {A:die Wahrheit} zu sagen, schwieg der Chef. | Statt [A:sie] [D:ihnen] zu sagen, schwieg der Chef.
+{N:Die Studentin} interessiert sich für {A:den neuen Dozenten}. | [N:sie] interessiert sich für [A:ihn].
+{N:Der Schlüssel} liegt {P:unter der Fußmatte}. | [N:er] liegt [P:darunter].
+Zum Glück hat {N:mein Nachbar} {D:meiner Frau} {A:die Leiter} geliehen. | Zum Glück hat [N:er] [A:sie] [D:ihr] geliehen.
+{N:Das Gremium} hat {D:der Stiftung} {A:den Antrag} genehmigt. | [N:es] hat [A:ihn] [D:ihr] genehmigt.
+Wann hat {N:der Lehrer} {D:den Kindern} {A:die Aufgabe} erklärt? | Wann hat [N:er] [A:sie] [D:ihnen] erklärt?
+Weil {N:der Junge} {D:dem Mädchen} {A:den Brief} nicht selbst geben wollte, bat er seinen Freund darum. | Weil [N:er] [A:ihn] [D:ihm] nicht selbst geben wollte, bat er seinen Freund darum.
+{N:Der Bürgermeister} hat {D:der Feuerwehr} {A:das neue Fahrzeug} übergeben. | [N:er] hat [A:es] [D:ihr] übergeben.
+{N:Der Erfolg} hängt {P:von der Vorbereitung} ab. | [N:er] hängt [P:davon] ab.
+{N:Die Lehrerin} bat mich, {D:dem neuen Schüler} {A:das Gebäude} zu zeigen. | [N:sie] bat mich, [A:es] [D:ihm] zu zeigen.
+Wir warten seit einer Stunde auf {A:den Techniker}. | Wir warten seit einer Stunde auf [A:ihn].
+{N:Der Arzt} wird {D:der Patientin} {A:das Medikament} nicht mehr verschreiben. | [N:er] wird [A:es] [D:ihr] nicht mehr verschreiben.
+Plötzlich hat der Hund {A:den Postboten} gebissen. | Plötzlich hat [A:ihn] der Hund gebissen.
+Nachdem {N:der Arzt} {D:dem Sportler} {A:das Training} verboten hatte, war dieser verzweifelt. | Nachdem [N:er] [A:es] [D:ihm] verboten hatte, war dieser verzweifelt.
+Wo ist der Mann, der {D:der Kassiererin} {A:den falschen Schein} gegeben hat? | Wo ist der Mann, der [A:ihn] [D:ihr] gegeben hat?
+{N:Der Kunde} hat {D:der Verkäuferin} {A:den Kassenbon} vorgezeigt. | [N:er] hat [A:ihn] [D:ihr] vorgezeigt.
+Zum Glück hat der Mechaniker {D:meinem Vater} einen Rabatt gegeben. | Zum Glück hat [D:ihm] der Mechaniker einen Rabatt gegeben.
+Die Kollegin, mit der {N:mein Chef} {A:das Projekt} geleitet hat, geht in Pension. | Die Kollegin, mit der [N:er] [A:es] geleitet hat, geht in Pension.
+{N:Der Junge} hat sich {A:die Haare} grün gefärbt. | [N:er] hat [A:sie] sich grün gefärbt.
+Nachdem {N:das Kind} {D:dem Hund} {A:den Knochen} weggenommen hatte, knurrte er. | Nachdem [N:es] [A:ihn] [D:ihm] weggenommen hatte, knurrte er.
+{N:Die Kommission} hat {D:dem Konzern} {A:die Strafe} auferlegt. | [N:sie] hat [A:sie] [D:ihm] auferlegt.
+{N:Der Bote} hat {D:der Nachbarin} {A:das Päckchen} anvertraut. | [N:er] hat [A:es] [D:ihr] anvertraut.
+Wann hat der Notar {D:der Witwe} {A:das Testament} vorgelesen? | Wann hat [A:es] [D:ihr] der Notar vorgelesen?
+Ob die Firma {D:dem Bewerber} eine Zusage schickt, ist unklar. | Ob [D:ihm] die Firma eine Zusage schickt, ist unklar.
+{N:Der Chef} hat {A:die Praktikantin} {P:um einen Bericht} gebeten. | [N:er] hat [A:sie] [P:darum] gebeten.
+{N:Unsere Nachbarn} haben sich {A:den Pool} selbst gebaut. | [N:sie] haben [A:ihn] sich selbst gebaut.
+Wer ist der Junge, dem {N:das Mädchen} {A:den Zettel} zugesteckt hat? | Wer ist der Junge, dem [N:es] [A:ihn] zugesteckt hat?
+Das Angebot, das {N:die Firma} {D:dem Kunden} gemacht hat, war unschlagbar. | Das Angebot, das [N:sie] [D:ihm] gemacht hat, war unschlagbar.
+Erst nach langem Zögern gab {N:die Zeugin} {D:dem Kommissar} {A:den Brief}. | Erst nach langem Zögern gab [N:sie] [A:ihn] [D:ihm].
+{N:Der Gutachter} hat {D:dem Gericht} {A:die Ergebnisse} vorgelegt. | [N:er] hat [A:sie] [D:ihm] vorgelegt.
+Damit {N:der Hausmeister} {D:den Bewohnern} {A:die neuen Regeln} erklären konnte, rief er eine Versammlung ein. | Damit [N:er] [A:sie] [D:ihnen] erklären konnte, rief er eine Versammlung ein.
+{N:Der Trainer} hat {A:die Spieler} {P:zu mehr Disziplin} aufgefordert. | [N:er] hat [A:sie] [P:dazu] aufgefordert.
+Hat der Arzt {D:deiner Mutter} etwas verschrieben? | Hat [D:ihr] der Arzt etwas verschrieben?
+Endlich hat {N:die Universität} {D:der Studentin} {A:das Diplom} ausgehändigt. | Endlich hat [N:sie] [A:es] [D:ihr] ausgehändigt.
+{N:Das Kind} hat Angst vor {D:dem großen Hund}. | [N:es] hat Angst vor [D:ihm].
+{N:Der Notar} hat {D:den Erben} {A:das Testament} vorgelesen. | [N:er] hat [A:es] [D:ihnen] vorgelesen.
+Obwohl {N:die Agentur} {D:dem Model} {A:die Gage} zugesagt hatte, kam kein Geld. | Obwohl [N:sie] [A:sie] [D:ihm] zugesagt hatte, kam kein Geld.
+Nachdem {N:die Kellnerin} {D:dem Gast} {A:die Rechnung} gebracht hatte, ging sie in die Küche. | Nachdem [N:sie] [A:sie] [D:ihm] gebracht hatte, ging sie in die Küche.
+Kennst du die Lehrerin, der {N:die Schüler} {A:das Geschenk} überreicht haben? | Kennst du die Lehrerin, der [N:sie] [A:es] überreicht haben?
+{N:Die Chefin} hat {A:das Team} {P:zu dem Erfolg} beglückwünscht. | [N:sie] hat [A:es] [P:dazu] beglückwünscht.
+Hast du daran gedacht, {D:der Oma} {A:die Karte} zu schicken? | Hast du daran gedacht, [A:sie] [D:ihr] zu schicken?
+Nachdem {N:das Gremium} {D:den Bewerbern} {A:die Absagen} geschickt hatte, begann die zweite Runde. | Nachdem [N:es] [A:sie] [D:ihnen] geschickt hatte, begann die zweite Runde.
+{N:Das Team} hat {P:mit dem Sieg} nicht gerechnet. | [N:es] hat [P:damit] nicht gerechnet.
+Er fragte, wann {N:die Agentur} {D:der Sängerin} {A:den Vertrag} vorlegen werde. | Er fragte, wann [N:sie] [A:ihn] [D:ihr] vorlegen werde.
+{N:Der Vorstand} wird {D:den Aktionären} {A:die Bilanz} nächste Woche präsentieren. | [N:er] wird [A:sie] [D:ihnen] nächste Woche präsentieren.
+Am Ende des Seminars teilte {N:die Dozentin} {D:den Teilnehmenden} {A:die Zertifikate} aus. | Am Ende des Seminars teilte [N:sie] [A:sie] [D:ihnen] aus.
+Dass {N:die Firma} {D:der Mitarbeiterin} {A:die Beförderung} versprochen hatte, wusste niemand. | Dass [N:sie] [A:sie] [D:ihr] versprochen hatte, wusste niemand.
+Gleich nach der Landung hat {N:die Flugbegleiterin} {D:dem Kind} {A:den Teddy} zurückgegeben. | Gleich nach der Landung hat [N:sie] [A:ihn] [D:ihm] zurückgegeben.
+Der Händler, bei dem {N:mein Mann} {A:den Teppich} gekauft hat, ist pleite. | Der Händler, bei dem [N:er] [A:ihn] gekauft hat, ist pleite.
+Ich kann mich gut an {A:meinen ersten Lehrer} erinnern. | Ich kann mich gut an [A:ihn] erinnern.
+Er rief an, um {D:der Kollegin} {A:die Nachricht} persönlich zu überbringen. | Er rief an, um [A:sie] [D:ihr] persönlich zu überbringen.
+{N:Die Polizei} hat {A:den Fahrer} {P:nach seinen Papieren} gefragt. | [N:sie] hat [A:ihn] [P:danach] gefragt.
+{N:Die Kinder} haben sich {A:die Geschichte} selbst ausgedacht. | [N:sie] haben [A:sie] sich selbst ausgedacht.
+{N:Das Labor} wird {D:der Klinik} {A:die Befunde} schicken. | [N:es] wird [A:sie] [D:ihr] schicken.
+Ich bin sicher, dass {N:die Kinder} {D:der Oma} {A:die Blumen} selbst gepflückt haben. | Ich bin sicher, dass [N:sie] [A:sie] [D:ihr] selbst gepflückt haben.
+Leider hat {N:die Versicherung} {D:dem Kunden} {A:den Schaden} nicht ersetzt. | Leider hat [N:sie] [A:ihn] [D:ihm] nicht ersetzt.
+Ich möchte wissen, wem {N:die Chefin} {A:die Unterlagen} gegeben hat. | Ich möchte wissen, wem [N:sie] [A:sie] gegeben hat.
+{N:Das Projekt} besteht {P:aus drei Phasen}. | [N:es] besteht [P:daraus].
+Seitdem {N:die Kollegin} {D:dem Team} {A:ihre Kündigung} mitgeteilt hat, ist die Stimmung schlecht. | Seitdem [N:sie] [A:sie] [D:ihm] mitgeteilt hat, ist die Stimmung schlecht.
+Ich hoffe, dass {N:die Versicherung} {D:meinen Eltern} {A:den Wasserschaden} ersetzt. | Ich hoffe, dass [N:sie] [A:ihn] [D:ihnen] ersetzt.
+Gestern hat mein Kollege {D:meiner Frau} Blumen gebracht. | Gestern hat [D:ihr] mein Kollege Blumen gebracht.
+Damit {N:die Lehrerin} {D:den Eltern} {A:die Situation} erklären kann, lädt sie sie ein. | Damit [N:sie] [A:sie] [D:ihnen] erklären kann, lädt sie sie ein.
+{N:Das Mädchen} hat sich {A:das Knie} aufgeschlagen. | [N:es] hat [A:es] sich aufgeschlagen.
+Ich kann mir {A:die neue Wohnung} leider nicht leisten. | Ich kann [A:sie] mir leider nicht leisten.
+Sobald {N:der Notar} {D:der Käuferin} {A:die Schlüssel} übergeben hat, gehört ihr das Haus. | Sobald [N:er] [A:sie] [D:ihr] übergeben hat, gehört ihr das Haus.
+Das ist das Unternehmen, das {D:den Arbeitern} {A:die Löhne} gekürzt hat. | Das ist das Unternehmen, das [A:sie] [D:ihnen] gekürzt hat.
+Bevor {N:die Notarin} {D:den Käufern} {A:den Vertrag} vorlas, prüfte sie die Ausweise. | Bevor [N:sie] [A:ihn] [D:ihnen] vorlas, prüfte sie die Ausweise.
+{N:Der Anwalt} riet ihr, {D:dem Gericht} {A:die Beweise} vorzulegen. | [N:er] riet ihr, [A:sie] [D:ihm] vorzulegen.
+Wenn {N:die Oma} {D:dem Kind} {A:die Geschichte} erzählt, schläft es sofort ein. | Wenn [N:sie] [A:sie] [D:ihm] erzählt, schläft es sofort ein.
+{N:Der Mann} hat sich {P:für sein Verhalten} bei {D:seiner Frau} entschuldigt. | [N:er] hat sich [P:dafür] bei [D:ihr] entschuldigt.
+{N:Das Team} hat {D:der Projektleiterin} {A:den Entwurf} gestern übermittelt. | [N:es] hat [A:ihn] [D:ihr] gestern übermittelt.
+Als {N:der Vater} {D:dem Sohn} {A:das Auto} endlich lieh, war dieser überglücklich. | Als [N:er] [A:es] [D:ihm] endlich lieh, war dieser überglücklich.
+Wird {N:das Krankenhaus} {D:dem Patienten} {A:die Behandlung} bezahlen? | Wird [N:es] [A:sie] [D:ihm] bezahlen?
+{N:Der Minister} hat sich {P:gegen die Reform} ausgesprochen. | [N:er] hat sich [P:dagegen] ausgesprochen.
+{N:Die Firma} muss {D:der Kundin} {A:die Kosten} erstatten. | [N:sie] muss [A:sie] [D:ihr] erstatten.
+Damals hat der Großvater {D:den Enkeln} {A:den Hof} vererbt. | Damals hat [A:ihn] [D:ihnen] der Großvater vererbt.
+{N:Der Anwalt} hat {D:seiner Mandantin} {P:von der Klage} abgeraten. | [N:er] hat [D:ihr] [P:davon] abgeraten.
+Ich habe mir {A:das Kleid} gestern gekauft. | Ich habe [A:es] mir gestern gekauft.
+{N:Die Personalabteilung} hat {D:dem neuen Mitarbeiter} {A:den Arbeitsvertrag} bereits zugeschickt. | [N:sie] hat [A:ihn] [D:ihm] bereits zugeschickt.
+Obwohl {N:das Hotel} {D:den Gästen} {A:das Frühstück} versprochen hatte, gab es keins. | Obwohl [N:es] [A:es] [D:ihnen] versprochen hatte, gab es keins.
+{N:Das Unternehmen} würde {D:der Bewerberin} {A:die Stelle} sofort anbieten. | [N:es] würde [A:sie] [D:ihr] sofort anbieten.
+{N:Der Verein} setzt sich {P:für den Umweltschutz} ein. | [N:er] setzt sich [P:dafür] ein.
+Es ist wichtig, {D:dem Kunden} {A:die Garantie} schriftlich zu bestätigen. | Es ist wichtig, [A:sie] [D:ihm] schriftlich zu bestätigen.
+{N:Die Leute} haben {D:dem Bürgermeister} {A:die Unterschriften} überreicht. | [N:sie] haben [A:sie] [D:ihm] überreicht.
+{N:Der Chef} hat mit {D:den Mitarbeitern} {P:über die Kündigungen} gesprochen. | [N:er] hat mit [D:ihnen] [P:darüber] gesprochen.
+{N:Die Verkäuferin} hat {D:dem Kunden} {A:das Wechselgeld} falsch herausgegeben. | [N:sie] hat [A:es] [D:ihm] falsch herausgegeben.
+Es wäre besser, wenn {N:die Chefin} {D:dem Team} {A:die Pläne} früher mitteilen würde. | Es wäre besser, wenn [N:sie] [A:sie] [D:ihm] früher mitteilen würde.
+{N:Die Ärztin} hat {D:dem Patienten} {A:das Gutachten} ausgehändigt. | [N:sie] hat [A:es] [D:ihm] ausgehändigt.
+Ich habe mir {A:den Termin} im Kalender markiert. | Ich habe [A:ihn] mir im Kalender markiert.
+Ich denke oft {P:an den Urlaub in Sizilien}. | Ich denke oft [P:daran].
+Sie erzählte, wie {N:ihr Großvater} {D:ihrer Mutter} {A:das Klavier} geschenkt hatte. | Sie erzählte, wie [N:er] [A:es] [D:ihr] geschenkt hatte.
+Du solltest dir {A:den Vertrag} genau durchlesen. | Du solltest [A:ihn] dir genau durchlesen.
+{N:Der Trainer} hat {D:der Mannschaft} {A:die Taktik} ausführlich erläutert. | [N:er] hat [A:sie] [D:ihr] ausführlich erläutert.
+Je früher {N:die Behörde} {D:den Antragstellern} {A:die Bescheide} schickt, desto besser. | Je früher [N:sie] [A:sie] [D:ihnen] schickt, desto besser.
+Die Frau, deren Sohn {D:meiner Tochter} {A:das Fahrrad} gestohlen hat, entschuldigte sich. | Die Frau, deren Sohn [A:es] [D:ihr] gestohlen hat, entschuldigte sich.
+Die Stiftung, die {D:dem Krankenhaus} {A:das Gerät} gespendet hat, möchte anonym bleiben. | Die Stiftung, die [A:es] [D:ihm] gespendet hat, möchte anonym bleiben.
+Der Politiker, der {D:den Wählern} {A:die Steuersenkung} versprochen hat, wurde gewählt. | Der Politiker, der [A:sie] [D:ihnen] versprochen hat, wurde gewählt.
+{N:Mein Sohn} interessiert sich {P:für Astronomie}. | [N:er] interessiert sich [P:dafür].
+{N:Mein Schwager} hat {D:meiner Tochter} {A:den Laptop} geliehen. | [N:er] hat [A:ihn] [D:ihr] geliehen.
+{N:Die Mutter} hat {A:ihren Sohn} {P:vor der Gefahr} gewarnt. | [N:sie] hat [A:ihn] [P:davor] gewarnt.
+Ich glaube, dass die Chefin {D:dem Praktikanten} {A:den Fehler} verziehen hat. | Ich glaube, dass [A:ihn] [D:ihm] die Chefin verziehen hat.
+Nach dem Spiel hat {N:die Trainerin} {D:dem Torwart} {A:den Fehler} verziehen. | Nach dem Spiel hat [N:sie] [A:ihn] [D:ihm] verziehen.
+Zur Hochzeit haben {N:die Freunde} {D:dem Brautpaar} {A:die Reise} geschenkt. | Zur Hochzeit haben [N:sie] [A:sie] [D:ihm] geschenkt.
+Ich verstehe nicht, weshalb {N:der Richter} {D:dem Angeklagten} {A:die Kaution} erlassen hat. | Ich verstehe nicht, weshalb [N:er] [A:sie] [D:ihm] erlassen hat.
+{N:Die Regierung} hat {P:auf die Kritik} nicht reagiert. | [N:sie] hat [P:darauf] nicht reagiert.
+Sie hat sich {A:das Rauchen} endlich abgewöhnt. | Sie hat [A:es] sich endlich abgewöhnt.
+{N:Das Gericht} hatte {D:der Angeklagten} {A:das Urteil} schriftlich mitgeteilt. | [N:es] hatte [A:es] [D:ihr] schriftlich mitgeteilt.
+Weil der Lehrer {D:den Schülern} die Lösung verraten hatte, waren alle Tests gleich. | Weil [D:ihnen] der Lehrer die Lösung verraten hatte, waren alle Tests gleich.
+Aus Versehen hat {N:der Postbote} {D:dem Nachbarn} {A:mein Paket} gegeben. | Aus Versehen hat [N:er] [A:es] [D:ihm] gegeben.
+Ich habe {D:meinem Bruder} {P:bei dem Umzug} geholfen. | Ich habe [D:ihm] [P:dabei] geholfen.
+Ich finde es unfair, dass {N:die Schule} {D:dem Schüler} {A:das Zeugnis} vorenthält. | Ich finde es unfair, dass [N:sie] [A:es] [D:ihm] vorenthält.
+{N:Die Regierung} hat {D:den Bürgern} {A:die Reform} nur unzureichend erklärt. | [N:sie] hat [A:sie] [D:ihnen] nur unzureichend erklärt.
+{N:Die Eltern} sind stolz auf {A:ihre Tochter}. | [N:sie] sind stolz auf [A:sie].
+Ich weiß, dass der Nachbar {A:das Auto} reparieren wird. | Ich weiß, dass [A:es] der Nachbar reparieren wird.
+Er hat versprochen, {D:den Kindern} {A:das Geld} zurückzugeben. | Er hat versprochen, [A:es] [D:ihnen] zurückzugeben.
+{N:Der Zoll} hat {D:dem Reisenden} {A:die Zigaretten} abgenommen. | [N:er] hat [A:sie] [D:ihm] abgenommen.
+{N:Die Chefin} wird {D:dem Praktikanten} {A:das Zeugnis} morgen ausstellen. | [N:sie] wird [A:es] [D:ihm] morgen ausstellen.
+{N:Die Nachbarin} kümmert sich um {A:unsere Katze}. | [N:sie] kümmert sich um [A:sie].
+{N:Das Finanzamt} hat {D:der Selbstständigen} {A:den Bescheid} zugestellt. | [N:es] hat [A:ihn] [D:ihr] zugestellt.
+Ehrlich gesagt hätte ich {D:dem Vertreter} {A:den Staubsauger} nie abgekauft. | Ehrlich gesagt hätte ich [A:ihn] [D:ihm] nie abgekauft.
+Was hat {N:der Arzt} {D:deiner Mutter} gesagt? | Was hat [N:er] [D:ihr] gesagt?
+Falls {N:der Vermieter} {D:den Mietern} {A:die Nebenkosten} erhöht, ziehen sie aus. | Falls [N:er] [A:sie] [D:ihnen] erhöht, ziehen sie aus.
+Er weigerte sich, {D:der Polizistin} {A:den Ausweis} zu zeigen. | Er weigerte sich, [A:ihn] [D:ihr] zu zeigen.
+Der Brief, den {N:die Anwältin} {D:dem Richter} geschickt hat, ist verschwunden. | Der Brief, den [N:sie] [D:ihm] geschickt hat, ist verschwunden.
+Als {N:der Kapitän} {D:den Passagieren} {A:die Nachricht} mitteilte, wurde es still. | Als [N:er] [A:sie] [D:ihnen] mitteilte, wurde es still.
+{N:Das Kind} hat sich {A:die Hände} gewaschen. | [N:es] hat [A:sie] sich gewaschen.
+Schon vor Jahren hat {N:die Stadt} {D:dem Museum} {A:das Gemälde} geschenkt. | Schon vor Jahren hat [N:sie] [A:es] [D:ihm] geschenkt.
+Er gab zu, dass {N:sein Kollege} ihm {A:die Idee} geliefert hatte. | Er gab zu, dass [N:er] [A:sie] ihm geliefert hatte.
+Weil {N:die Bank} {D:dem Start-up} {A:den Kredit} verweigert hatte, musste es schließen. | Weil [N:sie] [A:ihn] [D:ihm] verweigert hatte, musste es schließen.
+Wir haben vor, {D:unseren Gästen} {A:die Altstadt} zu zeigen. | Wir haben vor, [A:sie] [D:ihnen] zu zeigen.
+Wir haben mit {D:unseren Freunden} {P:über die Wahl} diskutiert. | Wir haben mit [D:ihnen] [P:darüber] diskutiert.
+{N:Die Studentin} hat {P:an der Konferenz} teilgenommen. | [N:sie] hat [P:daran] teilgenommen.
+Ich kann mich nicht {P:an seinen Namen} erinnern. | Ich kann mich nicht [P:daran] erinnern.
+Ich bezweifle, dass {N:der Händler} {D:dem Käufer} {A:den Mangel} verschwiegen hat. | Ich bezweifle, dass [N:er] [A:ihn] [D:ihm] verschwiegen hat.
+Es ist unklar, ob {N:die Behörde} {D:der Familie} {A:die Aufenthaltsgenehmigung} verlängert. | Es ist unklar, ob [N:sie] [A:sie] [D:ihr] verlängert.
+Wir haben uns {P:über den Lärm} bei {D:dem Hausmeister} beschwert. | Wir haben uns [P:darüber] bei [D:ihm] beschwert.
+{N:Die Lehrerin} hat {D:den Schülern} {A:den Test} zurückgegeben. | [N:sie] hat [A:ihn] [D:ihnen] zurückgegeben.
+Ich habe mich {P:über das Geschenk} sehr gefreut. | Ich habe mich [P:darüber] sehr gefreut.
+{N:Der Kollege} hat {D:mir und meiner Partnerin} {A:das Restaurant} empfohlen. | [N:er] hat [A:es] [D:uns] empfohlen.
+Es lohnt sich nicht, {D:dem Händler} {A:den alten Fernseher} zurückzubringen. | Es lohnt sich nicht, [A:ihn] [D:ihm] zurückzubringen.
+{N:Meine Freundin} hat sich {P:an das Klima} gewöhnt. | [N:sie] hat sich [P:daran] gewöhnt.
+Hast du dir {A:die Telefonnummer} notiert? | Hast du [A:sie] dir notiert?
+Weil {N:der Chef} {D:der Praktikantin} {A:die Verantwortung} übertragen hatte, war sie stolz. | Weil [N:er] [A:sie] [D:ihr] übertragen hatte, war sie stolz.
+{N:Der Kellner} hat {D:den Gästen} {A:den Wein} eingeschenkt. | [N:er] hat [A:ihn] [D:ihnen] eingeschenkt.
+Wer hat {D:den Kindern} {A:die Süßigkeiten} gegeben? | Wer hat [A:sie] [D:ihnen] gegeben?
+Da {N:die Stiftung} {D:dem Künstler} {A:das Atelier} kostenlos überlässt, kann er sich auf die Arbeit konzentrieren. | Da [N:sie] [A:es] [D:ihm] kostenlos überlässt, kann er sich auf die Arbeit konzentrieren.
+{N:Die Polizei} hat {D:dem Zeugen} {A:die Fotos} noch einmal vorgelegt. | [N:sie] hat [A:sie] [D:ihm] noch einmal vorgelegt.
+Deshalb hat {N:das Mädchen} {D:der Lehrerin} {A:den Zettel} gegeben. | Deshalb hat [N:es] [A:ihn] [D:ihr] gegeben.
+Bist du {P:mit dem Ergebnis} zufrieden? | Bist du [P:damit] zufrieden?
+Sofort nach dem Unfall hat {N:der Fahrer} {D:der Polizistin} {A:den Führerschein} gezeigt. | Sofort nach dem Unfall hat [N:er] [A:ihn] [D:ihr] gezeigt.
+Ich habe beschlossen, {D:meiner Schwester} {A:das Auto} zu schenken. | Ich habe beschlossen, [A:es] [D:ihr] zu schenken.
+Natürlich hätte {N:der Anwalt} {D:der Mandantin} {A:die Frist} mitteilen müssen. | Natürlich hätte [N:er] [A:sie] [D:ihr] mitteilen müssen.
+Ich habe mich über {A:meinen Kollegen} sehr geärgert. | Ich habe mich über [A:ihn] sehr geärgert.
+Das Mädchen, dem {N:die Lehrerin} {A:die Hauptrolle} gegeben hat, ist sehr schüchtern. | Das Mädchen, dem [N:sie] [A:sie] gegeben hat, ist sehr schüchtern.
+{N:Der Verein} setzt sich für {A:die Geflüchteten} ein. | [N:er] setzt sich für [A:sie] ein.
+Weil {N:mein Kollege} sich {A:den Vertrag} nicht durchgelesen hatte, übersah er die Klausel. | Weil [N:er] [A:ihn] sich nicht durchgelesen hatte, übersah er die Klausel.
+Hättest du {D:deiner Schwester} {A:das Geheimnis} verraten? | Hättest du [A:es] [D:ihr] verraten?
+Der Fahrer, der {D:der Polizei} {A:den Unfall} gemeldet hat, wartet noch. | Der Fahrer, der [A:ihn] [D:ihr] gemeldet hat, wartet noch.
+{N:Die Chefin} hat sich {A:die Präsentation} zweimal angehört. | [N:sie] hat [A:sie] sich zweimal angehört.
+{N:Der Junge} hat {D:der alten Dame} {A:den Koffer} nach oben getragen. | [N:er] hat [A:ihn] [D:ihr] nach oben getragen.
+{N:Das Komitee} hat {D:der Forscherin} {A:den Preis} verliehen. | [N:es] hat [A:ihn] [D:ihr] verliehen.
+Die Ärztin, die {D:der Patientin} {A:die Diagnose} erklärt hat, war sehr einfühlsam. | Die Ärztin, die [A:sie] [D:ihr] erklärt hat, war sehr einfühlsam.
+{N:Der Erfolg} hängt von {D:der Trainerin} ab. | [N:er] hängt von [D:ihr] ab.
+Wie {N:der Mechaniker} {D:dem Kunden} {A:die hohe Rechnung} erklären will, ist mir ein Rätsel. | Wie [N:er] [A:sie] [D:ihm] erklären will, ist mir ein Rätsel.
+Ohne Vorwarnung hat {N:der Vermieter} {D:den Mietern} {A:die Heizung} abgestellt. | Ohne Vorwarnung hat [N:er] [A:sie] [D:ihnen] abgestellt.
+Ich hoffe, dass das Wetter {D:den Gästen} nicht die Laune verdirbt. | Ich hoffe, dass [D:ihnen] das Wetter nicht die Laune verdirbt.
+{N:Die Großeltern} haben {D:den Enkelkindern} {A:das Erbe} vermacht. | [N:sie] haben [A:es] [D:ihnen] vermacht.
+{N:Die Kunden} haben {P:auf die Lieferung} drei Wochen gewartet. | [N:sie] haben [P:darauf] drei Wochen gewartet.
+Wir freuen uns sehr {P:auf das Wochenende}. | Wir freuen uns sehr [P:darauf].
+Als die Polizei {A:den Dieb} festnahm, wehrte er sich. | Als [A:ihn] die Polizei festnahm, wehrte er sich.
+Er wollte wissen, wer {D:der Presse} {A:die Informationen} gegeben hatte. | Er wollte wissen, wer [A:sie] [D:ihr] gegeben hatte.
+Ich möchte wissen, was {N:der Verkäufer} {D:deinem Vater} versprochen hat. | Ich möchte wissen, was [N:er] [D:ihm] versprochen hat.
+Im Nachhinein hat {N:der Zeuge} {D:der Polizei} {A:den Vorfall} anders geschildert. | Im Nachhinein hat [N:er] [A:ihn] [D:ihr] anders geschildert.
+Das ist der Grund, warum {N:die Bank} {D:dem Kunden} {A:den Kredit} gekündigt hat. | Das ist der Grund, warum [N:sie] [A:ihn] [D:ihm] gekündigt hat.
+{N:Die Nachbarin} kümmert sich {P:um den Garten}. | [N:sie] kümmert sich [P:darum].
+Gestern Abend hat {N:mein Mitbewohner} {D:den Gästen} {A:die Wohnung} gezeigt. | Gestern Abend hat [N:er] [A:sie] [D:ihnen] gezeigt.
+Hast du {P:mit dem Projekt} schon angefangen? | Hast du [P:damit] schon angefangen?
+Merk dir {A:diese Regel}! | Merk [A:sie] dir!
+Es ist bekannt, dass {N:der Minister} {D:den Journalisten} {A:das Interview} verweigert hat. | Es ist bekannt, dass [N:er] [A:es] [D:ihnen] verweigert hat.
+Falls {N:das Gericht} {D:der Firma} {A:die Lizenz} entzieht, droht die Insolvenz. | Falls [N:es] [A:sie] [D:ihr] entzieht, droht die Insolvenz.
+Anstatt {D:dem Kind} {A:die Regeln} zu erklären, schrie sie nur. | Anstatt [A:sie] [D:ihm] zu erklären, schrie sie nur.
+Habt ihr euch {A:die Ausstellung} schon angeschaut? | Habt ihr [A:sie] euch schon angeschaut?
+Die Nachbarn, denen {N:der Postbote} {A:das Paket} gegeben hat, sind verreist. | Die Nachbarn, denen [N:er] [A:es] gegeben hat, sind verreist.
+{N:Die Behörde} hat {D:dem Antragsteller} {A:das Visum} verweigert. | [N:sie] hat [A:es] [D:ihm] verweigert.
+{N:Der Lehrer} hat {A:die Schüler} {P:an die Hausaufgaben} erinnert. | [N:er] hat [A:sie] [P:daran] erinnert.
+Es steht fest, dass {N:das Ministerium} {D:den Gemeinden} {A:die Mittel} kürzen wird. | Es steht fest, dass [N:es] [A:sie] [D:ihnen] kürzen wird.
+{N:Der Verlag} hat {D:dem Übersetzer} {A:das Honorar} überwiesen. | [N:er] hat [A:es] [D:ihm] überwiesen.
+{N:Die Kinder} spielen gern {P:mit den Bauklötzen}. | [N:sie] spielen gern [P:damit].
+Es ist verboten, {D:den Tieren} {A:das Brot} zu geben. | Es ist verboten, [A:es] [D:ihnen] zu geben.
+{N:Die Kanzlei} hat {D:dem Mandanten} {A:die Rechnung} gestellt. | [N:sie] hat [A:sie] [D:ihm] gestellt.
+Ich habe gehört, dass {N:die Firma} {D:dem Gründer} {A:die Anteile} abgekauft hat. | Ich habe gehört, dass [N:sie] [A:sie] [D:ihm] abgekauft hat.
+Ob {N:der Verlag} {D:dem Autor} {A:den Vorschuss} zahlt, ist noch offen. | Ob [N:er] [A:ihn] [D:ihm] zahlt, ist noch offen.
+Gestern hat der Verkäufer {D:dem Kunden} {A:das Angebot} geschickt. | Gestern hat [A:es] [D:ihm] der Verkäufer geschickt.
+{N:Der Professor} hat {D:der Studentin} {A:die Arbeit} mit einer Eins zurückgegeben. | [N:er] hat [A:sie] [D:ihr] mit einer Eins zurückgegeben.
+Ich kann mir vorstellen, dass {N:die Patentante} {D:dem Täufling} {A:die Kette} schenkt. | Ich kann mir vorstellen, dass [N:sie] [A:sie] [D:ihm] schenkt.
+Endlich hat die Bank {D:den Kunden} {A:das Geld} zurückgezahlt. | Endlich hat [A:es] [D:ihnen] die Bank zurückgezahlt.
+Gestern haben die Kollegen {D:der Chefin} {A:den Plan} vorgestellt. | Gestern haben [A:ihn] [D:ihr] die Kollegen vorgestellt.
+Ohne {D:dem Vater} {A:den Grund} zu erklären, verließ sie das Haus. | Ohne [A:ihn] [D:ihm] zu erklären, verließ sie das Haus.
+Seit Monaten verweigert {N:die Versicherung} {D:dem Opfer} {A:die Entschädigung}. | Seit Monaten verweigert [N:sie] [A:sie] [D:ihm].
+{N:Der Mieter} hat sich {P:um eine größere Wohnung} beworben. | [N:er] hat sich [P:darum] beworben.
+Solange {N:der Kunde} {D:der Firma} {A:die Rechnung} nicht bezahlt, wird nichts geliefert. | Solange [N:er] [A:sie] [D:ihr] nicht bezahlt, wird nichts geliefert.
+Wenn {N:die Hausärztin} {D:dem Patienten} {A:die Überweisung} nicht ausstellt, bekommt er keinen Termin. | Wenn [N:sie] [A:sie] [D:ihm] nicht ausstellt, bekommt er keinen Termin.
+{N:Die Journalistin} hat {A:den Politiker} {P:nach seinen Plänen} gefragt. | [N:sie] hat [A:ihn] [P:danach] gefragt.
+Wenn {N:die Personalabteilung} {D:dem Bewerber} {A:die Zusage} heute schickt, kann er nächste Woche anfangen. | Wenn [N:sie] [A:sie] [D:ihm] heute schickt, kann er nächste Woche anfangen.
+{N:Das Personal} hat {D:den Gästen} {A:die Zimmer} pünktlich übergeben. | [N:es] hat [A:sie] [D:ihnen] pünktlich übergeben.
+Morgen wird {N:das Gericht} {D:den Parteien} {A:das Urteil} verkünden. | Morgen wird [N:es] [A:es] [D:ihnen] verkünden.
+Um {D:den Kunden} {A:den Vertrag} schmackhaft zu machen, bot er einen Rabatt an. | Um [A:ihn] [D:ihnen] schmackhaft zu machen, bot er einen Rabatt an.
+Die Studenten, denen {N:der Professor} {A:die Noten} mitgeteilt hat, sind zufrieden. | Die Studenten, denen [N:er] [A:sie] mitgeteilt hat, sind zufrieden.
+{N:Die Studentin} hat sich {A:die Vokabeln} gut gemerkt. | [N:sie] hat [A:sie] sich gut gemerkt.
+Nachdem das Gericht {A:den Angeklagten} freigesprochen hatte, jubelten seine Freunde. | Nachdem [A:ihn] das Gericht freigesprochen hatte, jubelten seine Freunde.
+Es wundert mich, dass das Theater {D:der Schauspielerin} gekündigt hat. | Es wundert mich, dass [D:ihr] das Theater gekündigt hat.
+Warum hat {N:die Bank} {D:dem Kunden} {A:die Karte} gesperrt? | Warum hat [N:sie] [A:sie] [D:ihm] gesperrt?
+Am Abend hat die Mutter {D:dem Kind} {A:die Geschichte} vorgelesen. | Am Abend hat [A:sie] [D:ihm] die Mutter vorgelesen.
+Während {N:der Guide} {D:den Touristen} {A:die Kathedrale} zeigte, begann es zu regnen. | Während [N:er] [A:sie] [D:ihnen] zeigte, begann es zu regnen.
+{N:Die Kinder} spielen gern mit {D:ihrem Cousin}. | [N:sie] spielen gern mit [D:ihm].
+Bevor {N:die Bank} {D:der Kundin} {A:das Konto} sperrte, schickte sie drei Mahnungen. | Bevor [N:sie] [A:es] [D:ihr] sperrte, schickte sie drei Mahnungen.
+{N:Der Arzt} hat {A:den Patienten} {P:über die Risiken} aufgeklärt. | [N:er] hat [A:ihn] [P:darüber] aufgeklärt.
+Das ist die Frau, die {D:meinem Bruder} {A:die Wohnung} vermietet hat. | Das ist die Frau, die [A:sie] [D:ihm] vermietet hat.
+{N:Der Vater} hat {D:den Kindern} {P:von seiner Reise} erzählt. | [N:er] hat [D:ihnen] [P:davon] erzählt.
+{N:Die Kollegen} haben mit {D:der Chefin} {P:über die Gehaltserhöhung} verhandelt. | [N:sie] haben mit [D:ihr] [P:darüber] verhandelt.
+Sobald {N:das Labor} {D:der Ärztin} {A:die Werte} schickt, ruft sie dich an. | Sobald [N:es] [A:sie] [D:ihr] schickt, ruft sie dich an.
+{N:Mein Bruder} hat sich {A:den neuen Film} schon angesehen. | [N:er] hat [A:ihn] sich schon angesehen.
+{N:Der Händler} hat {D:dem Sammler} {A:die Münzen} viel zu teuer verkauft. | [N:er] hat [A:sie] [D:ihm] viel zu teuer verkauft.
+{N:Das Reisebüro} hat {D:den Kunden} {A:die Tickets} per E-Mail geschickt. | [N:es] hat [A:sie] [D:ihnen] per E-Mail geschickt.
+{N:Der Arzt} hat angeordnet, {D:dem Patienten} {A:das Schmerzmittel} sofort zu geben. | [N:er] hat angeordnet, [A:es] [D:ihm] sofort zu geben.
+Letztes Jahr hat {N:die Gemeinde} {D:dem Sportverein} {A:den Platz} gekündigt. | Letztes Jahr hat [N:sie] [A:ihn] [D:ihm] gekündigt.
+{N:Der Onkel} hat {D:den Zwillingen} {A:das Märchen} erzählt. | [N:er] hat [A:es] [D:ihnen] erzählt.
+Nach der Prüfung hat {N:die Kommission} {D:den Kandidaten} {A:das Ergebnis} mitgeteilt. | Nach der Prüfung hat [N:sie] [A:es] [D:ihnen] mitgeteilt.
+Es ist fraglich, ob {N:die Gewerkschaft} {D:den Arbeitgebern} {A:die Zugeständnisse} macht. | Es ist fraglich, ob [N:sie] [A:sie] [D:ihnen] macht.
+Gestern hat {N:der Chef} {D:der Kollegin} {A:den Vertrag} gegeben. | Gestern hat [N:er] [A:ihn] [D:ihr] gegeben.
+Heute Morgen hat {N:die Assistentin} {D:dem Vorstand} {A:die Zahlen} geschickt. | Heute Morgen hat [N:sie] [A:sie] [D:ihm] geschickt.
+Wir haben uns {A:den Hauskauf} lange überlegt. | Wir haben [A:ihn] uns lange überlegt.
+Ich glaube kaum, dass {N:das Mädchen} {D:seinen Eltern} {A:den Unfall} gebeichtet hat. | Ich glaube kaum, dass [N:es] [A:ihn] [D:ihnen] gebeichtet hat.
+Nächste Woche wird {N:die Firma} {D:den Angestellten} {A:den Bonus} auszahlen. | Nächste Woche wird [N:sie] [A:ihn] [D:ihnen] auszahlen.
+{N:Die Kollegen} haben {D:dem Jubilar} {A:den Präsentkorb} überreicht. | [N:sie] haben [A:ihn] [D:ihm] überreicht.
+Ohne dass {N:der Chef} {D:der Abteilung} {A:die Gründe} genannt hätte, wurde das Projekt gestoppt. | Ohne dass [N:er] [A:sie] [D:ihr] genannt hätte, wurde das Projekt gestoppt.
+{N:Die Hausverwaltung} hätte {D:dem Mieter} {A:die Kündigung} persönlich zustellen sollen. | [N:sie] hätte [A:sie] [D:ihm] persönlich zustellen sollen.
+{N:Die Kollegin} hat sich bei {D:dem Chef} {P:über die Arbeitszeiten} beschwert. | [N:sie] hat sich bei [D:ihm] [P:darüber] beschwert.
+{N:Die Redaktion} hat {D:der Autorin} {A:das Manuskript} zurückgeschickt. | [N:sie] hat [A:es] [D:ihr] zurückgeschickt.
+Es ärgert mich, dass {N:mein Bruder} {D:meinen Eltern} {A:die Wahrheit} nicht gesagt hat. | Es ärgert mich, dass [N:er] [A:sie] [D:ihnen] nicht gesagt hat.
+Trotzdem hat {N:der Vater} {D:dem Mädchen} {A:das Handy} weggenommen. | Trotzdem hat [N:er] [A:es] [D:ihm] weggenommen.
+{N:Das Kind} hat {D:den Eltern} {A:die schlechte Note} verschwiegen. | [N:es] hat [A:sie] [D:ihnen] verschwiegen.
+{N:Die Forscher} arbeiten seit Jahren {P:an dem Impfstoff}. | [N:sie] arbeiten seit Jahren [P:daran].
+{N:Die Universität} hat {D:dem Doktoranden} {A:das Stipendium} gestrichen. | [N:sie] hat [A:es] [D:ihm] gestrichen.
+Indem {N:der Konzern} {D:den Aktionären} {A:die Verluste} verschwieg, machte er sich strafbar. | Indem [N:er] [A:sie] [D:ihnen] verschwieg, machte er sich strafbar.
+{N:Die Stadt} hat {D:dem Verein} {A:das Grundstück} überlassen. | [N:sie] hat [A:es] [D:ihm] überlassen.
+{N:Die Firma} hat {D:dem Kunden} {P:für seine Treue} gedankt. | [N:sie] hat [D:ihm] [P:dafür] gedankt.
+Bist du mit {D:deinem neuen Chef} zufrieden? | Bist du mit [D:ihm] zufrieden?
+{N:Die Großmutter} hat {D:dem Mädchen} {A:die Halskette} geschenkt. | [N:sie] hat [A:sie] [D:ihm] geschenkt.
+{N:Die Bank} hat {D:dem Ehepaar} {A:den Kredit} gewährt. | [N:sie] hat [A:ihn] [D:ihm] gewährt.
+Ich weiß nicht, warum {N:das Team} {D:dem Chef} {A:die Fehler} verheimlicht hat. | Ich weiß nicht, warum [N:es] [A:sie] [D:ihm] verheimlicht hat.
+{N:Das Mädchen} träumt {P:von einer Karriere als Ärztin}. | [N:es] träumt [P:davon].
+{N:Die Agentur} wird {D:dem Schauspieler} {A:das Drehbuch} zukommen lassen. | [N:sie] wird [A:es] [D:ihm] zukommen lassen.
+Es fällt mir schwer, {D:meinem Freund} {A:den Fehler} zu verzeihen. | Es fällt mir schwer, [A:ihn] [D:ihm] zu verzeihen.
+{N:Die Eltern} haben {D:dem Sohn} {A:den Umzug} finanziert. | [N:sie] haben [A:ihn] [D:ihm] finanziert.
+Sicher hat die Lehrerin {A:das Problem} längst bemerkt. | Sicher hat [A:es] die Lehrerin längst bemerkt.
+{N:Die Nachbarn} haben {D:dir und deinem Bruder} {A:den Schlüssel} gegeben. | [N:sie] haben [A:ihn] [D:euch] gegeben.
+{N:Das Ministerium} hat {D:den Schulen} {A:die Gelder} gestrichen. | [N:es] hat [A:sie] [D:ihnen] gestrichen.
+Ich denke oft an {A:meine Großmutter}. | Ich denke oft an [A:sie].
+Hat {N:der Kurier} {D:der Empfängerin} {A:die Lieferung} schon übergeben? | Hat [N:er] [A:sie] [D:ihr] schon übergeben?
+Die Kinder, denen {N:der Clown} {A:die Luftballons} geschenkt hat, sind begeistert. | Die Kinder, denen [N:er] [A:sie] geschenkt hat, sind begeistert.
+</script>
+
+<script>
+(function(){
+const PRON=[["ich","mich","mir"],["du","dich","dir"],["er","ihn","ihm"],["sie","sie","ihr"],["es","es","ihm"],["wir","uns","uns"],["ihr","euch","euch"],["sie","sie","ihnen"],["Sie","Sie","Ihnen"]];
+const DA=["damit","dafür","darüber","darauf","daran","davon","dazu","dabei","darin","dagegen","danach","dadurch","darum","daraus","darunter","davor"];
+const CASES=["N","A","D"], CASENAME={N:"Nominativ",A:"Akkusativ",D:"Dativ",P:"da-Wort"};
+const WAIT_OK=650, WAIT_BAD=2200;
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+const cap=w=>w.charAt(0).toUpperCase()+w.slice(1);
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const fmt=s=>s.toFixed(1).replace(".",",")+" s";
+
+const items=document.getElementById("data").textContent.trim().split("\n").map((line,i)=>{
+  const [orig,sol]=line.split("|").map(s=>s.trim());
+  const tokens=[],slots=[];let last=0;const re=/\[(N|A|D|P):([^\]]+)\]/g;let m;
+  while((m=re.exec(sol))){ if(m.index>last)tokens.push({t:"txt",v:sol.slice(last,m.index)});
+    tokens.push({t:"slot",k:slots.length,first:m.index===0});slots.push({c:m[1],w:m[2]});last=re.lastIndex;}
+  if(last<sol.length)tokens.push({t:"txt",v:sol.slice(last)});
+  const plain=orig.replace(/\{[NADP]:([^}]+)\}/g,"$1");
+  const origHTML=esc(orig).replace(/\{(N|A|D|P):([^}]+)\}/g,(_,c,t)=>`<span class="np ${c}" title="${CASENAME[c]}">${t}</span>`);
+  const par=2.5+plain.length*0.035+slots.length*1.4;
+  return {i,origHTML,tokens,slots,par};
+});
+
+const KEY="pronomen-master-v1";
+let st={res:{},pts:0,streak:0,best:0,bestStreak:0};
+try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&s.res)st=Object.assign(st,s);}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
+
+let active=null,filled=[],checked=false,timer=null,running=false,paused=false,t0=0,elapsed=0,raf=null;
+const listEl=document.getElementById("list");
+
+function bump(id,val){const el=document.getElementById(id);if(el.textContent!==String(val)){el.textContent=val;el.classList.remove("bump");void el.offsetWidth;el.classList.add("bump");}}
+function stats(){const v=Object.values(st.res);
+  bump("sPts",st.pts);bump("sStreak",st.streak);document.getElementById("sBest").textContent=st.best;
+  document.getElementById("sDone").textContent=v.length;document.getElementById("sOk").textContent=v.filter(r=>r.ok).length;
+  document.getElementById("sAvg").textContent=v.length?fmt(v.reduce((a,r)=>a+r.t,0)/v.length):"–";
+  document.getElementById("pbar").style.width=(v.length/items.length*100)+"%";}
+
+function cardClass(it){const r=st.res[it.i];return "card"+(r?(r.ok?" ok":" bad"):"")+(active===it.i?" active":"");}
+function reviewHTML(it){const r=st.res[it.i];let h=`<span class="lab">Deine Lösung</span>`;
+  it.tokens.forEach(tk=>{
+    if(tk.t==="txt"){tk.v.trim().split(/\s+/).filter(Boolean).forEach(w=>h+=`<span>${esc(w)}</span>`);return;}
+    const s=it.slots[tk.k],a=r.ans[tk.k],shown=tk.first?cap(s.w):s.w;
+    h+=a.ok?`<span class="rw ${s.c}">${esc(shown)}</span>`:`<span class="rw wrong ${s.c}"><s>${esc(a.w)}</s>${esc(shown)}</span>`;});
+  return h+`<span class="meta">${fmt(r.t)} · ${r.p>0?"+":""}${r.p} Punkte</span>`;}
+
+function renderCard(it){
+  let c=document.getElementById("c"+it.i);if(!c){c=document.createElement("article");c.id="c"+it.i;}
+  const r=st.res[it.i],isAct=active===it.i;c.className=cardClass(it);
+  c.innerHTML=`<button class="row" type="button"${isAct?' aria-current="true"':''}><span class="num">${it.i+1}</span><span class="orig">${it.origHTML}</span>${r&&!isAct?`<span class="state">${r.p>0?"+":""}${r.p}</span>`:""}</button>`+(r&&!isAct?`<div class="review">${reviewHTML(it)}</div>`:"");
+  c.querySelector(".row").onclick=()=>{if(active!==it.i)activate(it.i)};
+  if(isAct)buildWork(c);return c;}
+
+function renderList(){listEl.innerHTML="";items.forEach(it=>listEl.appendChild(renderCard(it)));
+  if(active===null){const first=items.find(it=>!st.res[it.i]);if(first)activate(first.i,false);else showDone();}}
+
+function activate(i,scroll=true){
+  clearTimeout(timer);timer=null;const prev=active;active=i;checked=false;filled=items[i].slots.map(()=>null);elapsed=0;
+  const d=document.getElementById("done");if(d)d.remove();
+  if(prev!==null&&document.getElementById("c"+prev))renderCard(items[prev]);
+  const c=renderCard(items[i]);
+  if(running&&!paused)startClock();
+  if(scroll)c.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"});}
+
+function buildWork(c){
+  const w=document.createElement("div");w.className="work";
+  if(!running){
+    w.innerHTML=`<div class="startbox"><p>${Object.keys(st.res).length?"Bereit für die nächste Runde?":"Die Uhr läuft ab dem ersten Klick auf Start. Viel Erfolg!"}</p><button class="go" type="button">Start</button></div>`;
+    w.querySelector(".go").onclick=()=>{running=true;paused=false;updPause();renderCard(items[active]);startClock();};
+    c.appendChild(w);return;}
+  w.innerHTML=`<div class="clock"><div class="tbar"><i></i></div><span class="sec">0,0 s</span></div><div class="sol"></div><div class="ctrl"><span class="msg" aria-live="polite"></span></div>`;
+  c.appendChild(w);drawSol();}
+
+function now(){return elapsed+(running&&!paused&&!checked&&t0?(performance.now()-t0)/1000:0);}
+function startClock(){t0=performance.now();cancelAnimationFrame(raf);const tick=()=>{drawClock();if(running&&!paused&&!checked)raf=requestAnimationFrame(tick);};tick();}
+function stopClock(){if(t0){elapsed+= (performance.now()-t0)/1000;t0=0;}cancelAnimationFrame(raf);}
+function drawClock(){const it=items[active];if(!it)return;const box=document.querySelector("#c"+active+" .clock");if(!box)return;
+  const t=now(),left=Math.max(0,1-t/it.par);box.querySelector("i").style.transform=`scaleX(${t>it.par?1:left})`;
+  box.classList.toggle("over",t>it.par);box.querySelector(".sec").textContent=fmt(t);}
+
+function drawSol(){
+  const it=items[active],box=document.querySelector("#c"+active+" .sol");if(!box)return;box.innerHTML="";const next=filled.indexOf(null);
+  it.tokens.forEach(tk=>{
+    if(tk.t==="txt"){tk.v.trim().split(/\s+/).filter(Boolean).forEach(word=>{const s=document.createElement("span");s.textContent=word;box.appendChild(s);});return;}
+    const f=filled[tk.k],b=document.createElement("button");b.type="button";b.dataset.k=tk.k;
+    b.className="slot"+(f?" filled "+f.c:"")+(tk.k===next?" next":"");
+    b.textContent=f?(tk.first?cap(f.w):f.w):"";b.setAttribute("aria-label",f?`Lücke ${tk.k+1}: ${f.w}`:`Lücke ${tk.k+1}, leer`);
+    b.onclick=()=>{if(checked||!filled[tk.k])return;filled[tk.k]=null;drawSol();};
+    box.appendChild(b);});}
+
+function pick(w,c,formal){
+  if(active===null||!running||paused||checked)return;const k=filled.indexOf(null);if(k<0)return;
+  filled[k]={w:formal?w:w.toLowerCase(),c,formal};drawSol();
+  if(!filled.includes(null))check();}
+
+function check(){
+  const it=items[active],card=document.getElementById("c"+active),msg=card.querySelector(".msg");
+  stopClock();checked=true;const t=elapsed;drawClock();
+  let wrong=0;const ans=[];
+  it.slots.forEach((s,k)=>{
+    const el=card.querySelector(`.slot[data-k="${k}"]`),f=filled[k],tok=it.tokens.find(x=>x.k===k);
+    const good=!f.formal&&f.w.toLowerCase()===s.w.toLowerCase();ans.push({w:f.w,ok:good});
+    const shown=tok.first?cap(s.w):s.w;el.classList.remove("next");
+    if(good){el.className="slot right "+s.c;el.textContent=shown;return;}
+    wrong++;
+    const finish=()=>{el.className="slot fixed "+s.c;el.innerHTML=`${esc(shown)}<span class="was">${esc(f.w)}</span>`;};
+    if(reduce){finish();return;}
+    el.className="slot filled whirl";const letters="abdehimnrsuw";let n=0;
+    const iv=setInterval(()=>{el.textContent=Array.from({length:Math.max(2,s.w.length)},()=>letters[Math.random()*letters.length|0]).join("");if(++n>8)clearInterval(iv)},60);
+    setTimeout(()=>{clearInterval(iv);finish();},600);});
+  /* Punkte */
+  const n=it.slots.length,over=t>it.par?Math.round((t-it.par)*20):0;let p;
+  if(!wrong){const speed=Math.max(0,Math.round(120*n*(1-t/it.par)));const mult=1+0.1*Math.min(st.streak,10);
+    p=Math.round((60*n+speed)*mult)-over;st.streak++;}
+  else{p=20*(n-wrong)-60*wrong-over;st.streak=0;}
+  st.pts+=p;st.bestStreak=Math.max(st.bestStreak,st.streak);if(st.pts>st.best)st.best=st.pts;
+  st.res[it.i]={ok:!wrong,ans,t:Math.round(t*10)/10,p};save();stats();
+  card.className=cardClass(it);
+  const fl=document.createElement("div");fl.className="float "+(p>=0?"plus":"minus");fl.textContent=(p>0?"+":"")+p;card.querySelector(".work").appendChild(fl);
+  msg.className="msg "+(wrong?"bad":"good");
+  msg.textContent=wrong?(wrong===1?"Ein Fehler.":`${wrong} Fehler.`)+" Merk dir die Korrektur.":(t<it.par*.5?"Blitzschnell!":t<it.par?"Richtig und schnell!":"Richtig, aber zu langsam.")+(st.streak>1?` Serie: ${st.streak}`:"");
+  const sk=document.createElement("button");sk.type="button";sk.className="skip";sk.textContent="Weiter →";sk.onclick=goNext;card.querySelector(".ctrl").appendChild(sk);
+  timer=setTimeout(goNext,wrong?WAIT_BAD:WAIT_OK);}
+
+function goNext(){clearTimeout(timer);timer=null;if(paused)return;
+  const pos=items.findIndex(x=>x.i===active);const nx=items.slice(pos+1).find(x=>!st.res[x.i])||items.find(x=>!st.res[x.i]);
+  if(nx){activate(nx.i);return;}
+  const last=active;active=null;running=false;renderCard(items[last]);showDone();}
+
+function showDone(){if(document.getElementById("done"))return;const v=Object.values(st.res);
+  const d=document.createElement("div");d.className="done";d.id="done";
+  d.innerHTML=`Alle 300 Sätze geschafft! ${st.pts} Punkte, ${v.filter(r=>r.ok).length} richtig, längste Serie ${st.bestStreak}.<br>Lösche den Fortschritt, um eine neue Runde zu starten.`;
+  listEl.appendChild(d);d.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"});}
+
+/* Pause */
+const pb=document.getElementById("pause");
+function updPause(){pb.textContent=paused?"Weiter":"Pause";pb.classList.toggle("primary",paused);pb.disabled=!running;
+  document.querySelectorAll(".cell").forEach(b=>b.disabled=paused);}
+pb.onclick=()=>{if(!running)return;paused=!paused;updPause();
+  const m=active!==null&&document.querySelector("#c"+active+" .msg");
+  if(paused){if(checked){clearTimeout(timer);timer=null;}else stopClock();if(m&&!checked){m.className="msg";m.textContent="Pausiert.";}}
+  else{if(checked)goNext();else{if(m)m.textContent="";startClock();}}};
+updPause();
+
+/* Tabelle */
+const grid=document.getElementById("grid"),dag=document.getElementById("dagrid");const narrow=matchMedia("(max-width:900px)");
+function cell(w,c,formal){const b=document.createElement("button");b.type="button";b.className="cell "+c+(formal?" formal":"");b.textContent=w;
+  b.title=CASENAME[c]+(formal?" (Höflichkeitsform)":"");b.onclick=()=>pick(w,c,formal);b.disabled=paused;return b;}
+function buildGrid(){grid.innerHTML="";dag.innerHTML="";
+  if(narrow.matches){CASES.forEach((c,ci)=>{const h=document.createElement("div");h.className="colh "+c;h.textContent=c==="N"?"Nom":c==="A"?"Akk":"Dat";grid.appendChild(h);
+      PRON.forEach((r,ri)=>grid.appendChild(cell(r[ci],c,ri===8)));});}
+  else{CASES.forEach(c=>{const h=document.createElement("div");h.className="colh "+c;h.textContent=CASENAME[c];grid.appendChild(h);});
+    PRON.forEach((r,ri)=>{if(ri===5||ri===8){const s=document.createElement("div");s.className="sep";grid.appendChild(s);}r.forEach((w,ci)=>grid.appendChild(cell(w,CASES[ci],ri===8)));});}
+  const h=document.createElement("div");h.className="colh P";h.textContent=narrow.matches?"da-":"da-Wörter";dag.appendChild(h);
+  DA.forEach(w=>dag.appendChild(cell(w,"P",false)));}
+narrow.addEventListener("change",buildGrid);buildGrid();
+
+/* Zurücksetzen */
+const rs=document.getElementById("reset");let armed=null;
+rs.onclick=()=>{if(!armed){rs.classList.add("armed");rs.textContent="Wirklich? Nochmal klicken";armed=setTimeout(()=>{armed=null;rs.classList.remove("armed");rs.textContent="Fortschritt löschen"},4000);return;}
+  clearTimeout(armed);armed=null;rs.classList.remove("armed");rs.textContent="Fortschritt löschen";
+  clearTimeout(timer);stopClock();const best=st.best;st={res:{},pts:0,streak:0,best,bestStreak:0};save();
+  running=false;paused=false;updPause();active=null;stats();renderList();window.scrollTo(0,0);};
+
+stats();renderList();window.scrollTo(0,0);
+
+/* Bubbles */
+const cv=document.getElementById("bubbles"),cx=cv.getContext("2d");let W,H;const B=[];
+function size(){W=cv.width=innerWidth*devicePixelRatio;H=cv.height=innerHeight*devicePixelRatio;}
+size();addEventListener("resize",size);
+const tint=["255,255,255","240,197,72","226,150,140","255,255,255"];
+for(let i=0;i<20;i++)B.push({x:Math.random(),y:Math.random(),r:8+Math.random()*46,s:.0001+Math.random()*.0003,d:Math.random()*6.28,c:tint[i%4]});
+function draw(){cx.clearRect(0,0,W,H);const dp=devicePixelRatio;
+  B.forEach(b=>{b.y-=b.s;b.d+=.004;if(b.y<-.1){b.y=1.1;b.x=Math.random();}
+    const x=(b.x+Math.sin(b.d)*.02)*W,y=b.y*H,r=b.r*dp;
+    const g=cx.createRadialGradient(x-r*.35,y-r*.35,r*.1,x,y,r);g.addColorStop(0,`rgba(${b.c},.13)`);g.addColorStop(1,`rgba(${b.c},.02)`);
+    cx.beginPath();cx.arc(x,y,r,0,7);cx.fillStyle=g;cx.fill();cx.lineWidth=1*dp;cx.strokeStyle=`rgba(${b.c},.3)`;cx.stroke();
+    cx.beginPath();cx.arc(x-r*.4,y-r*.4,r*.13,0,7);cx.fillStyle="rgba(255,255,255,.3)";cx.fill();});}
+if(reduce)draw();else(function loop(){draw();requestAnimationFrame(loop)})();
+})();
+</script>
+</body>
+</html>
