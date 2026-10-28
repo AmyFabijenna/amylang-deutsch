@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Präfix-Profis C1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3f4f7;
+    --card: #ffffff;
+    --text: #141414;
+    --abend: #2f4466;
+    --petrol: #24686a;
+    --flieder: #5b4a70;
+    --muted: #5c6370;
+    --line: #e2e5ea;
+    --ok-bg: #e3f0ea;
+    --ok: #23614a;
+    --bad-bg: #f5e6e6;
+    --bad: #8a3a3a;
+    --radius: 20px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Lexend", system-ui, sans-serif;
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 28px 16px 90px; }
+  header {
+    background: linear-gradient(135deg, var(--abend), var(--flieder));
+    color: #fff;
+    border-radius: var(--radius);
+    padding: 34px 28px;
+    margin-bottom: 26px;
+  }
+  header h1 { margin: 0 0 6px; font-weight: 500; font-size: 1.9rem; }
+  header p { margin: 0; font-weight: 300; opacity: 0.92; }
+  .sticky {
+    position: sticky; top: 10px; z-index: 5;
+    background: var(--card);
+    border-radius: 999px;
+    padding: 10px 22px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    margin-bottom: 24px; font-size: 0.95rem;
+  }
+  .sticky strong { color: var(--petrol); font-weight: 600; }
+  h2 { color: var(--petrol); font-weight: 500; font-size: 1.4rem; margin: 44px 0 6px; }
+  h3 { color: var(--flieder); font-weight: 500; font-size: 1.1rem; margin: 18px 0 8px; }
+  .task { color: var(--muted); margin: 0 0 14px; }
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--abend); font-weight: 500; }
+  td em { color: var(--flieder); font-style: normal; font-weight: 500; }
+  .item { padding: 18px 0; border-bottom: 1px solid var(--line); }
+  .item:last-child { border-bottom: none; }
+  .q { margin-bottom: 10px; }
+  .num { display: inline-block; min-width: 28px; color: var(--muted); font-weight: 500; }
+  .hint { display: block; font-size: 0.88rem; color: var(--flieder); margin: 2px 0 0 28px; }
+  .opts { display: flex; flex-direction: column; gap: 8px; margin-left: 28px; }
+  .opt {
+    text-align: left;
+    font-family: inherit; font-size: 1rem; color: var(--text);
+    background: #f7f8fa;
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .opt:hover:not(:disabled) { border-color: var(--petrol); background: #eef5f5; }
+  .opt:disabled { cursor: default; }
+  .opt.right { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }
+  .opt.wrong { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
+  .fb { margin: 10px 0 0 28px; font-size: 0.93rem; color: var(--muted); display: none; }
+  .fb.show { display: block; }
+  .fb b { color: var(--text); font-weight: 500; }
+  .block-score { margin-top: 14px; font-weight: 500; color: var(--flieder); }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 30px; }
+  button.main {
+    font-family: inherit; font-size: 0.95rem;
+    padding: 10px 22px; border-radius: 999px; border: none;
+    background: var(--petrol); color: #fff; cursor: pointer;
+  }
+  button.main.alt { background: var(--abend); }
+  @media (max-width: 560px) {
+    body { font-size: 16.5px; }
+    .opts, .fb, .hint { margin-left: 0; }
+    header h1 { font-size: 1.5rem; }
+  }
+  @media print {
+    body { background: #fff; font-size: 12.5px; }
+    .sticky, .actions, .block-score { display: none; }
+    header { background: none; color: var(--text); padding: 0; border-bottom: 2px solid var(--abend); border-radius: 0; }
+    .card { box-shadow: none; padding: 8px 0; }
+    .item { break-inside: avoid; padding: 10px 0; }
+    .opt { border: none; background: none; padding: 1px 0; }
+    .opt::before { content: "☐  "; }
+    .fb { display: none !important; }
+    body.with-key .fb { display: block !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Präfix-Profis C1</h1>
+  <p>Trennbar, untrennbar oder beides? Anspruchsvolle Übungen zur Vorbereitung auf die ÖSD-Prüfung C1</p>
+</header>
+
+<div class="sticky">
+  <span>Fortschritt: <strong id="done">0</strong> / <strong id="all">0</strong></span>
+  <span>Richtig: <strong id="right">0</strong></span>
+</div>
+
+<h2>Das Wichtigste vorab</h2>
+<div class="card">
+  <p>Bei den Vorsilben <em>durch-, über-, um-, unter-, hinter-, wider-, wieder-</em> und <em>voll-</em> entscheidet die Bedeutung. Als Faustregel gilt: Ist die Bedeutung wörtlich und räumlich, wird das Präfix betont und abgetrennt (Partizip mit <em>-ge-</em>, Infinitiv mit <em>-zu-</em> in der Mitte). Ist die Bedeutung übertragen oder abstrakt, bleibt das Präfix unbetont und fest am Verb (Partizip ohne <em>ge-</em>, „zu“ steht davor).</p>
+  <h3>Die wichtigsten Paare</h3>
+  <table>
+    <tr><th>Verb</th><th>trennbar (betont)</th><th>untrennbar (unbetont)</th></tr>
+    <tr><td>umfahren</td><td>niederfahren: <em>hat … umgefahren</em></td><td>um etwas herumfahren: <em>hat … umfahren</em></td></tr>
+    <tr><td>umgehen</td><td>mit etwas umgehen, kursieren: <em>ist umgegangen</em></td><td>vermeiden: <em>hat … umgangen</em></td></tr>
+    <tr><td>umschreiben</td><td>neu schreiben: <em>umgeschrieben</em></td><td>mit anderen Worten ausdrücken: <em>umschrieben</em></td></tr>
+    <tr><td>umstellen</td><td>anders anordnen: <em>umgestellt</em></td><td>einkreisen: <em>umstellt</em></td></tr>
+    <tr><td>umreißen</td><td>zu Boden reißen: <em>umgerissen</em></td><td>in groben Zügen darstellen: <em>umrissen</em></td></tr>
+    <tr><td>übersetzen</td><td>ans andere Ufer bringen: <em>übergesetzt</em></td><td>in eine andere Sprache: <em>übersetzt</em></td></tr>
+    <tr><td>übergehen</td><td>zu etwas wechseln: <em>ist übergegangen</em></td><td>nicht beachten: <em>hat … übergangen</em></td></tr>
+    <tr><td>überlegen</td><td>darüberlegen: <em>übergelegt</em></td><td>nachdenken: <em>überlegt</em></td></tr>
+    <tr><td>überziehen</td><td>ein Kleidungsstück anziehen: <em>übergezogen</em></td><td>Konto, Zeit überschreiten: <em>überzogen</em></td></tr>
+    <tr><td>überwerfen</td><td>locker umhängen: <em>übergeworfen</em></td><td>sich zerstreiten: <em>sich überworfen</em></td></tr>
+    <tr><td>überlaufen</td><td>über den Rand fließen, die Seite wechseln: <em>ist übergelaufen</em></td><td>ein Gefühl erfasst jemanden: <em>hat … überlaufen</em></td></tr>
+    <tr><td>übertreten</td><td>zu einer Partei wechseln: <em>ist übergetreten</em></td><td>ein Gesetz verletzen: <em>hat … übertreten</em></td></tr>
+    <tr><td>unterstellen</td><td>sich unterstellen (vor Regen): <em>untergestellt</em></td><td>jemandem etwas vorwerfen: <em>unterstellt</em></td></tr>
+    <tr><td>unterhalten</td><td>etwas darunterhalten: <em>untergehalten</em></td><td>sich unterhalten, versorgen: <em>unterhalten</em></td></tr>
+    <tr><td>unterziehen</td><td>darunter anziehen: <em>untergezogen</em></td><td>sich einer Sache unterziehen: <em>unterzogen</em></td></tr>
+    <tr><td>durchbrechen</td><td>in zwei Teile brechen: <em>ist durchgebrochen</em></td><td>gewaltsam überwinden: <em>hat … durchbrochen</em></td></tr>
+    <tr><td>durchdringen</td><td>bis zu jemandem gelangen: <em>ist durchgedrungen</em></td><td>ganz erfüllen: <em>hat … durchdrungen</em></td></tr>
+    <tr><td>durchlaufen</td><td>hindurchfließen: <em>ist durchgelaufen</em></td><td>absolvieren: <em>hat … durchlaufen</em></td></tr>
+    <tr><td>wieder-</td><td>fast immer trennbar: <em>wiedergeben, wiedersehen, wiedererkennen</em></td><td>nur <em>wiederholen</em> (noch einmal tun): <em>wiederholt</em></td></tr>
+    <tr><td>wider-</td><td>selten: <em>hallt wider</em></td><td>meist untrennbar: <em>widersprechen, widerlegen, widerrufen</em></td></tr>
+  </table>
+</div>
+
+<h2>1 · Perfekt: Welches Partizip passt?</h2>
+<p class="task">Der Kontext legt die Bedeutung fest. Wähle das passende Partizip II.</p>
+<div class="card" id="b1"></div>
+
+<h2>2 · Perfekt: haben oder sein, mit oder ohne ge-?</h2>
+<p class="task">Wähle die vollständige, korrekte Perfektform (Aktiv).</p>
+<div class="card" id="b2"></div>
+
+<h2>3 · Präsens: Welcher Satz drückt die Bedeutung aus?</h2>
+<p class="task">Die Bedeutung ist vorgegeben. Nur ein Satz ist grammatisch korrekt und hat genau diese Bedeutung.</p>
+<div class="card" id="b3"></div>
+
+<h2>4 · Infinitiv mit zu</h2>
+<p class="task">Ergänze die richtige Infinitivform mit „zu“.</p>
+<div class="card" id="b4"></div>
+
+<h2>5 · Nebensatz, Passiv und Plusquamperfekt</h2>
+<p class="task">Achte auf Zeitform und Satzstellung, die in Klammern angegeben sind.</p>
+<div class="card" id="b5"></div>
+
+<h2>6 · Was bedeutet der Satz?</h2>
+<p class="task">Wähle die Umschreibung, die genau dem Satz entspricht.</p>
+<div class="card" id="b6"></div>
+
+<div class="actions">
+  <button class="main" onclick="showAll()">Alle Lösungen anzeigen</button>
+  <button class="main alt" onclick="resetAll()">Neu mischen und von vorn</button>
+</div>
+
+</div>
+
+<script>
+const data = {
+  b1: [
+    { s: "Im Nebel hat der Lieferwagen ein Verkehrsschild ___; es liegt jetzt verbogen am Straßenrand.", o: ["umgefahren", "umfahren", "umfährt"], e: "Das Schild wurde niedergefahren: trennbares <b>umfahren</b>, Partizip mit -ge-." },
+    { s: "Wegen der Großbaustelle haben wir die Innenstadt weiträumig ___.", o: ["umfahren", "umgefahren", "umfuhr"], e: "Um etwas herumfahren: untrennbares <b>umfahren</b>, Partizip ohne ge-." },
+    { s: "Nach der Kritik des Verlags hat die Autorin das letzte Kapitel vollständig ___.", o: ["umgeschrieben", "umschrieben", "umschrieb"], e: "Neu schreiben: trennbar, also <b>umgeschrieben</b>." },
+    { s: "Da ihr der Fachbegriff nicht einfiel, hat sie ihn mit eigenen Worten ___.", o: ["umschrieben", "umgeschrieben", "umschreibt"], e: "Mit anderen Worten ausdrücken: untrennbar, also <b>umschrieben</b>." },
+    { s: "Als der Platzregen einsetzte, haben wir uns unter einem Vordach ___.", o: ["untergestellt", "unterstellt", "unterstellte"], e: "Schutz suchen: trennbares <b>sich unterstellen</b>, Partizip <b>untergestellt</b>." },
+    { s: "Der Verteidiger hat dem Zeugen vor Gericht eine bewusste Falschaussage ___.", o: ["unterstellt", "untergestellt", "unterstellen"], e: "Jemandem etwas vorwerfen: untrennbar, also <b>unterstellt</b>." },
+    { s: "Bei der Beförderung wurde die erfahrenste Kollegin einfach ___.", o: ["übergangen", "übergegangen", "übergeht"], e: "Nicht berücksichtigen: untrennbares <b>übergehen</b>, Partizip <b>übergangen</b>." },
+    { s: "Wir haben die Entscheidung lange ___, bevor wir den Vertrag unterschrieben haben.", o: ["überlegt", "übergelegt", "überlegte"], e: "Nachdenken: untrennbares <b>überlegen</b>." },
+    { s: "Die Mutter hat dem schlafenden Kind noch eine zweite Decke ___.", o: ["übergelegt", "überlegt", "überlag"], e: "Darüberlegen: trennbares <b>überlegen</b>, Partizip <b>übergelegt</b>." },
+    { s: "Er hat sein Girokonto diesen Monat um fast 2000 Euro ___.", o: ["überzogen", "übergezogen", "überzog"], e: "Das Konto über das Guthaben hinaus belasten: untrennbar, also <b>überzogen</b>." },
+    { s: "Weil es am Abend kühl wurde, hat sie sich eine Strickjacke ___.", o: ["übergezogen", "überzogen", "überziehen"], e: "Ein Kleidungsstück anziehen: trennbar, also <b>übergezogen</b>." },
+    { s: "Die Stadt hat in nur zwei Jahren alle Wohnviertel mit Glasfaser ___.", o: ["erschlossen", "erschließt", "erschloss"], e: "„er-“ ist immer untrennbar: Partizip ohne ge-, also <b>erschlossen</b>." }
+  ],
+  b2: [
+    { s: "Der morsche Ast ___ unter der Last des Schnees ___.", o: ["ist … durchgebrochen", "hat … durchbrochen", "hat … durchgebrochen"], e: "In zwei Teile brechen: trennbar, ohne Objekt und mit Zustandsänderung, daher <b>ist durchgebrochen</b>." },
+    { s: "Die Demonstrierenden ___ die Absperrung der Polizei ___.", o: ["haben … durchbrochen", "sind … durchgebrochen", "haben … durchgebrochen"], e: "Gewaltsam überwinden, mit Akkusativobjekt: untrennbar, daher <b>haben … durchbrochen</b>." },
+    { s: "Die Nachricht von seinem Rücktritt ___ erst am Abend bis zu uns ___.", o: ["ist … durchgedrungen", "hat … durchdrungen", "hat … durchgedrungen"], e: "Bis zu jemandem gelangen: trennbar, Bewegung, daher <b>ist durchgedrungen</b>." },
+    { s: "Ein beißender Rauchgeruch ___ das ganze Treppenhaus ___.", o: ["hat … durchdrungen", "ist … durchgedrungen", "hat … durchgedrungen"], e: "Etwas ganz erfüllen, mit Akkusativobjekt: untrennbar, <b>hat … durchdrungen</b>." },
+    { s: "Der Abgeordnete ___ kurz vor der Wahl zu einer anderen Partei ___.", o: ["ist … übergetreten", "hat … übertreten", "hat … übergetreten"], e: "Die Partei wechseln: trennbar, <b>ist übergetreten</b>." },
+    { s: "Der Fahrer ___ an einem einzigen Tag gleich mehrere Verkehrsregeln ___.", o: ["hat … übertreten", "ist … übergetreten", "hat … übergetreten"], e: "Eine Regel verletzen: untrennbar, mit Akkusativobjekt, <b>hat … übertreten</b>." },
+    { s: "Die Milch ___ auf dem Herd ___, weil niemand aufgepasst hat.", o: ["ist … übergelaufen", "hat … überlaufen", "hat … übergelaufen"], e: "Über den Rand fließen: trennbar, <b>ist übergelaufen</b>." },
+    { s: "Bei dieser Nachricht ___ sie ein kalter Schauer ___.", o: ["hat … überlaufen", "ist … übergelaufen", "hat … übergelaufen"], e: "Ein Gefühl erfasst jemanden: untrennbar, <b>hat … überlaufen</b>." },
+    { s: "Mit dem gefährlichen Gerät ___ er immer äußerst vorsichtig ___.", o: ["ist … umgegangen", "hat … umgangen", "hat … umgegangen"], e: "Mit etwas umgehen: trennbar, Perfekt mit <b>sein</b>." },
+    { s: "Mit einem juristischen Trick ___ die Firma das Verbot geschickt ___.", o: ["hat … umgangen", "ist … umgegangen", "hat … umgegangen"], e: "Vermeiden, unterlaufen: untrennbar, <b>hat … umgangen</b>." },
+    { s: "Alle Bewerberinnen ___ ein mehrstufiges Auswahlverfahren ___.", o: ["haben … durchlaufen", "sind … durchgelaufen", "haben … durchgelaufen"], e: "Etwas absolvieren: untrennbar, mit Objekt, <b>haben … durchlaufen</b>." },
+    { s: "Nach dem Starkregen ___ das Wasser durch die undichte Decke ___.", o: ["ist … durchgelaufen", "hat … durchlaufen", "hat … durchgelaufen"], e: "Hindurchfließen: trennbar, Bewegung, <b>ist durchgelaufen</b>." }
+  ],
+  b3: [
+    { h: "Bedeutung: in groben Zügen darstellen", o: ["Die Studie umreißt die wichtigsten Ergebnisse in wenigen Sätzen.", "Die Studie reißt die wichtigsten Ergebnisse in wenigen Sätzen um.", "Die Studie reißt um die wichtigsten Ergebnisse in wenigen Sätzen."], e: "Abstrakte Bedeutung: untrennbares <b>umreißen</b>." },
+    { h: "Bedeutung: zu Boden reißen", o: ["Der Sturm reißt den alten Gartenzaun um.", "Der Sturm umreißt den alten Gartenzaun.", "Der Sturm reißt um den alten Gartenzaun."], e: "Wörtliche Bedeutung: trennbar, das Präfix steht am Satzende." },
+    { h: "Bedeutung: von allen Seiten einkreisen", o: ["Die Polizei umstellt das Gebäude.", "Die Polizei stellt das Gebäude um.", "Die Polizei stellt um das Gebäude."], e: "Einkreisen: untrennbares <b>umstellen</b>." },
+    { h: "Bedeutung: anders anordnen", o: ["Wir stellen die Möbel im Wohnzimmer um.", "Wir umstellen die Möbel im Wohnzimmer.", "Wir stellen um die Möbel im Wohnzimmer."], e: "Neu anordnen: trennbares <b>umstellen</b>." },
+    { h: "Bedeutung: finanziell versorgen", o: ["Er unterhält seine Familie seit Jahren allein.", "Er hält seine Familie seit Jahren allein unter.", "Er hält unter seine Familie seit Jahren allein."], e: "Versorgen: untrennbares <b>unterhalten</b>." },
+    { h: "Bedeutung: etwas darunterhalten", o: ["Sie hält eine Schüssel unter, damit nichts auf den Boden tropft.", "Sie unterhält eine Schüssel, damit nichts auf den Boden tropft.", "Sie hält unter eine Schüssel, damit nichts auf den Boden tropft."], e: "Wörtlich räumlich: trennbares <b>unterhalten</b>, „unter“ am Satzende." },
+    { h: "Bedeutung: sich einer Behandlung aussetzen", o: ["Der Patient unterzieht sich einer gründlichen Untersuchung.", "Der Patient zieht sich einer gründlichen Untersuchung unter.", "Der Patient zieht sich unter einer gründlichen Untersuchung."], e: "Übertragene Bedeutung: untrennbares <b>sich unterziehen</b> mit Dativ." },
+    { h: "Bedeutung: ein Kleidungsstück darunter anziehen", o: ["Bei dieser Kälte ziehe ich noch einen Pullover unter.", "Bei dieser Kälte unterziehe ich noch einen Pullover.", "Bei dieser Kälte ziehe ich unter noch einen Pullover."], e: "Wörtlich: trennbares <b>unterziehen</b>." },
+    { h: "Bedeutung: Steuern bewusst nicht zahlen", o: ["Der Unternehmer hinterzieht seit Jahren Steuern.", "Der Unternehmer zieht seit Jahren Steuern hinter.", "Der Unternehmer zieht hinter seit Jahren Steuern."], e: "<b>hinterziehen</b> ist in der Standardsprache untrennbar." },
+    { h: "Bedeutung: einer Aussage entgegentreten", o: ["Die Ministerin widerspricht dem Vorwurf entschieden.", "Die Ministerin spricht dem Vorwurf entschieden wider.", "Die Ministerin wiederspricht dem Vorwurf entschieden."], e: "<b>widersprechen</b> ist untrennbar und wird mit „i“ geschrieben (wider = gegen, wieder = noch einmal)." },
+    { h: "Bedeutung: den Tank ganz füllen", o: ["Vor der langen Fahrt tanken wir noch voll.", "Vor der langen Fahrt volltanken wir noch.", "Vor der langen Fahrt tanken voll wir noch."], e: "<b>volltanken</b> ist trennbar." },
+    { h: "Bedeutung: zu Ende bringen", o: ["Der Komponist vollendet seine Sinfonie kurz vor seinem Tod.", "Der Komponist endet seine Sinfonie kurz vor seinem Tod voll.", "Der Komponist voll endet seine Sinfonie kurz vor seinem Tod."], e: "<b>vollenden</b> ist untrennbar." },
+    { h: "Bedeutung: genau schildern", o: ["Der Zeuge gibt den Ablauf des Unfalls genau wieder.", "Der Zeuge wiedergibt den Ablauf des Unfalls genau.", "Der Zeuge widergibt den Ablauf des Unfalls genau."], e: "<b>wiedergeben</b> ist trennbar, auch in der Bedeutung „schildern“." }
+  ],
+  b4: [
+    { s: "Auf dieser kurvigen Strecke ist es verboten, andere Fahrzeuge ___.", o: ["zu überholen", "überzuholen", "überholen zu"], e: "Untrennbar: „zu“ steht vor dem Verb." },
+    { s: "Mit einer Gesetzeslücke gelang es ihr, die Vorschrift ___.", o: ["zu umgehen", "umzugehen", "umgehen zu"], e: "Vermeiden: untrennbar, also <b>zu umgehen</b>." },
+    { s: "Er musste erst lernen, mit Kritik gelassener ___.", o: ["umzugehen", "zu umgehen", "umgehen zu"], e: "Mit etwas umgehen: trennbar, „zu“ in der Mitte." },
+    { s: "Wir haben beschlossen, das alte Bauernhaus komplett ___.", o: ["umzubauen", "zu umbauen", "umbauen zu"], e: "Renovieren, verändern: trennbar, also <b>umzubauen</b>." },
+    { s: "Der Stürmer versuchte vergeblich, die gegnerische Abwehr ___.", o: ["zu durchbrechen", "durchzubrechen", "durchbrechen zu"], e: "Überwinden, mit Objekt: untrennbar, also <b>zu durchbrechen</b>." },
+    { s: "Vergiss nicht, vor der Abfahrt noch ___.", o: ["vollzutanken", "zu volltanken", "volltanken zu"], e: "Trennbar: „zu“ zwischen Präfix und Stamm." },
+    { s: "Es ist nicht leicht, einen so komplexen Text angemessen ins Deutsche ___.", o: ["zu übersetzen", "überzusetzen", "übersetzen zu"], e: "Sprachlich übertragen: untrennbar." },
+    { s: "Der Fährmann war bereit, die Reisenden ans andere Ufer ___.", o: ["überzusetzen", "zu übersetzen", "übersetzen zu"], e: "Mit dem Boot hinüberbringen: trennbar." },
+    { s: "Der Lehrer bat sie, den letzten Satz noch einmal ___.", o: ["zu wiederholen", "wiederzuholen", "wiederholen zu"], e: "Noch einmal sagen: <b>wiederholen</b> ist hier untrennbar." },
+    { s: "Es ist schwierig, den Inhalt des Vortrags in wenigen Sätzen ___.", o: ["wiederzugeben", "zu wiedergeben", "zu widergeben"], e: "<b>wiedergeben</b> ist trennbar." },
+    { s: "Sie freute sich sehr, ihre Schulfreundin nach so vielen Jahren ___.", o: ["wiederzusehen", "zu wiedersehen", "zu widersehen"], e: "<b>wiedersehen</b> ist trennbar." },
+    { s: "Dem Gutachter gelang es, die Behauptung der Gegenseite überzeugend ___.", o: ["zu widerlegen", "widerzulegen", "wiederzulegen"], e: "<b>widerlegen</b> (als falsch nachweisen) ist untrennbar." },
+    { s: "Nach dem Umzug fiel es ihm schwer, sich der neuen Hausordnung ___.", o: ["unterzuordnen", "zu unterordnen", "unterordnen zu"], e: "<b>sich unterordnen</b> ist trennbar." }
+  ],
+  b5: [
+    { s: "Ich bin sicher, dass der Zeuge die Ereignisse korrekt ___. (Präsens, Nebensatz)", o: ["wiedergibt", "gibt wieder", "widergibt"], e: "Im Nebensatz steht das trennbare Verb als ein Wort am Ende." },
+    { s: "Nach zwanzig Jahren hatte ich meinen ehemaligen Lehrer sofort ___. (Plusquamperfekt)", o: ["wiedererkannt", "wiedererkennt", "widererkannt"], e: "<b>wiedererkennen</b>: trennbar, aber „er-“ verhindert ein zusätzliches ge-: <b>wiedererkannt</b>." },
+    { s: "Obwohl die Kommission die Daten mehrfach ___, blieben Zweifel. (Plusquamperfekt, Nebensatz)", o: ["überprüft hatte", "übergeprüft hatte", "hatte überprüft"], e: "<b>überprüfen</b> ist untrennbar; im Nebensatz steht das Hilfsverb am Ende." },
+    { s: "Der Vertrag wurde gestern von beiden Seiten ___. (Passiv Präteritum)", o: ["unterschrieben", "untergeschrieben", "unterschrieb"], e: "<b>unterschreiben</b> ist untrennbar." },
+    { s: "Das Fischerboot ist in dem schweren Sturm ___. (Perfekt)", o: ["untergegangen", "untergangen", "unterging"], e: "<b>untergehen</b> ist trennbar." },
+    { s: "Der Vortrag hat unsere Erwartungen bei Weitem ___. (Perfekt)", o: ["übertroffen", "übergetroffen", "übertreffen"], e: "<b>übertreffen</b> ist untrennbar." },
+    { s: "Nachdem die Firma ihre Produktion auf Elektroautos ___, stiegen die Gewinne. (Plusquamperfekt)", o: ["umgestellt hatte", "umstellt hatte", "hatte umgestellt"], e: "Verändern, wechseln: trennbares <b>umstellen</b>." },
+    { s: "Seit dem Erbstreit haben sich die Geschwister völlig ___. (Perfekt)", o: ["überworfen", "übergeworfen", "überwirft"], e: "Sich zerstreiten: untrennbares <b>sich überwerfen</b>." },
+    { s: "Gegen die Abendkälte hatte sie sich rasch einen Mantel ___. (Plusquamperfekt)", o: ["übergeworfen", "überworfen", "überwarf"], e: "Locker umhängen: trennbar, also <b>übergeworfen</b>." },
+    { s: "Der Täter wurde schließlich durch DNA-Spuren ___. (Passiv Präteritum)", o: ["überführt", "übergeführt", "überführte"], e: "Die Schuld nachweisen: nur untrennbar, also <b>überführt</b>." },
+    { s: "Der Kölner Dom wurde erst im 19. Jahrhundert ___. (Passiv Präteritum)", o: ["vollendet", "vollgeendet", "vollendete"], e: "<b>vollenden</b> ist untrennbar." },
+    { s: "Ich weiß nicht, ob die Fähre uns heute noch ___. (Präsens, Nebensatz)", o: ["übersetzt", "setzt über", "überzusetzen"], e: "Im Nebensatz steht auch das trennbare Verb als ein Wort am Ende: <b>übersetzt</b>." },
+    { s: "Weil der Redner seine Redezeit schon um zwanzig Minuten ___, wurde der letzte Punkt vertagt. (Präsens, Nebensatz)", o: ["überzieht", "zieht über", "übergezogen"], e: "Die Zeit überschreiten: untrennbares <b>überziehen</b>." }
+  ],
+  b6: [
+    { s: "Die Ministerin hat den Kritiker übergangen.", o: ["Sie hat ihn bewusst nicht berücksichtigt.", "Sie ist zu ihm gewechselt.", "Sie hat ihn beim Gehen überholt."], e: "Untrennbares <b>übergehen</b> heißt „nicht beachten“." },
+    { s: "Der Redner ist zum nächsten Thema übergegangen.", o: ["Er hat begonnen, über das nächste Thema zu sprechen.", "Er hat das nächste Thema ausgelassen.", "Er hat das nächste Thema kritisiert."], e: "Trennbares <b>übergehen</b> heißt „zu etwas wechseln“." },
+    { s: "Der Spion ist zum Gegner übergelaufen.", o: ["Er hat die Seiten gewechselt.", "Er hat den Gegner zahlenmäßig übertroffen.", "Ihm ist vor dem Gegner ein Schauer über den Rücken gelaufen."], e: "Trennbares <b>überlaufen</b> kann auch „die Seite wechseln“ bedeuten." },
+    { s: "Die Polizei hat das Haus umstellt.", o: ["Sie hat das Haus von allen Seiten eingekreist.", "Sie hat im Haus die Möbel neu angeordnet.", "Sie hat das Haus an einen anderen Ort gebracht."], e: "Untrennbares <b>umstellen</b> heißt „einkreisen“." },
+    { s: "Im Glossar wird der Begriff kurz umschrieben.", o: ["Der Begriff wird mit anderen Worten erklärt.", "Der Begriff wird neu geschrieben.", "Der Begriff wird durchgestrichen."], e: "Untrennbares <b>umschreiben</b> heißt „paraphrasieren“." },
+    { s: "Sie hat ihm böse Absicht unterstellt.", o: ["Sie hat behauptet, er habe absichtlich geschadet.", "Sie hat ihn vor bösen Absichten geschützt.", "Sie hat ihn einer Vorgesetzten zugeordnet."], e: "Untrennbares <b>unterstellen</b> heißt „etwas Negatives annehmen und behaupten“." },
+    { s: "Die Firma hat die Krise geschickt umschifft.", o: ["Sie hat die Krise geschickt vermieden.", "Sie ist an der Krise gescheitert.", "Sie hat ihre Waren auf ein anderes Schiff geladen."], e: "Untrennbares <b>umschiffen</b> (übertragen) heißt „vermeiden“." },
+    { s: "Der Bus hat den Radfahrer umgefahren.", o: ["Er hat ihn angefahren, sodass er stürzte.", "Er ist vorsichtig um ihn herumgefahren.", "Er hat ihn ein Stück mitgenommen."], e: "Trennbares <b>umfahren</b> heißt „niederfahren“." },
+    { s: "Der Bus hat die Unfallstelle umfahren.", o: ["Er ist um die Unfallstelle herumgefahren.", "Er hat die Unfallstelle niedergefahren.", "Er ist direkt durch die Unfallstelle gefahren."], e: "Untrennbares <b>umfahren</b> heißt „um etwas herumfahren“." },
+    { s: "Sein Geschäftspartner hat ihn hintergangen.", o: ["Er hat ihn betrogen.", "Er ist hinter ihm hergegangen.", "Er hat ihn im Stich gelassen, weil er krank war."], e: "<b>hintergehen</b> bedeutet „betrügen, täuschen“." },
+    { s: "Der Kandidat hat seine Aussage widerrufen.", o: ["Er hat seine Aussage offiziell zurückgenommen.", "Er hat seine Aussage noch einmal laut wiederholt.", "Er hat jemanden angerufen, um die Aussage zu bestätigen."], e: "<b>widerrufen</b> (untrennbar) heißt „zurücknehmen“." },
+    { s: "Ihre Rede war von tiefer Überzeugung durchdrungen.", o: ["Die Rede war ganz von Überzeugung erfüllt.", "Die Überzeugung ist erst spät bis zum Publikum gelangt.", "Die Überzeugung hat die Rede unterbrochen."], e: "Untrennbares <b>durchdringen</b> heißt „ganz erfüllen“." }
+  ]
+};
+
+let state = {};
+
+function shuffle(a) {
+  const arr = a.slice();
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function render() {
+  state = {};
+  let total = 0;
+  for (const [id, items] of Object.entries(data)) {
+    const box = document.getElementById(id);
+    box.innerHTML = "";
+    items.forEach((it, idx) => {
+      total++;
+      const key = id + "-" + idx;
+      state[key] = null;
+      const item = document.createElement("div");
+      item.className = "item";
+      const q = document.createElement("div");
+      q.className = "q";
+      if (it.h) {
+        q.innerHTML = '<span class="num">' + (idx + 1) + '.</span>' + it.h;
+      } else {
+        q.innerHTML = '<span class="num">' + (idx + 1) + '.</span>' + it.s;
+      }
+      item.appendChild(q);
+      const opts = document.createElement("div");
+      opts.className = "opts";
+      const correct = it.o[0];
+      shuffle(it.o).forEach(text => {
+        const b = document.createElement("button");
+        b.className = "opt";
+        b.textContent = text;
+        b.dataset.correct = text === correct ? "1" : "0";
+        b.onclick = () => answer(key, item, b, it, id);
+        opts.appendChild(b);
+      });
+      item.appendChild(opts);
+      const fb = document.createElement("div");
+      fb.className = "fb";
+      fb.innerHTML = "Lösung: <b>" + correct + "</b>. " + it.e;
+      item.appendChild(fb);
+      box.appendChild(item);
+    });
+    const sc = document.createElement("div");
+    sc.className = "block-score";
+    sc.id = id + "-score";
+    box.appendChild(sc);
+  }
+  document.getElementById("all").textContent = total;
+  update();
+}
+
+function answer(key, item, btn, it, id) {
+  if (state[key] !== null) return;
+  const ok = btn.dataset.correct === "1";
+  state[key] = ok;
+  item.querySelectorAll(".opt").forEach(b => {
+    b.disabled = true;
+    if (b.dataset.correct === "1") b.classList.add("right");
+  });
+  if (!ok) btn.classList.add("wrong");
+  item.querySelector(".fb").classList.add("show");
+  update(id);
+}
+
+function update(id) {
+  const vals = Object.values(state);
+  document.getElementById("done").textContent = vals.filter(v => v !== null).length;
+  document.getElementById("right").textContent = vals.filter(v => v === true).length;
+  for (const bid of Object.keys(data)) {
+    const keys = Object.keys(state).filter(k => k.startsWith(bid + "-"));
+    const answered = keys.filter(k => state[k] !== null).length;
+    if (answered === keys.length && keys.length) {
+      const r = keys.filter(k => state[k]).length;
+      document.getElementById(bid + "-score").textContent = r + " von " + keys.length + " richtig";
+    }
+  }
+}
+
+function showAll() {
+  document.querySelectorAll(".item").forEach(item => {
+    item.querySelectorAll(".opt").forEach(b => {
+      b.disabled = true;
+      if (b.dataset.correct === "1") b.classList.add("right");
+    });
+    item.querySelector(".fb").classList.add("show");
+  });
+  document.body.classList.add("with-key");
+}
+
+function resetAll() {
+  document.body.classList.remove("with-key");
+  render();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+render();
+</script>
+</body>
+</html>
