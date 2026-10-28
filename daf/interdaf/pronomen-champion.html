@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pronomen-Champions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: Sätze links untereinander, Pronomen-Tabelle rechts immer im Vordergrund (Handy: unten fixiert) */
+:root{
+  --sky1:#121a2e; --sky2:#223252; --sky3:#3d4d70;
+  --card:#fbfaf7; --line:#e6e2d8;
+  --ink:#151515; --muted:#5a5d68;
+  --nom:#151515; --nom-soft:#efeeea;
+  --akk:#14707a; --akk-soft:#e2f0f0;
+  --dat:#76508c; --dat-soft:#efe7f3;
+  --rose:#cf5679; --rose-soft:#fbe7ed;
+  --sun:#f0c548; --gold:#b48528; --gold-soft:#fbf0d3;
+  --font:"Lexend", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;color:var(--ink);font-family:var(--font);font-size:18px;line-height:1.55;
+  background:
+    radial-gradient(120% 60% at 50% 115%, rgba(224,148,132,.30), transparent 60%),
+    radial-gradient(80% 50% at 85% 0%, rgba(120,140,190,.25), transparent 70%),
+    linear-gradient(180deg,var(--sky1) 0%,var(--sky2) 50%,var(--sky3) 100%) fixed;
+  background-color:var(--sky2);background-attachment:fixed}
+#bubbles{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:24px;align-items:start}
+.main{min-width:0;display:flex;flex-direction:column;gap:12px}
+
+/* Kopf */
+.head{background:var(--card);border-radius:26px;padding:26px 28px 22px;box-shadow:0 20px 50px rgba(5,10,30,.35)}
+.eyebrow{font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.head h1{font-weight:700;font-size:clamp(30px,4.4vw,44px);line-height:1.05;letter-spacing:-.02em;margin:6px 0 10px}
+.head h1 em{font-style:normal;color:var(--rose)}
+.head p{margin:0;color:var(--muted);max-width:60ch;font-size:17px}
+.progress{margin-top:18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.bar{flex:1;min-width:160px;height:10px;border-radius:99px;background:#ece8dd;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--sun),var(--gold));border-radius:99px;transition:width .5s}
+.count{font-size:15px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--muted)}
+.count b{color:var(--ink);font-weight:700}
+.reset{font:inherit;font-size:14px;font-weight:500;background:transparent;border:1.5px solid var(--line);border-radius:99px;padding:6px 14px;cursor:pointer;color:var(--ink)}
+.reset.armed{background:var(--rose-soft);border-color:var(--rose)}
+.chips{display:flex;gap:8px;margin-top:18px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
+.chip{flex:none;font:inherit;font-size:15px;font-weight:500;border:1.5px solid var(--line);background:#fff;color:var(--ink);border-radius:99px;padding:8px 16px;cursor:pointer;transition:background .15s,border-color .15s}
+.chip:hover{border-color:#cfc8b6}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.chip span{opacity:.6;margin-left:4px;font-variant-numeric:tabular-nums}
+
+/* Satzkarten */
+.list{display:flex;flex-direction:column;gap:10px}
+.card{background:var(--card);border-radius:20px;box-shadow:0 6px 20px rgba(5,10,30,.22);overflow:hidden;transition:box-shadow .2s}
+.row{all:unset;box-sizing:border-box;display:flex;gap:14px;align-items:flex-start;width:100%;padding:16px 20px;cursor:pointer}
+.row:focus-visible{outline:3px solid var(--sun);outline-offset:-3px;border-radius:20px}
+.num{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#f0ede4;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:-2px}
+.card.ok .num{background:var(--gold-soft);color:var(--gold)}
+.card.bad .num{background:var(--rose-soft);color:var(--rose)}
+.orig{flex:1;min-width:0;font-size:20px;font-weight:400}
+.state{flex:none;font-size:13px;font-weight:600;padding:4px 10px;border-radius:99px;margin-top:2px}
+.card.ok .state{background:var(--gold-soft);color:#8a6418}
+.card.bad .state{background:var(--rose-soft);color:#a83558}
+.np{font-weight:600;text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:5px}
+.np.N{text-decoration-color:var(--nom)}
+.np.A{color:var(--akk);text-decoration-color:var(--akk)}
+.np.D{color:var(--dat);text-decoration-color:var(--dat)}
+
+.review{padding:0 20px 16px 70px;font-size:18px;display:flex;flex-wrap:wrap;column-gap:.32em;row-gap:6px;align-items:baseline;color:var(--muted)}
+.review .lab{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-right:6px}
+.rw{font-weight:600;color:var(--ink)}
+.rw.A{color:var(--akk)} .rw.D{color:var(--dat)}
+.rw.wrong{background:var(--rose-soft);border-radius:8px;padding:0 6px;box-shadow:inset 0 -2px 0 var(--rose)}
+.rw.wrong s{color:var(--rose);font-weight:500;font-size:.85em;margin-right:5px}
+
+.card.active{box-shadow:0 0 0 3px var(--sun),0 24px 50px rgba(5,10,30,.45)}
+.card.active .row{cursor:default;padding-top:22px}
+.card.active .orig{font-size:26px;line-height:1.5}
+.card.active .num{background:var(--sun);color:var(--ink)}
+.work{padding:6px 24px 24px 70px}
+.label{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:10px}
+.sol{font-size:26px;display:flex;flex-wrap:wrap;align-items:center;column-gap:.35em;row-gap:10px;padding-top:12px}
+.slot{display:inline-flex;align-items:center;justify-content:center;min-width:86px;height:54px;padding:0 16px;border:2px dashed #b9b5aa;border-radius:14px;background:#fff;font:inherit;font-size:25px;font-weight:600;cursor:pointer;position:relative;color:var(--ink)}
+.slot.next{border-color:var(--gold);border-style:solid;background:var(--gold-soft);animation:pulse 1.4s ease-in-out infinite}
+.slot.filled{border-style:solid;border-color:var(--line)}
+.slot.N{color:var(--nom)} .slot.A{color:var(--akk)} .slot.D{color:var(--dat)}
+.slot.right{border-style:solid;border-color:var(--gold);background:var(--gold-soft)}
+.slot.fixed{border-style:solid;border-color:var(--rose);background:var(--rose-soft)}
+.slot .was{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:15px;line-height:1;color:var(--rose);text-decoration:line-through;white-space:nowrap;font-weight:600}
+.slot.whirl{animation:whirl .9s cubic-bezier(.5,0,.3,1)}
+@keyframes whirl{0%{transform:rotate(0) scale(1);filter:blur(0)}45%{transform:rotate(380deg) scale(.55);filter:blur(2px)}100%{transform:rotate(720deg) scale(1);filter:blur(0)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(180,133,40,.4)}50%{box-shadow:0 0 0 7px rgba(180,133,40,0)}}
+.ctrl{display:flex;align-items:center;gap:14px;margin-top:22px;flex-wrap:wrap}
+.check{width:60px;height:60px;border-radius:50%;border:0;background:var(--rose);color:#fff;font-size:30px;font-weight:700;cursor:pointer;box-shadow:0 8px 18px rgba(207,86,121,.35);display:grid;place-items:center;transition:transform .1s}
+.check:active{transform:scale(.94)}
+.check.go{background:var(--gold);box-shadow:0 8px 18px rgba(180,133,40,.35)}
+.clear{font:inherit;font-size:15px;font-weight:500;background:#fff;border:1.5px solid var(--line);border-radius:99px;padding:8px 16px;cursor:pointer;color:var(--ink)}
+.msg{font-weight:600;font-size:17px;flex:1;min-width:200px}
+.msg.good{color:#8a6418} .msg.bad{color:#a83558}
+.timer{flex-basis:100%;height:5px;border-radius:99px;background:#ece8dd;overflow:hidden}
+.timer i{display:block;height:100%;width:100%;background:var(--gold);transform-origin:left}
+.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.done{background:var(--card);border-radius:20px;padding:22px 24px;text-align:center;font-size:19px;font-weight:600;box-shadow:0 6px 20px rgba(5,10,30,.22)}
+.done button{margin-top:12px}
+:is(.check,.clear,.cell,.chip,.reset):focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+
+/* Pronomen-Tabelle */
+.side{position:sticky;top:max(20px,env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:12px}
+.table{background:var(--card);border-radius:26px;padding:20px;box-shadow:0 24px 60px rgba(5,10,30,.5)}
+.table h2{font-size:15px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.colh{font-size:13px;font-weight:600;text-align:center;padding:7px 2px;border-radius:10px}
+.colh.N{background:var(--nom-soft);color:var(--nom)} .colh.A{background:var(--akk-soft);color:var(--akk)} .colh.D{background:var(--dat-soft);color:var(--dat)}
+.cell{font:inherit;font-weight:600;font-size:20px;height:46px;border-radius:12px;background:#fff;cursor:pointer;border:1.5px solid var(--line);transition:transform .08s,background .15s,border-color .15s}
+.cell.N{color:var(--nom)} .cell.A{color:var(--akk)} .cell.D{color:var(--dat)}
+.cell.N:hover{background:var(--nom-soft)} .cell.A:hover{background:var(--akk-soft);border-color:var(--akk)} .cell.D:hover{background:var(--dat-soft);border-color:var(--dat)}
+.cell:active{transform:scale(.93)}
+.cell.formal{font-size:17px}
+.sep{grid-column:1/-1;height:1px;background:var(--line);margin:3px 0}
+.rule{background:var(--card);border-radius:20px;padding:16px 18px;font-size:16px;box-shadow:0 10px 30px rgba(5,10,30,.35)}
+.rule b{font-weight:600}
+.rule .a{color:var(--akk);font-weight:600} .rule .d{color:var(--dat);font-weight:600}
+
+@media (max-width:880px){
+  .wrap{grid-template-columns:minmax(0,1fr);padding-bottom:210px}
+  .side{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:5;gap:0}
+  .rule{display:none}
+  .table{border-radius:22px 22px 0 0;padding:10px max(10px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px))}
+  .table h2{display:none}
+  .gridwrap{overflow-x:auto}
+  .grid{grid-template-columns:44px repeat(9,minmax(48px,1fr));min-width:520px;gap:5px}
+  .grid .sep{display:none}
+  .colh{font-size:11px;padding:4px 2px;display:grid;place-items:center}
+  .cell{font-size:17px;height:40px}
+  .cell.formal{font-size:14px}
+  .head{padding:22px 20px 18px}
+  .orig{font-size:18px}
+  .card.active .orig{font-size:21px}
+  .review{padding-left:20px}
+  .work{padding:4px 18px 20px}
+  .sol{font-size:21px}
+  .slot{min-width:68px;height:46px;font-size:21px;padding:0 12px}
+}
+@media (prefers-reduced-motion:reduce){.slot.next,.slot.whirl,.shake{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="bubbles" aria-hidden="true"></canvas>
+<div class="wrap">
+  <main class="main">
+    <header class="head">
+      <div class="eyebrow">Deutsch A2 · B1</div>
+      <h1>Pronomen-<em>Champions</em></h1>
+      <p>Ersetze die unterstrichenen Wörter durch Pronomen. Klicke die Pronomen in der Tabelle in der richtigen Reihenfolge an und prüfe mit ✓.</p>
+      <div class="progress">
+        <div class="bar"><i id="pbar"></i></div>
+        <span class="count"><b id="sDone">0</b> / 200 bearbeitet · <b id="sOk">0</b> richtig</span>
+        <button class="reset" id="reset" type="button">Fortschritt löschen</button>
+      </div>
+      <div class="chips" id="chips"></div>
+    </header>
+    <div class="list" id="list"></div>
+  </main>
+
+  <aside class="side">
+    <div class="table">
+      <h2>Pronomen</h2>
+      <div class="gridwrap"><div class="grid" id="grid"></div></div>
+    </div>
+    <div class="rule">
+      <b>Merke:</b> Pronomen stehen vor Nomen.<br>
+      Zwei Pronomen? <span class="a">Akkusativ</span> vor <span class="d">Dativ</span>.<br>
+      Das Mädchen gibt dem Hund das Futter.<br>→ Es gibt <span class="a">es</span> <span class="d">ihm</span>.
+    </div>
+  </aside>
+</div>
+
+<script type="text/plain" id="data">
+N | {N:Der Lehrer} erklärt heute die Grammatik. | [N:er] erklärt heute die Grammatik.
+N | {N:Meine Schwester} wohnt in Wien. | [N:sie] wohnt in Wien.
+N | {N:Das Baby} schläft im Kinderwagen. | [N:es] schläft im Kinderwagen.
+N | {N:Die Kinder} spielen im Garten. | [N:sie] spielen im Garten.
+N | {N:Mein Bruder und ich} fahren nach Salzburg. | [N:wir] fahren nach Salzburg.
+N | {N:Du und deine Freundin} kommt morgen, oder? | [N:ihr] kommt morgen, oder?
+N | {N:Der Zug} kommt pünktlich an. | [N:er] kommt pünktlich an.
+N | {N:Die Suppe} ist zu heiß. | [N:sie] ist zu heiß.
+N | {N:Das Fenster} ist offen. | [N:es] ist offen.
+N | {N:Die Nachbarn} feiern eine Party. | [N:sie] feiern eine Party.
+N | Heute kocht {N:mein Vater}. | Heute kocht [N:er].
+N | Morgen besucht {N:die Oma} uns. | Morgen besucht [N:sie] uns.
+N | {N:Der Hund} bellt laut. | [N:er] bellt laut.
+N | {N:Die Katze} liegt auf dem Sofa. | [N:sie] liegt auf dem Sofa.
+N | {N:Das Auto} steht vor dem Haus. | [N:es] steht vor dem Haus.
+N | {N:Anna und Tom} lernen zusammen Deutsch. | [N:sie] lernen zusammen Deutsch.
+N | {N:Paul und ich} gehen ins Kino. | [N:wir] gehen ins Kino.
+N | {N:Du und Lisa} habt viel Zeit. | [N:ihr] habt viel Zeit.
+N | Am Abend kommt {N:der Bus} nicht mehr. | Am Abend kommt [N:er] nicht mehr.
+N | {N:Die Blumen} sind sehr schön. | [N:sie] sind sehr schön.
+N | {N:Das Wetter} ist heute schlecht. | [N:es] ist heute schlecht.
+N | {N:Mein Handy} funktioniert nicht. | [N:es] funktioniert nicht.
+N | {N:Die Lampe} ist kaputt. | [N:sie] ist kaputt.
+N | {N:Der Kaffee} schmeckt gut. | [N:er] schmeckt gut.
+N | {N:Die Ärztin} hat heute keine Zeit. | [N:sie] hat heute keine Zeit.
+A | Ich kaufe {A:den Mantel}. | Ich kaufe [A:ihn].
+A | Wir besuchen {A:unsere Tante}. | Wir besuchen [A:sie].
+A | Er liest {A:das Buch}. | Er liest [A:es].
+A | Sie ruft {A:ihre Eltern} an. | Sie ruft [A:sie] an.
+A | Ich sehe {A:den Mann} jeden Tag. | Ich sehe [A:ihn] jeden Tag.
+A | Kennst du {A:die neue Kollegin}? | Kennst du [A:sie]?
+A | Wir trinken {A:den Tee}. | Wir trinken [A:ihn].
+A | {N:Der Kellner} bringt {A:die Rechnung}. | [N:er] bringt [A:sie].
+A | {N:Die Mutter} weckt {A:das Kind}. | [N:sie] weckt [A:es].
+A | {N:Mein Freund} repariert {A:das Fahrrad}. | [N:er] repariert [A:es].
+A | {N:Die Kinder} essen {A:die Äpfel}. | [N:sie] essen [A:sie].
+A | Ich liebe {A:dich und deinen Bruder}. | Ich liebe [A:euch].
+A | {N:Der Chef} fragt {A:meine Kollegin und mich}. | [N:er] fragt [A:uns].
+A | Ich finde {A:den Film} langweilig. | Ich finde [A:ihn] langweilig.
+A | Wir brauchen {A:die Tickets} morgen. | Wir brauchen [A:sie] morgen.
+A | Hast du {A:den Schlüssel}? | Hast du [A:ihn]?
+A | {N:Die Lehrerin} lobt {A:den Schüler}. | [N:sie] lobt [A:ihn].
+A | {N:Der Arzt} untersucht {A:die Patientin}. | [N:er] untersucht [A:sie].
+A | Ich putze {A:das Bad}. | Ich putze [A:es].
+A | {N:Der Vater} holt {A:die Kinder} ab. | [N:er] holt [A:sie] ab.
+A | Sie öffnet {A:die Tür}. | Sie öffnet [A:sie].
+A | {N:Mein Opa} liest {A:die Zeitung}. | [N:er] liest [A:sie].
+A | Ich nehme {A:den Bus}. | Ich nehme [A:ihn].
+A | {N:Die Frau} sucht {A:ihren Hund}. | [N:sie] sucht [A:ihn].
+A | Wir besuchen {A:dich und Maria} am Sonntag. | Wir besuchen [A:euch] am Sonntag.
+A | {N:Die Oma} umarmt {A:den Enkel}. | [N:sie] umarmt [A:ihn].
+A | Er bestellt {A:die Pizza}. | Er bestellt [A:sie].
+A | {N:Das Mädchen} malt {A:das Pferd}. | [N:es] malt [A:es].
+A | Ich vermisse {A:meine Freunde}. | Ich vermisse [A:sie].
+A | {N:Der Polizist} sieht {A:meinen Bruder und mich}. | [N:er] sieht [A:uns].
+D | Ich helfe {D:meiner Mutter}. | Ich helfe [D:ihr].
+D | Wir danken {D:dem Lehrer}. | Wir danken [D:ihm].
+D | Das Kleid gefällt {D:meiner Schwester}. | Das Kleid gefällt [D:ihr].
+D | Das Auto gehört {D:meinem Vater}. | Das Auto gehört [D:ihm].
+D | Er antwortet {D:dem Kunden}. | Er antwortet [D:ihm].
+D | Wir gratulieren {D:dem Kind} zum Geburtstag. | Wir gratulieren [D:ihm] zum Geburtstag.
+D | Die Suppe schmeckt {D:den Kindern}. | Die Suppe schmeckt [D:ihnen].
+D | Die Hose passt {D:meinem Bruder} nicht. | Die Hose passt [D:ihm] nicht.
+D | {N:Die Schüler} hören {D:der Lehrerin} zu. | [N:sie] hören [D:ihr] zu.
+D | {N:Der Hund} folgt {D:dem Mann}. | [N:er] folgt [D:ihm].
+D | {N:Die Oma} hilft {D:den Enkeln}. | [N:sie] hilft [D:ihnen].
+D | Ich glaube {D:dem Politiker} nicht. | Ich glaube [D:ihm] nicht.
+D | {N:Der Film} gefällt {D:meinem Freund und mir}. | [N:er] gefällt [D:uns].
+D | Wie geht es {D:deiner Schwester}? | Wie geht es [D:ihr]?
+D | Wie geht es {D:deinen Eltern}? | Wie geht es [D:ihnen]?
+D | {N:Das Handy} gehört {D:dem Mädchen}. | [N:es] gehört [D:ihm].
+D | Gefallen {N:die Schuhe} {D:dir und deiner Freundin}? | Gefallen [N:sie] [D:euch]?
+D | Ich vertraue {D:meinem Arzt}. | Ich vertraue [D:ihm].
+D | {N:Der Kellner} dankt {D:den Gästen}. | [N:er] dankt [D:ihnen].
+D | Wir begegnen {D:der Nachbarin} oft. | Wir begegnen [D:ihr] oft.
+D | {N:Die Torte} schmeckt {D:dem Opa}. | [N:sie] schmeckt [D:ihm].
+D | Ich schreibe {D:meiner Freundin}. | Ich schreibe [D:ihr].
+D | {N:Der Chef} gratuliert {D:der Kollegin}. | [N:er] gratuliert [D:ihr].
+D | {N:Das Buch} gehört {D:Peter und mir}. | [N:es] gehört [D:uns].
+D | Ich helfe {D:dir und deinem Bruder} gern. | Ich helfe [D:euch] gern.
+D | {N:Die Arbeit} macht {D:meinem Vater} Spaß. | [N:sie] macht [D:ihm] Spaß.
+D | Es tut {D:der Frau} leid. | Es tut [D:ihr] leid.
+D | {N:Der Mantel} ist {D:dem Mann} zu groß. | [N:er] ist [D:ihm] zu groß.
+D | {N:Das Kind} winkt {D:der Mutter}. | [N:es] winkt [D:ihr].
+D | {N:Die Studenten} widersprechen {D:dem Professor}. | [N:sie] widersprechen [D:ihm].
+AD | {N:Das Mädchen} gibt {D:dem Hund} {A:das Futter}. | [N:es] gibt [A:es] [D:ihm].
+AD | {N:Der Vater} kauft {D:dem Sohn} {A:den Ball}. | [N:er] kauft [A:ihn] [D:ihm].
+AD | Ich schenke {D:meiner Mutter} {A:die Blumen}. | Ich schenke [A:sie] [D:ihr].
+AD | {N:Die Lehrerin} erklärt {D:den Schülern} {A:die Regel}. | [N:sie] erklärt [A:sie] [D:ihnen].
+AD | Wir zeigen {D:dem Gast} {A:die Wohnung}. | Wir zeigen [A:sie] [D:ihm].
+AD | {N:Der Kellner} bringt {D:der Frau} {A:den Kaffee}. | [N:er] bringt [A:ihn] [D:ihr].
+AD | Ich schicke {D:meinem Bruder} {A:das Paket}. | Ich schicke [A:es] [D:ihm].
+AD | {N:Die Oma} erzählt {D:den Kindern} {A:die Geschichte}. | [N:sie] erzählt [A:sie] [D:ihnen].
+AD | Er leiht {D:seiner Freundin} {A:das Auto}. | Er leiht [A:es] [D:ihr].
+AD | {N:Der Verkäufer} empfiehlt {D:dem Kunden} {A:den Laptop}. | [N:er] empfiehlt [A:ihn] [D:ihm].
+AD | Ich gebe dir {A:den Schlüssel}. | Ich gebe [A:ihn] dir.
+AD | Kannst du mir {A:das Salz} geben? | Kannst du [A:es] mir geben?
+AD | {N:Der Arzt} gibt {D:dem Patienten} {A:die Tabletten}. | [N:er] gibt [A:sie] [D:ihm].
+AD | Wir kochen {D:den Gästen} {A:die Suppe}. | Wir kochen [A:sie] [D:ihnen].
+AD | {N:Die Mutter} liest {D:dem Kind} {A:das Märchen} vor. | [N:sie] liest [A:es] [D:ihm] vor.
+AD | Ich gebe {D:der Lehrerin} {A:das Heft}. | Ich gebe [A:es] [D:ihr].
+AD | {N:Mein Onkel} verkauft {D:meinem Vater} {A:das Haus}. | [N:er] verkauft [A:es] [D:ihm].
+AD | {N:Die Kinder} bringen {D:der Oma} {A:den Kuchen}. | [N:sie] bringen [A:ihn] [D:ihr].
+AD | Er zeigt {D:mir und meiner Schwester} {A:die Fotos}. | Er zeigt [A:sie] [D:uns].
+AD | Ich erkläre {D:dir und Paul} {A:die Aufgabe}. | Ich erkläre [A:sie] [D:euch].
+AD | {N:Der Junge} gibt dem Lehrer {A:den Test}. | [N:er] gibt [A:ihn] dem Lehrer.
+AD | Ich schenke meiner Freundin {A:das Buch}. | Ich schenke [A:es] meiner Freundin.
+AD | Wir schicken unseren Eltern {A:die Karte}. | Wir schicken [A:sie] unseren Eltern.
+AD | Sie gibt dem Kellner {A:das Trinkgeld}. | Sie gibt [A:es] dem Kellner.
+AD | {N:Der Opa} zeigt den Enkeln {A:den Garten}. | [N:er] zeigt [A:ihn] den Enkeln.
+AD | Ich bringe meinem Kollegen {A:den Kaffee}. | Ich bringe [A:ihn] meinem Kollegen.
+AD | {N:Die Chefin} gibt der Sekretärin {A:die Briefe}. | [N:sie] gibt [A:sie] der Sekretärin.
+AD | Er leiht seinem Nachbarn {A:die Leiter}. | Er leiht [A:sie] seinem Nachbarn.
+AD | {N:Der Junge} gibt {D:dem Lehrer} den Test. | [N:er] gibt [D:ihm] den Test.
+AD | Ich schenke {D:meiner Freundin} das Buch. | Ich schenke [D:ihr] das Buch.
+AD | Wir schicken {D:unseren Eltern} eine Karte. | Wir schicken [D:ihnen] eine Karte.
+AD | {N:Die Mutter} kauft {D:der Tochter} neue Schuhe. | [N:sie] kauft [D:ihr] neue Schuhe.
+AD | Ich erkläre {D:dem Schüler} die Aufgabe. | Ich erkläre [D:ihm] die Aufgabe.
+AD | {N:Der Mann} bringt {D:seiner Frau} Blumen. | [N:er] bringt [D:ihr] Blumen.
+AD | Er empfiehlt {D:den Touristen} ein Restaurant. | Er empfiehlt [D:ihnen] ein Restaurant.
+AD | Ich gebe {D:dem Baby} die Flasche. | Ich gebe [D:ihm] die Flasche.
+AD | {N:Die Kellnerin} serviert {D:den Gästen} {A:das Essen}. | [N:sie] serviert [A:es] [D:ihnen].
+AD | Ich reiche {D:dem Opa} {A:die Brille}. | Ich reiche [A:sie] [D:ihm].
+AD | {N:Der Briefträger} bringt {D:der Nachbarin} {A:die Post}. | [N:er] bringt [A:sie] [D:ihr].
+AD | Wir geben {D:dem Vermieter} {A:die Schlüssel}. | Wir geben [A:sie] [D:ihm].
+AD | {N:Mein Freund} leiht mir {A:sein Fahrrad}. | [N:er] leiht [A:es] mir.
+AD | Ich zeige {D:dem Polizisten} {A:den Ausweis}. | Ich zeige [A:ihn] [D:ihm].
+AD | {N:Die Tante} schenkt {D:dem Baby} {A:den Teddy}. | [N:sie] schenkt [A:ihn] [D:ihm].
+AD | Er gibt {D:der Katze} {A:die Milch}. | Er gibt [A:sie] [D:ihr].
+AD | {N:Der Lehrer} gibt {D:den Schülern} {A:die Hausaufgabe}. | [N:er] gibt [A:sie] [D:ihnen].
+AD | Ich bringe {D:dir und deiner Frau} {A:den Wein}. | Ich bringe [A:ihn] [D:euch].
+AD | {N:Lisa} erzählt {D:ihrem Freund} {A:das Geheimnis}. | [N:sie] erzählt [A:es] [D:ihm].
+AD | {N:Der Vater} erklärt {D:der Tochter} {A:das Spiel}. | [N:er] erklärt [A:es] [D:ihr].
+AD | Wir empfehlen {D:den Freunden} {A:das Hotel}. | Wir empfehlen [A:es] [D:ihnen].
+AD | {N:Die Großeltern} schenken {D:den Enkeln} {A:die Fahrräder}. | [N:sie] schenken [A:sie] [D:ihnen].
+AD | Kannst du {D:dem Kind} {A:den Löffel} geben? | Kannst du [A:ihn] [D:ihm] geben?
+AD | Gib {D:deiner Schwester} {A:das Spielzeug}! | Gib [A:es] [D:ihr]!
+AD | Zeig {D:dem Arzt} {A:die Wunde}! | Zeig [A:sie] [D:ihm]!
+AD | {N:Der Mechaniker} gibt {D:dem Kunden} {A:die Rechnung}. | [N:er] gibt [A:sie] [D:ihm].
+AD | Ich schreibe {D:meiner Oma} {A:den Brief}. | Ich schreibe [A:ihn] [D:ihr].
+AD | {N:Die Verkäuferin} zeigt {D:der Kundin} {A:das Kleid}. | [N:sie] zeigt [A:es] [D:ihr].
+AD | {N:Der Trainer} gibt {D:dir und mir} {A:die Bälle}. | [N:er] gibt [A:sie] [D:uns].
+AD | Wir bringen {D:den Nachbarn} {A:den Kuchen}. | Wir bringen [A:ihn] [D:ihnen].
+AD | {N:Das Kind} gibt {D:der Mutter} {A:den Brief}. | [N:es] gibt [A:ihn] [D:ihr].
+AD | Ich leihe {D:meinem Bruder} {A:die Kamera}. | Ich leihe [A:sie] [D:ihm].
+P | Ich gehe mit {D:meiner Freundin} ins Kino. | Ich gehe mit [D:ihr] ins Kino.
+P | Das Geschenk ist für {A:meinen Vater}. | Das Geschenk ist für [A:ihn].
+P | Wir sprechen über {A:den neuen Kollegen}. | Wir sprechen über [A:ihn].
+P | Er wohnt bei {D:seinen Eltern}. | Er wohnt bei [D:ihnen].
+P | Ich warte auf {A:meine Schwester}. | Ich warte auf [A:sie].
+P | {N:Die Kinder} spielen mit {D:dem Hund}. | [N:sie] spielen mit [D:ihm].
+P | Ich habe ein Geschenk für {A:dich und deinen Mann}. | Ich habe ein Geschenk für [A:euch].
+P | Kommst du mit {D:Anna und mir}? | Kommst du mit [D:uns]?
+P | Ich denke oft an {A:meine Oma}. | Ich denke oft an [A:sie].
+P | {N:Der Brief} ist von {D:meinem Onkel}. | [N:er] ist von [D:ihm].
+P | Wir fahren zu {D:unseren Großeltern}. | Wir fahren zu [D:ihnen].
+P | Sie tanzt mit {D:dem Lehrer}. | Sie tanzt mit [D:ihm].
+P | Er kämpft gegen {A:den Weltmeister}. | Er kämpft gegen [A:ihn].
+P | Ich lerne mit {D:meinem Kollegen} Deutsch. | Ich lerne mit [D:ihm] Deutsch.
+P | {N:Die Katze} schläft neben {D:dem Baby}. | [N:sie] schläft neben [D:ihm].
+P | Wir machen das ohne {A:den Chef}. | Wir machen das ohne [A:ihn].
+P | Er erzählt oft von {D:seiner Tochter}. | Er erzählt oft von [D:ihr].
+P | Ich gehe heute zu {D:der Ärztin}. | Ich gehe heute zu [D:ihr].
+P | {N:Mein Bruder} sitzt hinter {D:dem Fahrer}. | [N:er] sitzt hinter [D:ihm].
+P | Ich ärgere mich über {A:meinen Nachbarn}. | Ich ärgere mich über [A:ihn].
+P | Wir freuen uns auf {A:die Gäste}. | Wir freuen uns auf [A:sie].
+P | Das ist ein Brief an {A:die Direktorin}. | Das ist ein Brief an [A:sie].
+P | Sie wartet seit einer Stunde auf {A:dich und Tom}. | Sie wartet seit einer Stunde auf [A:euch].
+P | Er spricht gern mit {D:den Kindern}. | Er spricht gern mit [D:ihnen].
+P | {N:Der Opa} geht mit {D:dem Enkel} spazieren. | [N:er] geht mit [D:ihm] spazieren.
+B1 | Ich habe {D:meiner Mutter} {A:den Brief} geschrieben. | Ich habe [A:ihn] [D:ihr] geschrieben.
+B1 | {N:Der Chef} hat {D:den Mitarbeitern} {A:die Pläne} erklärt. | [N:er] hat [A:sie] [D:ihnen] erklärt.
+B1 | Wir wollen {D:unserem Lehrer} {A:das Geschenk} geben. | Wir wollen [A:es] [D:ihm] geben.
+B1 | Ich weiß, dass {N:Anna} {D:ihrem Bruder} {A:das Geld} gibt. | Ich weiß, dass [N:sie] [A:es] [D:ihm] gibt.
+B1 | Er sagt, dass {N:der Kellner} {D:dem Gast} {A:die Rechnung} bringt. | Er sagt, dass [N:er] [A:sie] [D:ihm] bringt.
+B1 | Hast du {D:deiner Freundin} {A:die Fotos} gezeigt? | Hast du [A:sie] [D:ihr] gezeigt?
+B1 | {N:Die Eltern} haben {D:dem Sohn} {A:das Handy} gekauft. | [N:sie] haben [A:es] [D:ihm] gekauft.
+B1 | Ich muss {D:dem Vermieter} {A:die Miete} überweisen. | Ich muss [A:sie] [D:ihm] überweisen.
+B1 | Weil {N:die Oma} {D:den Kindern} {A:die Bonbons} schenkt, sind sie glücklich. | Weil [N:sie] [A:sie] [D:ihnen] schenkt, sind sie glücklich.
+B1 | Könnt ihr {D:dem Touristen} {A:den Weg} zeigen? | Könnt ihr [A:ihn] [D:ihm] zeigen?
+B1 | {N:Der Postbote} hat {D:der Nachbarin} {A:das Paket} gebracht. | [N:er] hat [A:es] [D:ihr] gebracht.
+B1 | Ich hoffe, dass {N:mein Freund} mir {A:das Buch} zurückgibt. | Ich hoffe, dass [N:er] [A:es] mir zurückgibt.
+B1 | Wir haben {D:den Gästen} {A:den Garten} gezeigt. | Wir haben [A:ihn] [D:ihnen] gezeigt.
+B1 | Sie möchte {D:ihrem Mann} {A:die Uhr} schenken. | Sie möchte [A:sie] [D:ihm] schenken.
+B1 | Wenn {N:der Lehrer} {D:der Klasse} {A:die Aufgabe} erklärt, hören alle zu. | Wenn [N:er] [A:sie] [D:ihr] erklärt, hören alle zu.
+B1 | {N:Das Mädchen} hat {D:der Katze} {A:das Futter} gegeben. | [N:es] hat [A:es] [D:ihr] gegeben.
+B1 | Ich habe {D:dem Kollegen} {A:die E-Mail} geschickt. | Ich habe [A:sie] [D:ihm] geschickt.
+B1 | Darf ich {D:dem Kind} {A:die Schokolade} geben? | Darf ich [A:sie] [D:ihm] geben?
+B1 | Er hat vergessen, {D:seiner Frau} {A:den Schlüssel} zu geben. | Er hat vergessen, [A:ihn] [D:ihr] zu geben.
+B1 | Ich glaube, dass {N:die Firma} {D:den Kunden} {A:das Geld} zurückgibt. | Ich glaube, dass [N:sie] [A:es] [D:ihnen] zurückgibt.
+B1 | {N:Die Ärztin} hat {D:dem Patienten} {A:das Medikament} verschrieben. | [N:sie] hat [A:es] [D:ihm] verschrieben.
+B1 | Warum hast du {D:deinem Bruder} {A:die Wahrheit} nicht gesagt? | Warum hast du [A:sie] [D:ihm] nicht gesagt?
+B1 | Ob {N:der Vater} {D:den Kindern} {A:das Märchen} vorliest, weiß ich nicht. | Ob [N:er] [A:es] [D:ihnen] vorliest, weiß ich nicht.
+B1 | Wir sollen {D:der Lehrerin} {A:die Hausaufgaben} morgen geben. | Wir sollen [A:sie] [D:ihr] morgen geben.
+B1 | {N:Mein Opa} hat {D:mir und meinem Bruder} {A:den Garten} geschenkt. | [N:er] hat [A:ihn] [D:uns] geschenkt.
+B1 | Ich will {D:dir und Lukas} {A:die Stadt} zeigen. | Ich will [A:sie] [D:euch] zeigen.
+B1 | Nachdem {N:der Kunde} {D:der Verkäuferin} {A:das Geld} gegeben hatte, ging er. | Nachdem [N:er] [A:es] [D:ihr] gegeben hatte, ging er.
+B1 | {N:Die Polizistin} hat {D:dem Fahrer} {A:den Führerschein} zurückgegeben. | [N:sie] hat [A:ihn] [D:ihm] zurückgegeben.
+B1 | Ich finde es toll, dass {N:die Nachbarn} uns {A:den Rasenmäher} leihen. | Ich finde es toll, dass [N:sie] [A:ihn] uns leihen.
+B1 | Sobald {N:die Sekretärin} {D:dem Chef} {A:den Bericht} gibt, ruft er mich an. | Sobald [N:sie] [A:ihn] [D:ihm] gibt, ruft er mich an.
+</script>
+
+<script>
+(function(){
+const CATS=[["all","Alle"],["N","Nominativ"],["A","Akkusativ"],["D","Dativ"],["AD","Akkusativ + Dativ"],["P","Präpositionen"],["B1","B1: Perfekt & Nebensatz"]];
+const PRON=[["ich","mich","mir"],["du","dich","dir"],["er","ihn","ihm"],["sie","sie","ihr"],["es","es","ihm"],["wir","uns","uns"],["ihr","euch","euch"],["sie","sie","ihnen"],["Sie","Sie","Ihnen"]];
+const CASES=["N","A","D"], CASENAME={N:"Nominativ",A:"Akkusativ",D:"Dativ"};
+const WAIT_OK=1100, WAIT_BAD=4500;
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+const cap=w=>w.charAt(0).toUpperCase()+w.slice(1);
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const items=document.getElementById("data").textContent.trim().split("\n").map((line,i)=>{
+  const [cat,orig,sol]=line.split("|").map(s=>s.trim());
+  const tokens=[],slots=[];let last=0;const re=/\[(N|A|D):([^\]]+)\]/g;let m;
+  while((m=re.exec(sol))){ if(m.index>last)tokens.push({t:"txt",v:sol.slice(last,m.index)});
+    tokens.push({t:"slot",k:slots.length,first:m.index===0});slots.push({c:m[1],w:m[2]});last=re.lastIndex;}
+  if(last<sol.length)tokens.push({t:"txt",v:sol.slice(last)});
+  const origHTML=esc(orig).replace(/\{(N|A|D):([^}]+)\}/g,(_,c,t)=>`<span class="np ${c}" title="${CASENAME[c]}">${t}</span>`);
+  return {i,cat,origHTML,tokens,slots};
+});
+
+const KEY="pronomen-champions-v2";
+let res={};try{res=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(res))}catch(e){}};
+
+let filter="all",active=null,filled=[],checked=false,timer=null;
+const listEl=document.getElementById("list"),chipsEl=document.getElementById("chips");
+const visible=()=>items.filter(it=>filter==="all"||it.cat===filter);
+
+function stats(){const v=Object.values(res);document.getElementById("sDone").textContent=v.length;
+  document.getElementById("sOk").textContent=v.filter(r=>r.ok).length;document.getElementById("pbar").style.width=(v.length/items.length*100)+"%";}
+
+function chips(){chipsEl.innerHTML="";CATS.forEach(([k,l])=>{const n=k==="all"?items.length:items.filter(i=>i.cat===k).length;
+  const b=document.createElement("button");b.type="button";b.className="chip";b.setAttribute("aria-pressed",filter===k);b.innerHTML=`${l}<span>${n}</span>`;
+  b.onclick=()=>{stopTimer();filter=k;active=null;chips();renderList(true);};chipsEl.appendChild(b);});}
+
+function cardClass(it){const r=res[it.i];return "card"+(r?(r.ok?" ok":" bad"):"")+(active===it.i?" active":"");}
+
+/* Rückblick: was der Schüler geklickt hat, mit Korrektur */
+function reviewHTML(it){const r=res[it.i];let h=`<span class="lab">Deine Lösung</span>`;
+  it.tokens.forEach(tk=>{
+    if(tk.t==="txt"){tk.v.trim().split(/\s+/).filter(Boolean).forEach(w=>h+=`<span>${esc(w)}</span>`);return;}
+    const s=it.slots[tk.k],a=r.ans[tk.k],shown=tk.first?cap(s.w):s.w;
+    h+=a.ok?`<span class="rw ${s.c}">${esc(shown)}</span>`:`<span class="rw wrong ${s.c}"><s>${esc(a.w)}</s>${esc(shown)}</span>`;
+  });return h;}
+
+function renderCard(it){
+  let c=document.getElementById("c"+it.i);
+  if(!c){c=document.createElement("article");c.id="c"+it.i;}
+  const r=res[it.i],isAct=active===it.i;
+  c.className=cardClass(it);
+  c.innerHTML=`<button class="row" type="button"${isAct?' aria-current="true"':''}><span class="num">${it.i+1}</span><span class="orig">${it.origHTML}</span>${r&&!isAct?`<span class="state">${r.ok?"richtig":"Fehler"}</span>`:""}</button>`+
+    (r&&!isAct?`<div class="review">${reviewHTML(it)}</div>`:"");
+  c.querySelector(".row").onclick=()=>{if(active!==it.i)activate(it.i)};
+  if(isAct)buildWork(c);
+  return c;
+}
+
+function renderList(scrollTop){listEl.innerHTML="";const v=visible();v.forEach(it=>listEl.appendChild(renderCard(it)));
+  if(active===null&&v.length){const first=v.find(it=>!res[it.i]);if(first)activate(first.i,false);else showDone();}
+  if(scrollTop)window.scrollTo({top:0,behavior:"auto"});}
+
+function activate(i,scroll=true){
+  stopTimer();const prev=active;active=i;checked=false;filled=items[i].slots.map(()=>null);
+  const d=document.getElementById("done");if(d)d.remove();
+  if(prev!==null&&document.getElementById("c"+prev))renderCard(items[prev]);
+  const c=renderCard(items[i]);
+  if(scroll)c.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"});
+}
+
+function buildWork(c){
+  const w=document.createElement("div");w.className="work";
+  w.innerHTML=`<div class="label">${res[active]?"Nochmal mit Pronomen":"Mit Pronomen"}</div><div class="sol"></div>
+  <div class="ctrl"><button class="check" type="button" aria-label="Satz prüfen">✓</button><button class="clear" type="button">Löschen</button><span class="msg" aria-live="polite"></span></div>`;
+  c.appendChild(w);
+  w.querySelector(".check").onclick=check;
+  w.querySelector(".clear").onclick=()=>{if(checked)return;filled=filled.map(()=>null);drawSol();};
+  drawSol();
+}
+
+function drawSol(){
+  const it=items[active],box=document.querySelector("#c"+active+" .sol");if(!box)return;box.innerHTML="";
+  const next=filled.indexOf(null);
+  it.tokens.forEach(tk=>{
+    if(tk.t==="txt"){tk.v.trim().split(/\s+/).filter(Boolean).forEach(word=>{const s=document.createElement("span");s.textContent=word;box.appendChild(s);});return;}
+    const f=filled[tk.k],b=document.createElement("button");b.type="button";b.dataset.k=tk.k;
+    b.className="slot"+(f?" filled "+f.c:"")+(tk.k===next?" next":"");
+    b.textContent=f?(tk.first?cap(f.w):f.w):"";b.setAttribute("aria-label",f?`Lücke ${tk.k+1}: ${f.w} (zum Löschen klicken)`:`Lücke ${tk.k+1}, leer`);
+    b.onclick=()=>{if(checked||!filled[tk.k])return;filled[tk.k]=null;drawSol();};
+    box.appendChild(b);
+  });
+}
+
+function pick(w,c,formal){
+  if(active===null||checked)return;const k=filled.indexOf(null);
+  const m=document.querySelector("#c"+active+" .msg");
+  if(k<0){m.className="msg";m.textContent="Alle Lücken sind voll. Prüfe mit ✓ oder lösche ein Pronomen.";return;}
+  m.textContent="";filled[k]={w:formal?w:w.toLowerCase(),c,formal};drawSol();
+}
+
+function stopTimer(){if(timer){clearTimeout(timer);timer=null;}}
+
+function check(){
+  const it=items[active],card=document.getElementById("c"+active),msg=card.querySelector(".msg"),btn=card.querySelector(".check");
+  if(checked){goNext();return;}
+  const sol=card.querySelector(".sol");
+  if(filled.includes(null)){sol.classList.remove("shake");void sol.offsetWidth;sol.classList.add("shake");msg.className="msg";msg.textContent="Fülle zuerst alle Lücken aus.";return;}
+  checked=true;let wrong=0;const ans=[];
+  it.slots.forEach((s,k)=>{
+    const el=card.querySelector(`.slot[data-k="${k}"]`),f=filled[k],tok=it.tokens.find(t=>t.k===k);
+    const good=!f.formal&&f.w.toLowerCase()===s.w.toLowerCase();ans.push({w:f.w,ok:good});
+    const shown=tok.first?cap(s.w):s.w;
+    if(good){el.className="slot right "+s.c;el.textContent=shown;return;}
+    wrong++;
+    const finish=()=>{el.className="slot fixed "+s.c;el.innerHTML=`${esc(shown)}<span class="was">${esc(f.w)}</span>`;el.setAttribute("aria-label",`falsch: ${f.w}, richtig: ${s.w}`);};
+    if(reduce){finish();return;}
+    el.className="slot filled whirl";const letters="abcdeghimnrsuw";let n=0;
+    const t=setInterval(()=>{el.textContent=Array.from({length:Math.max(2,s.w.length)},()=>letters[Math.random()*letters.length|0]).join("");if(++n>12)clearInterval(t)},60);
+    setTimeout(()=>{clearInterval(t);finish();},900);
+  });
+  res[it.i]={ok:!wrong,ans};save();stats();
+  card.className=cardClass(it);
+  msg.className="msg "+(wrong?"bad":"good");
+  msg.textContent=wrong?(wrong===1?"Ein Pronomen war falsch. Schau dir die Korrektur an.":`${wrong} Pronomen waren falsch. Schau dir die Korrektur an.`):"Perfekt! Alles richtig.";
+  btn.classList.add("go");btn.textContent="→";btn.setAttribute("aria-label","Sofort weiter");
+  const wait=wrong?WAIT_BAD:WAIT_OK;
+  const tb=document.createElement("div");tb.className="timer";tb.innerHTML="<i></i>";card.querySelector(".ctrl").appendChild(tb);
+  const bar=tb.querySelector("i");
+  if(!reduce&&bar.animate)bar.animate([{transform:"scaleX(1)"},{transform:"scaleX(0)"}],{duration:wait,easing:"linear",fill:"forwards"});
+  timer=setTimeout(goNext,wait);
+}
+
+function goNext(){stopTimer();const v=visible(),pos=v.findIndex(x=>x.i===active);
+  const nx=v.slice(pos+1).find(x=>!res[x.i])||v[pos+1];
+  if(nx){activate(nx.i);return;}
+  const last=active;active=null;renderCard(items[last]);showDone();}
+
+function showDone(){if(document.getElementById("done"))return;const v=visible();const ok=v.filter(it=>res[it.i]&&res[it.i].ok).length;
+  const d=document.createElement("div");d.className="done";d.id="done";
+  d.innerHTML=`Geschafft! ${ok} von ${v.length} Sätzen richtig.<br><button class="reset" type="button">Diese Gruppe nochmal üben</button>`;
+  d.querySelector("button").onclick=()=>{v.forEach(it=>delete res[it.i]);save();stats();active=null;renderList(true);};
+  listEl.appendChild(d);d.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"});}
+
+/* Tabelle */
+const grid=document.getElementById("grid");const narrow=matchMedia("(max-width:880px)");
+function cell(w,c,formal){const b=document.createElement("button");b.type="button";b.className="cell "+c+(formal?" formal":"");b.textContent=w;
+  b.title=CASENAME[c]+(formal?" (Höflichkeitsform)":"");b.onclick=()=>pick(w,c,formal);return b;}
+function buildGrid(){grid.innerHTML="";
+  if(narrow.matches){CASES.forEach((c,ci)=>{const h=document.createElement("div");h.className="colh "+c;h.textContent=c==="N"?"Nom":c==="A"?"Akk":"Dat";grid.appendChild(h);
+      PRON.forEach((r,ri)=>grid.appendChild(cell(r[ci],c,ri===8)));});}
+  else{CASES.forEach(c=>{const h=document.createElement("div");h.className="colh "+c;h.textContent=CASENAME[c];grid.appendChild(h);});
+    PRON.forEach((r,ri)=>{if(ri===5||ri===8){const s=document.createElement("div");s.className="sep";grid.appendChild(s);}r.forEach((w,ci)=>grid.appendChild(cell(w,CASES[ci],ri===8)));});}
+}
+narrow.addEventListener("change",buildGrid);buildGrid();
+
+/* Alles zurücksetzen, mit Bestätigung durch zweiten Klick */
+const rs=document.getElementById("reset");let armed=null;
+rs.onclick=()=>{if(!armed){rs.classList.add("armed");rs.textContent="Wirklich? Nochmal klicken";armed=setTimeout(()=>{armed=null;rs.classList.remove("armed");rs.textContent="Fortschritt löschen"},4000);return;}
+  clearTimeout(armed);armed=null;rs.classList.remove("armed");rs.textContent="Fortschritt löschen";
+  stopTimer();res={};save();stats();active=null;renderList(true);};
+
+chips();stats();renderList(false);window.scrollTo(0,0);
+
+/* Bubbles */
+const cv=document.getElementById("bubbles"),cx=cv.getContext("2d");let W,H;const B=[];
+function size(){W=cv.width=innerWidth*devicePixelRatio;H=cv.height=innerHeight*devicePixelRatio;}
+size();addEventListener("resize",size);
+const tint=["255,255,255","240,197,72","226,150,140","255,255,255"];
+for(let i=0;i<20;i++)B.push({x:Math.random(),y:Math.random(),r:8+Math.random()*46,s:.0001+Math.random()*.0003,d:Math.random()*6.28,c:tint[i%4]});
+function draw(){cx.clearRect(0,0,W,H);const dp=devicePixelRatio;
+  B.forEach(b=>{b.y-=b.s;b.d+=.004;if(b.y<-.1){b.y=1.1;b.x=Math.random();}
+    const x=(b.x+Math.sin(b.d)*.02)*W,y=b.y*H,r=b.r*dp;
+    const g=cx.createRadialGradient(x-r*.35,y-r*.35,r*.1,x,y,r);g.addColorStop(0,`rgba(${b.c},.13)`);g.addColorStop(1,`rgba(${b.c},.02)`);
+    cx.beginPath();cx.arc(x,y,r,0,7);cx.fillStyle=g;cx.fill();cx.lineWidth=1*dp;cx.strokeStyle=`rgba(${b.c},.3)`;cx.stroke();
+    cx.beginPath();cx.arc(x-r*.4,y-r*.4,r*.13,0,7);cx.fillStyle="rgba(255,255,255,.3)";cx.fill();});}
+if(reduce)draw();else(function loop(){draw();requestAnimationFrame(loop)})();
+})();
+</script>
+</body>
+</html>
