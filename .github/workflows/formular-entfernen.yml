@@ -1,0 +1,52 @@
+name: Altes Formular entfernen
+
+# Eigener Helfer, getrennt vom Passwortschutz.
+# Entfernt aus allen HTML-Seiten im Repository die alte Anmelde-Maske
+# (Name, Muttersprache, Level, E-Mail-Bestätigung), also die Zeilen
+#   <!-- DAF Zugangsschutz -->
+#   <script src="...daf-access-control.js"></script>
+# Alles andere in den Seiten bleibt unverändert.
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  aufraeumen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Maske aus allen Seiten entfernen
+        run: |
+          python3 - <<'PY'
+          import pathlib, re
+          maske = re.compile(r'[ \t]*<!--\s*DAF Zugangsschutz\s*-->[ \t]*\r?\n?|[ \t]*<script[^>]*daf-access-control\.js[^>]*>\s*</script>[ \t]*\r?\n?', re.I)
+          entfernt = 0
+          for datei in sorted(pathlib.Path(".").rglob("*.html")):
+              if ".git" in datei.parts:
+                  continue
+              text = datei.read_text(encoding="utf-8", errors="surrogateescape")
+              neu = maske.sub("", text)
+              if neu != text:
+                  datei.write_text(neu, encoding="utf-8", errors="surrogateescape")
+                  entfernt += 1
+                  print("Maske entfernt:", datei)
+          print(f"Fertig – Maske aus {entfernt} Seite(n) entfernt.")
+          PY
+
+      - name: Änderungen speichern
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "Formular-Aufräumer"
+            git config user.email "actions@users.noreply.github.com"
+            git add -A -- '*.html'
+            git commit -m "Alte Anmelde-Maske entfernt"
+            git pull --rebase
+            git push
+          else
+            echo "Keine Seite enthält mehr die alte Maske."
+          fi
