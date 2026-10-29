@@ -1,0 +1,56 @@
+name: Passwortschutz interdaf
+
+# Läuft bei jedem Hochladen ins Repository (und auf Knopfdruck unter "Actions").
+# Fügt jeder HTML-Datei im Ordner daf/interdaf, die noch keinen Passwortschutz hat,
+# die Zeile <script src="/daf/interdaf/passwort.js"></script> in den <head> ein.
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  schuetzen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Passwort-Zeile in alle Übungen einfügen
+        run: |
+          python3 - <<'PY'
+          import pathlib, re
+          ordner = pathlib.Path("daf/interdaf")
+          # Dateien, die OFFEN bleiben sollen (Dateinamen hier eintragen, z. B. "uebungen.html"):
+          offen = set()
+          zeile = '<script src="/daf/interdaf/passwort.js"></script>'
+          geaendert = 0
+          for datei in sorted(ordner.rglob("*.html")):
+              if datei.name in offen:
+                  continue
+              text = datei.read_text(encoding="utf-8", errors="surrogateescape")
+              if "passwort.js" in text:
+                  continue
+              neu, anzahl = re.subn(r"(<head\b[^>]*>)", r"\1\n" + zeile, text, count=1, flags=re.I)
+              if anzahl == 0:
+                  neu, anzahl = re.subn(r"(<html\b[^>]*>)", r"\1\n<head>" + zeile + "</head>", text, count=1, flags=re.I)
+              if anzahl == 0:
+                  neu = zeile + "\n" + text
+              datei.write_text(neu, encoding="utf-8", errors="surrogateescape")
+              geaendert += 1
+              print("geschützt:", datei)
+          print(f"Fertig – {geaendert} Datei(en) neu geschützt.")
+          PY
+
+      - name: Änderungen speichern
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "Passwortschutz"
+            git config user.email "actions@users.noreply.github.com"
+            git add -A daf/interdaf
+            git commit -m "Passwortschutz für neue Übungen ergänzt"
+            git push
+          else
+            echo "Alle Übungen sind bereits geschützt."
+          fi
