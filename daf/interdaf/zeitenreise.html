@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Zeitenreise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --sky1:#121a2e; --sky2:#223252; --sky3:#3d4d70;
+  --card:#fbfaf7; --card-2:#f3f1ea; --line:#e3ded2;
+  --ink:#151515; --muted:#565a66;
+  --gold:#b48528; --gold-soft:#fbf0d3; --sun:#f0c548;
+  --ok:#14707a; --ok-soft:#e2f0f0; --bad:#b8475f; --bad-soft:#fbe7ed;
+  --t-plusq:#4f4585; --t-praet:#7d5a9e; --t-perf:#b0506e; --t-praes:#b48528;
+  --t-fut1:#2f6a9a; --t-fut2:#14707a; --t-konj:#b5603a;
+  --font:"Lexend","Segoe UI","Helvetica Neue",Arial,sans-serif;
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{background:var(--sky2)}
+html,body{min-height:100%}
+body{margin:0;color:var(--ink);font-family:var(--font);font-size:19px;line-height:1.6;
+  background:
+    radial-gradient(120% 60% at 50% 115%, rgba(224,148,132,.28), transparent 60%),
+    radial-gradient(80% 50% at 85% 0%, rgba(120,140,190,.25), transparent 70%),
+    linear-gradient(180deg,var(--sky1) 0%,var(--sky2) 50%,var(--sky3) 100%) fixed;
+  overflow-x:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+.bubbles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bubbles i{position:absolute;bottom:-120px;border-radius:50%;
+  background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.22),rgba(255,255,255,.04) 70%);
+  border:1px solid rgba(255,255,255,.10);animation:rise linear infinite}
+@keyframes rise{to{transform:translateY(-120vh) translateX(30px)}}
+@media (prefers-reduced-motion:reduce){.bubbles i{animation:none;display:none}}
+.wrap{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:28px 16px 64px}
+.hero{color:#f4f1ea;text-align:center;padding:18px 0 26px}
+.eyebrow{font-size:.95rem;letter-spacing:.06em;text-transform:uppercase;color:#d9cfae;margin:0 0 6px}
+h1{font-size:clamp(2.4rem,7vw,3.6rem);margin:0;font-weight:700;line-height:1.1}
+h1 span{color:var(--sun)}
+.lead{max-width:640px;margin:12px auto 0;color:#e6e2f0;font-size:1.05rem}
+.card{background:var(--card);border-radius:24px;padding:24px;box-shadow:0 18px 40px rgba(5,10,30,.28)}
+h2{font-size:1.5rem;margin:0 0 6px;line-height:1.25}
+h3{margin:0;font-size:1.2rem;line-height:1.3}
+.muted{color:var(--muted)}
+
+.modes{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:760px){.modes{grid-template-columns:1fr 1fr}}
+.mode{background:var(--card);border:0;border-radius:24px;padding:22px 22px 20px;text-align:left;
+  box-shadow:0 18px 40px rgba(5,10,30,.28);display:grid;gap:10px;position:relative;overflow:hidden;
+  transition:transform .15s ease, box-shadow .15s ease}
+.mode::before{content:"";position:absolute;inset:0 0 auto 0;height:7px;background:var(--c)}
+.mode:hover{transform:translateY(-3px);box-shadow:0 22px 46px rgba(5,10,30,.34)}
+.mode .icon{font-size:2rem;line-height:1}
+.mode p{margin:0;color:var(--muted)}
+.mode .meta{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:.92rem;color:var(--muted)}
+.mode .go{justify-self:start;background:var(--c);color:#fff;border-radius:999px;padding:9px 20px;font-weight:600}
+.stars{color:var(--gold);letter-spacing:2px;font-size:1.15rem}
+.stars .off{color:#d8d2c3}
+
+.settings{margin-top:16px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;color:#e6e2f0;justify-content:center}
+.chip{border:2px solid rgba(255,255,255,.35);background:transparent;color:#f4f1ea;border-radius:999px;padding:6px 16px;font-weight:500}
+.chip[aria-pressed="true"]{background:var(--sun);border-color:var(--sun);color:#1a1a1a}
+
+details.spick{margin-top:22px}
+details.spick summary{cursor:pointer;list-style:none;font-weight:600;font-size:1.2rem;display:flex;align-items:center;gap:10px}
+details.spick summary::-webkit-details-marker{display:none}
+details.spick summary::after{content:"▾";margin-left:auto;color:var(--muted);transition:transform .2s}
+details[open].spick summary::after{transform:rotate(180deg)}
+.strahl{display:grid;grid-template-columns:1fr;gap:12px;margin-top:16px}
+@media(min-width:640px){.strahl{grid-template-columns:1fr 1fr}}
+@media(min-width:900px){.strahl{grid-template-columns:1fr 1fr 1fr}}
+.tz{background:var(--card-2);border-radius:18px;padding:14px 16px;border-left:7px solid var(--c)}
+.tz h3{color:var(--c)}
+.tz .when{font-size:.85rem;color:var(--muted);margin:0 0 4px}
+.tz p{margin:4px 0 0}
+.tz .ex{font-size:.98rem}
+.tz .ex b{color:var(--c)}
+
+.quiz{display:grid;gap:16px}
+.qtop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.back{background:transparent;border:2px solid var(--line);border-radius:999px;padding:6px 16px;font-weight:500;color:var(--muted)}
+.qtitle{font-weight:700;font-size:1.1rem}
+.bar{height:10px;background:var(--card-2);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--t-fut1),var(--t-fut2));border-radius:99px;transition:width .3s}
+.task{color:var(--muted);font-size:.95rem}
+.sentence{font-size:clamp(1.35rem,4.4vw,1.75rem);font-weight:600;line-height:1.45;margin:0;padding:18px 20px;background:var(--card-2);border-radius:18px}
+.nowtag{display:inline-block;font-size:.85rem;font-weight:500;color:var(--muted);margin-bottom:6px}
+.nowtag b{color:var(--c)}
+.goal{display:inline-flex;align-items:center;gap:10px;background:var(--c);color:#fff;border-radius:16px;padding:10px 18px;font-weight:600;font-size:1.1rem}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(min-width:720px){.opts.tenses{grid-template-columns:repeat(4,1fr)}}
+.opts.long{grid-template-columns:1fr}
+.opt{display:flex;align-items:center;gap:10px;text-align:left;background:#fff;border:2px solid var(--line);border-radius:16px;padding:12px 14px;font-weight:500;font-size:1.05rem;transition:border-color .15s, background .15s}
+.opts.long .opt{font-size:1.12rem;padding:14px 16px}
+.opt:hover:not(:disabled){border-color:var(--c,#9aa3b8);background:#fdfcf8}
+.opt .dot{width:14px;height:14px;border-radius:50%;background:var(--c);flex:none}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt.dim{opacity:.5}
+.opt:disabled{cursor:default}
+.feedback{border-radius:18px;padding:14px 18px;display:grid;gap:6px}
+.feedback.ok{background:var(--ok-soft);border-left:7px solid var(--ok)}
+.feedback.no{background:var(--bad-soft);border-left:7px solid var(--bad)}
+.feedback strong{font-size:1.15rem}
+.feedback .solved{font-size:1.1rem}
+.feedback .solved b{color:var(--c)}
+.again-note{font-size:.9rem;color:var(--muted)}
+.next{justify-self:end;background:var(--t-fut1);color:#fff;border:0;border-radius:999px;padding:12px 26px;font-weight:600;font-size:1.05rem}
+.result{text-align:center;display:grid;gap:12px;justify-items:center;padding:10px 0}
+.bigstars{font-size:3rem;color:var(--gold);letter-spacing:6px}
+.bigstars .off{color:#d8d2c3}
+.row2{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.ghost{background:transparent;border:2px solid var(--line);border-radius:999px;padding:10px 22px;font-weight:500}
+footer{color:#cfc9dc;text-align:center;font-size:.9rem;margin-top:30px}
+</style>
+</head>
+<body>
+<div class="bubbles" id="bubbles" aria-hidden="true"></div>
+<div class="wrap">
+  <header class="hero">
+    <p class="eyebrow">Deutsch · Zeiten erkennen und verschieben</p>
+    <h1>Zeiten<span>reise</span></h1>
+    <p class="lead">Sieben Zeiten, über hundertfünfzig Sätze und unzählige Reisen durch die Zeit. Du musst nur klicken. Jede Runde bringt neue Sätze, und deine Fehler übst du am Ende gleich noch einmal.</p>
+  </header>
+
+  <main id="main">
+    <section id="startView">
+      <div class="modes">
+        <button class="mode" data-mode="erkennen" style="--c:var(--t-fut1)">
+          <span class="icon" aria-hidden="true">🔍</span>
+          <h2>Welche Zeit ist das?</h2>
+          <p>Ein Satz steht in einer Zeit. Erkennst du, ob es Präsens, Präteritum, Perfekt, Plusquamperfekt, Futur I, Futur II oder Konjunktiv II ist?</p>
+          <div class="meta"><span id="seen-erkennen"></span><span id="best-erkennen"></span></div>
+          <span class="go">Los geht's →</span>
+        </button>
+        <button class="mode" data-mode="reise" style="--c:var(--t-perf)">
+          <span class="icon" aria-hidden="true">🚀</span>
+          <h2>Zeitreise</h2>
+          <p>Schicke den Satz in eine andere Zeit. Welcher der Sätze ist genau in der gesuchten Zeit?</p>
+          <div class="meta"><span id="seen-reise"></span><span id="best-reise"></span></div>
+          <span class="go">Los geht's →</span>
+        </button>
+      </div>
+      <div class="settings" role="group" aria-label="Wie viele Aufgaben pro Runde?">
+        <span>Aufgaben pro Runde:</span>
+        <button class="chip" data-n="10" aria-pressed="false">10</button>
+        <button class="chip" data-n="20" aria-pressed="true">20</button>
+        <button class="chip" data-n="30" aria-pressed="false">30</button>
+      </div>
+
+      <details class="spick card" open>
+        <summary>📜 Spickzettel: So erkennst du die Zeiten</summary>
+        <div class="strahl" id="strahl"></div>
+      </details>
+    </section>
+
+    <section id="quizView" class="card" hidden></section>
+  </main>
+  <footer>Tipp: Lies zuerst, welche Verbteile im Satz stehen. Gibt es ein Hilfsverb? Gibt es ein Partizip mit ge-? Daran erkennst du fast jede Zeit.</footer>
+</div>
+
+<script>
+/* ===================== Zeiten ===================== */
+const ORDER=['plusq','praet','perf','praes','fut1','fut2','konj'];
+const T={
+  plusq:{n:'Plusquamperfekt',c:'var(--t-plusq)',to:'ins Plusquamperfekt',when:'Vorvergangenheit',
+    rule:'haben oder sein in der Vergangenheit (hatte, war …) + Partizip.',ex:'Ich <b>hatte</b> gespielt. Er <b>war</b> gegangen.'},
+  praet:{n:'Präteritum',c:'var(--t-praet)',to:'ins Präteritum',when:'Vergangenheit (erzählt)',
+    rule:'nur ein Verb, ohne Hilfsverb: oft mit -te (spielte) oder mit neuem Selbstlaut (ging, fuhr).',ex:'Ich <b>spielte</b>. Er <b>ging</b>.'},
+  perf:{n:'Perfekt',c:'var(--t-perf)',to:'ins Perfekt',when:'Vergangenheit (gesprochen)',
+    rule:'haben oder sein in der Gegenwart (habe, ist …) + Partizip (gespielt, gegangen).',ex:'Ich <b>habe</b> gespielt. Er <b>ist</b> gegangen.'},
+  praes:{n:'Präsens',c:'var(--t-praes)',to:'ins Präsens',when:'Gegenwart',
+    rule:'nur ein Verb, ohne Hilfsverb, und es passiert jetzt.',ex:'Ich <b>spiele</b>. Er <b>geht</b>.'},
+  fut1:{n:'Futur I',c:'var(--t-fut1)',to:'ins Futur I',when:'Zukunft',
+    rule:'werden (werde, wird …) + Grundform.',ex:'Ich <b>werde</b> spielen. Er <b>wird</b> gehen.'},
+  fut2:{n:'Futur II',c:'var(--t-fut2)',to:'ins Futur II',when:'vollendete Zukunft',
+    rule:'werden + Partizip + haben oder sein.',ex:'Ich <b>werde</b> gespielt <b>haben</b>. Er <b>wird</b> gegangen <b>sein</b>.'},
+  konj:{n:'Konjunktiv II',c:'var(--t-konj)',to:'in den Konjunktiv II',when:'Wunsch und Vorstellung',
+    rule:'wäre, hätte oder würde + Grundform. Mit Pünktchen: würde, nicht wird!',ex:'Ich <b>würde</b> spielen. Ich <b>wäre</b> müde. Ich <b>hätte</b> Zeit.'}
+};
+
+/* ===================== Verben ===================== */
+const WERDEN=['werde','wirst','wird','werden','werdet','werden'];
+const WUERDE=['würde','würdest','würde','würden','würdet','würden'];
+const SPECIAL={
+  sein:{praes:['bin','bist','ist','sind','seid','sind'],praet:['war','warst','war','waren','wart','waren'],konj:['wäre','wärst','wäre','wären','wärt','wären'],part:'gewesen',aux:'sein',inf:'sein',sep:''},
+  haben:{praes:['habe','hast','hat','haben','habt','haben'],praet:['hatte','hattest','hatte','hatten','hattet','hatten'],konj:['hätte','hättest','hätte','hätten','hättet','hätten'],part:'gehabt',aux:'haben',inf:'haben',sep:''}
+};
+function stemOf(inf){return /e[lr]n$/.test(inf)?inf.slice(0,-1):inf.slice(0,-2);}
+function praesForms(stem,inf,e){
+  const sib=/[sßzx]$/.test(stem);
+  return [stem+'e', e?stem+'est':sib?stem+'t':stem+'st', e?stem+'et':stem+'t', inf, e?stem+'et':stem+'t', inf];
+}
+function praetStrong(pt){
+  if(/e$/.test(pt)) return [pt,pt+'st',pt,pt+'n',pt+'t',pt+'n'];
+  const te=/[td]$/.test(pt), sib=/[sßz]$/.test(pt);
+  return [pt, pt+(te||sib?'est':'st'), pt, pt+'en', pt+(te?'et':'t'), pt+'en'];
+}
+function V(inf,o={}){
+  if(SPECIAL[inf]) return SPECIAL[inf];
+  const sep=o.sep||'', base=inf.slice(sep.length), stem=stemOf(base), e=!!o.e;
+  const praes=praesForms(stem,base,e);
+  if(o.p2){praes[1]=o.p2;praes[2]=o.p3;}
+  let praet;
+  if(o.pt) praet=praetStrong(o.pt);
+  else { const b=stem+(e?'ete':'te'); praet=[b,b+'st',b,b+'n',b+'t',b+'n']; }
+  const part=o.part||(sep+'ge'+stem+(e?'et':'t'));
+  return {inf,sep,praes,praet,part,aux:o.aux||'haben'};
+}
+const VERBS={
+  // schwache Verben
+  spielen:V('spielen'),malen:V('malen'),kochen:V('kochen'),lachen:V('lachen'),bauen:V('bauen'),kaufen:V('kaufen'),
+  suchen:V('suchen'),hören:V('hören'),lernen:V('lernen'),tanzen:V('tanzen'),holen:V('holen'),putzen:V('putzen'),
+  pflanzen:V('pflanzen'),fragen:V('fragen'),zeigen:V('zeigen'),schenken:V('schenken'),decken:V('decken'),
+  wohnen:V('wohnen'),brauchen:V('brauchen'),kleben:V('kleben'),zählen:V('zählen'),träumen:V('träumen'),
+  schmücken:V('schmücken'),wünschen:V('wünschen'),wehen:V('wehen'),schneien:V('schneien'),feiern:V('feiern'),
+  basteln:V('basteln'),sammeln:V('sammeln'),füttern:V('füttern'),streicheln:V('streicheln'),
+  warten:V('warten',{e:1}),arbeiten:V('arbeiten',{e:1}),retten:V('retten',{e:1}),regnen:V('regnen',{e:1}),
+  läuten:V('läuten',{e:1}),zeichnen:V('zeichnen',{e:1}),
+  erzählen:V('erzählen',{part:'erzählt'}),besuchen:V('besuchen',{part:'besucht'}),reparieren:V('reparieren',{part:'repariert'}),
+  klettern:V('klettern',{aux:'sein'}),wandern:V('wandern',{aux:'sein'}),backen:V('backen',{part:'gebacken'}),
+  aufräumen:V('aufräumen',{sep:'auf'}),einkaufen:V('einkaufen',{sep:'ein'}),abholen:V('abholen',{sep:'ab'}),
+  aufmachen:V('aufmachen',{sep:'auf'}),zumachen:V('zumachen',{sep:'zu'}),anmalen:V('anmalen',{sep:'an'}),
+  aufpassen:V('aufpassen',{sep:'auf'}),einpacken:V('einpacken',{sep:'ein'}),anschauen:V('anschauen',{sep:'an'}),
+  ausräumen:V('ausräumen',{sep:'aus'}),
+  // starke und gemischte Verben
+  gehen:V('gehen',{pt:'ging',part:'gegangen',aux:'sein'}),
+  fahren:V('fahren',{p2:'fährst',p3:'fährt',pt:'fuhr',part:'gefahren',aux:'sein'}),
+  laufen:V('laufen',{p2:'läufst',p3:'läuft',pt:'lief',part:'gelaufen',aux:'sein'}),
+  schwimmen:V('schwimmen',{pt:'schwamm',part:'geschwommen',aux:'sein'}),
+  springen:V('springen',{pt:'sprang',part:'gesprungen',aux:'sein'}),
+  kommen:V('kommen',{pt:'kam',part:'gekommen',aux:'sein'}),
+  fliegen:V('fliegen',{pt:'flog',part:'geflogen',aux:'sein'}),
+  reiten:V('reiten',{e:1,pt:'ritt',part:'geritten',aux:'sein'}),
+  bleiben:V('bleiben',{pt:'blieb',part:'geblieben',aux:'sein'}),
+  schlafen:V('schlafen',{p2:'schläfst',p3:'schläft',pt:'schlief',part:'geschlafen'}),
+  essen:V('essen',{p2:'isst',p3:'isst',pt:'aß',part:'gegessen'}),
+  trinken:V('trinken',{pt:'trank',part:'getrunken'}),
+  lesen:V('lesen',{p2:'liest',p3:'liest',pt:'las',part:'gelesen'}),
+  singen:V('singen',{pt:'sang',part:'gesungen'}),
+  schreiben:V('schreiben',{pt:'schrieb',part:'geschrieben'}),
+  finden:V('finden',{e:1,pt:'fand',part:'gefunden'}),
+  sehen:V('sehen',{p2:'siehst',p3:'sieht',pt:'sah',part:'gesehen'}),
+  geben:V('geben',{p2:'gibst',p3:'gibt',pt:'gab',part:'gegeben'}),
+  nehmen:V('nehmen',{p2:'nimmst',p3:'nimmt',pt:'nahm',part:'genommen'}),
+  helfen:V('helfen',{p2:'hilfst',p3:'hilft',pt:'half',part:'geholfen'}),
+  werfen:V('werfen',{p2:'wirfst',p3:'wirft',pt:'warf',part:'geworfen'}),
+  tragen:V('tragen',{p2:'trägst',p3:'trägt',pt:'trug',part:'getragen'}),
+  fangen:V('fangen',{p2:'fängst',p3:'fängt',pt:'fing',part:'gefangen'}),
+  waschen:V('waschen',{p2:'wäschst',p3:'wäscht',pt:'wusch',part:'gewaschen'}),
+  vergessen:V('vergessen',{p2:'vergisst',p3:'vergisst',pt:'vergaß',part:'vergessen'}),
+  gewinnen:V('gewinnen',{pt:'gewann',part:'gewonnen'}),
+  verlieren:V('verlieren',{pt:'verlor',part:'verloren'}),
+  rufen:V('rufen',{pt:'rief',part:'gerufen'}),
+  bringen:V('bringen',{pt:'brachte',part:'gebracht'}),
+  denken:V('denken',{pt:'dachte',part:'gedacht'}),
+  kennen:V('kennen',{pt:'kannte',part:'gekannt'}),
+  rennen:V('rennen',{pt:'rannte',part:'gerannt',aux:'sein'}),
+  schneiden:V('schneiden',{e:1,pt:'schnitt',part:'geschnitten'}),
+  pfeifen:V('pfeifen',{pt:'pfiff',part:'gepfiffen'}),
+  graben:V('graben',{p2:'gräbst',p3:'gräbt',pt:'grub',part:'gegraben'}),
+  beißen:V('beißen',{pt:'biss',part:'gebissen'}),
+  steigen:V('steigen',{pt:'stieg',part:'gestiegen',aux:'sein'}),
+  fallen:V('fallen',{p2:'fällst',p3:'fällt',pt:'fiel',part:'gefallen',aux:'sein'}),
+  wachsen:V('wachsen',{p2:'wächst',p3:'wächst',pt:'wuchs',part:'gewachsen',aux:'sein'}),
+  kriechen:V('kriechen',{pt:'kroch',part:'gekrochen',aux:'sein'}),
+  scheinen:V('scheinen',{pt:'schien',part:'geschienen'}),
+  streichen:V('streichen',{pt:'strich',part:'gestrichen'}),
+  einschlafen:V('einschlafen',{sep:'ein',p2:'schläfst',p3:'schläft',pt:'schlief',part:'eingeschlafen',aux:'sein'}),
+  aufstehen:V('aufstehen',{sep:'auf',pt:'stand',part:'aufgestanden',aux:'sein'}),
+  anrufen:V('anrufen',{sep:'an',pt:'rief',part:'angerufen'}),
+  mitnehmen:V('mitnehmen',{sep:'mit',p2:'nimmst',p3:'nimmt',pt:'nahm',part:'mitgenommen'}),
+  ankommen:V('ankommen',{sep:'an',pt:'kam',part:'angekommen',aux:'sein'}),
+  fernsehen:V('fernsehen',{sep:'fern',p2:'siehst',p3:'sieht',pt:'sah',part:'ferngesehen'}),
+  sein:V('sein'),haben:V('haben')
+};
+
+/* ===================== 160 Grundsätze =====================
+   [Subjekt, Person (0 ich,1 du,2 er/sie/es,3 wir,4 ihr,5 sie), Verb, Rest des Satzes] */
+const S=[
+['Ich',0,'spielen','mit meinem Hund'],['Lena',2,'malen','einen bunten Drachen'],['Wir',3,'kochen','eine Gemüsesuppe'],
+['Die Kinder',5,'lachen','über den Clown'],['Du',1,'bauen','eine Burg aus Sand'],['Papa',2,'kaufen','frisches Brot'],
+['Ihr',4,'suchen','den verlorenen Schlüssel'],['Der Lehrer',2,'erzählen','eine spannende Geschichte'],['Ich',0,'hören','ein schönes Lied'],
+['Meine Schwester',2,'lernen','das Einmaleins'],['Wir',3,'tanzen','im Wohnzimmer'],['Du',1,'holen','die Milch aus dem Kühlschrank'],
+['Oma',2,'backen','einen Apfelkuchen'],['Die Katze',2,'fangen','eine Maus'],['Ihr',4,'warten','auf den Bus'],
+['Mama',2,'arbeiten','im Büro'],['Ich',0,'putzen','meine Zähne'],['Der Bauer',2,'pflanzen','Kartoffeln'],
+['Die Schüler',5,'fragen','die Lehrerin'],['Du',1,'zeigen','mir dein Bild'],['Wir',3,'schenken','Opa ein Buch'],
+['Tim',2,'decken','den Tisch'],['Die Feuerwehr',2,'retten','die Katze vom Baum'],['Ich',0,'besuchen','meine Tante'],
+['Der Mechaniker',2,'reparieren','das Fahrrad'],['Ihr',4,'wünschen','euch einen Hund'],['Wir',3,'wohnen','in einem kleinen Haus'],
+['Du',1,'brauchen','einen neuen Bleistift'],['Die Kinder',5,'kleben','Sterne an das Fenster'],['Ich',0,'zählen','die Schafe'],
+['Anna',2,'träumen','von einem Pony'],['Wir',3,'schmücken','den Christbaum'],['Ich',0,'aufräumen','mein Zimmer'],
+['Mama',2,'einkaufen','im Supermarkt'],['Papa',2,'abholen','uns von der Schule'],['Du',1,'aufmachen','das Fenster'],
+['Die Kinder',5,'anmalen','die Ostereier'],['Ihr',4,'aufpassen','auf den kleinen Bruder'],['Wir',3,'einpacken','die Geschenke'],
+['Ich',0,'anschauen','die Bilder'],['Ich',0,'gehen','in den Wald'],['Wir',3,'fahren','mit dem Zug nach Wien'],
+['Der Hund',2,'laufen','über die Wiese'],['Du',1,'schwimmen','im See'],['Die Frösche',5,'springen','ins Wasser'],
+['Ihr',4,'kommen','zu spät'],['Die Vögel',5,'fliegen','nach Süden'],['Lisa',2,'reiten','auf einem Pferd'],
+['Wir',3,'bleiben','zu Hause'],['Das Baby',2,'schlafen','in seinem Bettchen'],['Ich',0,'essen','einen Apfel'],
+['Du',1,'trinken','ein Glas Wasser'],['Opa',2,'lesen','die Zeitung'],['Die Kinder',5,'singen','ein Lied'],
+['Ich',0,'schreiben','einen Brief'],['Wir',3,'finden','einen Schatz'],['Du',1,'sehen','einen Regenbogen'],
+['Max',2,'geben','dem Hund einen Knochen'],['Ihr',4,'nehmen','den Regenschirm'],['Ich',0,'helfen','meiner Mama'],
+['Der Junge',2,'werfen','den Ball'],['Die Mädchen',5,'tragen','bunte Kleider'],['Du',1,'waschen','deine Hände'],
+['Ich',0,'vergessen','meine Jause'],['Unsere Mannschaft',2,'gewinnen','das Spiel'],['Ihr',4,'verlieren','den Weg'],
+['Die Mutter',2,'rufen','die Kinder'],['Ich',0,'bringen','dir eine Blume'],['Wir',3,'denken','an dich'],
+['Du',1,'schneiden','das Papier'],['Der Schiedsrichter',2,'pfeifen','laut'],['Der Hund',2,'graben','ein tiefes Loch'],
+['Wir',3,'steigen','auf den Berg'],['Das Blatt',2,'fallen','vom Baum'],['Die Blumen',5,'wachsen','im Garten'],
+['Ich',0,'einschlafen','sofort'],['Ihr',4,'aufstehen','früh'],['Mama',2,'anrufen','die Oma'],
+['Ich',0,'mitnehmen','meinen Teddy'],['Der Zug',2,'ankommen','am Bahnhof'],['Wir',3,'fernsehen','am Abend'],
+['Ich',0,'sein','sehr müde'],['Du',1,'sein','mein bester Freund'],['Das Wetter',2,'sein','schön'],
+['Wir',3,'sein','im Zoo'],['Ihr',4,'sein','sehr fleißig'],['Die Kinder',5,'sein','glücklich'],
+['Ich',0,'haben','großen Hunger'],['Du',1,'haben','eine tolle Idee'],['Der Hase',2,'haben','lange Ohren'],
+['Wir',3,'haben','viel Spaß'],['Ihr',4,'haben','keine Zeit'],['Die Nachbarn',5,'haben','einen großen Garten'],
+['Der Bäcker',2,'backen','Semmeln'],['Wir',3,'spielen','Fußball im Park'],['Die Lehrerin',2,'erzählen','ein Märchen'],
+['Du',1,'malen','eine Sonne'],['Ich',0,'kochen','Nudeln'],['Die Eule',2,'rufen','in der Nacht'],
+['Der Wind',2,'wehen','über das Feld'],['Die Sonne',2,'scheinen','hell'],['Es',2,'regnen','stark'],
+['Es',2,'schneien','im Gebirge'],['Die Glocke',2,'läuten','laut'],['Wir',3,'feiern','meinen Geburtstag'],
+['Die Kinder',5,'basteln','Laternen'],['Ihr',4,'klettern','auf den Baum'],['Der Affe',2,'klettern','auf die Palme'],
+['Mein Bruder',2,'sammeln','Briefmarken'],['Wir',3,'wandern','durch die Berge'],['Du',1,'füttern','die Hühner'],
+['Opa',2,'streicheln','die Katze'],['Die Ente',2,'schwimmen','auf dem Teich'],['Ich',0,'laufen','zur Schule'],
+['Mein Freund',2,'kommen','zu Besuch'],['Du',1,'gehen','zum Arzt'],['Die Familie',2,'fahren','in den Urlaub'],
+['Der Ballon',2,'fliegen','in den Himmel'],['Ich',0,'trinken','warmen Tee'],['Wir',3,'essen','Pizza'],
+['Ihr',4,'lesen','ein spannendes Buch'],['Der Vogel',2,'singen','auf dem Dach'],['Die Kinder',5,'schreiben','eine Geschichte'],
+['Ich',0,'finden','meinen Schuh nicht'],['Wir',3,'sehen','einen Film'],['Du',1,'geben','mir die Hand'],
+['Die Lehrerin',2,'nehmen','die Kreide'],['Ihr',4,'helfen','dem alten Mann'],['Ich',0,'werfen','einen Stein in den Teich'],
+['Der Esel',2,'tragen','einen schweren Sack'],['Papa',2,'waschen','das Auto'],['Die Kinder',5,'vergessen','ihre Hefte'],
+['Ich',0,'gewinnen','einen Preis'],['Der König',2,'verlieren','seine Krone'],['Du',1,'bringen','den Müll in den Keller'],
+['Ich',0,'kennen','den Weg'],['Wir',3,'rennen','um die Wette'],['Mama',2,'schneiden','das Brot'],
+['Die Schildkröte',2,'kriechen','langsam'],['Der Hund',2,'beißen','in den Knochen'],['Die Rakete',2,'steigen','in die Luft'],
+['Ich',0,'fallen','in eine Pfütze'],['Mein Bruder',2,'wachsen','schnell'],['Das Baby',2,'einschlafen','im Kinderwagen'],
+['Wir',3,'aufstehen','um sieben Uhr'],['Du',1,'anrufen','deinen Freund'],['Ihr',4,'mitnehmen','eure Badesachen'],
+['Die Gäste',5,'ankommen','am Abend'],['Ich',0,'fernsehen','mit Opa'],['Meine Freundin',2,'sein','krank'],
+['Das Zimmer',2,'sein','sauber'],['Ich',0,'haben','einen Hund'],['Die Katze',2,'haben','weiches Fell'],
+['Ihr',4,'zumachen','die Tür'],['Wir',3,'ausräumen','den Geschirrspüler'],['Du',1,'abholen','das Paket'],
+['Die Kinder',5,'zeichnen','Tiere'],['Der Maler',2,'streichen','die Wand'],['Ich',0,'pfeifen','ein Lied'],
+['Die Prinzessin',2,'tanzen','mit dem Prinzen']
+];
+
+/* Satz in einer Zeit bauen: Liste aus [Wort, istVerbteil] */
+function build(i,t){
+  const [subj,p,vk,rest]=S[i], v=VERBS[vk], aux=VERBS[v.aux]||SPECIAL[v.aux];
+  const seg=[[subj,0]];
+  const add=(w,verb)=>{ if(w) seg.push([w,verb?1:0]); };
+  switch(t){
+    case 'praes': add(v.praes[p],1); add(rest); add(v.sep,1); break;
+    case 'praet': add(v.praet[p],1); add(rest); add(v.sep,1); break;
+    case 'perf':  add(SPECIAL[v.aux].praes[p],1); add(rest); add(v.part,1); break;
+    case 'plusq': add(SPECIAL[v.aux].praet[p],1); add(rest); add(v.part,1); break;
+    case 'fut1':  add(WERDEN[p],1); add(rest); add(v.inf,1); break;
+    case 'fut2':  add(WERDEN[p],1); add(rest); add(v.part,1); add(v.aux,1); break;
+    case 'konj':
+      if(v.konj){ add(v.konj[p],1); add(rest); }
+      else { add(WUERDE[p],1); add(rest); add(v.inf,1); }
+      break;
+  }
+  return seg;
+}
+const plain=seg=>seg.map(s=>s[0]).join(' ')+'.';
+const colored=(seg,c)=>seg.map(([w,v])=>v?`<b style="color:${c}">${esc(w)}</b>`:esc(w)).join(' ')+'.';
+const verbParts=seg=>seg.filter(s=>s[1]).map(s=>'»'+s[0]+'«').join(' + ');
+
+/* ===================== Hilfsfunktionen ===================== */
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function lsGet(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function starHTML(n){return '<span class="stars">'+[0,1,2].map(i=>i<n?'★':'<span class="off">★</span>').join('')+'</span>';}
+
+/* Satz-Stapel: Jeder Satz kommt dran, bevor sich einer wiederholt */
+function drawSentences(mode,n){
+  let deck=lsGet('zr-deck-'+mode,[]).filter(x=>x<S.length);
+  const out=[];
+  while(out.length<n){
+    if(!deck.length) deck=shuffle([...S.keys()]).filter(x=>!out.includes(x));
+    if(!deck.length) deck=shuffle([...S.keys()]);
+    out.push(deck.shift());
+  }
+  lsSet('zr-deck-'+mode,deck);
+  const seen=new Set(lsGet('zr-seen-'+mode,[])); out.forEach(x=>seen.add(x)); lsSet('zr-seen-'+mode,[...seen]);
+  return out;
+}
+/* Zeiten gleichmäßig verteilen */
+function tenseBag(n){let b=[];while(b.length<n) b=b.concat(shuffle(ORDER));return shuffle(b.slice(0,n));}
+
+/* Ähnliche Zeiten als Ablenker in der Zeitreise */
+const CONFUSE={
+  plusq:['perf','praet','fut2','konj'], praet:['praes','perf','plusq','konj'], perf:['plusq','praet','fut2','praes'],
+  praes:['praet','perf','fut1','konj'], fut1:['konj','fut2','praes','perf'], fut2:['perf','fut1','plusq','praet'],
+  konj:['fut1','praet','praes','plusq']
+};
+
+function makeItems(mode,n){
+  const idx=drawSentences(mode,n), tens=tenseBag(n);
+  return idx.map((i,k)=>{
+    if(mode==='erkennen'){
+      const t=tens[k];
+      return {mode,i,target:t,seg:build(i,t)};
+    }
+    const target=tens[k];
+    const from=pick(ORDER.filter(x=>x!==target));
+    const dis=CONFUSE[target].filter(x=>x!==from).slice(0,3);
+    while(dis.length<3){const x=pick(ORDER); if(x!==target&&x!==from&&!dis.includes(x)) dis.push(x);}
+    return {mode,i,target,from,dis,seg:build(i,target),fromSeg:build(i,from)};
+  });
+}
+
+/* ===================== Ablauf ===================== */
+let ROUND=20, Q=null;
+const NAMES={erkennen:'Welche Zeit ist das?',reise:'Zeitreise'};
+function drawStart(){
+  const best=lsGet('zr-best',{});
+  ['erkennen','reise'].forEach(m=>{
+    document.getElementById('best-'+m).innerHTML=starHTML(best[m]||0);
+    document.getElementById('seen-'+m).textContent=`Sätze entdeckt: ${lsGet('zr-seen-'+m,[]).length} von ${S.length}`;
+  });
+}
+function drawStrahl(){
+  document.getElementById('strahl').innerHTML=ORDER.map(k=>`<article class="tz" style="--c:${T[k].c}">
+    <p class="when">${T[k].when}</p><h3>${T[k].n}</h3><p>${T[k].rule}</p><p class="ex">${T[k].ex}</p></article>`).join('');
+}
+function startRound(mode){
+  const items=makeItems(mode,ROUND);
+  Q={mode,queue:items.map(it=>({...it,retry:false})),pos:0,total:items.length,ok:0,answered:false};
+  document.getElementById('startView').hidden=true;
+  document.getElementById('quizView').hidden=false;
+  renderQ();
+  try{document.getElementById('main').scrollIntoView({behavior:'smooth',block:'start'});}catch(e){}
+}
+function backToStart(){
+  Q=null; document.getElementById('quizView').hidden=true; document.getElementById('startView').hidden=false; drawStart();
+}
+function renderQ(){
+  if(Q.pos>=Q.queue.length) return renderResult();
+  const it=Q.queue[Q.pos]; Q.answered=false;
+  const pct=Math.round(Q.pos/Q.queue.length*100);
+  let body, opts;
+  if(it.mode==='erkennen'){
+    opts=ORDER.map(k=>({key:k,label:T[k].n,c:T[k].c}));
+    body=`<p class="sentence">${esc(plain(it.seg))}</p>
+      <div class="opts tenses">${opts.map(o=>`<button class="opt" data-k="${o.key}" style="--c:${o.c}"><span class="dot"></span>${esc(o.label)}</button>`).join('')}</div>`;
+  } else {
+    opts=shuffle([it.target,...it.dis]).map(k=>({key:k,label:plain(build(it.i,k))}));
+    body=`<div><span class="nowtag" style="--c:${T[it.from].c}">Der Satz steht jetzt im <b>${T[it.from].n}</b>:</span>
+      <p class="sentence">${esc(plain(it.fromSeg))}</p></div>
+      <div><span class="goal" style="--c:${T[it.target].c}">🚀 Schicke den Satz ${T[it.target].to}!</span></div>
+      <div class="opts long">${opts.map(o=>`<button class="opt" data-k="${o.key}">${esc(o.label)}</button>`).join('')}</div>`;
+  }
+  const v=document.getElementById('quizView');
+  v.innerHTML=`<div class="quiz">
+    <div class="qtop"><button class="back" id="backBtn">← Zurück</button><span class="qtitle">${NAMES[it.mode]}</span></div>
+    <div class="bar" aria-hidden="true"><i style="width:${pct}%"></i></div>
+    <div class="task">${it.mode==='erkennen'?'In welcher Zeit steht der Satz?':'Welcher Satz ist genau in der gesuchten Zeit?'} · Aufgabe ${Q.pos+1} von ${Q.queue.length}${it.retry?' · noch einmal':''}</div>
+    ${body}
+    <div id="fb" aria-live="polite"></div>
+  </div>`;
+  document.getElementById('backBtn').onclick=backToStart;
+  v.querySelectorAll('.opt').forEach(b=>b.onclick=()=>answer(b));
+}
+function answer(btn){
+  if(Q.answered) return; Q.answered=true;
+  const it=Q.queue[Q.pos], right=btn.dataset.k===it.target;
+  document.querySelectorAll('#quizView .opt').forEach(el=>{el.disabled=true;
+    if(el.dataset.k===it.target) el.classList.add('right'); else if(el===btn) el.classList.add('wrong'); else el.classList.add('dim');});
+  if(right){ if(!it.retry) Q.ok++; } else if(!it.retry){ Q.queue.push({...it,retry:true}); }
+  const t=T[it.target];
+  let head, text;
+  if(it.mode==='erkennen'){
+    head=right?pick(['Richtig!','Super!','Genau!','Bravo!','Stimmt!'])+' Das ist '+t.n+'.':'Fast! Das ist '+t.n+'.';
+    text=`Die Verbteile sind ${esc(verbParts(it.seg))}. ${t.n}: ${t.rule}`;
+    if(!right){const w=T[btn.dataset.k]; text+=` <br><span class="muted">${w.n} wäre: ${esc(plain(build(it.i,btn.dataset.k)))}</span>`;}
+  } else {
+    head=right?pick(['Richtig gereist!','Super!','Genau!','Bravo!','Perfekte Landung!']):'Fast! So heißt der Satz im '+t.n+':';
+    text=`${t.n}: ${t.rule}`;
+    if(!right){const w=T[btn.dataset.k]; text+=` <br><span class="muted">Dein Satz war ${w.n}.</span>`;}
+  }
+  const last=Q.pos+1>=Q.queue.length;
+  document.getElementById('fb').innerHTML=`<div class="feedback ${right?'ok':'no'}">
+      <strong>${head}</strong>
+      <span class="solved">${colored(it.seg,t.c)}</span>
+      <span>${text}</span>
+      ${!right&&!it.retry?'<span class="again-note">Diese Aufgabe kommt am Ende noch einmal.</span>':''}
+    </div>
+    <div style="display:grid;margin-top:12px"><button class="next" id="nextBtn">${last?'Zum Ergebnis':'Weiter →'}</button></div>`;
+  const nb=document.getElementById('nextBtn'); nb.onclick=()=>{Q.pos++;renderQ();}; nb.focus({preventScroll:true});
+}
+function renderResult(){
+  const r=Q.ok/Q.total, stars=r>=.9?3:r>=.7?2:r>=.5?1:0;
+  const best=lsGet('zr-best',{}); if(!(best[Q.mode]>=stars)){best[Q.mode]=stars;lsSet('zr-best',best);}
+  const msg=stars===3?'Du bist ein echter Zeitenprofi!':stars===2?'Sehr gut gemacht!':stars===1?'Gut! Mit Übung wird es noch besser.':'Schau dir den Spickzettel noch einmal an und probiere es wieder.';
+  document.getElementById('quizView').innerHTML=`<div class="quiz"><div class="result">
+    <div class="bigstars">${[0,1,2].map(i=>i<stars?'★':'<span class="off">★</span>').join('')}</div>
+    <h2>${msg}</h2>
+    <p class="muted">Beim ersten Versuch richtig: <b style="color:var(--ink)">${Q.ok} von ${Q.total}</b>. Alle Fehler hast du am Ende noch einmal geübt.</p>
+    <div class="row2"><button class="next" id="againBtn">Neue Runde mit neuen Sätzen</button><button class="ghost" id="listBtn">Zur Übersicht</button></div>
+  </div></div>`;
+  const m=Q.mode;
+  document.getElementById('againBtn').onclick=()=>startRound(m);
+  document.getElementById('listBtn').onclick=backToStart;
+}
+
+/* ===================== Start ===================== */
+document.querySelectorAll('.mode').forEach(b=>b.onclick=()=>startRound(b.dataset.mode));
+document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
+  ROUND=+c.dataset.n; document.querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed',String(x===c)));
+  lsSet('zr-round',ROUND);
+});
+(function(){const r=lsGet('zr-round',20); if([10,20,30].includes(r)){ROUND=r;document.querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed',String(+x.dataset.n===r)));}})();
+(function(){const b=document.getElementById('bubbles');let h='';for(let i=0;i<14;i++){const s=20+Math.random()*70;
+  h+=`<i style="left:${Math.random()*100}%;width:${s}px;height:${s}px;animation-duration:${18+Math.random()*22}s;animation-delay:-${Math.random()*30}s"></i>`;}b.innerHTML=h;})();
+drawStrahl(); drawStart();
+</script>
+</body>
+</html>
