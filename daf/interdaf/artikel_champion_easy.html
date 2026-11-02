@@ -1,0 +1,1862 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="/daf/interdaf/passwort.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Artikel-Champion Easy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1f1b24;
+    --ink-soft: #4f4858;
+    --muted: #6e6676;
+    --card: rgba(255, 252, 248, 0.90);
+    --card-solid: #fffcf8;
+    --line: rgba(92, 72, 98, 0.14);
+    --shadow: 0 14px 40px rgba(62, 48, 74, 0.10), 0 2px 6px rgba(62, 48, 74, 0.05);
+
+    --rust: #a2542b;       /* Herbstlaub */
+    --amber: #b9853d;      /* Bernstein */
+    --plum: #6a4a7a;       /* Dunkelflieder */
+    --dusk: #3d5a80;       /* Abendhimmel-Blau */
+    --petrol: #2c6873;     /* Petrol */
+    --berry: #8e3b56;      /* Beere */
+    --slate: #4b5878;      /* Schiefer */
+
+    --ok: #2c6873;  --ok-bg: #e2eef0;
+    --no: #a03a55;  --no-bg: #f7e4ea;
+    --sel: #b9853d; --sel-bg: #fbf1e1;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: 'Lexend', system-ui, sans-serif;
+    font-weight: 400;
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-color: #ebe3e0;
+    background-image:
+      radial-gradient(ellipse 70% 50% at 8% 100%, rgba(214, 160, 110, 0.28), transparent 70%),
+      radial-gradient(ellipse 60% 45% at 95% 0%, rgba(168, 188, 214, 0.45), transparent 70%),
+      radial-gradient(ellipse 50% 40% at 70% 70%, rgba(176, 150, 190, 0.18), transparent 70%),
+      linear-gradient(165deg, #f2e8dd 0%, #ebe1e2 42%, #dfe4ec 100%);
+    background-attachment: fixed;
+    line-height: 1.55;
+  }
+
+  /* ── Dekor: Blätter und Schneeflocken ── */
+  .deco-layer { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .deco {
+    position: absolute; top: -10vh; left: var(--x);
+    width: var(--s); height: var(--s);
+    opacity: var(--o);
+    animation: drift var(--d) linear infinite;
+    animation-delay: var(--delay);
+    will-change: transform;
+  }
+  .deco svg { width: 100%; height: 100%; display: block; }
+  @keyframes drift {
+    0%   { transform: translate3d(0, -10vh, 0) rotate(0deg); }
+    25%  { transform: translate3d(var(--sway), 22vh, 0) rotate(calc(var(--rot) * 0.25)); }
+    50%  { transform: translate3d(0, 52vh, 0) rotate(calc(var(--rot) * 0.5)); }
+    75%  { transform: translate3d(calc(var(--sway) * -1), 82vh, 0) rotate(calc(var(--rot) * 0.75)); }
+    100% { transform: translate3d(0, 118vh, 0) rotate(var(--rot)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .deco { animation: none; top: var(--y); }
+  }
+
+  .container { position: relative; z-index: 1; max-width: 920px; margin: 0 auto; padding: 28px 18px 60px; }
+
+  header { text-align: center; margin: 10px 0 30px; }
+  .eyebrow {
+    display: inline-block; font-size: 0.85rem; font-weight: 500; letter-spacing: 0.08em;
+    color: var(--plum); background: rgba(106, 74, 122, 0.09);
+    padding: 5px 14px; border-radius: 999px; margin-bottom: 14px;
+  }
+  h1 { font-size: clamp(2rem, 5vw, 2.9rem); font-weight: 600; letter-spacing: -0.01em; color: var(--ink); line-height: 1.15; }
+  h1 .easy { color: var(--rust); font-weight: 500; }
+  .subtitle { color: var(--ink-soft); font-size: 1.08rem; margin-top: 10px; font-weight: 300; }
+
+  .screen { display: none; animation: fadeIn 0.45s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+  .card {
+    background: var(--card);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    border: 1px solid var(--line);
+    border-radius: 26px;
+    box-shadow: var(--shadow);
+    padding: 28px;
+    margin-bottom: 22px;
+  }
+  .card-title { font-size: 1.3rem; font-weight: 600; margin-bottom: 18px; color: var(--ink); }
+
+  /* ── Menü ── */
+  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .mode-btn {
+    display: flex; align-items: center; gap: 16px;
+    background: var(--card-solid);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 16px 18px;
+    font-family: inherit; color: var(--ink); text-align: left;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .mode-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(62,48,74,0.10); border-color: var(--c); }
+  .mode-btn:focus-visible { outline: 3px solid var(--c); outline-offset: 2px; }
+  .chip {
+    flex: 0 0 auto; min-width: 62px; height: 52px; padding: 0 10px;
+    display: grid; place-items: center;
+    border-radius: 16px; background: var(--c); color: #fff;
+    font-weight: 600; font-size: 1rem; letter-spacing: 0.01em;
+  }
+  .mode-name { font-weight: 600; font-size: 1.08rem; }
+  .mode-desc { font-size: 0.92rem; color: var(--muted); margin-top: 2px; font-weight: 400; }
+  .mode-count { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+  .mode-btn.wide { grid-column: 1 / -1; }
+
+  /* ── Spiel ── */
+  .game-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--c, var(--plum)); color: #fff;
+    padding: 9px 18px; border-radius: 999px; font-weight: 500; font-size: 0.98rem;
+  }
+  .stats { display: flex; gap: 10px; }
+  .stat {
+    background: var(--card-solid); border: 1px solid var(--line); border-radius: 16px;
+    padding: 8px 16px; text-align: center; min-width: 92px;
+  }
+  .stat-label { font-size: 0.74rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .stat-value { font-size: 1.35rem; font-weight: 600; color: var(--ink); }
+
+  .progress { height: 12px; background: rgba(92,72,98,0.10); border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--rust), var(--amber) 45%, var(--plum)); border-radius: 999px; transition: width 0.5s ease; }
+  .progress-text { text-align: right; font-size: 0.9rem; color: var(--muted); margin: 6px 4px 18px; }
+
+  .sentence-card { text-align: center; padding: 40px 28px 30px; }
+  .sentence { font-size: clamp(1.35rem, 3.6vw, 1.85rem); line-height: 2.3; font-weight: 400; color: var(--ink); }
+  .slot {
+    display: inline-block; min-width: 84px; margin: 0 3px; padding: 0 14px;
+    line-height: 1.9; vertical-align: baseline;
+    border: 2px dashed rgba(92,72,98,0.30); border-radius: 14px;
+    background: rgba(255,255,255,0.7);
+    color: var(--muted); font-weight: 500; cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .slot.comma-slot { min-width: 46px; padding: 0 10px; }
+  .slot:hover { border-color: var(--sel); }
+  .slot.selected { border-style: solid; border-color: var(--sel); background: var(--sel-bg); color: var(--ink); box-shadow: 0 0 0 4px rgba(185,133,61,0.15); }
+  .slot.correct { border-style: solid; border-color: var(--ok); background: var(--ok-bg); color: var(--ok); font-weight: 600; cursor: default; animation: pop 0.45s ease; }
+  .slot.wrong { border-style: solid; border-color: var(--no); background: var(--no-bg); color: var(--no); animation: shake 0.4s ease; }
+  @keyframes pop { 50% { transform: scale(1.08); } }
+  @keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
+  .noun {
+    position: relative; cursor: help;
+    border-bottom: 2px dotted rgba(106,74,122,0.45);
+    transition: border-color 0.2s;
+  }
+  .noun:hover, .noun.show { border-bottom-color: var(--plum); }
+  .tip {
+    display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+    background: #fffaf1; color: var(--ink);
+    border: 1px solid rgba(185,133,61,0.55); border-radius: 12px;
+    padding: 3px 14px; font-size: 0.95rem; font-weight: 500; line-height: 1.6;
+    white-space: nowrap; z-index: 50;
+    box-shadow: 0 8px 20px rgba(62,48,74,0.15);
+    pointer-events: none;
+  }
+  .tip::after {
+    content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+    border: 7px solid transparent; border-top-color: rgba(185,133,61,0.55);
+  }
+  .noun:hover .tip, .noun.show .tip { display: block; }
+
+  .hint {
+    display: none; margin-top: 18px; padding: 12px 18px;
+    background: var(--no-bg); color: var(--ink); border-radius: 14px;
+    font-size: 1rem; border: 1px solid rgba(160,58,85,0.25);
+  }
+  .helper { margin-top: 14px; font-size: 0.92rem; color: var(--muted); font-weight: 300; }
+
+  .options { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin: 6px 0 24px; }
+  .options.two { grid-template-columns: 1fr 1fr; }
+  .opt {
+    background: var(--card-solid); border: 1px solid var(--line); border-radius: 16px;
+    padding: 14px 12px; font-family: inherit; font-size: 1.12rem; font-weight: 500; color: var(--ink);
+    cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s;
+  }
+  .opt:hover { transform: translateY(-2px); border-color: var(--c, var(--plum)); box-shadow: 0 8px 18px rgba(62,48,74,0.10); }
+  .opt:active { transform: translateY(0); }
+  .opt.zero { color: var(--ink-soft); font-size: 1rem; }
+
+  .controls { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    font-family: inherit; font-size: 1rem; font-weight: 500;
+    padding: 12px 24px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--card-solid); color: var(--ink);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(62,48,74,0.10); }
+  .btn.primary { background: var(--dusk); border-color: var(--dusk); color: #fff; }
+  .btn.primary:disabled { opacity: 0.6; cursor: default; transform: none; box-shadow: none; }
+
+  /* ── Ergebnis ── */
+  .result-title { font-size: 1.8rem; font-weight: 600; text-align: center; margin-bottom: 6px; }
+  .result-sub { text-align: center; color: var(--muted); margin-bottom: 22px; }
+  .result-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 22px; }
+  .r-stat { background: var(--card-solid); border: 1px solid var(--line); border-radius: 18px; padding: 16px 10px; text-align: center; }
+  .r-label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .r-value { font-size: 1.8rem; font-weight: 600; color: var(--plum); }
+  .name-input {
+    display: block; width: 100%; max-width: 340px; margin: 0 auto 16px;
+    font-family: inherit; font-size: 1.05rem; text-align: center;
+    padding: 12px 16px; border-radius: 14px; border: 1px solid var(--line); background: #fff; color: var(--ink);
+  }
+  .name-input:focus { outline: none; border-color: var(--dusk); box-shadow: 0 0 0 4px rgba(61,90,128,0.15); }
+
+  .board-entry {
+    display: grid; grid-template-columns: 44px 1fr auto auto; gap: 12px; align-items: center;
+    padding: 10px 14px; border-radius: 14px; background: var(--card-solid); border: 1px solid var(--line); margin-bottom: 8px;
+  }
+  .board-rank { font-weight: 600; color: var(--plum); text-align: center; }
+  .board-name { font-weight: 500; }
+  .board-mode { display: block; font-size: 0.82rem; color: var(--muted); font-weight: 400; }
+  .board-pts { font-weight: 600; color: var(--rust); }
+  .board-time { color: var(--muted); font-size: 0.9rem; }
+  .board-empty { color: var(--muted); text-align: center; }
+
+  /* ── Effekte ── */
+  .popup { position: fixed; z-index: 1000; pointer-events: none; font-weight: 600; font-size: 1.6rem; color: var(--petrol); animation: floatUp 1s ease-out forwards; }
+  .popup.combo { color: var(--rust); font-size: 1.9rem; }
+  @keyframes floatUp { from { transform: translateY(0) scale(0.9); opacity: 1; } to { transform: translateY(-70px) scale(1.1); opacity: 0; } }
+  .milestone { position: fixed; inset: 0; z-index: 2000; display: grid; place-items: center; background: rgba(242, 236, 232, 0.82); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); animation: fadeIn 0.3s ease; }
+  .milestone-inner { text-align: center; animation: scaleIn 0.5s cubic-bezier(.2,1.3,.4,1); }
+  @keyframes scaleIn { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .milestone-num { font-size: 6rem; font-weight: 700; color: var(--plum); line-height: 1; }
+  .milestone-text { font-size: 1.6rem; font-weight: 500; color: var(--ink); margin-top: 10px; }
+  .flake-burst { position: fixed; top: -20px; z-index: 3000; pointer-events: none; }
+
+  @media (max-width: 680px) {
+    .container { padding: 20px 14px 50px; }
+    .card { padding: 20px; border-radius: 22px; }
+    .mode-grid { grid-template-columns: 1fr; }
+    .sentence-card { padding: 30px 16px 22px; }
+    .result-grid { grid-template-columns: 1fr 1fr; }
+    .slot { min-width: 66px; padding: 0 10px; }
+    .stat { min-width: 76px; padding: 6px 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="deco-layer" id="deco"></div>
+
+<div class="container">
+  <header>
+    <div class="eyebrow">A1 · A2 · Deutsch üben</div>
+    <h1>Artikel-Champion <span class="easy">Easy</span></h1>
+    <p class="subtitle">Artikel, Fälle und Beistriche – mit einfachen Sätzen aus dem Alltag</p>
+  </header>
+
+  <!-- Start -->
+  <div id="startScreen" class="screen active">
+    <div class="card">
+      <h2 class="card-title">Was möchtest du üben?</h2>
+      <div class="mode-grid" id="modeGrid"></div>
+    </div>
+    <div class="card">
+      <h2 class="card-title">Bestenliste</h2>
+      <div id="menuBoard"></div>
+    </div>
+  </div>
+
+  <!-- Spiel -->
+  <div id="gameScreen" class="screen">
+    <div class="game-top">
+      <span class="pill" id="modePill">Modus</span>
+      <div class="stats">
+        <div class="stat"><div class="stat-label">Punkte</div><div class="stat-value" id="points">0</div></div>
+        <div class="stat"><div class="stat-label">Serie</div><div class="stat-value" id="streak">0</div></div>
+      </div>
+    </div>
+    <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText">0 / 0 Sätze</div>
+
+    <div class="card sentence-card">
+      <div class="sentence" id="sentence"></div>
+      <div class="hint" id="hint"></div>
+      <div class="helper" id="helper"></div>
+    </div>
+
+    <div class="options" id="options"></div>
+
+    <div class="controls">
+      <button class="btn" onclick="goToMenu()">← Menü</button>
+      <button class="btn" onclick="skipSentence()">Überspringen</button>
+      <button class="btn primary" onclick="endGame()">Beenden</button>
+    </div>
+  </div>
+
+  <!-- Ergebnis -->
+  <div id="resultScreen" class="screen">
+    <div class="card">
+      <h2 class="result-title">Geschafft!</h2>
+      <p class="result-sub" id="resultSub"></p>
+      <div class="result-grid">
+        <div class="r-stat"><div class="r-label">Punkte</div><div class="r-value" id="finalPoints">0</div></div>
+        <div class="r-stat"><div class="r-label">Zeit</div><div class="r-value" id="finalTime">0:00</div></div>
+        <div class="r-stat"><div class="r-label">Beste Serie</div><div class="r-value" id="bestStreak">0</div></div>
+        <div class="r-stat"><div class="r-label">Genauigkeit</div><div class="r-value" id="accuracy">0%</div></div>
+      </div>
+      <input type="text" class="name-input" id="playerName" placeholder="Dein Name …" maxlength="20">
+      <div class="controls">
+        <button class="btn primary" id="saveBtn" onclick="saveScore()">Speichern</button>
+        <button class="btn" onclick="startGame(state.mode)">Nochmal spielen</button>
+        <button class="btn" onclick="goToMenu()">Zum Menü</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2 class="card-title">Bestenliste</h2>
+      <div id="resultBoard"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const sentenceData = {
+preposition: [
+"Ich fahre mit [dem] N{der|Bus} zur Arbeit.",
+"Wir fahren mit [dem] N{der|Zug} nach Salzburg.",
+"Sie fährt mit [dem] N{das|Fahrrad} in die Stadt.",
+"Er kommt heute mit [dem] N{das|Auto}.",
+"Ich spreche mit [der] N{die|Lehrerin}.",
+"Am Abend esse ich mit [der] N{die|Familie}.",
+"Er telefoniert mit [dem] N{der|Chef}.",
+"Ich schreibe mit [dem] N{der|Kuli}.",
+"Wir essen die Suppe mit [dem] N{der|Löffel}.",
+"Sie schneidet das Brot mit [dem] N{das|Messer}.",
+"Die Kinder spielen mit [dem] N{der|Ball}.",
+"Die Oma spricht mit [den] N{der|Enkel|Enkeln}.",
+"Nach [dem] N{das|Frühstück} gehe ich zur Arbeit.",
+"Nach [der] N{die|Arbeit} gehe ich einkaufen.",
+"Nach [dem] N{der|Kurs} trinken wir Kaffee.",
+"Nach [der] N{die|Schule} macht er Hausaufgaben.",
+"Nach [dem] N{das|Essen} trinke ich einen Tee.",
+"Nach [der] N{die|Pause} lernen wir weiter.",
+"Nach [dem] N{der|Film} gehen wir nach Hause.",
+"Ich komme aus [_] Österreich.",
+"Sie kommt aus [der+] N{die|Schweiz}.",
+"Er kommt aus [der+] N{die|Türkei}.",
+"Wir kommen aus [_] Ungarn.",
+"Mein Kollege kommt aus [den+] N{die|USA}.",
+"Ich wohne in [_] Wien.",
+"Sie arbeitet in [der+] N{die|Schweiz}.",
+"Er fährt im Sommer in [die+] N{die|Türkei}.",
+"Wir fliegen nach [_] Spanien.",
+"Er nimmt den Saft aus [dem] N{der|Kühlschrank}.",
+"Sie holt das Geld aus [der] N{die|Tasche}.",
+"Ich komme gerade aus [dem] N{das|Büro}.",
+"Das Kind kommt um eins aus [der] N{die|Schule}.",
+"Er trinkt Wasser aus [der] N{die|Flasche}.",
+"Sie arbeitet bei [der] N{die|Post}.",
+"Er arbeitet bei [der] N{die|Bank}.",
+"Ich war gestern bei [der] N{die|Ärztin}.",
+"Wir warten an [der] N{die|Haltestelle}.",
+"Das Auto hält an [der] N{die|Ampel}.",
+"Das Bild hängt an [der] N{die|Wand}.",
+"Ich hänge das Bild an [die] N{die|Wand}.",
+"Sie arbeitet an [der] N{die|Kasse}.",
+"Jemand klopft an [die] N{die|Tür}.",
+"Am Wochenende fahren wir an [den] N{der|See}.",
+"Ich stelle den Stuhl an [den] N{der|Tisch}.",
+"Ich gehe jetzt in [die] N{die|Küche}.",
+"Ich koche in [der] N{die|Küche}.",
+"Wir gehen am Nachmittag in [den] N{der|Park}.",
+"Sie fährt mit dem Bus in [die] N{die|Stadt}.",
+"Er wohnt gern in [der] N{die|Stadt}.",
+"Ich lege die Milch in [den] N{der|Kühlschrank}.",
+"Das Kind geht in [den] N{der|Kindergarten}.",
+"Wir gehen in [die] N{die|Bäckerei}.",
+"Sie kauft Brot in [der] N{die|Bäckerei}.",
+"Er geht schnell in [die] N{die|Apotheke}.",
+"Wir wohnen in [der] N{die|Wohnung} im dritten Stock.",
+"Ich lege das Handy in [die] N{die|Tasche}.",
+"Das Handy ist in [der] N{die|Tasche}.",
+"Wir gehen in [den] N{der|Supermarkt}.",
+"Ich steige in [den] N{der|Zug}.",
+"Wir essen in [der] N{die|Kantine}.",
+"Das Buch liegt auf [dem] N{der|Tisch}.",
+"Ich lege das Buch auf [den] N{der|Tisch}.",
+"Die Katze schläft auf [dem] N{das|Sofa}.",
+"Die Katze springt auf [das] N{das|Sofa}.",
+"Der Schlüssel liegt auf [dem] N{der|Schrank}.",
+"Ich stelle die Tasse auf [den] N{der|Tisch}.",
+"Wir warten auf [den] N{der|Bus}.",
+"Ich warte auf [die] N{die|Straßenbahn}.",
+"Sie wartet auf [den] N{der|Zug}.",
+"Ich freue mich auf [das] N{das|Wochenende}.",
+"Er freut sich auf [den] N{der|Urlaub}.",
+"Wir freuen uns auf [die] N{die|Party}.",
+"Das Glas steht auf [dem] N{das|Regal}.",
+"Er legt das Handy auf [das] N{das|Bett}.",
+"Der Hund liegt auf [dem] N{der|Teppich}.",
+"Die Kinder spielen auf [dem] N{der|Spielplatz}.",
+"Am Samstag gehen wir auf [den] N{der|Markt}.",
+"Ich kaufe Obst auf [dem] N{der|Markt}.",
+"Der Brief liegt unter [dem] N{das|Buch}.",
+"Die Katze schläft unter [dem] N{das|Bett}.",
+"Der Ball rollt unter [das] N{das|Auto}.",
+"Die Schuhe stehen unter [dem] N{der|Stuhl}.",
+"Die Lampe hängt über [dem] N{der|Tisch}.",
+"Wir gehen über [die] N{die|Brücke}.",
+"Er geht bei Grün über [die] N{die|Straße}.",
+"Der Mond steht über [dem] N{das|Dorf}.",
+"Das Bild hängt über [dem] N{das|Sofa}.",
+"Die Lampe steht neben [dem] N{das|Bett}.",
+"Ich stelle die Lampe neben [das] N{das|Bett}.",
+"Die Bank ist neben [der] N{die|Post}.",
+"Er sitzt neben [dem] N{das|Fenster}.",
+"Sie setzt sich neben [die] N{die|Kollegin}.",
+"Das Auto steht hinter [dem] N{das|Haus}.",
+"Der Parkplatz ist hinter [der] N{die|Schule}.",
+"Ich stelle den Koffer hinter [die] N{die|Tür}.",
+"Ich warte vor [dem] N{das|Kino}.",
+"Wir treffen uns vor [dem] N{der|Bahnhof}.",
+"Das Taxi wartet vor [dem] N{das|Hotel}.",
+"Er parkt das Auto vor [der] N{die|Garage}.",
+"Vor [dem] N{das|Essen} wasche ich die Hände.",
+"Die Apotheke ist zwischen [der] N{die|Bank} und [dem] N{das|Café}.",
+"Das Geschenk ist für [den] N{der|Vater}.",
+"Die Blumen sind für [die] N{die|Mutter}.",
+"Das Spielzeug ist für [das] N{das|Baby}.",
+"Ich brauche einen Stift für [den] N{der|Test}.",
+"Wir bezahlen jetzt für [das] N{das|Essen}.",
+"Vielen Dank für [die] N{die|Hilfe}!",
+"Danke für [das] N{das|Geschenk}!",
+"Wir gehen durch [den] N{der|Park}.",
+"Der Bus fährt durch [die] N{die|Stadt}.",
+"Die Katze springt durch [das] N{das|Fenster}.",
+"Wir laufen durch [den] N{der|Wald}.",
+"Der Ball fliegt gegen [die] N{die|Tür}.",
+"Das Auto fährt gegen [den] N{der|Baum}.",
+"Wir sitzen um [den] N{der|Tisch}.",
+"Der Bus fährt um [die] N{die|Ecke}.",
+"Ich lerne seit [einem] N{das|Jahr} Deutsch.",
+"Er wohnt seit [einem] N{der|Monat} in Wien.",
+"Ich warte schon seit [einer] N{die|Stunde}.",
+"Wir sind seit [einer] N{die|Woche} hier.",
+"Sie arbeitet bei [einer] N{die|Firma} in Linz.",
+"Er wohnt in [einer] N{die|Wohnung} im Zentrum.",
+"Wir wohnen in [einem] N{das|Haus} mit Garten.",
+"Ich schreibe mit [einem] N{der|Bleistift}.",
+"Sie fährt mit [einem] N{das|Taxi} zum Flughafen.",
+"Ich gehe mit [einer] N{die|Kollegin} essen.",
+"Er spricht mit [einem] N{der|Kunde|Kunden}.",
+"Das Geschenk ist für [einen] N{der|Freund}.",
+"Ich suche ein Zimmer in [einem] N{das|Hotel}.",
+"Er wartet auf [einen] N{der|Anruf}.",
+"Ich gehe mit [meiner] N{die|Mutter} einkaufen.",
+"Ich telefoniere mit [meinem] N{der|Bruder}.",
+"Ich wohne noch bei [meinen] N{die|Eltern}.",
+"Ich fahre mit [meinem] N{das|Auto} nach Graz.",
+"Das ist ein Geschenk für [meine] N{die|Oma}.",
+"Ich spiele mit [meinem] N{der|Sohn} Fußball.",
+"Sie geht mit [ihrem] N{der|Hund} spazieren.",
+"Er wohnt bei [seiner] N{die|Tante}.",
+"Wir fahren mit [unseren] N{das|Kind|Kindern} ans Meer.",
+"Er spricht mit [seiner] N{die|Chefin}.",
+"Sie fährt mit [ihrer] N{die|Schwester} nach Italien.",
+"Kommst du mit [deinem] N{der|Freund}?",
+"Das Kind sitzt auf [dem] N{der|Stuhl}.",
+"Sie fährt ohne [ihren] N{der|Mann} in den Urlaub.",
+"Ich gehe nie ohne [mein] N{das|Handy} aus dem Haus.",
+"Die Kinder laufen über [den] N{der|Hof}.",
+"Im Sommer sitzen wir unter [dem] N{der|Baum}.",
+"Ich lege den Schlüssel unter [die] N{die|Fußmatte}.",
+"Ich hänge die Jacke in [den] N{der|Schrank}.",
+"Ich komme heute mit [der] N{die|U-Bahn}.",
+"Wir fahren mit [der] N{die|Straßenbahn} zum Bahnhof.",
+"Er geht mit [den] N{der|Freund|Freunden} ins Kino."
+],
+definite: [
+"[Der] N{der|Kaffee} ist heiß.",
+"[Die] N{die|Suppe} ist kalt.",
+"[Das] N{das|Brot} ist frisch.",
+"[Der] N{der|Bus} kommt um acht Uhr.",
+"[Die] N{die|Straßenbahn} ist heute sehr voll.",
+"[Das] N{das|Zimmer} ist groß und hell.",
+"[Der] N{der|Lehrer} kommt aus Deutschland.",
+"[Die] N{die|Lehrerin} ist sehr nett.",
+"[Das] N{das|Kind} spielt im Garten.",
+"[Die] N{das|Kind|Kinder} spielen im Park.",
+"[Der] N{der|Film} beginnt um acht.",
+"[Die] N{die|Wohnung} hat drei Zimmer.",
+"[Das] N{das|Wetter} ist heute schön.",
+"[Die] N{die|Sonne} scheint.",
+"[Der] N{der|Kuchen} schmeckt super.",
+"[Die] N{die|Pizza} ist sehr gut.",
+"[Das] N{das|Handy} ist neu.",
+"[Der] N{der|Computer} ist kaputt.",
+"[Die] N{die|Tür} ist offen.",
+"[Das] N{das|Fenster} ist zu.",
+"[Der] N{der|Supermarkt} hat am Sonntag zu.",
+"[Die] N{die|Apotheke} ist neben der Bank.",
+"[Das] N{das|Restaurant} ist sehr teuer.",
+"[Der] N{der|Zug} hat zehn Minuten Verspätung.",
+"[Die] N{die|Milch} ist im Kühlschrank.",
+"[Das] N{das|Wasser} ist kalt.",
+"[Der] N{der|Tee} ist zu heiß.",
+"[Die] N{die|Katze} schläft.",
+"[Der] N{der|Hund} bellt.",
+"[Das] N{das|Baby} weint.",
+"[Die] N{der|Schuh|Schuhe} sind neu.",
+"[Die] N{das|Buch|Bücher} liegen auf dem Tisch.",
+"[Die] N{der|Apfel|Äpfel} sind rot.",
+"[Der] N{der|Schnee} ist weiß.",
+"[Die] N{die|Blume} ist schön.",
+"[Das] N{das|Auto} ist alt.",
+"[Der] N{der|Kühlschrank} ist leer.",
+"[Die] N{die|Lampe} ist zu hell.",
+"[Das] N{das|Bett} ist sehr bequem.",
+"[Der] N{der|Winter} ist kalt.",
+"Ich sehe [den] N{der|Mann}.",
+"Ich kaufe [den] N{der|Käse}.",
+"Er kauft [die] N{die|Milch}.",
+"Sie kauft [das] N{das|Brot}.",
+"Wir brauchen [den] N{der|Schlüssel}.",
+"Ich suche [die] N{die|Brille}.",
+"Er sucht [das] N{das|Handy}.",
+"Ich finde [den] N{der|Weg} nicht.",
+"Sie liest [die] N{die|Zeitung}.",
+"Er liest [das] N{das|Buch}.",
+"Wir besuchen [den] N{der|Opa}.",
+"Wir besuchen [die] N{die|Oma}.",
+"Ich öffne [das] N{das|Fenster}.",
+"Kannst du bitte [die] N{die|Tür} zumachen?",
+"Ich nehme [den] N{der|Bus}.",
+"Sie nimmt [die] N{die|U-Bahn}.",
+"Er trinkt [den] N{der|Saft}.",
+"Ich esse [den] N{der|Apfel}.",
+"Ich esse [die] N{die|Banane}.",
+"Ich mag [den] N{der|Winter}.",
+"Ich mag [den] N{der|Herbst} sehr.",
+"Ich brauche [das] N{das|Formular}.",
+"Er bezahlt [die] N{die|Rechnung}.",
+"Sie putzt [das] N{das|Bad}.",
+"Ich wasche [die] N{die|Wäsche}.",
+"Er repariert [das] N{das|Fahrrad}.",
+"Wir kennen [die] N{die|Nachbarin}.",
+"Ich rufe [den] N{der|Arzt} an.",
+"Ich frage [die] N{die|Verkäuferin}.",
+"Ich verstehe [die] N{die|Frage} nicht.",
+"Er weiß [die] N{die|Antwort}.",
+"Sie hört [das] N{das|Lied} gern.",
+"Wir sehen [den] N{der|Film} heute Abend.",
+"Ich bestelle [die] N{die|Suppe}.",
+"Er bestellt [den] N{der|Salat}.",
+"Ich trage heute [den] N{der|Mantel}.",
+"Sie trägt [das] N{das|Kleid}.",
+"Ich kaufe [die] N{der|Schuh|Schuhe}.",
+"Er hat [die] N{die|Fahrkarte}.",
+"Hast du [das] N{das|Ticket}?",
+"Ich lerne [die] N{das|Wort|Wörter}.",
+"Ich mache [das] N{das|Frühstück}.",
+"Er kocht [das] N{das|Abendessen}.",
+"Wir besuchen [das] N{das|Museum}.",
+"Sie schreibt [den] N{der|Brief}.",
+"Ich höre [den] N{der|Regen}.",
+"Wir suchen [den] N{der|Bahnhof}.",
+"Er schließt [die] N{die|Tür}.",
+"Ich vergesse [den] N{der|Termin} nicht.",
+"Sie holt [das] N{das|Kind} vom Kindergarten ab.",
+"Ich helfe [dem] N{der|Mann}.",
+"Ich helfe [der] N{die|Frau}.",
+"Wir helfen [dem] N{das|Kind}.",
+"Wir danken [der] N{die|Lehrerin}.",
+"Er dankt [dem] N{der|Arzt}.",
+"Das Auto gehört [dem] N{der|Chef}.",
+"Die Tasche gehört [der] N{die|Kollegin}.",
+"Das Fahrrad gehört [dem] N{das|Mädchen}.",
+"Die Wohnung gefällt [der] N{die|Familie}.",
+"Das Essen schmeckt [den] N{das|Kind|Kindern}.",
+"Der Film gefällt [dem] N{der|Vater}.",
+"Ich gebe [dem] N{der|Kellner} das Geld.",
+"Sie gibt [der] N{die|Katze} Futter.",
+"Er zeigt [dem] N{der|Gast} [das] N{das|Zimmer}.",
+"Ich bringe [der] N{die|Nachbarin} [den] N{der|Brief}.",
+"Wir schenken [der] N{die|Mutter} [die] N{die|Blume|Blumen}.",
+"Ich erkläre [der] N{die|Studentin} [die] N{die|Aufgabe}.",
+"Ich schreibe [dem] N{der|Freund} eine Nachricht.",
+"Er gibt [dem] N{das|Kind} [den] N{der|Ball}.",
+"Sie zeigt [den] N{der|Gast|Gästen} [die] N{die|Stadt}.",
+"Die Jacke passt [der] N{die|Tochter} nicht.",
+"Ich antworte [dem] N{der|Lehrer}.",
+"Der Kaffee schmeckt [der] N{die|Oma}.",
+"[Der] N{der|Kellner} bringt [die] N{die|Speisekarte}.",
+"[Die] N{die|Mutter} kocht [die] N{die|Suppe}.",
+"[Das] N{das|Kind} sucht [den] N{der|Ball}.",
+"[Der] N{der|Vater} repariert [das] N{das|Auto}.",
+"[Die] N{die|Ärztin} untersucht [das] N{das|Kind}.",
+"[Der] N{der|Verkäufer} sucht [die] N{die|Jacke} in Größe M.",
+"[Die] N{die|Lehrerin} erklärt [die] N{die|Grammatik}.",
+"[Der] N{der|Chef} braucht [den] N{der|Bericht} heute.",
+"[Das] N{das|Mädchen} liest [die] N{die|Geschichte}.",
+"[Der] N{der|Hund} frisst [das] N{das|Fleisch}.",
+"[Die] N{die|Katze} trinkt [die] N{die|Milch}.",
+"[Der] N{der|Junge} isst [den] N{der|Apfel}.",
+"[Die] N{die|Oma} backt [den] N{der|Kuchen}.",
+"[Der] N{der|Opa} liest [die] N{die|Zeitung}.",
+"[Die] N{die|Frau} kauft [das] N{das|Gemüse}.",
+"[Der] N{der|Mann} trinkt [das] N{das|Bier}.",
+"[Die] N{die|Kollegin} öffnet [das] N{das|Fenster}.",
+"[Das] N{das|Baby} braucht [die] N{die|Flasche}.",
+"[Der] N{der|Student} lernt [die] N{das|Wort|Wörter}.",
+"Das ist das Auto [des] N{der|Lehrer|Lehrers}.",
+"Das ist die Tasche [der] N{die|Lehrerin}.",
+"Wie ist der Name [des] N{das|Hotel|Hotels}?",
+"Die Farbe [des] N{das|Auto|Autos} ist rot.",
+"Der Name [der] N{die|Straße} ist sehr lang.",
+"Die Adresse [der] N{die|Firma} ist neu.",
+"Das Ende [des] N{der|Film|Films} ist traurig.",
+"Die Tür [des] N{das|Haus|Hauses} ist blau.",
+"[Der] N{der|Schlüssel} liegt auf [dem] N{der|Tisch}.",
+"[Die] N{die|Tasse} steht neben [dem] N{das|Glas}.",
+"[Das] N{das|Bild} hängt an [der] N{die|Wand}.",
+"Ich lege [das] N{das|Buch} auf [den] N{der|Tisch}.",
+"[Die] N{das|Kind|Kinder} spielen mit [dem] N{der|Hund}.",
+"[Der] N{der|Arzt} hilft [der] N{die|Frau}.",
+"[Die] N{die|Verkäuferin} gibt [der] N{die|Kundin} [die] N{die|Tasche}.",
+"[Der] N{der|Kellner} empfiehlt [dem] N{der|Gast} [den] N{der|Fisch}.",
+"[Das] N{das|Mädchen} schenkt [der] N{die|Mutter} [das] N{das|Bild}.",
+"[Der] N{der|Lehrer} gibt [den] N{der|Schüler|Schülern} [die] N{die|Hausaufgabe}.",
+"[Die] N{die|Mutter} liest [dem] N{das|Kind} [die] N{die|Geschichte} vor."
+],
+indefinite: [
+"Das ist [ein] N{der|Tisch}.",
+"Das ist [eine] N{die|Lampe}.",
+"Das ist [ein] N{das|Bett}.",
+"Hier ist [ein] N{der|Supermarkt}.",
+"Dort ist [eine] N{die|Apotheke}.",
+"Da ist [ein] N{das|Café}.",
+"[Ein] N{der|Mann} wartet vor der Tür.",
+"[Eine] N{die|Frau} fragt nach dem Weg.",
+"[Ein] N{das|Kind} spielt im Garten.",
+"[Ein] N{der|Hund} bellt im Hof.",
+"[Eine] N{die|Katze} sitzt auf dem Dach.",
+"[Ein] N{das|Auto} steht vor dem Haus.",
+"Das ist [ein] N{der|Brief} für dich.",
+"Das ist [eine] N{die|Überraschung}!",
+"Das ist [ein] N{das|Geschenk} für dich.",
+"Neben dem Bahnhof ist [ein] N{das|Hotel}.",
+"Im Zimmer steht [ein] N{der|Schrank}.",
+"In der Küche steht [eine] N{die|Mikrowelle}.",
+"Im Wohnzimmer steht [ein] N{das|Sofa}.",
+"Das ist [eine] gute N{die|Idee}.",
+"Ich habe [einen] N{der|Bruder}.",
+"Ich habe [eine] N{die|Schwester}.",
+"Sie hat [ein] N{das|Kind}.",
+"Wir haben [einen] N{der|Hund}.",
+"Er hat [eine] N{die|Katze}.",
+"Ich habe [ein] N{das|Auto}.",
+"Ich brauche [einen] N{der|Stift}.",
+"Ich suche [eine] N{die|Wohnung}.",
+"Ich möchte [ein] N{das|Glas} Wasser.",
+"Ich kaufe [einen] N{der|Pullover}.",
+"Gibt es hier [eine] N{die|Bank}?",
+"Gibt es hier [einen] N{der|Bahnhof}?",
+"Gibt es hier [ein] N{das|Restaurant}?",
+"Ich habe [eine] N{die|Frage}.",
+"Haben Sie [ein] N{das|Zimmer} frei?",
+"Ich habe morgen [einen] N{der|Termin}.",
+"Wir haben [ein] N{das|Problem}.",
+"Er schreibt [eine] N{die|E-Mail}.",
+"Sie liest [ein] N{das|Buch}.",
+"Ich esse [einen] N{der|Apfel}.",
+"Ich esse [eine] N{die|Banane}.",
+"Ich nehme [ein] N{das|Brötchen}.",
+"Ich möchte [eine] N{die|Tasse} Tee.",
+"Er kauft [einen] N{der|Regenschirm}.",
+"Sie kauft [eine] N{die|Jacke}.",
+"Wir kaufen [ein] N{das|Sofa}.",
+"Ich suche [einen] N{der|Parkplatz}.",
+"Er sucht [eine] neue N{die|Stelle}.",
+"Wir suchen [ein] N{das|Hotel}.",
+"Ich brauche [einen] N{der|Arzt}.",
+"Ich brauche [eine] N{die|Pause}.",
+"Ich brauche [ein] N{das|Taxi}.",
+"Sie hat [einen] N{der|Freund}.",
+"Er hat [eine] N{die|Freundin}.",
+"Ich schreibe [einen] N{der|Brief}.",
+"Wir machen [eine] N{die|Party}.",
+"Wir machen [ein] N{das|Foto}.",
+"Ich habe [einen] N{der|Fehler} gemacht.",
+"Er macht [einen] N{der|Kurs}.",
+"Sie macht [eine] N{die|Reise}.",
+"Ich sehe [einen] N{der|Vogel}.",
+"Ich höre [ein] N{das|Geräusch}.",
+"Sie trägt [einen] N{der|Rock}.",
+"Er trägt [ein] N{das|Hemd}.",
+"Ich trage [eine] N{die|Mütze}.",
+"Wir mieten [eine] N{die|Ferienwohnung}.",
+"Ich reserviere [einen] N{der|Tisch}.",
+"Ich reserviere [ein] N{das|Zimmer}.",
+"Wir brauchen [eine] N{die|Lösung}.",
+"Hast du [einen] N{der|Moment} Zeit?",
+"Ich habe [eine] N{die|Idee}.",
+"Er hat [einen] N{der|Garten}.",
+"Wir haben [einen] N{der|Balkon}.",
+"Die Wohnung hat [eine] N{die|Küche} und [ein] N{das|Bad}.",
+"Das Hotel hat [ein] N{das|Schwimmbad}.",
+"Ich brauche [einen] N{der|Koffer}.",
+"Sie kauft [eine] N{die|Fahrkarte}.",
+"Er trägt immer [einen] N{der|Hut}.",
+"Ich möchte [einen] N{der|Löffel}, bitte.",
+"Kann ich [eine] N{die|Gabel} haben?",
+"Brauchst du [ein] N{das|Messer}?",
+"Ich kaufe [einen] N{der|Kalender}.",
+"Wir suchen [einen] N{der|Babysitter}.",
+"Sie hat [einen] N{der|Sohn} und [eine] N{die|Tochter}.",
+"Er hat [ein] N{das|Fahrrad} und [ein] N{das|Auto}.",
+"Ich wohne in [einer] N{die|Wohnung}.",
+"Er arbeitet in [einem] N{das|Büro}.",
+"Sie arbeitet in [einem] N{das|Krankenhaus}.",
+"Wir wohnen in [einem] N{das|Dorf}.",
+"Ich spreche mit [einer] N{die|Kollegin}.",
+"Er spricht mit [einem] N{der|Kollege|Kollegen}.",
+"Sie fährt mit [einem] N{das|Taxi}.",
+"Ich helfe [einer] N{die|Frau}.",
+"Er hilft [einem] N{der|Mann}.",
+"Wir helfen [einem] N{das|Kind}.",
+"Ich gebe [einem] N{der|Freund} das Buch.",
+"Sie schreibt [einer] N{die|Freundin} eine Karte.",
+"Das Handy gehört [einem] N{der|Schüler}.",
+"Die Tasche gehört [einer] N{die|Kundin}.",
+"Er wohnt bei [einer] N{die|Familie}.",
+"Ich arbeite seit [einem] N{das|Jahr} hier.",
+"Er lernt seit [einem] N{der|Monat} Deutsch.",
+"Wir warten seit [einer] N{die|Stunde}.",
+"Nach [einer] N{die|Woche} ist er wieder gesund.",
+"Ich wohne in [einem] N{das|Haus} mit Garten.",
+"Sie sitzt auf [einem] N{der|Stuhl}.",
+"Das Kind schläft in [einem] N{das|Bett} am Fenster.",
+"Wir essen in [einem] N{das|Restaurant} in der Stadt.",
+"Sie arbeitet in [einer] N{die|Bäckerei}.",
+"Er arbeitet in [einer] N{die|Firma} in Graz.",
+"Ich schreibe mit [einem] N{der|Kuli}.",
+"Er fährt mit [einem] N{der|Freund} nach Wien.",
+"Sie geht mit [einer] N{die|Freundin} ins Kino.",
+"Wir sprechen mit [einem] N{der|Arzt}.",
+"Ich telefoniere mit [einer] N{die|Kundin}.",
+"Das ist das Auto [eines] N{der|Freund|Freundes}.",
+"Das ist die Tasche [einer] N{die|Kollegin}.",
+"Das ist das Zimmer [eines] N{der|Gast|Gastes}.",
+"Das ist die Adresse [einer] N{die|Firma} in Linz.",
+"Das ist das Fahrrad [eines] N{der|Nachbar|Nachbarn}.",
+"Ich kaufe [_] N{der|Apfel|Äpfel}.",
+"Wir brauchen [_] N{das|Ei|Eier}.",
+"Sie kauft [_] N{die|Tomate|Tomaten}.",
+"Im Park spielen [_] N{das|Kind|Kinder}.",
+"Auf dem Tisch liegen [_] N{das|Buch|Bücher}.",
+"Ich brauche [_] neue N{der|Schuh|Schuhe}.",
+"Wir haben heute [_] N{der|Gast|Gäste}.",
+"Er kauft [_] N{die|Banane|Bananen}.",
+"Im Garten stehen [_] N{der|Baum|Bäume}.",
+"Vor dem Haus stehen [_] N{das|Auto|Autos}.",
+"Ich lese gern [_] N{das|Buch|Bücher}.",
+"Sie hat [_] N{die|Frage|Fragen}.",
+"In der Stadt gibt es [_] N{das|Kino|Kinos}.",
+"Im Kühlschrank sind [_] N{die|Karotte|Karotten}.",
+"Ich habe [_] N{das|Problem|Probleme}.",
+"Wir kaufen [einen] N{der|Kuchen} und [_] N{die|Kerze|Kerzen}.",
+"Ich habe [eine] N{die|Katze} und [_] N{der|Fisch|Fische}.",
+"Er bringt [eine] N{die|Torte} und [_] N{das|Getränk|Getränke}.",
+"Das ist [ein] N{der|Tisch} und das sind [_] N{der|Stuhl|Stühle}.",
+"Das ist [ein] N{der|Park} mit [_] alten N{der|Baum|Bäumen}.",
+"Ich suche [einen] N{der|Job} in [einem] N{das|Hotel}.",
+"Sie wohnt in [einer] N{die|Stadt} mit [einem] N{der|Fluss}.",
+"[Ein] N{der|Freund} von mir wohnt in Graz.",
+"[Eine] N{die|Kollegin} von mir kommt aus Polen.",
+"Da steht [ein] N{der|Mann} mit [einem] N{der|Hund}.",
+"[Ein] N{das|Mädchen} fragt nach [einem] N{der|Stift}.",
+"Ich wünsche dir [einen] schönen N{der|Tag}!",
+"Ich wünsche dir [ein] schönes N{das|Wochenende}!",
+"Wir wünschen euch [eine] gute N{die|Reise}!",
+"Hast du [einen] N{der|Bleistift} für mich?",
+"Das ist [ein] N{der|Fehler}."
+],
+negation: [
+"Ich habe [keinen] N{der|Hund}.",
+"Ich habe heute [keine] N{die|Zeit}.",
+"Wir haben [kein] N{das|Auto}.",
+"Sie haben [keine] N{das|Kind|Kinder}.",
+"Ich habe [keinen] N{der|Hunger}.",
+"Er hat [keinen] N{der|Durst}.",
+"Ich habe [keine] N{die|Lust}.",
+"Wir haben [keine] N{die|Milch} mehr.",
+"Er isst [kein] N{das|Fleisch}.",
+"Ich trinke [keinen] N{der|Kaffee}.",
+"Sie trinkt [keinen] N{der|Alkohol}.",
+"Es gibt hier [keinen] N{der|Supermarkt}.",
+"Es gibt hier [keine] N{die|Apotheke}.",
+"Es gibt hier [kein] N{das|Restaurant}.",
+"Das ist [kein] N{das|Problem}.",
+"Ich habe [keine] N{die|Frage|Fragen}.",
+"Er hat [keinen] N{der|Bruder}.",
+"Sie hat [keine] N{die|Schwester}.",
+"Wir haben [keinen] N{der|Garten}.",
+"Die Wohnung hat [keinen] N{der|Balkon}.",
+"Das Zimmer hat [kein] N{das|Fenster}.",
+"Ich habe [kein] N{das|Geld} dabei.",
+"Er hat [keine] N{die|Arbeit}.",
+"Ich habe [keinen] N{der|Schlüssel}.",
+"Ich habe [kein] N{das|Handy} dabei.",
+"Heute habe ich [keinen] N{der|Termin}.",
+"Wir haben [keine] N{die|Hausaufgabe|Hausaufgaben}.",
+"Ich sehe [keinen] N{der|Bus}.",
+"Ich finde [keinen] N{der|Parkplatz}.",
+"Ich brauche [keine] N{die|Tasche}.",
+"Er braucht [kein] N{das|Taxi}.",
+"Ich esse [keine] N{die|Wurst}.",
+"Sie isst [keinen] N{der|Fisch}.",
+"Ich mag [keinen] N{der|Käse}.",
+"Er kauft [kein] N{das|Brot}.",
+"Wir kaufen [keine] N{der|Apfel|Äpfel}.",
+"Ich trage [keine] N{die|Brille}.",
+"Er trägt [keinen] N{der|Hut}.",
+"Sie trägt [kein] N{das|Kleid}.",
+"Ich habe [keine] N{die|Idee}.",
+"Er hat [keinen] N{der|Plan}.",
+"Wir haben [kein] N{das|Ticket}.",
+"Ich habe [keinen] N{der|Fernseher}.",
+"Sie hat [keinen] N{der|Führerschein}.",
+"Wir haben [kein] N{das|WLAN}.",
+"Es gibt [keinen] N{der|Zucker} mehr.",
+"Im Kühlschrank ist [kein] N{das|Bier}.",
+"Im Zimmer ist [keine] N{die|Lampe}.",
+"Das Hotel hat [kein] N{das|Schwimmbad}.",
+"Heute gibt es [keine] N{die|Suppe}.",
+"Ich habe [keine] N{die|Angst}.",
+"Er hat [keine] N{die|Geduld}.",
+"Sie hat [keinen] N{der|Job}.",
+"Wir haben [keine] N{das|Haustier|Haustiere}.",
+"Ich habe [kein] N{das|Fahrrad}.",
+"Hier ist [kein] N{der|Platz} mehr frei.",
+"Das ist [keine] gute N{die|Idee}.",
+"Das ist [kein] guter N{der|Film}.",
+"Das ist [kein] schönes N{das|Wetter}.",
+"Leider habe ich [kein] N{das|Glück}.",
+"Er schreibt [keine] N{die|E-Mail|E-Mails}.",
+"Ich bekomme [keine] N{die|Antwort}.",
+"Ich verstehe [kein] N{das|Wort}.",
+"Wir sehen [keinen] N{der|Unterschied}.",
+"Der Laden hat [keine] N{der|Schuh|Schuhe} in Größe 36.",
+"Er hat [keine] N{der|Freund|Freunde} in Wien.",
+"Am Sonntag fährt [kein] N{der|Bus}.",
+"Heute kommt [keine] N{die|Post}.",
+"Hier wohnt [kein] N{das|Kind}.",
+"[Kein] N{der|Mensch} ist perfekt.",
+"[Keine] N{die|Sorge}, ich helfe dir!",
+"[Kein] N{das|Problem}!",
+"[Keine] N{die|Ahnung}!",
+"Ich wohne in [keiner] großen N{die|Stadt}, sondern in einem Dorf.",
+"Er wohnt in [keinem] N{das|Hotel}, sondern bei Freunden.",
+"Sie arbeitet in [keiner] N{die|Firma}, sie ist selbständig.",
+"Heute gibt es in [keinem] N{das|Geschäft} frisches Brot.",
+"Ich komme heute [nicht].",
+"Das Wetter ist [nicht] gut.",
+"Er wohnt [nicht] in Wien.",
+"Ich verstehe das [nicht].",
+"Wir arbeiten am Sonntag [nicht].",
+"Der Bus kommt heute [nicht] pünktlich.",
+"Sie ist [nicht] müde.",
+"Das Essen ist [nicht] teuer.",
+"Ich kann heute [nicht] kommen.",
+"Ich kenne den Mann [nicht].",
+"Das ist [nicht] mein Handy.",
+"Das ist [nicht] die richtige Adresse.",
+"Er schläft [nicht] gut.",
+"Ich weiß es [nicht].",
+"Die Wohnung ist [nicht] groß.",
+"Der Kaffee ist [nicht] heiß.",
+"Ich finde den Schlüssel [nicht].",
+"Sie mag den Film [nicht].",
+"Wir fahren [nicht] mit dem Auto.",
+"Ich gehe heute [nicht] einkaufen.",
+"Er spielt [nicht] gern Fußball.",
+"Das Kind isst [nicht] gern Gemüse.",
+"Die Tür ist [nicht] offen.",
+"Ich trinke den Tee [nicht].",
+"Das Restaurant ist [nicht] weit.",
+"Der Zug fährt [nicht] nach Graz.",
+"Ich habe das Buch [nicht] gelesen.",
+"Sie hat mich [nicht] angerufen.",
+"Wir sind gestern [nicht] gekommen.",
+"Er ist [nicht] zu Hause.",
+"Ich bin [nicht] krank.",
+"Das ist [nicht] schwer.",
+"Der Supermarkt ist am Sonntag [nicht] offen.",
+"Meine Tasche ist [nicht] hier.",
+"Ich esse heute [nicht] im Restaurant.",
+"Sie wartet [nicht] gern.",
+"Ich kann [nicht] gut kochen.",
+"Der Computer funktioniert [nicht].",
+"Er spricht [nicht] laut.",
+"Das Wasser ist [nicht] kalt.",
+"Wir wohnen [nicht] im Zentrum.",
+"Ich brauche das Formular [nicht].",
+"Das Handy ist [nicht] neu.",
+"Sie kommt [nicht] aus Deutschland.",
+"Der Film ist [nicht] lang.",
+"Ich habe heute [nicht] viel Zeit.",
+"Er arbeitet [nicht] mehr hier.",
+"Ich tanze [nicht] gern.",
+"Ich habe [keine] N{die|Zeit}, ich komme [nicht].",
+"Er hat [keinen] N{der|Hunger} und isst [nicht].",
+"Wir haben [kein] N{das|Auto} und fahren [nicht] gern Bus.",
+"Sie hat [keine] N{die|Lust} und geht [nicht] mit.",
+"Ich trinke [keinen] N{der|Kaffee}, sonst schlafe ich [nicht].",
+"Er hat [kein] N{das|Geld} und kauft [nicht] ein.",
+"Das Kind ist [nicht] müde und will [keine] N{die|Pause}.",
+"Ich habe [keinen] N{der|Regenschirm}, deshalb gehe ich [nicht] raus.",
+"Das Zimmer ist [nicht] groß und hat [keinen] N{der|Schrank}.",
+"Wir haben [keine] N{das|Ei|Eier} und backen heute [nicht].",
+"Wir haben [keine] N{die|Zeit} und kommen [nicht] mit.",
+"Ich habe [keine] N{die|Telefonnummer} von ihr.",
+"Sie hat [kein] N{das|Konto} bei dieser Bank.",
+"Im Kurs gibt es heute [keinen] N{der|Test}.",
+"In der Stadt gibt es [kein] N{das|Kino}.",
+"Ich sehe [keine] N{das|Auto|Autos} auf der Straße.",
+"Wir haben [keinen] N{der|Platz} für ein Sofa.",
+"Ich habe [keine] N{die|Jacke} dabei.",
+"Er macht [keinen] N{der|Fehler}.",
+"Ich höre [keine] N{die|Musik}.",
+"Sie bekommt [keinen] N{der|Brief}.",
+"Heute gibt es [keinen] N{der|Regen}.",
+"Hier gibt es [keine] N{die|Haltestelle}.",
+"Ich habe [kein] N{das|Wörterbuch}.",
+"Wir trinken [keinen] N{der|Wein}.",
+"Er hat [keine] N{die|Zeit} für Sport.",
+"Ich kaufe heute [kein] N{das|Gemüse}."
+],
+possessive: [
+"Das ist [mein] N{der|Bruder}.",
+"Das ist [meine] N{die|Schwester}.",
+"Das ist [mein] N{das|Kind}.",
+"Das sind [meine] N{die|Eltern}.",
+"Wo ist [dein] N{das|Handy}?",
+"Wo ist [deine] N{die|Tasche}?",
+"Wo ist [dein] N{der|Schlüssel}?",
+"Ist das [dein] N{das|Fahrrad}?",
+"Sind das [deine] N{der|Schuh|Schuhe}?",
+"[Mein] N{der|Name} ist Anna.",
+"[Meine] N{die|Adresse} ist neu.",
+"[Mein] N{das|Zimmer} ist klein.",
+"[Sein] N{der|Vater} ist Arzt.",
+"[Seine] N{die|Mutter} arbeitet in einer Bank.",
+"[Sein] N{das|Auto} ist rot.",
+"[Ihr] N{der|Mann} kocht gern.",
+"[Ihre] N{die|Tochter} geht in die Schule.",
+"[Ihr] N{das|Baby} schläft.",
+"[Unser] N{der|Lehrer} ist sehr nett.",
+"[Unsere] N{die|Wohnung} ist hell.",
+"[Unser] N{das|Haus} hat einen Garten.",
+"Ist das [euer] N{der|Hund}?",
+"Wo ist [eure] N{die|Katze}?",
+"Ist das [euer] N{das|Auto}?",
+"Wie ist [Ihr] N{der|Name}?",
+"Wie ist [Ihre] N{die|Adresse}?",
+"Wie ist [Ihre] N{die|Telefonnummer}?",
+"[Meine] N{das|Kind|Kinder} sind schon groß.",
+"[Seine] N{der|Freund|Freunde} wohnen in Graz.",
+"[Unsere] N{der|Nachbar|Nachbarn} sind sehr freundlich.",
+"Ich suche [meinen] N{der|Schlüssel}.",
+"Ich suche [meine] N{die|Brille}.",
+"Ich suche [mein] N{das|Handy}.",
+"Er besucht [seine] N{die|Mutter}.",
+"Er besucht [seinen] N{der|Vater}.",
+"Sie besucht [ihren] N{der|Opa}.",
+"Sie ruft [ihre] N{die|Freundin} an.",
+"Wir verkaufen [unser] N{das|Auto}.",
+"Wir lieben [unseren] N{der|Garten}.",
+"Wir putzen [unsere] N{die|Wohnung}.",
+"Besucht ihr [eure] N{die|Eltern}?",
+"Habt ihr [euren] N{der|Pass}?",
+"Ihr braucht [euer] N{das|Ticket}.",
+"Haben Sie [Ihren] N{der|Ausweis}?",
+"Haben Sie [Ihre] N{die|Kreditkarte}?",
+"Brauchen Sie [Ihr] N{das|Formular}?",
+"Hast du [deinen] N{der|Rucksack}?",
+"Nimm [deine] N{die|Jacke} mit!",
+"Vergiss [dein] N{das|Handy} nicht!",
+"Ich liebe [meinen] N{der|Hund}.",
+"Ich mag [meine] N{die|Arbeit}.",
+"Ich finde [mein] N{das|Heft} nicht.",
+"Er vergisst immer [seinen] N{der|Regenschirm}.",
+"Er sucht [seine] N{die|Brille}.",
+"Er repariert [sein] N{das|Fahrrad}.",
+"Sie putzt [ihr] N{das|Zimmer}.",
+"Sie verkauft [ihren] N{der|Computer}.",
+"Sie liebt [ihre] N{die|Katze}.",
+"Wir besuchen [unsere] N{die|Oma}.",
+"Wir feiern [unseren] N{der|Hochzeitstag}.",
+"Ich besuche [meine] N{die|Eltern}.",
+"Er ruft [seine] N{die|Kollegin} an.",
+"Sie trifft [ihre] N{der|Freund|Freunde} im Café.",
+"Wir zeigen euch [unser] N{das|Haus}.",
+"Ich zeige dir [meine] N{die|Wohnung}.",
+"Kennst du [meinen] N{der|Bruder}?",
+"Kennst du [meine] N{die|Schwester}?",
+"Ich mache [meine] N{die|Hausaufgabe|Hausaufgaben}.",
+"Er macht [sein] N{das|Frühstück}.",
+"Sie packt [ihren] N{der|Koffer}.",
+"Ich helfe [meiner] N{die|Mutter}.",
+"Ich helfe [meinem] N{der|Vater}.",
+"Er schreibt [seiner] N{die|Oma}.",
+"Sie dankt [ihrem] N{der|Lehrer}.",
+"Ich gebe [meinem] N{der|Hund} Futter.",
+"Er schenkt [seiner] N{die|Frau} Blumen.",
+"Sie kauft [ihrem] N{der|Sohn} ein Fahrrad.",
+"Wir helfen [unserem] N{der|Nachbar|Nachbarn}.",
+"Wir schreiben [unseren] N{die|Eltern} eine Karte.",
+"Hilfst du [deiner] N{die|Schwester}?",
+"Gibst du [deinem] N{der|Freund} das Buch?",
+"Dankt ihr [eurer] N{die|Lehrerin}?",
+"Ich zeige [meinem] N{das|Kind} den Park.",
+"Gehört das Auto [Ihrem] N{der|Mann}?",
+"Das Buch gehört [meiner] N{die|Tochter}.",
+"Die Jacke gehört [seinem] N{der|Bruder}.",
+"Ich wohne bei [meiner] N{die|Tante}.",
+"Er fährt mit [seinem] N{das|Auto}.",
+"Sie spricht mit [ihrer] N{die|Mutter}.",
+"Ich gehe mit [meinem] N{der|Hund} spazieren.",
+"Wir fahren mit [unseren] N{das|Kind|Kindern} in den Urlaub.",
+"Sie wohnt bei [ihren] N{die|Eltern}.",
+"Ich telefoniere oft mit [meiner] N{die|Schwester}.",
+"Er spielt mit [seiner] N{die|Tochter}.",
+"Kommst du mit [deinem] N{das|Fahrrad}?",
+"Fahrt ihr mit [eurem] N{das|Auto}?",
+"Ich esse mit [meinen] N{der|Freund|Freunden}.",
+"Er arbeitet mit [seinem] N{der|Computer}.",
+"Sie geht mit [ihrem] N{der|Freund} ins Kino.",
+"Wir essen mit [unserer] N{die|Familie}.",
+"Das ist das Auto [meines] N{der|Vater|Vaters}.",
+"Das ist die Wohnung [meiner] N{die|Schwester}.",
+"Das ist das Zimmer [meines] N{der|Sohn|Sohnes}.",
+"Das ist der Hund [seiner] N{die|Freundin}.",
+"Das ist das Haus [unserer] N{die|Oma}.",
+"Wie ist der Name [deines] N{der|Lehrer|Lehrers}?",
+"Das ist die Katze [ihres] N{der|Nachbar|Nachbarn}.",
+"[Mein] N{der|Bruder} besucht [seine] N{die|Freundin}.",
+"[Meine] N{die|Mutter} kocht für [meinen] N{der|Vater}.",
+"[Sein] N{der|Sohn} spielt mit [seinem] N{der|Ball}.",
+"[Ihre] N{die|Tochter} hilft [ihrer] N{die|Oma}.",
+"Ich gebe [meinem] N{der|Bruder} [meinen] N{der|Schlüssel}.",
+"[Unser] N{der|Hund} schläft auf [unserem] N{das|Sofa}.",
+"[Dein] N{das|Handy} liegt auf [deinem] N{das|Bett}.",
+"Sie zeigt [ihrer] N{die|Freundin} [ihr] N{das|Zimmer}.",
+"[Mein] N{das|Kind} sucht [seinen] N{der|Ball}.",
+"[Seine] N{die|Frau} fährt mit [ihrem] N{das|Fahrrad}.",
+"[Ihr] N{der|Mann} sucht [seine] N{die|Brille}.",
+"Ich wohne mit [meinem] N{der|Freund} in [unserer] N{die|Wohnung}.",
+"[Eure] N{die|Lehrerin} spricht mit [euren] N{die|Eltern}.",
+"[Unsere] N{das|Kind|Kinder} spielen mit [ihren] N{der|Freund|Freunden}.",
+"Er kauft [seiner] N{die|Mutter} [ihre] N{die|Lieblingsschokolade}.",
+"Habt ihr [eure] N{die|Fahrkarte|Fahrkarten}?",
+"[Euer] N{das|Haus} ist sehr schön.",
+"[Eure] N{das|Kind|Kinder} sind sehr nett.",
+"Wo arbeitet [euer] N{der|Vater}?",
+"Wie alt ist [eure] N{die|Tochter}?",
+"[Dein] N{der|Kaffee} wird kalt!",
+"[Deine] N{die|Suppe} ist fertig.",
+"Wie heißt [dein] N{der|Hund}?",
+"Wie heißt [deine] N{die|Katze}?",
+"Wann beginnt [dein] N{der|Kurs}?",
+"Wo wohnen [deine] N{die|Eltern}?",
+"[Mein] N{der|Zug} fährt um sieben.",
+"[Meine] N{die|Wohnung} liegt im Zentrum.",
+"[Sein] N{das|Büro} ist im dritten Stock.",
+"[Seine] N{die|Arbeit} beginnt um acht.",
+"[Ihr] N{das|Kleid} ist sehr schön.",
+"[Ihre] N{das|Haar|Haare} sind lang.",
+"[Unser] N{der|Urlaub} beginnt morgen.",
+"[Unsere] N{die|Firma} ist in Linz.",
+"Ist das [Ihr] N{der|Koffer}?",
+"Ist das [Ihre] N{die|Tasche}?",
+"Hier ist [Ihr] N{der|Schlüssel}.",
+"Hier ist [Ihr] N{das|Zimmer}.",
+"Ich brauche [Ihre] N{die|Unterschrift}.",
+"Darf ich [Ihren] N{der|Pass} sehen?",
+"Sie wartet auf [ihren] N{der|Bus}.",
+"Ich warte auf [meine] N{die|Freundin}.",
+"Er freut sich auf [seinen] N{der|Urlaub}.",
+"Wir denken an [unsere] N{die|Familie}.",
+"Ich spreche mit [meinem] N{der|Chef}."
+],
+relative: [
+"Der Mann, [der] dort steht, ist mein Lehrer.",
+"Die Frau, [die] neben mir wohnt, ist sehr nett.",
+"Das Kind, [das] im Garten spielt, heißt Leo.",
+"Die Kinder, [die] im Park spielen, sind laut.",
+"Der Bus, [der] nach Graz fährt, ist voll.",
+"Die Straßenbahn, [die] zum Bahnhof fährt, kommt gleich.",
+"Das Restaurant, [das] neben der Post ist, ist sehr gut.",
+"Ich habe einen Freund, [der] in Wien wohnt.",
+"Ich habe eine Freundin, [die] Ärztin ist.",
+"Ich habe ein Auto, [das] sehr alt ist.",
+"Das ist der Kollege, [der] aus Polen kommt.",
+"Das ist die Kollegin, [die] gut Englisch spricht.",
+"Das ist das Hotel, [das] am See liegt.",
+"Wo ist der Schlüssel, [der] auf dem Tisch lag?",
+"Wo ist die Tasche, [die] hier stand?",
+"Wo ist das Buch, [das] hier lag?",
+"Der Zug, [der] um acht abfährt, hat Verspätung.",
+"Die Wohnung, [die] im dritten Stock ist, hat einen Balkon.",
+"Das Café, [das] am Platz ist, hat auch am Sonntag offen.",
+"Die Leute, [die] hier wohnen, sind freundlich.",
+"Der Hund, [der] immer bellt, gehört dem Nachbarn.",
+"Die Katze, [die] auf dem Dach sitzt, ist schwarz.",
+"Das Baby, [das] weint, hat Hunger.",
+"Die Schuhe, [die] im Schaufenster stehen, sind teuer.",
+"Der Supermarkt, [der] neben dem Bahnhof ist, ist billig.",
+"Die Lehrerin, [die] uns Deutsch unterrichtet, kommt aus Wien.",
+"Das Mädchen, [das] neben mir sitzt, heißt Sara.",
+"Der Film, [der] heute läuft, ist lustig.",
+"Die Bäckerei, [die] um sechs Uhr aufmacht, ist sehr beliebt.",
+"Das Fenster, [das] kaputt ist, wird morgen repariert.",
+"Die Studenten, [die] im Kurs sind, kommen aus vielen Ländern.",
+"Ein Mensch, [der] viel liest, weiß viel.",
+"Der Film, [den] ich gestern gesehen habe, war super.",
+"Die Jacke, [die] ich gekauft habe, ist warm.",
+"Das Buch, [das] ich lese, ist spannend.",
+"Der Kuchen, [den] Oma backt, schmeckt fantastisch.",
+"Die Suppe, [die] du kochst, ist sehr gut.",
+"Das Kleid, [das] sie trägt, ist neu.",
+"Der Mann, [den] ich kenne, wohnt in Linz.",
+"Die Frau, [die] wir besuchen, ist meine Tante.",
+"Das Auto, [das] er kaufen möchte, ist teuer.",
+"Der Schlüssel, [den] ich suche, ist weg.",
+"Die Wohnung, [die] wir mieten, ist klein.",
+"Das Lied, [das] wir singen, ist bekannt.",
+"Der Kurs, [den] ich besuche, beginnt um neun.",
+"Die Bücher, [die] ich kaufe, sind für meine Kinder.",
+"Der Tee, [den] du trinkst, ist aus Japan.",
+"Die Pizza, [die] wir bestellen, kommt in 20 Minuten.",
+"Das Foto, [das] du gemacht hast, ist schön.",
+"Der Brief, [den] ich schreibe, ist für meine Mutter.",
+"Die Stadt, [die] ich am liebsten mag, ist Salzburg.",
+"Das Geschenk, [das] ich bekommen habe, ist toll.",
+"Der Arzt, [den] ich anrufe, hat heute keine Zeit.",
+"Die E-Mail, [die] du geschickt hast, ist nicht angekommen.",
+"Das Formular, [das] Sie brauchen, liegt dort.",
+"Ich habe einen Hund, [den] alle lieben.",
+"Das ist der Pullover, [den] ich gekauft habe.",
+"Das ist das Fahrrad, [das] ich repariert habe.",
+"Wo ist der Kuli, [den] ich dir gegeben habe?",
+"Die Freunde, [die] wir eingeladen haben, kommen um acht.",
+"Der Salat, [den] du gemacht hast, ist lecker.",
+"Das Wort, [das] ich nicht verstehe, steht im Wörterbuch.",
+"Der Kollege, [dem] ich helfe, ist neu.",
+"Die Frau, [der] ich das Buch gebe, ist meine Nachbarin.",
+"Das Kind, [dem] ich helfe, ist sieben Jahre alt.",
+"Die Kinder, [denen] ich helfe, lernen schnell.",
+"Der Mann, [dem] das Auto gehört, ist mein Chef.",
+"Die Frau, [der] die Tasche gehört, sucht sie überall.",
+"Das Mädchen, [dem] ich ein Geschenk gebe, hat heute Geburtstag.",
+"Die Leute, [denen] ich danke, haben mir sehr geholfen.",
+"Der Lehrer, [dem] wir zuhören, erzählt eine Geschichte.",
+"Die Oma, [der] ich einen Brief schreibe, wohnt in Ungarn.",
+"Der Freund, [dem] ich alles erzähle, wohnt in Graz.",
+"Die Gäste, [denen] wir die Stadt zeigen, kommen aus Italien.",
+"Das ist der Film, [der] mir am besten gefällt.",
+"Das ist die Musik, [die] mir gefällt.",
+"Der Kunde, [dem] ich antworte, ist nicht zufrieden.",
+"Die Kollegin, [der] ich vertraue, arbeitet schon lange hier.",
+"Das Baby, [dem] wir ein Lied singen, schläft ein.",
+"Die Nachbarn, [denen] ich die Blumen gieße, sind im Urlaub.",
+"Der Hund, [dem] ich Futter gebe, ist sehr lieb.",
+"Die Schüler, [denen] die Lehrerin hilft, haben morgen eine Prüfung.",
+"Das ist die Stadt, in [der] ich wohne.",
+"Das ist das Haus, in [dem] ich wohne.",
+"Das ist der Freund, mit [dem] ich Fußball spiele.",
+"Das ist die Firma, für [die] ich arbeite.",
+"Der Bus, auf [den] ich warte, kommt nicht.",
+"Die Leute, mit [denen] ich arbeite, sind nett.",
+"Das ist der Park, in [dem] wir oft spazieren gehen.",
+"Das ist die Freundin, mit [der] ich ins Kino gehe.",
+"Der Tisch, auf [dem] das Buch liegt, ist alt.",
+"Das Zimmer, in [dem] ich schlafe, ist klein.",
+"Die Party, auf [die] ich mich freue, ist am Samstag.",
+"Der Urlaub, auf [den] wir uns freuen, beginnt im Juli.",
+"Das ist der Kurs, in [dem] ich Deutsch lerne.",
+"Das ist die Schule, in [die] meine Tochter geht.",
+"Der Stuhl, auf [dem] du sitzt, ist neu.",
+"Die Kollegen, mit [denen] ich zu Mittag esse, sind lustig.",
+"Das Auto, mit [dem] wir fahren, gehört meinem Vater.",
+"Der Mann, von [dem] ich erzähle, ist mein Opa.",
+"Die Frau, bei [der] ich wohne, ist sehr nett.",
+"Das Problem, über [das] wir sprechen, ist groß.",
+"Der Arzt, zu [dem] ich gehe, ist sehr gut.",
+"Die Straße, in [der] ich wohne, ist ruhig.",
+"Das Hotel, in [dem] wir schlafen, ist billig.",
+"Der Supermarkt, in [dem] ich einkaufe, ist nicht weit.",
+"Die Bank, bei [der] ich mein Konto habe, ist in der Stadt.",
+"Das Geschäft, in [dem] ich arbeite, ist groß.",
+"Die Kinder, für [die] ich koche, essen gern Nudeln.",
+"Der Termin, an [den] ich immer denken muss, ist um neun.",
+"Der Mann, [dessen] Auto vor dem Haus steht, ist mein Nachbar.",
+"Die Frau, [deren] Sohn in meiner Klasse ist, heißt Maria.",
+"Die Nachbarn, [deren] Hund immer bellt, sind nett.",
+"Das Mädchen, [dessen] Mutter Ärztin ist, heißt Lena.",
+"Der Junge, [dessen] Fahrrad kaputt ist, geht zu Fuß.",
+"Die Kollegin, [deren] Büro neben meinem ist, ist sehr nett.",
+"Das Kind, [dessen] Ball im Garten liegt, sucht ihn.",
+"Der Lehrer, [dessen] Kurs ich besuche, kommt aus Graz.",
+"Die Familie, [deren] Haus am See steht, kommt aus Wien.",
+"Die Kinder, [deren] Eltern arbeiten, essen in der Schule.",
+"Das Hotel, [dessen] Zimmer sehr schön sind, ist am Meer.",
+"Die Firma, [deren] Chef ich kenne, sucht neue Mitarbeiter.",
+"Der Mann, [der] dort steht und [den] ich kenne, heißt Tom.",
+"Die Frau, [die] neben mir wohnt und [der] ich oft helfe, ist schon alt.",
+"Das Buch, [das] ich lese und [das] mir so gefällt, ist neu.",
+"Der Kollege, [dem] ich helfe und [der] mir hilft, ist mein Freund.",
+"Ich kenne einen Mann, [der] Koch ist und [dessen] Restaurant sehr gut ist.",
+"Wie heißt der Film, [den] du so magst?",
+"Wie heißt die Frau, [die] dort sitzt?",
+"Wie heißt das Restaurant, [das] du kennst?",
+"Das ist der Weg, [der] zum Bahnhof führt.",
+"Das ist die Ärztin, [die] mir geholfen hat.",
+"Wo ist das Kind, [das] hier gespielt hat?",
+"Ich suche eine Wohnung, [die] nicht zu teuer ist.",
+"Ich suche einen Job, [der] mir Spaß macht.",
+"Ich möchte ein Zimmer, [das] ruhig ist.",
+"Er hat eine Schwester, [die] in Berlin studiert.",
+"Wir haben Nachbarn, [die] sehr laut sind.",
+"Ich kaufe einen Tisch, [den] ich selbst aufbaue.",
+"Sie hat eine Katze, [die] sie sehr liebt.",
+"Er trinkt einen Kaffee, [den] er selbst macht.",
+"Wir sehen einen Film, [der] drei Stunden dauert.",
+"Ich lese ein Buch, [das] mein Freund geschrieben hat.",
+"Ich habe Freunde, [denen] ich vertraue.",
+"Das sind die Nachbarn, [denen] das Haus gehört.",
+"Ich treffe einen Freund, [den] ich lange nicht gesehen habe.",
+"Das ist ein Wort, [das] ich nicht kenne.",
+"Kennst du den Mann, [der] Klavier spielt?",
+"Kennst du die Lehrerin, [der] wir das Geschenk geben?",
+"Hier ist der Kuchen, [den] ich gebacken habe.",
+"Das ist die Tasche, [die] ich verloren habe.",
+"Das ist das Kind, [dem] der Ball gehört."
+],
+comma: [
+"Ich bleibe zu Hause[,] weil ich krank bin.",
+"Er kommt nicht[,] weil er arbeiten muss.",
+"Wir gehen spazieren[,] wenn die Sonne scheint.",
+"Wenn es regnet[,] nehme ich den Bus.",
+"Ich weiß[,] dass du müde bist.",
+"Sie sagt[,] dass sie morgen kommt.",
+"Ich hoffe[,] dass das Wetter schön wird.",
+"Er glaubt[,] dass der Zug Verspätung hat.",
+"Ich gehe einkaufen[,] bevor ich koche.",
+"Bevor ich frühstücke[,] trinke ich ein Glas Wasser.",
+"Nachdem er gegessen hat[,] macht er eine Pause.",
+"Ich lerne Deutsch[,] weil ich in Österreich arbeite.",
+"Weil der Bus nicht kommt[,] gehen wir zu Fuß.",
+"Obwohl es kalt ist[,] trägt er keine Jacke.",
+"Sie arbeitet[,] obwohl sie müde ist.",
+"Ich weiß nicht[,] ob er heute kommt.",
+"Kannst du mir sagen[,] wo der Bahnhof ist?",
+"Ich weiß nicht[,] wann der Kurs beginnt.",
+"Sag mir bitte[,] wie spät es ist.",
+"Weißt du[,] was das kostet?",
+"Ich frage die Lehrerin[,] ob wir eine Pause machen.",
+"Als ich ein Kind war[,] wohnte ich in Ungarn.",
+"Ich war froh[,] als du angerufen hast.",
+"Er spart Geld[,] damit er ein Auto kaufen kann.",
+"Ich rufe dich an[,] wenn ich zu Hause bin.",
+"Wenn du Zeit hast[,] komm bitte vorbei.",
+"Ich bin glücklich[,] dass du hier bist.",
+"Sie fragt[,] warum wir so spät kommen.",
+"Er erzählt[,] dass er einen neuen Job hat.",
+"Während ich koche[,] hört er Musik.",
+"Ich trinke Kaffee[,] damit ich wach bleibe.",
+"Es ist schön[,] dass du kommst.",
+"Wir warten[,] bis der Regen aufhört.",
+"Seit ich in Wien wohne[,] fahre ich mit der U-Bahn.",
+"Ich glaube[,] du hast recht.",
+"Ich denke[,] wir sollten jetzt gehen.",
+"Er meint[,] das ist zu teuer.",
+"Der Mann[,] der dort steht[,] ist mein Lehrer.",
+"Die Frau[,] die neben mir wohnt[,] ist sehr nett.",
+"Das Buch[,] das ich lese[,] ist spannend.",
+"Ich habe einen Freund[,] der in Graz wohnt.",
+"Das ist die Wohnung[,] die ich mieten möchte.",
+"Der Kuchen[,] den du gebacken hast[,] ist lecker.",
+"Das ist der Bus[,] der zum Bahnhof fährt.",
+"Die Kinder[,] die im Park spielen[,] sind laut.",
+"Ich suche ein Zimmer[,] das nicht zu teuer ist.",
+"Das ist die Stadt[,] in der ich wohne.",
+"Der Kollege[,] mit dem ich arbeite[,] ist sehr nett.",
+"Ich möchte kommen[,] aber ich habe keine Zeit.",
+"Das Hotel ist schön[,] aber teuer.",
+"Er ist müde[,] aber glücklich.",
+"Ich trinke keinen Kaffee[,] sondern Tee.",
+"Sie wohnt nicht in Graz[,] sondern in Wien.",
+"Wir bleiben zu Hause[,] denn es regnet.",
+"Ich esse jetzt[,] denn ich habe Hunger.",
+"Er wollte kommen[,] doch er war krank.",
+"Das Essen ist gut[,] aber zu salzig.",
+"Das ist nicht mein Handy[,] sondern deins.",
+"Ich kaufe Brot[,] Milch[_] und Käse.",
+"Wir brauchen Eier[,] Mehl[,] Zucker[_] und Butter.",
+"Er spricht Deutsch[,] Englisch[_] und Spanisch.",
+"Am Montag[,] Dienstag[_] und Mittwoch arbeite ich.",
+"Im Zimmer sind ein Bett[,] ein Tisch[_] und ein Stuhl.",
+"Meine Lieblingsfarben sind Blau[,] Rot[_] und Lila.",
+"Möchtest du Tee[_] oder Kaffee?",
+"Wir fahren mit dem Bus[_] oder mit dem Zug.",
+"Ich mag Äpfel[,] Bananen[_] und Orangen.",
+"Sie hat einen Hund[,] zwei Katzen[_] und einen Hasen.",
+"Er wäscht ab[,] trocknet ab[_] und räumt auf.",
+"Das Wetter ist kalt[,] nass[_] und windig.",
+"Liebe Anna[,] danke für die Karte!",
+"Hallo Peter[,] wie geht es dir?",
+"Guten Morgen[,] Frau Huber!",
+"Komm bitte her[,] Lisa!",
+"Herr Berger[,] Sie haben einen Termin um neun.",
+"Lieber Tom[,] ich komme am Samstag.",
+"Wien[,] die Hauptstadt von Österreich[,] ist sehr schön.",
+"Mein Bruder[,] ein Koch[,] arbeitet in einem Hotel.",
+"Frau Müller[,] unsere Lehrerin[,] kommt aus Graz.",
+"Das ist Max[,] mein bester Freund.",
+"Ich lerne Deutsch[,] um in Wien zu arbeiten.",
+"Er fährt nach Graz[,] um seine Oma zu besuchen.",
+"Sie geht in die Stadt[,] um einzukaufen.",
+"Er geht[,] ohne Tschüss zu sagen.",
+"Sie kauft das Kleid[,] ohne es anzuprobieren.",
+"Wir spielen[,] statt zu lernen.",
+"Ich spare Geld[,] um eine Reise zu machen.",
+"Er steht früh auf[,] um den Bus zu nehmen.",
+"Heute Abend[_] gehen wir ins Kino.",
+"Im Sommer[_] fahren wir ans Meer.",
+"Am Wochenende[_] besuche ich meine Eltern.",
+"Morgen[_] habe ich einen Termin.",
+"Er ist größer[_] als sein Bruder.",
+"Sie ist so alt[_] wie ich.",
+"Der Zug ist schneller[_] als der Bus.",
+"Ich trinke Kaffee[_] und esse ein Brötchen.",
+"Er steht auf[_] und duscht.",
+"Wir kochen[_] und essen zusammen.",
+"Sie liest[_] oder hört Musik.",
+"Mein Bruder und ich[_] wohnen in Linz.",
+"Um acht Uhr[_] beginnt der Kurs.",
+"Nach dem Essen[_] trinken wir Tee.",
+"Sowohl Anna[_] als auch Tom kommen zur Party.",
+"Weder ich[_] noch mein Mann haben Zeit.",
+"Ich esse gern Pizza[_] und Pasta.",
+"Heute ist es kälter[_] als gestern.",
+"Sie spricht so gut Deutsch[_] wie ihre Lehrerin.",
+"Er geht nach Hause[_] und schläft.",
+"Wir wohnen in Wien[_] und arbeiten in Mödling.",
+"Nimmst du den Bus[_] oder das Fahrrad?",
+"Ich glaube[,] dass er heute kommt[_] und uns hilft.",
+"Wenn ich Zeit habe[,] lese ich[_] oder höre Musik.",
+"Er sagt[,] dass er Hunger hat[_] und etwas essen will.",
+"Am Abend[_] koche ich[,] weil ich gern koche.",
+"Ich bleibe zu Hause[,] weil ich müde bin[_] und schlafen möchte.",
+"Weil es regnet[,] bleiben wir drinnen[_] und spielen Karten.",
+"Morgen[_] fahre ich nach Graz[,] um meine Freundin zu besuchen.",
+"Ich kaufe Äpfel[,] weil sie gesund sind.",
+"Die Frau[,] die dort sitzt[,] ist meine Chefin.",
+"Er ist älter[_] als ich[,] aber kleiner.",
+"Wenn du kommst[,] bring bitte Brot[,] Käse[_] und Wein mit.",
+"Ich frage mich[,] ob er recht hat.",
+"Bitte sag mir[,] wann du kommst.",
+"Ich weiß[,] wo der Schlüssel ist.",
+"Er fragt[,] wie viel das Ticket kostet.",
+"Sie erklärt[,] warum sie traurig ist.",
+"Ich freue mich[,] wenn du anrufst.",
+"Der Arzt sagt[,] ich soll viel trinken.",
+"Ich hoffe[,] es geht dir gut.",
+"Er ruft an[,] wenn er angekommen ist.",
+"Als der Film zu Ende war[,] gingen wir nach Hause.",
+"Sobald ich zu Hause bin[,] rufe ich dich an.",
+"Ich mache das[,] sobald ich Zeit habe.",
+"Er arbeitet viel[,] damit seine Kinder studieren können.",
+"Ich gehe zum Arzt[,] weil mir der Kopf wehtut.",
+"Ich bin müde[,] denn ich habe schlecht geschlafen.",
+"Das Kleid ist schön[,] aber es ist zu teuer.",
+"Er kommt nicht heute[,] sondern morgen.",
+"Ich habe keine Zeit[,] ich muss arbeiten.",
+"Es ist spät[,] wir müssen gehen.",
+"Ich koche[,] du deckst den Tisch.",
+"Leider[_] habe ich keine Zeit.",
+"Zuerst[_] trinke ich einen Kaffee.",
+"In der Pause[_] essen wir ein Brot.",
+"Meine Schwester ist jünger[_] als ich.",
+"Er kauft ein Brot[_] und eine Zeitung.",
+"Wir gehen ins Kino[_] oder ins Theater.",
+"Ich glaube nicht[,] dass das stimmt.",
+"Wie schön[,] dass du da bist!",
+"Ich habe gehört[,] dass du umziehst.",
+"Wenn ich groß bin[,] werde ich Pilot."
+]
+};
+
+
+// ==================== MODI ====================
+const MODES = {
+  preposition: { name: 'Präpositionen', chip: 'mit', color: 'var(--rust)',  desc: 'mit, nach, aus, in, auf, für … – welcher Artikel passt?' },
+  definite:    { name: 'Bestimmte Artikel', chip: 'der', color: 'var(--dusk)', desc: 'der, die, das, den, dem, des' },
+  indefinite:  { name: 'Unbestimmte Artikel', chip: 'ein', color: 'var(--plum)', desc: 'ein, eine, einen, einem … oder gar kein Artikel?' },
+  negation:    { name: 'Verneinung', chip: 'kein', color: 'var(--berry)', desc: 'kein, keine, keinen … oder nicht?' },
+  possessive:  { name: 'Possessivartikel', chip: 'mein', color: 'var(--amber)', desc: 'mein, dein, sein, ihr, unser, euer, Ihr' },
+  relative:    { name: 'Relativpronomen', chip: 'der,', color: 'var(--petrol)', desc: 'der, die, das, den, dem, denen, dessen, deren' },
+  comma:       { name: 'Beistriche', chip: ' , ', color: 'var(--slate)', desc: 'Nebensätze, Aufzählungen, aber/sondern, um … zu – Beistrich oder nicht?' }
+};
+
+const DEF  = ['der', 'die', 'das', 'den', 'dem', 'des'];
+const IND  = ['ein', 'eine', 'einen', 'einem', 'einer', 'eines'];
+const KEIN = ['kein', 'keine', 'keinen', 'keinem', 'keiner'];
+const REL  = ['der', 'die', 'das', 'den', 'dem', 'denen', 'dessen', 'deren'];
+
+function possForms(base) {
+  if (base === 'euer')  return ['euer', 'eure', 'euren', 'eurem', 'eurer', 'eures'];
+  if (base === 'unser') return ['unser', 'unsere', 'unseren', 'unserem', 'unserer', 'unseres'];
+  return ['', 'e', 'en', 'em', 'er', 'es'].map(e => base + e);
+}
+function familyOf(ans) {
+  const a = ans.toLowerCase();
+  if (DEF.includes(a)) return DEF.slice();
+  if (IND.includes(a)) return IND.slice();
+  if (KEIN.includes(a)) return KEIN.slice();
+  for (const b of ['unser', 'euer', 'mein', 'dein', 'sein', 'ihr']) {
+    if (a.startsWith(b) || (b === 'euer' && a.startsWith('eur'))) return possForms(b);
+  }
+  return null;
+}
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+// ==================== SATZ-PARSER ====================
+// [x] = Lücke, [x+] = Lücke, bei der zusätzlich „kein Artikel" angeboten wird
+// [,] = hier gehört ein Beistrich hin, [_] = hier steht kein Beistrich / kein Artikel
+// N{Artikel|Grundform} oder N{Artikel|Grundform|Form im Satz} = Nomen mit Artikel-Hilfe
+const TOKEN = /\[([^\]]*)\]|N\{([^}]+)\}/g;
+function parse(str, mode) {
+  const parts = [], slots = [];
+  let last = 0, m;
+  TOKEN.lastIndex = 0;
+  while ((m = TOKEN.exec(str)) !== null) {
+    if (m.index > last) parts.push({ t: 'text', v: str.slice(last, m.index) });
+    if (m[1] !== undefined) {
+      let v = m[1], addZero = false;
+      if (v.endsWith('+')) { addZero = true; v = v.slice(0, -1); }
+      const slot = mode === 'comma' ? { comma: v === ',' } : { art: v, addZero };
+      slots.push(slot);
+      parts.push({ t: 'slot', i: slots.length - 1 });
+    } else {
+      const p = m[2].split('|');
+      parts.push({ t: 'noun', art: p[0], base: p[1], show: p[2] || p[1] });
+    }
+    last = TOKEN.lastIndex;
+  }
+  if (last < str.length) parts.push({ t: 'text', v: str.slice(last) });
+  return { parts, slots };
+}
+
+// ==================== ZUSTAND ====================
+const state = {
+  mode: null, points: 0, streak: 0, bestStreak: 0,
+  correct: 0, attempts: 0, start: 0,
+  remaining: [], solved: 0, total: 0,
+  current: null, selected: null, busy: false
+};
+
+function init() {
+  buildDeco();
+  buildMenu();
+  renderBoard('menuBoard', 5);
+}
+
+function buildMenu() {
+  const grid = document.getElementById('modeGrid');
+  grid.innerHTML = '';
+  Object.keys(MODES).forEach((k, idx, arr) => {
+    const md = MODES[k];
+    const b = document.createElement('button');
+    b.className = 'mode-btn' + (idx === arr.length - 1 && arr.length % 2 === 1 ? ' wide' : '');
+    b.style.setProperty('--c', md.color);
+    b.onclick = () => startGame(k);
+    b.innerHTML = `<span class="chip">${md.chip}</span>
+      <span><span class="mode-name">${md.name}</span>
+      <span class="mode-desc" style="display:block">${md.desc}</span>
+      <span class="mode-count" style="display:block">${sentenceData[k].length} Sätze</span></span>`;
+    grid.appendChild(b);
+  });
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function startGame(mode) {
+  Object.assign(state, {
+    mode, points: 0, streak: 0, bestStreak: 0, correct: 0, attempts: 0,
+    start: Date.now(), solved: 0, selected: null, busy: false
+  });
+  state.remaining = shuffle(sentenceData[mode].slice());
+  state.total = state.remaining.length;
+
+  const md = MODES[mode];
+  const pill = document.getElementById('modePill');
+  pill.textContent = md.name;
+  pill.style.setProperty('--c', md.color);
+  document.getElementById('options').style.setProperty('--c', md.color);
+  document.getElementById('helper').textContent = (mode === 'comma' || mode === 'relative')
+    ? 'Tippe auf eine Lücke und wähle unten die Antwort.'
+    : 'Tipp: Zeig mit der Maus auf ein unterstrichenes Nomen (oder tippe darauf) – dann siehst du seinen Artikel.';
+
+  const nameInput = document.getElementById('playerName');
+  nameInput.disabled = false; nameInput.value = '';
+  const sb = document.getElementById('saveBtn');
+  sb.disabled = false; sb.textContent = 'Speichern';
+
+  updateStats(); updateProgress();
+  showScreen('gameScreen');
+  loadNext();
+}
+
+function loadNext() {
+  if (state.remaining.length === 0) { endGame(); return; }
+  state.current = parse(state.remaining[0], state.mode);
+  state.busy = false;
+  document.getElementById('hint').style.display = 'none';
+  renderSentence();
+  const first = document.querySelector('.slot');
+  if (first) selectSlot(first);
+}
+
+function renderSentence() {
+  const box = document.getElementById('sentence');
+  box.innerHTML = '';
+  state.current.parts.forEach(p => {
+    if (p.t === 'text') {
+      box.appendChild(document.createTextNode(p.v));
+    } else if (p.t === 'slot') {
+      const s = document.createElement('span');
+      s.className = 'slot' + (state.mode === 'comma' ? ' comma-slot' : '');
+      s.dataset.i = p.i;
+      s.textContent = state.mode === 'comma' ? '?' : '…';
+      s.onclick = () => selectSlot(s);
+      box.appendChild(s);
+    } else {
+      const n = document.createElement('span');
+      n.className = 'noun';
+      n.textContent = p.show;
+      const tip = document.createElement('span');
+      tip.className = 'tip';
+      tip.textContent = p.art + ' ' + p.base;
+      n.appendChild(tip);
+      n.onclick = (e) => {
+        e.stopPropagation();
+        const on = n.classList.contains('show');
+        document.querySelectorAll('.noun.show').forEach(x => x.classList.remove('show'));
+        if (!on) n.classList.add('show');
+      };
+      box.appendChild(n);
+    }
+  });
+}
+document.addEventListener('click', () => document.querySelectorAll('.noun.show').forEach(x => x.classList.remove('show')));
+
+function optionsForSlot(slot) {
+  const m = state.mode;
+  if (m === 'definite') return DEF.slice();
+  if (m === 'indefinite') return IND.concat('_');
+  if (m === 'negation') return KEIN.concat('nicht');
+  if (m === 'relative') return REL.slice();
+  const ans = slot.art;
+  if (m === 'preposition') {
+    if (ans === '_') return DEF.concat('_');
+    const fam = familyOf(ans) || DEF.slice();
+    return slot.addZero ? fam.concat('_') : fam;
+  }
+  if (m === 'possessive') {
+    const fam = familyOf(ans) || [];
+    return /^[A-ZÄÖÜ]/.test(ans) ? fam.map(cap) : fam;
+  }
+  return [];
+}
+
+function renderOptions() {
+  const grid = document.getElementById('options');
+  grid.innerHTML = '';
+  grid.classList.toggle('two', state.mode === 'comma');
+  if (!state.selected) return;
+  if (state.mode === 'comma') {
+    [{ l: 'Beistrich ( , )', v: true }, { l: 'kein Beistrich', v: false }].forEach(o => {
+      const b = document.createElement('button');
+      b.className = 'opt'; b.textContent = o.l;
+      b.onclick = () => answer(o.v);
+      grid.appendChild(b);
+    });
+    return;
+  }
+  const slot = state.current.slots[+state.selected.dataset.i];
+  optionsForSlot(slot).forEach(o => {
+    const b = document.createElement('button');
+    b.className = 'opt' + (o === '_' ? ' zero' : '');
+    b.textContent = o === '_' ? 'kein Artikel' : o;
+    b.onclick = () => answer(o);
+    grid.appendChild(b);
+  });
+}
+
+function selectSlot(el) {
+  if (state.busy || el.classList.contains('correct')) return;
+  document.querySelectorAll('.slot').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  state.selected = el;
+  renderOptions();
+}
+
+function answer(value) {
+  if (state.busy) return;
+  if (!state.selected) {
+    const free = document.querySelector('.slot:not(.correct)');
+    if (!free) return;
+    selectSlot(free);
+  }
+  const el = state.selected;
+  const slot = state.current.slots[+el.dataset.i];
+  state.attempts++;
+
+  let ok, rightText;
+  if (state.mode === 'comma') {
+    ok = value === slot.comma;
+    rightText = slot.comma ? 'Hier gehört ein Beistrich hin.' : 'Hier steht kein Beistrich.';
+  } else {
+    ok = value.toLowerCase() === slot.art.toLowerCase();
+    rightText = 'Richtig wäre: „' + (slot.art === '_' ? 'kein Artikel' : slot.art) + '“';
+  }
+
+  if (ok) {
+    el.classList.remove('selected', 'wrong');
+    el.classList.add('correct');
+    if (state.mode === 'comma') el.textContent = slot.comma ? ',' : '–';
+    else el.textContent = slot.art === '_' ? '∅' : slot.art;
+    state.correct++; state.streak++;
+    state.bestStreak = Math.max(state.bestStreak, state.streak);
+    let pts = 10;
+    if (state.streak >= 20) pts *= 5; else if (state.streak >= 15) pts *= 4;
+    else if (state.streak >= 10) pts *= 3; else if (state.streak >= 5) pts *= 2;
+    state.points += pts;
+    updateStats(); sound('ok'); popup(pts, state.streak >= 5);
+    document.getElementById('hint').style.display = 'none';
+
+    const next = document.querySelector('.slot:not(.correct)');
+    if (next) { selectSlot(next); }
+    else {
+      state.selected = null; state.busy = true;
+      renderOptions();
+      setTimeout(() => {
+        state.remaining.shift();
+        state.solved++;
+        updateProgress();
+        if (state.solved % 10 === 0 && state.remaining.length > 0) milestone(state.solved);
+        loadNext();
+      }, 850);
+    }
+  } else {
+    state.streak = 0; updateStats(); sound('no');
+    el.classList.add('wrong');
+    el.textContent = state.mode === 'comma' ? (value ? ',' : '–') : (value === '_' ? '∅' : value);
+    const h = document.getElementById('hint');
+    h.textContent = rightText; h.style.display = 'block';
+    setTimeout(() => {
+      el.classList.remove('wrong');
+      if (!el.classList.contains('correct')) el.textContent = state.mode === 'comma' ? '?' : '…';
+    }, 650);
+  }
+}
+
+function skipSentence() {
+  if (state.busy || state.remaining.length < 2) return;
+  state.streak = 0; updateStats();
+  state.remaining.push(state.remaining.shift());
+  loadNext();
+}
+
+function updateStats() {
+  document.getElementById('points').textContent = state.points;
+  document.getElementById('streak').textContent = state.streak;
+}
+function updateProgress() {
+  const pct = state.total ? state.solved / state.total * 100 : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `${state.solved} / ${state.total} Sätze`;
+}
+
+function fmt(s) { return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }
+
+function endGame() {
+  const sec = Math.floor((Date.now() - state.start) / 1000);
+  document.getElementById('finalPoints').textContent = state.points;
+  document.getElementById('finalTime').textContent = fmt(sec);
+  document.getElementById('bestStreak').textContent = state.bestStreak;
+  document.getElementById('accuracy').textContent = state.attempts ? Math.round(state.correct / state.attempts * 100) + '%' : '0%';
+  document.getElementById('resultSub').textContent = `${MODES[state.mode].name} · ${state.solved} von ${state.total} Sätzen gelöst`;
+  state.endSec = sec;
+  showScreen('resultScreen');
+  renderBoard('resultBoard', 5);
+  sound('win'); flakeBurst();
+}
+
+// ==================== BESTENLISTE ====================
+const BOARD_KEY = 'artikelChampionEasyBestenliste';
+function loadBoard() { try { return JSON.parse(localStorage.getItem(BOARD_KEY) || '[]'); } catch (e) { return []; } }
+function storeBoard(b) { try { localStorage.setItem(BOARD_KEY, JSON.stringify(b)); } catch (e) {} }
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+function saveScore() {
+  const name = document.getElementById('playerName').value.trim() || 'Anonym';
+  const b = loadBoard();
+  b.push({ name, points: state.points, time: state.endSec || 0, mode: MODES[state.mode].name });
+  b.sort((x, y) => y.points - x.points);
+  storeBoard(b.slice(0, 10));
+  renderBoard('resultBoard', 5); renderBoard('menuBoard', 5);
+  document.getElementById('playerName').disabled = true;
+  const sb = document.getElementById('saveBtn');
+  sb.disabled = true; sb.textContent = '✓ Gespeichert';
+}
+
+function renderBoard(id, limit) {
+  const c = document.getElementById(id);
+  const b = loadBoard();
+  if (!b.length) { c.innerHTML = '<p class="board-empty">Noch keine Einträge – du kannst die Erste oder der Erste sein!</p>'; return; }
+  c.innerHTML = b.slice(0, limit).map((e, i) => `
+    <div class="board-entry">
+      <span class="board-rank">${i + 1}.</span>
+      <span class="board-name">${esc(e.name)}<span class="board-mode">${esc(e.mode || '')}</span></span>
+      <span class="board-pts">${e.points} Pkt</span>
+      <span class="board-time">${fmt(e.time)}</span>
+    </div>`).join('');
+}
+
+function goToMenu() {
+  showScreen('startScreen');
+  renderBoard('menuBoard', 5);
+}
+
+// ==================== TÖNE ====================
+let audioCtx = null;
+function tone(freq, start, dur, vol) {
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type = 'sine'; o.frequency.value = freq;
+  o.connect(g); g.connect(audioCtx.destination);
+  const t = audioCtx.currentTime + start;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.start(t); o.stop(t + dur + 0.05);
+}
+function sound(kind) {
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (kind === 'ok') { tone(784, 0, 0.18, 0.10); tone(1046, 0.07, 0.2, 0.07); }
+    else if (kind === 'no') { tone(262, 0, 0.25, 0.08); }
+    else { [523, 659, 784, 1046].forEach((f, i) => tone(f, i * 0.11, 0.35, 0.08)); }
+  } catch (e) {}
+}
+
+// ==================== EFFEKTE ====================
+function popup(pts, combo) {
+  const p = document.createElement('div');
+  p.className = 'popup' + (combo ? ' combo' : '');
+  p.textContent = combo ? `+${pts} Serie!` : `+${pts}`;
+  p.style.left = (Math.random() * 50 + 25) + '%';
+  p.style.top = '38%';
+  document.body.appendChild(p);
+  setTimeout(() => p.remove(), 1000);
+}
+function milestone(n) {
+  const o = document.createElement('div');
+  o.className = 'milestone';
+  o.innerHTML = `<div class="milestone-inner"><div class="milestone-num">${n}</div><div class="milestone-text">Sätze geschafft – weiter so!</div></div>`;
+  document.body.appendChild(o);
+  sound('win'); flakeBurst();
+  o.onclick = () => o.remove();
+  setTimeout(() => o.remove(), 2200);
+}
+
+const LEAVES = [
+  'M12 1.5l1.9 5.3 4.6-2.2-1.7 4.7 5.4.9-4.3 3.1 2 4.6-5.1-1.6L12 22.5l-2.8-6.2-5.1 1.6 2-4.6L1.8 10.2l5.4-.9-1.7-4.7 4.6 2.2z',
+  'M12 2C6.5 6.5 4.8 12.4 12 22c7.2-9.6 5.5-15.5 0-20z',
+  'M12 2c-2 2.5-5.5 3-5.5 7 0 1.6.8 2.6 1.6 3.3C6.6 13 5.6 14.4 5.6 16c0 3 3 4.6 6.4 6 3.4-1.4 6.4-3 6.4-6 0-1.6-1-3-2.5-3.7.8-.7 1.6-1.7 1.6-3.3 0-4-3.5-4.5-5.5-7z'
+];
+const LEAF_COLORS = ['#a2542b', '#b9853d', '#8e4a3a', '#6a4a7a', '#c08a58'];
+function leafSVG(color) {
+  const d = LEAVES[Math.floor(Math.random() * LEAVES.length)];
+  return `<svg viewBox="0 0 24 24"><path d="${d}" fill="${color}"/><path d="M12 5v16" stroke="rgba(255,255,255,0.35)" stroke-width="0.8" fill="none"/></svg>`;
+}
+function flakeSVG(color) {
+  let arms = '';
+  for (let a = 0; a < 180; a += 60) {
+    arms += `<g transform="rotate(${a} 12 12)"><line x1="12" y1="2" x2="12" y2="22"/>
+      <polyline points="9.5,4.5 12,7 14.5,4.5"/><polyline points="9.5,19.5 12,17 14.5,19.5"/></g>`;
+  }
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">${arms}</svg>`;
+}
+function buildDeco() {
+  const layer = document.getElementById('deco');
+  const make = (html, size, op, dur) => {
+    const d = document.createElement('div');
+    d.className = 'deco';
+    d.innerHTML = html;
+    d.style.setProperty('--x', (Math.random() * 98) + 'vw');
+    d.style.setProperty('--y', (Math.random() * 95) + 'vh');
+    d.style.setProperty('--s', size + 'px');
+    d.style.setProperty('--o', op);
+    d.style.setProperty('--d', dur + 's');
+    d.style.setProperty('--delay', (-Math.random() * dur) + 's');
+    d.style.setProperty('--sway', (Math.random() * 60 + 20) * (Math.random() < 0.5 ? -1 : 1) + 'px');
+    d.style.setProperty('--rot', (Math.random() * 300 + 120) * (Math.random() < 0.5 ? -1 : 1) + 'deg');
+    layer.appendChild(d);
+  };
+  for (let i = 0; i < 11; i++) make(leafSVG(LEAF_COLORS[i % LEAF_COLORS.length]), Math.random() * 16 + 18, (Math.random() * 0.14 + 0.16).toFixed(2), Math.random() * 18 + 30);
+  for (let i = 0; i < 16; i++) make(flakeSVG(i % 3 ? '#8ea3bf' : '#a796b4'), Math.random() * 12 + 12, (Math.random() * 0.2 + 0.25).toFixed(2), Math.random() * 20 + 34);
+}
+function flakeBurst() {
+  for (let i = 0; i < 36; i++) {
+    const f = document.createElement('div');
+    f.className = 'flake-burst';
+    const size = Math.random() * 14 + 12;
+    f.style.width = f.style.height = size + 'px';
+    f.style.left = Math.random() * 100 + 'vw';
+    f.innerHTML = Math.random() < 0.5 ? leafSVG(LEAF_COLORS[i % LEAF_COLORS.length]) : flakeSVG('#7f95b3');
+    document.body.appendChild(f);
+    const anim = f.animate([
+      { transform: 'translateY(0) rotate(0deg)', opacity: 0.9 },
+      { transform: `translate(${(Math.random() - 0.5) * 120}px, 105vh) rotate(${Math.random() * 540}deg)`, opacity: 0 }
+    ], { duration: Math.random() * 1800 + 2200, easing: 'ease-in' });
+    anim.onfinish = () => f.remove();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
