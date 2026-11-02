@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Je-desto-Champions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f1ec; --card:#fffdf9; --ink:#1b1b20; --muted:#55556a; --line:#e2dcd2;
+  --sky:#34537a; --sky-soft:#e3e9f2;
+  --petrol:#1e6a72; --petrol-soft:#ddecee;
+  --lilac:#5e4673; --lilac-soft:#ece5f1;
+  --rose:#9c3d50; --rose-soft:#f7e4e7;
+  --amber:#93641c; --amber-soft:#f6ead6;
+  --sand:#ece6dc;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:'Lexend',system-ui,-apple-system,sans-serif;font-size:19px;line-height:1.6;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+.wrap{max-width:920px;margin:0 auto;padding:0 16px 140px}
+
+/* Kopfbereich */
+.hero{background:linear-gradient(135deg,#2c4669 0%,#3f4a74 45%,#5e4673 100%);color:#fff;padding:44px 20px 34px;border-radius:0 0 32px 32px}
+.hero-in{max-width:920px;margin:0 auto}
+.hero .kicker{font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;opacity:.8;font-weight:500}
+.hero h1{font-size:clamp(2rem,6vw,3rem);line-height:1.15;margin:.3em 0 .35em;font-weight:700}
+.hero p{margin:0;max-width:640px;opacity:.92;font-weight:300}
+
+/* Leiste mit Punkten */
+.topbar{position:sticky;top:0;z-index:20;background:rgba(244,241,236,.94);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:920px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:14px}
+.bar{flex:1;height:10px;background:var(--sand);border-radius:99px;overflow:hidden}
+.bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--sky),var(--lilac));border-radius:99px;transition:width .5s ease}
+.total{font-weight:600;font-size:.95rem;white-space:nowrap}
+.total small{font-weight:400;color:var(--muted)}
+
+nav.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 4px}
+nav.tabs a{text-decoration:none;color:var(--ink);background:var(--card);border:1.5px solid var(--line);padding:7px 14px;border-radius:99px;font-size:.88rem;font-weight:500;transition:.2s}
+nav.tabs a:hover{border-color:var(--sky);color:var(--sky)}
+
+/* Karten */
+.card{background:var(--card);border-radius:26px;padding:26px 24px;margin:26px 0;box-shadow:0 1px 0 rgba(0,0,0,.03),0 12px 32px rgba(40,40,70,.07)}
+.merk{background:linear-gradient(180deg,#fffdf9,#f7f3fb);border:1.5px solid var(--lilac-soft)}
+.merk h2{margin:0 0 .6em;font-size:1.3rem;color:var(--lilac)}
+.rule{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:8px 0 14px}
+.rule div{background:#fff;border-radius:18px;padding:14px 16px;border:1.5px solid var(--line)}
+.rule b.k{color:var(--sky)}
+.v{color:var(--lilac);font-weight:700;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+.cmp-list{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0;padding:0;list-style:none}
+.cmp-list li{background:var(--sky-soft);border-radius:10px;padding:3px 10px;font-size:.88rem}
+.merk p{margin:.6em 0}
+
+.ex-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.num{width:46px;height:46px;flex:0 0 46px;border-radius:15px;display:grid;place-items:center;color:#fff;font-weight:700;font-size:1.25rem}
+.ex-head h2{margin:0;font-size:1.3rem;flex:1;min-width:200px;line-height:1.3}
+.ex-head h2 small{display:block;font-size:.8rem;font-weight:400;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.score{font-weight:600;font-size:.92rem;padding:6px 12px;border-radius:99px;background:var(--sand);white-space:nowrap}
+.task{color:var(--muted);margin:14px 0 6px}
+.c-sky .num{background:var(--sky)} .c-petrol .num{background:var(--petrol)} .c-lilac .num{background:var(--lilac)}
+.c-sky .ex-head h2{color:var(--sky)} .c-petrol .ex-head h2{color:var(--petrol)} .c-lilac .ex-head h2{color:var(--lilac)}
+
+.example{background:var(--sand);border-radius:16px;padding:12px 18px;margin:14px 0;color:var(--sky);font-style:italic}
+.example .lab{font-style:normal;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block}
+
+.reset{font:inherit;font-size:.85rem;background:none;border:1.5px solid var(--line);color:var(--muted);border-radius:99px;padding:6px 14px;cursor:pointer;margin-top:12px}
+.reset:hover{border-color:var(--rose);color:var(--rose)}
+
+/* Aufgaben-Karten */
+.item{border:1.5px solid var(--line);border-radius:20px;padding:14px 16px;margin:12px 0;background:#fff;transition:border-color .25s,background .25s,box-shadow .25s}
+.item:focus-within{border-color:var(--sky);box-shadow:0 0 0 4px var(--sky-soft)}
+.item.is-ok{border-color:var(--petrol);background:var(--petrol-soft)}
+.item.is-bad{border-color:var(--rose);background:var(--rose-soft)}
+.item-top{display:flex;gap:12px;align-items:flex-start}
+.inum{flex:0 0 30px;height:30px;border-radius:10px;background:var(--sand);display:grid;place-items:center;font-size:.85rem;font-weight:600;color:var(--muted);margin-top:2px}
+.prompt{flex:1}
+.prompt b{font-weight:600}
+.row{display:flex;gap:8px;margin-top:10px}
+input.tin{flex:1;min-width:0;font:inherit;font-size:1rem;padding:12px 14px;border:1.5px solid var(--line);border-radius:14px;background:#fff;color:var(--ink);outline:none}
+input.tin:focus{border-color:var(--sky)}
+input[readonly]{background:transparent;border-style:dashed}
+.go{font:inherit;font-weight:600;border:none;border-radius:14px;padding:0 18px;background:var(--sky);color:#fff;cursor:pointer}
+.go:hover{filter:brightness(1.1)}
+
+.blank{font:inherit;font-size:1rem;width:9ch;border:none;border-bottom:2px solid var(--sky);background:var(--sky-soft);border-radius:8px 8px 0 0;padding:2px 8px;text-align:center;color:var(--ink);outline:none;margin:2px 2px}
+.blank:focus{background:#d4deeb}
+.blank.ok{border-bottom-color:var(--petrol);background:#c9e2e5}
+.blank.bad{border-bottom-color:var(--rose);background:#f1cdd3;text-decoration:line-through}
+.hint{color:var(--muted);font-style:italic}
+.sline{line-height:2.3}
+
+.fb:empty{display:none}
+.fb{margin-top:10px;font-size:.95rem}
+.msg{font-weight:600}
+.msg.ok{color:var(--petrol)} .msg.bad{color:var(--rose)}
+.note{margin-top:6px;background:var(--amber-soft);color:#5d4210;border-radius:12px;padding:6px 12px;display:inline-block}
+.cmp{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin-top:6px}
+.cmp .lab{color:var(--muted);font-size:.85rem;padding-top:2px}
+.x{background:#f1cdd3;text-decoration:line-through;text-decoration-color:var(--rose);border-radius:5px;padding:0 3px}
+.hl{background:var(--amber-soft);font-weight:600;border-radius:5px;padding:0 3px;box-shadow:inset 0 -2px 0 #e3c48f}
+.retry{font:inherit;font-size:.85rem;margin-top:10px;background:#fff;border:1.5px solid var(--rose);color:var(--rose);border-radius:99px;padding:5px 14px;cursor:pointer}
+
+/* Kombinieren */
+.current{background:var(--lilac-soft);border-radius:22px;padding:20px;margin:16px 0;text-align:center}
+.current .lab{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--lilac)}
+.current .je{font-size:1.25rem;font-weight:600;margin-top:4px}
+.endings{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}
+.ending{font:inherit;font-size:.98rem;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:12px 14px;cursor:pointer;color:var(--ink);transition:.2s}
+.ending:hover{border-color:var(--lilac);background:#faf7fc}
+.ending.wrong{border-color:var(--rose);background:var(--rose-soft);animation:shake .45s}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.solved{margin:18px 0 0;padding:0;list-style:none;counter-reset:s}
+.solved li{padding:9px 14px;border-radius:14px;margin:6px 0;background:var(--petrol-soft);font-size:.95rem}
+.solved li.had-err{background:var(--amber-soft)}
+.solved li .tag{font-size:.75rem;color:var(--amber);font-weight:600;margin-left:6px}
+.done-msg{text-align:center;font-weight:600;color:var(--petrol);padding:12px}
+
+/* Sätze bauen */
+.line{min-height:58px;border:2px dashed #d6cfc3;border-radius:16px;padding:8px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;background:#fcfbf8}
+.line .ph{color:#a39e94;font-size:.9rem;padding-left:6px}
+.bank{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.tile{font:inherit;font-size:.98rem;padding:8px 14px;border-radius:13px;border:1.5px solid #cfd8e6;background:#fff;color:var(--ink);cursor:pointer;transition:transform .12s,background .2s}
+.tile:hover{transform:translateY(-2px);background:var(--sky-soft)}
+.line .tile{background:var(--sky-soft);border-color:var(--sky-soft)}
+.tile.comma{font-weight:700;padding:8px 16px;color:var(--lilac)}
+.item.is-ok .line,.item.is-bad .line{border-style:solid}
+.tile:disabled{cursor:default;transform:none}
+
+/* Kasten Übung 5 */
+.box{border:2px solid var(--line);border-radius:20px;padding:14px 16px;display:flex;flex-wrap:wrap;gap:8px 18px;margin:14px 0;background:#fff}
+.box span{font-size:.95rem}
+.box span.used{text-decoration:line-through;color:#a39e94}
+
+/* Ergebnis */
+.result{text-align:center;background:linear-gradient(135deg,#2c4669,#5e4673);color:#fff}
+.result h2{margin:.2em 0;font-size:1.5rem}
+.result .big{font-size:2.6rem;font-weight:700;line-height:1.1}
+.result p{opacity:.92;margin:.6em auto 0;max-width:560px}
+
+/* Umlaut-Leiste */
+#uml{position:fixed;left:50%;bottom:14px;transform:translateX(-50%) translateY(120px);background:#fff;border:1.5px solid var(--line);border-radius:99px;padding:6px;display:flex;gap:6px;box-shadow:0 10px 30px rgba(40,40,70,.15);transition:transform .25s;z-index:30}
+#uml.show{transform:translateX(-50%) translateY(0)}
+#uml button{font:inherit;font-weight:600;width:44px;height:40px;border-radius:99px;border:none;background:var(--sky-soft);color:var(--sky);cursor:pointer}
+
+@media (max-width:560px){
+  body{font-size:17.5px}
+  .card{padding:20px 16px;border-radius:22px}
+  .item{padding:12px}
+  .go{padding:0 14px}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-in">
+    <div class="kicker">Grammatiktraining · Komparativ</div>
+    <h1>Je mehr du übst,<br>desto sicherer wirst du.</h1>
+    <p>Hier trainierst du Sätze mit <b>je … desto / umso</b>: die richtige Wortstellung und die richtigen Komparativ-Formen – auch mit Adjektivendungen. Tippe deine Antwort ein und drück <b>Enter</b>: Du siehst sofort, ob es stimmt, und es geht gleich weiter.</p>
+  </div>
+</header>
+
+<div class="topbar"><div class="topbar-in">
+  <div class="bar"><span id="bar"></span></div>
+  <div class="total">⭐ <span id="totalScore">0</span> <small>/ <span id="totalMax">0</span> Punkte</small></div>
+</div></div>
+
+<main class="wrap">
+
+<nav class="tabs">
+  <a href="#merk">Merkkasten</a><a href="#u1">1 Kombinieren</a><a href="#u2">2 Komparative</a><a href="#u3">3 Sätze bauen</a><a href="#u4">4 Ist das wahr?</a><a href="#u5">5 Was passt?</a><a href="#u6">6 Das Wetter</a>
+</nav>
+
+<section class="card merk" id="merk">
+  <h2>💡 So funktioniert <i>je … desto</i></h2>
+  <div class="rule">
+    <div><b class="k">je</b> + Komparativ …<br>→ das Verb steht <b>am Ende</b>.<br><span style="font-size:.92rem">Je mehr man <span class="v">übt</span>,</span></div>
+    <div><b class="k">desto / umso</b> + Komparativ …<br>→ das Verb kommt <b>direkt danach</b> (Position 2).<br><span style="font-size:.92rem">desto besser <span class="v">spricht</span> man.</span></div>
+  </div>
+  <p>Zwischen den beiden Teilen steht immer ein <b>Komma</b>. <i>desto</i> und <i>umso</i> bedeuten dasselbe – du kannst beide verwenden.</p>
+  <p><b>Trennbare Verben</b> bleiben im je-Teil zusammen am Ende: <i>Je früher man <span class="v">losfährt</span>, desto pünktlicher <span class="v">kommt</span> man <span class="v">an</span>.</i></p>
+  <p><b>Besondere Komparative:</b></p>
+  <ul class="cmp-list">
+    <li>gut → besser</li><li>viel → mehr</li><li>sehr → mehr</li><li>gern → lieber</li><li>hoch → höher</li><li>nah → näher</li><li>oft → öfter</li><li>teuer → teurer</li><li>dunkel → dunkler</li><li>alt → älter</li><li>groß → größer</li><li>jung → jünger</li><li>kalt → kälter</li><li>warm → wärmer</li><li>lang → länger</li><li>kurz → kürzer</li><li>stark → stärker</li>
+  </ul>
+  <p style="margin-top:14px"><b>Vor einem Nomen</b> bekommt der Komparativ eine Adjektivendung: <i>desto größer<b>e</b> Portionen, desto süßer<b>en</b> Saft, desto wärmer<b>e</b> Socken</i>. Aber: <b>mehr</b> und <b>weniger</b> haben nie eine Endung – <i>desto mehr Leute, desto weniger Möbel</i>.</p>
+</section>
+
+<section class="card c-lilac" id="u1">
+  <div class="ex-head"><span class="num">1</span><h2><small>Übung 1</small>Was passt zusammen?</h2><span class="score" id="s1"></span></div>
+  <p class="task">Lies den je-Teil und tippe das passende Satzende an. Achte auch auf die Pronomen (er, sie …) – sie helfen dir!</p>
+  <div id="ex1"></div>
+  <button class="reset" data-reset="1">↺ Übung neu starten</button>
+</section>
+
+<section class="card c-sky" id="u2">
+  <div class="ex-head"><span class="num">2</span><h2><small>Übung 2</small>Ergänze die Komparative</h2><span class="score" id="s2"></span></div>
+  <p class="task">Schreib das Wort in Klammern im Komparativ in die Lücke. Vor einem Nomen brauchst du auch die richtige Endung! Mit <b>Enter</b> springst du zur nächsten Lücke.</p>
+  <div class="example"><span class="lab">Beispiel</span>Je <u>ruhiger</u> (ruhig) es im Haus ist, desto <u>besser</u> (gut) kann ich lernen.</div>
+  <div id="ex2"></div>
+  <button class="reset" data-reset="2">↺ Übung neu starten</button>
+</section>
+
+<section class="card c-petrol" id="u3">
+  <div class="ex-head"><span class="num">3</span><h2><small>Übung 3</small>Bau die Sätze richtig</h2><span class="score" id="s3"></span></div>
+  <p class="task">Tippe die Wortkärtchen in der richtigen Reihenfolge an – das Komma ist auch ein Kärtchen. Wenn alle Kärtchen verwendet sind, wird dein Satz sofort geprüft. Ein falsches Kärtchen kannst du vorher einfach zurücktippen.</p>
+  <div class="example"><span class="lab">Beispiel</span>je • ich • müder • bin • , • desto • langsamer • arbeite • ich<br>→ Je müder ich bin, desto langsamer arbeite ich.</div>
+  <div id="ex3"></div>
+  <button class="reset" data-reset="3">↺ Übung neu starten</button>
+</section>
+
+<section class="card c-lilac" id="u4">
+  <div class="ex-head"><span class="num">4</span><h2><small>Übung 4</small>Ist das wahr? Schreib Sätze mit je … desto / umso</h2><span class="score" id="s4"></span></div>
+  <p class="task">Schreib einen ganzen Satz. Verwende <b>man</b> als Subjekt – außer es steht schon ein anderes Subjekt da (das Auto, die Stadt …).</p>
+  <div class="example"><span class="lab">Beispiel</span>viel lernen • viel wissen → Je mehr man lernt, desto mehr weiß man.</div>
+  <div id="ex4"></div>
+  <button class="reset" data-reset="4">↺ Übung neu starten</button>
+</section>
+
+<section class="card c-sky" id="u5">
+  <div class="ex-head"><span class="num">5</span><h2><small>Übung 5</small>Was passt zusammen? Schreib Sätze</h2><span class="score" id="s5"></span></div>
+  <p class="task">Finde im Kasten das passende Ende und schreib den ganzen Satz mit <b>je … desto / umso</b>. Subjekt ist immer <b>man</b>.</p>
+  <div class="box" id="box5"></div>
+  <div class="example"><span class="lab">Beispiel</span>viel schlafen + ausgeruht sein → Je mehr man schläft, desto ausgeruhter ist man.</div>
+  <div id="ex5"></div>
+  <button class="reset" data-reset="5">↺ Übung neu starten</button>
+</section>
+
+<section class="card c-petrol" id="u6">
+  <div class="ex-head"><span class="num">6</span><h2><small>Übung 6</small>Das Wetter: Schreib die Sätze neu mit je … desto / umso</h2><span class="score" id="s6"></span></div>
+  <p class="task">Mach aus dem wenn-Satz einen je-desto-Satz. Aus beiden Adjektiven bzw. Adverbien wird ein Komparativ.</p>
+  <div class="example"><span class="lab">Beispiel</span>Wenn es windig ist, fliegen die Drachen hoch.<br>→ Je windiger es ist, desto höher fliegen die Drachen.</div>
+  <div id="ex6"></div>
+  <button class="reset" data-reset="6">↺ Übung neu starten</button>
+</section>
+
+<section class="card result" id="result">
+  <div style="opacity:.8;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase">Dein Ergebnis</div>
+  <div class="big"><span id="rOk">0</span> / <span id="rMax">0</span></div>
+  <h2 id="rHead">Los geht's!</h2>
+  <p id="rText">Je mehr Aufgaben du löst, desto mehr Sterne sammelst du. Gezählt wird immer dein erster Versuch.</p>
+</section>
+
+</main>
+
+<div id="uml" aria-hidden="true"><button>ä</button><button>ö</button><button>ü</button><button>ß</button></div>
+
+<script>
+/* ===================== DATEN ===================== */
+const EX1 = [
+  ["Je länger ich Deutsch lerne,","desto mehr Wörter kenne ich."],
+  ["Je wärmer es draußen ist,","umso mehr Eis wird verkauft."],
+  ["Je später der Bus kommt,","desto ungeduldiger werden die Fahrgäste."],
+  ["Je mehr Kerzen auf der Torte stehen,","desto älter ist das Geburtstagskind."],
+  ["Je höher man auf einen Berg steigt,","umso dünner wird die Luft."],
+  ["Je reifer die Bananen sind,","desto brauner wird ihre Schale."],
+  ["Je mehr Geschenke unter dem Baum liegen,","umso größer ist die Freude der Kinder."],
+  ["Je länger der Tee zieht,","desto bitterer schmeckt er."],
+  ["Je öfter du mit dem Handy telefonierst,","desto teurer wird deine Rechnung."],
+  ["Je mehr Zwiebeln man schneidet,","umso mehr muss man weinen."],
+  ["Je kleiner die Schrift ist,","desto schwerer kann man sie lesen."],
+  ["Je schneller der Zug fährt,","desto früher sind wir in Wien."]
+];
+
+/* {Lösung(en)|Grundform} – mehrere Lösungen mit / */
+const EX2 = [
+  "Je {früher|früh} wir losfahren, desto {weniger|wenig} Stau gibt es.",
+  "Je {wärmer|warm} das Wasser ist, desto {länger|lang} bleiben die Kinder im See.",
+  "Je {öfter|oft} du übst, umso {sicherer|sicher} spielst du Klavier.",
+  "Je {höher|hoch} der Berg ist, desto {schöner|schön} ist die Aussicht von oben.",
+  "Je {näher|nah} die Prüfung kommt, desto {nervöser|nervös} werden die Schüler.",
+  "Je {dunkler|dunkel} das Zimmer ist, umso {besser|gut} schläft man.",
+  "Je {teurer|teuer} das Hotel ist, desto {bequemer|bequem} sind die Betten.",
+  "Je {mehr|viel} Gäste kommen, desto {größer|groß} muss der Kuchen sein.",
+  "Je {lieber|gern} man ein Hobby macht, desto {schneller|schnell} vergeht die Zeit.",
+  "Je {kürzer|kurz} die Nächte sind, umso {müder|müde} sind wir am Morgen.",
+  "Je {älter|alt} die Kinder werden, desto {größere|groß} Kleidung brauchen sie.",
+  "Je {fleißiger|fleißig} man trainiert, desto {bessere|gut} Ergebnisse erzielt man.",
+  "Je {frischer|frisch} die Zutaten sind, umso {leckerere/leckrere|lecker} Gerichte kann man kochen.",
+  "Je {sportlicher|sportlich} jemand ist, desto {längere|lang} Strecken kann er laufen.",
+  "Je {reifer|reif} das Obst ist, desto {süßeren|süß} Saft bekommt man.",
+  "Je {kälter|kalt} der Winter ist, umso {wärmere|warm} Socken braucht man.",
+  "Je {besser|gut} das Wetter ist, desto {mehr|viel} Leute sitzen im Park.",
+  "Je {lauter|laut} die Musik ist, desto {schlechter|schlecht} kann man sich unterhalten.",
+  "Je {kleiner|klein} die Wohnung ist, umso {weniger|wenig} Möbel passen hinein.",
+  "Je {stärker|stark} der Kaffee ist, desto {schneller|schnell} wird man wach."
+];
+
+const EX3 = [
+  "je|länger|wir|im Park|spazieren gehen|,|desto|hungriger|werden|wir",
+  "je|mehr Vokabeln|du|jeden Tag|wiederholst|,|umso|leichter|verstehst|du|die Texte",
+  "je|früher|wir|am Bahnhof|ankommen|,|desto|mehr Zeit|haben|wir|für das Museum",
+  "je|sorgfältiger|man|den Text|korrigiert|,|umso|weniger Fehler|findet|der Lehrer",
+  "je|öfter|ich|mit meinen Kollegen|spreche|,|desto|besser|verstehen|wir|uns",
+  "je|mehr Gemüse|die Kinder|essen|,|desto|gesünder|bleiben|sie",
+  "je|wärmer|es|am Wochenende|ist|,|umso|lieber|fahren|wir|an den See",
+  "je|schneller|du|deine Hausaufgaben|machst|,|desto|mehr Freizeit|hast|du|am Nachmittag",
+  "je|billiger|die Flüge|sind|,|desto|mehr Menschen|reisen|ans Meer",
+  "je|genauer|man|das Rezept|liest|,|desto|besser|gelingt|der Kuchen",
+  "je|mehr Sport|sie|in ihrer Freizeit|treibt|,|desto|fitter|fühlt|sie|sich",
+  "je|lauter|die Kinder|spielen|,|umso|schwerer|kann|ich|mich|konzentrieren",
+  "je|länger|er|in Österreich|lebt|,|desto|besser|gefällt|es|ihm",
+  "je|mehr Bücher|du|liest|,|umso|größer|wird|dein Wortschatz",
+  "je|später|wir|ins Kino|gehen|,|desto|leerer|ist|der Saal",
+  "je|freundlicher|die Verkäuferin|ist|,|desto|lieber|kaufen|wir|dort|ein",
+  "je|pünktlicher|die Busse|fahren|,|umso|zufriedener|sind|die Fahrgäste",
+  "je|mehr|ihr|zusammen|übt|,|desto|sicherer|werdet|ihr|bei der Prüfung",
+  "je|gründlicher|wir|die Wohnung|putzen|,|desto|wohler|fühlen|wir|uns",
+  "je|besser|ich|mich|vorbereite|,|umso|ruhiger|gehe|ich|ins Vorstellungsgespräch"
+];
+
+const EX4 = [
+  ["früh losfahren • pünktlich ankommen",["Je früher man losfährt, desto pünktlicher kommt man an."]],
+  ["viel fernsehen • wenig lesen",["Je mehr man fernsieht, desto weniger liest man."]],
+  ["alt werden • weise sein",["Je älter man wird, desto weiser ist man."]],
+  ["das Restaurant ist teuer • das Essen ist gut",["Je teurer das Restaurant ist, desto besser ist das Essen."]],
+  ["die Stadt ist groß • die Mieten sind hoch",["Je größer die Stadt ist, desto höher sind die Mieten."]],
+  ["viel üben • gut sprechen",["Je mehr man übt, desto besser spricht man."]],
+  ["wenig schlafen • nervös sein",["Je weniger man schläft, desto nervöser ist man."]],
+  ["viel Zucker essen • oft zum Zahnarzt gehen",["Je mehr Zucker man isst, desto öfter geht man zum Zahnarzt."]],
+  ["viele Freunde haben • selten allein sein",["Je mehr Freunde man hat, desto seltener ist man allein."]],
+  ["das Auto ist neu • das Auto ist sicher",["Je neuer das Auto ist, desto sicherer ist es.","Je neuer das Auto ist, desto sicherer ist das Auto."]],
+  ["viel Kaffee trinken • schlecht schlafen",["Je mehr Kaffee man trinkt, desto schlechter schläft man."]],
+  ["lange am Computer sitzen • müde Augen haben",["Je länger man am Computer sitzt, desto müdere Augen hat man."]],
+  ["gesund essen • fit sein",["Je gesünder man isst, desto fitter ist man.","Je gesunder man isst, desto fitter ist man."]],
+  ["viele Sprachen sprechen • gute Chancen haben",["Je mehr Sprachen man spricht, desto bessere Chancen hat man."]],
+  ["die Party dauert lange • die Gäste sind müde",["Je länger die Party dauert, desto müder sind die Gäste."]],
+  ["billig einkaufen • schlechte Qualität bekommen",["Je billiger man einkauft, desto schlechtere Qualität bekommt man."]],
+  ["viel Stress haben • ungeduldig sein",["Je mehr Stress man hat, desto ungeduldiger ist man."]],
+  ["oft Komplimente machen • beliebt sein",["Je öfter man Komplimente macht, desto beliebter ist man."]],
+  ["jung sein • leicht lernen",["Je jünger man ist, desto leichter lernt man."]],
+  ["viel Gemüse essen • selten krank sein",["Je mehr Gemüse man isst, desto seltener ist man krank."]]
+];
+
+const EX5 = [
+  ["viel lesen","viele Bücher kennen",["Je mehr man liest, desto mehr Bücher kennt man."]],
+  ["viel reisen","viele Länder kennen",["Je mehr man reist, desto mehr Länder kennt man."]],
+  ["viel Wasser trinken","wenig Durst haben",["Je mehr Wasser man trinkt, desto weniger Durst hat man."]],
+  ["wenig Geld ausgeben","viel Geld sparen",["Je weniger Geld man ausgibt, desto mehr Geld spart man.","Je weniger Geld man ausgibt, desto mehr spart man."]],
+  ["spät ins Bett gehen","am Morgen müde sein",["Je später man ins Bett geht, desto müder ist man am Morgen."]],
+  ["schnell Auto fahren","viel Benzin brauchen",["Je schneller man Auto fährt, desto mehr Benzin braucht man."]],
+  ["oft lachen","gute Laune haben",["Je öfter man lacht, desto bessere Laune hat man."]],
+  ["viel im Garten arbeiten","viel Gemüse ernten",["Je mehr man im Garten arbeitet, desto mehr Gemüse erntet man."]],
+  ["freundlich lächeln","freundliche Antworten bekommen",["Je freundlicher man lächelt, desto freundlichere Antworten bekommt man."]],
+  ["viel trainieren","starke Muskeln haben",["Je mehr man trainiert, desto stärkere Muskeln hat man."]]
+];
+
+const EX6 = [
+  ["Wenn der Wind stark weht, wird es kalt.",["Je stärker der Wind weht, desto kälter wird es."]],
+  ["Wenn es lange regnet, werden die Straßen nass.",["Je länger es regnet, desto nasser werden die Straßen.","Je länger es regnet, desto nässer werden die Straßen."]],
+  ["Wenn die Sonne hoch steht, sind die Schatten kurz.",["Je höher die Sonne steht, desto kürzer sind die Schatten."]],
+  ["Wenn es warm ist, gehen viele Leute ins Freibad.",["Je wärmer es ist, desto mehr Leute gehen ins Freibad."]],
+  ["Wenn der Schnee hoch liegt, ist das Autofahren schwierig.",["Je höher der Schnee liegt, desto schwieriger ist das Autofahren."]],
+  ["Wenn die Luft feucht ist, trocknet die Wäsche langsam.",["Je feuchter die Luft ist, desto langsamer trocknet die Wäsche."]],
+  ["Wenn es kalt ist, brauchen wir dicke Jacken.",["Je kälter es ist, desto dickere Jacken brauchen wir."]],
+  ["Wenn der Himmel blau ist, sind die Menschen gut gelaunt.",["Je blauer der Himmel ist, desto besser gelaunt sind die Menschen."]],
+  ["Wenn das Gewitter nah ist, ist der Donner laut.",["Je näher das Gewitter ist, desto lauter ist der Donner."]],
+  ["Wenn es heiß ist, trinken wir viel Wasser.",["Je heißer es ist, desto mehr Wasser trinken wir."]],
+  ["Wenn es oft schneit, freuen sich die Kinder sehr.",["Je öfter es schneit, desto mehr freuen sich die Kinder.","Je öfter es schneit, desto mehr freuen die Kinder sich."]],
+  ["Wenn die Tage kurz sind, brauchen wir viel Licht.",["Je kürzer die Tage sind, desto mehr Licht brauchen wir."]],
+  ["Wenn es stark regnet, steigt der Fluss schnell.",["Je stärker es regnet, desto schneller steigt der Fluss."]],
+  ["Wenn die Wolken dunkel sind, ist das Gewitter nah.",["Je dunkler die Wolken sind, desto näher ist das Gewitter."]],
+  ["Wenn es im Winter kalt ist, sind die Heizkosten hoch.",["Je kälter es im Winter ist, desto höher sind die Heizkosten."]],
+  ["Wenn das Wetter schön ist, machen wir lange Ausflüge.",["Je schöner das Wetter ist, desto längere Ausflüge machen wir."]],
+  ["Wenn der Nebel dicht ist, fährt man langsam.",["Je dichter der Nebel ist, desto langsamer fährt man."]],
+  ["Wenn die Temperatur niedrig ist, friert der See schnell zu.",["Je niedriger die Temperatur ist, desto schneller friert der See zu."]],
+  ["Wenn der Sommer trocken ist, haben die Bauern große Probleme.",["Je trockener der Sommer ist, desto größere Probleme haben die Bauern."]],
+  ["Wenn es draußen grau ist, bleiben wir gern zu Hause.",["Je grauer es draußen ist, desto lieber bleiben wir zu Hause."]]
+];
+
+/* ===================== WERKZEUGE ===================== */
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const shuffle = a => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+const U = s => s.toLowerCase().replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss').replace(/[’'`´]/g,'');
+const tokens = s => s.replace(/\bum\s+so\b/gi,'umso').replace(/[.!?;:„“"»«]+/g,' ').replace(/,/g,' , ').trim().split(/\s+/).filter(Boolean);
+const NT = t => { t = U(t); return t === 'umso' ? 'desto' : t; };
+const eq = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
+const noComma = a => a.filter(x => x !== ',');
+function lcs(a, b) {
+  const n = a.length, m = b.length, d = Array.from({length: n + 1}, () => new Array(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) d[i][j] = a[i] === b[j] ? d[i+1][j+1] + 1 : Math.max(d[i+1][j], d[i][j+1]);
+  const ai = new Set(), bi = new Set(); let i = 0, j = 0;
+  while (i < n && j < m) { if (a[i] === b[j]) { ai.add(i); bi.add(j); i++; j++; } else if (d[i+1][j] >= d[i][j+1]) i++; else j++; }
+  return {ai, bi};
+}
+const notIn = (len, set) => { const s = new Set(); for (let i = 0; i < len; i++) if (!set.has(i)) s.add(i); return s; };
+function joinToks(toks, marks, cls) {
+  let out = '';
+  toks.forEach((t, i) => {
+    const w = marks && marks.has(i) ? `<span class="${cls}">${esc(t)}</span>` : esc(t);
+    out += (t === ',' || !out) ? w : ' ' + w;
+  });
+  return out;
+}
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+function checkSentence(input, sols) {
+  const it = tokens(input), itn = it.map(NT);
+  let best = null, bestScore = -1;
+  for (const sol of sols) {
+    const st = tokens(sol), stn = st.map(NT);
+    if (eq(itn, stn)) return {ok: true, comma: false, sol, it, st};
+    if (eq(noComma(itn), noComma(stn))) return {ok: true, comma: true, sol, it, st};
+    const m = lcs(itn, stn);
+    if (m.ai.size > bestScore) { bestScore = m.ai.size; best = {ok: false, sol, it, st, m}; }
+  }
+  return best;
+}
+
+/* ===================== PUNKTE ===================== */
+const SCORE = {
+  1: {ok: 0, done: 0, total: EX1.length}, 2: {ok: 0, done: 0, total: EX2.length},
+  3: {ok: 0, done: 0, total: EX3.length}, 4: {ok: 0, done: 0, total: EX4.length},
+  5: {ok: 0, done: 0, total: EX5.length}, 6: {ok: 0, done: 0, total: EX6.length}
+};
+function updScore(n) {
+  const s = SCORE[n];
+  $('#s' + n).textContent = `${s.ok} / ${s.total}` + (s.done === s.total ? ' ✓' : '');
+  let ok = 0, done = 0, total = 0;
+  for (const k in SCORE) { ok += SCORE[k].ok; done += SCORE[k].done; total += SCORE[k].total; }
+  $('#totalScore').textContent = ok; $('#totalMax').textContent = total;
+  $('#bar').style.width = (done / total * 100) + '%';
+  $('#rOk').textContent = ok; $('#rMax').textContent = total;
+  if (done === 0) return;
+  const p = ok / done;
+  let head, text;
+  if (done < total) {
+    head = `Schon ${done} von ${total} Aufgaben geschafft!`;
+    text = p >= .85 ? 'Das läuft richtig gut – bleib dran!' : 'Schau dir die markierten Stellen genau an – genau dort lernst du am meisten.';
+  } else if (p >= .9) { head = '🏆 Du bist ein echter Je-desto-Champion!'; text = 'Wortstellung und Komparative sitzen. Großartige Arbeit!'; }
+  else if (p >= .7) { head = '🌟 Sehr gut gemacht!'; text = 'Fast alles sitzt schon. Schau dir deine markierten Sätze noch einmal in Ruhe an – dann bist du bald ganz sicher.'; }
+  else { head = '💪 Gut, dass du so fleißig geübt hast!'; text = 'Je öfter du übst, desto sicherer wirst du. Starte einzelne Übungen ruhig noch einmal neu.'; }
+  $('#rHead').textContent = head; $('#rText').textContent = text;
+}
+
+function goNext(list, card) {
+  const i = list.indexOf(card);
+  const next = list.slice(i + 1).find(c => !c._done()) || list.find(c => !c._done());
+  setTimeout(() => {
+    if (next && next !== card) {
+      next._focus();
+      next.scrollIntoView({behavior: 'smooth', block: 'center'});
+    }
+  }, 700);
+}
+
+/* Ganzer Satz eintippen */
+function typedItem(list, n, idx, promptHTML, sols, onCheck) {
+  const card = document.createElement('div');
+  card.className = 'item';
+  card.innerHTML = `<div class="item-top"><span class="inum">${idx}</span><div class="prompt">${promptHTML}</div></div>
+    <div class="row"><input type="text" class="tin" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go" placeholder="Je …"><button class="go" aria-label="Prüfen">↵</button></div>
+    <div class="fb"></div>`;
+  const inp = $('input', card), fb = $('.fb', card);
+  let tried = false, done = false;
+  function check() {
+    if (done) return;
+    const v = inp.value.trim();
+    if (!v) { inp.focus(); return; }
+    const r = checkSentence(v, sols);
+    done = true; inp.readOnly = true;
+    card.classList.add(r.ok ? 'is-ok' : 'is-bad');
+    if (!tried) { tried = true; SCORE[n].done++; if (r.ok) SCORE[n].ok++; updScore(n); }
+    let html = '';
+    if (r.ok) {
+      html = '<div class="msg ok">✓ Richtig!</div>';
+      const notes = [];
+      if (r.comma) notes.push('Denk an das Komma zwischen dem je-Teil und dem desto-Teil!');
+      if (!/[.!?]\s*$/.test(v)) notes.push('Kleiner Tipp: Am Satzende steht ein Punkt.');
+      if (notes.length) html += `<div class="note">${notes.join(' ')}</div>`;
+      if (v.replace(/\s+/g, ' ') !== r.sol) html += `<div class="cmp"><span class="lab">So sieht er perfekt aus:</span><span>${esc(r.sol)}</span></div>`;
+    } else {
+      const bad = notIn(r.it.length, r.m.ai), miss = notIn(r.st.length, r.m.bi);
+      html = `<div class="msg bad">✗ Noch nicht ganz.</div>
+        <div class="cmp"><span class="lab">Du:</span><span>${joinToks(r.it, bad, 'x')}</span>
+        <span class="lab">Richtig:</span><span>${joinToks(r.st, miss, 'hl')}.</span></div>
+        <button class="retry">↺ Nochmal versuchen</button>`;
+    }
+    fb.innerHTML = html;
+    const rb = $('.retry', fb);
+    if (rb) rb.onclick = () => { done = false; inp.readOnly = false; inp.value = ''; card.classList.remove('is-bad'); fb.innerHTML = ''; inp.focus(); };
+    if (onCheck) onCheck(r);
+    goNext(list, card);
+  }
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); check(); } });
+  $('.go', card).onclick = check;
+  card._focus = () => inp.focus({preventScroll: true});
+  card._done = () => done;
+  list.push(card);
+  return card;
+}
+
+/* ===================== ÜBUNG 1 ===================== */
+function build1() {
+  const root = $('#ex1'); root.innerHTML = '';
+  const order = shuffle(EX1.map((_, i) => i));
+  const remaining = shuffle(EX1.map((_, i) => i));
+  let cur = 0, hadErr = false;
+  const cbox = document.createElement('div'); cbox.className = 'current';
+  const ebox = document.createElement('div'); ebox.className = 'endings';
+  const sol = document.createElement('ol'); sol.className = 'solved';
+  root.append(cbox, ebox, sol);
+  function render() {
+    if (cur >= order.length) {
+      cbox.innerHTML = '<div class="done-msg">🎉 Alle Sätze sind kombiniert!</div>'; ebox.innerHTML = ''; return;
+    }
+    cbox.innerHTML = `<div class="lab">Satz ${cur + 1} von ${order.length}</div><div class="je">${esc(EX1[order[cur]][0])} …</div>`;
+    ebox.innerHTML = '';
+    remaining.forEach(k => {
+      const b = document.createElement('button'); b.className = 'ending'; b.textContent = '… ' + EX1[k][1];
+      b.onclick = () => {
+        if (k === order[cur]) {
+          SCORE[1].done++; if (!hadErr) SCORE[1].ok++; updScore(1);
+          const li = document.createElement('li');
+          if (hadErr) li.className = 'had-err';
+          li.innerHTML = esc(EX1[k][0] + ' ' + EX1[k][1]) + (hadErr ? '<span class="tag">im 2. Versuch</span>' : ' ✓');
+          sol.appendChild(li);
+          remaining.splice(remaining.indexOf(k), 1);
+          cur++; hadErr = false; render();
+        } else {
+          hadErr = true; b.classList.remove('wrong'); void b.offsetWidth; b.classList.add('wrong');
+        }
+      };
+      ebox.appendChild(b);
+    });
+  }
+  render();
+}
+
+/* ===================== ÜBUNG 2 ===================== */
+function build2() {
+  const root = $('#ex2'); root.innerHTML = '';
+  const list = [];
+  EX2.forEach((tpl, idx) => {
+    const blanks = [];
+    let html = '', last = 0;
+    const re = /\{([^|}]+)\|([^}]+)\}/g; let m;
+    while ((m = re.exec(tpl))) {
+      html += esc(tpl.slice(last, m.index));
+      const ans = m[1].split('/');
+      blanks.push(ans);
+      const w = Math.max(...ans.map(a => a.length)) + 3;
+      html += `<input class="blank" style="width:${w}ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next"> <span class="hint">(${esc(m[2])})</span>`;
+      last = re.lastIndex;
+    }
+    html += esc(tpl.slice(last));
+    const full = tpl.replace(/\{([^|}]+)\|[^}]+\}/g, (_, a) => `<span class="hl">${esc(a.split('/')[0])}</span>`);
+    const card = document.createElement('div'); card.className = 'item';
+    card.innerHTML = `<div class="item-top"><span class="inum">${idx + 1}</span><div class="prompt sline">${html}</div></div><div class="fb"></div>`;
+    const ins = [...card.querySelectorAll('.blank')], fb = $('.fb', card);
+    let tried = false, done = false;
+    function check() {
+      if (done) return;
+      const empty = ins.find(i => !i.value.trim());
+      if (empty) { empty.focus(); return; }
+      done = true;
+      let all = true;
+      ins.forEach((inp, k) => {
+        const v = U(inp.value.trim().replace(/[.,!?]/g, ''));
+        const ok = blanks[k].some(a => U(a) === v);
+        inp.classList.add(ok ? 'ok' : 'bad'); inp.readOnly = true;
+        if (!ok) all = false;
+      });
+      card.classList.add(all ? 'is-ok' : 'is-bad');
+      if (!tried) { tried = true; SCORE[2].done++; if (all) SCORE[2].ok++; updScore(2); }
+      fb.innerHTML = all ? '<div class="msg ok">✓ Richtig!</div>'
+        : `<div class="msg bad">✗ Noch nicht ganz.</div><div class="cmp"><span class="lab">Richtig:</span><span>${full}</span></div><button class="retry">↺ Nochmal versuchen</button>`;
+      const rb = $('.retry', fb);
+      if (rb) rb.onclick = () => { done = false; card.classList.remove('is-bad'); fb.innerHTML = ''; ins.forEach(i => { i.readOnly = false; if (i.classList.contains('bad')) i.value = ''; i.classList.remove('ok', 'bad'); }); ins[0].focus(); };
+      goNext(list, card);
+    }
+    ins.forEach((inp, k) => inp.addEventListener('keydown', e => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      if (k < ins.length - 1) ins[k + 1].focus(); else check();
+    }));
+    card._focus = () => ins[0].focus({preventScroll: true});
+    card._done = () => done;
+    list.push(card); root.appendChild(card);
+  });
+}
+
+/* ===================== ÜBUNG 3 ===================== */
+function fmtTiles(arr) { let s = ''; arr.forEach(t => { s += (t === ',' || !s) ? t : ' ' + t; }); return cap(s) + '.'; }
+function build3() {
+  const root = $('#ex3'); root.innerHTML = '';
+  const list = [];
+  EX3.forEach((spec, idx) => {
+    const sol = spec.split('|');
+    const card = document.createElement('div'); card.className = 'item';
+    card.innerHTML = `<div class="item-top"><span class="inum">${idx + 1}</span><div class="prompt"><div class="line"></div><div class="bank"></div></div></div><div class="fb"></div>`;
+    const lineEl = $('.line', card), bankEl = $('.bank', card), fb = $('.fb', card);
+    let bank, line, tried = false, done = false;
+    function setup() {
+      let s; do { s = shuffle(sol.map((t, i) => ({t, id: i}))); } while (eq(s.map(x => x.t), sol));
+      bank = s; line = [];
+    }
+    function render() {
+      lineEl.innerHTML = line.length ? '' : '<span class="ph">Tippe die Kärtchen in der richtigen Reihenfolge an …</span>';
+      line.forEach(o => {
+        const b = document.createElement('button'); b.className = 'tile' + (o.t === ',' ? ' comma' : ''); b.textContent = o.t; b.disabled = done;
+        b.onclick = () => { if (done) return; line.splice(line.indexOf(o), 1); bank.push(o); render(); };
+        lineEl.appendChild(b);
+      });
+      bankEl.innerHTML = '';
+      bank.forEach(o => {
+        const b = document.createElement('button'); b.className = 'tile' + (o.t === ',' ? ' comma' : ''); b.textContent = o.t;
+        b.onclick = () => { if (done) return; bank.splice(bank.indexOf(o), 1); line.push(o); render(); if (!bank.length) check(); };
+        bankEl.appendChild(b);
+      });
+    }
+    function check() {
+      done = true;
+      const lt = line.map(o => o.t);
+      const ok = eq(lt, sol), okNoC = !ok && eq(noComma(lt), noComma(sol));
+      const good = ok || okNoC;
+      card.classList.add(good ? 'is-ok' : 'is-bad');
+      if (!tried) { tried = true; SCORE[3].done++; if (good) SCORE[3].ok++; updScore(3); }
+      render();
+      if (good) {
+        fb.innerHTML = `<div class="msg ok">✓ Richtig! ${esc(fmtTiles(sol))}</div>` + (okNoC ? '<div class="note">Achte auf das Komma: Es steht direkt nach dem je-Teil, vor desto/umso.</div>' : '');
+      } else {
+        const m = lcs(lt, sol); const miss = notIn(sol.length, m.bi);
+        fb.innerHTML = `<div class="msg bad">✗ Noch nicht ganz.</div><div class="cmp"><span class="lab">Richtig:</span><span>${cap(joinToks(sol, miss, 'hl')).replace(/^<span class="hl">j/, '<span class="hl">J')}.</span></div><button class="retry">↺ Nochmal versuchen</button>`;
+        $('.retry', fb).onclick = () => { done = false; card.classList.remove('is-bad'); fb.innerHTML = ''; setup(); render(); };
+      }
+      goNext(list, card);
+    }
+    setup(); render();
+    card._focus = () => {};
+    card._done = () => done;
+    list.push(card); root.appendChild(card);
+  });
+}
+
+/* ===================== ÜBUNG 4 ===================== */
+function build4() {
+  const root = $('#ex4'); root.innerHTML = '';
+  const list = [];
+  EX4.forEach(([p, s], i) => root.appendChild(typedItem(list, 4, i + 1, `<b>${esc(p)}</b>`, s)));
+}
+
+/* ===================== ÜBUNG 5 ===================== */
+function build5() {
+  const root = $('#ex5'); root.innerHTML = '';
+  const box = $('#box5'); box.innerHTML = '<span class="used">ausgeruht sein</span>';
+  const spans = {};
+  shuffle(EX5.map((_, i) => i)).forEach(i => { const sp = document.createElement('span'); sp.textContent = EX5[i][1]; spans[i] = sp; box.append(' • ', sp); });
+  const list = [];
+  EX5.forEach(([l, r, s], i) => root.appendChild(typedItem(list, 5, i + 1, `<b>${esc(l)}</b> + <span class="hint">… (aus dem Kasten)</span>`, s, () => spans[i].classList.add('used'))));
+}
+
+/* ===================== ÜBUNG 6 ===================== */
+function build6() {
+  const root = $('#ex6'); root.innerHTML = '';
+  const list = [];
+  EX6.forEach(([p, s], i) => root.appendChild(typedItem(list, 6, i + 1, esc(p), s)));
+}
+
+const BUILD = {1: build1, 2: build2, 3: build3, 4: build4, 5: build5, 6: build6};
+document.querySelectorAll('[data-reset]').forEach(b => b.onclick = () => {
+  const n = +b.dataset.reset; SCORE[n].ok = 0; SCORE[n].done = 0; BUILD[n](); updScore(n);
+  $('#u' + n).scrollIntoView({behavior: 'smooth'});
+});
+for (const n in BUILD) { BUILD[n](); updScore(n); }
+
+/* ===================== UMLAUT-LEISTE ===================== */
+const uml = $('#uml'); let lastInput = null, hideT;
+document.addEventListener('focusin', e => { if (e.target.matches('input.tin, input.blank')) { lastInput = e.target; clearTimeout(hideT); uml.classList.add('show'); } });
+document.addEventListener('focusout', e => { if (e.target.matches('input.tin, input.blank')) hideT = setTimeout(() => uml.classList.remove('show'), 200); });
+uml.querySelectorAll('button').forEach(b => {
+  b.addEventListener('pointerdown', e => e.preventDefault());
+  b.addEventListener('click', () => {
+    if (!lastInput || lastInput.readOnly) return;
+    const s = lastInput.selectionStart ?? lastInput.value.length, en = lastInput.selectionEnd ?? s;
+    lastInput.setRangeText(b.textContent, s, en, 'end'); lastInput.focus();
+  });
+});
+</script>
+</body>
+</html>

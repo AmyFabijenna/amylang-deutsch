@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="/daf/interdaf/passwort.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relativsatz-Master</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Literata:opsz,wght@7..72,400;7..72,600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+body{margin:0}
+
+/* Layout: Arbeitsblatt-Werkbank – links die Übungskarte mit Schritt-für-Schritt-Umbau, rechts der Spickzettel (Schritte + Pronomentabelle) */
+:root{
+  --bg:#eef2f5; --paper:#ffffff; --ink:#1c2632; --muted:#586676; --line:#d3dce5;
+  --accent:#2c5a86; --accent-ink:#ffffff; --accent-soft:#e3edf6;
+  --noun:#ffe777; --noun-ink:#3a3000; --pron:#c6e6ff; --pron-ink:#0b3553;
+  --verb:#ffd5c7; --verb-ink:#5a1d08;
+  --ok:#22744a; --ok-soft:#e1f3e8; --err:#a9372f; --err-soft:#fbe7e4;
+  --f-sent:"Literata",Georgia,"Times New Roman",serif;
+  --f-ui:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141a21; --paper:#1d252f; --ink:#e6ecf2; --muted:#9aa8b6; --line:#2f3a47;
+  --accent:#7fb2e3; --accent-ink:#0e1822; --accent-soft:#22344a;
+  --noun:#5b4d0c; --noun-ink:#fff1a8; --pron:#173f5f; --pron-ink:#d3ecff;
+  --verb:#5a2a1c; --verb-ink:#ffd9cb;
+  --ok:#6fd39c; --ok-soft:#173a28; --err:#ff8f84; --err-soft:#43211e; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a21; --paper:#1d252f; --ink:#e6ecf2; --muted:#9aa8b6; --line:#2f3a47;
+  --accent:#7fb2e3; --accent-ink:#0e1822; --accent-soft:#22344a;
+  --noun:#5b4d0c; --noun-ink:#fff1a8; --pron:#173f5f; --pron-ink:#d3ecff;
+  --verb:#5a2a1c; --verb-ink:#ffd9cb;
+  --ok:#6fd39c; --ok-soft:#173a28; --err:#ff8f84; --err-soft:#43211e; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:16px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:24px 48px}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:20px}
+h1{font-family:var(--f-sent);font-weight:600;font-size:clamp(1.6rem,3.5vw,2.2rem);line-height:1.15;margin:0;text-wrap:balance}
+h1 em{font-style:normal;background:linear-gradient(transparent 55%,var(--noun) 55%);color:inherit;padding:0 .1em}
+.sub{color:var(--muted);margin:.35rem 0 0;max-width:60ch}
+.seg{display:inline-flex;border:1.5px solid var(--accent);border-radius:999px;overflow:hidden}
+.seg button{font:inherit;font-weight:700;border:0;background:transparent;color:var(--accent);padding:.5rem 1.1rem;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.seg button:focus-visible,.chip:focus-visible,.btn:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;align-items:center}
+.filters .lbl{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-right:4px}
+.chip{font:inherit;font-size:.92rem;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:.3rem .85rem;cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--ink);font-weight:700}
+.chip .n{font-family:var(--f-mono);font-size:.75rem;color:var(--muted);margin-left:.3rem}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start}
+@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:22px}
+.meta{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:center;margin-bottom:14px}
+.counter{font-family:var(--f-mono);font-size:.85rem;color:var(--muted)}
+.badge{font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.15rem .6rem;border-radius:6px;background:var(--accent-soft);color:var(--accent)}
+.sentences{display:grid;gap:10px;margin-bottom:18px}
+.sent{display:grid;grid-template-columns:3.2rem minmax(0,1fr);gap:10px;align-items:baseline}
+.sent .tag{font-family:var(--f-mono);font-size:.78rem;color:var(--muted)}
+.sent .txt{font-family:var(--f-sent);font-size:clamp(1.12rem,2.4vw,1.32rem);line-height:1.45}
+mark.n{background:var(--noun);color:var(--noun-ink);border-radius:3px;padding:0 .12em}
+mark.p{background:var(--pron);color:var(--pron-ink);border-radius:3px;padding:0 .12em}
+mark.v{background:var(--verb);color:var(--verb-ink);border-radius:3px;padding:0 .12em}
+label.ans{display:block;font-size:.85rem;font-weight:700;margin-bottom:6px}
+textarea{width:100%;min-height:86px;resize:vertical;font-family:var(--f-sent);font-size:1.1rem;line-height:1.45;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btn{font:inherit;font-weight:700;border-radius:10px;padding:.55rem 1rem;cursor:pointer;border:1.5px solid var(--accent);background:var(--paper);color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{border-color:var(--line);color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:default}
+.spacer{flex:1}
+.feedback{margin-top:14px;padding:10px 14px;border-radius:10px;display:none}
+.feedback.ok{display:block;background:var(--ok-soft);color:var(--ok)}
+.feedback.err{display:block;background:var(--err-soft);color:var(--err)}
+.feedback.hint{display:block;background:var(--accent-soft);color:var(--ink)}
+.steps{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:12px;counter-reset:st}
+.steps li{display:grid;grid-template-columns:2rem minmax(0,1fr);gap:10px;padding-top:12px;border-top:1px dashed var(--line);counter-increment:st}
+.steps li::before{content:counter(st);font-family:var(--f-mono);font-weight:500;width:1.7rem;height:1.7rem;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);font-size:.85rem}
+.steps h3{margin:0;font-size:.95rem}
+.steps .hu{font-size:.85rem;color:var(--muted);font-style:italic;margin:0}
+.steps .ex{font-family:var(--f-sent);font-size:1.08rem;margin:.3rem 0 0}
+.steps .why{font-size:.88rem;color:var(--muted);margin:.25rem 0 0}
+.steps li.final .ex{font-weight:600}
+aside .card{padding:18px}
+aside h2{font-family:var(--f-sent);font-size:1.15rem;margin:0 0 10px}
+aside ol{margin:0;padding-left:1.2rem;display:grid;gap:8px;font-size:.93rem}
+aside ol .hu{display:block;color:var(--muted);font-style:italic;font-size:.84rem}
+.tblwrap{overflow-x:auto;margin-top:6px}
+table{border-collapse:collapse;width:100%;font-size:.92rem;font-variant-numeric:tabular-nums}
+th,td{border-bottom:1px solid var(--line);padding:.35rem .4rem;text-align:left}
+th{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+td.hot{font-weight:700;color:var(--accent)}
+.tip{font-size:.88rem;color:var(--muted);margin:.8rem 0 0}
+aside{display:grid;gap:16px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:.85rem;margin-top:10px}
+.progress{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:6px}
+.progress > div{height:100%;background:var(--ok);width:0}
+.prog-txt{font-size:.85rem;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.steps li{animation:in .25s ease-out both}@keyframes in{from{transform:translateY(4px);opacity:.3}to{transform:none;opacity:1}}}
+/* Ergänzungen für den Master: Aufgabenkarten ohne Schritte, Sofortprüfung, Punkte */
+.badge.case{background:var(--pron);color:var(--pron-ink)}
+.pill{display:inline-block;font-family:var(--f-ui);font-size:.8rem;font-weight:700;letter-spacing:.02em;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:.12rem .6rem;margin-right:.45rem;vertical-align:.12em}
+.ob{color:var(--muted)}
+.clock{display:flex;align-items:center;gap:10px;margin:0 0 14px}
+.tbar{flex:1;height:6px;background:var(--line);border-radius:6px;overflow:hidden}
+.tbar i{display:block;height:100%;background:var(--accent);transform-origin:left;transform:scaleX(1)}
+.clock.over .tbar i{background:var(--err)}
+.sec{font-family:var(--f-mono);font-size:.85rem;color:var(--muted);min-width:4.6em;text-align:right}
+.review{margin-top:14px;display:none;gap:10px}
+.review.on{display:grid}
+.review .lab{display:block;font-size:.75rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700;margin-bottom:2px}
+.review .line{font-family:var(--f-sent);font-size:clamp(1.05rem,2.2vw,1.2rem);line-height:1.55}
+s.x{color:var(--err);text-decoration-thickness:2px}
+.note{font-size:.9rem;color:var(--muted);margin:0}
+.cd{height:4px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:10px;display:none}
+.cd.on{display:block}
+.cd i{display:block;height:100%;width:100%;background:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.stat{border:1px solid var(--line);border-radius:10px;padding:.45rem .7rem}
+.stat small{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.stat b{font-family:var(--f-mono);font-weight:500;font-size:1.25rem;font-variant-numeric:tabular-nums}
+.stat.pts b{color:var(--accent)}
+.bump{animation:bump .35s}
+@keyframes bump{40%{transform:scale(1.15)}}
+.btn.armed{border-color:var(--err);color:var(--err)}
+.howto p{margin:0 0 .6rem;font-size:.93rem}
+.howto .hu{display:block;color:var(--muted);font-style:italic;font-size:.84rem;margin-top:.2rem}
+.howto .ex{font-family:var(--f-sent);font-size:1rem;background:var(--bg);border-radius:10px;padding:.55rem .75rem;margin:.4rem 0 0}
+.feedback .pts{font-family:var(--f-mono);font-weight:500;margin-left:.4rem}
+textarea[readonly]{opacity:.85}
+.reset{margin-top:12px}
+@media (prefers-reduced-motion:reduce){.bump{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Relativsatz-<em>Master</em></h1>
+      <p class="sub">Keine Hilfsschritte mehr: Baue Relativsätze aus Bausteinen, verbinde zwei Hauptsätze oder zerlege einen Satz wieder. Tippen, prüfen, Punkte sammeln.</p>
+    </div>
+    <div class="seg" role="group" aria-label="Niveau">
+      <button id="m-b1" data-mode="b1" aria-pressed="true">A2 / B1</button>
+      <button id="m-c1" data-mode="c1" aria-pressed="false">C1 / C2</button>
+    </div>
+  </header>
+
+  <div class="filters" id="filters"><span class="lbl">Aufgabe</span></div>
+
+  <div class="grid">
+    <main class="card" aria-live="polite">
+      <div class="meta">
+        <span class="counter" id="counter"></span>
+        <span><span class="badge" id="mbadge"></span> <span class="badge case" id="cbadge" hidden></span></span>
+      </div>
+      <div class="sentences" id="task"></div>
+      <div class="clock" id="clock"><div class="tbar"><i id="tbar"></i></div><span class="sec" id="sec">0,0 s</span></div>
+      <label class="ans" for="answer" id="anslab">Dein Satz</label>
+      <textarea id="answer" spellcheck="false" autocomplete="off" autocapitalize="sentences"></textarea>
+      <div class="actions">
+        <button class="btn primary" id="check">Prüfen</button>
+        <button class="btn" id="solve">Lösung zeigen</button>
+        <button class="btn ghost" id="halt" hidden>Anhalten</button>
+        <span class="spacer"></span>
+        <button class="btn ghost" id="prev" aria-label="Vorherige Aufgabe">←</button>
+        <button class="btn ghost" id="rand">Zufall</button>
+        <button class="btn ghost" id="next" aria-label="Nächste Aufgabe">→</button>
+      </div>
+      <div class="feedback" id="fb"></div>
+      <div class="cd" id="cd"><i id="cdbar"></i></div>
+      <div class="review" id="review"></div>
+    </main>
+
+    <aside>
+      <section class="card howto">
+        <h2 id="howh">So geht's</h2>
+        <div id="how"></div>
+      </section>
+      <section class="card">
+        <h2>Relativpronomen</h2>
+        <div class="tblwrap"><table>
+          <thead><tr><th></th><th>m</th><th>f</th><th>n</th><th>Pl</th></tr></thead>
+          <tbody>
+            <tr><th>Nom</th><td>der</td><td>die</td><td>das</td><td>die</td></tr>
+            <tr><th>Akk</th><td>den</td><td>die</td><td>das</td><td>die</td></tr>
+            <tr><th>Dat</th><td>dem</td><td>der</td><td>dem</td><td class="hot">denen</td></tr>
+            <tr><th>Gen</th><td class="hot">dessen</td><td class="hot">deren</td><td class="hot">dessen</td><td class="hot">deren</td></tr>
+          </tbody>
+        </table></div>
+        <p class="tip" id="tabtip"></p>
+      </section>
+      <section class="card">
+        <h2>Punkte &amp; Fortschritt</h2>
+        <div class="stats">
+          <div class="stat pts"><small>Punkte</small><b id="sPts">0</b></div>
+          <div class="stat"><small>Serie</small><b id="sStreak">0</b></div>
+          <div class="stat"><small>Rekord</small><b id="sBest">0</b></div>
+          <div class="stat"><small>Ø Zeit</small><b id="sAvg">–</b></div>
+        </div>
+        <div class="prog-txt" id="progtxt"></div>
+        <div class="progress"><div id="progbar"></div></div>
+        <button class="btn ghost reset" id="reset">Fortschritt löschen</button>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<script type="text/plain" id="d-b1">
+B | N | der ICE (der Zug) | der Zug | mehr als 300 km/h fahren (können) | Ein ICE ist ein Zug, {der} mehr als 300 km/h ^fahren kann.
+B | PA | der Koffer (das Ding) | man | Kleidung packen (in + Akk.) | Ein Koffer ist ein Ding, {in das} man Kleidung ^packt.
+B | PD | der Löffel (das Ding) | man | Suppe essen (mit) | Ein Löffel ist ein Ding, {mit dem} man Suppe ^isst.
+B | D | die Freundin (der Mensch) | man | vertrauen (können, + Dat.) | Eine Freundin ist ein Mensch, {dem} man ^vertrauen kann.
+B | A | die Handschuhe (die Kleidungsstücke, Pl.) | man | nur im Winter tragen | Handschuhe sind Kleidungsstücke, {die} man nur im Winter ^trägt.
+B | PD | die Schere (das Werkzeug) | man | Papier schneiden (mit) | Eine Schere ist ein Werkzeug, {mit dem} man Papier ^schneidet.
+B | PD | der Kühlschrank (das Gerät) | man | Lebensmittel kühl halten (in + Dat.) | Ein Kühlschrank ist ein Gerät, {in dem} man Lebensmittel kühl ^hält.
+B | PD | das Wörterbuch (das Buch) | man | Wörter nachschlagen (in + Dat.) | Ein Wörterbuch ist ein Buch, {in dem} man Wörter ^nachschlägt.
+B | N | der Briefträger (der Mann) | der Mann | uns die Post bringen | Ein Briefträger ist ein Mann, {der} uns die Post ^bringt.
+B | PD | die Bäckerin (die Frau) | man | Brot und Gebäck kaufen (bei) | Eine Bäckerin ist eine Frau, {bei der} man Brot und Gebäck ^kauft.
+B | A | die Nachbarn (die Leute, Pl.) | man | jeden Tag sehen (+ Akk.) | Nachbarn sind Leute, {die} man jeden Tag ^sieht.
+B | N | der Wecker (die Uhr) | die Uhr | uns morgens wecken | Ein Wecker ist eine Uhr, {die} uns morgens ^weckt.
+B | PD | der Schlüssel (der Gegenstand) | man | Türen aufsperren (mit) | Ein Schlüssel ist ein Gegenstand, {mit dem} man Türen ^aufsperrt.
+B | PD | das Handtuch (das Tuch) | man | sich abtrocknen (mit) | Ein Handtuch ist ein Tuch, {mit dem} man sich ^abtrocknet.
+B | PD | der Kellner (der Mann) | man | im Restaurant bestellen (bei) | Ein Kellner ist ein Mann, {bei dem} man im Restaurant ^bestellt.
+B | PD | die Brille (das Ding) | man | besser sehen (können, mit) | Eine Brille ist ein Ding, {mit dem} man besser ^sehen kann.
+B | PD | die Großeltern (die Menschen, Pl.) | man | oft Geschenke bekommen (von) | Großeltern sind Menschen, {von denen} man oft Geschenke ^bekommt.
+B | D | der Lehrer (der Mensch) | man | Fragen stellen (können, + Dat.) | Ein Lehrer ist ein Mensch, {dem} man Fragen ^stellen kann.
+B | PA | das Kissen (das Ding) | man | den Kopf legen (auf + Akk.) | Ein Kissen ist ein Ding, {auf das} man den Kopf ^legt.
+B | PD | der Stuhl (das Möbelstück) | man | sitzen (auf + Dat.) | Ein Stuhl ist ein Möbelstück, {auf dem} man ^sitzt.
+B | PA | der Schrank (das Möbelstück) | man | Kleidung hängen (in + Akk.) | Ein Schrank ist ein Möbelstück, {in das} man Kleidung ^hängt.
+B | D | die Kinder (die Menschen, Pl.) | man | Märchen vorlesen (+ Dat.) | Kinder sind Menschen, {denen} man Märchen ^vorliest.
+B | PD | der Arzt (die Person) | man | gehen, wenn man krank ist (zu) | Ein Arzt ist eine Person, {zu der} man ^geht, wenn man krank ist.
+B | PD | die Kamera (das Gerät) | man | Fotos machen (mit) | Eine Kamera ist ein Gerät, {mit dem} man Fotos ^macht.
+B | A | der Hund (das Tier) | viele Menschen | als Haustier halten (+ Akk.) | Ein Hund ist ein Tier, {das} viele Menschen als Haustier ^halten.
+B | A | das Geschenk (die Sache) | man | jemandem zum Geburtstag geben (+ Akk.) | Ein Geschenk ist eine Sache, {die} man jemandem zum Geburtstag ^gibt.
+B | PD | die Waschmaschine (das Gerät) | man | die Wäsche waschen (in + Dat.) | Eine Waschmaschine ist ein Gerät, {in dem} man die Wäsche ^wäscht.
+B | A | der Rucksack (die Tasche) | man | auf dem Rücken tragen (+ Akk.) | Ein Rucksack ist eine Tasche, {die} man auf dem Rücken ^trägt.
+B | PD | die Kollegen (die Leute, Pl.) | man | zusammenarbeiten (mit) | Kollegen sind Leute, {mit denen} man ^zusammenarbeitet.
+B | PD | der Regenschirm (das Ding) | man | sich vor Regen schützen (mit) | Ein Regenschirm ist ein Ding, {mit dem} man sich vor Regen ^schützt.
+B | PD | das Krankenhaus (das Gebäude) | Ärzte | Patienten behandeln (in + Dat.) | Ein Krankenhaus ist ein Gebäude, {in dem} Ärzte Patienten ^behandeln.
+B | D | der Babysitter (die Person) | Eltern | ihre Kinder anvertrauen (+ Dat.) | Ein Babysitter ist eine Person, {der} Eltern ihre Kinder ^anvertrauen.
+B | PD | die Geldbörse (das Ding) | man | Geld und Karten aufbewahren (in + Dat.) | Eine Geldbörse ist ein Ding, {in dem} man Geld und Karten ^aufbewahrt.
+B | PD | der Supermarkt (das Geschäft) | man | Lebensmittel einkaufen (können, in + Dat.) | Ein Supermarkt ist ein Geschäft, {in dem} man Lebensmittel ^einkaufen kann.
+B | D | die Eltern (die Menschen, Pl.) | man | viel verdanken (+ Dat.) | Eltern sind Menschen, {denen} man viel ^verdankt.
+B | PA | der Kalender (das Ding) | man | Termine eintragen (in + Akk.) | Ein Kalender ist ein Ding, {in das} man Termine ^einträgt.
+B | PD | der Bus (das Verkehrsmittel) | man | in die Arbeit fahren (mit) | Ein Bus ist ein Verkehrsmittel, {mit dem} man in die Arbeit ^fährt.
+B | PD | das Smartphone (das Gerät) | man | telefonieren und im Internet surfen (können, mit) | Ein Smartphone ist ein Gerät, {mit dem} man telefonieren und im Internet ^surfen kann.
+B | PD | der Fernseher (das Gerät) | man | sich am Abend Filme ansehen (auf + Dat.) | Ein Fernseher ist ein Gerät, {auf dem} man sich am Abend Filme ^ansieht.
+B | A | die Touristen (die Leute, Pl.) | man | im Sommer überall in der Stadt sehen (+ Akk.) | Touristen sind Leute, {die} man im Sommer überall in der Stadt ^sieht.
+B | G | der Witwer (der Mann) | die Frau (des Mannes) | Frau gestorben sein (Perfekt, Genitiv) | Ein Witwer ist ein Mann, {dessen} Frau ^gestorben ist.
+B | G | die Witwe (die Frau) | der Mann (der Frau) | Mann gestorben sein (Perfekt, Genitiv) | Eine Witwe ist eine Frau, {deren} Mann ^gestorben ist.
+V | PD | Die Leute sind meine Nachbarn. | Du hast mit den Leuten gesprochen. | Die Leute, {mit denen} du ^gesprochen hast, sind meine Nachbarn.
+V | PD | Die Kinder sind noch in der Heimat. | Sie erzählen viel von den Kindern. | Die Kinder, {von denen} sie viel ^erzählen, sind noch in der Heimat.
+V | D | Der Mann wohnt im dritten Stock. | Ich habe dem Mann beim Umzug geholfen. | Der Mann, {dem} ich beim Umzug ^geholfen habe, wohnt im dritten Stock.
+V | A | Die Jacke war im Angebot. | Ich habe die Jacke gestern gekauft. | Die Jacke, {die} ich gestern ^gekauft habe, war im Angebot.
+V | PA | Das Thema ist sehr interessant. | Wir sprechen heute über das Thema. | Das Thema, {über das} wir heute ^sprechen, ist sehr interessant.
+V | G | Die Frau ist Ärztin. | Der Sohn der Frau geht in meine Klasse. | Die Frau, {deren} Sohn in meine Klasse ^geht, ist Ärztin.
+V | G | Der Nachbar ist sehr nett. | Das Auto des Nachbarn steht vor unserem Haus. | Der Nachbar, {dessen} Auto vor unserem Haus ^steht, ist sehr nett.
+V | D | Die Freunde kommen aus Ungarn. | Ich schicke den Freunden oft Pakete. | Die Freunde, {denen} ich oft Pakete ^schicke, kommen aus Ungarn.
+V | A | Der Kollege ist heute krank. | Ich rufe den Kollegen jeden Morgen an. | Der Kollege, {den} ich jeden Morgen ^anrufe, ist heute krank. | Trennbares Verb: Im Relativsatz steht anrufe wieder zusammen am Ende.
+V | PD | Das Haus ist sehr alt. | Meine Großeltern haben in dem Haus gewohnt. | Das Haus, {in dem} meine Großeltern ^gewohnt haben, ist sehr alt.
+V | A | Das Buch ist leider sehr teuer. | Ich möchte das Buch unbedingt lesen. | Das Buch, {das} ich unbedingt ^lesen möchte, ist leider sehr teuer.
+V | PA | Die Prüfung ist nächste Woche. | Ich muss mich auf die Prüfung vorbereiten. | Die Prüfung, {auf die} ich mich ^vorbereiten muss, ist nächste Woche.
+V | A | Kennst du den Mann? | Die Polizei sucht den Mann. | Kennst du den Mann, {den} die Polizei ^sucht?
+V | PD | Der Schlüssel ist weg. | Ich sperre mit dem Schlüssel die Wohnungstür auf. | Der Schlüssel, {mit dem} ich die Wohnungstür ^aufsperre, ist weg.
+V | D | Die Gäste waren sehr zufrieden. | Wir haben den Gästen ein ungarisches Menü serviert. | Die Gäste, {denen} wir ein ungarisches Menü ^serviert haben, waren sehr zufrieden.
+V | PD | Die Firma sucht neue Mitarbeiter. | Mein Bruder arbeitet seit fünf Jahren bei der Firma. | Die Firma, {bei der} mein Bruder seit fünf Jahren ^arbeitet, sucht neue Mitarbeiter.
+V | N | Der Zug hatte eine Stunde Verspätung. | Der Zug ist um acht Uhr in Wien angekommen. | Der Zug, {der} um acht Uhr in Wien ^angekommen ist, hatte eine Stunde Verspätung.
+V | PA | Der Film war leider langweilig. | Ich habe mich so auf den Film gefreut. | Der Film, {auf den} ich mich so ^gefreut habe, war leider langweilig.
+V | G | Die Kinder spielen im Park. | Die Eltern der Kinder sitzen auf der Bank. | Die Kinder, {deren} Eltern auf der Bank ^sitzen, spielen im Park.
+V | D | Die Kundin war sehr freundlich. | Ich habe der Kundin den Weg erklärt. | Die Kundin, {der} ich den Weg ^erklärt habe, war sehr freundlich.
+V | PD | Das Messer ist sehr scharf. | Du schneidest mit dem Messer das Brot. | Das Messer, {mit dem} du das Brot ^schneidest, ist sehr scharf.
+V | PD | Das ist der Kollege. | Ich arbeite gern mit dem Kollegen zusammen. | Das ist der Kollege, {mit dem} ich gern ^zusammenarbeite.
+V | PD | Das ist die Stadt. | Ich bin in der Stadt geboren. | Das ist die Stadt, {in der} ich ^geboren bin.
+V | D | Wo ist das Kind? | Du hast dem Kind das Eis gekauft. | Wo ist das Kind, {dem} du das Eis ^gekauft hast?
+V | PA | Die Probleme sind nicht so schlimm. | Du machst dir Sorgen um die Probleme. | Die Probleme, {um die} du dir Sorgen ^machst, sind nicht so schlimm.
+V | PD | Die Kolleginnen sind sehr hilfsbereit. | Ich verstehe mich gut mit den Kolleginnen. | Die Kolleginnen, {mit denen} ich mich gut ^verstehe, sind sehr hilfsbereit.
+V | PA | Das Paket ist endlich angekommen. | Ich habe lange auf das Paket gewartet. | Das Paket, {auf das} ich lange ^gewartet habe, ist endlich angekommen.
+V | G | Der Hund bellt die ganze Nacht. | Der Besitzer des Hundes ist im Urlaub. | Der Hund, {dessen} Besitzer im Urlaub ^ist, bellt die ganze Nacht.
+V | D | Die Ärztin hat mir sehr geholfen. | Ich vertraue der Ärztin. | Die Ärztin, {der} ich ^vertraue, hat mir sehr geholfen.
+V | PD | Die Wohnung ist zu klein. | Wir wohnen seit zwei Jahren in der Wohnung. | Die Wohnung, {in der} wir seit zwei Jahren ^wohnen, ist zu klein.
+V | A | Die Schuhe sind schon kaputt. | Ich habe die Schuhe erst letzten Monat gekauft. | Die Schuhe, {die} ich erst letzten Monat ^gekauft habe, sind schon kaputt.
+V | PA | Der Termin wurde verschoben. | Ich habe mich nicht mehr an den Termin erinnert. | Der Termin, {an den} ich mich nicht mehr ^erinnert habe, wurde verschoben.
+V | D | Die Touristen suchen den Bahnhof. | Ich habe den Touristen den Stadtplan gezeigt. | Die Touristen, {denen} ich den Stadtplan ^gezeigt habe, suchen den Bahnhof.
+V | PD | Der Freund lebt jetzt in Kanada. | Ich habe oft mit dem Freund Fußball gespielt. | Der Freund, {mit dem} ich oft Fußball ^gespielt habe, lebt jetzt in Kanada.
+V | G | Die Schülerin hat einen Preis gewonnen. | Der Aufsatz der Schülerin war der beste. | Die Schülerin, {deren} Aufsatz der beste ^war, hat einen Preis gewonnen.
+V | PA | Das ist das Geschenk. | Ich habe mich sehr über das Geschenk gefreut. | Das ist das Geschenk, {über das} ich mich sehr ^gefreut habe.
+V | A | Der Fernseher ist kaputt. | Ich will den Fernseher morgen zurückgeben. | Der Fernseher, {den} ich morgen ^zurückgeben will, ist kaputt.
+V | PD | Die Lehrerin ist sehr streng. | Wir haben Angst vor der Lehrerin. | Die Lehrerin, {vor der} wir Angst ^haben, ist sehr streng.
+V | N | Die Frau ist meine Tante. | Die Frau hat sich gestern bei mir gemeldet. | Die Frau, {die} sich gestern bei mir ^gemeldet hat, ist meine Tante.
+V | D | Die Nachbarn sind im Urlaub. | Wir gießen den Nachbarn die Blumen. | Die Nachbarn, {denen} wir die Blumen ^gießen, sind im Urlaub.
+V | PD | Die Reise war wunderschön. | Wir haben lange von der Reise geträumt. | Die Reise, {von der} wir lange ^geträumt haben, war wunderschön.
+V | PD | Die Leute waren sehr freundlich. | Wir haben bei den Leuten übernachtet. | Die Leute, {bei denen} wir ^übernachtet haben, waren sehr freundlich.
+V | G | Das Mädchen weint. | Das Fahrrad des Mädchens wurde gestohlen. | Das Mädchen, {dessen} Fahrrad gestohlen ^wurde, weint.
+V | A | Die Suppe schmeckt fantastisch. | Meine Oma hat die Suppe gekocht. | Die Suppe, {die} meine Oma ^gekocht hat, schmeckt fantastisch.
+V | PA | Der Kurs beginnt im Oktober. | Ich habe mich für den Kurs angemeldet. | Der Kurs, {für den} ich mich ^angemeldet habe, beginnt im Oktober.
+V | D | Der Junge hat sich bedankt. | Ich habe dem Jungen den Ball zurückgegeben. | Der Junge, {dem} ich den Ball ^zurückgegeben habe, hat sich bedankt.
+V | PD | Das Café ist heute geschlossen. | Wir treffen uns immer in dem Café. | Das Café, {in dem} wir uns immer ^treffen, ist heute geschlossen.
+V | A | Das ist der Kuchen. | Ich backe den Kuchen jedes Jahr zu Weihnachten. | Das ist der Kuchen, {den} ich jedes Jahr zu Weihnachten ^backe.
+V | PD | Ich zeige dir das Foto. | Ich bin auf dem Foto drei Jahre alt. | Ich zeige dir das Foto, {auf dem} ich drei Jahre alt ^bin.
+V | G | Die Nachbarn haben uns eingeladen. | Der Garten der Nachbarn ist wunderschön. | Die Nachbarn, {deren} Garten wunderschön ^ist, haben uns eingeladen.
+V | D | Wie heißt die Frau? | Du hast der Frau deine Telefonnummer gegeben. | Wie heißt die Frau, {der} du deine Telefonnummer ^gegeben hast?
+V | PD | Das Projekt ist fast fertig. | Wir arbeiten seit Monaten an dem Projekt. | Das Projekt, {an dem} wir seit Monaten ^arbeiten, ist fast fertig.
+U | PD | Die Leute, mit denen du gesprochen hast, sind meine Nachbarn. | Die Leute ^sind meine Nachbarn. | Du ^hast mit den Leuten gesprochen.
+U | PD | Die Kinder, von denen sie viel erzählen, sind noch in der Heimat. | Die Kinder ^sind noch in der Heimat. | Sie ^erzählen viel von den Kindern.
+U | D | Der Kollege, dem ich bei der Arbeit helfe, kommt aus Polen. | Der Kollege ^kommt aus Polen. | Ich ^helfe dem Kollegen bei der Arbeit.
+U | A | Das Fahrrad, das mein Vater mir geschenkt hat, ist rot. | Das Fahrrad ^ist rot. | Mein Vater ^hat mir das Fahrrad geschenkt.
+U | G | Die Frau, deren Hund so laut bellt, wohnt neben uns. | Die Frau ^wohnt neben uns. | Der Hund der Frau ^bellt so laut.
+U | PA | Die Stadt, in die wir im Sommer fahren, liegt am Meer. | Die Stadt ^liegt am Meer. | Wir ^fahren im Sommer in die Stadt.
+U | PD | Das Restaurant, in dem wir gestern gegessen haben, ist neu. | Das Restaurant ^ist neu. | Wir ^haben gestern in dem Restaurant gegessen.
+U | D | Die Gäste, denen wir das Zimmer gezeigt haben, kommen aus Italien. | Die Gäste ^kommen aus Italien. | Wir ^haben den Gästen das Zimmer gezeigt.
+U | PA | Der Brief, auf den ich so lange gewartet habe, ist heute gekommen. | Der Brief ^ist heute gekommen. | Ich ^habe so lange auf den Brief gewartet.
+U | A | Die Freundin, die ich vom Bahnhof abhole, besucht mich eine Woche lang. | Die Freundin ^besucht mich eine Woche lang. | Ich ^hole die Freundin vom Bahnhof ab. | Trennbares Verb: Im Hauptsatz wird abholen wieder getrennt.
+U | G | Der Schüler, dessen Mutter Lehrerin ist, ist sehr fleißig. | Der Schüler ^ist sehr fleißig. | Die Mutter des Schülers ^ist Lehrerin.
+U | PD | Die Firma, bei der ich mich beworben habe, hat mir geantwortet. | Die Firma ^hat mir geantwortet. | Ich ^habe mich bei der Firma beworben.
+U | D | Die Ärztin, der ich alles erzählt habe, war sehr verständnisvoll. | Die Ärztin ^war sehr verständnisvoll. | Ich ^habe der Ärztin alles erzählt.
+U | PA | Das Spiel, über das alle sprechen, war gestern im Fernsehen. | Das Spiel ^war gestern im Fernsehen. | Alle ^sprechen über das Spiel.
+U | A | Die Wohnung, die wir mieten wollen, hat einen Balkon. | Die Wohnung ^hat einen Balkon. | Wir ^wollen die Wohnung mieten.
+U | PD | Die Freunde, mit denen ich Urlaub mache, sind sehr lustig. | Die Freunde ^sind sehr lustig. | Ich ^mache mit den Freunden Urlaub.
+U | N | Der Bus, der gerade abgefahren ist, fährt nach Graz. | Der Bus ^fährt nach Graz. | Der Bus ^ist gerade abgefahren.
+U | PA | Die Arbeit, um die ich mich gekümmert habe, ist fertig. | Die Arbeit ^ist fertig. | Ich ^habe mich um die Arbeit gekümmert.
+U | G | Die Leute, deren Kinder im Hof spielen, sind sehr nett. | Die Leute ^sind sehr nett. | Die Kinder der Leute ^spielen im Hof.
+U | D | Das Kind, dem ich bei den Hausaufgaben helfe, ist zehn Jahre alt. | Das Kind ^ist zehn Jahre alt. | Ich ^helfe dem Kind bei den Hausaufgaben.
+U | PD | Der Mann, mit dem du telefoniert hast, ist mein Chef. | Der Mann ^ist mein Chef. | Du ^hast mit dem Mann telefoniert.
+U | A | Das ist das Lied, das ich so gern höre. | Das ^ist das Lied. | Ich ^höre das Lied so gern.
+U | PD | Hier ist die Tasche, in der mein Handy war. | Hier ^ist die Tasche. | Mein Handy ^war in der Tasche.
+U | A | Die Blumen, die du mir geschenkt hast, sind wunderschön. | Die Blumen ^sind wunderschön. | Du ^hast mir die Blumen geschenkt.
+U | PA | Die Kollegin, für die ich das Geschenk gekauft habe, hat heute Geburtstag. | Die Kollegin ^hat heute Geburtstag. | Ich ^habe für die Kollegin das Geschenk gekauft.
+U | D | Der Nachbar, dem das Auto gehört, ist nicht zu Hause. | Der Nachbar ^ist nicht zu Hause. | Das Auto ^gehört dem Nachbarn. | n-Deklination: dem Nachbarn.
+U | PD | Die Straße, in der ich wohne, ist sehr ruhig. | Die Straße ^ist sehr ruhig. | Ich ^wohne in der Straße.
+U | G | Das Haus, dessen Dach kaputt ist, wird renoviert. | Das Haus ^wird renoviert. | Das Dach des Hauses ^ist kaputt.
+U | PA | Die Fragen, auf die ich keine Antwort weiß, sind schwer. | Die Fragen ^sind schwer. | Ich ^weiß keine Antwort auf die Fragen.
+U | A | Der Termin, den ich absagen muss, ist am Montag. | Der Termin ^ist am Montag. | Ich ^muss den Termin absagen.
+U | D | Die Kinder, denen der Clown Luftballons schenkt, lachen. | Die Kinder ^lachen. | Der Clown ^schenkt den Kindern Luftballons.
+U | PD | Der Lehrer, von dem ich viel gelernt habe, geht in Pension. | Der Lehrer ^geht in Pension. | Ich ^habe von dem Lehrer viel gelernt.
+U | N | Die Studentin, die sich für den Job interessiert, ruft morgen an. | Die Studentin ^ruft morgen an. | Die Studentin ^interessiert sich für den Job.
+U | PD | Kennst du das Café, in dem wir uns kennengelernt haben? | ^Kennst du das Café? | Wir ^haben uns in dem Café kennengelernt.
+U | G | Der Autor, dessen Buch ich gerade lese, kommt aus Österreich. | Der Autor ^kommt aus Österreich. | Ich ^lese gerade das Buch des Autors.
+U | PA | Das Problem, über das wir gestern gesprochen haben, ist gelöst. | Das Problem ^ist gelöst. | Wir ^haben gestern über das Problem gesprochen.
+U | D | Die Oma, der ich jede Woche einen Brief schreibe, wird neunzig. | Die Oma ^wird neunzig. | Ich ^schreibe der Oma jede Woche einen Brief.
+U | PD | Die Kurse, an denen ich teilnehme, sind kostenlos. | Die Kurse ^sind kostenlos. | Ich ^nehme an den Kursen teil.
+U | A | Ich habe den Film, den du mir empfohlen hast, gestern gesehen. | Ich ^habe den Film gestern gesehen. | Du ^hast mir den Film empfohlen.
+U | N | Ich danke der Frau, die mir den Weg gezeigt hat. | Ich ^danke der Frau. | Die Frau ^hat mir den Weg gezeigt.
+</script>
+<script type="text/plain" id="d-c1">
+B | G | die Waise (das Kind) | die Eltern (des Kindes) | Eltern gestorben sein (Perfekt, Genitiv) | Eine Waise ist ein Kind, {dessen} Eltern ^gestorben sind.
+B | N | das Denkmal (das Bauwerk) | das Bauwerk | zur Erinnerung an eine Person errichten (Passiv Perfekt) | Ein Denkmal ist ein Bauwerk, {das} zur Erinnerung an eine Person ^errichtet worden ist.
+B | W | das Geheimnis (etwas) | man | niemandem verraten (dürfen) | Ein Geheimnis ist etwas, {was} man niemandem ^verraten darf.
+B | PD | das Thermometer (das Messgerät) | die Temperatur | die Temperatur messen (mit, Passiv Präsens) | Ein Thermometer ist ein Messgerät, {mit dem} die Temperatur ^gemessen wird.
+B | D | der Vormund (die Person) | die Sorge (vom Gericht) | vom Gericht die Sorge für ein minderjähriges Kind übertragen (+ Dat., Passiv Perfekt) | Ein Vormund ist eine Person, {der} vom Gericht die Sorge für ein minderjähriges Kind ^übertragen worden ist.
+B | G | der Kronzeuge (der Zeuge) | die Aussage (des Zeugen) | Aussage für das Urteil entscheidend sein (Genitiv) | Ein Kronzeuge ist ein Zeuge, {dessen} Aussage für das Urteil entscheidend ^ist.
+B | PD | der Ratgeber (das Buch) | man | in schwierigen Lebenslagen Rat finden (in + Dat.) | Ein Ratgeber ist ein Buch, {in dem} man in schwierigen Lebenslagen Rat ^findet.
+B | PA | die Bürgschaft (die Verpflichtung) | man | für die Schulden eines anderen haften (durch) | Eine Bürgschaft ist eine Verpflichtung, {durch die} man für die Schulden eines anderen ^haftet.
+B | G | der Pionier (der Mensch) | die Ideen (des Menschen) | Ideen ihrer Zeit voraus sein (Genitiv) | Ein Pionier ist ein Mensch, {dessen} Ideen ihrer Zeit voraus ^sind.
+B | PD | das Fundament (die Grundlage) | das ganze Gebäude | ruhen (auf + Dat.) | Ein Fundament ist eine Grundlage, {auf der} das ganze Gebäude ^ruht.
+B | PD | der Kompromiss (die Lösung) | beide Seiten | leben (können, mit) | Ein Kompromiss ist eine Lösung, {mit der} beide Seiten ^leben können.
+B | PD | die Ausrede (die Begründung) | man | sich herausreden (wollen, mit) | Eine Ausrede ist eine Begründung, {mit der} man sich ^herausreden will.
+B | PD | das Vorbild (der Mensch) | man | sich orientieren (an + Dat.) | Ein Vorbild ist ein Mensch, {an dem} man sich ^orientiert.
+B | PA | die Vertrauensperson (der Mensch) | man | sich in Notlagen wenden (können, an + Akk.) | Eine Vertrauensperson ist ein Mensch, {an den} man sich in Notlagen ^wenden kann.
+B | PD | das Dilemma (die Situation) | man | zwischen zwei gleich schlechten Möglichkeiten wählen (müssen, in + Dat.) | Ein Dilemma ist eine Situation, {in der} man zwischen zwei gleich schlechten Möglichkeiten ^wählen muss.
+B | PG | der Mentor (die Person) | man | von der Erfahrung (Genitiv!) profitieren | Ein Mentor ist eine Person, {von deren} Erfahrung man ^profitiert.
+B | PA | die Zuflucht (der Ort) | man | sich in Gefahr zurückziehen (können, an + Akk.) | Eine Zuflucht ist ein Ort, {an den} man sich in Gefahr ^zurückziehen kann.
+B | G | das Paradoxon (die Aussage) | der Inhalt (der Aussage) | Inhalt sich selbst widersprechen (Genitiv) | Ein Paradoxon ist eine Aussage, {deren} Inhalt sich selbst ^widerspricht.
+B | D | der Lügner (der Mensch) | man | nichts glauben (dürfen, + Dat.) | Ein Lügner ist ein Mensch, {dem} man nichts ^glauben darf.
+B | D | der Sündenbock (die Person) | man | die Schuld für die Fehler anderer zuschieben (+ Dat.) | Ein Sündenbock ist eine Person, {der} man die Schuld für die Fehler anderer ^zuschiebt.
+B | A | das Ehrenamt (die Tätigkeit) | man | ausüben, ohne dafür bezahlt zu werden (+ Akk.) | Ein Ehrenamt ist eine Tätigkeit, {die} man ^ausübt, ohne dafür bezahlt zu werden.
+B | PD | der Gastgeber (die Person) | man | eingeladen sein (bei) | Ein Gastgeber ist eine Person, {bei der} man ^eingeladen ist.
+B | W | das Rätsel (etwas) | niemand | sich erklären (können, + Akk.) | Ein Rätsel ist etwas, {was} sich niemand ^erklären kann.
+B | W | die Ruhe (das Beste) | man | sich nach einem langen Tag wünschen (können, + Akk.) | Ruhe ist das Beste, {was} man sich nach einem langen Tag ^wünschen kann.
+B | PD | das Labyrinth (das System von Wegen) | man | nur schwer wieder herausfinden (aus) | Ein Labyrinth ist ein System von Wegen, {aus dem} man nur schwer wieder ^herausfindet.
+B | PG | die Schlüsselfigur (die Person) | ein Vorhaben | ohne die Mitwirkung (Genitiv!) nicht gelingen (können) | Eine Schlüsselfigur ist eine Person, {ohne deren} Mitwirkung ein Vorhaben nicht ^gelingen kann.
+B | PA | der Präzedenzfall (der Fall) | spätere Gerichte | sich berufen (können, auf + Akk.) | Ein Präzedenzfall ist ein Fall, {auf den} sich spätere Gerichte ^berufen können.
+B | PD | die Sackgasse (die Straße) | man | nicht weiterkommen (in + Dat.) | Eine Sackgasse ist eine Straße, {in der} man nicht ^weiterkommt.
+B | PG | die Hebamme (die Fachfrau) | Kinder | mit der Hilfe (Genitiv!) zur Welt kommen | Eine Hebamme ist eine Fachfrau, {mit deren} Hilfe Kinder zur Welt ^kommen.
+B | PD | der Generalschlüssel (der Schlüssel) | sämtliche Türen eines Gebäudes | sich aufsperren lassen (mit) | Ein Generalschlüssel ist ein Schlüssel, {mit dem} sich sämtliche Türen eines Gebäudes ^aufsperren lassen.
+B | PA | ein ungeklärtes Phänomen (die Erscheinung) | die Wissenschaft | noch keine Erklärung haben (für) | Ein ungeklärtes Phänomen ist eine Erscheinung, {für die} die Wissenschaft noch keine Erklärung ^hat.
+B | PD | der Wendepunkt (der Moment) | alles | sich verändern (an + Dat.) | Ein Wendepunkt ist ein Moment, {an dem} sich alles ^verändert.
+B | G | der Querdenker (der Mensch) | die Ansichten (des Menschen) | Ansichten von der gängigen Meinung abweichen (Genitiv) | Ein Querdenker ist ein Mensch, {dessen} Ansichten von der gängigen Meinung ^abweichen.
+B | PD | die Grauzone (der Bereich) | — | nicht eindeutig geregelt sein, was erlaubt ist (in + Dat.) | Eine Grauzone ist ein Bereich, {in dem} nicht eindeutig geregelt ^ist, was erlaubt ist.
+B | PD | das Druckmittel (das Mittel) | man | jemanden zu etwas zwingen (wollen, mit) | Ein Druckmittel ist ein Mittel, {mit dem} man jemanden zu etwas ^zwingen will.
+B | PA | die Faustregel (die Regel) | man | sich in den meisten Fällen verlassen (können, auf + Akk.) | Eine Faustregel ist eine Regel, {auf die} man sich in den meisten Fällen ^verlassen kann.
+B | PD | der Brückentag (der Arbeitstag) | viele Menschen | Urlaub nehmen (an + Dat.) | Ein Brückentag ist ein Arbeitstag, {an dem} viele Menschen Urlaub ^nehmen.
+B | PG | der Schwellenwert (der Wert) | bestimmte Regeln | bei der Überschreitung (Genitiv!) gelten | Ein Schwellenwert ist ein Wert, {bei dessen} Überschreitung bestimmte Regeln ^gelten.
+B | W | das Heimweh (etwas) | viele Auswanderer | leiden (unter, wo(r)-Form) | Heimweh ist etwas, {worunter} viele Auswanderer ^leiden.
+B | W | das Lebenswerk (alles) | ein Mensch | in seinem Leben schaffen (Perfekt, + Akk.) | Ein Lebenswerk ist alles, {was} ein Mensch in seinem Leben ^geschaffen hat.
+B | A | der Maßanzug (der Anzug) | man | sich beim Schneider anfertigen lassen (+ Akk.) | Ein Maßanzug ist ein Anzug, {den} man sich beim Schneider ^anfertigen lässt.
+V | PG | Die Insel ist nur mit dem Boot erreichbar. | Wegen der Abgeschiedenheit der Insel kommen kaum Touristen. | Die Insel, {wegen deren/wegen derer} Abgeschiedenheit kaum Touristen ^kommen, ist nur mit dem Boot erreichbar. | Präposition + Genitiv: wegen deren (derer hört man oft, standardsprachlich gilt deren).
+V | G | Der Komponist wurde erst spät berühmt. | Die frühen Werke des Komponisten waren lange verschollen. | Der Komponist, {dessen} frühe Werke lange verschollen ^waren, wurde erst spät berühmt. | Nach dessen/deren wird das Adjektiv stark dekliniert: frühe Werke.
+V | A | Das Auto fährt wieder einwandfrei. | Ich habe das Auto in der Werkstatt reparieren lassen. | Das Auto, {das} ich in der Werkstatt ^habe reparieren lassen, fährt wieder einwandfrei. | Ersatzinfinitiv: Das Hilfsverb steht vor den zwei Infinitiven.
+V | W | Er hat die Prüfung auf Anhieb bestanden. | Das hat alle überrascht. | Er hat die Prüfung auf Anhieb bestanden, {was} alle ^überrascht hat. | Bezug auf den ganzen Satz: was.
+V | N | Die Brücke ist seit Jahren baufällig. | Die Brücke muss dringend saniert werden. | Die Brücke, {die} dringend ^saniert werden muss, ist seit Jahren baufällig.
+V | W | Es gibt etwas. | Ich muss dir etwas unbedingt erzählen. | Es gibt etwas, {was} ich dir unbedingt ^erzählen muss. | Nach etwas, nichts, alles, vieles steht was.
+V | PD | Die Bedingungen sind inakzeptabel. | Unter den Bedingungen müssten wir auf einen Teil des Gehalts verzichten. | Die Bedingungen, {unter denen} wir auf einen Teil des Gehalts ^verzichten müssten, sind inakzeptabel.
+V | PG | Die Stiftung feiert ihr hundertjähriges Bestehen. | Mit der Unterstützung der Stiftung wurden zahlreiche Schulen gebaut. | Die Stiftung, {mit deren} Unterstützung zahlreiche Schulen ^gebaut wurden, feiert ihr hundertjähriges Bestehen.
+V | G | Die Autorin liest heute in Wien. | Ich habe dem neuesten Roman der Autorin eine Rezension gewidmet. | Die Autorin, {deren} neuestem Roman ich eine Rezension ^gewidmet habe, liest heute in Wien. | Starke Deklination nach deren: neuestem Roman (Dativ).
+V | PA | Der Vorwurf ist völlig haltlos. | Gegen den Vorwurf hat sich die Ministerin vehement gewehrt. | Der Vorwurf, {gegen den} sich die Ministerin vehement ^gewehrt hat, ist völlig haltlos.
+V | N | Das Gemälde hängt heute im Belvedere. | Das Gemälde war jahrzehntelang für verschollen gehalten worden. | Das Gemälde, {das} jahrzehntelang für verschollen ^gehalten worden war, hängt heute im Belvedere.
+V | D | Die Flüchtlinge erhielten vorübergehend Schutz. | Man hatte den Flüchtlingen zunächst die Einreise verweigert. | Die Flüchtlinge, {denen} man zunächst die Einreise ^verweigert hatte, erhielten vorübergehend Schutz.
+V | W | Er hat endlich eine feste Stelle gefunden. | Das hatte er sich immer gewünscht. | Er hat endlich eine feste Stelle gefunden, {was} er sich immer ^gewünscht hatte.
+V | W | Sie hat die Stelle gekündigt. | Darüber haben sich ihre Eltern sehr aufgeregt. | Sie hat die Stelle gekündigt, {worüber} sich ihre Eltern sehr ^aufgeregt haben. | darüber → worüber.
+V | W | Er kam wieder zu spät. | Darauf hatte der Chef schon gewartet. | Er kam wieder zu spät, {worauf} der Chef schon ^gewartet hatte.
+V | PD | Die Gründe sind nicht nachvollziehbar. | Aus den Gründen hat der Vorstand die Fusion abgesagt. | Die Gründe, {aus denen} der Vorstand die Fusion ^abgesagt hat, sind nicht nachvollziehbar.
+V | G | Die Patientin wurde in eine Spezialklinik verlegt. | Der Zustand der Patientin hatte sich über Nacht verschlechtert. | Die Patientin, {deren} Zustand sich über Nacht ^verschlechtert hatte, wurde in eine Spezialklinik verlegt.
+V | A | Die Unterlagen liegen noch auf meinem Schreibtisch. | Ich hätte die Unterlagen schon gestern abgeben sollen. | Die Unterlagen, {die} ich schon gestern ^hätte abgeben sollen, liegen noch auf meinem Schreibtisch. | Ersatzinfinitiv: hätte steht vor abgeben sollen.
+V | PD | Die Methode ist weltweit verbreitet. | Mit der Methode lassen sich Krankheiten frühzeitig erkennen. | Die Methode, {mit der} sich Krankheiten frühzeitig ^erkennen lassen, ist weltweit verbreitet.
+V | PA | Das Abkommen tritt im Jänner in Kraft. | Auf das Abkommen haben sich die beiden Staaten nach zähen Verhandlungen geeinigt. | Das Abkommen, {auf das} sich die beiden Staaten nach zähen Verhandlungen ^geeinigt haben, tritt im Jänner in Kraft.
+V | G | Die Kollegen sind über die Entscheidung empört. | Die langjährige Arbeit der Kollegen wurde nicht berücksichtigt. | Die Kollegen, {deren} langjährige Arbeit nicht ^berücksichtigt wurde, sind über die Entscheidung empört.
+V | PD | Das Labor gehört zu den modernsten Europas. | In dem Labor wird an neuen Impfstoffen geforscht. | Das Labor, {in dem} an neuen Impfstoffen ^geforscht wird, gehört zu den modernsten Europas.
+V | D | Der Zeuge wurde erneut vorgeladen. | Das Gericht hatte dem Zeugen zunächst keinen Glauben geschenkt. | Der Zeuge, {dem} das Gericht zunächst keinen Glauben ^geschenkt hatte, wurde erneut vorgeladen.
+V | PD | Die Tradition reicht bis ins Mittelalter zurück. | Die Dorfbewohner halten bis heute an der Tradition fest. | Die Tradition, {an der} die Dorfbewohner bis heute ^festhalten, reicht bis ins Mittelalter zurück.
+V | PG | Die Frist läuft morgen ab. | Innerhalb der Frist muss der Einspruch eingelegt werden. | Die Frist, {innerhalb deren/innerhalb derer} der Einspruch ^eingelegt werden muss, läuft morgen ab.
+V | A | Wir haben den Antrag rechtzeitig eingereicht. | Die Behörde hatte den Antrag zunächst verloren. | Wir haben den Antrag, {den} die Behörde zunächst ^verloren hatte, rechtzeitig eingereicht. | Der Relativsatz steht direkt hinter dem Bezugswort, mitten im Satz.
+V | PG | Der Fluss tritt regelmäßig über die Ufer. | An den Ufern des Flusses wurden neue Dämme errichtet. | Der Fluss, {an dessen} Ufern neue Dämme ^errichtet wurden, tritt regelmäßig über die Ufer.
+V | N | Die Ausstellung ist nur noch bis Sonntag zu sehen. | Die Ausstellung ist bisher von über hunderttausend Menschen besucht worden. | Die Ausstellung, {die} bisher von über hunderttausend Menschen ^besucht worden ist, ist nur noch bis Sonntag zu sehen.
+V | PA | Die Reform stößt auf heftigen Widerstand. | Die Regierung hatte sich jahrelang für die Reform eingesetzt. | Die Reform, {für die} sich die Regierung jahrelang ^eingesetzt hatte, stößt auf heftigen Widerstand.
+V | D | Die Bewohner wurden evakuiert. | Den Bewohnern war die Gefahr lange nicht bewusst gewesen. | Die Bewohner, {denen} die Gefahr lange nicht bewusst ^gewesen war, wurden evakuiert.
+V | G | Die Forscherin erhält den Nobelpreis. | Die Entdeckung der Forscherin hat die Krebstherapie revolutioniert. | Die Forscherin, {deren} Entdeckung die Krebstherapie ^revolutioniert hat, erhält den Nobelpreis.
+V | PA | Die Firma steht kurz vor der Insolvenz. | Mein Vater hat dreißig Jahre lang für die Firma gearbeitet. | Die Firma, {für die} mein Vater dreißig Jahre lang ^gearbeitet hat, steht kurz vor der Insolvenz.
+V | A | Das Gespräch verlief überraschend positiv. | Ich hatte das Gespräch lange nicht führen wollen. | Das Gespräch, {das} ich lange nicht ^hatte führen wollen, verlief überraschend positiv. | Ersatzinfinitiv: hatte steht vor führen wollen.
+V | PD | Der Verdacht hat sich bestätigt. | Von dem Verdacht war in den Medien schon länger die Rede. | Der Verdacht, {von dem} in den Medien schon länger die Rede ^war, hat sich bestätigt.
+V | G | Der Präsident trat zurück. | Die Glaubwürdigkeit des Präsidenten war schwer beschädigt. | Der Präsident, {dessen} Glaubwürdigkeit schwer ^beschädigt war, trat zurück.
+V | PD | Die Bibliothek wird renoviert. | In der Bibliothek habe ich als Student ganze Nächte verbracht. | Die Bibliothek, {in der} ich als Student ganze Nächte ^verbracht habe, wird renoviert.
+V | W | Sie hat alles verloren. | Sie hatte sich alles mühsam aufgebaut. | Sie hat alles verloren, {was} sie sich mühsam ^aufgebaut hatte.
+V | W | Er hat vieles gesagt. | Ich kann vieles nicht nachvollziehen. | Er hat vieles gesagt, {was} ich nicht ^nachvollziehen kann.
+V | PA | Die Fragen blieben unbeantwortet. | Die Journalisten hatten sich vor allem für die Fragen interessiert. | Die Fragen, {für die} sich die Journalisten vor allem ^interessiert hatten, blieben unbeantwortet.
+V | G | Die Länder fordern mehr Mitsprache. | Die Wirtschaft der Länder ist stark vom Export abhängig. | Die Länder, {deren} Wirtschaft stark vom Export ^abhängig ist, fordern mehr Mitsprache.
+V | PD | Der Kredit muss in zehn Jahren zurückgezahlt werden. | Mit dem Kredit wurde der Bau der neuen Schule finanziert. | Der Kredit, {mit dem} der Bau der neuen Schule ^finanziert wurde, muss in zehn Jahren zurückgezahlt werden.
+V | A | Er hat den Vertrag nie unterschrieben. | Sein Anwalt hatte ihm den Vertrag dringend empfohlen. | Er hat den Vertrag, {den} ihm sein Anwalt dringend ^empfohlen hatte, nie unterschrieben.
+V | PG | Die Pandemie hat vieles verändert. | Infolge der Pandemie haben viele Menschen ihre Arbeit verloren. | Die Pandemie, {infolge deren/infolge derer} viele Menschen ihre Arbeit ^verloren haben, hat vieles verändert.
+V | D | Der Kandidat wurde gewählt. | Kaum jemand hatte dem Kandidaten eine Chance gegeben. | Der Kandidat, {dem} kaum jemand eine Chance ^gegeben hatte, wurde gewählt.
+V | PD | Das Gremium tagt nur zweimal im Jahr. | In dem Gremium sind alle Bundesländer vertreten. | Das Gremium, {in dem} alle Bundesländer ^vertreten sind, tagt nur zweimal im Jahr.
+V | W | Der Server fiel aus. | Dadurch war die Website stundenlang nicht erreichbar. | Der Server fiel aus, {wodurch} die Website stundenlang nicht ^erreichbar war. | dadurch → wodurch.
+V | G | Der Künstler stellt erstmals in Wien aus. | Den Bildern des Künstlers wird eine heilende Wirkung nachgesagt. | Der Künstler, {dessen} Bildern eine heilende Wirkung ^nachgesagt wird, stellt erstmals in Wien aus.
+V | PA | Der Konflikt droht die Region zu destabilisieren. | In den Konflikt sind mehrere Nachbarstaaten verwickelt. | Der Konflikt, {in den} mehrere Nachbarstaaten ^verwickelt sind, droht die Region zu destabilisieren.
+V | N | Die Kandidatin hat ihre Bewerbung zurückgezogen. | Die Kandidatin hätte die Stelle problemlos bekommen können. | Die Kandidatin, {die} die Stelle problemlos ^hätte bekommen können, hat ihre Bewerbung zurückgezogen.
+V | PD | Die Zeiten sind glücklicherweise vorbei. | In den Zeiten durften Frauen ohne Zustimmung ihres Ehemannes kein Konto eröffnen. | Die Zeiten, {in denen} Frauen ohne Zustimmung ihres Ehemannes kein Konto ^eröffnen durften, sind glücklicherweise vorbei.
+V | G | Die Eltern werden morgen informiert. | Die Kinder der Eltern haben an dem Schulversuch teilgenommen. | Die Eltern, {deren} Kinder an dem Schulversuch ^teilgenommen haben, werden morgen informiert.
+V | PD | Der Brief wurde erst nach Jahrzehnten entdeckt. | In dem Brief bittet die Dichterin ihren Bruder um Vergebung. | Der Brief, {in dem} die Dichterin ihren Bruder um Vergebung ^bittet, wurde erst nach Jahrzehnten entdeckt.
+U | PG | Die Insel, wegen deren Abgeschiedenheit kaum Touristen kommen, ist nur mit dem Boot erreichbar. | Die Insel ^ist nur mit dem Boot erreichbar. | Wegen der Abgeschiedenheit der Insel ^kommen kaum Touristen.
+U | G | Der Komponist, dessen frühe Werke lange verschollen waren, wurde erst spät berühmt. | Der Komponist ^wurde erst spät berühmt. | Die frühen Werke des Komponisten ^waren lange verschollen.
+U | A | Das Auto, das ich in der Werkstatt habe reparieren lassen, fährt wieder einwandfrei. | Das Auto ^fährt wieder einwandfrei. | Ich ^habe das Auto in der Werkstatt reparieren lassen.
+U | W | Er hat die Prüfung bestanden, was niemand erwartet hatte. | Er ^hat die Prüfung bestanden. | Niemand ^hatte das erwartet. | was → das.
+U | W | Sie hat gekündigt, worüber sich ihr Chef sehr geärgert hat. | Sie ^hat gekündigt. | Ihr Chef ^hat sich sehr darüber geärgert. | worüber → darüber.
+U | PG | Die Stiftung, mit deren Geld die Schule gebaut wurde, wird hundert Jahre alt. | Die Stiftung ^wird hundert Jahre alt. | Mit dem Geld der Stiftung ^wurde die Schule gebaut.
+U | G | Die Autorin, deren neuestem Roman ich eine Rezension gewidmet habe, liest heute in Wien. | Die Autorin ^liest heute in Wien. | Ich ^habe dem neuesten Roman der Autorin eine Rezension gewidmet. | Nach dem Artikel wird das Adjektiv wieder schwach: dem neuesten Roman.
+U | A | Die Unterlagen, die ich gestern hätte abgeben sollen, liegen noch hier. | Die Unterlagen ^liegen noch hier. | Ich ^hätte die Unterlagen gestern abgeben sollen.
+U | PD | Die Bedingungen, unter denen wir arbeiten müssen, sind unzumutbar. | Die Bedingungen ^sind unzumutbar. | Wir ^müssen unter den Bedingungen arbeiten.
+U | PA | Das Abkommen, auf das sich beide Staaten geeinigt haben, tritt im Jänner in Kraft. | Das Abkommen ^tritt im Jänner in Kraft. | Beide Staaten ^haben sich auf das Abkommen geeinigt.
+U | N | Das Gemälde, das jahrzehntelang für verschollen gehalten worden war, hängt heute im Belvedere. | Das Gemälde ^hängt heute im Belvedere. | Das Gemälde ^war jahrzehntelang für verschollen gehalten worden.
+U | D | Die Bewohner, denen die Gefahr nicht bewusst war, wurden evakuiert. | Die Bewohner ^wurden evakuiert. | Den Bewohnern ^war die Gefahr nicht bewusst.
+U | W | Sie hat alles verloren, was sie sich mühsam aufgebaut hatte. | Sie ^hat alles verloren. | Sie ^hatte sich alles mühsam aufgebaut.
+U | PA | Der Vorwurf, gegen den sich die Ministerin gewehrt hat, ist haltlos. | Der Vorwurf ^ist haltlos. | Die Ministerin ^hat sich gegen den Vorwurf gewehrt.
+U | G | Der Präsident, dessen Glaubwürdigkeit beschädigt war, trat zurück. | Der Präsident ^trat zurück. | Die Glaubwürdigkeit des Präsidenten ^war beschädigt.
+U | PD | Das Labor, in dem an neuen Impfstoffen geforscht wird, gehört zu den modernsten Europas. | Das Labor ^gehört zu den modernsten Europas. | In dem Labor ^wird an neuen Impfstoffen geforscht.
+U | PG | Der Fluss, an dessen Ufern neue Dämme errichtet wurden, tritt oft über die Ufer. | Der Fluss ^tritt oft über die Ufer. | An den Ufern des Flusses ^wurden neue Dämme errichtet.
+U | W | Der Server fiel aus, wodurch die Website nicht erreichbar war. | Der Server ^fiel aus. | Dadurch ^war die Website nicht erreichbar.
+U | G | Der Künstler, dessen Bildern eine heilende Wirkung nachgesagt wird, stellt in Wien aus. | Der Künstler ^stellt in Wien aus. | Den Bildern des Künstlers ^wird eine heilende Wirkung nachgesagt.
+U | PD | Die Tradition, an der das Dorf bis heute festhält, stammt aus dem Mittelalter. | Die Tradition ^stammt aus dem Mittelalter. | Das Dorf ^hält bis heute an der Tradition fest.
+U | N | Die Kandidatin, die die Stelle hätte bekommen können, hat abgesagt. | Die Kandidatin ^hat abgesagt. | Die Kandidatin ^hätte die Stelle bekommen können.
+U | PG | Die Krise, infolge deren viele ihre Arbeit verloren haben, ist noch nicht vorbei. | Die Krise ^ist noch nicht vorbei. | Infolge der Krise ^haben viele ihre Arbeit verloren.
+U | W | Er kam zu spät, worauf der Chef schon gewartet hatte. | Er ^kam zu spät. | Der Chef ^hatte schon darauf gewartet.
+U | A | Er hat den Vertrag, den ihm sein Anwalt empfohlen hatte, nie unterschrieben. | Er ^hat den Vertrag nie unterschrieben. | Sein Anwalt ^hatte ihm den Vertrag empfohlen.
+U | G | Die Länder, deren Wirtschaft vom Export abhängt, fordern mehr Mitsprache. | Die Länder ^fordern mehr Mitsprache. | Die Wirtschaft der Länder ^hängt vom Export ab.
+U | PA | Die Reform, für die sich die Regierung eingesetzt hatte, scheiterte im Parlament. | Die Reform ^scheiterte im Parlament. | Die Regierung ^hatte sich für die Reform eingesetzt.
+U | PA | Die Firma, für die mein Vater dreißig Jahre gearbeitet hat, ist insolvent. | Die Firma ^ist insolvent. | Mein Vater ^hat dreißig Jahre für die Firma gearbeitet.
+U | W | Er hat vieles gesagt, was ich nicht nachvollziehen kann. | Er ^hat vieles gesagt. | Ich ^kann vieles nicht nachvollziehen.
+U | PD | Der Verdacht, von dem in den Medien die Rede war, hat sich bestätigt. | Der Verdacht ^hat sich bestätigt. | In den Medien ^war von dem Verdacht die Rede.
+U | G | Die Firma, deren neues Produkt ich getestet habe, sitzt in Linz. | Die Firma ^sitzt in Linz. | Ich ^habe das neue Produkt der Firma getestet. | Nach dem Artikel wird das Adjektiv wieder schwach: das neue Produkt.
+U | D | Der Zeuge, dem das Gericht keinen Glauben geschenkt hatte, wurde erneut vorgeladen. | Der Zeuge ^wurde erneut vorgeladen. | Das Gericht ^hatte dem Zeugen keinen Glauben geschenkt.
+U | PD | Die Zeiten, in denen Frauen kein eigenes Konto eröffnen durften, sind vorbei. | Die Zeiten ^sind vorbei. | In den Zeiten ^durften Frauen kein eigenes Konto eröffnen.
+U | A | Das Gespräch, das ich lange nicht hatte führen wollen, verlief positiv. | Das Gespräch ^verlief positiv. | Ich ^hatte das Gespräch lange nicht führen wollen.
+U | PD | Die Menschen, mit denen ich aufgewachsen bin, leben heute über ganz Europa verstreut. | Die Menschen ^leben heute über ganz Europa verstreut. | Ich ^bin mit den Menschen aufgewachsen.
+U | PG | Der Verein, auf dessen Initiative das Fest zurückgeht, feiert Jubiläum. | Der Verein ^feiert Jubiläum. | Das Fest ^geht auf die Initiative des Vereins zurück.
+U | PA | Die Entscheidung, über die so lange gestritten wurde, ist endlich gefallen. | Die Entscheidung ^ist endlich gefallen. | Über die Entscheidung ^wurde so lange gestritten.
+U | D | Die Kinder, denen das Gericht einen Vormund zugewiesen hat, leben bei Pflegeeltern. | Die Kinder ^leben bei Pflegeeltern. | Das Gericht ^hat den Kindern einen Vormund zugewiesen.
+U | N | Die Brücke, die dringend saniert werden muss, ist seit Jahren baufällig. | Die Brücke ^ist seit Jahren baufällig. | Die Brücke ^muss dringend saniert werden.
+U | G | Die Patientin, deren Zustand sich verschlechtert hatte, wurde verlegt. | Die Patientin ^wurde verlegt. | Der Zustand der Patientin ^hatte sich verschlechtert.
+U | PA | Das ist eine Frage, auf die es keine einfache Antwort gibt. | Das ^ist eine Frage. | Auf die Frage ^gibt es keine einfache Antwort.
+</script>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- Daten ---------- */
+function mk(s){
+  const pron=s.match(/\{([^}]*)\}/)[1];
+  const text=s.replace(/[{}^]/g,"");
+  const cl=(s.split("^")[1]||"").split(/[,.?!]/)[0].trim();
+  const html=esc(s).replace(/\{([^}]*)\}/,'<mark class="p">$1</mark>').replace(/\^([^,.?!]*)/,(m,c)=>'<mark class="v">'+c.trim()+'</mark>'+(c.endsWith(" ")?" ":""));
+  return {text,pron,cluster:cl,html};
+}
+function expand(s){
+  const m=s.match(/\{([^}]*)\}/);
+  return m[1].split("/").map(o=>mk(s.replace(/\{[^}]*\}/,"{"+o.trim()+"}")));
+}
+function part(s){
+  const verb=s.split("^")[1].split(/[\s.?!]/)[0];
+  return {text:s.replace("^",""),verb,html:esc(s).replace(/\^(\S+?)(?=[\s.?!])/,'<mark class="v">$1</mark>')};
+}
+function parse(t){
+  return t.trim().split("\n").filter(l=>l.trim()).map((l,i)=>{
+    const f=l.split("|").map(x=>x.trim());
+    if(f[0]==="B") return {id:i,m:"B",code:f[1],word:f[2],subj:f[3],cue:f[4],sols:expand(f[5])};
+    if(f[0]==="V") return {id:i,m:"V",code:f[1],s1:f[2],s2:f[3],sols:expand(f[4]),note:f[5]||""};
+    return {id:i,m:"U",code:f[1],comb:f[2],parts:[part(f[3]),part(f[4])],note:f[5]||""};
+  });
+}
+const DATA={b1:parse($("d-b1").textContent),c1:parse($("d-c1").textContent)};
+
+const CASES={N:"Nominativ",A:"Akkusativ",D:"Dativ",G:"Genitiv",PA:"Präposition + Akk.",PD:"Präposition + Dativ",PG:"Präposition + Genitiv",W:"was / wo(r)-"};
+const MODES={B:"Bausteine",V:"Verbinden",U:"Umkehren"};
+const FILTERS=[["mix","Gemischt"],["B","Bausteine"],["V","Verbinden"],["U","Umkehren"]];
+const HOW={
+  B:{t:"Bilde einen Definitionssatz: <b>Begriff + ist/sind + Oberbegriff</b> (mit ein/eine, im Plural ohne Artikel) + Relativsatz. Das Relativpronomen richtet sich nach dem <b>Oberbegriff in Klammern</b>, nicht nach dem Begriff! Wer im Relativsatz handelt, zeigt das Subjekt. Verb im Präsens, wenn nichts anderes dabeisteht.",
+     hu:"A vonatkozó névmás a zárójelben álló főfogalomhoz igazodik, nem magához a szóhoz!",
+     ex:"der Topf (das Gefäß) · Subjekt: man · Suppe kochen (in + Dat.)<br>→ Ein Topf ist ein Gefäß, in dem man Suppe kocht."},
+  V:{t:"Verbinde die zwei Hauptsätze zu <b>einem</b> Satz. Der Relativsatz steht <b>direkt hinter dem Bezugswort</b>, mit Komma davor und – wenn der Satz danach weitergeht – auch dahinter.",
+     hu:"A mellékmondat közvetlenül a vonatkoztatott főnév mögé kerül, vesszők közé.",
+     ex:"Das Kleid war sehr teuer. + Ich habe mich in das Kleid verliebt.<br>→ Das Kleid, in das ich mich verliebt habe, war sehr teuer."},
+  U:{t:"Zerlege den Satz in <b>zwei Hauptsätze</b>, jeden mit Punkt. Setze statt des Relativpronomens wieder das <b>Nomen im richtigen Kasus</b> ein – kein Pronomen! Das konjugierte Verb steht an Position 2. Die Reihenfolge der zwei Sätze ist egal.",
+     hu:"Bontsd két főmondatra! A vonatkozó névmás helyére újra a főnév kerül, a megfelelő esetben.",
+     ex:"Der Mann, dessen Katze verschwunden ist, sucht überall.<br>→ Der Mann sucht überall. Die Katze des Mannes ist verschwunden."}
+};
+const HOW_C1={B:" Bei <b>etwas, alles, das Beste</b> heißt das Pronomen <b>was</b>, mit Präposition <b>wo(r)-</b> (worunter, wodurch …).",
+  V:" Bezieht sich der Relativsatz auf den <b>ganzen Satz</b>, beginnt er mit <b>was</b> oder <b>wo(r)+Präposition</b> (darüber → worüber).",
+  U:" Aus <b>was</b> wird im Hauptsatz <b>das</b>, aus <b>wo(r)-</b> wird <b>da(r)-</b> (worüber → darüber)."};
+
+/* ---------- Zustand ---------- */
+const KEY="relativsatz-master-v1";
+function blank(){return {res:{},pts:0,streak:0,best:0,bestStreak:0}}
+let ST={b1:blank(),c1:blank(),lv:"b1",flt:"mix"};
+try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&s.b1&&s.c1)ST=Object.assign(ST,s);}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}};
+
+let list=[],pos=0,phase="input",t0=0,elapsed=0,raf=null,adv=null,par=30;
+const items=()=>DATA[ST.lv];
+const cur=()=>items()[list[pos]];
+const S=()=>ST[ST.lv];
+
+function seeded(n,seed){const a=[...Array(n).keys()];let x=seed;const r=()=>(x=(x*1103515245+12345)%2147483648)/2147483648;
+  for(let i=n-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a;}
+function rebuild(){
+  const all=items();
+  list=ST.flt==="mix"?seeded(all.length,ST.lv==="b1"?7:11):all.filter(x=>x.m===ST.flt).map(x=>x.id);
+}
+
+/* ---------- Vergleich ---------- */
+function norm(s){return s.toLowerCase().replace(/ß/g,"ss").replace(/[„“”"»«]/g,"").replace(/[–—]/g,"-")
+  .replace(/\s*,\s*/g,", ").replace(/\s+/g," ").replace(/[\s.!?]+$/,"").trim()}
+const CONTR=[[" in dem "," im "],[" an dem "," am "],[" von dem "," vom "],[" zu dem "," zum "],[" zu der "," zur "],[" bei dem "," beim "],[" in das "," ins "]];
+function normU(s){let x=" "+norm(s)+" ";CONTR.forEach(([a,b])=>{x=x.split(a).join(b)});return x.trim()}
+const words=s=>s.replace(/[,.!?;:]/g," ").split(/\s+/).filter(Boolean);
+const bag=a=>[...a].sort().join(" ");
+const commas=s=>(s.match(/,/g)||[]).length;
+const lead=s=>s.replace(/^(ein|eine|der|die|das)\s+/,"");
+
+function checkBV(ans,it){
+  let A=norm(ans); if(it.m==="B")A=lead(A);
+  for(const v of it.sols){let T=norm(v.text);if(it.m==="B")T=lead(T);if(A===T)return {ok:true,v,exact:true};}
+  for(const v of it.sols){let T=norm(v.text);if(it.m==="B")T=lead(T);
+    if(bag(words(A))!==bag(words(T))||commas(A)!==commas(T))continue;
+    const i=A.indexOf(", "+norm(v.pron)+" ");if(i<0)continue;
+    const cl=A.slice(i+2).split(",")[0];const cw=words(cl),vw=words(norm(v.cluster));
+    if(cw.slice(-vw.length).join(" ")===vw.join(" "))return {ok:true,v,exact:false};}
+  const v=it.sols[0];let T=norm(v.text);if(it.m==="B")T=lead(T);
+  let why;
+  if(words(A).join(" ")===words(T).join(" "))why="komma";
+  else if(!it.sols.some(x=>A.includes(", "+norm(x.pron)+" ")))why="pron";
+  else if(bag(words(A))===bag(words(T)))why="order";
+  else why="words";
+  return {ok:false,v,why};
+}
+function matchPart(sent,p){
+  const a=normU(sent),e=normU(p.text);if(a===e)return true;
+  const wa=words(a),we=words(e);if(bag(wa)!==bag(we))return false;
+  const vb=normU(p.verb),ev=we.indexOf(vb);
+  return wa.some((w,k)=>w===vb&&(ev===0?k===0:(k>=1&&(k!==wa.length-1||ev===we.length-1))));
+}
+function checkU(ans,it){
+  const ss=ans.trim().split(/(?<=[.!?])\s+/).map(x=>x.trim()).filter(Boolean);
+  if(ss.length!==2)return {formal:true};
+  const [p,q]=it.parts;
+  if((matchPart(ss[0],p)&&matchPart(ss[1],q))||(matchPart(ss[0],q)&&matchPart(ss[1],p)))return {ok:true};
+  let why="words";
+  const relw=/\b(denen|dessen|deren|derer|worüber|worauf|wodurch|worunter|wofür|womit)\b/i;
+  if(ss.some(s=>relw.test(s)))why="pron";
+  else if(ss.some(s=>{const w=words(normU(s));return [p,q].some(x=>{const vb=normU(x.verb);const we=words(normU(x.text));return w[w.length-1]===vb&&we[we.length-1]!==vb;});}))why="verbend";
+  return {ok:false,why};
+}
+
+/* Wort-Diff: falsche/überzählige Wörter der Antwort durchstreichen */
+function diffHTML(ans,sol){
+  const a=ans.trim().split(/\s+/),b=sol.trim().split(/\s+/);
+  const k=w=>norm(w).replace(/[,.!?]/g,"");
+  const n=a.length,m=b.length,L=Array.from({length:n+1},()=>new Array(m+1).fill(0));
+  for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--)L[i][j]=k(a[i])===k(b[j])?L[i+1][j+1]+1:Math.max(L[i+1][j],L[i][j+1]);
+  let i=0,j=0;const out=[];
+  while(i<n){if(j<m&&k(a[i])===k(b[j])){out.push(esc(a[i]));i++;j++;}
+    else if(j<m&&L[i][j+1]>=L[i+1][j])j++;else{out.push('<s class="x">'+esc(a[i])+'</s>');i++;}}
+  return out.join(" ");
+}
+
+/* ---------- Uhr ---------- */
+const fmt=t=>t.toFixed(1).replace(".",",")+" s";
+function now(){return elapsed+(t0?(performance.now()-t0)/1000:0)}
+function drawClock(){const t=now();$("tbar").style.transform=`scaleX(${t>par?1:Math.max(0,1-t/par)})`;
+  $("clock").classList.toggle("over",t>par);$("sec").textContent=fmt(t);}
+function startClock(){t0=performance.now();cancelAnimationFrame(raf);const tick=()=>{drawClock();if(t0)raf=requestAnimationFrame(tick)};tick();}
+function stopClock(){if(t0){elapsed+=(performance.now()-t0)/1000;t0=0;}cancelAnimationFrame(raf);drawClock();}
+
+/* ---------- Anzeige ---------- */
+function bump(id,val){const el=$(id);if(el.textContent!==String(val)){el.textContent=val;el.classList.remove("bump");void el.offsetWidth;el.classList.add("bump");}}
+function stats(){const s=S(),v=Object.values(s.res),tot=items().length;
+  bump("sPts",s.pts);bump("sStreak",s.streak);$("sBest").textContent=s.best;
+  $("sAvg").textContent=v.length?fmt(v.reduce((a,r)=>a+r.t,0)/v.length):"–";
+  $("progtxt").textContent=`${v.length} von ${tot} Aufgaben bearbeitet · ${v.filter(r=>r.ok).length} richtig (${ST.lv==="b1"?"A2/B1":"C1/C2"})`;
+  $("progbar").style.width=(100*v.length/tot)+"%";}
+
+function drawHow(m){
+  const h=HOW[m],c1=ST.lv==="c1";
+  $("howh").textContent="So geht's: "+MODES[m];
+  $("how").innerHTML=`<p>${h.t}${c1?HOW_C1[m]:""}${c1?"":`<span class="hu">${h.hu}</span>`}</p><p class="ex">${h.ex}</p>`;
+  $("tabtip").innerHTML=c1?"Nach <b>etwas, nichts, alles, vieles, das Beste</b> und bei Bezug auf den ganzen Satz: <b>was</b>. Mit Präposition: <b>wo(r)-</b> + Präposition. Nach <b>dessen/deren</b> wird ein Adjektiv stark dekliniert.":"Genus und Numerus kommen vom Bezugswort (bei den Bausteinen: vom Oberbegriff). Den Kasus bestimmt seine Rolle im Relativsatz bzw. die Präposition.";
+}
+function row(tag,html){return `<div class="sent"><span class="tag">${tag}</span><span class="txt">${html}</span></div>`}
+function wordHTML(w){const m=w.match(/^(.*?)\s*\((.*)\)$/);return m?`<b>${esc(m[1])}</b> <span class="ob">(${esc(m[2])})</span>`:`<b>${esc(w)}</b>`}
+
+function render(){
+  rebuild();
+  if(pos>=list.length)pos=0;
+  clearTimeout(adv);adv=null;cancelAnimationFrame(raf);t0=0;elapsed=0;phase="input";
+  const it=cur(),s=S();
+  $("counter").textContent=`Aufgabe ${pos+1} / ${list.length}`+(s.res[it.id]?(s.res[it.id].ok?" · ✓ schon gelöst":" · schon bearbeitet"):"");
+  $("mbadge").textContent=MODES[it.m];$("cbadge").hidden=true;$("cbadge").textContent=CASES[it.code];
+  let h="";
+  if(it.m==="B"){h=row("Wort",wordHTML(it.word))+row("Info",(it.subj&&it.subj!=="—"?`<span class="pill">Subjekt: ${esc(it.subj)}</span>`:"")+esc(it.cue));
+    $("anslab").textContent="Dein Satz";$("answer").placeholder="Ein … ist ein …, …";}
+  else if(it.m==="V"){h=row("Satz 1",esc(it.s1))+row("Satz 2",esc(it.s2));
+    $("anslab").textContent="Dein Satz";$("answer").placeholder="Schreibe hier den verbundenen Satz …";}
+  else{h=row("Satz",esc(it.comb));$("anslab").textContent="Deine zwei Hauptsätze";$("answer").placeholder="Erster Hauptsatz. Zweiter Hauptsatz.";}
+  $("task").innerHTML=h;
+  const len=it.m==="U"?it.parts[0].text.length+it.parts[1].text.length:it.sols[0].text.length;
+  par=Math.round(14+len*(it.m==="U"?0.35:0.32));
+  drawClock();
+  const a=$("answer");a.value="";a.readOnly=false;
+  $("check").textContent="Prüfen";$("solve").disabled=false;$("halt").hidden=true;
+  $("fb").className="feedback";$("fb").innerHTML="";$("review").className="review";$("review").innerHTML="";$("cd").className="cd";
+  $("prev").disabled=pos===0;$("next").disabled=pos>=list.length-1;
+  drawHow(it.m);stats();
+}
+
+/* ---------- Prüfen ---------- */
+const MSG={komma:"Die Wörter stimmen – nur die Kommas nicht. Der Relativsatz steht zwischen Kommas.",
+  pron:"Das Relativpronomen passt nicht. Genus und Numerus vom Bezugswort, Kasus aus dem Relativsatz!",
+  order:"Alle Wörter sind da, aber die Wortstellung stimmt nicht. Im Relativsatz steht das konjugierte Verb am Ende.",
+  words:"Noch nicht richtig. Vergleiche deinen Satz mit der Lösung.",
+  verbend:"Im Hauptsatz steht das konjugierte Verb an Position 2, nicht am Ende.",
+  shown:"Hier ist die Lösung. Merk dir besonders das markierte Pronomen und das Verb."};
+const PRON_B="Das Relativpronomen passt nicht. Achtung: Es richtet sich nach dem Oberbegriff in Klammern!";
+const PRON_U="Im Hauptsatz gibt es kein Relativpronomen mehr – setze das Nomen im richtigen Kasus ein.";
+
+function evaluate(shown){
+  const it=cur(),a=$("answer").value,fb=$("fb");
+  if(!shown&&!a.trim()){fb.className="feedback hint";fb.textContent=it.m==="U"?"Schreib zuerst deine zwei Hauptsätze ins Feld.":"Schreib zuerst deinen Satz ins Feld.";return;}
+  let r;
+  if(shown)r={ok:false,why:"shown",v:it.sols&&it.sols[0]};
+  else if(it.m==="U"){r=checkU(a,it);if(r.formal){fb.className="feedback hint";fb.textContent="Schreib genau zwei Hauptsätze, jeden mit einem Punkt am Ende.";return;}}
+  else r=checkBV(a,it);
+  stopClock();phase="done";
+  const t=Math.round(now()*10)/10,s=S(),practice=!!s.res[it.id];
+  let p=0;
+  if(!practice){
+    const over=t>par?Math.min(60,Math.round((t-par)*2)):0;
+    if(r.ok){const speed=Math.max(0,Math.round(100*(1-t/par)));p=Math.round((100+speed)*(1+0.1*Math.min(s.streak,10)))-over;s.streak++;}
+    else{p=(shown?-30:-50)-over;s.streak=0;}
+    s.pts+=p;s.bestStreak=Math.max(s.bestStreak,s.streak);if(s.pts>s.best)s.best=s.pts;
+    s.res[it.id]={ok:r.ok,t,p};save();
+  }
+  $("cbadge").hidden=false;
+  const ptxt=practice?'<span class="pts">· Wiederholung, ohne Punkte</span>':`<span class="pts">${p>0?"+":""}${p} Punkte</span>`;
+  let msg;
+  if(r.ok){msg=(t<par*.5?"Blitzschnell und richtig!":t<par?"Richtig!":"Richtig, aber etwas langsam.")+(s.streak>1&&!practice?` Serie: ${s.streak}`:"")+(r.exact===false?" Auch diese Wortstellung passt.":"");}
+  else msg=r.why==="pron"?(it.m==="B"?PRON_B:it.m==="U"?PRON_U:MSG.pron):MSG[r.why];
+  fb.className="feedback "+(r.ok?"ok":"err");fb.innerHTML=esc(msg)+ptxt;
+  /* Lösung + Diff */
+  let rv="";
+  const solHTML=it.m==="U"?it.parts.map(x=>x.html).join(" "):(r.v||it.sols[0]).html;
+  const solTxt=it.m==="U"?it.parts.map(x=>x.text).join(" "):(r.v||it.sols[0]).text;
+  if(!r.ok&&!shown&&it.m!=="U")rv+=`<div><span class="lab">Dein Satz</span><div class="line">${diffHTML(a,solTxt)}</div></div>`;
+  if(!r.ok&&!shown&&it.m==="U")rv+=`<div><span class="lab">Deine Sätze</span><div class="line">${esc(a)}</div></div>`;
+  rv+=`<div><span class="lab">${r.ok?"Musterlösung":"Richtig wäre"}</span><div class="line">${solHTML}</div></div>`;
+  if(it.m==="U"&&!r.ok)rv+=`<p class="note">Die zwei Sätze dürfen auch in umgekehrter Reihenfolge stehen.</p>`;
+  if(it.note)rv+=`<p class="note">${esc(it.note)}</p>`;
+  $("review").innerHTML=rv;$("review").className="review on";
+  $("answer").readOnly=true;$("check").textContent="Weiter →";$("solve").disabled=true;
+  $("counter").textContent=`Aufgabe ${pos+1} / ${list.length}`;
+  stats();
+  if(!shown)autoNext(r.ok?1600:9000);
+}
+function autoNext(ms){
+  clearTimeout(adv);
+  const cd=$("cd"),bar=$("cdbar");
+  if(ms>2000){cd.className="cd on";bar.style.transition="none";bar.style.width="100%";void bar.offsetWidth;
+    bar.style.transition=`width ${ms}ms linear`;bar.style.width="0%";$("halt").hidden=false;}
+  adv=setTimeout(goNext,ms);
+}
+$("halt").onclick=()=>{clearTimeout(adv);adv=null;$("cd").className="cd";$("halt").hidden=true;};
+function goNext(){
+  clearTimeout(adv);adv=null;const s=S();
+  for(let k=1;k<=list.length;k++){const q=(pos+k)%list.length;if(!s.res[items()[list[q]].id]){pos=q;render();focusAns();return;}}
+  pos=(pos+1)%list.length;render();
+  $("fb").className="feedback ok";$("fb").textContent="Alle Aufgaben dieser Auswahl sind bearbeitet! Du kannst sie wiederholen (ohne Punkte) oder den Fortschritt löschen.";
+}
+function focusAns(){if(matchMedia("(hover:hover)").matches)$("answer").focus();}
+
+/* ---------- Steuerung ---------- */
+$("check").onclick=()=>phase==="input"?evaluate(false):goNext();
+$("solve").onclick=()=>{if(phase==="input")evaluate(true)};
+$("answer").addEventListener("input",()=>{if(phase==="input"&&!t0&&$("answer").value.trim())startClock();});
+$("answer").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();phase==="input"?evaluate(false):goNext();}});
+function go(d){pos=Math.max(0,Math.min(list.length-1,pos+d));render();}
+$("prev").onclick=()=>go(-1);$("next").onclick=()=>go(1);
+$("rand").onclick=()=>{if(list.length<2)return;let n;do{n=Math.floor(Math.random()*list.length)}while(n===pos);pos=n;render();};
+
+function firstOpen(){const s=S();const k=list.findIndex(id=>!s.res[items()[id].id]);return k<0?0:k;}
+function drawFilters(){
+  const f=$("filters");f.querySelectorAll(".chip").forEach(c=>c.remove());
+  FILTERS.forEach(([k,l])=>{const n=k==="mix"?items().length:items().filter(x=>x.m===k).length;
+    const b=document.createElement("button");b.className="chip";b.setAttribute("aria-pressed",k===ST.flt);
+    b.innerHTML=l+`<span class="n">${n}</span>`;b.onclick=()=>{ST.flt=k;save();drawFilters();rebuild();pos=firstOpen();render();};f.appendChild(b);});
+}
+function setLevel(l){ST.lv=l;save();
+  document.querySelectorAll(".seg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.mode===l));
+  drawFilters();rebuild();pos=firstOpen();render();}
+document.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>setLevel(b.dataset.mode));
+
+const rs=$("reset");let armed=null;
+rs.onclick=()=>{
+  if(!armed){rs.classList.add("armed");rs.textContent="Wirklich? Nochmal klicken";armed=setTimeout(()=>{armed=null;rs.classList.remove("armed");rs.textContent="Fortschritt löschen"},4000);return;}
+  clearTimeout(armed);armed=null;rs.classList.remove("armed");rs.textContent="Fortschritt löschen";
+  const best=S().best;ST[ST.lv]=blank();ST[ST.lv].best=best;save();rebuild();pos=0;render();
+};
+
+setLevel(ST.lv==="c1"?"c1":"b1");
+})();
+</script>
+
+</body>
+</html>
