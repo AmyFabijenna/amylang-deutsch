@@ -1,0 +1,905 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verben nachschlagen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ece7df;
+  --card:#f9f7f3;
+  --line:#ddd6cb;
+  --ink:#1c1b19;
+  --soft:#5e5a54;
+  --nom:#596274;  --nom-t:#e6e8ed;
+  --akk:#34557a;  --akk-t:#e1e8f1;
+  --dat:#22666d;  --dat-t:#dceced;
+  --gen:#65507e;  --gen-t:#ebe5f1;
+  --prep:#86643a; --prep-t:#f1e8da;
+  --blue:#2f4f78; --blue-soft:#c9d4e4; --blue-wash:#dbe3ee;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:"Lexend",system-ui,sans-serif;
+  font-size:19px;
+  line-height:1.6;
+  font-weight:300;
+  min-height:100vh;
+  background-image:linear-gradient(180deg,#d6dfeb 0px,#e3e4e6 320px,var(--bg) 620px);
+  background-repeat:no-repeat;
+}
+main{max-width:760px;margin:0 auto;padding:9vh 16px 60px}
+h1{
+  font-weight:500;font-size:1.15rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--blue);text-align:center;margin:0 0 24px;
+}
+h1::after{content:"";display:block;width:46px;height:3px;border-radius:3px;background:var(--blue);opacity:.55;margin:12px auto 0}
+.searchwrap{position:relative}
+#q{
+  width:100%;
+  font:inherit;font-size:1.65rem;font-weight:400;
+  padding:22px 28px;
+  border:1.5px solid var(--blue-soft);
+  border-radius:22px;
+  background:var(--card);
+  color:var(--ink);
+  outline:none;
+  box-shadow:0 6px 24px rgba(60,50,35,.07);
+  transition:border-color .2s, box-shadow .2s;
+}
+#q:focus{border-color:var(--blue);box-shadow:0 8px 34px rgba(47,79,120,.20)}
+#q::placeholder{color:#a39d94;font-weight:300}
+#sugg{
+  list-style:none;margin:10px 0 0;padding:6px;
+  background:var(--card);border:1px solid var(--line);border-radius:18px;
+  box-shadow:0 10px 30px rgba(60,50,35,.09);
+  display:none;
+}
+#sugg.open{display:block}
+#sugg li{
+  display:flex;justify-content:space-between;align-items:baseline;gap:14px;
+  padding:10px 18px;border-radius:12px;cursor:pointer;
+}
+#sugg li.act,#sugg li:hover{background:var(--blue-wash)}
+#sugg .v{font-weight:400}
+#sugg .s{font-size:.82rem;color:var(--soft);text-align:right}
+.hint{text-align:center;color:var(--soft);font-size:.92rem;margin-top:18px}
+.hint a{color:var(--akk);text-decoration:none;cursor:pointer;border-bottom:1px solid #c5cfdc}
+.empty{text-align:center;color:var(--soft);margin-top:30px}
+
+#card{
+  margin-top:30px;background:var(--card);border:1px solid var(--line);
+  border-radius:24px;padding:34px 36px;box-shadow:0 10px 34px rgba(47,79,120,.10);
+  border-top:5px solid var(--blue);
+  display:none;
+}
+#card.show{display:block}
+.verb{font-size:2.3rem;font-weight:500;line-height:1.2;margin:0 0 20px}
+.pattern{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:6px 0}
+.or{color:var(--soft);font-size:.85rem;margin:10px 0 4px;letter-spacing:.06em;text-transform:uppercase}
+.plus{color:var(--soft);font-weight:400}
+.chip{
+  display:inline-flex;flex-direction:column;align-items:center;line-height:1.25;
+  padding:8px 16px;border-radius:14px;font-weight:500;font-size:1rem;
+}
+.chip small{font-weight:300;font-size:.75rem;opacity:.85}
+.chip.nom{background:var(--nom-t);color:var(--nom)}
+.chip.akk{background:var(--akk-t);color:var(--akk)}
+.chip.dat{background:var(--dat-t);color:var(--dat)}
+.chip.gen{background:var(--gen-t);color:var(--gen)}
+.desc{font-size:.88rem;color:var(--soft);margin:4px 0 0}
+h2{
+  font-size:.82rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--blue);margin:30px 0 10px;
+}
+.sec{margin-top:34px;padding-top:6px;border-top:1px solid var(--line)}
+.sec>h2{margin-top:22px}
+.kl{display:inline-block;margin-left:10px;padding:2px 12px;border-radius:999px;font-size:.78rem;letter-spacing:.02em;text-transform:none;font-weight:400;vertical-align:1px}
+.kl.r{background:var(--dat-t);color:var(--dat)}
+.kl.u{background:var(--gen-t);color:var(--gen)}
+.kl.g,.kl.m{background:var(--akk-t);color:var(--akk)}
+.forms{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.ft{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.ft small{display:block;font-size:.72rem;color:var(--soft);letter-spacing:.04em}
+.ft b{display:block;font-weight:500;font-size:1.08rem;line-height:1.35;margin-top:3px}
+.ft b em{font-style:normal;color:var(--blue)}
+.fcap{margin:-4px 0 10px;font-size:.82rem;color:var(--soft)}
+.fnote{margin:10px 0 0;font-size:.9rem;color:var(--soft)}
+.part{display:grid;grid-template-columns:150px 1fr;gap:4px 18px;align-items:baseline;padding:12px 0;border-top:1px solid var(--line)}
+.part:first-of-type{border-top:none}
+.part .lab{font-size:.8rem;color:var(--soft);line-height:1.35}
+.part .lab b{display:block;color:var(--blue);font-weight:500;font-size:1rem}
+.part .ph{font-size:1.05rem}
+.part .no{color:#8d877e;text-decoration:line-through;text-decoration-color:#b1776f;text-decoration-thickness:2px}
+.nobadge{display:inline-block;margin-left:10px;padding:1px 10px;border-radius:999px;background:#f2e3e0;color:#8a4a42;font-size:.75rem;text-decoration:none}
+.phint{font-size:.85rem;color:var(--soft);margin:8px 0 0}
+.ex{margin:0;padding:0;list-style:none}
+.ex li{padding:10px 0 10px 18px;border-left:3px solid var(--line);margin-bottom:8px}
+mark{background:none;padding:1px 5px;border-radius:7px;font-weight:400}
+mark.m-N{color:var(--nom);background:var(--nom-t)}
+mark.m-A{color:var(--akk);background:var(--akk-t)}
+mark.m-D{color:var(--dat);background:var(--dat-t)}
+mark.m-G{color:var(--gen);background:var(--gen-t)}
+.prep{padding:14px 0;border-top:1px solid var(--line)}
+.prep:first-of-type{border-top:none}
+.pl{font-weight:500}
+.pl .pc{padding:1px 8px;border-radius:7px;margin-left:2px}
+.pc.Akk{color:var(--akk);background:var(--akk-t)}
+.pc.Dat{color:var(--dat);background:var(--dat-t)}
+.pc.Gen{color:var(--gen);background:var(--gen-t)}
+.pc.Nom{color:var(--nom);background:var(--nom-t)}
+.pe{color:var(--ink);margin-top:2px}
+.note{
+  margin-top:26px;padding:14px 18px;border-radius:14px;
+  background:var(--prep-t);color:#5a4426;font-size:.95rem;
+}
+footer{text-align:center;color:#8f887e;font-size:.8rem;margin-top:40px}
+@media (max-width:640px){
+  .forms{grid-template-columns:1fr 1fr}
+  .part{grid-template-columns:1fr}
+}
+@media (max-width:560px){
+  body{font-size:17px}
+  #q{font-size:1.3rem;padding:18px 20px}
+  #card{padding:24px 20px}
+  .verb{font-size:1.9rem}
+  #sugg .s{display:none}
+}
+</style>
+</head>
+<body>
+<main>
+  <h1>Verben nachschlagen</h1>
+  <div class="searchwrap">
+    <input id="q" type="text" placeholder="Verb eintippen …" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Verb suchen">
+    <ul id="sugg" role="listbox"></ul>
+  </div>
+  <p class="hint" id="hint">z. B. <a data-v="helfen">helfen</a> · <a data-v="schenken">schenken</a> · <a data-v="warten">warten</a> · <a data-v="fragen">fragen</a> · <a data-v="gedenken">gedenken</a></p>
+  <p class="empty" id="empty" hidden></p>
+  <section id="card" aria-live="polite"></section>
+  <footer id="count"></footer>
+</main>
+
+<script>
+/* Format: [Verb, Muster (mehrere mit |), Beispiel 1, Beispiel 2, [[Präposition, Beispiel], …], Hinweis]
+   Markierungen im Satz: {A …} Akkusativ, {D …} Dativ, {G …} Genitiv, {N …} Nominativ */
+const V = [
+["abfahren","N","Der Zug fährt um acht Uhr ab.","Wann fahrt ihr morgen ab?",[["nach + Dat","Wir fahren morgen nach {D Salzburg} ab."],["von + Dat","Der Bus fährt von {D dem Bahnhof} ab."]]],
+["abfragen","AA","Die Lehrerin fragt {A mich} {A die Vokabeln} ab.","Kannst du {A mich} {A das Gedicht} abfragen?"],
+["abgeben","DA|A","Ich gebe {D dem Lehrer} {A das Heft} ab.","Bitte gib {A deine Jacke} an der Garderobe ab.",[["an + Akk","Er gibt {A einen Teil} an {A seine Schwester} ab."]]],
+["abhängen","N","Alles hängt vom Wetter ab.","Ob wir fahren, hängt noch ab.",[["von + Dat","Das hängt von {D dir} ab."]]],
+["abholen","A","Ich hole {A dich} um sechs ab.","Sie holt {A die Kinder} ab.",[["von + Dat","Ich hole {A dich} von {D der Arbeit} ab."]]],
+["ablehnen","A","Er lehnt {A das Angebot} ab.","Die Firma hat {A meine Bewerbung} abgelehnt."],
+["abnehmen","N|DA","Ich habe zwei Kilo abgenommen.","Darf ich {D Ihnen} {A den Mantel} abnehmen?"],
+["abraten","D","Ich rate {D dir} davon ab.","Der Arzt hat {D ihr} abgeraten.",[["von + Dat","Ich rate {D dir} von {D dieser Reise} ab."]]],
+["absagen","DA|A","Ich muss {D dir} {A den Termin} leider absagen.","Sie hat {A die Party} abgesagt."],
+["abschließen","A","Schließ bitte {A die Tür} ab.","Er hat {A sein Studium} abgeschlossen.",[["mit + Dat","Ich habe mit {D diesem Thema} abgeschlossen."]]],
+["abwaschen","A|N","Ich wasche {A das Geschirr} ab.","Wer wäscht heute ab?"],
+["achten","N","Er achtet sehr auf seine Gesundheit.","Achte beim Schreiben auf die Groß- und Kleinschreibung!",[["auf + Akk","Bitte achte auf {A den Verkehr}!"]]],
+["ähneln","D","Sie ähnelt {D ihrer Mutter}.","Die beiden Bilder ähneln {D sich} sehr."],
+["ändern","A|rA","Ich ändere {A meinen Plan}.","Das Wetter ändert {A sich} schnell.",[["an + Dat","Daran kann man nichts ändern."]]],
+["anbieten","DA","Darf ich {D Ihnen} {A einen Kaffee} anbieten?","Die Firma bietet {D ihm} {A eine Stelle} an."],
+["anfangen","A|N","Der Kurs fängt um neun an.","Ich fange {A eine neue Arbeit} an.",[["mit + Dat","Wir fangen mit {D der ersten Übung} an."]]],
+["angehören","D","Er gehört {D dem Verein} seit Jahren an.","Sie gehört {D der Gruppe} nicht mehr an."],
+["angreifen","A","Der Hund greift {A den Briefträger} an.","Die Mannschaft greift {A das Tor} an."],
+["ankommen","N","Wir kommen um zehn an.","Ist das Paket schon angekommen?",[["in + Dat","Der Zug kommt in {D Linz} an."],["auf + Akk","Es kommt auf {A das Wetter} an."],["bei + Dat","Die Idee kommt bei {D den Kunden} gut an."]]],
+["anklagen","AG|A","Man klagt {A den Mann} {G des Diebstahls} an.","Der Staatsanwalt hat {A ihn} angeklagt.",[["wegen + Gen","Sie wurde wegen {G Betrugs} angeklagt."]],"Genitivverb: jemanden (Akk) einer Sache (Gen) anklagen."],
+["anmelden","A|rA","Ich melde {A mein Kind} in der Schule an.","Hast du {A dich} schon angemeldet?",[["sich bei + Dat","Ich melde mich bei {D der Gemeinde} an."],["sich für + Akk","Sie meldet sich für {A den Kurs} an."],["sich zu + Dat","Er meldet sich zu {D der Prüfung} an."]]],
+["annehmen","A|rG","Ich nehme {A das Angebot} gern an.","Sie nimmt {A sich} {G des Problems} an.",[],"„etwas annehmen“ = akzeptieren oder vermuten (Akk); gehoben „sich einer Sache annehmen“ = sich darum kümmern (Gen)."],
+["anrufen","A","Ich rufe {A dich} morgen an.","Hast du {A deine Mutter} schon angerufen?",[["bei + Dat","Ich rufe bei {D der Firma} an."]],"Achtung: jemanden (Akkusativ!) anrufen – nicht „ihm anrufen“."],
+["anschauen","A|rD","Wir schauen {A das Foto} an.","Ich schaue {D mir} {A den Film} an."],
+["sich anschließen","rAD","Ich schließe {A mich} {D dir} an.","Darf ich {A mich} {D euch} anschließen?"],
+["ansehen","A|rD","Sie sieht {A mich} lange an.","Wir sehen {D uns} {A die Wohnung} an."],
+["antworten","D","Bitte antworte {D mir} bald.","Er hat {D dem Lehrer} nicht geantwortet.",[["auf + Akk","Sie antwortet auf {A die Frage}."]],"Vergleiche: antworten + Dativ / auf + Akk, aber beantworten + Akkusativ."],
+["anziehen","A|rA|rD","Ich ziehe {A den Mantel} an.","Ich ziehe {D mir} {A die Jacke} an.",[],"Ich ziehe {A mich} an (sich = Akk). Mit Kleidungsstück: Ich ziehe {D mir} {A den Pullover} an (sich = Dat)."],
+["applaudieren","D","Das Publikum applaudiert {D den Musikern}.","Alle applaudierten {D ihr}."],
+["arbeiten","N","Sie arbeitet in einer Bank.","Er arbeitet zu viel.",[["an + Dat","Ich arbeite an {D einem Projekt}."],["bei + Dat","Er arbeitet bei {D einer großen Firma}."],["als + Nom","Sie arbeitet als {N Lehrerin}."]]],
+["ärgern","A|rA","Mein Bruder ärgert {A mich} ständig.","Ärgere {A dich} nicht!",[["sich über + Akk","Sie ärgert sich über {A den Lärm}."]]],
+["assistieren","D","Die Schwester assistiert {D dem Arzt}.","Er assistiert {D dem Professor}."],
+["auffallen","D","Ist {D dir} etwas aufgefallen?","Der Fehler fiel {D niemandem} auf."],
+["aufhören","N","Hör endlich auf!","Der Regen hört bald auf.",[["mit + Dat","Er hört mit {D dem Rauchen} auf."]]],
+["aufmachen","A|DA","Mach bitte {A das Fenster} auf.","Kannst du {D mir} {A die Tür} aufmachen?"],
+["aufpassen","N","Pass gut auf!","Im Unterricht muss man aufpassen.",[["auf + Akk","Ich passe auf {A die Kinder} auf."]]],
+["aufräumen","A|N","Ich räume {A mein Zimmer} auf.","Wir müssen noch aufräumen."],
+["aufstehen","N","Ich stehe um sechs auf.","Wann bist du heute aufgestanden?"],
+["aufwachen","N","Ich wache früh auf.","Das Baby ist aufgewacht."],
+["ausfüllen","A","Bitte füllen Sie {A das Formular} aus.","Ich habe {A den Antrag} ausgefüllt."],
+["ausgeben","A","Sie gibt {A viel Geld} aus.","Wie viel hast du ausgegeben?",[["für + Akk","Er gibt alles für {A Bücher} aus."],["sich als + Nom","Er gibt sich als {N Arzt} aus."]]],
+["ausleihen","DA|rD","Ich leihe {D dir} {A mein Fahrrad} aus.","Ich leihe {D mir} {A ein Buch} aus.",[["von + Dat","Ich leihe mir das Auto von {D meinem Bruder} aus."]]],
+["ausmachen","A|D","Mach bitte {A das Licht} aus.","Macht es {D dir} etwas aus, wenn ich das Fenster öffne?",[],"„Das macht mir nichts aus“ = Das stört mich nicht (Dativ)."],
+["ausruhen","rA","Ich ruhe {A mich} kurz aus.","Ruh {A dich} gut aus!",[["sich von + Dat","Sie ruht sich von {D der Reise} aus."]]],
+["aussehen","N","Du siehst müde aus.","Das Kleid sieht toll aus.",[["nach + Dat","Es sieht nach {D Regen} aus."],["wie + Nom","Er sieht aus wie {N sein Vater}."]]],
+["aussteigen","N","Wir steigen hier aus.","An der nächsten Haltestelle müssen Sie aussteigen.",[["aus + Dat","Sie steigt aus {D dem Bus} aus."]]],
+["aussuchen","A|rD","Such {A ein Geschenk} aus!","Ich suche {D mir} {A ein Kleid} aus."],
+["ausweichen","D","Der Fahrer weicht {D dem Reh} aus.","Sie weicht {D meiner Frage} aus."],
+["backen","A|DA","Ich backe {A einen Kuchen}.","Oma hat {D uns} {A Kekse} gebacken."],
+["baden","N|A","Ich bade gern.","Sie badet {A das Baby}."],
+["bauen","A","Wir bauen {A ein Haus}.","Die Kinder bauen {A eine Sandburg}.",[["auf + Akk","Ich baue auf {A dich}."]]],
+["beantworten","A","Bitte beantworten Sie {A die Frage}.","Er hat {A meinen Brief} nie beantwortet.",[],"beantworten + Akkusativ, aber antworten + Dativ (jemandem) bzw. auf + Akk."],
+["sich bedanken","rA","Ich bedanke {A mich} herzlich.","Hast du {A dich} schon bedankt?",[["bei + Dat","Ich bedanke mich bei {D Ihnen}."],["für + Akk","Sie bedankt sich für {A das Geschenk}."]]],
+["bedeuten","A|DA","Diese Farbe bedeutet {A Gefahr}.","Du bedeutest {D mir} {A sehr viel}."],
+["bedienen","A|rG","Die Kellnerin bedient {A die Gäste}.","Er bedient {A sich} {G eines Tricks}.",[],"Gehoben mit Genitiv: sich einer Sache bedienen = etwas benutzen."],
+["bedürfen","G","Das bedarf {G einer Erklärung}.","Der Kranke bedarf {G der Ruhe}.",[],"Genitivverb (gehoben): einer Sache bedürfen = etwas brauchen."],
+["beeilen","rA","Ich muss {A mich} beeilen.","Beeil {A dich}, der Bus kommt!"],
+["beeinflussen","A","Die Werbung beeinflusst {A die Menschen}.","Das Wetter beeinflusst {A meine Laune}."],
+["beenden","A","Wir beenden {A die Stunde}.","Sie hat {A ihr Studium} beendet."],
+["befehlen","DA|D","Der Offizier befiehlt {D den Soldaten} {A den Rückzug}.","Du hast {D mir} nichts zu befehlen!"],
+["befinden","rA","Das Hotel befindet {A sich} im Zentrum.","Wo befindet {A sich} der Ausgang?"],
+["befreien","A","Die Feuerwehr befreit {A den Fahrer}.","Sie befreit {A die Katze}.",[["von + Dat","Er befreit {A sich} von {D seinen Sorgen}."],["aus + Dat","Man befreite {A ihn} aus {D dem Auto}."]]],
+["begegnen","D","Ich bin {D meinem Lehrer} im Supermarkt begegnet.","Wir begegnen {D uns} oft im Park.",[],"Perfekt mit „sein“: Ich bin ihm begegnet."],
+["beginnen","A|N","Der Film beginnt um acht.","Sie beginnt {A ein neues Leben}.",[["mit + Dat","Wir beginnen mit {D der ersten Übung}."]]],
+["begleiten","A","Ich begleite {A dich} nach Hause.","Er begleitet {A die Sängerin} am Klavier."],
+["begreifen","A","Ich begreife {A das} nicht.","Er hat {A die Regel} schnell begriffen."],
+["begrüßen","A","Der Lehrer begrüßt {A die Schüler}.","Wir begrüßen {A Sie} herzlich."],
+["behalten","A","Darf ich {A das Buch} behalten?","Sie behält {A die Ruhe}.",[["für + Akk","Behalte das bitte für {A dich}."]]],
+["behandeln","A","Der Arzt behandelt {A den Patienten}.","Er behandelt {A seine Kollegen} fair."],
+["behaupten","A|rA","Er behauptet {A das Gegenteil}.","Sie konnte {A sich} gut behaupten."],
+["beibringen","DA","Ich bringe {D dir} {A das Schwimmen} bei.","Wer hat {D dir} {A das} beigebracht?"],
+["beißen","A|N","Der Hund hat {A den Jungen} gebissen.","Beißt der Hund?",[["in + Akk","Er beißt in {A den Apfel}."]]],
+["beistehen","D","Ich stehe {D dir} bei.","Freunde stehen {D einander} bei."],
+["beitragen","A|N","Er trägt {A einen Teil} bei.","Jeder kann etwas beitragen.",[["zu + Dat","Jeder trägt zu {D dem Erfolg} bei."]]],
+["bekämpfen","A","Wir bekämpfen {A die Armut}.","Man muss {A das Problem} bekämpfen."],
+["bekommen","A","Ich bekomme {A einen Brief}.","Hast du {A meine Nachricht} bekommen?",[],"Achtung: „bekommen“ heißt nicht „werden“ (englisch „become“)."],
+["beleidigen","A","Er hat {A mich} beleidigt.","Du darfst {A niemanden} beleidigen."],
+["bemerken","A","Ich habe {A den Fehler} nicht bemerkt.","Hast du {A das} bemerkt?"],
+["bemühen","rA","Ich bemühe {A mich} sehr.","Bitte bemühen Sie {A sich} nicht!",[["sich um + Akk","Er bemüht sich um {A eine Stelle}."]]],
+["beneiden","A","Ich beneide {A dich}.","Alle beneiden {A sie}.",[["um + Akk","Ich beneide {A dich} um {A deinen Garten}."]]],
+["benötigen","A","Wir benötigen {A Ihre Unterschrift}.","Ich benötige {A mehr Zeit}."],
+["benutzen","A","Darf ich {A dein Handy} benutzen?","Benutz bitte {A den Aufzug}!"],
+["beobachten","A","Die Katze beobachtet {A den Vogel}.","Ich beobachte {A die Sterne}."],
+["beraten","A|N","Die Verkäuferin berät {A die Kundin}.","Wir beraten noch.",[["über + Akk","Wir beraten über {A das Problem}."],["bei + Dat","Sie berät {A mich} bei {D der Wahl}."],["sich mit + Dat","Ich berate mich mit {D meiner Familie}."]]],
+["berauben","AG","Man hat {A ihn} {G seines Geldes} beraubt.","Der Krieg beraubte {A sie} {G ihrer Heimat}.",[],"Genitivverb: jemanden (Akk) einer Sache (Gen) berauben."],
+["berichten","D|DA|N","Er berichtet {D uns} {A alles}.","Die Zeitung berichtet täglich.",[["über + Akk","Die Zeitung berichtet über {A den Unfall}."],["von + Dat","Sie berichtet von {D ihrer Reise}."]]],
+["bereuen","A","Ich bereue {A nichts}.","Er bereut {A seine Entscheidung}."],
+["beruhigen","A|rA","Die Mutter beruhigt {A das Baby}.","Beruhige {A dich}!"],
+["beschäftigen","A|rA","Die Firma beschäftigt {A 50 Mitarbeiter}.","Das Thema beschäftigt {A mich}.",[["sich mit + Dat","Ich beschäftige mich mit {D Geschichte}."]]],
+["beschließen","A","Wir beschließen {A eine Pause}.","Das Parlament hat {A das Gesetz} beschlossen."],
+["beschreiben","DA|A","Beschreib {D mir} {A dein Zimmer}.","Sie beschreibt {A den Täter} genau."],
+["beschuldigen","AG|A","Man beschuldigt {A ihn} {G des Diebstahls}.","Sie beschuldigt {A ihren Nachbarn}.",[],"Genitivverb: jemanden (Akk) einer Sache (Gen) beschuldigen."],
+["beschützen","A","Der Hund beschützt {A die Kinder}.","Ich beschütze {A dich}.",[["vor + Dat","Er beschützt {A sie} vor {D der Gefahr}."]]],
+["beschweren","rA","Ich beschwere {A mich}.","Hast du {A dich} schon beschwert?",[["sich über + Akk","Er beschwert sich über {A den Lärm}."],["sich bei + Dat","Sie beschwert sich bei {D dem Chef}."]]],
+["besitzen","A","Sie besitzt {A ein Grundstück}.","Er besitzt {A viel Erfahrung}."],
+["besprechen","A","Wir besprechen {A das Problem}.","Lass uns {A den Plan} besprechen.",[["mit + Dat","Ich bespreche das mit {D meinem Mann}."]]],
+["bestätigen","A|DA","Bitte bestätigen Sie {A den Termin}.","Er bestätigt {D mir} {A die Buchung}."],
+["bestehen","A|N","Sie hat {A die Prüfung} bestanden.","Das Problem besteht seit Jahren.",[["aus + Dat","Das Team besteht aus {D fünf Personen}."],["auf + Dat","Ich bestehe auf {D einer Antwort}."]]],
+["bestellen","A|DA","Ich bestelle {A eine Pizza}.","Kannst du {D mir} {A ein Taxi} bestellen?",[["bei + Dat","Ich bestelle das Buch bei {D einem Händler}."]]],
+["bestrafen","A","Der Lehrer bestraft {A den Schüler}.","Man hat {A ihn} streng bestraft.",[["für + Akk","Sie wird für {A ihre Lüge} bestraft."]]],
+["besuchen","A","Ich besuche {A meine Oma}.","Er besucht {A einen Deutschkurs}."],
+["beten","N","Sie betet jeden Abend.","Wir beten gemeinsam.",[["zu + Dat","Sie betet zu {D Gott}."],["für + Akk","Wir beten für {A den Frieden}."]]],
+["betreten","A","Bitte betreten Sie {A den Raum} leise.","Er betritt {A die Bühne}."],
+["betrügen","A","Er hat {A seine Frau} betrogen.","Der Händler betrügt {A die Kunden}.",[["um + Akk","Man hat {A ihn} um {A sein Geld} betrogen."]]],
+["beurteilen","A","Der Lehrer beurteilt {A die Arbeit}.","Ich kann {A das} nicht beurteilen."],
+["bewegen","A|rA","Ich kann {A meinen Arm} nicht bewegen.","Du musst {A dich} mehr bewegen."],
+["bewerben","rA","Ich bewerbe {A mich}.","Hast du {A dich} schon beworben?",[["sich um + Akk","Sie bewirbt sich um {A eine Stelle}."],["sich bei + Dat","Er bewirbt sich bei {D einer Schule}."],["sich als + Nom","Ich bewerbe mich als {N Trainerin}."]]],
+["beweisen","DA|A","Ich beweise {D dir} {A das Gegenteil}.","Er kann {A seine Unschuld} beweisen."],
+["bewundern","A","Ich bewundere {A deinen Mut}.","Alle bewundern {A die Aussicht}."],
+["bezahlen","A|DA","Ich bezahle {A die Rechnung}.","Er bezahlt {D mir} {A das Essen}.",[["für + Akk","Wie viel hast du für {A die Schuhe} bezahlt?"]]],
+["bezichtigen","AG","Man bezichtigt {A sie} {G der Lüge}.","Er bezichtigte {A den Kollegen} {G des Betrugs}.",[],"Genitivverb (gehoben): jemanden einer Sache bezichtigen."],
+["bezweifeln","A","Ich bezweifle {A das}.","Sie bezweifelt {A seine Aussage}."],
+["bieten","DA|A","Die Stadt bietet {D den Touristen} {A viel Kultur}.","Das Hotel bietet {A einen schönen Blick}."],
+["bilden","A|rA","Die Kinder bilden {A einen Kreis}.","Bilde {A einen Satz}!",[["sich über + Akk","Bilde dir selbst eine Meinung über {A das Thema}."]]],
+["binden","A","Er bindet {A die Schuhe}.","Sie bindet {A die Haare} zusammen.",[["an + Akk","Er bindet {A das Boot} an {A den Steg}."]]],
+["bitten","A","Darf ich {A Sie} etwas bitten?","Sie bittet {A mich} herein.",[["um + Akk","Ich bitte {A dich} um {A Hilfe}."]],"jemanden (Akk) um etwas (Akk) bitten."],
+["bleiben","N|NN","Ich bleibe heute zu Hause.","Er bleibt {N mein bester Freund}.",[["bei + Dat","Ich bleibe bei {D meiner Meinung}."]]],
+["blicken","N","Sie blickt aus dem Fenster.","Er blickt nach vorne.",[["auf + Akk","Wir blicken auf {A den See}."]]],
+["borgen","DA|rD","Ich borge {D dir} {A mein Buch}.","Ich borge {D mir} {A ein Fahrrad}.",[["von + Dat","Ich borge mir Geld von {D meinem Bruder}."]]],
+["braten","A","Ich brate {A ein Ei}.","Er brät {A das Gemüse} in Öl."],
+["brauchen","A","Ich brauche {A deine Hilfe}.","Wir brauchen {A mehr Zeit}.",[["für + Akk","Ich brauche das für {A die Schule}."]]],
+["brechen","A|N","Er hat {A sein Versprechen} gebrochen.","Das Eis bricht.",[["mit + Dat","Sie bricht mit {D der Tradition}."]]],
+["brennen","N","Das Feuer brennt.","Das Haus hat gebrannt."],
+["bringen","DA|A","Ich bringe {D dir} {A einen Kaffee}.","Der Postbote bringt {A ein Paket}.",[["zu + Dat","Bring {A das Kind} zu {D der Oma}."]]],
+["buchen","A","Wir buchen {A ein Hotelzimmer}.","Hast du {A den Flug} schon gebucht?"],
+["danken","D","Ich danke {D dir}!","Wir danken {D Ihnen} herzlich.",[["für + Akk","Ich danke {D dir} für {A deine Hilfe}."]]],
+["dauern","N","Der Film dauert zwei Stunden.","Wie lange dauert das?"],
+["decken","A","Ich decke {A den Tisch}.","Die Versicherung deckt {A den Schaden}."],
+["denken","N|A","Ich denke, dass du recht hast.","Was denkst du?",[["an + Akk","Ich denke oft an {A dich}."],["über + Akk","Was denkst du über {A den Film}?"],["von + Dat","Was denkst du von {D ihm}?"]]],
+["dienen","D","Der Raum dient {D uns} als Büro.","Das dient {D der Sicherheit}.",[["als + Nom","Der Keller dient als {N Lager}."],["zu + Dat","Das dient zu {D deinem Schutz}."]]],
+["diskutieren","A|N","Die Klasse diskutiert {A das Thema}.","Wir diskutieren gern.",[["über + Akk","Wir diskutieren über {A Politik}."],["mit + Dat","Ich diskutiere gern mit {D meinem Vater}."]]],
+["drehen","A|rA","Dreh {A den Schlüssel} nach rechts.","Die Erde dreht {A sich}.",[["sich um + Akk","Alles dreht sich um {A Geld}."]]],
+["drohen","D","Er droht {D mir}.","Es droht {D uns} ein Gewitter.",[["mit + Dat","Sie droht {D ihm} mit {D der Polizei}."]]],
+["drucken","A","Ich drucke {A das Dokument}.","Kannst du {A die Fotos} drucken?"],
+["drücken","A","Drück {A den Knopf}!","Die Schuhe drücken {A mich}.",[["auf + Akk","Drück auf {A den grünen Knopf}."]]],
+["dürfen","N","Darf ich hier parken?","Du darfst nicht rauchen.",[],"Modalverb – steht meist mit einem Infinitiv am Satzende."],
+["duschen","N|rA","Ich dusche jeden Morgen.","Er duscht {A sich} kalt."],
+["duzen","A","Darf ich {A dich} duzen?","Wir duzen {A uns}."],
+["ehren","A","Man ehrt {A die Gewinner}.","Ihr Besuch ehrt {A uns}."],
+["eignen","rA","Der Raum eignet {A sich} gut.","Er eignet {A sich} nicht.",[["sich für + Akk","Das Buch eignet sich für {A Anfänger}."],["sich als + Nom","Sie eignet sich als {N Leiterin}."]]],
+["einfallen","D","{D Mir} fällt nichts ein.","Ist {D dir} sein Name wieder eingefallen?"],
+["einigen","rA","Wir haben {A uns} geeinigt.","Sie können {A sich} nicht einigen.",[["sich auf + Akk","Wir einigen uns auf {A einen Termin}."]]],
+["einkaufen","N|A","Ich kaufe am Samstag ein.","Sie kauft {A Gemüse} ein."],
+["einladen","A","Ich lade {A dich} ein.","Wir laden {A alle Nachbarn} ein.",[["zu + Dat","Sie lädt {A uns} zu {D ihrer Party} ein."]]],
+["einschalten","A","Schalte bitte {A das Licht} ein.","Er schaltet {A den Fernseher} ein."],
+["einschlafen","N","Ich schlafe schnell ein.","Das Baby ist eingeschlafen."],
+["einsetzen","A|rA","Wir setzen {A neue Fenster} ein.","Setze {A das richtige Wort} ein!",[["sich für + Akk","Sie setzt sich für {A die Tiere} ein."]]],
+["einsteigen","N","Bitte einsteigen!","Wo bist du eingestiegen?",[["in + Akk","Steig in {A den Bus} ein!"]]],
+["eintreten","N","Treten Sie ein!","Das Gegenteil ist eingetreten.",[["in + Akk","Er tritt in {A den Verein} ein."],["für + Akk","Sie tritt für {A ihre Rechte} ein."]]],
+["empfangen","A","Wir empfangen {A die Gäste}.","Hier kann man {A kein Signal} empfangen."],
+["empfehlen","DA","Ich empfehle {D dir} {A dieses Buch}.","Was empfehlen Sie {D mir}?"],
+["empören","rA","Die Leute empören {A sich}.","Sie war empört.",[["sich über + Akk","Er empört sich über {A die Preise}."]]],
+["enden","N","Der Film endet um zehn.","Wie endet die Geschichte?",[["mit + Dat","Das Fest endet mit {D einem Feuerwerk}."]]],
+["entbehren","G|A","Das entbehrt {G jeder Grundlage}.","Ich kann {A das Auto} nicht entbehren.",[],"Mit Genitiv (gehoben): einer Sache entbehren = etwas nicht haben."],
+["entdecken","A","Kolumbus entdeckte {A Amerika}.","Ich habe {A einen Fehler} entdeckt."],
+["entfernen","A|rA","Bitte entfernen Sie {A den Fleck}.","Er entfernt {A sich} langsam.",[["von + Dat","Sie entfernt sich von {D der Gruppe}."]]],
+["entfliehen","D","Er entflieht {D dem Alltag}.","Der Gefangene entfloh {D den Wächtern}."],
+["entgegnen","DA|D","Sie entgegnete {D ihm} {A nichts}.","Er entgegnete {D mir}, dass er keine Zeit habe."],
+["entgegenkommen","D","Ein Auto kommt {D uns} entgegen.","Der Chef kommt {D mir} beim Urlaub entgegen."],
+["entgehen","D","Das ist {D mir} entgangen.","Ihm entgeht nichts."],
+["entheben","AG","Man enthob {A ihn} {G seines Amtes}.","Der Minister wurde {G seines Postens} enthoben.",[],"Genitivverb (gehoben)."],
+["entkommen","D","Der Dieb ist {D der Polizei} entkommen.","Wir entkommen {D dem Regen} nicht."],
+["entlassen","A","Die Firma entlässt {A zehn Mitarbeiter}.","Er wurde aus dem Krankenhaus entlassen.",[["aus + Dat","Man entlässt {A ihn} aus {D der Haft}."]]],
+["entscheiden","A|rA","Wir entscheiden {A das} morgen.","Ich kann {A mich} nicht entscheiden.",[["sich für + Akk","Ich habe mich für {A das blaue Kleid} entschieden."],["sich gegen + Akk","Er entscheidet sich gegen {A den Umzug}."],["über + Akk","Das Gericht entscheidet über {A den Fall}."]]],
+["entschuldigen","A|rA","Entschuldigen Sie {A die Störung}.","Ich möchte {A mich} entschuldigen.",[["sich bei + Dat","Ich entschuldige mich bei {D dir}."],["sich für + Akk","Er entschuldigt sich für {A seine Verspätung}."]]],
+["sich entsinnen","rG","Ich entsinne {A mich} {G dieses Tages} gut.","Sie entsann {A sich} {G ihres Versprechens}.",[["sich an + Akk","Ich entsinne mich an {A den Abend}."]],"Gehoben, mit Genitiv oder an + Akk."],
+["entspannen","A|rA","Musik entspannt {A mich}.","Ich entspanne {A mich} im Garten."],
+["entsprechen","D","Das entspricht {D der Wahrheit}.","Die Wohnung entspricht {D unseren Wünschen}."],
+["entstehen","N","Hier entsteht ein neues Haus.","Wie ist das Problem entstanden?",[["aus + Dat","Aus {D der Idee} entstand ein Buch."]]],
+["enttäuschen","A","Du hast {A mich} enttäuscht.","Der Film enttäuscht {A die Zuschauer}."],
+["entwickeln","A|rA","Die Firma entwickelt {A eine App}.","Das Kind entwickelt {A sich} gut.",[["sich zu + Dat","Er entwickelt sich zu {D einem Experten}."]]],
+["erfahren","A","Ich habe {A die Neuigkeit} erfahren.","Wann hast du {A das} erfahren?",[["von + Dat","Wir haben von {D dem Unfall} erfahren."]]],
+["erfinden","A","Wer hat {A das Telefon} erfunden?","Er erfindet {A eine Ausrede}."],
+["sich erfreuen","rG","Sie erfreut {A sich} {G bester Gesundheit}.","Das Café erfreut {A sich} {G großer Beliebtheit}.",[["an + Dat","Ich erfreue mich an {D den Blumen}."]],"Gehoben mit Genitiv: sich einer Sache erfreuen = etwas haben/genießen."],
+["erfüllen","DA|A","Ich erfülle {D dir} {A deinen Wunsch}.","Er erfüllt {A seine Pflicht}."],
+["erhalten","A","Ich habe {A Ihren Brief} erhalten.","Sie erhält {A einen Preis}."],
+["erhöhen","A|rA","Die Firma erhöht {A die Preise}.","Die Temperatur erhöht {A sich}."],
+["erholen","rA","Ich erhole {A mich} im Urlaub.","Hast du {A dich} gut erholt?",[["sich von + Dat","Er erholt sich von {D der Grippe}."]]],
+["erinnern","A|rA","Erinnere {A mich} bitte morgen!","Ich erinnere {A mich} nicht.",[["an + Akk","Erinnere {A mich} an {A den Termin}!"],["sich an + Akk","Ich erinnere mich gern an {A meine Kindheit}."]],"Gehoben auch mit Genitiv: sich einer Sache erinnern."],
+["erkälten","rA","Ich habe {A mich} erkältet.","Pass auf, dass du {A dich} nicht erkältest!"],
+["erkennen","A","Ich habe {A dich} sofort erkannt.","Erkennst du {A den Fehler}?",[["an + Dat","Ich erkenne {A ihn} an {D seiner Stimme}."]]],
+["erklären","DA|A","Kannst du {D mir} {A die Regel} erklären?","Er erklärt {A die Grammatik} sehr gut."],
+["sich erkundigen","rA","Ich erkundige {A mich}.","Sie hat {A sich} genau erkundigt.",[["sich nach + Dat","Er erkundigt sich nach {D dem Weg}."],["sich bei + Dat","Ich erkundige mich bei {D der Information}."]]],
+["erlauben","DA|rD","Meine Eltern erlauben {D mir} {A das} nicht.","Was erlauben Sie {D sich}?"],
+["erleben","A","Wir haben {A viel} erlebt.","Sie erlebt {A ein Abenteuer}."],
+["ermöglichen","DA","Das Stipendium ermöglicht {D ihr} {A das Studium}.","Du ermöglichst {D mir} {A diese Reise}."],
+["ernähren","A|rA","Sie ernährt {A ihre Familie}.","Ich ernähre {A mich} gesund.",[["sich von + Dat","Er ernährt sich von {D Obst}."]]],
+["ernennen","A","Man ernennt {A sie} zur Direktorin.","Der Präsident ernennt {A den Minister}.",[["zu + Dat","Man ernannte {A ihn} zu {D dem neuen Leiter}."]]],
+["eröffnen","A|DA","Wir eröffnen {A ein Geschäft}.","Er eröffnet {D mir} {A eine neue Möglichkeit}."],
+["erreichen","A","Wir haben {A den Zug} erreicht.","Ich erreiche {A dich} telefonisch nicht."],
+["erscheinen","N|D","Das Buch erscheint im Mai.","Das erscheint {D mir} seltsam."],
+["erschrecken","A|N","Du hast {A mich} erschreckt!","Ich bin furchtbar erschrocken.",[["vor + Dat","Sie erschrak vor {D dem Hund}."],["über + Akk","Er erschrak über {A die Nachricht}."]]],
+["ersetzen","A|DA","Wir ersetzen {A das alte Fenster}.","Die Versicherung ersetzt {D ihm} {A den Schaden}.",[["durch + Akk","Man ersetzt {A den Lehrer} durch {A eine Kollegin}."]]],
+["erteilen","DA","Die Behörde erteilt {D ihm} {A die Erlaubnis}.","Sie erteilt {D mir} {A eine Auskunft}."],
+["erwarten","A","Wir erwarten {A Gäste}.","Sie erwartet {A ein Baby}.",[["von + Dat","Ich erwarte von {D dir} mehr."]]],
+["erzählen","DA|A","Erzähl {D mir} {A eine Geschichte}!","Oma erzählt {A ein Märchen}.",[["von + Dat","Er erzählt von {D seiner Reise}."],["über + Akk","Sie erzählt {D uns} viel über {A ihre Heimat}."]]],
+["es gibt","A","Es gibt {A einen Park} in der Nähe.","Gibt es hier {A eine Bank}?",[],"„es gibt“ steht immer mit Akkusativ: Es gibt {A keinen Kaffee} mehr."],
+["essen","A|N","Ich esse {A einen Apfel}.","Wann essen wir?"],
+["fahren","N|A","Wir fahren nach Wien.","Sie fährt {A ein neues Auto}.",[["mit + Dat","Ich fahre mit {D dem Zug}."],["nach + Dat","Wir fahren nach {D Italien}."],["zu + Dat","Ich fahre zu {D meiner Tante}."],["in + Akk","Wir fahren in {A die Berge}."]]],
+["fallen","N|D","Das Glas ist auf den Boden gefallen.","Die Entscheidung fällt {D mir} schwer.",[["auf + Akk","Der Apfel fällt auf {A den Boden}."]]],
+["fangen","A","Die Katze fängt {A eine Maus}.","Fang {A den Ball}!"],
+["fassen","A","Er fasst {A meine Hand}.","Ich kann {A es} nicht fassen!",[["sich an + Akk","Fass dich an {A die eigene Nase}!"]]],
+["fehlen","D","Du fehlst {D mir}.","Mir fehlt das Geld.",[["an + Dat","Es fehlt {D uns} an {D nichts}."]],"„Du fehlst mir“ bedeutet: Ich vermisse dich. Achtung: Hier ist die vermisste Person das Subjekt (Nominativ)!"],
+["feiern","A|N","Wir feiern {A meinen Geburtstag}.","Heute wird gefeiert!"],
+["fernsehen","N","Die Kinder sehen fern.","Ich sehe abends selten fern."],
+["festhalten","A|rA","Halt {A das Seil} fest!","Halte {A dich} gut fest!",[["sich an + Dat","Halt dich an {D dem Geländer} fest!"]]],
+["finden","A","Ich finde {A meinen Schlüssel} nicht.","Wie findest du {A den Film}?"],
+["fliegen","N|A","Der Vogel fliegt hoch.","Der Pilot fliegt {A eine große Maschine}.",[["nach + Dat","Wir fliegen nach {D Spanien}."]]],
+["fliehen","N","Die Menschen fliehen.","Der Dieb ist geflohen.",[["vor + Dat","Sie fliehen vor {D dem Krieg}."],["aus + Dat","Er flieht aus {D dem Gefängnis}."]]],
+["flüstern","DA|N","Sie flüstert {D mir} {A ein Geheimnis} ins Ohr.","Bitte flüstert nicht!"],
+["folgen","D","Folgen Sie {D mir} bitte!","Der Hund folgt {D seinem Besitzer}.",[],"Perfekt mit „sein“: Ich bin ihm gefolgt."],
+["fordern","A","Die Arbeiter fordern {A mehr Lohn}.","Das fordert {A viel Kraft}.",[["von + Dat","Der Chef fordert viel von {D seinen Mitarbeitern}."]]],
+["fördern","A","Die Schule fördert {A begabte Kinder}.","Sport fördert {A die Gesundheit}."],
+["fotografieren","A","Ich fotografiere {A den Sonnenuntergang}.","Darf ich {A Sie} fotografieren?"],
+["fragen","A|AA","Ich frage {A den Lehrer}.","Darf ich {A Sie} {A etwas} fragen?",[["nach + Dat","Er fragt nach {D dem Weg}."]],"Achtung: jemanden (Akkusativ!) fragen – nicht „ihm fragen“."],
+["fressen","A","Die Katze frisst {A ihr Futter}.","Der Hund hat {A den Kuchen} gefressen.",[],"„fressen“ sagt man bei Tieren, bei Menschen „essen“."],
+["freuen","rA|A","Ich freue {A mich} sehr!","Das freut {A mich}!",[["sich über + Akk","Sie freut sich über {A das Geschenk}."],["sich auf + Akk","Wir freuen uns auf {A den Urlaub}."]],"sich freuen über = über etwas, das schon da ist; sich freuen auf = auf etwas, das noch kommt."],
+["frühstücken","N|A","Wir frühstücken um acht.","Ich frühstücke {A ein Müsli}."],
+["fühlen","A|rA","Ich fühle {A den Wind}.","Ich fühle {A mich} gut."],
+["führen","A","Sie führt {A die Touristen} durch die Stadt.","Er führt {A ein Restaurant}.",[["zu + Dat","Das führt zu {D Problemen}."]]],
+["füllen","A","Ich fülle {A das Glas}.","Sie füllt {A den Tank}.",[["mit + Dat","Füll die Flasche mit {D Wasser}."]]],
+["fürchten","A|rA","Er fürchtet {A den Tod}.","Fürchte {A dich} nicht!",[["sich vor + Dat","Das Kind fürchtet sich vor {D der Dunkelheit}."],["um + Akk","Sie fürchtet um {A ihr Leben}."]]],
+["garantieren","DA","Ich garantiere {D Ihnen} {A die Qualität}.","Wir garantieren {A schnelle Lieferung}."],
+["geben","DA","Gib {D mir} bitte {A das Salz}.","Ich gebe {D dem Kind} {A einen Apfel}.",[],"Siehe auch „es gibt“ + Akkusativ: Es gibt {A ein Problem}."],
+["gedenken","G","Wir gedenken {G der Opfer}.","Sie gedenkt {G ihrer Großmutter}.",[],"Genitivverb (gehoben): einer Person oder Sache gedenken = sich ehrend erinnern."],
+["gefallen","D","Das Kleid gefällt {D mir}.","Wie gefällt {D dir} Wien?",[],"Das, was gefällt, ist das Subjekt (Nominativ). Die Person steht im Dativ."],
+["gehen","N","Ich gehe nach Hause.","Wie geht es {D dir}?",[["in + Akk","Wir gehen in {A den Park}."],["zu + Dat","Ich gehe zu {D dem Arzt}."],["um + Akk","Es geht um {A Geld}."],["mit + Dat","Er geht mit {D seiner Freundin}."]],"„Wie geht es dir?“ – die Person steht im Dativ."],
+["gehorchen","D","Der Hund gehorcht {D mir}.","Die Kinder gehorchen {D den Eltern}."],
+["gehören","D","Das Buch gehört {D mir}.","{D Wem} gehört das Auto?",[["zu + Dat","Er gehört zu {D unserer Familie}."]]],
+["gelingen","D","Der Kuchen ist {D mir} gut gelungen.","Es gelingt {D ihr} immer."],
+["gelten","N","Die Regel gilt seit Januar.","Das Ticket gilt einen Tag.",[["für + Akk","Die Regel gilt für {A alle}."],["als + Nom","Er gilt als {N Experte}."]]],
+["genießen","A","Ich genieße {A die Sonne}.","Sie genießt {A die Ruhe}."],
+["genügen","D","Das genügt {D mir}.","Ein Glas Wasser genügt {D ihm}."],
+["geraten","N","Er gerät leicht in Wut.","Der Kuchen ist gut geraten.",[["in + Akk","Sie gerät in {A Panik}."]]],
+["geschehen","D","Was ist {D dir} geschehen?","Das geschieht {D ihm} recht!"],
+["gestehen","DA|A","Er gesteht {D ihr} {A seine Liebe}.","Der Täter gesteht {A die Tat}."],
+["gewähren","DA","Die Bank gewährt {D ihm} {A einen Kredit}.","Wir gewähren {D Ihnen} {A einen Rabatt}."],
+["gewinnen","A|N","Sie hat {A den Preis} gewonnen.","Wer gewinnt?",[["gegen + Akk","Wir gewinnen gegen {A die andere Mannschaft}."]]],
+["gewöhnen","rA|A","Ich habe {A mich} schon gewöhnt.","Sie gewöhnt {A das Kind} an den Kindergarten.",[["sich an + Akk","Ich gewöhne mich an {A das Klima}."]]],
+["gießen","A","Ich gieße {A die Blumen}.","Er gießt {A Wasser} ins Glas."],
+["glauben","D|A|DA","Ich glaube {D dir}.","Ich glaube {A das} nicht.",[["an + Akk","Sie glaubt an {A Gott}."]],"Person im Dativ, Sache im Akkusativ: Ich glaube {D dir} {A kein Wort}."],
+["gleichen","D","Sie gleicht {D ihrer Mutter}.","Die Zwillinge gleichen {D sich}."],
+["gönnen","DA|rD","Ich gönne {D dir} {A den Erfolg}.","Gönn {D dir} {A eine Pause}!"],
+["graben","A","Der Hund gräbt {A ein Loch}.","Wir graben {A einen Brunnen}."],
+["gratulieren","D","Ich gratuliere {D dir}!","Alle gratulieren {D der Siegerin}.",[["zu + Dat","Wir gratulieren {D dir} zu {D deinem Geburtstag}."]]],
+["greifen","N","Er greift ins Regal.","Sie greift zu.",[["nach + Dat","Das Kind greift nach {D dem Ball}."]]],
+["grüßen","A","Grüß {A deine Eltern} von mir!","Er grüßt {A die Nachbarin}."],
+["gucken","N","Guck mal!","Was guckst du?",[["auf + Akk","Er guckt auf {A die Uhr}."]]],
+["haben","A","Ich habe {A einen Bruder}.","Hast du {A Zeit}?"],
+["halten","A|N","Halt bitte {A die Tasche}!","Der Bus hält hier.",[["von + Dat","Was hältst du von {D der Idee}?"],["für + Akk","Ich halte {A ihn} für {A einen ehrlichen Menschen}."],["sich an + Akk","Halte dich an {A die Regeln}!"]]],
+["handeln","N","Wir müssen schnell handeln.","Er hat richtig gehandelt.",[["von + Dat","Das Buch handelt von {D einem Mädchen}."],["mit + Dat","Er handelt mit {D Autos}."],["sich um + Akk","Es handelt sich um {A ein Missverständnis}."]]],
+["hängen","A|N","Ich hänge {A das Bild} an die Wand.","Das Bild hängt an der Wand.",[["an + Dat","Sie hängt sehr an {D ihrer Heimat}."]]],
+["harren","G","Wir harren {G der Dinge}, die da kommen.","Sie harrte {G seiner Rückkehr}.",[],"Genitivverb (sehr gehoben): einer Sache harren = auf etwas warten."],
+["hassen","A","Ich hasse {A den Winter}.","Er hasst {A Lügen}."],
+["heiraten","A|N","Sie heiratet {A ihren Freund}.","Wir heiraten im Mai.",[],"Achtung: jemanden (Akk) heiraten – nicht „mit jemandem heiraten“."],
+["heißen","NN","Ich heiße {N Anna}.","Wie heißt das auf Deutsch?"],
+["heizen","A|N","Wir heizen {A das Wohnzimmer}.","Im Winter heizen wir mit Holz."],
+["helfen","D","Ich helfe {D meiner Mutter} im Garten.","Kannst du {D mir} kurz helfen?",[["bei + Dat","Sie hilft {D mir} bei {D den Hausaufgaben}."]]],
+["herrschen","N","Hier herrscht Ordnung.","Draußen herrscht Stille.",[["über + Akk","Der König herrscht über {A das Land}."]]],
+["herstellen","A","Die Firma stellt {A Möbel} her.","Wir stellen {A Kontakt} her."],
+["hindern","A","Niemand hindert {A dich}.","Der Regen hindert {A uns}.",[["an + Dat","Der Lärm hindert {A mich} an {D der Arbeit}."]]],
+["hinweisen","A|N","Ich weise {A Sie} darauf hin.","Das Schild weist auf eine Gefahr hin.",[["auf + Akk","Er weist {A mich} auf {A den Fehler} hin."]]],
+["hoffen","N|A","Ich hoffe, du kommst.","Wir hoffen {A das Beste}.",[["auf + Akk","Wir hoffen auf {A gutes Wetter}."]]],
+["holen","A|rD","Ich hole {A Brot}.","Hol {D dir} {A einen Stuhl}!"],
+["hören","A","Ich höre {A Musik}.","Hörst du {A das}?",[["auf + Akk","Hör auf {A deine Mutter}!"],["von + Dat","Ich habe von {D dem Unfall} gehört."]]],
+["imponieren","D","Sein Mut imponiert {D mir}.","Sie will {D ihm} imponieren."],
+["informieren","A|rA","Wir informieren {A die Eltern}.","Ich informiere {A mich}.",[["über + Akk","Er informiert {A uns} über {A die Änderung}."]]],
+["interessieren","A|rA","Das interessiert {A mich} nicht.","Interessierst du {A dich} für Sport?",[["sich für + Akk","Ich interessiere mich für {A Kunst}."]]],
+["irren","rA","Da irrst du {A dich}!","Ich habe {A mich} geirrt.",[["sich in + Dat","Er hat sich in {D der Zeit} geirrt."]]],
+["jammern","N","Hör auf zu jammern!","Sie jammert ständig.",[["über + Akk","Er jammert über {A das Wetter}."]]],
+["kämpfen","N","Die Soldaten kämpfen.","Sie kämpft tapfer.",[["für + Akk","Wir kämpfen für {A die Freiheit}."],["gegen + Akk","Er kämpft gegen {A die Krankheit}."],["um + Akk","Sie kämpfen um {A den Sieg}."]]],
+["kaufen","A|DA|rD","Ich kaufe {A ein Auto}.","Ich kaufe {D dir} {A ein Eis}."],
+["kennen","A","Ich kenne {A diesen Mann}.","Kennst du {A das Lied}?"],
+["kennenlernen","A","Ich habe {A ihn} im Urlaub kennengelernt.","Wir möchten {A Sie} gern kennenlernen."],
+["klagen","N","Sie klagt nie.","Er hat vor Gericht geklagt.",[["über + Akk","Er klagt über {A Kopfschmerzen}."],["gegen + Akk","Sie klagt gegen {A die Firma}."]]],
+["klauen","DA|A","Jemand hat {D mir} {A das Handy} geklaut.","Er klaut {A Äpfel}."],
+["kleben","A|N","Ich klebe {A das Foto} ins Album.","Der Kaugummi klebt.",[["an + Dat","Das Etikett klebt an {D der Flasche}."]]],
+["klettern","N","Die Kinder klettern gern.","Die Katze klettert aufs Dach.",[["auf + Akk","Er klettert auf {A den Baum}."]]],
+["klingeln","N","Das Telefon klingelt.","Es hat geklingelt.",[["an + Dat","Der Postbote klingelt an {D der Tür}."]]],
+["klingen","N","Das klingt gut!","Deine Stimme klingt müde.",[["nach + Dat","Das klingt nach {D Spaß}."]]],
+["klopfen","N","Es klopft.","Mein Herz klopft.",[["an + Akk","Jemand klopft an {A die Tür}."]]],
+["kochen","A|N","Ich koche {A Suppe}.","Wer kocht heute?"],
+["kommen","N","Kommst du mit?","Der Bus kommt gleich.",[["aus + Dat","Ich komme aus {D Ungarn}."],["zu + Dat","Kommst du zu {D meiner Feier}?"],["auf + Akk","Wie kommst du auf {A die Idee}?"]]],
+["kondolieren","D","Wir kondolieren {D der Familie}.","Ich möchte {D Ihnen} kondolieren."],
+["können","A|N","Ich kann {A Deutsch}.","Kannst du schwimmen?",[],"Modalverb – steht meist mit einem Infinitiv am Satzende."],
+["kontrollieren","A","Der Schaffner kontrolliert {A die Fahrkarten}.","Bitte kontrolliere {A deine Antworten}."],
+["konzentrieren","rA","Ich kann {A mich} nicht konzentrieren.","Konzentrier {A dich}!",[["sich auf + Akk","Sie konzentriert sich auf {A die Prüfung}."]]],
+["korrigieren","A","Die Lehrerin korrigiert {A die Tests}.","Bitte korrigiere {A meinen Text}."],
+["kosten","A|AA","Das kostet {A zehn Euro}.","Das kostet {A mich} {A viel Zeit}."],
+["kriegen","A","Ich kriege {A ein Geschenk}.","Hast du {A meine Nachricht} gekriegt?"],
+["kümmern","rA","Ich kümmere {A mich} darum.","Kümmere {A dich} nicht darum!",[["sich um + Akk","Sie kümmert sich um {A die Katze}."]]],
+["kündigen","D|A","Die Firma hat {D ihm} gekündigt.","Ich kündige {A die Wohnung}."],
+["küssen","A","Er küsst {A seine Frau}.","Sie küsst {A das Baby}."],
+["lächeln","N","Sie lächelt freundlich.","Lächeln bitte!",[["über + Akk","Er lächelt über {A den Witz}."]]],
+["lachen","N","Wir lachen viel.","Warum lachst du?",[["über + Akk","Alle lachen über {A den Clown}."]]],
+["landen","N","Das Flugzeug landet pünktlich.","Wir sind in Wien gelandet.",[["in + Dat","Wir landen in {D Paris}."]]],
+["lassen","A","Lass {A mich} in Ruhe!","Ich lasse {A das Auto} reparieren."],
+["laufen","N","Ich laufe jeden Morgen.","Der Film läuft im Kino.",[["zu + Dat","Sie läuft zu {D der Haltestelle}."]]],
+["leben","N","Sie lebt in Wien.","Er lebt allein.",[["von + Dat","Er lebt von {D seiner Rente}."],["in + Dat","Wir leben in {D einer kleinen Stadt}."],["mit + Dat","Sie lebt mit {D ihrem Partner} zusammen."]]],
+["legen","A|rA","Ich lege {A das Buch} auf den Tisch.","Ich lege {A mich} hin."],
+["lehren","AA|A","Sie lehrt {A die Kinder} {A das Lesen}.","Er lehrt {A Mathematik} an der Universität."],
+["leiden","N","Er leidet sehr.","Die Pflanze leidet.",[["unter + Dat","Sie leidet unter {D dem Stress}."],["an + Dat","Er leidet an {D einer Allergie}."]]],
+["leihen","DA|rD","Ich leihe {D dir} {A mein Auto}.","Ich leihe {D mir} {A ein Buch}.",[["von + Dat","Ich leihe mir Geld von {D meiner Schwester}."]]],
+["leisten","A|rD","Er leistet {A gute Arbeit}.","Das kann ich {D mir} nicht leisten."],
+["leiten","A","Sie leitet {A die Firma}.","Wer leitet {A den Kurs}?"],
+["lenken","A","Er lenkt {A das Auto}.","Sie lenkt {A das Gespräch} auf ein anderes Thema."],
+["lernen","A|N","Ich lerne {A Deutsch}.","Er lernt fleißig.",[["für + Akk","Ich lerne für {A die Prüfung}."]]],
+["lesen","A","Ich lese {A ein Buch}.","Hast du {A die Zeitung} gelesen?",[["über + Akk","Ich habe viel über {A das Thema} gelesen."]]],
+["leugnen","A","Er leugnet {A die Tat}.","Sie leugnet {A alles}."],
+["lieben","A","Ich liebe {A dich}.","Sie liebt {A die Natur}."],
+["liefern","DA|A","Wir liefern {D Ihnen} {A die Ware} morgen.","Die Firma liefert {A Möbel}."],
+["liegen","N|D","Das Buch liegt auf dem Tisch.","Mathe liegt {D mir} nicht.",[["an + Dat","Das liegt an {D dir}."]]],
+["loben","A","Der Lehrer lobt {A die Schülerin}.","Alle loben {A das Essen}.",[["für + Akk","Sie lobt {A ihn} für {A seine Arbeit}."]]],
+["lohnen","rA","Das lohnt {A sich}!","Hat {A sich} die Reise gelohnt?"],
+["lösen","A","Ich löse {A die Aufgabe}.","Wir müssen {A das Problem} lösen."],
+["lügen","N","Du lügst!","Er hat nie gelogen."],
+["machen","A|DA","Ich mache {A Hausaufgaben}.","Du machst {D mir} {A Freude}."],
+["malen","A|N","Sie malt {A ein Bild}.","Das Kind malt gern."],
+["mangeln","D","Es mangelt {D uns} an Zeit.","Ihm mangelt es an nichts.",[["an + Dat","Es mangelt an {D Lehrern}."]]],
+["meckern","N","Er meckert ständig.","Hör auf zu meckern!",[["über + Akk","Sie meckert über {A das Essen}."]]],
+["meinen","A|N","Ich meine {A dich}!","Was meinst du?",[["zu + Dat","Was meinst du zu {D dem Vorschlag}?"]]],
+["melden","A|rA","Ich melde {A den Unfall}.","Melde {A dich} bitte!",[["sich bei + Dat","Melde dich bei {D mir}!"]]],
+["merken","A|rD","Ich merke {A nichts}.","Merk {D dir} {A das}!"],
+["messen","A","Ich messe {A die Temperatur}.","Wir messen {A den Raum}."],
+["mieten","A","Wir mieten {A eine Wohnung}.","Er mietet {A ein Auto}."],
+["misslingen","D","Der Kuchen ist {D mir} misslungen.","Der Versuch misslang {D ihm}."],
+["misstrauen","D","Ich misstraue {D ihm}.","Sie misstraut {D der Werbung}."],
+["mitbringen","DA|A","Ich bringe {D dir} {A etwas} mit.","Bring bitte {A Brot} mit!"],
+["mitkommen","N","Kommst du mit?","Sie kommt morgen mit.",[["zu + Dat","Kommst du mit zu {D dem Konzert}?"]]],
+["mitnehmen","A","Nimm {A einen Schirm} mit!","Kannst du {A mich} mitnehmen?"],
+["mitteilen","DA","Ich teile {D Ihnen} {A meine neue Adresse} mit.","Wir teilen {D den Eltern} {A die Ergebnisse} mit."],
+["mögen","A","Ich mag {A dich}.","Magst du {A Schokolade}?",[],"Auch als Modalverb in der Form „möchte“: Ich möchte {A einen Tee}."],
+["müssen","N","Ich muss jetzt gehen.","Du musst das nicht tun.",[],"Modalverb – steht meist mit einem Infinitiv am Satzende."],
+["nachdenken","N","Lass mich kurz nachdenken.","Er denkt viel nach.",[["über + Akk","Ich denke über {A dein Angebot} nach."]]],
+["nachgeben","D|N","Ich gebe {D dir} nach.","Das Eis gibt nach."],
+["nachlaufen","D","Der Hund läuft {D mir} nach.","Lauf {D ihm} nicht nach!"],
+["sich nähern","rAD","Der Sturm nähert {A sich} {D der Küste}.","Wir nähern {A uns} {D dem Ziel}."],
+["nehmen","A|rD","Ich nehme {A den Bus}.","Nimm {D dir} {A ein Stück Kuchen}!"],
+["neigen","N","Er neigt zum Übertreiben.","Die Mauer neigt sich zur Seite.",[["zu + Dat","Sie neigt zu {D Kopfschmerzen}."]]],
+["nennen","AA|A","Sie nennen {A ihn} {A Max}.","Nenn {A drei Beispiele}!"],
+["nützen","D","Das nützt {D mir} nichts.","Die Erfahrung nützt {D ihr} im Beruf."],
+["nutzen","A","Wir nutzen {A die Zeit}.","Nutze {A die Chance}!"],
+["öffnen","A|DA","Öffne bitte {A das Fenster}!","Er öffnet {D mir} {A die Tür}."],
+["opfern","A|rA","Sie opfert {A ihre Freizeit}.","Er opfert {A sich} für die Familie."],
+["ordnen","A","Ich ordne {A meine Papiere}.","Ordne {A die Wörter} alphabetisch."],
+["packen","A","Ich packe {A den Koffer}.","Hast du {A alles} gepackt?"],
+["parken","A|N","Ich parke {A das Auto} vor dem Haus.","Hier darf man nicht parken."],
+["passen","D","Die Hose passt {D mir}.","Passt {D dir} Montag?",[["zu + Dat","Die Farbe passt zu {D dir}."],["auf + Akk","Ich passe auf {A die Kinder} auf."]]],
+["passieren","D","Was ist {D dir} passiert?","Das kann {D jedem} passieren."],
+["pflanzen","A","Wir pflanzen {A einen Baum}.","Sie pflanzt {A Tomaten}."],
+["pflegen","A","Sie pflegt {A ihre kranke Mutter}.","Ich pflege {A meinen Garten}."],
+["planen","A","Wir planen {A eine Reise}.","Hast du {A alles} geplant?"],
+["plaudern","N","Wir plaudern gern.","Sie plaudern im Café.",[["mit + Dat","Ich plaudere mit {D der Nachbarin}."],["über + Akk","Wir plaudern über {A das Wetter}."]]],
+["probieren","A","Probier {A den Kuchen}!","Ich probiere {A das Kleid} an."],
+["protestieren","N","Die Studenten protestieren.","Alle protestierten laut.",[["gegen + Akk","Sie protestieren gegen {A die neuen Gesetze}."]]],
+["prüfen","A","Der Lehrer prüft {A die Schüler}.","Bitte prüfen Sie {A die Rechnung}."],
+["putzen","A|rD","Ich putze {A die Fenster}.","Putz {D dir} {A die Zähne}!"],
+["raten","DA|D|N","Ich rate {D dir}, früher loszufahren.","Rate mal!",[["zu + Dat","Ich rate {D dir} zu {D mehr Geduld}."]]],
+["rauchen","N|A","Er raucht nicht mehr.","Sie raucht {A eine Zigarette}."],
+["reagieren","N","Er reagiert nicht.","Wie hat sie reagiert?",[["auf + Akk","Sie reagiert auf {A meine Nachricht}."]]],
+["rechnen","N","Das Kind rechnet gut.","Wir müssen genau rechnen.",[["mit + Dat","Ich rechne mit {D deiner Hilfe}."]]],
+["reden","N","Wir reden viel.","Er redet zu schnell.",[["mit + Dat","Ich rede mit {D meiner Freundin}."],["über + Akk","Wir reden über {A den Urlaub}."],["von + Dat","Er redet nur von {D seiner Arbeit}."]]],
+["regeln","A","Wir regeln {A das} morgen.","Die Ampel regelt {A den Verkehr}."],
+["regnen","N","Es regnet.","Gestern hat es stark geregnet.",[],"Unpersönliches Verb mit „es“."],
+["reichen","DA|N","Reich {D mir} bitte {A das Brot}.","Das Geld reicht nicht.",[["für + Akk","Das Essen reicht für {A alle}."]]],
+["reinigen","A","Wir reinigen {A den Teppich}.","Bitte reinigen Sie {A die Küche}."],
+["reisen","N","Wir reisen gern.","Sie reist allein.",[["nach + Dat","Wir reisen nach {D Japan}."],["in + Akk","Sie reist in {A die Schweiz}."]]],
+["rennen","N","Die Kinder rennen.","Er ist zum Bus gerannt.",[["zu + Dat","Sie rennt zu {D der Tür}."]]],
+["reparieren","A","Er repariert {A das Fahrrad}.","Kannst du {A die Uhr} reparieren?"],
+["reservieren","DA|A","Ich reserviere {D Ihnen} {A einen Tisch}.","Wir reservieren {A zwei Plätze}."],
+["retten","A","Der Arzt rettet {A das Kind}.","Die Feuerwehr hat {A die Katze} gerettet.",[["vor + Dat","Er rettet {A sie} vor {D dem Feuer}."]]],
+["richten","A|rA","Er richtet {A die Frage} an mich.","Ich richte {A mich} danach.",[["sich nach + Dat","Ich richte mich nach {D dir}."],["an + Akk","Bitte richten Sie Ihre Fragen an {A das Büro}."]]],
+["riechen","A|N","Ich rieche {A den Kaffee}.","Die Blume riecht gut.",[["nach + Dat","Es riecht nach {D frischem Brot}."],["an + Dat","Er riecht an {D der Rose}."]]],
+["riskieren","A","Er riskiert {A sein Leben}.","Ich riskiere {A nichts}."],
+["rufen","A|N","Ruf {A den Arzt}!","Er ruft laut.",[["nach + Dat","Das Kind ruft nach {D seiner Mutter}."],["um + Akk","Sie ruft um {A Hilfe}."]]],
+["sich rühmen","rG","Er rühmt {A sich} {G seiner Erfolge}.","Die Stadt rühmt {A sich} {G ihrer Geschichte}.",[],"Genitivverb (gehoben): sich einer Sache rühmen = damit angeben."],
+["sagen","DA|A","Sag {D mir} {A die Wahrheit}!","Was hast du gesagt?",[["zu + Dat","Was sagst du zu {D diesem Plan}?"],["über + Akk","Er sagt nichts über {A seine Pläne}."]]],
+["sammeln","A","Er sammelt {A Briefmarken}.","Wir sammeln {A Geld} für die Schule."],
+["schaden","D","Rauchen schadet {D der Gesundheit}.","Ein bisschen Sport schadet {D dir} nicht."],
+["schaffen","A","Ich schaffe {A das}!","Hast du {A die Prüfung} geschafft?"],
+["schämen","rA|rG","Ich schäme {A mich}.","Er schämt {A sich} {G seiner Tat}.",[["sich für + Akk","Sie schämt sich für {A ihren Fehler}."],["sich vor + Dat","Er schämt sich vor {D seinen Freunden}."]],"Gehoben auch mit Genitiv: sich einer Sache schämen."],
+["schätzen","A","Ich schätze {A deine Hilfe}.","Wie alt schätzt du {A ihn}?"],
+["schauen","N","Schau mal!","Sie schaut aus dem Fenster.",[["auf + Akk","Er schaut auf {A die Uhr}."],["nach + Dat","Ich schaue nach {D den Kindern}."]]],
+["scheinen","N|D","Die Sonne scheint.","Das scheint {D mir} richtig."],
+["schenken","DA","Ich schenke {D meiner Mutter} {A Blumen}.","Was schenkst du {D ihm} zum Geburtstag?"],
+["schicken","DA|A","Ich schicke {D dir} {A ein Foto}.","Sie schickt {A ein Paket}.",[["an + Akk","Ich schicke {A den Brief} an {A die Behörde}."]]],
+["schieben","A","Er schiebt {A den Kinderwagen}.","Schieb {A den Tisch} zur Seite!"],
+["schimpfen","N","Die Mutter schimpft.","Er schimpft laut.",[["mit + Dat","Sie schimpft mit {D den Kindern}."],["über + Akk","Er schimpft über {A die Politik}."]]],
+["schlafen","N","Ich schlafe acht Stunden.","Hast du gut geschlafen?"],
+["schlagen","A","Er schlägt {A den Ball}.","Unsere Mannschaft hat {A den Gegner} geschlagen."],
+["schließen","A|N","Schließ bitte {A die Tür}!","Das Geschäft schließt um sechs."],
+["schmecken","D","Das Essen schmeckt {D mir}.","Schmeckt {D dir} der Kuchen?",[["nach + Dat","Die Suppe schmeckt nach {D Knoblauch}."]]],
+["schmeicheln","D","Er schmeichelt {D der Chefin}.","Das schmeichelt {D mir}."],
+["schneiden","A|rD","Ich schneide {A das Brot}.","Ich habe {D mir} {A die Haare} geschnitten."],
+["schneien","N","Es schneit.","Gestern hat es geschneit.",[],"Unpersönliches Verb mit „es“."],
+["schreiben","DA|A","Ich schreibe {D dir} {A einen Brief}.","Sie schreibt {A ein Buch}.",[["an + Akk","Ich schreibe an {A meine Freundin}."],["über + Akk","Er schreibt über {A seine Reise}."]]],
+["schreien","N","Das Baby schreit.","Schrei nicht so!",[["nach + Dat","Er schreit nach {D Hilfe}."]]],
+["schulden","DA","Du schuldest {D mir} {A zehn Euro}.","Ich schulde {D dir} {A eine Erklärung}."],
+["schützen","A|rA","Die Jacke schützt {A mich}.","Schütze {A dich}!",[["vor + Dat","Die Creme schützt {A die Haut} vor {D der Sonne}."]]],
+["schweigen","N","Er schweigt.","Sie hat lange geschwiegen.",[["über + Akk","Er schweigt über {A die Sache}."]]],
+["schwimmen","N","Ich schwimme gern.","Wir sind im See geschwommen."],
+["schwören","DA","Ich schwöre {D dir} {A ewige Treue}.","Er schwört, die Wahrheit zu sagen."],
+["sehen","A","Ich sehe {A den Berg}.","Hast du {A den Film} gesehen?"],
+["sein","NN|N","Ich bin {N Lehrerin}.","Das ist {N mein Bruder}.",[],"Gleichsetzung: Nach „sein“ steht wieder der Nominativ – nie der Akkusativ."],
+["senden","DA|A","Ich sende {D Ihnen} {A die Unterlagen}.","Das Radio sendet {A Nachrichten}."],
+["setzen","A|rA","Ich setze {A das Kind} auf den Stuhl.","Setz {A dich}!"],
+["siezen","A","Ich sieze {A meinen Chef}.","Wir siezen {A uns}."],
+["singen","A|N","Sie singt {A ein Lied}.","Er singt im Chor."],
+["sitzen","N","Ich sitze am Fenster.","Wir haben lange gesessen."],
+["sollen","N","Du sollst pünktlich sein.","Was soll ich tun?",[],"Modalverb – steht meist mit einem Infinitiv am Satzende."],
+["sorgen","N|rA","Ich sorge dafür.","Sorg {A dich} nicht!",[["für + Akk","Sie sorgt für {A die Kinder}."],["sich um + Akk","Er sorgt sich um {A seine Mutter}."]]],
+["sparen","A|N","Ich spare {A Geld}.","Wir müssen sparen.",[["für + Akk","Sie spart für {A ein Auto}."],["auf + Akk","Er spart auf {A einen Urlaub}."]]],
+["speichern","A","Speichere {A die Datei}!","Ich habe {A deine Nummer} gespeichert."],
+["spenden","A","Sie spendet {A Blut}.","Wir spenden {A Kleidung}.",[["für + Akk","Er spendet Geld für {A die Kinder}."],["an + Akk","Wir spenden an {A einen Verein}."]]],
+["spielen","A|N","Wir spielen {A Fußball}.","Die Kinder spielen draußen.",[["mit + Dat","Sie spielt mit {D ihrer Puppe}."],["gegen + Akk","Wir spielen gegen {A die Gäste}."]]],
+["sprechen","A|N","Sie spricht {A drei Sprachen}.","Er spricht leise.",[["mit + Dat","Ich spreche mit {D dem Chef}."],["über + Akk","Wir sprechen über {A das Problem}."],["von + Dat","Er spricht von {D seiner Kindheit}."]]],
+["spülen","A","Ich spüle {A das Geschirr}.","Er spült {A die Gläser}."],
+["stammen","N","Das Wort stammt aus dem Lateinischen.","Wo stammst du her?",[["aus + Dat","Sie stammt aus {D einer kleinen Stadt}."],["von + Dat","Das Bild stammt von {D einem bekannten Maler}."]]],
+["starten","A|N","Ich starte {A den Motor}.","Das Rennen startet um zehn."],
+["stattfinden","N","Das Konzert findet morgen statt.","Wo findet der Kurs statt?"],
+["staunen","N","Die Kinder staunen.","Da staunst du, oder?",[["über + Akk","Wir staunen über {A die Aussicht}."]]],
+["stecken","A|N","Ich stecke {A den Schlüssel} ins Schloss.","Der Schlüssel steckt."],
+["stehen","N|D","Die Vase steht auf dem Tisch.","Das Kleid steht {D dir} gut.",[["auf + Akk","Ich stehe auf {A Jazz}."],["zu + Dat","Ich stehe zu {D meinem Wort}."]]],
+["stehlen","DA|A","Man hat {D mir} {A das Fahrrad} gestohlen.","Er stiehlt {A Geld}."],
+["steigen","N","Die Preise steigen.","Wir steigen auf den Berg.",[["auf + Akk","Sie steigt auf {A die Leiter}."],["in + Akk","Er steigt in {A das Auto}."]]],
+["stellen","A|rA","Ich stelle {A die Vase} auf den Tisch.","Stell {A dich} hinten an!",[["sich vor + Akk","Er stellt sich vor {A die Klasse}."]]],
+["sterben","N","Die Pflanze ist gestorben.","Er starb mit 90 Jahren.",[["an + Dat","Er starb an {D einem Herzinfarkt}."]]],
+["stimmen","N|A","Das stimmt!","Der Musiker stimmt {A die Gitarre}.",[["für + Akk","Wir stimmen für {A den Vorschlag}."],["gegen + Akk","Sie stimmt gegen {A das Gesetz}."]]],
+["stören","A","Störe {A mich} nicht!","Der Lärm stört {A die Nachbarn}.",[["bei + Dat","Er stört {A mich} bei {D der Arbeit}."]]],
+["stoßen","A|N","Er stößt {A mich}.","Ich habe mir den Kopf gestoßen.",[["auf + Akk","Wir stoßen auf {A ein Problem}."],["gegen + Akk","Sie stößt gegen {A den Tisch}."]]],
+["streicheln","A","Sie streichelt {A die Katze}.","Er streichelt {A das Baby}."],
+["streichen","A","Wir streichen {A die Wand}.","Ich streiche {A Butter} aufs Brot."],
+["streiten","rA|N","Die Kinder streiten {A sich}.","Hört auf zu streiten!",[["sich mit + Dat","Ich streite mich mit {D meinem Bruder}."],["über + Akk","Sie streiten über {A Politik}."],["um + Akk","Sie streiten um {A das Erbe}."]]],
+["studieren","A|N","Sie studiert {A Medizin}.","Er studiert in Wien."],
+["suchen","A","Ich suche {A meine Brille}.","Sie sucht {A eine Wohnung}.",[["nach + Dat","Er sucht nach {D einer Lösung}."]]],
+["tanzen","N|A","Wir tanzen gern.","Sie tanzen {A einen Walzer}."],
+["tauschen","A","Wir tauschen {A die Plätze}.","Er tauscht {A Briefmarken}.",[["gegen + Akk","Ich tausche {A mein Buch} gegen {A deine CD}."],["mit + Dat","Ich tausche mit {D dir}."]]],
+["teilen","A|DA","Wir teilen {A die Pizza}.","Der Lehrer teilt {D den Schülern} {A die Ergebnisse} mit.",[["mit + Dat","Ich teile {A das Zimmer} mit {D meiner Schwester}."],["durch + Akk","Teile {A zehn} durch {A zwei}."]]],
+["teilnehmen","N","Ich nehme gern teil.","Wie viele haben teilgenommen?",[["an + Dat","Sie nimmt an {D dem Kurs} teil."]]],
+["telefonieren","N","Er telefoniert gerade.","Wir telefonieren jeden Abend.",[["mit + Dat","Ich telefoniere mit {D meiner Mutter}."]]],
+["testen","A","Wir testen {A das neue Gerät}.","Der Lehrer testet {A die Schüler}."],
+["töten","A","Die Katze tötet {A die Maus}.","Er hat {A niemanden} getötet."],
+["tragen","A","Sie trägt {A ein rotes Kleid}.","Kannst du {A die Tasche} tragen?"],
+["transportieren","A","Der Lkw transportiert {A Holz}.","Wir transportieren {A die Möbel}."],
+["trauen","D|rA","Ich traue {D ihm} nicht.","Ich traue {A mich} nicht.",[],"jemandem (Dat) trauen = vertrauen; sich trauen = den Mut haben."],
+["trauern","N","Die Familie trauert.","Sie hat lange getrauert.",[["um + Akk","Sie trauert um {A ihren Vater}."]]],
+["träumen","N","Ich habe schlecht geträumt.","Sie träumt oft.",[["von + Dat","Er träumt von {D einem Haus am Meer}."]]],
+["treffen","A|rA","Ich treffe {A meinen Freund}.","Wir treffen {A uns} um acht.",[["sich mit + Dat","Ich treffe mich mit {D Freunden}."]]],
+["treiben","A","Er treibt {A Sport}.","Der Wind treibt {A die Blätter}."],
+["trennen","A|rA","Wir trennen {A den Müll}.","Sie haben {A sich} getrennt.",[["sich von + Dat","Sie trennt sich von {D ihrem Mann}."]]],
+["trinken","A|N","Ich trinke {A einen Tee}.","Er trinkt zu wenig."],
+["trösten","A","Die Mutter tröstet {A das Kind}.","Ich tröste {A meine Freundin}."],
+["trotzen","D","Sie trotzt {D dem Sturm}.","Er trotzt {D allen Problemen}."],
+["tun","A|D","Ich tue {A mein Bestes}.","Das tut {D mir} leid.",[],"Feste Wendungen mit Dativ: Es tut {D mir} leid. Der Kopf tut {D mir} weh."],
+["üben","A|N","Ich übe {A Klavier}.","Du musst mehr üben."],
+["überführen","AG","Die Polizei überführte {A den Täter} {G des Mordes}.","Man überführte {A ihn} {G der Lüge}.",[],"Genitivverb: jemanden (Akk) einer Sache (Gen) überführen."],
+["überlassen","DA","Ich überlasse {D dir} {A die Entscheidung}.","Sie überlässt {D ihm} {A das Zimmer}."],
+["überlegen","rD|A|N","Ich überlege {D mir} {A das} noch.","Er überlegt lange."],
+["übernehmen","A","Sie übernimmt {A die Firma}.","Ich übernehme {A die Verantwortung}."],
+["überraschen","A","Wir überraschen {A Oma}.","Das Ergebnis hat {A mich} überrascht."],
+["überreden","A","Er überredet {A mich}.","Sie lässt {A sich} nicht überreden.",[["zu + Dat","Sie überredet {A mich} zu {D einem Ausflug}."]]],
+["übersetzen","A","Ich übersetze {A den Text}.","Kannst du {A das} übersetzen?",[["aus + Dat","Er übersetzt aus {D dem Englischen}."],["in + Akk","Sie übersetzt {A den Brief} in {A die deutsche Sprache}."]]],
+["überweisen","DA|A","Ich überweise {D dir} {A das Geld}.","Bitte überweisen Sie {A den Betrag}."],
+["überzeugen","A","Du hast {A mich} überzeugt.","Der Film überzeugt {A die Kritiker}.",[["von + Dat","Er überzeugt {A sie} von {D seiner Idee}."]]],
+["umarmen","A","Sie umarmt {A ihre Freundin}.","Darf ich {A dich} umarmen?"],
+["umsteigen","N","Wir müssen in Linz umsteigen.","Wo steige ich um?",[["in + Akk","Sie steigt in {A die U-Bahn} um."]]],
+["umziehen","N|rA","Wir ziehen nächsten Monat um.","Ich ziehe {A mich} schnell um.",[["nach + Dat","Sie zieht nach {D Wien} um."],["in + Akk","Wir ziehen in {A eine größere Wohnung} um."]]],
+["unterbrechen","A","Unterbrich {A mich} nicht!","Er unterbricht {A die Sitzung}."],
+["unterhalten","rA|A","Wir unterhalten {A uns} gut.","Der Clown unterhält {A die Kinder}.",[["sich mit + Dat","Ich unterhalte mich mit {D dem Nachbarn}."],["sich über + Akk","Wir unterhalten uns über {A Bücher}."]]],
+["unterliegen","D","Die Mannschaft unterlag {D dem Gegner}.","Das unterliegt {D der Schweigepflicht}."],
+["unterrichten","A|N","Sie unterrichtet {A Deutsch}.","Er unterrichtet {A Kinder}.",[["über + Akk","Wir unterrichten {A Sie} über {A die Änderungen}."]]],
+["untersagen","DA","Der Arzt untersagt {D ihm} {A das Rauchen}.","Man untersagte {D uns} {A den Zutritt}."],
+["unterscheiden","A|rA","Ich kann {A die Zwillinge} nicht unterscheiden.","Die beiden unterscheiden {A sich} kaum.",[["von + Dat","Man muss {A das eine} von {D dem anderen} unterscheiden."],["sich in + Dat","Sie unterscheiden sich in {D der Farbe}."]]],
+["unterschreiben","A","Bitte unterschreiben Sie {A den Vertrag}.","Ich habe {A das Formular} unterschrieben."],
+["unterstützen","A","Ich unterstütze {A dich}.","Die Stadt unterstützt {A den Verein}.",[["bei + Dat","Sie unterstützt {A mich} bei {D dem Umzug}."]]],
+["untersuchen","A","Der Arzt untersucht {A den Patienten}.","Die Polizei untersucht {A den Fall}."],
+["verabreden","rA","Wir verabreden {A uns} für Freitag.","Ich bin heute verabredet.",[["sich mit + Dat","Ich verabrede mich mit {D meiner Freundin}."]]],
+["verabschieden","rA|A","Ich verabschiede {A mich}.","Wir verabschieden {A die Gäste}.",[["sich von + Dat","Sie verabschiedet sich von {D allen}."]]],
+["verändern","A|rA","Das Erlebnis hat {A ihn} verändert.","Die Stadt verändert {A sich}."],
+["verbessern","A|rA","Ich verbessere {A meine Fehler}.","Dein Deutsch hat {A sich} verbessert."],
+["verbieten","DA","Der Arzt verbietet {D ihm} {A den Alkohol}.","Meine Eltern verbieten {D mir} {A das}."],
+["verbinden","A","Die Brücke verbindet {A die Stadtteile}.","Der Arzt verbindet {A die Wunde}.",[["mit + Dat","Ich verbinde {A das Handy} mit {D dem Computer}."]]],
+["verbrauchen","A","Das Auto verbraucht {A viel Benzin}.","Wir verbrauchen {A zu viel Strom}."],
+["verbringen","A","Wir verbringen {A den Urlaub} am Meer.","Sie verbringt {A viel Zeit} im Garten."],
+["verdächtigen","AG|A","Man verdächtigt {A ihn} {G des Diebstahls}.","Die Polizei verdächtigt {A den Nachbarn}.",[],"Genitivverb: jemanden (Akk) einer Sache (Gen) verdächtigen."],
+["verdanken","DA","Ich verdanke {D dir} {A alles}.","Sie verdankt {D ihrem Lehrer} {A ihren Erfolg}."],
+["verdienen","A","Sie verdient {A gut}.","Du hast {A eine Pause} verdient."],
+["vereinbaren","A","Wir vereinbaren {A einen Termin}.","Sie haben {A einen Preis} vereinbart.",[["mit + Dat","Ich vereinbare das mit {D der Chefin}."]]],
+["vergeben","DA","Ich vergebe {D dir} {A deinen Fehler}.","Die Stelle ist schon vergeben.",[["an + Akk","Der Preis wird an {A eine Schülerin} vergeben."]]],
+["vergessen","A","Ich habe {A deinen Namen} vergessen.","Vergiss {A den Schlüssel} nicht!"],
+["sich vergewissern","rG","Ich vergewissere {A mich} {G der Fakten}.","Sie vergewisserte {A sich}, dass die Tür zu war.",[],"Genitivverb (gehoben): sich einer Sache vergewissern = etwas genau prüfen."],
+["vergleichen","A","Vergleiche {A die beiden Texte}!","Wir vergleichen {A die Preise}.",[["mit + Dat","Vergleich {A dich} nicht mit {D anderen}!"]]],
+["verhaften","A","Die Polizei verhaftet {A den Dieb}.","Man hat {A ihn} verhaftet."],
+["verheimlichen","DA","Er verheimlicht {D ihr} {A die Wahrheit}.","Was verheimlichst du {D mir}?"],
+["verhindern","A","Wir müssen {A den Unfall} verhindern.","Das hat {A Schlimmeres} verhindert."],
+["verkaufen","DA|A","Ich verkaufe {D dir} {A mein Fahrrad}.","Sie verkauft {A Obst} auf dem Markt.",[["an + Akk","Er verkauft {A das Haus} an {A eine Familie}."]]],
+["verlangen","A","Er verlangt {A eine Erklärung}.","Was verlangen Sie für das Auto?",[["von + Dat","Das kannst du nicht von {D mir} verlangen."],["nach + Dat","Er verlangt nach {D dem Chef}."]]],
+["verlassen","A|rA","Er verlässt {A das Haus}.","Sie hat {A ihren Mann} verlassen.",[["sich auf + Akk","Ich verlasse mich auf {A dich}."]]],
+["verletzen","A|rA","Er hat {A mich} verletzt.","Ich habe {A mich} verletzt."],
+["verlieben","rA","Ich habe {A mich} verliebt.","Sie ist verliebt.",[["sich in + Akk","Er verliebt sich in {A seine Kollegin}."]]],
+["verlieren","A","Ich habe {A meinen Schlüssel} verloren.","Wir haben {A das Spiel} verloren.",[["gegen + Akk","Wir verlieren gegen {A die andere Mannschaft}."]]],
+["vermieten","DA|A","Sie vermietet {D uns} {A die Wohnung}.","Er vermietet {A Zimmer}.",[["an + Akk","Wir vermieten {A das Haus} an {A Studenten}."]]],
+["vermissen","A","Ich vermisse {A dich}.","Sie vermisst {A ihre Heimat}.",[],"Vergleiche: Ich vermisse {A dich} = Du fehlst {D mir}."],
+["verraten","DA|A","Verrat {D mir} {A dein Geheimnis}!","Er hat {A seinen Freund} verraten."],
+["verreisen","N","Wir verreisen im Sommer.","Sie ist verreist."],
+["verschieben","A","Wir verschieben {A den Termin}.","Kannst du {A das Treffen} verschieben?",[["auf + Akk","Wir verschieben das auf {A nächste Woche}."]]],
+["verschweigen","DA","Er verschweigt {D uns} {A etwas}.","Sie hat {D ihm} {A die Wahrheit} verschwiegen."],
+["verschwinden","N","Die Katze ist verschwunden.","Verschwinde!",[["aus + Dat","Er verschwindet aus {D dem Zimmer}."]]],
+["versichern","A|DA|AG","Ich versichere {A mein Auto}.","Ich versichere {D dir}, dass alles gut wird.",[["gegen + Akk","Wir versichern {A das Haus} gegen {A Feuer}."]],"Gehoben mit Genitiv: Sie versicherte {A ihn} {G ihrer Unterstützung}."],
+["versorgen","A","Sie versorgt {A die Familie}.","Der Arzt versorgt {A die Wunde}.",[["mit + Dat","Wir versorgen {A die Stadt} mit {D Wasser}."]]],
+["verspäten","rA","Der Zug hat {A sich} verspätet.","Entschuldigung, ich habe {A mich} verspätet."],
+["versprechen","DA","Ich verspreche {D dir} {A alles}.","Er verspricht {D ihr}, pünktlich zu sein."],
+["verstehen","A|rA","Ich verstehe {A dich}.","Verstehst du {A die Frage}?",[["sich mit + Dat","Ich verstehe mich gut mit {D meiner Schwester}."],["unter + Dat","Was verstehst du unter {D Glück}?"],["von + Dat","Er versteht viel von {D Autos}."]]],
+["versuchen","A","Versuch {A es} noch einmal!","Ich versuche, pünktlich zu sein."],
+["verteidigen","A|rA","Er verteidigt {A seine Meinung}.","Sie verteidigt {A sich}.",[["gegen + Akk","Er verteidigt {A sich} gegen {A die Vorwürfe}."]]],
+["vertrauen","D","Ich vertraue {D dir}.","Sie vertraut {D ihrem Arzt}.",[["auf + Akk","Ich vertraue auf {A dein Wort}."]]],
+["vertreten","A","Sie vertritt {A ihre Kollegin}.","Er vertritt {A die Firma}."],
+["verursachen","A","Der Sturm verursacht {A große Schäden}.","Wer hat {A den Unfall} verursacht?"],
+["verwechseln","A","Ich verwechsle immer {A die Wörter}.","Sie hat {A die Namen} verwechselt.",[["mit + Dat","Ich verwechsle {A dich} mit {D deiner Schwester}."]]],
+["verweigern","DA|A","Man verweigert {D ihm} {A die Einreise}.","Er verweigert {A die Aussage}."],
+["verweisen","A|AG","Er verweist {A mich} an die Kollegin.","Man verwies {A ihn} {G des Landes}.",[["auf + Akk","Ich verweise auf {A den Vertrag}."],["an + Akk","Sie verweist {A mich} an {A den Chef}."]],"Gehoben mit Genitiv: jemanden des Landes / der Schule verweisen = hinauswerfen."],
+["verwenden","A","Ich verwende {A frisches Gemüse}.","Wofür verwendest du {A das}?",[["für + Akk","Wir verwenden das Geld für {A die Reise}."]]],
+["verzeihen","DA|D","Verzeih {D mir}!","Ich verzeihe {D dir} {A alles}."],
+["verzichten","N","Ich verzichte gern.","Er kann nicht verzichten.",[["auf + Akk","Sie verzichtet auf {A Zucker}."]]],
+["vorbereiten","A|rA","Ich bereite {A das Essen} vor.","Hast du {A dich} gut vorbereitet?",[["sich auf + Akk","Sie bereitet sich auf {A die Prüfung} vor."]]],
+["vorkommen","D|N","Das kommt {D mir} komisch vor.","So etwas kommt oft vor."],
+["vorlesen","DA|A","Ich lese {D dem Kind} {A eine Geschichte} vor.","Er liest {A den Text} laut vor."],
+["vorschlagen","DA|A","Ich schlage {D dir} {A einen Kompromiss} vor.","Sie schlägt {A einen Spaziergang} vor."],
+["vorstellen","DA|rA|rD","Darf ich {D Ihnen} {A meinen Mann} vorstellen?","Ich stelle {D mir} {A das} schwierig vor.",[],"Ich stelle {A mich} vor (= sage meinen Namen). Ich stelle {D mir} {A etwas} vor (= denke es mir)."],
+["vorwerfen","DA","Er wirft {D mir} {A Faulheit} vor.","Was wirfst du {D ihr} vor?"],
+["vorziehen","DA|A","Ich ziehe {A Tee} {D dem Kaffee} vor.","Wir ziehen {A den Termin} vor."],
+["wachsen","N","Die Pflanze wächst schnell.","Der Junge ist sehr gewachsen."],
+["wagen","A|rA","Er wagt {A den Sprung}.","Ich wage {A mich} nicht hinaus."],
+["wählen","A|N","Wir wählen {A einen neuen Präsidenten}.","Am Sonntag wird gewählt.",[["zwischen + Dat","Du kannst zwischen {D zwei Farben} wählen."]]],
+["wandern","N","Wir wandern gern.","Sie sind auf den Berg gewandert."],
+["warnen","A","Ich warne {A dich}!","Das Radio warnt {A die Autofahrer}.",[["vor + Dat","Er warnt {A uns} vor {D dem Hund}."]]],
+["warten","N","Ich warte schon lange.","Bitte warten Sie hier.",[["auf + Akk","Ich warte auf {A den Bus}."]]],
+["waschen","A|rA|rD","Ich wasche {A die Wäsche}.","Ich wasche {D mir} {A die Hände}."],
+["wechseln","A","Ich wechsle {A das Thema}.","Kannst du {A das Geld} wechseln?"],
+["wecken","A","Weck {A mich} um sieben!","Der Lärm hat {A das Baby} geweckt."],
+["wehren","rA","Er wehrt {A sich}.","Wehr {A dich}!",[["sich gegen + Akk","Sie wehrt sich gegen {A die Vorwürfe}."]]],
+["wehtun","D","Der Kopf tut {D mir} weh.","Hast du {D dir} wehgetan?"],
+["weichen","D","Er wich {D ihr} nicht von der Seite.","Das alte Haus muss {D dem Neubau} weichen."],
+["weinen","N","Das Kind weint.","Warum weinst du?",[["über + Akk","Sie weint über {A den Verlust}."],["um + Akk","Er weint um {A seinen Hund}."]]],
+["weitergeben","DA|A","Gib {D mir} {A die Info} bitte weiter.","Er gibt {A die Nachricht} weiter.",[["an + Akk","Ich gebe das an {A die Kollegen} weiter."]]],
+["wenden","A|rA","Er wendet {A das Auto}.","Bitte wenden!",[["sich an + Akk","Wenden Sie sich an {A die Information}."]]],
+["werden","NN|N","Ich werde {N Ärztin}.","Es wird kalt.",[["zu + Dat","Das Wasser wird zu {D Eis}."]],"„werden“ ist auch Hilfsverb: Ich werde morgen kommen (Futur) – Das Haus wird gebaut (Passiv)."],
+["werfen","A","Er wirft {A den Ball}.","Wirf {A das} nicht weg!",[["nach + Dat","Er wirft einen Stein nach {D dem Hund}."]]],
+["widersetzen","rAD","Er widersetzt {A sich} {D dem Befehl}.","Sie widersetzte {A sich} {D den Regeln}."],
+["widersprechen","D","Ich widerspreche {D dir}.","Das widerspricht {D den Fakten}."],
+["widmen","DA|rAD","Ich widme {D dir} {A dieses Buch}.","Sie widmet {A sich} {D ihren Kindern}."],
+["wiederholen","A","Bitte wiederholen Sie {A den Satz}.","Er wiederholt {A die Klasse}."],
+["wiegen","A|N","Ich wiege {A das Mehl}.","Das Paket wiegt zwei Kilo."],
+["winken","D","Sie winkt {D mir}.","Die Kinder winken {D dem Zug}."],
+["wirken","N","Das Medikament wirkt schnell.","Er wirkt müde.",[["auf + Akk","Die Musik wirkt beruhigend auf {A mich}."]]],
+["wischen","A","Ich wische {A den Boden}.","Er wischt {A den Tisch}."],
+["wissen","A","Ich weiß {A die Antwort}.","Weißt du {A das}?",[["von + Dat","Ich weiß nichts von {D diesem Plan}."],["über + Akk","Was weißt du über {A ihn}?"]]],
+["wohnen","N","Ich wohne in Wien.","Wo wohnst du?",[["in + Dat","Wir wohnen in {D einem Altbau}."],["bei + Dat","Er wohnt bei {D seinen Eltern}."]]],
+["wollen","A|N","Ich will {A ein Eis}.","Wir wollen morgen wandern.",[],"Modalverb – steht meist mit einem Infinitiv am Satzende."],
+["wundern","rA|A","Ich wundere {A mich}.","Das wundert {A mich}.",[["sich über + Akk","Sie wundert sich über {A seine Antwort}."]]],
+["wünschen","DA|rD","Ich wünsche {D dir} {A alles Gute}!","Ich wünsche {D mir} {A ein Fahrrad}."],
+["würdigen","A|AG","Man würdigt {A ihre Arbeit}.","Er würdigte {A mich} {G keines Blickes}.",[],"Gehoben mit Genitiv: jemanden keines Blickes würdigen = ihn ignorieren."],
+["zahlen","A|N","Ich zahle {A die Miete}.","Zahlen, bitte!",[["für + Akk","Wie viel zahlst du für {A die Wohnung}?"]]],
+["zählen","A|N","Ich zähle {A das Geld}.","Das Kind zählt bis zehn.",[["auf + Akk","Ich zähle auf {A dich}."],["zu + Dat","Er zählt zu {D den Besten}."]]],
+["zeichnen","A|N","Sie zeichnet {A ein Pferd}.","Er zeichnet gern."],
+["zeigen","DA","Ich zeige {D dir} {A die Stadt}.","Zeig {D mir} {A dein Foto}!",[["auf + Akk","Er zeigt auf {A das Haus}."]]],
+["zerstören","A","Der Sturm zerstört {A das Dach}.","Der Krieg hat {A die Stadt} zerstört."],
+["ziehen","A|N","Er zieht {A den Wagen}.","Es zieht – mach das Fenster zu!",[["an + Dat","Er zieht an {D dem Seil}."],["nach + Dat","Sie zieht nach {D Berlin}."]]],
+["zögern","N","Er zögert lange.","Zögere nicht!",[["mit + Dat","Sie zögert mit {D der Antwort}."]]],
+["zuhören","D","Hör {D mir} zu!","Die Kinder hören {D der Lehrerin} zu."],
+["zumachen","A","Mach bitte {A die Tür} zu!","Das Geschäft macht um sechs zu."],
+["zunehmen","N","Ich habe zugenommen.","Der Verkehr nimmt zu.",[["an + Dat","Der Sturm nimmt an {D Stärke} zu."]]],
+["zurückgeben","DA","Gib {D mir} {A mein Buch} zurück!","Ich gebe {D dir} {A das Geld} morgen zurück."],
+["zurückkommen","N","Wann kommst du zurück?","Er ist gestern zurückgekommen.",[["aus + Dat","Sie kommt aus {D dem Urlaub} zurück."],["auf + Akk","Ich komme auf {A Ihre Frage} zurück."]]],
+["zusagen","D|A","Die Wohnung sagt {D mir} zu.","Er hat {A seine Teilnahme} zugesagt."],
+["zuschauen","D","Ich schaue {D dir} zu.","Wir schauen {D den Kindern} beim Spielen zu.",[["bei + Dat","Darf ich bei {D dem Training} zuschauen?"]]],
+["zusehen","D","Sie sieht {D mir} beim Kochen zu.","Wir sehen {D den Tänzern} zu."],
+["zustehen","D","Das Geld steht {D dir} zu.","Ihm steht ein Urlaubstag zu."],
+["zustimmen","D","Ich stimme {D dir} zu.","Alle stimmen {D dem Vorschlag} zu."],
+["zutrauen","DA","Ich traue {D dir} {A das} zu.","Das hätte ich {D ihm} nie zugetraut!"],
+["zuvorkommen","D","Sie kam {D mir} zuvor.","Wir müssen {D der Konkurrenz} zuvorkommen."],
+["zweifeln","N","Er zweifelt noch.","Ich habe nie gezweifelt.",[["an + Dat","Sie zweifelt an {D seiner Ehrlichkeit}."]]],
+["zwingen","A","Niemand zwingt {A dich}.","Der Regen zwingt {A uns} zur Pause.",[["zu + Dat","Man zwingt {A ihn} zu {D einer Entscheidung}."]]]
+];
+
+/* Grundformen: [Präsens er/sie/es, Präteritum, Perfekt, Klasse, Partizip I, Partizip II, Beispiel P I, Beispiel P II, Hinweis] – „!“ = gibt es nicht */
+const F = {"abfahren":["fährt ab","fuhr ab","ist abgefahren","u","abfahrend","abgefahren","der abfahrende Zug","der abgefahrene Zug",""],"abfragen":["fragt ab","fragte ab","hat abgefragt","r","abfragend","abgefragt","die abfragende Lehrerin","die abgefragten Vokabeln",""],"abgeben":["gibt ab","gab ab","hat abgegeben","u","abgebend","abgegeben","der abgebende Schüler","das abgegebene Heft",""],"abhängen":["hängt ab","hing ab","hat abgehangen","u","abhängend","abgehangen","die vom Wetter abhängende Entscheidung","!die abgehangene Entscheidung",""],"abholen":["holt ab","holte ab","hat abgeholt","r","abholend","abgeholt","die abholende Mutter","das abgeholte Paket",""],"ablehnen":["lehnt ab","lehnte ab","hat abgelehnt","r","ablehnend","abgelehnt","die ablehnende Antwort","der abgelehnte Antrag",""],"abnehmen":["nimmt ab","nahm ab","hat abgenommen","u","abnehmend","abgenommen","der abnehmende Mond","der abgenommene Verband",""],"abraten":["rät ab","riet ab","hat abgeraten","u","abratend","abgeraten","der abratende Arzt","!der abgeratene Kauf",""],"absagen":["sagt ab","sagte ab","hat abgesagt","r","absagend","abgesagt","die absagende Firma","der abgesagte Termin",""],"abschließen":["schließt ab","schloss ab","hat abgeschlossen","u","abschließend","abgeschlossen","die abschließende Frage","die abgeschlossene Tür",""],"abwaschen":["wäscht ab","wusch ab","hat abgewaschen","u","abwaschend","abgewaschen","der abwaschende Vater","das abgewaschene Geschirr",""],"achten":["achtet","achtete","hat geachtet","r","achtend","geachtet","die auf alles achtende Mutter","der geachtete Bürger",""],"ähneln":["ähnelt","ähnelte","hat geähnelt","r","ähnelnd","geähnelt","die einander ähnelnden Zwillinge","!die geähnelte Mutter",""],"ändern":["ändert","änderte","hat geändert","r","ändernd","geändert","das sich ändernde Wetter","der geänderte Plan",""],"anbieten":["bietet an","bot an","hat angeboten","u","anbietend","angeboten","die anbietende Firma","der angebotene Kaffee",""],"anfangen":["fängt an","fing an","hat angefangen","u","anfangend","angefangen","die gerade anfangende Stunde","die angefangene Arbeit",""],"angehören":["gehört an","gehörte an","hat angehört","r","angehörend","angehört","die dem Verein angehörenden Mitglieder","!die angehörten Mitglieder",""],"angreifen":["greift an","griff an","hat angegriffen","u","angreifend","angegriffen","der angreifende Hund","der angegriffene Briefträger",""],"ankommen":["kommt an","kam an","ist angekommen","u","ankommend","angekommen","der ankommende Zug","der angekommene Gast",""],"anklagen":["klagt an","klagte an","hat angeklagt","r","anklagend","angeklagt","der anklagende Staatsanwalt","der angeklagte Mann",""],"anmelden":["meldet an","meldete an","hat angemeldet","r","anmeldend","angemeldet","die sich anmeldenden Teilnehmer","der angemeldete Besuch",""],"annehmen":["nimmt an","nahm an","hat angenommen","u","annehmend","angenommen","die das Angebot annehmende Firma","das angenommene Angebot",""],"anrufen":["ruft an","rief an","hat angerufen","u","anrufend","angerufen","der anrufende Kunde","die angerufene Nummer",""],"anschauen":["schaut an","schaute an","hat angeschaut","r","anschauend","angeschaut","der mich anschauende Hund","der angeschaute Film",""],"sich anschließen":["schließt sich an","schloss sich an","hat sich angeschlossen","u","sich anschließend","angeschlossen","die sich anschließende Diskussion","das angeschlossene Gerät",""],"ansehen":["sieht an","sah an","hat angesehen","u","ansehend","angesehen","die mich ansehenden Augen","der angesehene Arzt",""],"antworten":["antwortet","antwortete","hat geantwortet","r","antwortend","geantwortet","der antwortende Schüler","!der geantwortete Lehrer",""],"anziehen":["zieht an","zog an","hat angezogen","u","anziehend","angezogen","die sich anziehenden Kinder","das angezogene Kind",""],"applaudieren":["applaudiert","applaudierte","hat applaudiert","r","applaudierend","applaudiert","das applaudierende Publikum","!die applaudierten Musiker",""],"arbeiten":["arbeitet","arbeitete","hat gearbeitet","r","arbeitend","gearbeitet","die arbeitende Bevölkerung","!die gearbeitete Frau",""],"ärgern":["ärgert","ärgerte","hat geärgert","r","ärgernd","geärgert","der sich ärgernde Kunde","die geärgerte Schwester",""],"assistieren":["assistiert","assistierte","hat assistiert","r","assistierend","assistiert","die assistierende Schwester","!der assistierte Arzt",""],"auffallen":["fällt auf","fiel auf","ist aufgefallen","u","auffallend","aufgefallen","das auffallende Kleid","der aufgefallene Fehler",""],"aufhören":["hört auf","hörte auf","hat aufgehört","r","aufhörend","aufgehört","der aufhörende Regen","!der aufgehörte Regen",""],"aufmachen":["macht auf","machte auf","hat aufgemacht","r","aufmachend","aufgemacht","der die Tür aufmachende Portier","das aufgemachte Fenster",""],"aufpassen":["passt auf","passte auf","hat aufgepasst","r","aufpassend","aufgepasst","die aufpassende Oma","!die aufgepassten Kinder",""],"aufräumen":["räumt auf","räumte auf","hat aufgeräumt","r","aufräumend","aufgeräumt","die aufräumende Mutter","das aufgeräumte Zimmer",""],"aufstehen":["steht auf","stand auf","ist aufgestanden","u","aufstehend","aufgestanden","die früh aufstehenden Bäcker","!die aufgestandenen Bäcker",""],"aufwachen":["wacht auf","wachte auf","ist aufgewacht","r","aufwachend","aufgewacht","das aufwachende Baby","das gerade aufgewachte Baby",""],"ausfüllen":["füllt aus","füllte aus","hat ausgefüllt","r","ausfüllend","ausgefüllt","der ausfüllende Kunde","das ausgefüllte Formular",""],"ausgeben":["gibt aus","gab aus","hat ausgegeben","u","ausgebend","ausgegeben","die ausgebende Bank","das ausgegebene Geld",""],"ausleihen":["leiht aus","lieh aus","hat ausgeliehen","u","ausleihend","ausgeliehen","die ausleihende Bibliothek","das ausgeliehene Buch",""],"ausmachen":["macht aus","machte aus","hat ausgemacht","r","ausmachend","ausgemacht","die das Licht ausmachende Mutter","das ausgemachte Licht",""],"ausruhen":["ruht sich aus","ruhte sich aus","hat sich ausgeruht","r","sich ausruhend","ausgeruht","die sich ausruhenden Wanderer","der ausgeruhte Fahrer",""],"aussehen":["sieht aus","sah aus","hat ausgesehen","u","aussehend","ausgesehen","der gut aussehende Mann","!der ausgesehene Mann",""],"aussteigen":["steigt aus","stieg aus","ist ausgestiegen","u","aussteigend","ausgestiegen","die aussteigenden Fahrgäste","die ausgestiegenen Fahrgäste",""],"aussuchen":["sucht aus","suchte aus","hat ausgesucht","r","aussuchend","ausgesucht","die aussuchende Kundin","das ausgesuchte Geschenk",""],"ausweichen":["weicht aus","wich aus","ist ausgewichen","u","ausweichend","ausgewichen","die ausweichende Antwort","!das ausgewichene Reh",""],"backen":["backt / bäckt","backte","hat gebacken","g","backend","gebacken","der backende Bäcker","das gebackene Brot","Im Präsens sind „backt“ und „bäckt“ beide richtig; „backt“ ist heute häufiger."],"baden":["badet","badete","hat gebadet","r","badend","gebadet","die badenden Kinder","das gebadete Baby",""],"bauen":["baut","baute","hat gebaut","r","bauend","gebaut","die bauende Firma","das gebaute Haus",""],"beantworten":["beantwortet","beantwortete","hat beantwortet","r","beantwortend","beantwortet","der Fragen beantwortende Lehrer","die beantwortete Frage",""],"sich bedanken":["bedankt sich","bedankte sich","hat sich bedankt","r","sich bedankend","bedankt","der sich bedankende Gast","!der bedankte Gast",""],"bedeuten":["bedeutet","bedeutete","hat bedeutet","r","bedeutend","bedeutet","die bedeutende Künstlerin","!das bedeutete Wort",""],"bedienen":["bedient","bediente","hat bedient","r","bedienend","bedient","die bedienende Kellnerin","der bediente Gast",""],"bedürfen":["bedarf","bedurfte","hat bedurft","g","bedürfend","bedurft","die der Hilfe bedürfenden Menschen","!die bedurften Menschen",""],"beeilen":["beeilt sich","beeilte sich","hat sich beeilt","r","sich beeilend","beeilt","die sich beeilenden Pendler","!die beeilten Pendler",""],"beeinflussen":["beeinflusst","beeinflusste","hat beeinflusst","r","beeinflussend","beeinflusst","die beeinflussende Werbung","die beeinflussten Kunden",""],"beenden":["beendet","beendete","hat beendet","r","beendend","beendet","die das Treffen beendende Rede","das beendete Spiel",""],"befehlen":["befiehlt","befahl","hat befohlen","u","befehlend","befohlen","der befehlende Offizier","der befohlene Rückzug",""],"befinden":["befindet sich","befand sich","hat sich befunden","u","sich befindend","befunden","die sich im Zentrum befindende Bank","!die befundene Bank",""],"befreien":["befreit","befreite","hat befreit","r","befreiend","befreit","die befreiende Wirkung","die befreite Katze",""],"begegnen":["begegnet","begegnete","ist begegnet","r","begegnend","begegnet","die mir begegnende Nachbarin","!die begegnete Nachbarin",""],"beginnen":["beginnt","begann","hat begonnen","u","beginnend","begonnen","die beginnende Stunde","die begonnene Arbeit",""],"begleiten":["begleitet","begleitete","hat begleitet","r","begleitend","begleitet","die begleitende Mutter","die begleitete Gruppe",""],"begreifen":["begreift","begriff","hat begriffen","u","begreifend","begriffen","der schnell begreifende Schüler","die begriffene Regel",""],"begrüßen":["begrüßt","begrüßte","hat begrüßt","r","begrüßend","begrüßt","die begrüßende Lehrerin","die begrüßten Gäste",""],"behalten":["behält","behielt","hat behalten","u","behaltend","behalten","der das Geld behaltende Finder","das behaltene Wechselgeld",""],"behandeln":["behandelt","behandelte","hat behandelt","r","behandelnd","behandelt","der behandelnde Arzt","der behandelte Patient",""],"behaupten":["behauptet","behauptete","hat behauptet","r","behauptend","behauptet","die das Gegenteil behauptende Zeugin","die behauptete Tatsache",""],"beibringen":["bringt bei","brachte bei","hat beigebracht","g","beibringend","beigebracht","die mir das Schwimmen beibringende Lehrerin","das beigebrachte Wissen",""],"beißen":["beißt","biss","hat gebissen","u","beißend","gebissen","der beißende Hund","der gebissene Junge",""],"beistehen":["steht bei","stand bei","hat beigestanden","u","beistehend","beigestanden","der mir beistehende Freund","!der beigestandene Freund",""],"beitragen":["trägt bei","trug bei","hat beigetragen","u","beitragend","beigetragen","die beitragenden Mitglieder","der beigetragene Teil",""],"bekämpfen":["bekämpft","bekämpfte","hat bekämpft","r","bekämpfend","bekämpft","die die Armut bekämpfende Organisation","die bekämpfte Krankheit",""],"bekommen":["bekommt","bekam","hat bekommen","u","bekommend","bekommen","der ein Geschenk bekommende Junge","das bekommene Geschenk",""],"beleidigen":["beleidigt","beleidigte","hat beleidigt","r","beleidigend","beleidigt","die beleidigenden Worte","der beleidigte Kollege",""],"bemerken":["bemerkt","bemerkte","hat bemerkt","r","bemerkend","bemerkt","der den Fehler bemerkende Lehrer","der bemerkte Fehler",""],"bemühen":["bemüht sich","bemühte sich","hat sich bemüht","r","sich bemühend","bemüht","die sich bemühende Schülerin","die bemühte Schülerin",""],"beneiden":["beneidet","beneidete","hat beneidet","r","beneidend","beneidet","die ihn beneidenden Kollegen","die beneidete Freundin",""],"benötigen":["benötigt","benötigte","hat benötigt","r","benötigend","benötigt","die Hilfe benötigenden Menschen","die benötigten Unterlagen",""],"benutzen":["benutzt","benutzte","hat benutzt","r","benutzend","benutzt","der das Gerät benutzende Kunde","das benutzte Handtuch",""],"beobachten":["beobachtet","beobachtete","hat beobachtet","r","beobachtend","beobachtet","die beobachtende Katze","der beobachtete Vogel",""],"beraten":["berät","beriet","hat beraten","u","beratend","beraten","die beratende Verkäuferin","die beratene Kundin",""],"berauben":["beraubt","beraubte","hat beraubt","r","beraubend","beraubt","der die Leute beraubende Dieb","die beraubte Frau",""],"berichten":["berichtet","berichtete","hat berichtet","r","berichtend","berichtet","die berichtende Journalistin","die berichteten Ereignisse",""],"bereuen":["bereut","bereute","hat bereut","r","bereuend","bereut","der bereuende Sünder","die bereute Entscheidung",""],"beruhigen":["beruhigt","beruhigte","hat beruhigt","r","beruhigend","beruhigt","die beruhigende Musik","das beruhigte Baby",""],"beschäftigen":["beschäftigt","beschäftigte","hat beschäftigt","r","beschäftigend","beschäftigt","die mich beschäftigende Frage","die beschäftigten Mitarbeiter",""],"beschließen":["beschließt","beschloss","hat beschlossen","u","beschließend","beschlossen","die beschließende Versammlung","das beschlossene Gesetz",""],"beschreiben":["beschreibt","beschrieb","hat beschrieben","u","beschreibend","beschrieben","die beschreibende Zeugin","der beschriebene Täter",""],"beschuldigen":["beschuldigt","beschuldigte","hat beschuldigt","r","beschuldigend","beschuldigt","der beschuldigende Nachbar","der beschuldigte Mann",""],"beschützen":["beschützt","beschützte","hat beschützt","r","beschützend","beschützt","der beschützende Hund","die beschützten Kinder",""],"beschweren":["beschwert sich","beschwerte sich","hat sich beschwert","r","sich beschwerend","beschwert","der sich beschwerende Kunde","!der beschwerte Kunde",""],"besitzen":["besitzt","besaß","hat besessen","u","besitzend","besessen","die besitzende Familie","!das besessene Grundstück",""],"besprechen":["bespricht","besprach","hat besprochen","u","besprechend","besprochen","die besprechende Gruppe","das besprochene Thema",""],"bestätigen":["bestätigt","bestätigte","hat bestätigt","r","bestätigend","bestätigt","die bestätigende Nachricht","der bestätigte Termin",""],"bestehen":["besteht","bestand","hat bestanden","u","bestehend","bestanden","das bestehende Problem","die bestandene Prüfung",""],"bestellen":["bestellt","bestellte","hat bestellt","r","bestellend","bestellt","der bestellende Gast","die bestellte Pizza",""],"bestrafen":["bestraft","bestrafte","hat bestraft","r","bestrafend","bestraft","der bestrafende Lehrer","der bestrafte Schüler",""],"besuchen":["besucht","besuchte","hat besucht","r","besuchend","besucht","die besuchende Tante","das besuchte Museum",""],"beten":["betet","betete","hat gebetet","r","betend","gebetet","die betenden Menschen","das gebetete Vaterunser",""],"betreten":["betritt","betrat","hat betreten","u","betretend","betreten","die den Raum betretenden Gäste","der betretene Rasen",""],"betrügen":["betrügt","betrog","hat betrogen","u","betrügend","betrogen","der betrügende Händler","die betrogene Frau",""],"beurteilen":["beurteilt","beurteilte","hat beurteilt","r","beurteilend","beurteilt","der beurteilende Lehrer","die beurteilte Arbeit",""],"bewegen":["bewegt","bewegte","hat bewegt","r","bewegend","bewegt","die bewegende Geschichte","die bewegten Bilder","Im Sinn von „veranlassen“ unregelmäßig: Was hat dich bewogen, das zu tun?"],"bewerben":["bewirbt sich","bewarb sich","hat sich beworben","u","sich bewerbend","beworben","die sich bewerbenden Kandidaten","!die beworbenen Kandidaten",""],"beweisen":["beweist","bewies","hat bewiesen","u","beweisend","bewiesen","die die Unschuld beweisenden Fotos","die bewiesene Unschuld",""],"bewundern":["bewundert","bewunderte","hat bewundert","r","bewundernd","bewundert","die bewundernden Blicke","die bewunderte Sängerin",""],"bezahlen":["bezahlt","bezahlte","hat bezahlt","r","bezahlend","bezahlt","der bezahlende Gast","die bezahlte Rechnung",""],"bezichtigen":["bezichtigt","bezichtigte","hat bezichtigt","r","bezichtigend","bezichtigt","der bezichtigende Zeuge","der bezichtigte Kollege",""],"bezweifeln":["bezweifelt","bezweifelte","hat bezweifelt","r","bezweifelnd","bezweifelt","der alles bezweifelnde Kritiker","die bezweifelte Aussage",""],"bieten":["bietet","bot","hat geboten","u","bietend","geboten","der meistbietende Käufer","das gebotene Programm",""],"bilden":["bildet","bildete","hat gebildet","r","bildend","gebildet","die bildende Kunst","der gebildete Mensch",""],"binden":["bindet","band","hat gebunden","u","bindend","gebunden","die bindende Zusage","die gebundenen Schuhe",""],"bitten":["bittet","bat","hat gebeten","u","bittend","gebeten","die bittende Stimme","die gebetene Auskunft",""],"bleiben":["bleibt","blieb","ist geblieben","u","bleibend","geblieben","die bleibenden Erinnerungen","!der gebliebene Gast",""],"blicken":["blickt","blickte","hat geblickt","r","blickend","geblickt","der in die Ferne blickende Mann","!der geblickte See",""],"borgen":["borgt","borgte","hat geborgt","r","borgend","geborgt","der Geld borgende Freund","das geborgte Buch",""],"braten":["brät","briet","hat gebraten","u","bratend","gebraten","die bratenden Würstchen","das gebratene Ei",""],"brauchen":["braucht","brauchte","hat gebraucht","r","brauchend","gebraucht","die Hilfe brauchenden Menschen","das dringend gebrauchte Geld",""],"brechen":["bricht","brach","hat / ist gebrochen","u","brechend","gebrochen","die brechenden Wellen","das gebrochene Bein","„hat gebrochen“ (etwas brechen), „ist gebrochen“ ohne Objekt: Das Eis ist gebrochen."],"brennen":["brennt","brannte","hat gebrannt","g","brennend","gebrannt","das brennende Haus","die gebrannten Mandeln",""],"bringen":["bringt","brachte","hat gebracht","g","bringend","gebracht","der Pakete bringende Postbote","das gebrachte Paket",""],"buchen":["bucht","buchte","hat gebucht","r","buchend","gebucht","die buchende Familie","das gebuchte Zimmer",""],"danken":["dankt","dankte","hat gedankt","r","dankend","gedankt","die dankende Familie","!die gedankten Helfer",""],"dauern":["dauert","dauerte","hat gedauert","r","dauernd","gedauert","die dauernde Störung","!der gedauerte Film",""],"decken":["deckt","deckte","hat gedeckt","r","deckend","gedeckt","die deckende Farbe","der gedeckte Tisch",""],"denken":["denkt","dachte","hat gedacht","g","denkend","gedacht","der denkende Mensch","die gedachte Linie",""],"dienen":["dient","diente","hat gedient","r","dienend","gedient","die dienende Rolle","!der gediente Chef",""],"diskutieren":["diskutiert","diskutierte","hat diskutiert","r","diskutierend","diskutiert","die diskutierenden Schüler","das diskutierte Thema",""],"drehen":["dreht","drehte","hat gedreht","r","drehend","gedreht","die sich drehende Erde","der gedrehte Film",""],"drohen":["droht","drohte","hat gedroht","r","drohend","gedroht","die drohende Gefahr","!der gedrohte Nachbar",""],"drucken":["druckt","druckte","hat gedruckt","r","druckend","gedruckt","der druckende Drucker","das gedruckte Buch",""],"drücken":["drückt","drückte","hat gedrückt","r","drückend","gedrückt","die drückende Hitze","der gedrückte Knopf",""],"dürfen":["darf","durfte","hat gedurft","m","dürfend","gedurft","!der dürfende Schüler","!der gedurfte Schüler","Mit Infinitiv steht im Perfekt der Infinitiv statt „gedurft“: Ich habe nicht kommen dürfen."],"duschen":["duscht","duschte","hat geduscht","r","duschend","geduscht","der duschende Sportler","der frisch geduschte Sportler",""],"duzen":["duzt","duzte","hat geduzt","r","duzend","geduzt","die sich duzenden Kollegen","die geduzte Kollegin",""],"ehren":["ehrt","ehrte","hat geehrt","r","ehrend","geehrt","die ehrende Rede","die geehrten Gäste",""],"eignen":["eignet sich","eignete sich","hat sich geeignet","r","sich eignend","geeignet","das sich eignende Buch","die geeignete Methode",""],"einfallen":["fällt ein","fiel ein","ist eingefallen","u","einfallend","eingefallen","die einfallenden Sonnenstrahlen","!der eingefallene Name",""],"einigen":["einigt sich","einigte sich","hat sich geeinigt","r","sich einigend","geeinigt","die sich einigenden Parteien","!die geeinigten Parteien",""],"einkaufen":["kauft ein","kaufte ein","hat eingekauft","r","einkaufend","eingekauft","die einkaufenden Kunden","die eingekauften Lebensmittel",""],"einladen":["lädt ein","lud ein","hat eingeladen","u","einladend","eingeladen","das einladende Café","die eingeladenen Gäste",""],"einschalten":["schaltet ein","schaltete ein","hat eingeschaltet","r","einschaltend","eingeschaltet","der das Licht einschaltende Mann","das eingeschaltete Licht",""],"einschlafen":["schläft ein","schlief ein","ist eingeschlafen","u","einschlafend","eingeschlafen","das einschlafende Baby","das eingeschlafene Baby",""],"einsetzen":["setzt ein","setzte ein","hat eingesetzt","r","einsetzend","eingesetzt","der einsetzende Regen","die eingesetzten Fenster",""],"einsteigen":["steigt ein","stieg ein","ist eingestiegen","u","einsteigend","eingestiegen","die einsteigenden Fahrgäste","die eingestiegenen Fahrgäste",""],"eintreten":["tritt ein","trat ein","ist eingetreten","u","eintretend","eingetreten","die eintretenden Gäste","der eingetretene Fall",""],"empfangen":["empfängt","empfing","hat empfangen","u","empfangend","empfangen","die empfangende Gastgeberin","die empfangene Nachricht",""],"empfehlen":["empfiehlt","empfahl","hat empfohlen","u","empfehlend","empfohlen","die empfehlende Ärztin","das empfohlene Buch",""],"empören":["empört sich","empörte sich","hat sich empört","r","sich empörend","empört","die empörenden Zustände","die empörten Bürger",""],"enden":["endet","endete","hat geendet","r","endend","geendet","der endende Sommer","!der geendete Sommer",""],"entbehren":["entbehrt","entbehrte","hat entbehrt","r","entbehrend","entbehrt","die jeder Grundlage entbehrende Behauptung","die lang entbehrte Ruhe",""],"entdecken":["entdeckt","entdeckte","hat entdeckt","r","entdeckend","entdeckt","die entdeckenden Kinder","die entdeckte Insel",""],"entfernen":["entfernt","entfernte","hat entfernt","r","entfernend","entfernt","der sich entfernende Zug","der entfernte Fleck",""],"entfliehen":["entflieht","entfloh","ist entflohen","u","entfliehend","entflohen","der dem Alltag entfliehende Mann","der entflohene Häftling",""],"entgegnen":["entgegnet","entgegnete","hat entgegnet","r","entgegnend","entgegnet","die entgegnende Stimme","!die entgegnete Kollegin",""],"entgegenkommen":["kommt entgegen","kam entgegen","ist entgegengekommen","u","entgegenkommend","entgegengekommen","das entgegenkommende Auto","!das entgegengekommene Auto",""],"entgehen":["entgeht","entging","ist entgangen","u","entgehend","entgangen","der entgehende Gewinn","der entgangene Gewinn",""],"entheben":["enthebt","enthob","hat enthoben","u","enthebend","enthoben","die enthebende Behörde","der seines Amtes enthobene Minister",""],"entkommen":["entkommt","entkam","ist entkommen","u","entkommend","entkommen","der entkommende Dieb","der entkommene Dieb",""],"entlassen":["entlässt","entließ","hat entlassen","u","entlassend","entlassen","die entlassende Firma","der entlassene Mitarbeiter",""],"entscheiden":["entscheidet","entschied","hat entschieden","u","entscheidend","entschieden","die entscheidende Frage","die entschiedene Sache",""],"entschuldigen":["entschuldigt","entschuldigte","hat entschuldigt","r","entschuldigend","entschuldigt","der sich entschuldigende Schüler","der entschuldigte Schüler",""],"sich entsinnen":["entsinnt sich","entsann sich","hat sich entsonnen","u","sich entsinnend","entsonnen","der sich entsinnende Großvater","!der entsonnene Großvater",""],"entspannen":["entspannt","entspannte","hat entspannt","r","entspannend","entspannt","die entspannende Musik","der entspannte Urlauber",""],"entsprechen":["entspricht","entsprach","hat entsprochen","u","entsprechend","entsprochen","die entsprechende Antwort","!die entsprochene Antwort",""],"entstehen":["entsteht","entstand","ist entstanden","u","entstehend","entstanden","die entstehenden Kosten","der entstandene Schaden",""],"enttäuschen":["enttäuscht","enttäuschte","hat enttäuscht","r","enttäuschend","enttäuscht","das enttäuschende Ergebnis","die enttäuschten Fans",""],"entwickeln":["entwickelt","entwickelte","hat entwickelt","r","entwickelnd","entwickelt","das sich entwickelnde Kind","die entwickelte App",""],"erfahren":["erfährt","erfuhr","hat erfahren","u","erfahrend","erfahren","die das Geheimnis erfahrende Freundin","die erfahrene Lehrerin",""],"erfinden":["erfindet","erfand","hat erfunden","u","erfindend","erfunden","der erfindende Ingenieur","die erfundene Geschichte",""],"sich erfreuen":["erfreut sich","erfreute sich","hat sich erfreut","r","sich erfreuend","erfreut","die sich großer Beliebtheit erfreuende Band","die erfreuten Gäste",""],"erfüllen":["erfüllt","erfüllte","hat erfüllt","r","erfüllend","erfüllt","die erfüllende Arbeit","der erfüllte Wunsch",""],"erhalten":["erhält","erhielt","hat erhalten","u","erhaltend","erhalten","die das Gebäude erhaltende Stiftung","der erhaltene Brief",""],"erhöhen":["erhöht","erhöhte","hat erhöht","r","erhöhend","erhöht","die sich erhöhende Temperatur","die erhöhten Preise",""],"erholen":["erholt sich","erholte sich","hat sich erholt","r","sich erholend","erholt","die sich erholenden Urlauber","die erholten Urlauber",""],"erinnern":["erinnert","erinnerte","hat erinnert","r","erinnernd","erinnert","die an früher erinnernden Fotos","die erinnerte Kindheit",""],"erkälten":["erkältet sich","erkältete sich","hat sich erkältet","r","sich erkältend","erkältet","das sich leicht erkältende Kind","das erkältete Kind",""],"erkennen":["erkennt","erkannte","hat erkannt","g","erkennend","erkannt","der erkennende Blick","der erkannte Fehler",""],"erklären":["erklärt","erklärte","hat erklärt","r","erklärend","erklärt","die erklärende Lehrerin","die erklärte Regel",""],"sich erkundigen":["erkundigt sich","erkundigte sich","hat sich erkundigt","r","sich erkundigend","erkundigt","der sich erkundigende Tourist","!der erkundigte Tourist",""],"erlauben":["erlaubt","erlaubte","hat erlaubt","r","erlaubend","erlaubt","die alles erlaubenden Eltern","das erlaubte Spiel",""],"erleben":["erlebt","erlebte","hat erlebt","r","erlebend","erlebt","die das Abenteuer erlebenden Kinder","das erlebte Abenteuer",""],"ermöglichen":["ermöglicht","ermöglichte","hat ermöglicht","r","ermöglichend","ermöglicht","das das Studium ermöglichende Stipendium","die ermöglichte Reise",""],"ernähren":["ernährt","ernährte","hat ernährt","r","ernährend","ernährt","die die Familie ernährende Mutter","das gut ernährte Kind",""],"ernennen":["ernennt","ernannte","hat ernannt","g","ernennend","ernannt","die ernennende Behörde","die ernannte Direktorin",""],"eröffnen":["eröffnet","eröffnete","hat eröffnet","r","eröffnend","eröffnet","die eröffnende Rede","das eröffnete Geschäft",""],"erreichen":["erreicht","erreichte","hat erreicht","r","erreichend","erreicht","der das Ziel erreichende Läufer","das erreichte Ziel",""],"erscheinen":["erscheint","erschien","ist erschienen","u","erscheinend","erschienen","das monatlich erscheinende Magazin","das erschienene Buch",""],"erschrecken":["erschrickt","erschrak","ist erschrocken","u","erschreckend","erschrocken","der erschreckende Anblick","das erschrockene Kind","Ohne Objekt unregelmäßig: Ich erschrak / bin erschrocken. Mit Akkusativ regelmäßig: Du erschrecktest mich / hast mich erschreckt."],"ersetzen":["ersetzt","ersetzte","hat ersetzt","r","ersetzend","ersetzt","die die Kollegin ersetzende Lehrerin","das ersetzte Fenster",""],"erteilen":["erteilt","erteilte","hat erteilt","r","erteilend","erteilt","die erteilende Behörde","die erteilte Erlaubnis",""],"erwarten":["erwartet","erwartete","hat erwartet","r","erwartend","erwartet","die ein Baby erwartende Frau","die erwarteten Gäste",""],"erzählen":["erzählt","erzählte","hat erzählt","r","erzählend","erzählt","die erzählende Oma","die erzählte Geschichte",""],"es gibt":["es gibt","es gab","es hat gegeben","u","","gegeben","!","!",""],"essen":["isst","aß","hat gegessen","u","essend","gegessen","die essenden Gäste","der gegessene Apfel",""],"fahren":["fährt","fuhr","ist / hat gefahren","u","fahrend","gefahren","das fahrende Auto","die gefahrene Strecke","„ist gefahren“ für die Bewegung, „hat gefahren“ mit Akkusativobjekt: Sie hat das Auto gefahren."],"fallen":["fällt","fiel","ist gefallen","u","fallend","gefallen","die fallenden Blätter","die gefallenen Blätter",""],"fangen":["fängt","fing","hat gefangen","u","fangend","gefangen","die fangende Katze","der gefangene Fisch",""],"fassen":["fasst","fasste","hat gefasst","r","fassend","gefasst","die meine Hand fassende Mutter","der gefasste Dieb",""],"fehlen":["fehlt","fehlte","hat gefehlt","r","fehlend","gefehlt","der fehlende Schüler","!der gefehlte Schüler",""],"feiern":["feiert","feierte","hat gefeiert","r","feiernd","gefeiert","die feiernden Gäste","der gefeierte Star",""],"fernsehen":["sieht fern","sah fern","hat ferngesehen","u","fernsehend","ferngesehen","die fernsehenden Kinder","!die ferngesehenen Kinder",""],"festhalten":["hält fest","hielt fest","hat festgehalten","u","festhaltend","festgehalten","die sich festhaltenden Fahrgäste","das festgehaltene Ergebnis",""],"finden":["findet","fand","hat gefunden","u","findend","gefunden","der den Schatz findende Junge","der gefundene Schlüssel",""],"fliegen":["fliegt","flog","ist / hat geflogen","u","fliegend","geflogen","der fliegende Vogel","die geflogene Strecke","„ist geflogen“ für die Bewegung, „hat geflogen“ mit Akkusativobjekt: Der Pilot hat die Maschine geflogen."],"fliehen":["flieht","floh","ist geflohen","u","fliehend","geflohen","die fliehenden Menschen","der geflohene Häftling",""],"flüstern":["flüstert","flüsterte","hat geflüstert","r","flüsternd","geflüstert","die flüsternde Stimme","die geflüsterten Worte",""],"folgen":["folgt","folgte","ist gefolgt","r","folgend","gefolgt","die folgenden Tage","!die gefolgten Touristen",""],"fordern":["fordert","forderte","hat gefordert","r","fordernd","gefordert","die fordernden Arbeiter","der geforderte Lohn",""],"fördern":["fördert","förderte","hat gefördert","r","fördernd","gefördert","die fördernde Lehrerin","die geförderten Kinder",""],"fotografieren":["fotografiert","fotografierte","hat fotografiert","r","fotografierend","fotografiert","die fotografierenden Touristen","der fotografierte Sonnenuntergang",""],"fragen":["fragt","fragte","hat gefragt","r","fragend","gefragt","die fragende Schülerin","die gefragte Expertin","Die starken Formen „frug“ sind veraltet – heute nur: fragte, gefragt."],"fressen":["frisst","fraß","hat gefressen","u","fressend","gefressen","die fressende Katze","der gefressene Kuchen",""],"freuen":["freut sich","freute sich","hat sich gefreut","r","sich freuend","gefreut","die sich freuenden Kinder","!die gefreuten Kinder",""],"frühstücken":["frühstückt","frühstückte","hat gefrühstückt","r","frühstückend","gefrühstückt","die frühstückenden Gäste","!die gefrühstückten Gäste",""],"fühlen":["fühlt","fühlte","hat gefühlt","r","fühlend","gefühlt","die fühlenden Wesen","die gefühlte Temperatur",""],"führen":["führt","führte","hat geführt","r","führend","geführt","die führende Firma","die geführte Gruppe",""],"füllen":["füllt","füllte","hat gefüllt","r","füllend","gefüllt","die das Glas füllende Kellnerin","das gefüllte Glas",""],"fürchten":["fürchtet","fürchtete","hat gefürchtet","r","fürchtend","gefürchtet","die sich fürchtenden Kinder","der gefürchtete Lehrer",""],"garantieren":["garantiert","garantierte","hat garantiert","r","garantierend","garantiert","die garantierende Firma","die garantierte Qualität",""],"geben":["gibt","gab","hat gegeben","u","gebend","gegeben","die gebende Hand","das gegebene Versprechen",""],"gedenken":["gedenkt","gedachte","hat gedacht","g","gedenkend","gedacht","die der Opfer gedenkenden Menschen","!die gedachten Opfer",""],"gefallen":["gefällt","gefiel","hat gefallen","u","gefallend","gefallen","das mir gefallende Bild","!das gefallene Kleid","Partizip II „gefallen“ sieht aus wie bei „fallen“ – Perfekt aber mit „hat“: Das Kleid hat mir gefallen."],"gehen":["geht","ging","ist gegangen","u","gehend","gegangen","die gehenden Gäste","!die gegangenen Gäste",""],"gehorchen":["gehorcht","gehorchte","hat gehorcht","r","gehorchend","gehorcht","der gehorchende Hund","!der gehorchte Hund",""],"gehören":["gehört","gehörte","hat gehört","r","gehörend","gehört","die mir gehörenden Bücher","!die gehörten Bücher",""],"gelingen":["gelingt","gelang","ist gelungen","u","gelingend","gelungen","das gelingende Leben","der gelungene Kuchen",""],"gelten":["gilt","galt","hat gegolten","u","geltend","gegolten","das geltende Gesetz","!das gegoltene Gesetz",""],"genießen":["genießt","genoss","hat genossen","u","genießend","genossen","die genießenden Gäste","die genossene Ruhe",""],"genügen":["genügt","genügte","hat genügt","r","genügend","genügt","die genügende Menge","!die genügte Menge",""],"geraten":["gerät","geriet","ist geraten","u","geratend","geraten","die in Panik geratende Menge","der gut geratene Kuchen",""],"geschehen":["geschieht","geschah","ist geschehen","u","geschehend","geschehen","das geschehende Unrecht","das geschehene Unglück",""],"gestehen":["gesteht","gestand","hat gestanden","u","gestehend","gestanden","der gestehende Täter","das gestandene Verbrechen",""],"gewähren":["gewährt","gewährte","hat gewährt","r","gewährend","gewährt","die gewährende Bank","der gewährte Kredit",""],"gewinnen":["gewinnt","gewann","hat gewonnen","u","gewinnend","gewonnen","die gewinnende Mannschaft","das gewonnene Spiel",""],"gewöhnen":["gewöhnt sich","gewöhnte sich","hat sich gewöhnt","r","sich gewöhnend","gewöhnt","das sich an alles gewöhnende Kind","die an Kälte gewöhnten Tiere",""],"gießen":["gießt","goss","hat gegossen","u","gießend","gegossen","die gießende Gärtnerin","die gegossenen Blumen",""],"glauben":["glaubt","glaubte","hat geglaubt","r","glaubend","geglaubt","die glaubenden Menschen","die geglaubte Lüge",""],"gleichen":["gleicht","glich","hat geglichen","u","gleichend","geglichen","die einander gleichenden Zwillinge","!die geglichenen Zwillinge",""],"gönnen":["gönnt","gönnte","hat gegönnt","r","gönnend","gegönnt","der neidlos gönnende Freund","die gegönnte Pause",""],"graben":["gräbt","grub","hat gegraben","u","grabend","gegraben","der grabende Hund","das gegrabene Loch",""],"gratulieren":["gratuliert","gratulierte","hat gratuliert","r","gratulierend","gratuliert","die gratulierenden Gäste","!die gratulierte Siegerin",""],"greifen":["greift","griff","hat gegriffen","u","greifend","gegriffen","die greifende Hand","die aus der Luft gegriffene Zahl",""],"grüßen":["grüßt","grüßte","hat gegrüßt","r","grüßend","gegrüßt","die grüßende Nachbarin","die gegrüßte Nachbarin",""],"gucken":["guckt","guckte","hat geguckt","r","guckend","geguckt","die guckenden Nachbarn","!die geguckten Nachbarn",""],"haben":["hat","hatte","hat gehabt","u","habend","gehabt","!der habende Mann","!das gehabte Glück",""],"halten":["hält","hielt","hat gehalten","u","haltend","gehalten","der haltende Bus","das gehaltene Versprechen",""],"handeln":["handelt","handelte","hat gehandelt","r","handelnd","gehandelt","die handelnden Personen","die an der Börse gehandelten Aktien",""],"hängen":["hängt","hing","hat gehangen","u","hängend","gehangen","das hängende Bild","die frisch gehängten Bilder","Ohne Objekt unregelmäßig: Das Bild hing / hat gehangen. Mit Akkusativ regelmäßig: Ich hängte das Bild auf die Wand / habe es gehängt."],"harren":["harrt","harrte","hat geharrt","r","harrend","geharrt","die der Dinge harrenden Gäste","!die geharrten Gäste",""],"hassen":["hasst","hasste","hat gehasst","r","hassend","gehasst","die hassenden Augen","der gehasste Winter",""],"heiraten":["heiratet","heiratete","hat geheiratet","r","heiratend","geheiratet","das heiratende Paar","die von ihm geheiratete Frau",""],"heißen":["heißt","hieß","hat geheißen","u","heißend","geheißen","!der Anna heißende Hund","!der geheißene Hund",""],"heizen":["heizt","heizte","hat geheizt","r","heizend","geheizt","der heizende Ofen","das geheizte Zimmer",""],"helfen":["hilft","half","hat geholfen","u","helfend","geholfen","der helfende Freund","!das geholfene Kind",""],"herrschen":["herrscht","herrschte","hat geherrscht","r","herrschend","geherrscht","die herrschende Meinung","!die geherrschte Meinung",""],"herstellen":["stellt her","stellte her","hat hergestellt","r","herstellend","hergestellt","die herstellende Firma","die hergestellten Möbel",""],"hindern":["hindert","hinderte","hat gehindert","r","hindernd","gehindert","der hindernde Umstand","die am Weiterfahren gehinderten Autos",""],"hinweisen":["weist hin","wies hin","hat hingewiesen","u","hinweisend","hingewiesen","das hinweisende Schild","!das hingewiesene Schild",""],"hoffen":["hofft","hoffte","hat gehofft","r","hoffend","gehofft","die hoffenden Eltern","!der gehoffte Erfolg",""],"holen":["holt","holte","hat geholt","r","holend","geholt","die die Kinder holende Mutter","das geholte Brot",""],"hören":["hört","hörte","hat gehört","r","hörend","gehört","die hörenden Menschen","die gehörte Musik",""],"imponieren":["imponiert","imponierte","hat imponiert","r","imponierend","imponiert","die imponierende Leistung","!der imponierte Chef",""],"informieren":["informiert","informierte","hat informiert","r","informierend","informiert","die informierende Broschüre","die informierten Eltern",""],"interessieren":["interessiert","interessierte","hat interessiert","r","interessierend","interessiert","das mich interessierende Thema","die interessierten Schüler",""],"irren":["irrt sich","irrte sich","hat sich geirrt","r","sich irrend","geirrt","der irrende Wanderer","!der geirrte Zeuge",""],"jammern":["jammert","jammerte","hat gejammert","r","jammernd","gejammert","die jammernde Nachbarin","!die gejammerte Nachbarin",""],"kämpfen":["kämpft","kämpfte","hat gekämpft","r","kämpfend","gekämpft","die kämpfenden Soldaten","!der gekämpfte Sieg",""],"kaufen":["kauft","kaufte","hat gekauft","r","kaufend","gekauft","die kaufenden Kunden","das gekaufte Auto",""],"kennen":["kennt","kannte","hat gekannt","g","kennend","gekannt","die einander kennenden Kollegen","!das gekannte Lied",""],"kennenlernen":["lernt kennen","lernte kennen","hat kennengelernt","r","kennenlernend","kennengelernt","die sich kennenlernenden Kinder","die im Urlaub kennengelernten Freunde","Auch getrennt geschrieben möglich: kennen lernen."],"klagen":["klagt","klagte","hat geklagt","r","klagend","geklagt","die klagenden Bauern","!die geklagten Bauern",""],"klauen":["klaut","klaute","hat geklaut","r","klauend","geklaut","der klauende Junge","das geklaute Handy",""],"kleben":["klebt","klebte","hat geklebt","r","klebend","geklebt","die klebende Folie","das geklebte Foto",""],"klettern":["klettert","kletterte","ist geklettert","r","kletternd","geklettert","die kletternden Kinder","!die gekletterten Kinder",""],"klingeln":["klingelt","klingelte","hat geklingelt","r","klingelnd","geklingelt","das klingelnde Telefon","!das geklingelte Telefon",""],"klingen":["klingt","klang","hat geklungen","u","klingend","geklungen","die klingenden Glocken","!die geklungenen Glocken",""],"klopfen":["klopft","klopfte","hat geklopft","r","klopfend","geklopft","das klopfende Herz","das geklopfte Schnitzel",""],"kochen":["kocht","kochte","hat gekocht","r","kochend","gekocht","das kochende Wasser","das gekochte Ei",""],"kommen":["kommt","kam","ist gekommen","u","kommend","gekommen","die kommende Woche","die gekommenen Gäste",""],"kondolieren":["kondoliert","kondolierte","hat kondoliert","r","kondolierend","kondoliert","die kondolierenden Freunde","!die kondolierte Familie",""],"können":["kann","konnte","hat gekonnt","m","könnend","gekonnt","!der könnende Schüler","der gekonnte Schuss","Mit Infinitiv steht im Perfekt der Infinitiv statt „gekonnt“: Ich habe nicht schlafen können."],"kontrollieren":["kontrolliert","kontrollierte","hat kontrolliert","r","kontrollierend","kontrolliert","der kontrollierende Schaffner","die kontrollierten Fahrkarten",""],"konzentrieren":["konzentriert sich","konzentrierte sich","hat sich konzentriert","r","sich konzentrierend","konzentriert","die sich konzentrierenden Schüler","die konzentrierten Schüler",""],"korrigieren":["korrigiert","korrigierte","hat korrigiert","r","korrigierend","korrigiert","die korrigierende Lehrerin","die korrigierten Tests",""],"kosten":["kostet","kostete","hat gekostet","r","kostend","gekostet","das viel Geld kostende Auto","die gekostete Suppe",""],"kriegen":["kriegt","kriegte","hat gekriegt","r","kriegend","gekriegt","der ein Geschenk kriegende Junge","das gekriegte Geschenk",""],"kümmern":["kümmert sich","kümmerte sich","hat sich gekümmert","r","sich kümmernd","gekümmert","die sich kümmernde Nachbarin","!die gekümmerte Nachbarin",""],"kündigen":["kündigt","kündigte","hat gekündigt","r","kündigend","gekündigt","der kündigende Mieter","die gekündigte Wohnung",""],"küssen":["küsst","küsste","hat geküsst","r","küssend","geküsst","das sich küssende Paar","die geküsste Frau",""],"lächeln":["lächelt","lächelte","hat gelächelt","r","lächelnd","gelächelt","die lächelnde Frau","!die gelächelte Frau",""],"lachen":["lacht","lachte","hat gelacht","r","lachend","gelacht","die lachenden Kinder","!die gelachten Kinder",""],"landen":["landet","landete","ist gelandet","r","landend","gelandet","das landende Flugzeug","das gelandete Flugzeug",""],"lassen":["lässt","ließ","hat gelassen","u","lassend","gelassen","!der lassende Vater","!der gelassene Vater",""],"laufen":["läuft","lief","ist gelaufen","u","laufend","gelaufen","die laufenden Kosten","die gelaufene Strecke","Mit Strecke auch „hat“: Er hat einen Marathon gelaufen (häufiger: ist gelaufen)."],"leben":["lebt","lebte","hat gelebt","r","lebend","gelebt","die lebenden Tiere","das gelebte Leben",""],"legen":["legt","legte","hat gelegt","r","legend","gelegt","die Eier legende Henne","das gelegte Ei",""],"lehren":["lehrt","lehrte","hat gelehrt","r","lehrend","gelehrt","der lehrende Professor","der gelehrte Mann",""],"leiden":["leidet","litt","hat gelitten","u","leidend","gelitten","die leidenden Menschen","!die gelittenen Menschen",""],"leihen":["leiht","lieh","hat geliehen","u","leihend","geliehen","der Geld leihende Freund","das geliehene Auto",""],"leisten":["leistet","leistete","hat geleistet","r","leistend","geleistet","die viel leistende Mitarbeiterin","die geleistete Arbeit",""],"leiten":["leitet","leitete","hat geleitet","r","leitend","geleitet","die leitende Ärztin","der geleitete Kurs",""],"lenken":["lenkt","lenkte","hat gelenkt","r","lenkend","gelenkt","der lenkende Fahrer","das gelenkte Auto",""],"lernen":["lernt","lernte","hat gelernt","r","lernend","gelernt","die lernenden Schüler","die gelernten Wörter",""],"lesen":["liest","las","hat gelesen","u","lesend","gelesen","die lesende Frau","das gelesene Buch",""],"leugnen":["leugnet","leugnete","hat geleugnet","r","leugnend","geleugnet","der leugnende Täter","die geleugnete Tat",""],"lieben":["liebt","liebte","hat geliebt","r","liebend","geliebt","die liebende Mutter","die geliebte Frau",""],"liefern":["liefert","lieferte","hat geliefert","r","liefernd","geliefert","die liefernde Firma","die gelieferte Ware",""],"liegen":["liegt","lag","hat gelegen","u","liegend","gelegen","die liegende Acht","das zentral gelegene Hotel","In Österreich und Süddeutschland: Ich bin gelegen."],"loben":["lobt","lobte","hat gelobt","r","lobend","gelobt","die lobende Lehrerin","die gelobte Schülerin",""],"lohnen":["lohnt sich","lohnte sich","hat sich gelohnt","r","sich lohnend","gelohnt","die sich lohnende Reise","!die gelohnte Reise",""],"lösen":["löst","löste","hat gelöst","r","lösend","gelöst","die das Problem lösende Idee","die gelöste Aufgabe",""],"lügen":["lügt","log","hat gelogen","u","lügend","gelogen","der lügende Zeuge","die gelogene Geschichte",""],"machen":["macht","machte","hat gemacht","r","machend","gemacht","der alles selbst machende Handwerker","das gemachte Bett",""],"malen":["malt","malte","hat gemalt","r","malend","gemalt","die malende Künstlerin","das gemalte Bild",""],"mangeln":["mangelt","mangelte","hat gemangelt","r","mangelnd","gemangelt","die mangelnde Erfahrung","!die gemangelte Erfahrung",""],"meckern":["meckert","meckerte","hat gemeckert","r","meckernd","gemeckert","die meckernde Ziege","!die gemeckerte Ziege",""],"meinen":["meint","meinte","hat gemeint","r","meinend","gemeint","die es gut meinende Freundin","die gemeinte Person",""],"melden":["meldet","meldete","hat gemeldet","r","meldend","gemeldet","der sich meldende Schüler","der gemeldete Unfall",""],"merken":["merkt","merkte","hat gemerkt","r","merkend","gemerkt","der sich alles merkende Schüler","die gemerkte Nummer",""],"messen":["misst","maß","hat gemessen","u","messend","gemessen","das die Temperatur messende Gerät","die gemessene Temperatur",""],"mieten":["mietet","mietete","hat gemietet","r","mietend","gemietet","die mietende Familie","die gemietete Wohnung",""],"misslingen":["misslingt","misslang","ist misslungen","u","misslingend","misslungen","der misslingende Versuch","der misslungene Versuch",""],"misstrauen":["misstraut","misstraute","hat misstraut","r","misstrauend","misstraut","der allen misstrauende Mann","!der misstraute Mann",""],"mitbringen":["bringt mit","brachte mit","hat mitgebracht","g","mitbringend","mitgebracht","die Kuchen mitbringende Oma","das mitgebrachte Geschenk",""],"mitkommen":["kommt mit","kam mit","ist mitgekommen","u","mitkommend","mitgekommen","die mitkommenden Freunde","die mitgekommenen Kinder",""],"mitnehmen":["nimmt mit","nahm mit","hat mitgenommen","u","mitnehmend","mitgenommen","die mich mitnehmende Nachbarin","das mitgenommene Essen",""],"mitteilen":["teilt mit","teilte mit","hat mitgeteilt","r","mitteilend","mitgeteilt","die mitteilende Behörde","die mitgeteilte Adresse",""],"mögen":["mag","mochte","hat gemocht","m","mögend","gemocht","!der mögende Hund","!die gemochte Freundin","Für Wünsche verwendet man „möchte“: Ich möchte einen Tee."],"müssen":["muss","musste","hat gemusst","m","müssend","gemusst","!der müssende Schüler","!der gemusste Schüler","Mit Infinitiv steht im Perfekt der Infinitiv statt „gemusst“: Ich habe arbeiten müssen."],"nachdenken":["denkt nach","dachte nach","hat nachgedacht","g","nachdenkend","nachgedacht","der nachdenkende Schüler","!das nachgedachte Problem",""],"nachgeben":["gibt nach","gab nach","hat nachgegeben","u","nachgebend","nachgegeben","der nachgebende Boden","!der nachgegebene Boden",""],"nachlaufen":["läuft nach","lief nach","ist nachgelaufen","u","nachlaufend","nachgelaufen","der nachlaufende Hund","!der nachgelaufene Hund",""],"sich nähern":["nähert sich","näherte sich","hat sich genähert","r","sich nähernd","genähert","der sich nähernde Sturm","!der genäherte Sturm",""],"nehmen":["nimmt","nahm","hat genommen","u","nehmend","genommen","die nehmende Hand","das genommene Stück",""],"neigen":["neigt","neigte","hat geneigt","r","neigend","geneigt","die sich neigende Sonne","der geneigte Leser",""],"nennen":["nennt","nannte","hat genannt","g","nennend","genannt","die Namen nennende Zeugin","das genannte Beispiel",""],"nützen":["nützt","nützte","hat genützt","r","nützend","genützt","der allen nützende Plan","!der genützte Freund",""],"nutzen":["nutzt","nutzte","hat genutzt","r","nutzend","genutzt","die nutzenden Kunden","die genutzte Zeit",""],"öffnen":["öffnet","öffnete","hat geöffnet","r","öffnend","geöffnet","die sich öffnende Tür","das geöffnete Fenster",""],"opfern":["opfert","opferte","hat geopfert","r","opfernd","geopfert","die sich opfernde Mutter","die geopferte Freizeit",""],"ordnen":["ordnet","ordnete","hat geordnet","r","ordnend","geordnet","die ordnende Hand","die geordneten Papiere",""],"packen":["packt","packte","hat gepackt","r","packend","gepackt","der packende Film","der gepackte Koffer",""],"parken":["parkt","parkte","hat geparkt","r","parkend","geparkt","die parkenden Autos","das geparkte Auto",""],"passen":["passt","passte","hat gepasst","r","passend","gepasst","die passende Hose","!die gepasste Hose",""],"passieren":["passiert","passierte","ist passiert","r","passierend","passiert","die passierenden Autos","das passierte Unglück",""],"pflanzen":["pflanzt","pflanzte","hat gepflanzt","r","pflanzend","gepflanzt","die pflanzenden Kinder","der gepflanzte Baum",""],"pflegen":["pflegt","pflegte","hat gepflegt","r","pflegend","gepflegt","die pflegende Tochter","der gepflegte Garten",""],"planen":["plant","plante","hat geplant","r","planend","geplant","die planende Familie","die geplante Reise",""],"plaudern":["plaudert","plauderte","hat geplaudert","r","plaudernd","geplaudert","die plaudernden Nachbarinnen","!die geplauderten Nachbarinnen",""],"probieren":["probiert","probierte","hat probiert","r","probierend","probiert","die probierenden Gäste","der probierte Kuchen",""],"protestieren":["protestiert","protestierte","hat protestiert","r","protestierend","protestiert","die protestierenden Studenten","!die protestierten Studenten",""],"prüfen":["prüft","prüfte","hat geprüft","r","prüfend","geprüft","der prüfende Blick","die geprüfte Rechnung",""],"putzen":["putzt","putzte","hat geputzt","r","putzend","geputzt","die putzende Frau","die geputzten Fenster",""],"raten":["rät","riet","hat geraten","u","ratend","geraten","der ratende Kandidat","die geratene Zahl",""],"rauchen":["raucht","rauchte","hat geraucht","r","rauchend","geraucht","der rauchende Schornstein","die gerauchte Zigarette",""],"reagieren":["reagiert","reagierte","hat reagiert","r","reagierend","reagiert","der schnell reagierende Fahrer","!der reagierte Fahrer",""],"rechnen":["rechnet","rechnete","hat gerechnet","r","rechnend","gerechnet","das rechnende Kind","die gerechnete Aufgabe",""],"reden":["redet","redete","hat geredet","r","redend","geredet","die redenden Gäste","!die geredeten Gäste",""],"regeln":["regelt","regelte","hat geregelt","r","regelnd","geregelt","die den Verkehr regelnde Polizistin","die geregelte Arbeitszeit",""],"regnen":["regnet","regnete","hat geregnet","r","regnend","geregnet","!","!",""],"reichen":["reicht","reichte","hat gereicht","r","reichend","gereicht","die bis zum Boden reichenden Vorhänge","das gereichte Brot",""],"reinigen":["reinigt","reinigte","hat gereinigt","r","reinigend","gereinigt","die reinigende Wirkung","der gereinigte Teppich",""],"reisen":["reist","reiste","ist gereist","r","reisend","gereist","die reisenden Touristen","der weit gereiste Mann",""],"rennen":["rennt","rannte","ist gerannt","g","rennend","gerannt","die rennenden Kinder","!die gerannten Kinder",""],"reparieren":["repariert","reparierte","hat repariert","r","reparierend","repariert","der reparierende Mechaniker","das reparierte Fahrrad",""],"reservieren":["reserviert","reservierte","hat reserviert","r","reservierend","reserviert","die reservierende Familie","der reservierte Tisch",""],"retten":["rettet","rettete","hat gerettet","r","rettend","gerettet","die rettende Idee","die gerettete Katze",""],"richten":["richtet","richtete","hat gerichtet","r","richtend","gerichtet","die sich nach dem Wetter richtende Planung","die an alle gerichtete Frage",""],"riechen":["riecht","roch","hat gerochen","u","riechend","gerochen","die gut riechende Seife","!die gerochene Seife",""],"riskieren":["riskiert","riskierte","hat riskiert","r","riskierend","riskiert","der viel riskierende Fahrer","das riskierte Leben",""],"rufen":["ruft","rief","hat gerufen","u","rufend","gerufen","die rufende Stimme","der gerufene Arzt",""],"sich rühmen":["rühmt sich","rühmte sich","hat sich gerühmt","r","sich rühmend","gerühmt","die sich ihrer Geschichte rühmende Stadt","die viel gerühmte Küche",""],"sagen":["sagt","sagte","hat gesagt","r","sagend","gesagt","die die Wahrheit sagende Zeugin","das gesagte Wort",""],"sammeln":["sammelt","sammelte","hat gesammelt","r","sammelnd","gesammelt","die sammelnden Kinder","die gesammelten Briefmarken",""],"schaden":["schadet","schadete","hat geschadet","r","schadend","geschadet","die der Gesundheit schadenden Stoffe","!die geschadete Gesundheit",""],"schaffen":["schafft","schaffte","hat geschafft","r","schaffend","geschafft","die schaffenden Hände","die geschaffte Prüfung","Im Sinn von „erschaffen“ unregelmäßig: Gott schuf die Welt / hat sie geschaffen."],"schämen":["schämt sich","schämte sich","hat sich geschämt","r","sich schämend","geschämt","der sich schämende Junge","!der geschämte Junge",""],"schätzen":["schätzt","schätzte","hat geschätzt","r","schätzend","geschätzt","der grob schätzende Gutachter","die geschätzte Kollegin",""],"schauen":["schaut","schaute","hat geschaut","r","schauend","geschaut","die schauenden Kinder","!die geschauten Kinder",""],"scheinen":["scheint","schien","hat geschienen","u","scheinend","geschienen","die scheinende Sonne","!die geschienene Sonne",""],"schenken":["schenkt","schenkte","hat geschenkt","r","schenkend","geschenkt","die schenkende Oma","die geschenkten Blumen",""],"schicken":["schickt","schickte","hat geschickt","r","schickend","geschickt","die das Paket schickende Firma","das geschickte Foto",""],"schieben":["schiebt","schob","hat geschoben","u","schiebend","geschoben","der schiebende Vater","der geschobene Kinderwagen",""],"schimpfen":["schimpft","schimpfte","hat geschimpft","r","schimpfend","geschimpft","die schimpfende Mutter","!die geschimpften Kinder",""],"schlafen":["schläft","schlief","hat geschlafen","u","schlafend","geschlafen","das schlafende Baby","!das geschlafene Baby",""],"schlagen":["schlägt","schlug","hat geschlagen","u","schlagend","geschlagen","das schlagende Herz","der geschlagene Gegner",""],"schließen":["schließt","schloss","hat geschlossen","u","schließend","geschlossen","die sich schließende Tür","die geschlossene Tür",""],"schmecken":["schmeckt","schmeckte","hat geschmeckt","r","schmeckend","geschmeckt","die gut schmeckende Suppe","!die geschmeckte Suppe",""],"schmeicheln":["schmeichelt","schmeichelte","hat geschmeichelt","r","schmeichelnd","geschmeichelt","die schmeichelnden Worte","die geschmeichelte Gastgeberin",""],"schneiden":["schneidet","schnitt","hat geschnitten","u","schneidend","geschnitten","das schneidende Messer","das geschnittene Brot",""],"schneien":["schneit","schneite","hat geschneit","r","schneiend","geschneit","!","!",""],"schreiben":["schreibt","schrieb","hat geschrieben","u","schreibend","geschrieben","die schreibende Schülerin","der geschriebene Brief",""],"schreien":["schreit","schrie","hat geschrien","u","schreiend","geschrien","das schreiende Baby","!das geschriene Baby",""],"schulden":["schuldet","schuldete","hat geschuldet","r","schuldend","geschuldet","der mir Geld schuldende Freund","das geschuldete Geld",""],"schützen":["schützt","schützte","hat geschützt","r","schützend","geschützt","die schützende Jacke","die geschützte Haut",""],"schweigen":["schweigt","schwieg","hat geschwiegen","u","schweigend","geschwiegen","die schweigende Mehrheit","!die geschwiegene Mehrheit",""],"schwimmen":["schwimmt","schwamm","ist geschwommen","u","schwimmend","geschwommen","die schwimmenden Kinder","!die geschwommenen Kinder","Mit Strecke auch „hat“: Sie hat 1000 Meter geschwommen."],"schwören":["schwört","schwor","hat geschworen","u","schwörend","geschworen","der schwörende Zeuge","der geschworene Eid",""],"sehen":["sieht","sah","hat gesehen","u","sehend","gesehen","die sehende Frau","der gesehene Film",""],"sein":["ist","war","ist gewesen","u","seind","gewesen","!der seiende Mann","!der gewesene Mann",""],"senden":["sendet","sandte / sendete","hat gesandt / gesendet","g","sendend","gesandt / gesendet","der sendende Radiosender","die gesendete Nachricht","„sandte / gesandt“ für Briefe und Grüße, „sendete / gesendet“ für Radio, Fernsehen und Nachrichten."],"setzen":["setzt","setzte","hat gesetzt","r","setzend","gesetzt","die sich setzenden Gäste","das gesetzte Ziel",""],"siezen":["siezt","siezte","hat gesiezt","r","siezend","gesiezt","die sich siezenden Kollegen","der gesiezte Chef",""],"singen":["singt","sang","hat gesungen","u","singend","gesungen","die singenden Kinder","das gesungene Lied",""],"sitzen":["sitzt","saß","hat gesessen","u","sitzend","gesessen","die sitzenden Gäste","!die gesessenen Gäste","In Österreich und Süddeutschland: Ich bin gesessen."],"sollen":["soll","sollte","hat gesollt","m","sollend","gesollt","!der sollende Schüler","!der gesollte Schüler","Mit Infinitiv steht im Perfekt der Infinitiv statt „gesollt“: Ich hätte anrufen sollen."],"sorgen":["sorgt","sorgte","hat gesorgt","r","sorgend","gesorgt","die sich sorgende Mutter","!die gesorgte Mutter",""],"sparen":["spart","sparte","hat gespart","r","sparend","gespart","die sparende Familie","das gesparte Geld",""],"speichern":["speichert","speicherte","hat gespeichert","r","speichernd","gespeichert","das Daten speichernde Gerät","die gespeicherte Datei",""],"spenden":["spendet","spendete","hat gespendet","r","spendend","gespendet","die spendenden Bürger","das gespendete Blut",""],"spielen":["spielt","spielte","hat gespielt","r","spielend","gespielt","die spielenden Kinder","das gespielte Lied",""],"sprechen":["spricht","sprach","hat gesprochen","u","sprechend","gesprochen","die sprechende Puppe","die gesprochene Sprache",""],"spülen":["spült","spülte","hat gespült","r","spülend","gespült","die spülende Köchin","das gespülte Geschirr",""],"stammen":["stammt","stammte","hat gestammt","r","stammend","gestammt","die aus Ungarn stammende Familie","!die gestammte Familie",""],"starten":["startet","startete","ist / hat gestartet","r","startend","gestartet","das startende Flugzeug","das gestartete Programm","„ist gestartet“ ohne Objekt (Das Flugzeug ist gestartet), „hat gestartet“ mit Akkusativ (Ich habe das Programm gestartet)."],"stattfinden":["findet statt","fand statt","hat stattgefunden","u","stattfindend","stattgefunden","das stattfindende Konzert","!das stattgefundene Konzert",""],"staunen":["staunt","staunte","hat gestaunt","r","staunend","gestaunt","die staunenden Kinder","!die gestaunten Kinder",""],"stecken":["steckt","steckte","hat gesteckt","r","steckend","gesteckt","der steckende Schlüssel","das gesteckte Ziel",""],"stehen":["steht","stand","hat gestanden","u","stehend","gestanden","die stehenden Fahrgäste","!die gestandenen Fahrgäste","In Österreich und Süddeutschland: Ich bin gestanden."],"stehlen":["stiehlt","stahl","hat gestohlen","u","stehlend","gestohlen","der stehlende Dieb","das gestohlene Fahrrad",""],"steigen":["steigt","stieg","ist gestiegen","u","steigend","gestiegen","die steigenden Preise","die gestiegenen Preise",""],"stellen":["stellt","stellte","hat gestellt","r","stellend","gestellt","die sich stellende Frage","die gestellte Frage",""],"sterben":["stirbt","starb","ist gestorben","u","sterbend","gestorben","die sterbenden Bäume","die gestorbenen Fische",""],"stimmen":["stimmt","stimmte","hat gestimmt","r","stimmend","gestimmt","die stimmende Rechnung","die gestimmte Gitarre",""],"stören":["stört","störte","hat gestört","r","störend","gestört","der störende Lärm","die gestörten Nachbarn",""],"stoßen":["stößt","stieß","hat / ist gestoßen","u","stoßend","gestoßen","der zu uns stoßende Kollege","der gestoßene Pfeffer","„hat gestoßen“ (jemanden stoßen), „ist gestoßen“ in „auf etwas stoßen“: Wir sind auf ein Problem gestoßen."],"streicheln":["streichelt","streichelte","hat gestreichelt","r","streichelnd","gestreichelt","die streichelnde Hand","die gestreichelte Katze",""],"streichen":["streicht","strich","hat gestrichen","u","streichend","gestrichen","der streichende Maler","die gestrichene Wand",""],"streiten":["streitet sich","stritt sich","hat sich gestritten","u","sich streitend","gestritten","die streitenden Kinder","!die gestrittenen Kinder",""],"studieren":["studiert","studierte","hat studiert","r","studierend","studiert","die studierende Tochter","der studierte Lehrer",""],"suchen":["sucht","suchte","hat gesucht","r","suchend","gesucht","die suchenden Eltern","der gesuchte Täter",""],"tanzen":["tanzt","tanzte","hat getanzt","r","tanzend","getanzt","die tanzenden Paare","der getanzte Walzer",""],"tauschen":["tauscht","tauschte","hat getauscht","r","tauschend","getauscht","die tauschenden Kinder","die getauschten Plätze",""],"teilen":["teilt","teilte","hat geteilt","r","teilend","geteilt","die das Zimmer teilenden Schwestern","die geteilte Pizza",""],"teilnehmen":["nimmt teil","nahm teil","hat teilgenommen","u","teilnehmend","teilgenommen","die teilnehmenden Schüler","!die teilgenommenen Schüler",""],"telefonieren":["telefoniert","telefonierte","hat telefoniert","r","telefonierend","telefoniert","der telefonierende Fahrer","!der telefonierte Fahrer",""],"testen":["testet","testete","hat getestet","r","testend","getestet","die testende Firma","das getestete Gerät",""],"töten":["tötet","tötete","hat getötet","r","tötend","getötet","das tötende Gift","die getötete Maus",""],"tragen":["trägt","trug","hat getragen","u","tragend","getragen","die tragende Wand","das getragene Kleid",""],"transportieren":["transportiert","transportierte","hat transportiert","r","transportierend","transportiert","der transportierende Lkw","das transportierte Holz",""],"trauen":["traut","traute","hat getraut","r","trauend","getraut","das sich nicht trauende Kind","!der getraute Freund",""],"trauern":["trauert","trauerte","hat getrauert","r","trauernd","getrauert","die trauernde Familie","!die getrauerte Familie",""],"träumen":["träumt","träumte","hat geträumt","r","träumend","geträumt","das träumende Kind","der lang geträumte Traum",""],"treffen":["trifft","traf","hat getroffen","u","treffend","getroffen","die sich treffenden Freunde","die getroffene Entscheidung",""],"treiben":["treibt","trieb","hat getrieben","u","treibend","getrieben","die treibende Kraft","der getriebene Mensch",""],"trennen":["trennt","trennte","hat getrennt","r","trennend","getrennt","die trennende Wand","der getrennte Müll",""],"trinken":["trinkt","trank","hat getrunken","u","trinkend","getrunken","die trinkenden Gäste","der getrunkene Tee",""],"trösten":["tröstet","tröstete","hat getröstet","r","tröstend","getröstet","die tröstenden Worte","das getröstete Kind",""],"trotzen":["trotzt","trotzte","hat getrotzt","r","trotzend","getrotzt","das dem Sturm trotzende Haus","!der getrotzte Sturm",""],"tun":["tut","tat","hat getan","u","tund","getan","!der tuende Mann","die getane Arbeit",""],"üben":["übt","übte","hat geübt","r","übend","geübt","die übenden Schüler","das geübte Lied",""],"überführen":["überführt","überführte","hat überführt","r","überführend","überführt","die überführenden Beweise","der überführte Täter",""],"überlassen":["überlässt","überließ","hat überlassen","u","überlassend","überlassen","die mir ihr Zimmer überlassende Freundin","die überlassene Entscheidung",""],"überlegen":["überlegt sich","überlegte sich","hat sich überlegt","r","sich überlegend","überlegt","der lange überlegende Spieler","die überlegte Antwort",""],"übernehmen":["übernimmt","übernahm","hat übernommen","u","übernehmend","übernommen","die übernehmende Firma","die übernommene Firma",""],"überraschen":["überrascht","überraschte","hat überrascht","r","überraschend","überrascht","der überraschende Besuch","die überraschte Oma",""],"überreden":["überredet","überredete","hat überredet","r","überredend","überredet","die überredende Stimme","der überredete Freund",""],"übersetzen":["übersetzt","übersetzte","hat übersetzt","r","übersetzend","übersetzt","die übersetzende Dolmetscherin","der übersetzte Text",""],"überweisen":["überweist","überwies","hat überwiesen","u","überweisend","überwiesen","die überweisende Bank","das überwiesene Geld",""],"überzeugen":["überzeugt","überzeugte","hat überzeugt","r","überzeugend","überzeugt","das überzeugende Argument","die überzeugte Kundin",""],"umarmen":["umarmt","umarmte","hat umarmt","r","umarmend","umarmt","die sich umarmenden Freunde","die umarmte Freundin",""],"umsteigen":["steigt um","stieg um","ist umgestiegen","u","umsteigend","umgestiegen","die umsteigenden Fahrgäste","die umgestiegenen Fahrgäste",""],"umziehen":["zieht um","zog um","ist / hat umgezogen","u","umziehend","umgezogen","die umziehende Familie","die umgezogene Familie","„ist umgezogen“ (in eine andere Wohnung), aber „hat sich umgezogen“ (andere Kleidung)."],"unterbrechen":["unterbricht","unterbrach","hat unterbrochen","u","unterbrechend","unterbrochen","die ständig unterbrechende Werbung","die unterbrochene Sitzung",""],"unterhalten":["unterhält sich","unterhielt sich","hat sich unterhalten","u","sich unterhaltend","unterhalten","die unterhaltende Show","die unterhaltenen Gäste",""],"unterliegen":["unterliegt","unterlag","hat unterlegen","u","unterliegend","unterlegen","die unterliegende Mannschaft","die unterlegene Mannschaft",""],"unterrichten":["unterrichtet","unterrichtete","hat unterrichtet","r","unterrichtend","unterrichtet","die unterrichtende Lehrerin","das unterrichtete Fach",""],"untersagen":["untersagt","untersagte","hat untersagt","r","untersagend","untersagt","die untersagende Behörde","das untersagte Rauchen",""],"unterscheiden":["unterscheidet","unterschied","hat unterschieden","u","unterscheidend","unterschieden","das unterscheidende Merkmal","die unterschiedenen Arten",""],"unterschreiben":["unterschreibt","unterschrieb","hat unterschrieben","u","unterschreibend","unterschrieben","die unterschreibende Kundin","der unterschriebene Vertrag",""],"unterstützen":["unterstützt","unterstützte","hat unterstützt","r","unterstützend","unterstützt","die unterstützenden Eltern","die unterstützte Familie",""],"untersuchen":["untersucht","untersuchte","hat untersucht","r","untersuchend","untersucht","die untersuchende Ärztin","der untersuchte Patient",""],"verabreden":["verabredet sich","verabredete sich","hat sich verabredet","r","sich verabredend","verabredet","die sich verabredenden Freunde","das verabredete Treffen",""],"verabschieden":["verabschiedet sich","verabschiedete sich","hat sich verabschiedet","r","sich verabschiedend","verabschiedet","die sich verabschiedenden Gäste","das verabschiedete Gesetz",""],"verändern":["verändert","veränderte","hat verändert","r","verändernd","verändert","die sich verändernde Stadt","die veränderte Lage",""],"verbessern":["verbessert","verbesserte","hat verbessert","r","verbessernd","verbessert","die verbessernde Lehrerin","die verbesserte Version",""],"verbieten":["verbietet","verbot","hat verboten","u","verbietend","verboten","die verbietenden Eltern","das verbotene Zimmer",""],"verbinden":["verbindet","verband","hat verbunden","u","verbindend","verbunden","die verbindende Brücke","die verbundene Wunde",""],"verbrauchen":["verbraucht","verbrauchte","hat verbraucht","r","verbrauchend","verbraucht","das viel Benzin verbrauchende Auto","die verbrauchte Energie",""],"verbringen":["verbringt","verbrachte","hat verbracht","g","verbringend","verbracht","die den Urlaub am Meer verbringende Familie","die verbrachte Zeit",""],"verdächtigen":["verdächtigt","verdächtigte","hat verdächtigt","r","verdächtigend","verdächtigt","der verdächtigende Blick","der verdächtigte Nachbar",""],"verdanken":["verdankt","verdankte","hat verdankt","r","verdankend","verdankt","die ihm alles verdankende Schülerin","der dem Zufall verdankte Erfolg",""],"verdienen":["verdient","verdiente","hat verdient","r","verdienend","verdient","die gut verdienende Ärztin","die verdiente Pause",""],"vereinbaren":["vereinbart","vereinbarte","hat vereinbart","r","vereinbarend","vereinbart","die vereinbarenden Parteien","der vereinbarte Termin",""],"vergeben":["vergibt","vergab","hat vergeben","u","vergebend","vergeben","die vergebende Mutter","die vergebene Stelle",""],"vergessen":["vergisst","vergaß","hat vergessen","u","vergessend","vergessen","die schnell vergessende Freundin","der vergessene Schlüssel",""],"sich vergewissern":["vergewissert sich","vergewisserte sich","hat sich vergewissert","r","sich vergewissernd","vergewissert","der sich vergewissernde Fahrer","!der vergewisserte Fahrer",""],"vergleichen":["vergleicht","verglich","hat verglichen","u","vergleichend","verglichen","die vergleichende Studie","die verglichenen Preise",""],"verhaften":["verhaftet","verhaftete","hat verhaftet","r","verhaftend","verhaftet","der verhaftende Polizist","der verhaftete Dieb",""],"verheimlichen":["verheimlicht","verheimlichte","hat verheimlicht","r","verheimlichend","verheimlicht","der etwas verheimlichende Mann","die verheimlichte Wahrheit",""],"verhindern":["verhindert","verhinderte","hat verhindert","r","verhindernd","verhindert","die den Unfall verhindernde Bremse","der verhinderte Unfall",""],"verkaufen":["verkauft","verkaufte","hat verkauft","r","verkaufend","verkauft","die verkaufende Händlerin","das verkaufte Auto",""],"verlangen":["verlangt","verlangte","hat verlangt","r","verlangend","verlangt","der verlangende Blick","der verlangte Preis",""],"verlassen":["verlässt","verließ","hat verlassen","u","verlassend","verlassen","die das Haus verlassenden Gäste","das verlassene Haus",""],"verletzen":["verletzt","verletzte","hat verletzt","r","verletzend","verletzt","die verletzenden Worte","der verletzte Spieler",""],"verlieben":["verliebt sich","verliebte sich","hat sich verliebt","r","sich verliebend","verliebt","die sich verliebenden Teenager","das verliebte Paar",""],"verlieren":["verliert","verlor","hat verloren","u","verlierend","verloren","die verlierende Mannschaft","der verlorene Schlüssel",""],"vermieten":["vermietet","vermietete","hat vermietet","r","vermietend","vermietet","die vermietende Familie","die vermietete Wohnung",""],"vermissen":["vermisst","vermisste","hat vermisst","r","vermissend","vermisst","die ihre Heimat vermissende Frau","die vermisste Katze",""],"verraten":["verrät","verriet","hat verraten","u","verratend","verraten","die das Geheimnis verratende Freundin","das verratene Geheimnis",""],"verreisen":["verreist","verreiste","ist verreist","r","verreisend","verreist","die verreisende Familie","die verreisten Nachbarn",""],"verschieben":["verschiebt","verschob","hat verschoben","u","verschiebend","verschoben","die sich verschiebende Grenze","der verschobene Termin",""],"verschweigen":["verschweigt","verschwieg","hat verschwiegen","u","verschweigend","verschwiegen","der etwas verschweigende Zeuge","die verschwiegene Wahrheit",""],"verschwinden":["verschwindet","verschwand","ist verschwunden","u","verschwindend","verschwunden","die verschwindende Sonne","der verschwundene Schlüssel",""],"versichern":["versichert","versicherte","hat versichert","r","versichernd","versichert","die versichernde Gesellschaft","das versicherte Auto",""],"versorgen":["versorgt","versorgte","hat versorgt","r","versorgend","versorgt","die versorgende Mutter","die versorgte Wunde",""],"verspäten":["verspätet sich","verspätete sich","hat sich verspätet","r","sich verspätend","verspätet","der sich verspätende Zug","der verspätete Zug",""],"versprechen":["verspricht","versprach","hat versprochen","u","versprechend","versprochen","die vielversprechende Idee","das versprochene Geschenk",""],"verstehen":["versteht","verstand","hat verstanden","u","verstehend","verstanden","die verstehende Freundin","die verstandene Regel",""],"versuchen":["versucht","versuchte","hat versucht","r","versuchend","versucht","die es noch einmal versuchende Schülerin","der versuchte Diebstahl",""],"verteidigen":["verteidigt","verteidigte","hat verteidigt","r","verteidigend","verteidigt","der verteidigende Spieler","die verteidigte Meinung",""],"vertrauen":["vertraut","vertraute","hat vertraut","r","vertrauend","vertraut","die vertrauenden Kinder","!die vertrauten Kinder",""],"vertreten":["vertritt","vertrat","hat vertreten","u","vertretend","vertreten","die vertretende Kollegin","die vertretene Meinung",""],"verursachen":["verursacht","verursachte","hat verursacht","r","verursachend","verursacht","der verursachende Fahrer","der verursachte Schaden",""],"verwechseln":["verwechselt","verwechselte","hat verwechselt","r","verwechselnd","verwechselt","die die Namen verwechselnde Oma","die verwechselten Namen",""],"verweigern":["verweigert","verweigerte","hat verweigert","r","verweigernd","verweigert","der verweigernde Zeuge","die verweigerte Aussage",""],"verweisen":["verweist","verwies","hat verwiesen","u","verweisend","verwiesen","das verweisende Schild","der des Landes verwiesene Mann",""],"verwenden":["verwendet","verwandte / verwendete","hat verwandt / verwendet","g","verwendend","verwandt / verwendet","die frisches Gemüse verwendende Köchin","das verwendete Material","Beide Formen sind richtig: verwendete / verwandte, verwendet / verwandt."],"verzeihen":["verzeiht","verzieh","hat verziehen","u","verzeihend","verziehen","die verzeihende Mutter","der verziehene Fehler",""],"verzichten":["verzichtet","verzichtete","hat verzichtet","r","verzichtend","verzichtet","der verzichtende Kandidat","!der verzichtete Zucker",""],"vorbereiten":["bereitet vor","bereitete vor","hat vorbereitet","r","vorbereitend","vorbereitet","die sich vorbereitenden Schüler","das vorbereitete Essen",""],"vorkommen":["kommt vor","kam vor","ist vorgekommen","u","vorkommend","vorgekommen","die vorkommenden Fehler","die vorgekommenen Fälle",""],"vorlesen":["liest vor","las vor","hat vorgelesen","u","vorlesend","vorgelesen","die vorlesende Oma","die vorgelesene Geschichte",""],"vorschlagen":["schlägt vor","schlug vor","hat vorgeschlagen","u","vorschlagend","vorgeschlagen","der vorschlagende Kollege","der vorgeschlagene Kompromiss",""],"vorstellen":["stellt vor","stellte vor","hat vorgestellt","r","vorstellend","vorgestellt","die sich vorstellende Bewerberin","der vorgestellte Plan",""],"vorwerfen":["wirft vor","warf vor","hat vorgeworfen","u","vorwerfend","vorgeworfen","der vorwerfende Ton","die vorgeworfene Faulheit",""],"vorziehen":["zieht vor","zog vor","hat vorgezogen","u","vorziehend","vorgezogen","die Tee vorziehende Oma","der vorgezogene Termin",""],"wachsen":["wächst","wuchs","ist gewachsen","u","wachsend","gewachsen","die wachsende Stadt","die gewachsene Stadt",""],"wagen":["wagt","wagte","hat gewagt","r","wagend","gewagt","der alles wagende Held","der gewagte Sprung",""],"wählen":["wählt","wählte","hat gewählt","r","wählend","gewählt","die wählenden Bürger","der gewählte Präsident",""],"wandern":["wandert","wanderte","ist gewandert","r","wandernd","gewandert","die wandernden Kinder","!die gewanderten Kinder",""],"warnen":["warnt","warnte","hat gewarnt","r","warnend","gewarnt","das warnende Schild","die gewarnten Autofahrer",""],"warten":["wartet","wartete","hat gewartet","r","wartend","gewartet","die wartenden Fahrgäste","!die gewartete Freundin",""],"waschen":["wäscht","wusch","hat gewaschen","u","waschend","gewaschen","die waschende Mutter","die gewaschene Wäsche",""],"wechseln":["wechselt","wechselte","hat gewechselt","r","wechselnd","gewechselt","das wechselnde Wetter","das gewechselte Geld",""],"wecken":["weckt","weckte","hat geweckt","r","weckend","geweckt","die weckende Mutter","das geweckte Baby",""],"wehren":["wehrt sich","wehrte sich","hat sich gewehrt","r","sich wehrend","gewehrt","der sich wehrende Hund","!der gewehrte Hund",""],"wehtun":["tut weh","tat weh","hat wehgetan","u","wehtund","wehgetan","die wehtuenden Füße","!die wehgetanen Füße",""],"weichen":["weicht","wich","ist gewichen","u","weichend","gewichen","die weichenden Soldaten","!die gewichenen Soldaten",""],"weinen":["weint","weinte","hat geweint","r","weinend","geweint","das weinende Kind","die geweinten Tränen",""],"weitergeben":["gibt weiter","gab weiter","hat weitergegeben","u","weitergebend","weitergegeben","die das Wissen weitergebende Oma","die weitergegebene Information",""],"wenden":["wendet","wandte / wendete","hat gewandt / gewendet","g","wendend","gewandt / gewendet","das wendende Auto","der gewendete Pfannkuchen","„wandte / gewandt“ bei „sich an jemanden wenden“, „wendete / gewendet“ beim Umdrehen: Ich habe den Pfannkuchen gewendet."],"werden":["wird","wurde","ist geworden","u","werdend","geworden","die werdende Mutter","!die gewordene Mutter",""],"werfen":["wirft","warf","hat geworfen","u","werfend","geworfen","der werfende Spieler","der geworfene Ball",""],"widersetzen":["widersetzt sich","widersetzte sich","hat sich widersetzt","r","sich widersetzend","widersetzt","der sich widersetzende Gefangene","!der widersetzte Gefangene",""],"widersprechen":["widerspricht","widersprach","hat widersprochen","u","widersprechend","widersprochen","die widersprechenden Aussagen","!die widersprochene Aussage",""],"widmen":["widmet","widmete","hat gewidmet","r","widmend","gewidmet","die sich ihren Kindern widmende Mutter","das gewidmete Buch",""],"wiederholen":["wiederholt","wiederholte","hat wiederholt","r","wiederholend","wiederholt","der sich wiederholende Fehler","die wiederholte Frage",""],"wiegen":["wiegt","wog","hat gewogen","u","wiegend","gewogen","das sich im Wind wiegende Gras","das gewogene Mehl","„wiegen“ (Gewicht) ist unregelmäßig: wog, gewogen. „ein Baby wiegen“ (schaukeln) ist regelmäßig: wiegte, gewiegt."],"winken":["winkt","winkte","hat gewinkt","r","winkend","gewinkt","die winkenden Kinder","!die gewinkten Kinder",""],"wirken":["wirkt","wirkte","hat gewirkt","r","wirkend","gewirkt","das schnell wirkende Mittel","!das gewirkte Mittel",""],"wischen":["wischt","wischte","hat gewischt","r","wischend","gewischt","der wischende Roboter","der gewischte Boden",""],"wissen":["weiß","wusste","hat gewusst","g","wissend","gewusst","der wissende Blick","!das gewusste Ergebnis",""],"wohnen":["wohnt","wohnte","hat gewohnt","r","wohnend","gewohnt","die in Wien wohnende Familie","!die gewohnte Familie",""],"wollen":["will","wollte","hat gewollt","m","wollend","gewollt","!der wollende Schüler","das gewollte Kind","Mit Infinitiv steht im Perfekt der Infinitiv statt „gewollt“: Ich habe dich nicht stören wollen."],"wundern":["wundert sich","wunderte sich","hat sich gewundert","r","sich wundernd","gewundert","die sich wundernde Lehrerin","!die gewunderte Lehrerin",""],"wünschen":["wünscht","wünschte","hat gewünscht","r","wünschend","gewünscht","die sich ein Fahrrad wünschenden Kinder","das gewünschte Geschenk",""],"würdigen":["würdigt","würdigte","hat gewürdigt","r","würdigend","gewürdigt","die würdigende Rede","die gewürdigte Arbeit",""],"zahlen":["zahlt","zahlte","hat gezahlt","r","zahlend","gezahlt","die zahlenden Kunden","der gezahlte Betrag",""],"zählen":["zählt","zählte","hat gezählt","r","zählend","gezählt","die zählende Kassiererin","das gezählte Geld",""],"zeichnen":["zeichnet","zeichnete","hat gezeichnet","r","zeichnend","gezeichnet","das zeichnende Kind","das gezeichnete Pferd",""],"zeigen":["zeigt","zeigte","hat gezeigt","r","zeigend","gezeigt","der zeigende Finger","das gezeigte Foto",""],"zerstören":["zerstört","zerstörte","hat zerstört","r","zerstörend","zerstört","der zerstörende Sturm","das zerstörte Dach",""],"ziehen":["zieht","zog","hat / ist gezogen","u","ziehend","gezogen","die ziehenden Wolken","der gezogene Wagen","„hat gezogen“ (etwas ziehen), „ist gezogen“ für die Bewegung: Wir sind nach Wien gezogen."],"zögern":["zögert","zögerte","hat gezögert","r","zögernd","gezögert","der zögernde Schüler","!der gezögerte Schüler",""],"zuhören":["hört zu","hörte zu","hat zugehört","r","zuhörend","zugehört","die zuhörenden Schüler","!die zugehörten Schüler",""],"zumachen":["macht zu","machte zu","hat zugemacht","r","zumachend","zugemacht","die die Tür zumachende Oma","die zugemachte Tür",""],"zunehmen":["nimmt zu","nahm zu","hat zugenommen","u","zunehmend","zugenommen","der zunehmende Mond","!der zugenommene Mond",""],"zurückgeben":["gibt zurück","gab zurück","hat zurückgegeben","u","zurückgebend","zurückgegeben","der das Buch zurückgebende Schüler","das zurückgegebene Buch",""],"zurückkommen":["kommt zurück","kam zurück","ist zurückgekommen","u","zurückkommend","zurückgekommen","die zurückkommenden Urlauber","die zurückgekommenen Urlauber",""],"zusagen":["sagt zu","sagte zu","hat zugesagt","r","zusagend","zugesagt","die zusagende Firma","die zugesagte Teilnahme",""],"zuschauen":["schaut zu","schaute zu","hat zugeschaut","r","zuschauend","zugeschaut","die zuschauenden Kinder","!die zugeschauten Kinder",""],"zusehen":["sieht zu","sah zu","hat zugesehen","u","zusehend","zugesehen","die zusehenden Kinder","!die zugesehenen Kinder",""],"zustehen":["steht zu","stand zu","hat zugestanden","u","zustehend","zugestanden","das ihm zustehende Geld","!das zugestandene Geld",""],"zustimmen":["stimmt zu","stimmte zu","hat zugestimmt","r","zustimmend","zugestimmt","die zustimmenden Kollegen","!der zugestimmte Vorschlag",""],"zutrauen":["traut zu","traute zu","hat zugetraut","r","zutrauend","zugetraut","die ihm alles zutrauende Mutter","die ihm zugetraute Aufgabe",""],"zuvorkommen":["kommt zuvor","kam zuvor","ist zuvorgekommen","u","zuvorkommend","zuvorgekommen","die zuvorkommende Verkäuferin","!die zuvorgekommene Konkurrenz",""],"zweifeln":["zweifelt","zweifelte","hat gezweifelt","r","zweifelnd","gezweifelt","der zweifelnde Blick","!der gezweifelte Blick",""],"zwingen":["zwingt","zwang","hat gezwungen","u","zwingend","gezwungen","die zwingenden Gründe","das gezwungene Lächeln",""]};
+
+const CASES = {
+  Nom:{n:"Nominativ",q:"wer? was?",c:"nom"},
+  Akk:{n:"Akkusativ",q:"wen? was?",c:"akk"},
+  Dat:{n:"Dativ",q:"wem?",c:"dat"},
+  Gen:{n:"Genitiv",q:"wessen?",c:"gen"}
+};
+const PAT = {
+  N:  {p:[["Nom"]], d:"Kein Akkusativ- oder Dativobjekt.", s:"ohne Objekt"},
+  A:  {p:[["Nom"],["Akk"]], s:"+ Akk"},
+  D:  {p:[["Nom"],["Dat"]], s:"+ Dat"},
+  DA: {p:[["Nom"],["Dat"],["Akk"]], d:"Person meist im Dativ, Sache im Akkusativ.", s:"+ Dat + Akk"},
+  G:  {p:[["Nom"],["Gen"]], d:"Genitivverb – eher gehobene Sprache.", s:"+ Gen"},
+  AG: {p:[["Nom"],["Akk"],["Gen"]], d:"Genitivverb: jemanden (Akk) einer Sache (Gen) …", s:"+ Akk + Gen"},
+  AA: {p:[["Nom"],["Akk"],["Akk"]], d:"Zwei Akkusative: jemanden etwas …", s:"+ Akk + Akk"},
+  NN: {p:[["Nom"],["Nom"]], d:"Gleichsetzung: beide Teile stehen im Nominativ.", s:"+ Nom"},
+  rA: {p:[["Nom"],["Akk","sich"]], d:"Reflexiv: ich – mich, du – dich, er/sie – sich.", s:"sich (Akk)"},
+  rD: {p:[["Nom"],["Dat","sich"],["Akk"]], d:"Reflexiv mit Dativ: ich – mir, du – dir, er/sie – sich.", s:"sich (Dat) + Akk"},
+  rG: {p:[["Nom"],["Akk","sich"],["Gen"]], d:"Reflexiv mit Genitiv – gehobene Sprache.", s:"sich + Gen"},
+  rAD:{p:[["Nom"],["Akk","sich"],["Dat"]], d:"Reflexiv (mich, dich, sich) plus Dativobjekt.", s:"sich + Dat"}
+};
+
+const norm = s => s.toLowerCase().replace(/^sich\s+/,"").replace(/ä/g,"a").replace(/ö/g,"o").replace(/ü/g,"u").replace(/ß/g,"ss").trim();
+V.forEach(e => e.k = norm(e[0]));
+V.sort((a,b)=>a[0].replace(/^sich /,"").localeCompare(b[0].replace(/^sich /,""),"de"));
+
+const $ = id => document.getElementById(id);
+const q=$("q"), sugg=$("sugg"), card=$("card"), empty=$("empty"), hint=$("hint");
+$("count").textContent = V.length + " Verben";
+let list=[], act=0;
+
+const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+const mark = s => esc(s).replace(/\{([NADG]) ([^}]+)\}/g,'<mark class="m-$1">$2</mark>');
+
+function chip(part){
+  const c=CASES[part[0]];
+  const label = part[1] ? "sich · "+c.n : c.n;
+  return `<span class="chip ${c.c}"><b>${label}</b><small>${c.q}</small></span>`;
+}
+function patternHTML(code){
+  const P=PAT[code];
+  const chips=P.p.map(chip).join('<span class="plus">+</span>');
+  return `<div class="pattern">${chips}</div>${P.d?`<p class="desc">${P.d}</p>`:""}`;
+}
+function prepHTML(verb,[label,ex]){
+  const base=verb.replace(/^sich /,"");
+  const refl=/^sich /.test(verb);
+  let l=label, pre="";
+  if(/^sich /.test(l)){ l=l.replace(/^sich /,""); pre="sich "; }
+  else if(refl){ pre="sich "; }
+  l=esc(l).replace(/\b(Akk|Dat|Gen|Nom)\b/,'<span class="pc $1">$1</span>');
+  return `<div class="prep"><div class="pl">${pre}${esc(base)} ${l}</div><div class="pe">${mark(ex)}</div></div>`;
+}
+
+const KL={r:"regelmäßig",u:"unregelmäßig",g:"gemischt (regelmäßige und unregelmäßige Merkmale)",m:"Modalverb – unregelmäßig"};
+function formsHTML(name){
+  const f=F[name]; if(!f) return "";
+  const [pr,pt,pf,k,p1,p2,x1,x2,note]=f;
+  const per = name==="es gibt" ? "" : "er / sie / es";
+  let h=`<div class="sec"><h2>Grundformen<span class="kl ${k}">${KL[k]}</span></h2>${per?`<p class="fcap">Formen für er / sie / es</p>`:""}<div class="forms">
+    <div class="ft"><small>Infinitiv</small><b>${esc(name)}</b></div>
+    <div class="ft"><small>Präsens</small><b>${esc(pr)}</b></div>
+    <div class="ft"><small>Präteritum</small><b>${esc(pt)}</b></div>
+    <div class="ft"><small>Perfekt</small><b>${esc(pf)}</b></div></div>`;
+  if(note) h+=`<p class="fnote">${esc(note)}</p>`;
+  h+=`</div><div class="sec"><h2>Partizipien als Adjektiv</h2>`;
+  const row=(lab,form,ex)=>{
+    const no=ex.startsWith("!"); const t=ex.replace(/^!/,"");
+    let ph;
+    if(no && !t) ph=`<span class="no">${esc(form||"–")}</span><span class="nobadge">als Adjektiv nicht üblich</span>`;
+    else if(no) ph=`<span class="no">${esc(t)}</span><span class="nobadge">gibt es nicht</span>`;
+    else ph=esc(t);
+    return `<div class="part"><div class="lab"><b>${lab}</b>${esc(form||"–")}</div><div class="ph">${ph}</div></div>`;
+  };
+  h+=row("Partizip I",p1,x1)+row("Partizip II",p2,x2);
+  if(x2.startsWith("!") && x2.length>1) h+=`<p class="phint">Partizip II als Adjektiv geht nur bei Verben mit Akkusativobjekt (das gebackene Brot) oder bei Verben mit „sein“, die eine Veränderung ausdrücken (der angekommene Zug).</p>`;
+  h+=`</div>`;
+  return h;
+}
+
+function show(e){
+  const codes=e[1].split("|");
+  let h=`<div class="verb">${esc(e[0])}</div>`;
+  codes.forEach((c,i)=>{ if(i) h+=`<div class="or">oder</div>`; h+=patternHTML(c); });
+  h+=`<h2>Beispiele</h2><ul class="ex"><li>${mark(e[2])}</li><li>${mark(e[3])}</li></ul>`;
+  if(e[4] && e[4].length){
+    h+=`<h2>Mit Präposition</h2>`+e[4].map(p=>prepHTML(e[0],p)).join("");
+  }
+  if(e[5]) h+=`<div class="note">${mark(e[5])}</div>`;
+  h+=formsHTML(e[0]);
+  card.innerHTML=h; card.classList.add("show");
+  empty.hidden=true; hint.hidden=true;
+}
+
+function search(val){
+  const n=norm(val);
+  if(!n){ return []; }
+  const a=[],b=[],c=[];
+  V.forEach(e=>{
+    if(e.k===n) a.push(e);
+    else if(e.k.startsWith(n)) b.push(e);
+    else if(e.k.includes(n)) c.push(e);
+  });
+  return a.concat(b,c).slice(0,8);
+}
+function renderSugg(){
+  if(!list.length){ sugg.classList.remove("open"); sugg.innerHTML=""; return; }
+  sugg.innerHTML=list.map((e,i)=>`<li role="option" data-i="${i}" class="${i===act?"act":""}"><span class="v">${esc(e[0])}</span><span class="s">${e[1].split("|").map(c=>PAT[c].s).join(" / ")}</span></li>`).join("");
+  sugg.classList.add("open");
+}
+function choose(e){
+  q.value=e[0]; list=[]; renderSugg(); show(e);
+  try{ history.replaceState(null,"","#"+encodeURIComponent(e[0])); }catch(_){}
+}
+
+q.addEventListener("input",()=>{
+  const val=q.value;
+  list=search(val); act=0; renderSugg();
+  const exact=V.find(e=>e.k===norm(val));
+  if(exact){ show(exact); }
+  else if(!val.trim()){ card.classList.remove("show"); empty.hidden=true; hint.hidden=false; }
+  else if(!list.length){ card.classList.remove("show"); empty.hidden=false; hint.hidden=true;
+    empty.textContent="Dieses Verb ist noch nicht in der Liste."; }
+});
+q.addEventListener("keydown",ev=>{
+  if(ev.key==="ArrowDown"&&list.length){ act=(act+1)%list.length; renderSugg(); ev.preventDefault(); }
+  else if(ev.key==="ArrowUp"&&list.length){ act=(act-1+list.length)%list.length; renderSugg(); ev.preventDefault(); }
+  else if(ev.key==="Enter"&&list.length){ choose(list[act]); }
+  else if(ev.key==="Escape"){ list=[]; renderSugg(); }
+});
+sugg.addEventListener("mousedown",ev=>{
+  const li=ev.target.closest("li"); if(li){ ev.preventDefault(); choose(list[+li.dataset.i]); }
+});
+q.addEventListener("blur",()=>setTimeout(()=>{list=[];renderSugg();},120));
+hint.addEventListener("click",ev=>{
+  const a=ev.target.closest("a"); if(!a) return;
+  const e=V.find(x=>x[0]===a.dataset.v); if(e) choose(e);
+});
+(function init(){
+  const h=decodeURIComponent(location.hash.slice(1));
+  const e=h&&V.find(x=>x.k===norm(h));
+  if(e) choose(e); else q.focus();
+})();
+</script>
+</body>
+</html>
