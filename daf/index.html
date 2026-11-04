@@ -149,6 +149,18 @@ h1 .mark{background:linear-gradient(transparent 62%,rgba(233,207,138,.75) 62%);p
 .tag.th{background:var(--gold-pale);color:#4a3a14;border:1px solid var(--gold-light);font-weight:500;}
 .tag.dt{background:#fff;color:var(--muted);border:1px solid var(--line);}
 .tag.sp{background:var(--blue-pale);color:var(--blue);border:1px solid #c9d7e5;}
+/* Listenansicht */
+.list{display:flex;flex-direction:column;gap:8px;}
+.row{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:14px;align-items:center;text-decoration:none;
+  background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 16px;
+  transition:border-color .18s ease,background .18s ease,box-shadow .18s ease;}
+.row:hover{border-color:var(--gold-light);background:#fffaf0;box-shadow:0 6px 18px rgba(110,80,20,.08);}
+.row:focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
+.row .em{width:40px;height:40px;border-radius:12px;font-size:1.1rem;}
+.row .ttl{font-size:1rem;}
+.row .rline{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:3px;}
+.row .rdesc{font-size:.86rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+.row .rtags{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;max-width:300px;}
 .empty{text-align:center;padding:50px 20px;color:var(--muted);background:var(--card);border:1px dashed var(--line);border-radius:var(--r);}
 
 /* ── Über Amy ── */
@@ -169,6 +181,9 @@ footer{text-align:center;color:var(--muted);font-size:.85rem;margin-top:26px;}
   .frow{grid-template-columns:1fr;gap:6px;}
   .flabel{padding-top:0;}
   .grid{grid-template-columns:1fr;}
+  .row{grid-template-columns:40px minmax(0,1fr);}
+  .row .rtags{grid-column:2;justify-content:flex-start;max-width:none;}
+  .row .rdesc{display:none;}
   .about{padding:20px 16px;}
 }
 </style>
@@ -210,6 +225,7 @@ footer{text-align:center;color:var(--muted);font-size:.85rem;margin-top:26px;}
     <div class="frow"><div class="flabel">Ich möchte üben</div><div class="chips" id="fTheme"></div></div>
     <div class="frow"><div class="flabel">Erklärung auch auf</div><div class="chips" id="fLang"></div></div>
     <div class="frow"><div class="flabel">Reihenfolge</div><div class="chips" id="fSort"></div></div>
+    <div class="frow"><div class="flabel">Ansicht</div><div class="chips" id="fView"></div></div>
 
     <div class="statusbar">
       <div class="count" id="count"></div>
@@ -634,6 +650,7 @@ const NIVEAUS = [
 ];
 const SPRACHEN = [["hu","Ungarisch"],["en","Englisch"],["it","Italienisch"],["sr","Serbisch"]];
 const SPRACH_NAME = Object.fromEntries(SPRACHEN);
+const ANSICHTEN = [["kacheln","▦ Kacheln"],["liste","☰ Liste"]];
 const SORTEN = [["niveau","Nach Niveau geordnet"],["neu","Neueste zuerst"],["lernweg","Vom Leichten zum Schweren"]];
 
 const ABSCHNITTE = [
@@ -665,7 +682,8 @@ const DATA = EX.map(e => {
 });
 
 /* ── Zustand (wird in der Adresse gespeichert, damit man gefilterte Links teilen kann) ── */
-const S = {n:"", t:"", s:"", o:"niveau", q:""};
+const S = {n:"", t:"", s:"", o:"niveau", q:"", v:"kacheln"};
+try{ const gespeichert = localStorage.getItem("daf-ansicht"); if(gespeichert==="liste"||gespeichert==="kacheln") S.v = gespeichert; }catch(e){}
 (function ladeAusAdresse(){
   try{
     const p = new URLSearchParams(location.search);
@@ -674,6 +692,7 @@ const S = {n:"", t:"", s:"", o:"niveau", q:""};
     if(p.get("sprache")) S.s = p.get("sprache");
     if(p.get("sort")) S.o = p.get("sort");
     if(p.get("suche")) S.q = p.get("suche");
+    if(p.get("ansicht")==="liste"||p.get("ansicht")==="kacheln") S.v = p.get("ansicht");
   }catch(e){}
 })();
 function schreibeAdresse(){
@@ -684,6 +703,7 @@ function schreibeAdresse(){
     if(S.s) p.set("sprache",S.s);
     if(S.o!=="niveau") p.set("sort",S.o);
     if(S.q) p.set("suche",S.q);
+    if(S.v!=="kacheln") p.set("ansicht",S.v);
     const qs = p.toString();
     history.replaceState(null,"",location.pathname+(qs?"?"+qs:"")+location.hash);
   }catch(e){}
@@ -746,7 +766,20 @@ function karte(e){
     <div class="desc">${e.desc}</div>
     <div class="tags">${tags}</div></a>`;
 }
-const grid = liste => `<div class="grid">${liste.map(karte).join("")}</div>`;
+function zeile(e){
+  const flags = (e.neu?'<span class="flag neu">Neu</span>':'') + (e.tip?'<span class="flag tipp">★ Tipp</span>':'');
+  const tags = e.th.map(x=>`<span class="tag th">${THEMA_NAME[x]||x}</span>`).join("")
+    + e.sp.map(x=>`<span class="tag sp">auch auf ${SPRACH_NAME[x]}</span>`).join("");
+  return `<a class="row" href="${e.href}" target="_blank" rel="noopener">
+    <div class="em">${e.em}</div>
+    <div style="min-width:0"><div class="ttl">${e.t}</div>
+      <div class="rline">${niveauBadges(e.nv)}${flags}<span class="date">· ${fmtDatum(e.d)}</span></div>
+      <div class="rdesc">${e.desc}</div></div>
+    <div class="rtags">${tags}</div></a>`;
+}
+const grid = liste => S.v==="liste"
+  ? `<div class="list">${liste.map(zeile).join("")}</div>`
+  : `<div class="grid">${liste.map(karte).join("")}</div>`;
 
 /* ── Hauptdarstellung ── */
 function sortieren(liste){
@@ -762,6 +795,7 @@ function zeichnen(){
   chipsZeichnen("fTheme", THEMEN, S.t, v=>ohneT.filter(e=>passtThema(e,v)).length, v=>S.t=v, "Alle Themen");
   chipsZeichnen("fLang", SPRACHEN, S.s, v=>ohneS.filter(e=>passtSprache(e,v)).length, v=>S.s=v, "egal");
   chipsZeichnen("fSort", SORTEN, S.o, null, v=>S.o=v||"niveau", null);
+  chipsZeichnen("fView", ANSICHTEN, S.v, null, v=>{ S.v=v||"kacheln"; try{localStorage.setItem("daf-ansicht",S.v);}catch(e){} }, null);
 
   const liste = sortieren(filtern());
   const out = document.getElementById("out");
