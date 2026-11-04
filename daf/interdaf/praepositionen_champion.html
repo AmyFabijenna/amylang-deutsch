@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="/daf/interdaf/passwort.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Präpositionen-Champion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1f1b24;
+    --ink-soft: #4f4858;
+    --muted: #6e6676;
+    --card: rgba(255, 252, 248, 0.90);
+    --card-solid: #fffcf8;
+    --line: rgba(92, 72, 98, 0.14);
+    --shadow: 0 14px 40px rgba(62, 48, 74, 0.10), 0 2px 6px rgba(62, 48, 74, 0.05);
+
+    --rust: #a2542b;
+    --amber: #b9853d;
+    --plum: #6a4a7a;
+    --dusk: #3d5a80;
+    --petrol: #2c6873;
+    --berry: #8e3b56;
+    --slate: #4b5878;
+
+    --ok: #2c6873;  --ok-bg: #e2eef0;
+    --no: #a03a55;  --no-bg: #f7e4ea;
+    --sel: #b9853d; --sel-bg: #fbf1e1;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: 'Lexend', system-ui, sans-serif;
+    font-weight: 400;
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-color: #ebe3e0;
+    background-image:
+      radial-gradient(ellipse 70% 50% at 8% 100%, rgba(214, 160, 110, 0.28), transparent 70%),
+      radial-gradient(ellipse 60% 45% at 95% 0%, rgba(168, 188, 214, 0.45), transparent 70%),
+      radial-gradient(ellipse 50% 40% at 70% 70%, rgba(176, 150, 190, 0.18), transparent 70%),
+      linear-gradient(165deg, #f2e8dd 0%, #ebe1e2 42%, #dfe4ec 100%);
+    background-attachment: fixed;
+    line-height: 1.55;
+  }
+
+  .deco-layer { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .deco {
+    position: absolute; top: -10vh; left: var(--x);
+    width: var(--s); height: var(--s);
+    opacity: var(--o);
+    animation: drift var(--d) linear infinite;
+    animation-delay: var(--delay);
+    will-change: transform;
+  }
+  .deco svg { width: 100%; height: 100%; display: block; }
+  @keyframes drift {
+    0%   { transform: translate3d(0, -10vh, 0) rotate(0deg); }
+    25%  { transform: translate3d(var(--sway), 22vh, 0) rotate(calc(var(--rot) * 0.25)); }
+    50%  { transform: translate3d(0, 52vh, 0) rotate(calc(var(--rot) * 0.5)); }
+    75%  { transform: translate3d(calc(var(--sway) * -1), 82vh, 0) rotate(calc(var(--rot) * 0.75)); }
+    100% { transform: translate3d(0, 118vh, 0) rotate(var(--rot)); }
+  }
+  @media (prefers-reduced-motion: reduce) { .deco { animation: none; top: var(--y); } }
+
+  .container { position: relative; z-index: 1; max-width: 920px; margin: 0 auto; padding: 28px 18px 60px; }
+
+  header { text-align: center; margin: 10px 0 30px; }
+  .eyebrow {
+    display: inline-block; font-size: 0.85rem; font-weight: 500; letter-spacing: 0.08em;
+    color: var(--plum); background: rgba(106, 74, 122, 0.09);
+    padding: 5px 14px; border-radius: 999px; margin-bottom: 14px;
+  }
+  h1 { font-size: clamp(2rem, 5vw, 2.9rem); font-weight: 600; letter-spacing: -0.01em; color: var(--ink); line-height: 1.15; }
+  h1 .accent { color: var(--rust); font-weight: 500; }
+  .subtitle { color: var(--ink-soft); font-size: 1.08rem; margin-top: 10px; font-weight: 300; }
+
+  .screen { display: none; animation: fadeIn 0.45s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+  .card {
+    background: var(--card);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    border: 1px solid var(--line);
+    border-radius: 26px;
+    box-shadow: var(--shadow);
+    padding: 28px;
+    margin-bottom: 22px;
+  }
+  .card-title { font-size: 1.3rem; font-weight: 600; margin-bottom: 18px; color: var(--ink); }
+  .intro { color: var(--ink-soft); font-size: 1rem; margin: -6px 0 18px; font-weight: 300; }
+
+  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .mode-btn {
+    display: flex; align-items: center; gap: 16px;
+    background: var(--card-solid);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 16px 18px;
+    font-family: inherit; color: var(--ink); text-align: left;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .mode-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(62,48,74,0.10); border-color: var(--c); }
+  .mode-btn:focus-visible { outline: 3px solid var(--c); outline-offset: 2px; }
+  .mode-btn.soon { cursor: default; opacity: 0.62; border-style: dashed; }
+  .mode-btn.soon:hover { transform: none; box-shadow: none; border-color: var(--line); }
+  .chip {
+    flex: 0 0 auto; min-width: 62px; height: 52px; padding: 0 10px;
+    display: grid; place-items: center;
+    border-radius: 16px; background: var(--c); color: #fff;
+    font-weight: 600; font-size: 1rem; letter-spacing: 0.01em;
+  }
+  .mode-name { font-weight: 600; font-size: 1.08rem; }
+  .mode-desc { font-size: 0.92rem; color: var(--muted); margin-top: 2px; font-weight: 400; }
+  .mode-count { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+
+  .game-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--c, var(--plum)); color: #fff;
+    padding: 9px 18px; border-radius: 999px; font-weight: 500; font-size: 0.98rem;
+  }
+  .stats { display: flex; gap: 10px; }
+  .stat {
+    background: var(--card-solid); border: 1px solid var(--line); border-radius: 16px;
+    padding: 8px 16px; text-align: center; min-width: 92px;
+  }
+  .stat-label { font-size: 0.74rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .stat-value { font-size: 1.35rem; font-weight: 600; color: var(--ink); }
+
+  .progress { height: 12px; background: rgba(92,72,98,0.10); border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--rust), var(--amber) 45%, var(--plum)); border-radius: 999px; transition: width 0.5s ease; }
+  .progress-text { text-align: right; font-size: 0.9rem; color: var(--muted); margin: 6px 4px 18px; }
+
+  .sentence-card { text-align: center; padding: 40px 28px 30px; }
+  .task { display: inline-block; font-size: 0.86rem; color: var(--plum); background: rgba(106,74,122,0.08); border-radius: 999px; padding: 4px 14px; margin-bottom: 14px; }
+  .sentence { font-size: clamp(1.35rem, 3.6vw, 1.85rem); line-height: 2.3; font-weight: 400; color: var(--ink); }
+  .slot {
+    display: inline-block; min-width: 84px; margin: 0 3px; padding: 0 14px;
+    line-height: 1.9; vertical-align: baseline;
+    border: 2px dashed rgba(92,72,98,0.30); border-radius: 14px;
+    background: rgba(255,255,255,0.7);
+    color: var(--muted); font-weight: 500; cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .slot.prep-slot { border-color: rgba(61,90,128,0.40); background: rgba(232,238,246,0.75); }
+  .slot:hover { border-color: var(--sel); }
+  .slot.selected { border-style: solid; border-color: var(--sel); background: var(--sel-bg); color: var(--ink); box-shadow: 0 0 0 4px rgba(185,133,61,0.15); }
+  .slot.correct { border-style: solid; border-color: var(--ok); background: var(--ok-bg); color: var(--ok); font-weight: 600; cursor: default; animation: pop 0.45s ease; }
+  .slot.wrong { border-style: solid; border-color: var(--no); background: var(--no-bg); color: var(--no); animation: shake 0.4s ease; }
+  @keyframes pop { 50% { transform: scale(1.08); } }
+  @keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
+  .noun { position: relative; cursor: help; border-bottom: 2px dotted rgba(106,74,122,0.45); transition: border-color 0.2s; }
+  .noun:hover, .noun.show { border-bottom-color: var(--plum); }
+  .tip {
+    display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+    background: #fffaf1; color: var(--ink);
+    border: 1px solid rgba(185,133,61,0.55); border-radius: 12px;
+    padding: 3px 14px; font-size: 0.95rem; font-weight: 500; line-height: 1.6;
+    white-space: nowrap; z-index: 50;
+    box-shadow: 0 8px 20px rgba(62,48,74,0.15);
+    pointer-events: none;
+  }
+  .tip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 7px solid transparent; border-top-color: rgba(185,133,61,0.55); }
+  .noun:hover .tip, .noun.show .tip { display: block; }
+
+  .hint {
+    display: none; margin-top: 18px; padding: 12px 18px;
+    background: var(--no-bg); color: var(--ink); border-radius: 14px;
+    font-size: 1rem; border: 1px solid rgba(160,58,85,0.25);
+  }
+  .hint .rule { display: block; margin-top: 4px; color: var(--ink-soft); font-size: 0.95rem; }
+  .helper { margin-top: 14px; font-size: 0.92rem; color: var(--muted); font-weight: 300; }
+
+  .options { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; margin: 6px 0 24px; }
+  .opt {
+    background: var(--card-solid); border: 1px solid var(--line); border-radius: 16px;
+    padding: 14px 12px; font-family: inherit; font-size: 1.12rem; font-weight: 500; color: var(--ink);
+    cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s;
+  }
+  .opt:hover { transform: translateY(-2px); border-color: var(--c, var(--plum)); box-shadow: 0 8px 18px rgba(62,48,74,0.10); }
+  .opt:active { transform: translateY(0); }
+
+  details.cheat { margin-bottom: 22px; }
+  details.cheat summary { cursor: pointer; font-weight: 500; color: var(--dusk); list-style: none; display: flex; align-items: center; gap: 10px; }
+  details.cheat summary::-webkit-details-marker { display: none; }
+  details.cheat summary::before { content: '▸'; transition: transform 0.2s; }
+  details.cheat[open] summary::before { transform: rotate(90deg); }
+  .cheat-body { margin-top: 14px; display: grid; gap: 12px; }
+  .rule-box { background: var(--card-solid); border: 1px solid var(--line); border-left: 5px solid var(--c, var(--plum)); border-radius: 16px; padding: 12px 16px; font-size: 0.98rem; }
+  .rule-box b { font-weight: 600; }
+  .rule-box .ex { display: block; color: var(--ink-soft); font-size: 0.92rem; margin-top: 3px; }
+
+  .controls { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    font-family: inherit; font-size: 1rem; font-weight: 500;
+    padding: 12px 24px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--card-solid); color: var(--ink);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(62,48,74,0.10); }
+  .btn.primary { background: var(--dusk); border-color: var(--dusk); color: #fff; }
+  .btn.primary:disabled { opacity: 0.6; cursor: default; transform: none; box-shadow: none; }
+
+  .result-title { font-size: 1.8rem; font-weight: 600; text-align: center; margin-bottom: 6px; }
+  .result-sub { text-align: center; color: var(--muted); margin-bottom: 22px; }
+  .result-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 22px; }
+  .r-stat { background: var(--card-solid); border: 1px solid var(--line); border-radius: 18px; padding: 16px 10px; text-align: center; }
+  .r-label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .r-value { font-size: 1.8rem; font-weight: 600; color: var(--plum); }
+  .name-input {
+    display: block; width: 100%; max-width: 340px; margin: 0 auto 16px;
+    font-family: inherit; font-size: 1.05rem; text-align: center;
+    padding: 12px 16px; border-radius: 14px; border: 1px solid var(--line); background: #fff; color: var(--ink);
+  }
+  .name-input:focus { outline: none; border-color: var(--dusk); box-shadow: 0 0 0 4px rgba(61,90,128,0.15); }
+  .review-list { list-style: none; display: grid; gap: 8px; }
+  .review-list li { background: var(--card-solid); border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px; font-size: 1rem; }
+  .review-list .r-rule { display: block; font-size: 0.88rem; color: var(--muted); margin-top: 2px; }
+  .review-list mark { background: var(--ok-bg); color: var(--ok); font-weight: 600; padding: 0 5px; border-radius: 6px; }
+
+  .board-entry {
+    display: grid; grid-template-columns: 44px 1fr auto auto; gap: 12px; align-items: center;
+    padding: 10px 14px; border-radius: 14px; background: var(--card-solid); border: 1px solid var(--line); margin-bottom: 8px;
+  }
+  .board-rank { font-weight: 600; color: var(--plum); text-align: center; }
+  .board-name { font-weight: 500; }
+  .board-mode { display: block; font-size: 0.82rem; color: var(--muted); font-weight: 400; }
+  .board-pts { font-weight: 600; color: var(--rust); }
+  .board-time { color: var(--muted); font-size: 0.9rem; }
+  .board-empty { color: var(--muted); text-align: center; }
+
+  .popup { position: fixed; z-index: 1000; pointer-events: none; font-weight: 600; font-size: 1.6rem; color: var(--petrol); animation: floatUp 1s ease-out forwards; }
+  .popup.combo { color: var(--rust); font-size: 1.9rem; }
+  @keyframes floatUp { from { transform: translateY(0) scale(0.9); opacity: 1; } to { transform: translateY(-70px) scale(1.1); opacity: 0; } }
+  .milestone { position: fixed; inset: 0; z-index: 2000; display: grid; place-items: center; background: rgba(242, 236, 232, 0.82); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); animation: fadeIn 0.3s ease; }
+  .milestone-inner { text-align: center; animation: scaleIn 0.5s cubic-bezier(.2,1.3,.4,1); }
+  @keyframes scaleIn { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .milestone-num { font-size: 6rem; font-weight: 700; color: var(--plum); line-height: 1; }
+  .milestone-text { font-size: 1.6rem; font-weight: 500; color: var(--ink); margin-top: 10px; }
+  .flake-burst { position: fixed; top: -20px; z-index: 3000; pointer-events: none; }
+
+  @media (max-width: 680px) {
+    .container { padding: 20px 14px 50px; }
+    .card { padding: 20px; border-radius: 22px; }
+    .mode-grid { grid-template-columns: 1fr; }
+    .sentence-card { padding: 30px 16px 22px; }
+    .result-grid { grid-template-columns: 1fr 1fr; }
+    .slot { min-width: 66px; padding: 0 10px; }
+    .stat { min-width: 76px; padding: 6px 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="deco-layer" id="deco"></div>
+
+<div class="container">
+  <header>
+    <div class="eyebrow">A2 · B1 · B2 · Deutsch üben</div>
+    <h1>Präpositionen-<span class="accent">Champion</span></h1>
+    <p class="subtitle">Welche Präposition? Welcher Artikel? Welcher Fall? – vom Alltag bis zu den Verben mit Präposition</p>
+  </header>
+
+  <div id="startScreen" class="screen active">
+    <div class="card">
+      <h2 class="card-title">Wähle dein Level</h2>
+      <p class="intro">Du klickst nur – tippen musst du nichts. Ist deine Antwort richtig, geht es automatisch weiter. Ist sie falsch, siehst du die Regel und probierst es noch einmal.</p>
+      <div class="mode-grid" id="modeGrid"></div>
+    </div>
+    <div class="card">
+      <h2 class="card-title">Bestenliste</h2>
+      <div id="menuBoard"></div>
+    </div>
+  </div>
+
+  <div id="gameScreen" class="screen">
+    <div class="game-top">
+      <span class="pill" id="modePill">Level</span>
+      <div class="stats">
+        <div class="stat"><div class="stat-label">Punkte</div><div class="stat-value" id="points">0</div></div>
+        <div class="stat"><div class="stat-label">Serie</div><div class="stat-value" id="streak">0</div></div>
+      </div>
+    </div>
+    <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText">0 / 0 Sätze</div>
+
+    <div class="card sentence-card">
+      <div class="task" id="task"></div>
+      <div class="sentence" id="sentence"></div>
+      <div class="hint" id="hint"></div>
+      <div class="helper" id="helper">Tipp: Zeig mit der Maus auf ein unterstrichenes Nomen (oder tippe darauf) – dann siehst du seinen Artikel.</div>
+    </div>
+
+    <div class="options" id="options"></div>
+
+    <details class="card cheat" id="cheat">
+      <summary>Spickzettel für dieses Level</summary>
+      <div class="cheat-body" id="cheatBody"></div>
+    </details>
+
+    <div class="controls">
+      <button class="btn" onclick="goToMenu()">← Menü</button>
+      <button class="btn" onclick="skipSentence()">Überspringen</button>
+      <button class="btn primary" onclick="endGame()">Beenden</button>
+    </div>
+  </div>
+
+  <div id="resultScreen" class="screen">
+    <div class="card">
+      <h2 class="result-title">Geschafft!</h2>
+      <p class="result-sub" id="resultSub"></p>
+      <div class="result-grid">
+        <div class="r-stat"><div class="r-label">Punkte</div><div class="r-value" id="finalPoints">0</div></div>
+        <div class="r-stat"><div class="r-label">Zeit</div><div class="r-value" id="finalTime">0:00</div></div>
+        <div class="r-stat"><div class="r-label">Beste Serie</div><div class="r-value" id="bestStreak">0</div></div>
+        <div class="r-stat"><div class="r-label">Genauigkeit</div><div class="r-value" id="accuracy">0%</div></div>
+      </div>
+      <input type="text" class="name-input" id="playerName" placeholder="Dein Name …" maxlength="20">
+      <div class="controls">
+        <button class="btn primary" id="saveBtn" onclick="saveScore()">Speichern</button>
+        <button class="btn" onclick="startGame(state.mode)">Nochmal spielen</button>
+        <button class="btn" onclick="goToMenu()">Zum Menü</button>
+      </div>
+    </div>
+    <div class="card" id="reviewCard" style="display:none">
+      <h2 class="card-title">Diese Sätze schaust du dir am besten noch einmal an</h2>
+      <ul class="review-list" id="reviewList"></ul>
+    </div>
+    <div class="card">
+      <h2 class="card-title">Bestenliste</h2>
+      <div id="resultBoard"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const sentenceData = {
+a2: [
+"Der Igel schläft im Winter unter [den] N{das|Blatt|Blättern}.",
+"Das Eichhörnchen springt auf [einen] N{der|Ast}.",
+"Die Ente schwimmt mit [ihren] N{das|Küken|Küken} auf dem Teich.",
+"Die Kühe stehen auf [der] N{die|Weide} und fressen Gras.",
+"Am Morgen treibt der Bauer die Kühe auf [die] N{die|Weide}.",
+"Ein Frosch sitzt auf [einem] N{der|Stein} im Bach.",
+"Die Bienen fliegen in [den] N{der|Bienenstock}.",
+"Der Fuchs wohnt in [einer] N{die|Höhle} im Wald.",
+"Ein Vogel baut sein Nest in [der] N{die|Hecke}.",
+"Der Hund rennt durch [den] tiefen N{der|Schnee}.",
+"Die Pferde laufen um [den] N{der|Teich}.",
+"Im Herbst fliegen die Störche in [den] N{der|Süden}.",
+"Der Hirsch steht ganz still zwischen [den] N{der|Baum|Bäumen}.",
+"Am Abend kommen die Rehe aus [dem] N{der|Wald}.",
+"Der Adler sitzt hoch oben auf [einem] N{der|Felsen}.",
+"Die Möwe fliegt auf [das] N{das|Schiff}.",
+"Der Papagei klettert auf [die] N{die|Schulter} von seinem Besitzer.",
+"Die Ameisen laufen über [den] N{der|Waldweg}.",
+"Die Hühner schlafen in [einem] kleinen N{der|Stall}.",
+"Die Fledermäuse hängen tagsüber an [der] N{die|Decke} der Höhle.",
+"Der Hase hoppelt hinter [die] N{die|Scheune}.",
+"Ich stelle die Blumen in [eine] N{die|Vase}.",
+"Nach [dem] N{der|Regen} riecht der Wald wunderbar.",
+"Wir wandern durch [ein] stilles N{das|Tal}.",
+"Der Weg führt über [einen] kleinen N{der|Hügel}.",
+"Hinter [den] N{der|Berg|Bergen} geht die Sonne unter.",
+"Die Sonne scheint durch [die] N{die|Wolke|Wolken}.",
+"Im Sommer liegen wir am See unter [einem] N{der|Sonnenschirm}.",
+"Ich lege mein Handtuch auf [den] warmen N{der|Sand}.",
+"Seit [einer] N{die|Woche} regnet es jeden Tag.",
+"Der Weg geht mitten durch [die] N{das|Feld|Felder}.",
+"Die Wolken ziehen langsam über [die] N{der|Berg|Berge}.",
+"Am Morgen liegt Nebel über [dem] N{das|Tal}.",
+"Wir sitzen am Lagerfeuer unter [den] N{der|Stern|Sternen}.",
+"Die Pilze wachsen neben [den] N{die|Wurzel|Wurzeln} der Bäume.",
+"Meine Kollegin sitzt im Büro neben [dem] N{das|Fenster}.",
+"Ich hänge meinen Mantel an [den] N{der|Haken}.",
+"Der Chef legt die Unterlagen auf [meinen] N{der|Schreibtisch}.",
+"Die Unterlagen liegen schon auf [deinem] N{der|Schreibtisch}.",
+"Nach [der] N{die|Besprechung} trinken wir einen Kaffee.",
+"Vor [dem] N{das|Meeting} lese ich schnell meine E-Mails. ||Zeitangabe (Wann?): vor + Dativ.",
+"Ich arbeite seit [einem] halben N{das|Jahr} bei dieser Firma.",
+"Mein Kollege fährt jeden Tag mit [der] N{die|S-Bahn} ins Büro.",
+"Wir sprechen in [der] N{die|Mittagspause} über den Urlaub. ||Zeitangabe (Wann?): in + Dativ.",
+"Ich stelle den Drucker in [die] N{die|Ecke}.",
+"Der Drucker steht jetzt in [der] N{die|Ecke}.",
+"Für [das] neue N{das|Projekt} brauchen wir mehr Zeit.",
+"Ohne [meinen] N{der|Laptop} kann ich nicht arbeiten.",
+"Morgen geht er zu [einem] N{das|Vorstellungsgespräch}.",
+"Sie arbeitet als Pflegerin bei [einem] N{der|Pflegedienst}.",
+"Der Bäcker steht schon um vier Uhr in [der] N{die|Backstube}.",
+"Die Köchin legt das Fleisch in [die] heiße N{die|Pfanne}.",
+"Der Kellner bringt den Wein an [den] N{der|Tisch}.",
+"Die Ärztin hängt ihren Kittel hinter [die] N{die|Tür}.",
+"Gegen [den] N{der|Stress} hilft ein kurzer Spaziergang.",
+"Die Mechanikerin liegt unter [dem] N{das|Auto}.",
+"Die Kollegen stehen um [die] N{die|Kaffeemaschine} und plaudern.",
+"Nach [dem] N{der|Feierabend} gehe ich ins Fitnessstudio.",
+"Der Praktikant legt die Briefe in [ein] anderes N{das|Fach}.",
+"Die Briefe liegen schon in [einem] anderen N{das|Fach}.",
+"Die Gärtnerin arbeitet heute hinter [dem] N{das|Rathaus}.",
+"Ich klebe einen Zettel an [den] N{der|Bildschirm}.",
+"Der Zettel klebt noch an [deinem] N{der|Bildschirm}.",
+"Wir treffen uns heute Abend vor [dem] N{das|Theater}.",
+"Am Samstag gehen wir zu [einer] N{die|Geburtstagsfeier}.",
+"Sie fährt am Wochenende zu [ihren] N{die|Großeltern}.",
+"Wir sitzen zusammen auf [dem] N{der|Balkon} und reden.",
+"Komm, wir setzen uns auf [die] N{die|Terrasse}!",
+"Ich bringe einen Kuchen für [die] N{die|Gastgeberin} mit.",
+"Die Gäste kommen durch [die] N{die|Gartentür}.",
+"Häng deine Jacke einfach über [den] N{der|Stuhl}.",
+"Die Jacken hängen schon in [der] N{die|Garderobe}.",
+"Beim Essen sitzt er zwischen [seiner] N{die|Frau} und [seiner] N{die|Schwester}.",
+"Die Kerzen stehen zwischen [den] N{der|Teller|Tellern}.",
+"Ich stelle die Kerzen zwischen [die] N{das|Glas|Gläser}.",
+"Nach [dem] N{das|Dessert} spielen wir Karten.",
+"Bei [einer] N{die|Dinnerparty} lernt man oft neue Leute kennen.",
+"Kommst du ohne [deinen] N{der|Partner} zur Party?",
+"Ich habe ein kleines Geschenk für [eure] N{die|Tochter}.",
+"Seit [unserem] N{der|Umzug} sehen wir uns leider selten.",
+"Die Musik kommt aus [der] N{die|Küche}.",
+"Lena wohnt direkt gegenüber [der] N{die|Bibliothek}.",
+"Sie stellt die Salatschüssel in [die] N{die|Mitte} des Tisches.",
+"Ich lege das Gemüse in [den] N{der|Einkaufswagen}.",
+"Die Äpfel liegen in [einer] N{die|Kiste} neben den Birnen.",
+"Die Verkäuferin stellt die Flaschen in [ein] neues N{das|Regal}.",
+"Ich bezahle an [der] N{die|Kasse} mit Karte.",
+"Für [ein] N{das|Kilo} Tomaten zahle ich drei Euro.",
+"Er steckt das Wechselgeld in [die] N{die|Hosentasche}.",
+"Die Schals liegen neben [den] N{die|Mütze|Mützen}.",
+"Ich bummle heute durch [die] N{die|Fußgängerzone}.",
+"Am Samstag kaufen wir Käse bei [einem] N{der|Bauer|Bauern} aus der Gegend.",
+"Ohne [eine] N{die|Einkaufsliste} vergesse ich immer etwas.",
+"Die Milch steht hinter [den] N{der|Joghurt|Joghurts}.",
+"Nach [dem] N{der|Einkauf} trinken wir einen Kaffee.",
+"Die Kundin probiert die Schuhe vor [dem] N{der|Spiegel} an.",
+"Ich hänge das Kleid zurück an [die] N{die|Stange}.",
+"Wir fahren mit [der] N{die|Fähre} auf die Insel.",
+"Der Bus hält direkt vor [dem] N{das|Rathaus}.",
+"Wir steigen in [die] N{die|Seilbahn}.",
+"Jetzt sitzen wir schon in [der] N{die|Seilbahn}.",
+"Ich lege meinen Pass in [den] N{der|Rucksack}.",
+"Der Pass ist in [meinem] N{der|Rucksack}.",
+"Am Abend spazieren wir durch [die] N{die|Altstadt}.",
+"Das Hotel liegt hinter [der] N{die|Kirche}.",
+"Der Zug fährt durch [einen] langen N{der|Tunnel}.",
+"Wir wohnen in [einer] kleinen N{die|Pension} am Meer.",
+"Der Koffer passt nicht unter [den] N{der|Sitz}.",
+"Wir fliegen über [den] N{der|Atlantik} nach New York.",
+"Vor [der] N{die|Abfahrt} kaufe ich noch Wasser. ||Zeitangabe (Wann?): vor + Dativ.",
+"Der Radweg führt um [den] ganzen N{der|See}.",
+"Wir machen ein Foto vor [dem] N{der|Brunnen}.",
+"Ich gieße frisches Wasser in [die] N{die|Gießkanne}.",
+"Die Pflanze steht seit Wochen auf [der] N{die|Fensterbank}.",
+"Ich stelle die Pflanze auf [die] N{die|Fensterbank}.",
+"Wir hängen die Lichterkette über [das] N{das|Regal}.",
+"Die Uhr hängt über [der] N{die|Tür}.",
+"Ich räume die Teller in [den] N{der|Geschirrspüler}.",
+"Die Socken liegen unter [der] N{die|Heizung}.",
+"Der Schlüssel fällt hinter [die] N{die|Kommode}.",
+"Nach [dem] N{das|Aufstehen} öffne ich das Fenster.",
+"In [der] N{die|Nacht} ist es hier ganz still. ||Zeitangabe (Wann?): in + Dativ.",
+"In [einer] N{die|Stunde} beginnt der Film. ||Zeitangabe (Wann?): in + Dativ.",
+"Ich jogge jeden Morgen durch [den] N{der|Stadtpark}.",
+"Der Ball fliegt über [das] N{das|Tor}.",
+"Der Ball liegt hinter [dem] N{das|Tor}.",
+"Sie spielt seit [ihrer] N{die|Kindheit} Klavier.",
+"Am Sonntag spielen wir gegen [eine] starke N{die|Mannschaft}.",
+"Ich gehe mit [meinen] N{die|Kollegin|Kolleginnen} zum Tanzkurs.",
+"Die Kletterin hängt an [einem] dicken N{das|Seil}.",
+"Ich lege die Yogamatte auf [den] N{der|Boden}.",
+"Beim Yoga sitze ich gern auf [einem] N{das|Kissen}.",
+"Ohne [einen] N{der|Helm} fahre ich nicht Rad.",
+"Die Zuschauer sitzen hinter [dem] N{der|Zaun}.",
+"Durch [das] N{das|Fernglas} sehen wir die Gämsen.",
+"Nach [der] N{die|Operation} muss er eine Woche im Bett bleiben.",
+"Gegen [die] N{die|Kopfschmerzen} trinke ich viel Wasser.",
+"Sie legt ein kühles Tuch auf [die] N{die|Stirn}.",
+"Die Pflaster liegen in [der] N{die|Schublade}.",
+"Ich schneide die Zwiebeln mit [einem] scharfen N{das|Messer}.",
+"Gib noch etwas Salz in [die] N{die|Suppe}!",
+"Die Suppe kocht auf [dem] N{der|Herd}.",
+"Ich stelle den Topf auf [den] N{der|Herd}.",
+"Den Kuchen backe ich für [unsere] N{die|Nachbarin}.",
+"Heute essen wir Spaghetti mit [einer] scharfen N{die|Tomatensoße}.",
+"Er trinkt Tee aus [einer] großen N{die|Tasse}.",
+"Ich schiebe das Blech in [den] heißen N{der|Ofen}.",
+"Das Brot ist in [der] N{die|Brotdose}.",
+"Nach [dem] N{das|Kochen} räume ich die Küche auf.",
+"Vor [dem] N{das|Schlafengehen} trinke ich Kräutertee. ||Zeitangabe (Wann?): vor + Dativ.",
+"Heute bekomme ich eine Nachricht von [meiner] N{die|Chefin}.",
+"Das Paket ist von [deinen] N{die|Eltern}.",
+"Er wohnt seit dem Studium bei [einer] N{die|Gastfamilie}.",
+"Ich fahre mit [meinem] N{der|Roller} zur Arbeit.",
+"Die Kinder rennen um [das] N{das|Haus}.",
+"Ich setze mich neben [meinen] N{der|Kollege|Kollegen}. ||Wechselpräposition „neben“: Hier fragst du Wohin? (sich setzen) – also Akkusativ.",
+"Mein Kollege sitzt den ganzen Tag vor [dem] N{der|Computer}.",
+"Zwischen [den] N{der|Kurs|Kursen} machen wir eine kurze Pause. ||Zeitangabe (Wann?): zwischen + Dativ."
+],
+b1: [
+"Ich denke oft [^an/über/von] [meine] N{die|Großmutter} in Ungarn. ||denken an + Akkusativ",
+"Erinnerst du dich noch [^an] [unseren] ersten N{der|Urlaub} in Italien? ||sich erinnern an + Akkusativ",
+"Sie hat sich schnell [^an] [ihren] neuen N{der|Arbeitsweg} gewöhnt. ||sich gewöhnen an + Akkusativ",
+"Morgen nehme ich [^an] [einem] N{der|Erste-Hilfe-Kurs} teil. ||teilnehmen an + Dativ (!)",
+"Viele Kinder glauben [^an] [den] N{der|Weihnachtsmann}. ||glauben an + Akkusativ",
+"Hast du [^an/über] [die] N{die|Milch} gedacht? ||denken an + Akkusativ",
+"Er hat nicht [^an/über] [den] N{der|Hochzeitstag} seiner Eltern gedacht. ||denken an + Akkusativ",
+"Erinnerst du dich [^an] [die] N{die|Lehrerin} aus der Volksschule? ||sich erinnern an + Akkusativ",
+"Ich gewöhne mich langsam [^an] [die] N{die|Zeitumstellung}. ||sich gewöhnen an + Akkusativ",
+"Am Freitag nehmen wir [^an] [einer] N{die|Weinverkostung} teil. ||teilnehmen an + Dativ (!)",
+"Wie lange arbeitest du schon [^an] [der] N{die|Präsentation}? ||arbeiten an + Dativ (!)",
+"Bitte achte [^auf] [die] N{die|Rechtschreibung}! ||achten auf + Akkusativ",
+"Achtung, achte [^auf] [den] N{der|Radfahrer}! ||achten auf + Akkusativ",
+"Kannst du heute Abend [^auf] [unseren] N{der|Hund} aufpassen? ||aufpassen auf + Akkusativ",
+"Pass gut [^auf] [deine] N{die|Tasche} auf, hier gibt es Taschendiebe! ||aufpassen auf + Akkusativ",
+"Die Kinder freuen sich schon [^auf/über] [die] N{die|Sommerferien}. ||sich freuen auf + Akkusativ (etwas kommt noch)",
+"Meine Tochter freut sich [^auf/über] [den] ersten N{der|Schultag}. ||sich freuen auf + Akkusativ (etwas kommt noch)",
+"Er bereitet sich gut [^auf] [das] N{das|Vorstellungsgespräch} vor. ||sich vorbereiten auf + Akkusativ",
+"Wir haben uns lange [^auf] [die] N{die|Prüfung} vorbereitet. ||sich vorbereiten auf + Akkusativ",
+"Ich warte schon seit Tagen [^auf] [eine] N{die|Antwort} von der Firma. ||warten auf + Akkusativ",
+"Sie hat noch nicht [^auf] [meine] N{die|Nachricht} geantwortet. ||antworten auf + Akkusativ",
+"Bitte antworte bald [^auf] [meine] N{die|Einladung}. ||antworten auf + Akkusativ",
+"Wie reagiert dein Chef [^auf] [den] N{der|Vorschlag}? ||reagieren auf + Akkusativ",
+"Die Rosen reagieren empfindlich [^auf] [den] N{der|Frost}. ||reagieren auf + Akkusativ",
+"Du kannst dich immer [^auf] [deine] N{der|Freund|Freunde} verlassen. ||sich verlassen auf + Akkusativ",
+"Die Eltern sind sehr stolz [^auf] [ihre] N{die|Tochter}. ||stolz auf + Akkusativ",
+"Wir sind sehr stolz [^auf] [unser] N{das|Team}. ||stolz auf + Akkusativ",
+"Wir sind gespannt [^auf] [den] neuen N{der|Film} dieser Regisseurin. ||gespannt auf + Akkusativ",
+"Beim Lernen konzentriere ich mich [^auf] [die] wichtigsten N{das|Wort|Wörter}. ||sich konzentrieren auf + Akkusativ",
+"Er ist neugierig [^auf] [die] neue N{die|Mitbewohnerin}. ||neugierig auf + Akkusativ",
+"Ich habe Lust [^auf] [ein] großes N{das|Eis}. ||Lust haben auf + Akkusativ",
+"Ich habe überhaupt keine Lust [^auf] [den] N{der|Abwasch}. ||Lust haben auf + Akkusativ",
+"Ich bedanke mich [^bei/für] [der] N{die|Nachbarin} für die Blumen. ||sich bedanken bei + Dativ (Person)",
+"Er entschuldigt sich [^bei/für] [seiner] N{die|Kollegin} für den Fehler. ||sich entschuldigen bei + Dativ (Person)",
+"Wir beschweren uns [^bei/über] [der] N{die|Hausverwaltung}. ||sich beschweren bei + Dativ (Person, Stelle)",
+"Mein Bruder arbeitet seit Kurzem [^bei/für/in] [einer] N{die|Versicherung}. ||arbeiten bei + Dativ (Firma)",
+"Ich bewerbe mich [^bei/für/um] [einer] N{die|Bank} in Wien. ||sich bewerben bei + Dativ (Firma)",
+"Kannst du mir [^bei/mit] [der] N{die|Steuererklärung} helfen? ||helfen bei + Dativ",
+"Interessierst du dich [^für] [die] N{die|Geschichte} von Wien? ||sich interessieren für + Akkusativ",
+"Mein Vater interessiert sich sehr [^für] [die] N{die|Politik}. ||sich interessieren für + Akkusativ",
+"Am Ende hat sie sich [^für/gegen] [das] rote N{das|Kleid} entschieden. ||sich entscheiden für + Akkusativ",
+"Danke [^für] [deine] N{die|Hilfe} beim Umzug! ||danken für + Akkusativ",
+"Vielen Dank [^für] [den] leckeren N{der|Apfelstrudel}! ||danken für + Akkusativ",
+"Wir bedanken uns [^für/bei] [die] tolle N{die|Einladung}. ||sich bedanken für + Akkusativ (Sache)",
+"Entschuldigung [^für] [die] N{die|Verspätung}! ||sich entschuldigen für + Akkusativ (Sache)",
+"Wer sorgt am Wochenende [^für] [die] N{die|Pflanze|Pflanzen}? ||sorgen für + Akkusativ",
+"Wer ist [^für] [die] N{die|Bestellung} verantwortlich? ||verantwortlich für + Akkusativ",
+"Dieses Wetter ist typisch [^für] [den] N{der|November}. ||typisch für + Akkusativ",
+"Unsere Nachbarin engagiert sich [^für/in] [den] N{der|Tierschutz}. ||sich engagieren für + Akkusativ",
+"Dieses Restaurant ist bekannt [^für] [seine] N{die|Fischsuppe}. ||bekannt für + Akkusativ",
+"Meine Kollegin ist zuständig [^für] [die] N{die|Urlaubsplanung}. ||zuständig für + Akkusativ",
+"Sie hat kaum Zeit [^für] [ihre] N{das|Hobby|Hobbys}. ||Zeit haben für + Akkusativ",
+"Ich habe mich [^für/zu] [einen] N{der|Spanischkurs} angemeldet. ||sich anmelden für + Akkusativ",
+"Die Mannschaft kämpft [^gegen] [den] N{der|Abstieg}. ||kämpfen gegen + Akkusativ",
+"Viele Leute protestieren [^gegen/für] [den] N{der|Bau} der neuen Autobahn. ||protestieren gegen + Akkusativ",
+"Unser Team gewinnt [^gegen] [die] N{die|Mannschaft} aus Linz. ||gewinnen gegen + Akkusativ",
+"Er hat sich im Urlaub [^in] [eine] N{die|Surflehrerin} verliebt. ||sich verlieben in + Akkusativ",
+"Mein Bruder ist total [^in] [die] neue N{die|Nachbarin} verliebt. ||verliebt in + Akkusativ",
+"Wann fängst du [^mit] [der] N{die|Masterarbeit} an? ||anfangen mit + Dativ",
+"Ich höre jetzt endlich [^mit] [dem] N{das|Rauchen} auf. ||aufhören mit + Dativ",
+"Wann beginnt ihr [^mit] [dem] N{der|Umbau}? ||beginnen mit + Dativ",
+"In meiner Freizeit beschäftige ich mich gern [^mit] [der] N{die|Fotografie}. ||sich beschäftigen mit + Dativ",
+"Die Schüler beschäftigen sich [^mit] [einem] spannenden N{das|Projekt}. ||sich beschäftigen mit + Dativ",
+"Ich telefoniere jeden Sonntag [^mit] [meiner] N{die|Schwester} in Kanada. ||telefonieren mit + Dativ",
+"Auf der Party unterhalte ich mich lange [^mit/über/von] [einem] N{der|Koch} aus Peru. ||sich unterhalten mit + Dativ (Person)",
+"Morgen spricht er [^mit/über/von] [der] N{die|Vermieterin}. ||sprechen mit + Dativ (Person)",
+"Bist du [^mit] [dem] N{das|Ergebnis} zufrieden? ||zufrieden mit + Dativ",
+"Die Chefin ist [^mit] [unserer] N{die|Arbeit} sehr zufrieden. ||zufrieden mit + Dativ",
+"Bist du [^mit] [deinem] neuen N{das|Handy} zufrieden? ||zufrieden mit + Dativ",
+"Ich bin nicht [^mit] [deinem] N{der|Plan} einverstanden. ||einverstanden mit + Dativ",
+"Sie ist seit zehn Jahren [^mit] [einem] N{der|Musiker} verheiratet. ||verheiratet mit + Dativ",
+"Mein Kollege ist [^mit] [einer] N{die|Kollegin} aus der Buchhaltung befreundet. ||befreundet mit + Dativ",
+"Ich treffe mich heute [^mit] [meiner] N{die|Kollegin} zum Mittagessen. ||sich treffen mit + Dativ",
+"Wir haben nicht [^mit] [dem] N{der|Stau} gerechnet. ||rechnen mit + Dativ",
+"Ich rechne [^mit] [einer] N{die|Verspätung} von einer Stunde. ||rechnen mit + Dativ",
+"Der Tourist fragt [^nach] [dem] N{der|Weg} zum Museum. ||fragen nach + Dativ",
+"Sie fragt die Verkäuferin [^nach] [dem] N{der|Preis} der Jacke. ||fragen nach + Dativ",
+"Der Kellner fragt [^nach] [unseren] N{der|Wunsch|Wünschen}. ||fragen nach + Dativ",
+"Er fragt [^nach] [der] N{die|Telefonnummer} der Ärztin. ||fragen nach + Dativ",
+"Ich suche schon lange [^nach] [einer] günstigen N{die|Wohnung}. ||suchen nach + Dativ",
+"Die Küche riecht [^nach] [dem] N{das|Brot}, das du gebacken hast. ||riechen nach + Dativ",
+"Ich ärgere mich [^über] [den] N{der|Lärm} auf der Baustelle. ||sich ärgern über + Akkusativ",
+"Ich ärgere mich [^über] [meinen] eigenen N{der|Fehler}. ||sich ärgern über + Akkusativ",
+"Er ärgert sich [^über] [die] lange N{die|Wartezeit}. ||sich ärgern über + Akkusativ",
+"Sie hat sich sehr [^über/auf] [dein] N{das|Geschenk} gefreut. ||sich freuen über + Akkusativ (etwas ist schon da)",
+"Ich habe mich sehr [^über/auf] [deinen] N{der|Anruf} gefreut. ||sich freuen über + Akkusativ (etwas ist schon da)",
+"Vor der Reise informieren wir uns [^über] [die] N{die|Einreisebestimmung|Einreisebestimmungen}. ||sich informieren über + Akkusativ",
+"Im Kurs diskutieren wir [^über] [das] N{das|Thema} Klimawandel. ||diskutieren über + Akkusativ",
+"Wir diskutieren lange [^über] [den] N{der|Urlaubsort}. ||diskutieren über + Akkusativ",
+"Alle lachen [^über] [den] N{der|Witz} meines Onkels. ||lachen über + Akkusativ",
+"Wir lachen noch heute [^über] [die] N{die|Geschichte} mit dem Hund. ||lachen über + Akkusativ",
+"Ich muss noch [^über] [dein] N{das|Angebot} nachdenken. ||nachdenken über + Akkusativ",
+"Hast du schon [^über] [meinen] N{der|Vorschlag} nachgedacht? ||nachdenken über + Akkusativ",
+"Mein Vater regt sich immer [^über] [die] N{die|Nachricht|Nachrichten} im Fernsehen auf. ||sich aufregen über + Akkusativ",
+"Die Zeitung berichtet [^über/von] [den] N{der|Unfall} auf der Autobahn. ||berichten über + Akkusativ",
+"Im Kurs sprechen wir heute [^über/von] [die] N{die|Umwelt}. ||sprechen über + Akkusativ (Thema)",
+"Er wundert sich [^über] [das] warme N{das|Wetter} im Dezember. ||sich wundern über + Akkusativ",
+"Wir sind sehr glücklich [^über] [die] N{die|Geburt} unseres Sohnes. ||glücklich über + Akkusativ",
+"Sie ist traurig [^über] [den] N{der|Abschied} von ihren Kollegen. ||traurig über + Akkusativ",
+"Wer kümmert sich [^um] [euren] N{der|Garten}, wenn ihr im Urlaub seid? ||sich kümmern um + Akkusativ",
+"Sie hat sich lange [^um] [ihre] kranke N{die|Mutter} gekümmert. ||sich kümmern um + Akkusativ",
+"Kümmere dich bitte [^um] [die] N{der|Gast|Gäste}! ||sich kümmern um + Akkusativ",
+"Darf ich Sie [^um] [einen] N{der|Gefallen} bitten? ||bitten um + Akkusativ",
+"Ich bitte dich [^um] [deine] N{die|Hilfe}. ||bitten um + Akkusativ",
+"Sie bewirbt sich [^um/für] [eine] N{die|Stelle} als Grafikerin. ||sich bewerben um + Akkusativ (Stelle)",
+"In diesem Roman geht es [^um] [eine] junge N{die|Ärztin} in Wien. ||es geht um + Akkusativ",
+"Ich mache mir Sorgen [^um/über] [meinen] N{der|Opa}. ||sich Sorgen machen um + Akkusativ",
+"Die Kinder streiten sich [^um/über] [das] letzte N{das|Stück} Pizza. ||sich streiten um + Akkusativ",
+"Viele Menschen leiden [^unter/an] [der] N{die|Hitze}. ||leiden unter + Dativ",
+"Leidest du auch [^unter/an] [dem] ständigen N{der|Zeitdruck}? ||leiden unter + Dativ",
+"Ich träume [^von] [einem] N{das|Haus} am Meer. ||träumen von + Dativ",
+"Die Studentin träumt [^von] [einer] N{die|Karriere} als Pilotin. ||träumen von + Dativ",
+"Erzähl mal [^von/über] [deiner] N{die|Reise} nach Japan! ||erzählen von + Dativ",
+"Mein Opa erzählt gern [^von/über] [seiner] N{die|Kindheit} auf dem Bauernhof. ||erzählen von + Dativ",
+"Ob wir grillen, hängt [^von] [der] N{die|Wettervorhersage} ab. ||abhängen von + Dativ",
+"Im Urlaub erholt sie sich [^von] [der] anstrengenden N{die|Arbeit}. ||sich erholen von + Dativ",
+"Am Ende verabschieden wir uns [^von] [unseren] N{der|Gast|Gästen}. ||sich verabschieden von + Dativ",
+"Sie verabschiedet sich [^von] [ihren] N{die|Kollegin|Kolleginnen}. ||sich verabschieden von + Dativ",
+"Die Kinder sind ganz begeistert [^von/über] [der] N{die|Zaubershow}. ||begeistert von + Dativ",
+"Die Gäste sind begeistert [^von/über] [deinem] N{der|Kuchen}. ||begeistert von + Dativ",
+"Ich bin enttäuscht [^von/über] [meinem] N{das|Prüfungsergebnis}. ||enttäuscht von + Dativ",
+"Sie ist fest überzeugt [^von] [ihrer] N{die|Idee}. ||überzeugt von + Dativ",
+"Was hältst du [^von] [der] neuen N{die|Chefin}? ||halten von + Dativ",
+"Mein Sohn hat Angst [^vor/um] [dem] N{der|Zahnarzt}. ||Angst haben vor + Dativ (!)",
+"Hast du Angst [^vor/um] [der] N{die|Prüfung}? ||Angst haben vor + Dativ (!)",
+"Die Polizei warnt [^vor] [dem] N{das|Glatteis}. ||warnen vor + Dativ",
+"Das Kind fürchtet sich [^vor] [dem] N{das|Gewitter}. ||sich fürchten vor + Dativ",
+"Die Creme schützt [^vor/gegen] [der] starken N{die|Sonne}. ||schützen vor + Dativ",
+"Wir laden euch herzlich [^zu/auf] [unserer] N{die|Hochzeit} ein. ||einladen zu + Dativ",
+"Wir gratulieren dir herzlich [^zu] [deinem] N{der|Geburtstag}. ||gratulieren zu + Dativ",
+"Die Schuhe passen gut [^zu] [deinem] N{das|Kleid}. ||passen zu + Dativ",
+"Diese Insel gehört [^zu] [den] schönsten N{der|Ort|Orten} der Welt. ||gehören zu + Dativ",
+"Das Ordnen der Post gehört [^zu] [meinen] N{die|Aufgabe|Aufgaben}. ||gehören zu + Dativ",
+"Die Ärztin rät ihm [^zu] [einer] längeren N{die|Pause}. ||raten zu + Dativ",
+"Das ständige Streiten führt [^zu] [einer] N{die|Trennung}. ||führen zu + Dativ",
+"Er bastelt schon seit Wochen [^an] [einem] N{das|Vogelhaus}. ||arbeiten / basteln an + Dativ (!)",
+"Am Wochenende wartet sie ungeduldig [^auf] [die] N{die|Postbotin}. ||warten auf + Akkusativ",
+"Ich freue mich so [^auf/über] [das] N{das|Wiedersehen} mit dir nächste Woche! ||sich freuen auf + Akkusativ (etwas kommt noch)",
+"Der Hund passt [^auf] [das] N{das|Baby} auf. ||aufpassen auf + Akkusativ",
+"Viele Leute interessieren sich [^für] [den] N{der|Garten} hinter dem Schloss. ||sich interessieren für + Akkusativ",
+"Die Schülerin entschuldigt sich [^bei/für] [ihrem] N{der|Lehrer}. ||sich entschuldigen bei + Dativ (Person)",
+"Wir freuen uns sehr [^über/auf] [die] vielen N{die|Glückwunschkarte|Glückwunschkarten}, die wir bekommen haben. ||sich freuen über + Akkusativ (etwas ist schon da)",
+"Denk bitte [^an/über] [deinen] N{der|Termin} beim Friseur! ||denken an + Akkusativ",
+"Viele junge Leute träumen [^von] [einer] N{die|Weltreise}. ||träumen von + Dativ",
+"Mein Nachbar beschwert sich ständig [^über/bei] [die] laute N{die|Musik}. ||sich beschweren über + Akkusativ (Sache)"
+],
+b2: [
+"Mein Großvater ist [^an] [einer] seltenen N{die|Krankheit} erkrankt. ||erkranken an + Dativ",
+"Sie leidet seit Jahren [^an/unter] [einer] N{die|Pollenallergie}. ||leiden an + Dativ (Krankheit)",
+"Dass das Projekt so lange dauert, liegt [^an/in] [der] schlechten N{die|Planung}. ||liegen an + Dativ (= der Grund ist)",
+"Ich zweifle keine Sekunde [^an] [deiner] N{die|Ehrlichkeit}. ||zweifeln an + Dativ",
+"Trotz aller Kritik hält die Regierung [^an] [ihrem] N{der|Plan} fest. ||festhalten an + Dativ",
+"In vielen Schulen mangelt es [^an] [den] nötigen N{die|Lehrkraft|Lehrkräften}. ||mangeln an + Dativ",
+"Das Projekt ist [^an] [den] hohen N{die|Kosten} gescheitert. ||scheitern an + Dativ",
+"Bei der Planung orientieren wir uns [^an] [den] N{das|Bedürfnis|Bedürfnissen} der Kunden. ||sich orientieren an + Dativ",
+"Wir müssen uns [^an] [die] neuen N{die|Vorschrift|Vorschriften} anpassen. ||sich anpassen an + Akkusativ",
+"Bei Fragen wenden Sie sich bitte [^an] [die] N{die|Personalabteilung}. ||sich wenden an + Akkusativ",
+"Bei schwierigen Fragen wende ich mich immer [^an] [meine] N{die|Mentorin}. ||sich wenden an + Akkusativ",
+"Die Ministerin appelliert [^an] [die] N{die|Bevölkerung}, Energie zu sparen. ||appellieren an + Akkusativ",
+"Leider halten sich nicht alle [^an] [die] N{die|Geschwindigkeitsbegrenzung}. ||sich halten an + Akkusativ",
+"Unser Grundstück grenzt direkt [^an] [einen] N{der|Wald}. ||grenzen an + Akkusativ",
+"Der Film basiert [^auf] [einer] wahren N{die|Geschichte}. ||basieren auf + Dativ (!)",
+"Der Kunde beharrt [^auf] [seiner] N{die|Forderung}. ||beharren auf + Dativ (!)",
+"Meine Chefin besteht [^auf] [einem] schriftlichen N{der|Bericht}. ||bestehen auf + Dativ (!) = fordern",
+"Die Jury besteht [^aus/auf/in] [den] N{der|Trainer|Trainern} aller Vereine. ||bestehen aus + Dativ = sich zusammensetzen",
+"Die Schwierigkeit besteht [^in/aus] [der] N{die|Finanzierung}. ||bestehen in + Dativ = liegen in",
+"Die Studie fußt [^auf] [einer] N{die|Umfrage} unter 2000 Personen. ||fußen auf + Dativ (!)",
+"Die neue Regel wirkt sich positiv [^auf] [das] N{das|Betriebsklima} aus. ||sich auswirken auf + Akkusativ",
+"Ich beschränke mich heute [^auf] [die] wichtigsten N{der|Punkt|Punkte}. ||sich beschränken auf + Akkusativ",
+"Meine Frage bezieht sich [^auf] [Ihre] N{die|E-Mail} vom Montag. ||sich beziehen auf + Akkusativ",
+"Leider ist er gar nicht [^auf] [meinen] N{der|Einwand} eingegangen. ||eingehen auf + Akkusativ",
+"Die Ärztin weist [^auf] [die] möglichen N{die|Nebenwirkung|Nebenwirkungen} hin. ||hinweisen auf + Akkusativ",
+"Die Kanzlei hat sich [^auf] [das] N{das|Mietrecht} spezialisiert. ||sich spezialisieren auf + Akkusativ",
+"Der Autor stützt sich [^auf] [eine] große N{die|Studie} aus Schweden. ||sich stützen auf + Akkusativ",
+"Aus Umweltgründen verzichten wir [^auf] [das] eigene N{das|Auto}. ||verzichten auf + Akkusativ",
+"Wir zählen [^auf/zu] [deine] N{die|Unterstützung}! ||zählen auf + Akkusativ",
+"Viele Familien sind [^auf] [das] zweite N{das|Einkommen} angewiesen. ||angewiesen auf + Akkusativ",
+"Die Kosten belaufen sich [^auf] [eine] halbe N{die|Million} Euro. ||sich belaufen auf + Akkusativ",
+"Der Erfolg ist vor allem [^auf] [die] gute N{die|Zusammenarbeit} zurückzuführen. ||zurückführen auf + Akkusativ",
+"Das Wort stammt [^aus/von] [dem] N{das|Griechische|Griechischen}. ||stammen aus + Dativ",
+"Das Ergebnis ergibt sich [^aus] [der] N{die|Befragung} vom Juni. ||sich ergeben aus + Dativ",
+"Die neue Firma ist [^aus] [einem] kleinen N{das|Start-up} hervorgegangen. ||hervorgehen aus + Dativ",
+"Die Klasse setzt sich [^aus] [den] N{der|Schüler|Schülern} zweier Schulen zusammen. ||sich zusammensetzen aus + Dativ",
+"Sie übersetzt Romane [^aus/von] [dem] N{das|Polnische|Polnischen}. ||übersetzen aus + Dativ",
+"Bitte erkundigen Sie sich [^bei/nach] [der] N{die|Gemeinde}. ||sich erkundigen bei + Dativ (Person, Stelle)",
+"Er erkundigt sich [^nach/bei/über] [den] N{die|Öffnungszeit|Öffnungszeiten} des Museums. ||sich erkundigen nach + Dativ (Sache)",
+"Das Hotel zeichnet sich [^durch] [seinen] persönlichen N{der|Service} aus. ||sich auszeichnen durch + Akkusativ",
+"Die Zwillinge unterscheiden sich nur [^durch/in] [die] N{die|Haarfarbe}. ||sich unterscheiden durch + Akkusativ",
+"Dieses Material eignet sich gut [^für/zu] [den] N{der|Außenbereich}. ||sich eignen für + Akkusativ",
+"Sie setzt sich seit Jahren [^für] [die] N{das|Recht|Rechte} von Geflüchteten ein. ||sich einsetzen für + Akkusativ",
+"Eltern haften [^für] [ihre] N{das|Kind|Kinder}. ||haften für + Akkusativ",
+"Die Expertin plädiert [^für/gegen] [eine] N{die|Vier-Tage-Woche}. ||plädieren für + Akkusativ",
+"Er schämt sich [^für] [sein] N{das|Verhalten} auf der Feier. ||sich schämen für + Akkusativ",
+"Die Stadt wirbt mit Plakaten [^für/um] [den] neuen N{der|Radweg}. ||werben für + Akkusativ",
+"Die Partei spricht sich klar [^gegen/für] [den] N{der|Plan} aus. ||sich aussprechen gegen + Akkusativ",
+"Die Anwohner wehren sich [^gegen] [den] N{der|Fluglärm}. ||sich wehren gegen + Akkusativ",
+"Das Unternehmen hat [^gegen] [das] N{das|Gesetz} verstoßen. ||verstoßen gegen + Akkusativ",
+"Die Behörden gehen hart [^gegen] [die] N{die|Schwarzarbeit} vor. ||vorgehen gegen + Akkusativ",
+"Nach der Impfung ist man immun [^gegen] [das] N{das|Virus}. ||immun gegen + Akkusativ",
+"Die Patientin hat nicht [^in] [die] N{die|Operation} eingewilligt. ||einwilligen in + Akkusativ",
+"Misch dich bitte nicht [^in] [meine] N{die|Angelegenheit|Angelegenheiten} ein! ||sich einmischen in + Akkusativ",
+"Die Firma investiert [^in] [eine] neue N{die|Produktionshalle}. ||investieren in + Akkusativ",
+"Im Märchen verwandelt sich der Frosch [^in] [einen] N{der|Prinz|Prinzen}. ||sich verwandeln in + Akkusativ",
+"Versetz dich doch mal [^in] [meine] N{die|Lage}! ||sich versetzen in + Akkusativ",
+"Da habe ich mich [^in/bei] [der] N{die|Uhrzeit} geirrt. ||sich irren in + Dativ (!)",
+"Ich habe mich [^in] [meiner] N{die|Kollegin} getäuscht. ||sich täuschen in + Dativ (!)",
+"Er hat sich inzwischen [^mit] [der] N{die|Kündigung} abgefunden. ||sich abfinden mit + Dativ",
+"Wir setzen uns [^mit] [der] N{die|Kritik} der Kunden auseinander. ||sich auseinandersetzen mit + Dativ",
+"Die Konferenz befasst sich [^mit] [dem] N{der|Klimawandel}. ||sich befassen mit + Dativ",
+"Er begnügt sich [^mit] [einer] kleinen N{die|Wohnung}. ||sich begnügen mit + Dativ",
+"Die Liga droht dem Verein [^mit] [einem] N{der|Punktabzug}. ||drohen mit + Dativ",
+"Nach langen Gesprächen haben sich die Parteien [^auf/über/mit] [einen] N{der|Kompromiss} geeinigt. ||sich einigen auf + Akkusativ",
+"Viele Fans identifizieren sich [^mit] [ihrem] N{der|Verein}. ||sich identifizieren mit + Dativ",
+"Wie gehst du [^mit] [dem] ständigen N{der|Druck} um? ||umgehen mit + Dativ",
+"Die Gewerkschaft verhandelt [^mit/über] [den] N{der|Arbeitgeber|Arbeitgebern}. ||verhandeln mit + Dativ (Partner)",
+"Verträgst du dich gut [^mit] [deiner] N{die|Schwiegermutter}? ||sich vertragen mit + Dativ",
+"Ihre Aussage stimmt nicht [^mit] [den] N{die|Tatsache|Tatsachen} überein. ||übereinstimmen mit + Dativ",
+"Er sehnt sich [^nach] [seiner] N{die|Heimat}. ||sich sehnen nach + Dativ",
+"Viele Menschen streben [^nach] [einem] sicheren N{der|Arbeitsplatz}. ||streben nach + Dativ",
+"Wir richten uns ganz [^nach] [Ihren] N{der|Wunsch|Wünschen}. ||sich richten nach + Dativ",
+"Die Bevölkerung verlangt [^nach] [einer] klaren N{die|Erklärung}. ||verlangen nach + Dativ",
+"Das Kind greift [^nach] [der] N{die|Hand} seiner Mutter. ||greifen nach + Dativ",
+"Das Hotel verfügt [^über] [einen] eigenen N{der|Strand}. ||verfügen über + Akkusativ",
+"Die Mieter beklagen sich [^über/bei] [die] hohen N{die|Heizkosten}. ||sich beklagen über + Akkusativ (Sache)",
+"Wir staunen [^über] [die] N{die|Größe} des Doms. ||staunen über + Akkusativ",
+"Sie macht sich gern [^über] [ihren] großen N{der|Bruder} lustig. ||sich lustig machen über + Akkusativ",
+"Die Eltern sind empört [^über] [die] N{die|Entscheidung} der Schule. ||empört über + Akkusativ",
+"Wir sind entsetzt [^über] [das] N{das|Ausmaß} der Zerstörung. ||entsetzt über + Akkusativ",
+"Das Gericht hat noch nicht [^über] [den] N{der|Fall} entschieden. ||entscheiden über + Akkusativ",
+"Sie bemüht sich sehr [^um] [eine] gute N{die|Zusammenarbeit}. ||sich bemühen um + Akkusativ",
+"Ich beneide dich [^um] [deine] N{die|Geduld}. ||beneiden um + Akkusativ",
+"Bei diesem Fund handelt es sich [^um] [einen] römischen N{der|Helm}. ||es handelt sich um + Akkusativ",
+"Das ganze Dorf trauert [^um] [den] alten N{der|Bürgermeister}. ||trauern um + Akkusativ",
+"Die beiden Firmen ringen [^um] [den] großen N{der|Auftrag}. ||ringen um + Akkusativ",
+"Sie hat sich erfolgreich [^um/für] [ein] N{das|Stipendium} beworben. ||sich bewerben um + Akkusativ",
+"Die Zahl der Touristen hat [^um] [ein] N{das|Drittel} zugenommen. ||zunehmen um + Akkusativ (Unterschied)",
+"Was verstehst du [^unter] [einer] guten N{die|Work-Life-Balance}? ||verstehen unter + Dativ",
+"Was stellen Sie sich [^unter] [einem] idealen N{der|Arbeitsplatz} vor? ||sich vorstellen unter + Dativ",
+"Die Ärztin rät [^von] [einer] langen N{die|Flugreise} ab. ||abraten von + Dativ",
+"Der Verein distanziert sich [^von] [den] N{die|Äußerung|Äußerungen} seines Präsidenten. ||sich distanzieren von + Dativ",
+"Die ganze Region profitiert [^von] [der] neuen N{die|Bahnlinie}. ||profitieren von + Dativ",
+"Es fällt ihr schwer, sich [^von] [ihrem] alten N{das|Auto} zu trennen. ||sich trennen von + Dativ",
+"Wir gehen [^von] [einer] N{die|Steigerung} der Preise aus. ||ausgehen von + Dativ",
+"Viele Länder sind stark abhängig [^von] [den] N{der|Import|Importen}. ||abhängig von + Dativ",
+"Die Jury war tief beeindruckt [^von] [ihrer] N{die|Stimme}. ||beeindruckt von + Dativ",
+"Der Vortrag handelt [^von] [den] N{die|Folge|Folgen} der Digitalisierung. ||handeln von + Dativ",
+"Er ekelt sich [^vor] [den] N{die|Spinne|Spinnen} im Keller. ||sich ekeln vor + Dativ",
+"Hüte dich [^vor] [den] falschen N{der|Freund|Freunden}! ||sich hüten vor + Dativ",
+"Tausende Menschen fliehen [^vor] [dem] N{der|Krieg}. ||fliehen vor + Dativ",
+"Sie schreckt [^vor] [keiner] N{die|Herausforderung} zurück. ||zurückschrecken vor + Dativ",
+"Unter dem Vordach ist man sicher [^vor] [dem] N{der|Regen}. ||sicher vor + Dativ",
+"Wie schützt man sich [^vor/gegen] [einem] N{der|Sonnenstich}? ||sich schützen vor + Dativ",
+"Die Polizei fordert die Fahrer [^zu] [einer] vorsichtigen N{die|Fahrweise} auf. ||auffordern zu + Dativ",
+"Jeder kann [^zu] [einem] besseren N{das|Klima} im Team beitragen. ||beitragen zu + Dativ",
+"Nach langem Zögern hat er sich [^zu] [einem] N{der|Neuanfang} entschlossen. ||sich entschließen zu + Dativ",
+"Meine Freundin hat mich [^zu] [einem] N{der|Tanzkurs} überredet. ||überreden zu + Dativ",
+"Er neigt [^zu] [einer] eher pessimistischen N{die|Sichtweise}. ||neigen zu + Dativ",
+"Niemand kann dich [^zu] [einer] N{die|Entscheidung} zwingen. ||zwingen zu + Dativ",
+"Mit dem Vertrag verpflichten Sie sich [^zu] [einer] N{die|Mindestlaufzeit} von zwei Jahren. ||sich verpflichten zu + Dativ",
+"Ihr Lob hat mich [^zu] [einem] neuen N{das|Projekt} ermutigt. ||ermutigen zu + Dativ",
+"Sind Sie [^zu/für] [einem] N{der|Kompromiss} bereit? ||bereit zu + Dativ",
+"Er hat sich offen [^zu] [seinen] N{der|Fehler|Fehlern} bekannt. ||sich bekennen zu + Dativ",
+"Das Interesse [^an/für] [der] N{die|Ausstellung} war riesig. ||das Interesse an + Dativ (!)",
+"Es gibt viel Kritik [^an] [der] neuen N{die|Regelung}. ||die Kritik an + Dativ",
+"Im Krankenhaus besteht großer Bedarf [^an] [einer] modernen N{die|Ausstattung}. ||der Bedarf an + Dativ",
+"Die Teilnahme [^an] [der] N{die|Exkursion} ist freiwillig. ||die Teilnahme an + Dativ",
+"Sie hat keinen Zweifel [^an] [seiner] N{die|Unschuld}. ||der Zweifel an + Dativ",
+"Nach der Kündigung hat er Anspruch [^auf] [eine] N{die|Abfindung}. ||der Anspruch auf + Akkusativ",
+"Soziale Medien haben großen Einfluss [^auf] [die] N{die|Meinung|Meinungen} junger Menschen. ||der Einfluss auf + Akkusativ",
+"Bitte nehmen Sie Rücksicht [^auf] [die] N{das|Kind|Kinder} im Haus! ||Rücksicht nehmen auf + Akkusativ",
+"Die Hoffnung [^auf] [eine] schnelle N{die|Lösung} wird immer kleiner. ||die Hoffnung auf + Akkusativ",
+"Sie hat eine enge Beziehung [^zu/mit] [ihrem] N{der|Großvater}. ||die Beziehung zu + Dativ",
+"Wie ist dein Verhältnis [^zu/mit] [deinen] N{die|Geschwister|Geschwistern}? ||das Verhältnis zu + Dativ",
+"Er hat großen Respekt [^vor] [seiner] N{die|Lehrerin}. ||der Respekt vor + Dativ",
+"Die Nachfrage [^nach] [den] N{die|Wärmepumpe|Wärmepumpen} steigt. ||die Nachfrage nach + Dativ",
+"Die Suche [^nach] [einer] N{die|Kinderbetreuung} ist oft schwierig. ||die Suche nach + Dativ",
+"Die Diskussion [^über/um] [das] N{das|Tempolimit} dauert schon Jahre. ||die Diskussion über + Akkusativ",
+"Ihre Sorge [^um/über] [die] N{die|Gesundheit} ihres Vaters ist groß. ||die Sorge um + Akkusativ",
+"Der Kampf [^gegen] [den] N{der|Klimawandel} betrifft uns alle. ||der Kampf gegen + Akkusativ",
+"Es gab heftigen Widerstand [^gegen] [das] neue N{das|Gesetz}. ||der Widerstand gegen + Akkusativ",
+"Die Verantwortung [^für] [den] N{der|Unfall} trägt der Fahrer. ||die Verantwortung für + Akkusativ",
+"Die Angst [^vor/um] [der] N{die|Zukunft} lähmt viele junge Menschen. ||die Angst vor + Dativ",
+"Er ist sehr misstrauisch [^gegenüber/gegen] [den] N{der|Politiker|Politikern}. ||misstrauisch gegenüber + Dativ",
+"Sie ist immer offen [^für/gegenüber] [die] N{die|Idee|Ideen} anderer Leute. ||offen für + Akkusativ",
+"Das kleine Café ist sehr beliebt [^bei] [den] N{der|Student|Studenten}. ||beliebt bei + Dativ",
+"Der neue Kollege ist [^mit] [dem] N{das|Programm} noch nicht vertraut. ||vertraut mit + Dativ",
+"Ich bin [^mit] [der] N{die|Aufgabe} fast fertig. ||fertig mit + Dativ",
+"Meine Nichte ist geradezu süchtig [^nach] [ihrem] N{das|Handy}. ||süchtig nach + Dativ",
+"Er ist verrückt [^nach] [der] N{die|Musik} der 80er-Jahre. ||verrückt nach + Dativ",
+"Mein Sohn ist eifersüchtig [^auf] [seine] kleine N{die|Schwester}. ||eifersüchtig auf + Akkusativ",
+"Bist du etwa neidisch [^auf] [den] N{der|Erfolg} deiner Kollegin? ||neidisch auf + Akkusativ",
+"Er ist wütend [^auf/über] [seinen] N{der|Chef}. ||wütend auf + Akkusativ (Person)",
+"Sie ist wütend [^über/auf] [die] N{die|Ungerechtigkeit}. ||wütend über + Akkusativ (Sache)",
+"Ich freue mich riesig [^auf/über] [den] N{der|Urlaub} nächste Woche. ||sich freuen auf + Akkusativ (etwas kommt noch)",
+"Gestern habe ich mich sehr [^über/auf] [deine] N{die|Postkarte} gefreut. ||sich freuen über + Akkusativ (etwas ist schon da)",
+"Er leidet sehr [^unter/an] [der] N{die|Trennung} von seiner Frau. ||leiden unter + Dativ (seelisch, durch etwas)",
+"Was denkst du eigentlich [^über/von/an] [die] neue N{die|Kollegin}? ||denken über + Akkusativ (Meinung)",
+"Der Erfolg hängt stark [^von] [der] N{die|Motivation} des Teams ab. ||abhängen von + Dativ",
+"Wir haben uns lange [^mit/über/um] [dem] N{der|Vermieter} gestritten. ||sich streiten mit + Dativ (Person)"
+]
+};
+
+
+// ==================== LEVELS ====================
+const MODES = {
+  a2:  { name: 'A2 · Alltag', chip: 'A2', color: 'var(--rust)', task: 'Welcher Artikel passt nach der Präposition?',
+         desc: 'Dativ- und Akkusativ-Präpositionen, Wo? oder Wohin?, Zeitangaben' },
+  b1:  { name: 'B1 · Verben mit Präposition', chip: 'B1', color: 'var(--dusk)', task: 'Erst die Präposition, dann der Artikel',
+         desc: 'denken an, sich freuen auf, sich kümmern um, träumen von …' },
+  b2:  { name: 'B2 · Profi-Präpositionen', chip: 'B2', color: 'var(--plum)', task: 'Erst die Präposition, dann der Artikel',
+         desc: 'verzichten auf, bestehen auf + Dativ, sich abfinden mit, Nomen und Adjektive mit Präposition' },
+  mix: { name: 'Champion-Mix', chip: 'Mix', color: 'var(--petrol)', task: '',
+         desc: '60 gemischte Sätze aus A2, B1 und B2' }
+};
+const SOON = { name: 'C1 · C2', chip: 'C1', desc: 'Die ganz kniffligen Fälle – kommt bald' };
+
+const CHEATS = {
+  a2: [
+    ['var(--petrol)', '<b>Immer Dativ:</b> aus, bei, mit, nach, seit, von, zu, gegenüber', 'mit dem Zug · seit einer Woche · zu meiner Freundin'],
+    ['var(--rust)', '<b>Immer Akkusativ:</b> durch, für, gegen, ohne, um', 'durch den Park · für meine Mutter · ohne einen Helm'],
+    ['var(--dusk)', '<b>Wechselpräpositionen:</b> an, auf, hinter, in, neben, über, unter, vor, zwischen', 'Frag dich: <b>Wo?</b> (Position) → Dativ · <b>Wohin?</b> (Richtung, Bewegung zum Ziel) → Akkusativ'],
+    ['var(--plum)', '<b>Wo? oder Wohin?</b> Achte auf das Verb', 'liegen, stehen, hängen, sitzen, wohnen → Wo? · legen, stellen, hängen, setzen, gehen, fahren → Wohin?'],
+    ['var(--amber)', '<b>Zeitangaben (Wann?)</b> mit in, an, vor, zwischen → immer Dativ', 'in der Nacht · vor dem Essen · in einer Stunde']
+  ],
+  b1: [
+    ['var(--dusk)', '<b>Die Präposition gehört zum Verb</b> – lern sie immer mit', 'denken an, sich freuen auf, sich interessieren für, träumen von'],
+    ['var(--rust)', '<b>an, auf, über, in</b> bei Verben meistens mit Akkusativ', 'denken an den Urlaub · warten auf den Bus · sich ärgern über den Lärm'],
+    ['var(--petrol)', '<b>Ausnahmen mit Dativ:</b> teilnehmen an, arbeiten an, leiden unter, Angst haben vor', 'an einem Kurs teilnehmen · Angst vor dem Zahnarzt'],
+    ['var(--plum)', '<b>mit, nach, von, zu, bei, aus</b> → immer Dativ · <b>für, um, gegen, durch</b> → immer Akkusativ', 'zufrieden mit dem Ergebnis · sich kümmern um den Garten'],
+    ['var(--amber)', '<b>sich freuen auf</b> (kommt noch) – <b>sich freuen über</b> (ist schon da)', 'auf die Ferien · über das Geschenk']
+  ],
+  b2: [
+    ['var(--plum)', '<b>auf + Dativ:</b> basieren, beharren, bestehen (= fordern), fußen', 'Ich bestehe auf einer Antwort.'],
+    ['var(--petrol)', '<b>an + Dativ:</b> erkranken, festhalten, leiden, liegen, mangeln, scheitern, zweifeln, sich orientieren · das Interesse, die Kritik, der Bedarf an', 'Es mangelt an der Zeit. · Kritik an der Regelung'],
+    ['var(--dusk)', '<b>in + Dativ:</b> sich irren, sich täuschen, bestehen in (= liegen in) · <b>in + Akkusativ:</b> einwilligen, investieren, sich einmischen, sich verwandeln', 'Ich habe mich in der Uhrzeit geirrt.'],
+    ['var(--rust)', '<b>Gleiches Verb, andere Präposition:</b> bestehen aus / auf / in · leiden an / unter · wütend auf (Person) / über (Sache)', 'Das Team besteht aus Profis. · Der Chef besteht auf Pünktlichkeit.'],
+    ['var(--amber)', '<b>Nomen und Adjektive</b> behalten die Präposition des Verbs', 'sich interessieren für → das Interesse an (!) · stolz auf · abhängig von']
+  ]
+};
+
+const DEF  = ['der', 'die', 'das', 'den', 'dem', 'des'];
+const IND  = ['ein', 'eine', 'einen', 'einem', 'einer', 'eines'];
+const KEIN = ['kein', 'keine', 'keinen', 'keinem', 'keiner'];
+const PREP_POOL = ['an', 'auf', 'aus', 'bei', 'durch', 'für', 'gegen', 'in', 'mit', 'nach', 'über', 'um', 'unter', 'von', 'vor', 'zu'];
+const DAT_P  = ['aus', 'bei', 'mit', 'nach', 'seit', 'von', 'zu', 'gegenüber'];
+const AKK_P  = ['durch', 'für', 'gegen', 'ohne', 'um'];
+const WECHSEL = ['an', 'auf', 'hinter', 'in', 'neben', 'über', 'unter', 'vor', 'zwischen'];
+const ALL_P = DAT_P.concat(AKK_P, WECHSEL);
+
+function possForms(base) {
+  if (base === 'euer')  return ['euer', 'eure', 'euren', 'eurem', 'eurer', 'eures'];
+  if (base === 'unser') return ['unser', 'unsere', 'unseren', 'unserem', 'unserer', 'unseres'];
+  return ['', 'e', 'en', 'em', 'er', 'es'].map(e => base + e);
+}
+function familyOf(ans) {
+  const a = ans.toLowerCase();
+  if (DEF.includes(a)) return DEF.slice();
+  if (IND.includes(a)) return IND.slice();
+  if (KEIN.includes(a)) return KEIN.slice();
+  for (const b of ['unser', 'euer', 'mein', 'dein', 'sein', 'ihr']) {
+    if (a.startsWith(b) || (b === 'euer' && a.startsWith('eur'))) return possForms(b);
+  }
+  return null;
+}
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+// ==================== SATZ-PARSER ====================
+// [den] = Artikel-Lücke · [^auf] = Präpositions-Lücke · [^auf/über] = „über“ wird nicht als Auswahl angeboten
+// N{Artikel|Grundform|Form im Satz} = Nomen mit Artikel-Hilfe · „||Regel“ am Ende = Regel bei Fehlern
+const TOKEN = /\[([^\]]*)\]|N\{([^}]+)\}/g;
+function parse(raw) {
+  const cut = raw.indexOf('||');
+  const str = cut >= 0 ? raw.slice(0, cut).trim() : raw;
+  const rule = cut >= 0 ? raw.slice(cut + 2).trim() : '';
+  const parts = [], slots = [];
+  let last = 0, m, lastPrep = null, pending = null;
+  TOKEN.lastIndex = 0;
+  const scanText = t => {
+    const words = t.toLowerCase().match(/[a-zäöüß]+/g) || [];
+    words.forEach(w => { if (ALL_P.includes(w)) lastPrep = w; });
+  };
+  while ((m = TOKEN.exec(str)) !== null) {
+    if (m.index > last) { const t = str.slice(last, m.index); parts.push({ t: 'text', v: t }); scanText(t); }
+    if (m[1] !== undefined) {
+      let slot;
+      if (m[1].startsWith('^')) {
+        const [ans, ...excl] = m[1].slice(1).split('/');
+        slot = { kind: 'prep', ans, excl };
+        lastPrep = ans;
+      } else {
+        slot = { kind: 'art', ans: m[1], prep: lastPrep };
+        pending = slot;
+      }
+      slots.push(slot);
+      parts.push({ t: 'slot', i: slots.length - 1 });
+    } else {
+      const p = m[2].split('|');
+      const noun = { t: 'noun', art: p[0], base: p[1], show: p[2] || p[1] };
+      if (pending && !pending.noun) { pending.noun = noun; pending = null; }
+      parts.push(noun);
+    }
+    last = TOKEN.lastIndex;
+  }
+  if (last < str.length) parts.push({ t: 'text', v: str.slice(last) });
+  slots.forEach(s => {
+    if (s.kind === 'prep') {
+      const pool = shuffle(PREP_POOL.filter(p => p !== s.ans && !s.excl.includes(p))).slice(0, 4);
+      s.opts = pool.concat(s.ans).sort((a, b) => a.localeCompare(b, 'de'));
+    }
+  });
+  return { parts, slots, rule, raw: str };
+}
+
+function caseOf(art, noun) {
+  const a = art.toLowerCase();
+  if (!noun) return null;
+  const pl = noun.show !== noun.base;
+  if (/em$/.test(a)) return 'D';
+  if (noun.art === 'die' && !pl && /er$/.test(a)) return 'D';
+  if (/en$/.test(a)) return (noun.art === 'die' || pl) ? 'D' : 'A';
+  return 'A';
+}
+function autoRule(slot) {
+  const p = slot.prep;
+  if (!p) return '';
+  if (DAT_P.includes(p)) return `„${p}“ steht immer mit Dativ.`;
+  if (AKK_P.includes(p)) return `„${p}“ steht immer mit Akkusativ.`;
+  if (WECHSEL.includes(p)) {
+    return caseOf(slot.ans, slot.noun) === 'D'
+      ? `Wechselpräposition „${p}“: Hier fragst du Wo? – also Dativ.`
+      : `Wechselpräposition „${p}“: Hier fragst du Wohin? – also Akkusativ.`;
+  }
+  return '';
+}
+
+// ==================== ZUSTAND ====================
+const state = {
+  mode: null, points: 0, streak: 0, bestStreak: 0,
+  correct: 0, attempts: 0, start: 0,
+  remaining: [], solved: 0, total: 0,
+  current: null, selected: null, busy: false, review: [], hadError: false
+};
+
+function init() {
+  sentenceData.mix = [];
+  buildDeco();
+  buildMenu();
+  renderBoard('menuBoard', 5);
+}
+
+function poolFor(mode) {
+  if (mode !== 'mix') return sentenceData[mode].slice();
+  return shuffle(sentenceData.a2.slice()).slice(0, 20)
+    .concat(shuffle(sentenceData.b1.slice()).slice(0, 20), shuffle(sentenceData.b2.slice()).slice(0, 20));
+}
+
+function buildMenu() {
+  const grid = document.getElementById('modeGrid');
+  grid.innerHTML = '';
+  Object.keys(MODES).forEach(k => {
+    const md = MODES[k];
+    const b = document.createElement('button');
+    b.className = 'mode-btn';
+    b.style.setProperty('--c', md.color);
+    b.onclick = () => startGame(k);
+    const n = k === 'mix' ? 60 : sentenceData[k].length;
+    b.innerHTML = `<span class="chip">${md.chip}</span>
+      <span><span class="mode-name">${md.name}</span>
+      <span class="mode-desc" style="display:block">${md.desc}</span>
+      <span class="mode-count" style="display:block">${n} Sätze</span></span>`;
+    grid.appendChild(b);
+  });
+  const s = document.createElement('div');
+  s.className = 'mode-btn soon';
+  s.style.setProperty('--c', 'var(--slate)');
+  s.innerHTML = `<span class="chip">${SOON.chip}</span>
+    <span><span class="mode-name">${SOON.name}</span>
+    <span class="mode-desc" style="display:block">${SOON.desc}</span></span>`;
+  s.style.gridColumn = '1 / -1';
+  grid.appendChild(s);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function levelOf(raw) {
+  if (sentenceData.a2.includes(raw)) return 'a2';
+  if (sentenceData.b1.includes(raw)) return 'b1';
+  return 'b2';
+}
+
+function renderCheat(mode) {
+  const body = document.getElementById('cheatBody');
+  const keys = mode === 'mix' ? ['a2', 'b1', 'b2'] : [mode];
+  body.innerHTML = keys.map(k => CHEATS[k].map(([c, t, ex]) =>
+    `<div class="rule-box" style="--c:${c}">${t}<span class="ex">${ex}</span></div>`).join('')).join('');
+  document.getElementById('cheat').open = false;
+}
+
+function startGame(mode) {
+  Object.assign(state, {
+    mode, points: 0, streak: 0, bestStreak: 0, correct: 0, attempts: 0,
+    start: Date.now(), solved: 0, selected: null, busy: false, review: []
+  });
+  state.remaining = shuffle(poolFor(mode));
+  state.total = state.remaining.length;
+
+  const md = MODES[mode];
+  const pill = document.getElementById('modePill');
+  pill.textContent = md.name;
+  pill.style.setProperty('--c', md.color);
+  document.getElementById('options').style.setProperty('--c', md.color);
+  renderCheat(mode);
+
+  const nameInput = document.getElementById('playerName');
+  nameInput.disabled = false; nameInput.value = '';
+  const sb = document.getElementById('saveBtn');
+  sb.disabled = false; sb.textContent = 'Speichern';
+
+  updateStats(); updateProgress();
+  showScreen('gameScreen');
+  loadNext();
+}
+
+function loadNext() {
+  if (state.remaining.length === 0) { endGame(); return; }
+  const raw = state.remaining[0];
+  state.current = parse(raw);
+  state.busy = false;
+  state.hadError = false;
+  const hasPrep = state.current.slots.some(s => s.kind === 'prep');
+  document.getElementById('task').textContent = hasPrep ? MODES.b1.task : MODES.a2.task;
+  document.getElementById('hint').style.display = 'none';
+  renderSentence();
+  const first = document.querySelector('.slot');
+  if (first) selectSlot(first);
+}
+
+function renderSentence() {
+  const box = document.getElementById('sentence');
+  box.innerHTML = '';
+  state.current.parts.forEach(p => {
+    if (p.t === 'text') {
+      box.appendChild(document.createTextNode(p.v));
+    } else if (p.t === 'slot') {
+      const slot = state.current.slots[p.i];
+      const s = document.createElement('span');
+      s.className = 'slot' + (slot.kind === 'prep' ? ' prep-slot' : '');
+      s.dataset.i = p.i;
+      s.textContent = '…';
+      s.onclick = () => selectSlot(s);
+      box.appendChild(s);
+    } else {
+      const n = document.createElement('span');
+      n.className = 'noun';
+      n.textContent = p.show;
+      const tip = document.createElement('span');
+      tip.className = 'tip';
+      tip.textContent = p.art + ' ' + p.base;
+      n.appendChild(tip);
+      n.onclick = (e) => {
+        e.stopPropagation();
+        const on = n.classList.contains('show');
+        document.querySelectorAll('.noun.show').forEach(x => x.classList.remove('show'));
+        if (!on) n.classList.add('show');
+      };
+      box.appendChild(n);
+    }
+  });
+}
+document.addEventListener('click', () => document.querySelectorAll('.noun.show').forEach(x => x.classList.remove('show')));
+
+function optionsForSlot(slot) {
+  if (slot.kind === 'prep') return slot.opts.slice();
+  const fam = familyOf(slot.ans) || DEF.slice();
+  return /^[A-ZÄÖÜ]/.test(slot.ans) ? fam.map(cap) : fam;
+}
+
+function renderOptions() {
+  const grid = document.getElementById('options');
+  grid.innerHTML = '';
+  if (!state.selected) return;
+  const slot = state.current.slots[+state.selected.dataset.i];
+  optionsForSlot(slot).forEach(o => {
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.textContent = o;
+    b.onclick = () => answer(o);
+    grid.appendChild(b);
+  });
+}
+
+function selectSlot(el) {
+  if (state.busy || el.classList.contains('correct')) return;
+  document.querySelectorAll('.slot').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  state.selected = el;
+  renderOptions();
+}
+
+function ruleFor(slot) {
+  return state.current.rule || (slot.kind === 'art' ? autoRule(slot) : '');
+}
+
+function answer(value) {
+  if (state.busy) return;
+  if (!state.selected) {
+    const free = document.querySelector('.slot:not(.correct)');
+    if (!free) return;
+    selectSlot(free);
+  }
+  const el = state.selected;
+  const slot = state.current.slots[+el.dataset.i];
+  state.attempts++;
+  const ok = value.toLowerCase() === slot.ans.toLowerCase();
+
+  if (ok) {
+    el.classList.remove('selected', 'wrong');
+    el.classList.add('correct');
+    el.textContent = slot.ans;
+    state.correct++; state.streak++;
+    state.bestStreak = Math.max(state.bestStreak, state.streak);
+    let pts = 10;
+    if (state.streak >= 20) pts *= 5; else if (state.streak >= 15) pts *= 4;
+    else if (state.streak >= 10) pts *= 3; else if (state.streak >= 5) pts *= 2;
+    state.points += pts;
+    updateStats(); sound('ok'); popup(pts, state.streak >= 5);
+
+    const next = document.querySelector('.slot:not(.correct)');
+    if (next) { selectSlot(next); }
+    else {
+      state.selected = null; state.busy = true;
+      renderOptions();
+      setTimeout(() => {
+        state.remaining.shift();
+        state.solved++;
+        updateProgress();
+        if (state.solved % 10 === 0 && state.remaining.length > 0) milestone(state.solved);
+        loadNext();
+      }, state.hadError ? 1500 : 850);
+    }
+  } else {
+    state.streak = 0; updateStats(); sound('no');
+    el.classList.add('wrong');
+    el.textContent = value;
+    const rule = ruleFor(slot);
+    const h = document.getElementById('hint');
+    h.innerHTML = `Richtig wäre: <b>„${esc(slot.ans)}“</b>` + (rule ? `<span class="rule">${esc(rule)}</span>` : '');
+    h.style.display = 'block';
+    if (!state.hadError) {
+      state.hadError = true;
+      state.review.push({ raw: state.current.raw, rule: state.current.rule || autoRule(state.current.slots.find(s => s.kind === 'art') || {}) });
+    }
+    setTimeout(() => {
+      el.classList.remove('wrong');
+      if (!el.classList.contains('correct')) el.textContent = '…';
+    }, 650);
+  }
+}
+
+function skipSentence() {
+  if (state.busy || state.remaining.length < 2) return;
+  state.streak = 0; updateStats();
+  state.remaining.push(state.remaining.shift());
+  loadNext();
+}
+
+function updateStats() {
+  document.getElementById('points').textContent = state.points;
+  document.getElementById('streak').textContent = state.streak;
+}
+function updateProgress() {
+  const pct = state.total ? state.solved / state.total * 100 : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `${state.solved} / ${state.total} Sätze`;
+}
+
+function fmt(s) { return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }
+
+function solvedHTML(raw) {
+  return esc(raw)
+    .replace(/\[\^?([^\]\/]*)[^\]]*\]/g, (_, a) => `<mark>${a}</mark>`)
+    .replace(/N\{([^}]+)\}/g, (_, x) => { const p = x.split('|'); return p[2] || p[1]; });
+}
+
+function endGame() {
+  const sec = Math.floor((Date.now() - state.start) / 1000);
+  document.getElementById('finalPoints').textContent = state.points;
+  document.getElementById('finalTime').textContent = fmt(sec);
+  document.getElementById('bestStreak').textContent = state.bestStreak;
+  document.getElementById('accuracy').textContent = state.attempts ? Math.round(state.correct / state.attempts * 100) + '%' : '0%';
+  document.getElementById('resultSub').textContent = `${MODES[state.mode].name} · ${state.solved} von ${state.total} Sätzen gelöst`;
+  const rc = document.getElementById('reviewCard');
+  if (state.review.length) {
+    document.getElementById('reviewList').innerHTML = state.review.map(r =>
+      `<li>${solvedHTML(r.raw)}${r.rule ? `<span class="r-rule">${esc(r.rule)}</span>` : ''}</li>`).join('');
+    rc.style.display = 'block';
+  } else rc.style.display = 'none';
+  state.endSec = sec;
+  showScreen('resultScreen');
+  renderBoard('resultBoard', 5);
+  sound('win'); flakeBurst();
+}
+
+// ==================== BESTENLISTE ====================
+const BOARD_KEY = 'praepositionenChampionBestenliste';
+function loadBoard() { try { return JSON.parse(localStorage.getItem(BOARD_KEY) || '[]'); } catch (e) { return []; } }
+function storeBoard(b) { try { localStorage.setItem(BOARD_KEY, JSON.stringify(b)); } catch (e) {} }
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+function saveScore() {
+  const name = document.getElementById('playerName').value.trim() || 'Anonym';
+  const b = loadBoard();
+  b.push({ name, points: state.points, time: state.endSec || 0, mode: MODES[state.mode].name });
+  b.sort((x, y) => y.points - x.points);
+  storeBoard(b.slice(0, 10));
+  renderBoard('resultBoard', 5); renderBoard('menuBoard', 5);
+  document.getElementById('playerName').disabled = true;
+  const sb = document.getElementById('saveBtn');
+  sb.disabled = true; sb.textContent = '✓ Gespeichert';
+}
+
+function renderBoard(id, limit) {
+  const c = document.getElementById(id);
+  const b = loadBoard();
+  if (!b.length) { c.innerHTML = '<p class="board-empty">Noch keine Einträge – du kannst die Erste oder der Erste sein!</p>'; return; }
+  c.innerHTML = b.slice(0, limit).map((e, i) => `
+    <div class="board-entry">
+      <span class="board-rank">${i + 1}.</span>
+      <span class="board-name">${esc(e.name)}<span class="board-mode">${esc(e.mode || '')}</span></span>
+      <span class="board-pts">${e.points} Pkt</span>
+      <span class="board-time">${fmt(e.time)}</span>
+    </div>`).join('');
+}
+
+function goToMenu() {
+  showScreen('startScreen');
+  renderBoard('menuBoard', 5);
+}
+
+// ==================== TÖNE ====================
+let audioCtx = null;
+function tone(freq, start, dur, vol) {
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type = 'sine'; o.frequency.value = freq;
+  o.connect(g); g.connect(audioCtx.destination);
+  const t = audioCtx.currentTime + start;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.start(t); o.stop(t + dur + 0.05);
+}
+function sound(kind) {
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (kind === 'ok') { tone(784, 0, 0.18, 0.10); tone(1046, 0.07, 0.2, 0.07); }
+    else if (kind === 'no') { tone(262, 0, 0.25, 0.08); }
+    else { [523, 659, 784, 1046].forEach((f, i) => tone(f, i * 0.11, 0.35, 0.08)); }
+  } catch (e) {}
+}
+
+// ==================== EFFEKTE ====================
+function popup(pts, combo) {
+  const p = document.createElement('div');
+  p.className = 'popup' + (combo ? ' combo' : '');
+  p.textContent = combo ? `+${pts} Serie!` : `+${pts}`;
+  p.style.left = (Math.random() * 50 + 25) + '%';
+  p.style.top = '38%';
+  document.body.appendChild(p);
+  setTimeout(() => p.remove(), 1000);
+}
+function milestone(n) {
+  const o = document.createElement('div');
+  o.className = 'milestone';
+  o.innerHTML = `<div class="milestone-inner"><div class="milestone-num">${n}</div><div class="milestone-text">Sätze geschafft – weiter so!</div></div>`;
+  document.body.appendChild(o);
+  sound('win'); flakeBurst();
+  o.onclick = () => o.remove();
+  setTimeout(() => o.remove(), 2200);
+}
+
+const LEAVES = [
+  'M12 1.5l1.9 5.3 4.6-2.2-1.7 4.7 5.4.9-4.3 3.1 2 4.6-5.1-1.6L12 22.5l-2.8-6.2-5.1 1.6 2-4.6L1.8 10.2l5.4-.9-1.7-4.7 4.6 2.2z',
+  'M12 2C6.5 6.5 4.8 12.4 12 22c7.2-9.6 5.5-15.5 0-20z',
+  'M12 2c-2 2.5-5.5 3-5.5 7 0 1.6.8 2.6 1.6 3.3C6.6 13 5.6 14.4 5.6 16c0 3 3 4.6 6.4 6 3.4-1.4 6.4-3 6.4-6 0-1.6-1-3-2.5-3.7.8-.7 1.6-1.7 1.6-3.3 0-4-3.5-4.5-5.5-7z'
+];
+const LEAF_COLORS = ['#a2542b', '#b9853d', '#8e4a3a', '#6a4a7a', '#c08a58'];
+function leafSVG(color) {
+  const d = LEAVES[Math.floor(Math.random() * LEAVES.length)];
+  return `<svg viewBox="0 0 24 24"><path d="${d}" fill="${color}"/><path d="M12 5v16" stroke="rgba(255,255,255,0.35)" stroke-width="0.8" fill="none"/></svg>`;
+}
+function flakeSVG(color) {
+  let arms = '';
+  for (let a = 0; a < 180; a += 60) {
+    arms += `<g transform="rotate(${a} 12 12)"><line x1="12" y1="2" x2="12" y2="22"/>
+      <polyline points="9.5,4.5 12,7 14.5,4.5"/><polyline points="9.5,19.5 12,17 14.5,19.5"/></g>`;
+  }
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">${arms}</svg>`;
+}
+function buildDeco() {
+  const layer = document.getElementById('deco');
+  const make = (html, size, op, dur) => {
+    const d = document.createElement('div');
+    d.className = 'deco';
+    d.innerHTML = html;
+    d.style.setProperty('--x', (Math.random() * 98) + 'vw');
+    d.style.setProperty('--y', (Math.random() * 95) + 'vh');
+    d.style.setProperty('--s', size + 'px');
+    d.style.setProperty('--o', op);
+    d.style.setProperty('--d', dur + 's');
+    d.style.setProperty('--delay', (-Math.random() * dur) + 's');
+    d.style.setProperty('--sway', (Math.random() * 60 + 20) * (Math.random() < 0.5 ? -1 : 1) + 'px');
+    d.style.setProperty('--rot', (Math.random() * 300 + 120) * (Math.random() < 0.5 ? -1 : 1) + 'deg');
+    layer.appendChild(d);
+  };
+  for (let i = 0; i < 11; i++) make(leafSVG(LEAF_COLORS[i % LEAF_COLORS.length]), Math.random() * 16 + 18, (Math.random() * 0.14 + 0.16).toFixed(2), Math.random() * 18 + 30);
+  for (let i = 0; i < 16; i++) make(flakeSVG(i % 3 ? '#8ea3bf' : '#a796b4'), Math.random() * 12 + 12, (Math.random() * 0.2 + 0.25).toFixed(2), Math.random() * 20 + 34);
+}
+function flakeBurst() {
+  for (let i = 0; i < 36; i++) {
+    const f = document.createElement('div');
+    f.className = 'flake-burst';
+    const size = Math.random() * 14 + 12;
+    f.style.width = f.style.height = size + 'px';
+    f.style.left = Math.random() * 100 + 'vw';
+    f.innerHTML = Math.random() < 0.5 ? leafSVG(LEAF_COLORS[i % LEAF_COLORS.length]) : flakeSVG('#7f95b3');
+    document.body.appendChild(f);
+    const anim = f.animate([
+      { transform: 'translateY(0) rotate(0deg)', opacity: 0.9 },
+      { transform: `translate(${(Math.random() - 0.5) * 120}px, 105vh) rotate(${Math.random() * 540}deg)`, opacity: 0 }
+    ], { duration: Math.random() * 1800 + 2200, easing: 'ease-in' });
+    anim.onfinish = () => f.remove();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
