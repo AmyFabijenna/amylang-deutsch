@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Die Verb-Ernte</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f2ed; --card:#ffffff; --ink:#1c1c22; --muted:#56566a; --line:#e4ded5;
+  --blue:#3d5a80; --blue-soft:#e3eaf3;
+  --petrol:#1f6f78; --petrol-soft:#dbebeb;
+  --lilac:#6b4e7a; --lilac-soft:#ece4f1;
+  --rose:#a8495e; --rose-soft:#f6e4e8;
+  --bark:#7a5c48;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:Lexend,system-ui,sans-serif;font-size:18px;line-height:1.6;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1100px;margin:0 auto;padding:32px 16px 64px}
+
+header h1{font-weight:600;font-size:clamp(1.8rem,4.5vw,2.5rem);line-height:1.15;margin:0 0 .5rem;letter-spacing:-.01em}
+header p.lead{margin:0;color:var(--muted);max-width:64ch;font-weight:300;font-size:1.05rem}
+
+.rules{margin:22px 0 0;background:var(--card);border-radius:22px;padding:18px 22px;box-shadow:0 2px 0 var(--line)}
+.rules p{margin:.2rem 0}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;font-size:.92rem}
+
+.chip{padding:1px 8px;border-radius:8px;white-space:nowrap}
+.c-N{background:var(--blue-soft);color:var(--blue);box-shadow:inset 0 -2px 0 var(--blue)}
+.c-A{background:var(--lilac-soft);color:var(--lilac);box-shadow:inset 0 -2px 0 var(--lilac)}
+.c-D{background:var(--petrol-soft);color:var(--petrol);box-shadow:inset 0 -2px 0 var(--petrol)}
+.c-V{font-weight:600;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px;text-decoration-color:#c9b8a6}
+
+.stats{display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;margin:26px 0 12px;font-size:.98rem;color:var(--muted)}
+.stats b{color:var(--ink);font-weight:600}
+.progress{flex:1 1 200px;height:10px;border-radius:99px;background:#e7e1d8;overflow:hidden}
+.progress span{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--blue),var(--lilac));transition:width .5s ease}
+.tools{display:flex;gap:8px}
+.ghostbtn{font:inherit;font-size:.9rem;color:var(--muted);background:var(--card);border:1.5px solid var(--line);border-radius:99px;padding:5px 14px;cursor:pointer}
+.ghostbtn:hover{border-color:#cfc6ba;color:var(--ink)}
+
+/* Obstgarten */
+.orchard{position:relative;border-radius:30px;padding:34px 18px 46px;min-height:320px;overflow:hidden;
+  background:linear-gradient(180deg,#dde6f1 0%,#e7e3f0 62%,#f0e9e1 100%)}
+.orchard svg.tree{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.branch{position:relative;z-index:1;display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;gap:18px 20px;max-width:900px;margin:0 auto}
+.fwrap{display:flex;flex-direction:column;align-items:center;transform-origin:50% 0;animation:sway 4.2s ease-in-out infinite}
+.fwrap.picked{visibility:hidden}
+.fwrap.sel,.fwrap.dragging{animation-play-state:paused}
+.stem{width:2px;height:18px;background:var(--bark);position:relative;border-radius:2px}
+.stem::after{content:"";position:absolute;left:2px;top:3px;width:15px;height:8px;border-radius:0 80% 0 80%;background:#9ba08a;transform:rotate(-14deg)}
+@keyframes sway{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.6deg)}}
+
+.fruit,.flyer{font:inherit;font-weight:500;font-size:17px;color:var(--ink);border:none;
+  padding:20px 20px 22px;min-width:110px;text-align:center;
+  border-radius:50% 50% 47% 47% / 56% 56% 44% 44%;
+  background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.85),rgba(255,255,255,0) 42%),var(--f);
+  box-shadow:inset 0 -7px 0 rgba(0,0,0,.055),0 7px 16px rgba(70,50,70,.13)}
+.fruit{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;transition:transform .22s ease,box-shadow .22s ease}
+.fruit:hover{transform:translateY(-3px)}
+.fruit:focus-visible{outline:3px solid var(--blue);outline-offset:4px}
+.fwrap.sel .fruit{transform:translateY(-7px) scale(1.07);box-shadow:0 0 0 3px #fff,0 0 0 6px var(--petrol),0 14px 24px rgba(70,50,70,.18)}
+.fwrap.dragging .fruit{opacity:.25}
+.flyer{position:fixed;left:0;top:0;z-index:1000;pointer-events:none;margin:0}
+
+.roundcard{position:relative;z-index:2;max-width:560px;margin:10px auto;background:rgba(255,255,255,.94);border-radius:24px;padding:26px 26px 24px;text-align:center;box-shadow:0 10px 30px rgba(60,50,80,.12);animation:rise .5s ease both}
+.roundcard h2{margin:0 0 .4rem;font-weight:600;font-size:1.45rem}
+.roundcard p{margin:.3rem 0;color:var(--muted)}
+.roundcard ul{list-style:none;padding:0;margin:14px 0 4px;text-align:left}
+.roundcard li{padding:8px 12px;border-radius:12px;background:var(--bg);margin-bottom:6px;font-size:.95rem}
+.mainbtn{font:inherit;font-weight:500;color:#fff;background:var(--blue);border:none;border-radius:99px;padding:11px 26px;margin-top:14px;cursor:pointer;box-shadow:0 4px 0 #2b4262;transition:transform .15s}
+.mainbtn:hover{transform:translateY(-1px)}
+.mainbtn:active{transform:translateY(2px);box-shadow:0 2px 0 #2b4262}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+/* Körbe */
+.baskets{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:16px;margin-top:22px}
+.basket{font:inherit;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:24px;padding:16px 12px 16px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:0;transition:border-color .2s,box-shadow .2s,transform .2s}
+.basket:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.baskets.ready .basket{border-style:dashed;border-color:#b9c6d8}
+.basket.hover,.baskets.ready .basket:hover{border-style:solid;border-color:var(--blue);box-shadow:0 6px 18px rgba(61,90,128,.15);transform:translateY(-2px)}
+.pile{position:relative;z-index:2;width:78%;min-height:34px;display:flex;flex-wrap:wrap-reverse;justify-content:center;align-items:flex-end;gap:3px;margin-bottom:-11px}
+.pip{width:15px;height:15px;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.8),rgba(255,255,255,0) 50%),var(--f);box-shadow:0 1px 2px rgba(0,0,0,.15);animation:pipin .45s cubic-bezier(.3,1.6,.5,1) both}
+.pip.miss{box-shadow:0 0 0 2px var(--rose)}
+@keyframes pipin{from{transform:translateY(-14px) scale(.4);opacity:0}to{transform:none;opacity:1}}
+.weave{position:relative;width:84%;height:58px;border-radius:5px 5px 28px 28px;
+  background-image:repeating-linear-gradient(0deg,rgba(80,50,20,.10) 0 2px,transparent 2px 11px),repeating-linear-gradient(90deg,#cba679 0 12px,#b98f62 12px 14px)}
+.weave::before{content:"";position:absolute;left:-6%;right:-6%;top:-6px;height:12px;border-radius:8px;background:#8c6744;box-shadow:inset 0 2px 0 rgba(255,255,255,.18)}
+.count{position:absolute;right:8px;bottom:6px;font-size:.75rem;font-weight:600;color:#fff;background:rgba(70,45,25,.45);border-radius:99px;padding:0 7px}
+.bt{font-weight:600;margin-top:12px;line-height:1.3}
+.bq{font-size:.9rem;color:var(--muted);font-weight:300}
+.basket.good{border-color:var(--petrol);animation:pop .5s ease}
+.basket.bad{border-color:var(--rose);animation:shake .45s ease}
+@keyframes pop{0%{transform:scale(1)}35%{transform:scale(1.05)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(2px)}}
+.spark{position:fixed;z-index:999;width:8px;height:8px;border-radius:50%;pointer-events:none}
+
+/* Rückmeldung */
+.fb{margin-top:20px;background:var(--card);border-radius:20px;padding:16px 22px;border-left:7px solid var(--line);min-height:62px;transition:border-color .3s}
+.fb.ok{border-left-color:var(--petrol)}
+.fb.no{border-left-color:var(--rose)}
+.fb .head{font-weight:500}
+.fb .ex{margin-top:6px;font-size:1.02rem;line-height:2}
+.fb .hint{color:var(--muted);font-weight:300}
+
+@media (max-width:600px){
+  body{font-size:17px}
+  .fruit,.flyer{font-size:15.5px;min-width:92px;padding:16px 15px 18px}
+  .branch{gap:14px 12px}
+  .baskets{grid-template-columns:repeat(2,1fr);gap:12px}
+  .basket:last-child{grid-column:1 / -1}
+}
+@media (prefers-reduced-motion:reduce){
+  .fwrap{animation:none}
+  .basket.good,.basket.bad,.pip{animation:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Die Verb-Ernte</h1>
+    <p class="lead">Auf dem Baum hängen reife Verben. Pflück sie eins nach dem anderen und leg jedes in den Korb, der zu seinen Ergänzungen passt. Ob du richtig gelegen hast, verrät dir der Korb erst, wenn die Frucht drin ist.</p>
+  </header>
+
+  <section class="rules">
+    <p>Tippe auf eine Frucht und dann auf einen Korb – oder zieh sie einfach hinüber. Frag dich dabei: <b>Wer</b> tut etwas, und braucht das Verb außerdem noch jemanden oder etwas im Akkusativ (<i>wen? was?</i>) oder im Dativ (<i>wem?</i>)?</p>
+    <p class="hint" style="color:var(--muted);font-weight:300">Es zählen nur die Ergänzungen, die das Verb selbst mitbringt. Freiwillige Zusätze wie „mir“ in „Ich suche <i>mir</i> eine Jacke“ verändern den Korb nicht.</p>
+    <div class="legend"><span class="chip c-N">Nominativ</span><span class="chip c-A">Akkusativ</span><span class="chip c-D">Dativ</span><span class="c-V">Verb</span></div>
+  </section>
+
+  <div class="stats">
+    <span>Ernte <b id="sRound">1</b> von <b id="sRounds">5</b></span>
+    <span>richtig: <b id="sOk">0</b></span>
+    <span>daneben: <b id="sNo">0</b></span>
+    <div class="progress" aria-hidden="true"><span id="bar"></span></div>
+    <div class="tools">
+      <button class="ghostbtn" id="soundBtn" type="button">Ton: an</button>
+      <button class="ghostbtn" id="restartBtn" type="button">Neu mischen</button>
+    </div>
+  </div>
+
+  <section class="orchard" id="orchard">
+    <svg class="tree" viewBox="0 0 1000 400" preserveAspectRatio="none" aria-hidden="true">
+      <g fill="none" stroke="#7a5c48" stroke-linecap="round" vector-effect="non-scaling-stroke" opacity=".55">
+        <path d="M500 400 C 498 330, 505 260, 500 190" stroke-width="22" vector-effect="non-scaling-stroke"/>
+        <path d="M500 230 C 420 170, 300 120, 120 90" stroke-width="9" vector-effect="non-scaling-stroke"/>
+        <path d="M500 220 C 590 160, 720 110, 890 80" stroke-width="9" vector-effect="non-scaling-stroke"/>
+        <path d="M500 195 C 470 120, 420 70, 330 30" stroke-width="6" vector-effect="non-scaling-stroke"/>
+        <path d="M500 195 C 540 120, 600 70, 690 28" stroke-width="6" vector-effect="non-scaling-stroke"/>
+        <path d="M330 140 C 280 180, 200 210, 90 230" stroke-width="5" vector-effect="non-scaling-stroke"/>
+        <path d="M680 135 C 740 180, 820 210, 930 235" stroke-width="5" vector-effect="non-scaling-stroke"/>
+      </g>
+    </svg>
+    <div class="branch" id="branch"></div>
+  </section>
+
+  <section class="baskets" id="baskets" aria-label="Körbe"></section>
+
+  <div class="fb" id="fb" aria-live="polite"><span class="hint">Pflück die erste Frucht vom Baum.</span></div>
+</div>
+
+<script>
+const CATS = [
+  {id:'n',   title:'nur Nominativ',                     q:'Wer?'},
+  {id:'na',  title:'Nominativ + Akkusativ',             q:'Wer … wen / was?'},
+  {id:'nd',  title:'Nominativ + Dativ',                 q:'Wer … wem?'},
+  {id:'nad', title:'Nominativ + Akkusativ + Dativ',     q:'Wer … wem … was?'},
+  {id:'naa', title:'Nominativ + 2 Akkusative',          q:'Wer … wen … was?'}
+];
+
+const VERBS = [
+  ['schlafen','n','{N|Das Baby} {V|schläft} tief und fest.'],
+  ['aufstehen','n','{N|Ich} {V|stehe} jeden Morgen um sechs Uhr {V|auf}.'],
+  ['ankommen','n','{N|Der Zug} {V|kommt} pünktlich in Wien {V|an}.'],
+  ['einschlafen','n','{N|Mein Opa} {V|schläft} beim Fernsehen immer {V|ein}.'],
+  ['aufwachen','n','{N|Die Katze} {V|wacht} um vier Uhr früh {V|auf}.'],
+  ['verschwinden','n','{N|Der Schlüssel} {V|ist} schon wieder {V|verschwunden}.'],
+  ['niesen','n','{N|Du} {V|niest} schon den ganzen Tag.'],
+  ['gähnen','n','{N|Alle} {V|gähnen} in der langen Besprechung.'],
+  ['zittern','n','{N|Der kleine Hund} {V|zittert} vor Kälte.'],
+
+  ['besuchen','na','{N|Wir} {V|besuchen} am Sonntag {A|unsere Großeltern}.'],
+  ['kennen','na','{V|Kennst} {N|du} {A|den neuen Kollegen}?'],
+  ['vermissen','na','{N|Ich} {V|vermisse} {A|dich}.'],
+  ['anrufen','na','{N|Sie} {V|ruft} {A|ihren Bruder} {V|an}.'],
+  ['heiraten','na','{N|Mein Cousin} {V|heiratet} {A|seine Jugendliebe}.'],
+  ['lieben','na','{N|Er} {V|liebt} {A|den Herbst}.'],
+  ['suchen','na','{N|Ich} {V|suche} {A|meine Brille}.'],
+  ['besitzen','na','{N|Die Familie} {V|besitzt} {A|ein kleines Haus} am See.'],
+  ['benutzen','na','{N|Du} {V|benutzt} {A|einen Regenschirm}.'],
+  ['verstehen','na','{V|Verstehst} {N|du} {A|die Frage}?'],
+
+  ['helfen','nd','{N|Ich} {V|helfe} {D|meiner Nachbarin}.'],
+  ['danken','nd','{N|Wir} {V|danken} {D|Ihnen} für die Einladung.'],
+  ['gefallen','nd','{N|Das Kleid} {V|gefällt} {D|mir}.'],
+  ['gehören','nd','{N|Das Fahrrad} {V|gehört} {D|meinem Sohn}.'],
+  ['gratulieren','nd','{N|Wir} {V|gratulieren} {D|dir} zum Geburtstag.'],
+  ['vertrauen','nd','{N|Sie} {V|vertraut} {D|ihrer besten Freundin}.'],
+  ['folgen','nd','{N|Die Entenküken} {V|folgen} {D|der Mutter}.'],
+  ['zuhören','nd','{N|Die Kinder} {V|hören} {D|der Lehrerin} {V|zu}.'],
+  ['begegnen','nd','{N|Ich} {V|bin} {D|ihm} im Park {V|begegnet}.'],
+  ['gehorchen','nd','{N|Der Hund} {V|gehorcht} {D|seinem Herrchen}.'],
+  ['zustimmen','nd','{N|Ich} {V|stimme} {D|dir} {V|zu}.'],
+
+  ['geben','nad','{N|Ich} {V|gebe} {D|dir} {A|den Schlüssel}.'],
+  ['schenken','nad','{N|Er} {V|schenkt} {D|seiner Frau} {A|Blumen}.'],
+  ['zeigen','nad','{N|Die Ärztin} {V|zeigt} {D|dem Patienten} {A|das Röntgenbild}.'],
+  ['erklären','nad','{N|Die Lehrerin} {V|erklärt} {D|den Schülern} {A|die Regel}.'],
+  ['schicken','nad','{N|Wir} {V|schicken} {D|euch} {A|eine Postkarte}.'],
+  ['leihen','nad','{V|Leihst} {N|du} {D|mir} {A|dein Buch}?'],
+  ['empfehlen','nad','{N|Der Kellner} {V|empfiehlt} {D|uns} {A|den Fisch}.'],
+  ['erzählen','nad','{N|Oma} {V|erzählt} {D|den Enkeln} {A|ein Märchen}.'],
+  ['verbieten','nad','{N|Die Eltern} {V|verbieten} {D|dem Kind} {A|das Handy} beim Essen.'],
+  ['anbieten','nad','{N|Die Gastgeberin} {V|bietet} {D|den Gästen} {A|Tee} {V|an}.'],
+  ['mitteilen','nad','{N|Die Firma} {V|teilt} {D|uns} {A|den Termin} {V|mit}.'],
+
+  ['lehren','naa','{N|Die Großmutter} {V|lehrt} {A|mich} {A|das Stricken}.'],
+  ['kosten','naa','{N|Die Reparatur} {V|kostet} {A|ihn} {A|ein Vermögen}.'],
+  ['nennen','naa','{N|Alle} {V|nennen} {A|ihn} {A|den Professor}.'],
+  ['abfragen','naa','{N|Die Mutter} {V|fragt} {A|den Sohn} {A|die Vokabeln} {V|ab}.']
+];
+
+const SHADES = [
+  {f:'#f3cdb0', e:'#d9a07a'}, // Marille
+  {f:'#eec2cc', e:'#cf8b9b'}, // Kirsche
+  {f:'#dccdea', e:'#a990c2'}, // Traube
+  {f:'#f1e0a8', e:'#cfb366'}, // Birne
+  {f:'#cddcea', e:'#8fa9c6'}  // Pflaume
+];
+const PER_ROUND = 9;
+
+const $ = s => document.querySelector(s);
+const branch = $('#branch'), basketsEl = $('#baskets'), fb = $('#fb');
+let rounds = [], roundIdx = 0, resolved = 0, okCount = 0, noCount = 0, misses = [], selected = null, soundOn = true;
+const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+const catOf = id => CATS.find(c=>c.id===id);
+
+function buildRounds(){
+  const groups = CATS.map(c => shuffle(VERBS.filter(v=>v[1]===c.id).map(v=>({w:v[0],cat:v[1],ex:v[2]}))));
+  const list = [];
+  while(groups.some(g=>g.length)){
+    shuffle(groups.slice()).forEach(g => { if(g.length) list.push(g.pop()); });
+  }
+  rounds = [];
+  for(let i=0;i<list.length;i+=PER_ROUND) rounds.push(shuffle(list.slice(i,i+PER_ROUND)));
+}
+
+function renderSentence(s){
+  return s.replace(/\{([NADV])\|([^}]*)\}/g,(m,t,txt)=> t==='V' ? `<span class="c-V">${txt}</span>` : `<span class="chip c-${t}">${txt}</span>`);
+}
+
+/* ---------- Ton ---------- */
+let ac = null;
+function tone(freq, dur, type='sine', gain=.06, slideTo=null, delay=0){
+  if(!soundOn) return;
+  try{
+    ac = ac || new (window.AudioContext||window.webkitAudioContext)();
+    const t = ac.currentTime + delay, o = ac.createOscillator(), g = ac.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq,t);
+    if(slideTo) o.frequency.exponentialRampToValueAtTime(slideTo,t+dur);
+    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(gain,t+.015); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    o.connect(g).connect(ac.destination); o.start(t); o.stop(t+dur+.02);
+  }catch(e){}
+}
+const sPlop = () => tone(520,.14,'sine',.07,240);
+const sGood = () => { tone(660,.16,'triangle',.05); tone(990,.26,'triangle',.045,null,.09); };
+const sBad  = () => tone(250,.25,'sine',.06,170);
+
+/* ---------- Körbe ---------- */
+function buildBaskets(){
+  basketsEl.innerHTML = '';
+  CATS.forEach(c=>{
+    const b = document.createElement('button');
+    b.type='button'; b.className='basket'; b.dataset.cat=c.id;
+    b.innerHTML = `<div class="pile"></div><div class="weave"><span class="count">0</span></div><div class="bt">${c.title}</div><div class="bq">${c.q}</div>`;
+    b.addEventListener('click',()=>{
+      if(selected) assign(selected, c.id, selected.querySelector('.fruit').getBoundingClientRect());
+      else showHint('Pflück zuerst eine Frucht vom Baum – dann weißt du, was in den Korb soll.');
+    });
+    basketsEl.appendChild(b);
+  });
+}
+const basketEl = id => basketsEl.querySelector(`[data-cat="${id}"]`);
+
+function addPip(catId, shade, miss){
+  const b = basketEl(catId), pile = b.querySelector('.pile'), cnt = b.querySelector('.count');
+  const p = document.createElement('span');
+  p.className = 'pip' + (miss?' miss':''); p.style.setProperty('--f',shade.f);
+  pile.appendChild(p);
+  if(pile.children.length > 14) pile.removeChild(pile.firstChild);
+  cnt.textContent = (+cnt.textContent) + 1;
+}
+
+/* ---------- Baum ---------- */
+function renderRound(){
+  branch.innerHTML = ''; resolved = 0; selected = null; basketsEl.classList.remove('ready');
+  rounds[roundIdx].forEach((v,i)=>{
+    const shade = SHADES[(i + roundIdx) % SHADES.length];
+    const w = document.createElement('div');
+    w.className='fwrap'; w.style.animationDelay = (-Math.random()*4).toFixed(2)+'s';
+    w.style.marginTop = Math.round(Math.random()*16)+'px';
+    w.innerHTML = `<span class="stem"></span><button type="button" class="fruit" aria-label="Verb ${v.w}">${v.w}</button>`;
+    w._v = v; w._shade = shade;
+    const f = w.querySelector('.fruit'); f.style.setProperty('--f',shade.f);
+    attachDrag(w,f);
+    branch.appendChild(w);
+  });
+  updateStats();
+}
+
+function select(w){
+  if(selected) selected.classList.remove('sel');
+  if(selected === w){ selected = null; basketsEl.classList.remove('ready'); showHint('Pflück eine Frucht vom Baum.'); return; }
+  selected = w; w.classList.add('sel'); basketsEl.classList.add('ready');
+  showHint(`In welchen Korb gehört <b>${w._v.w}</b>?`);
+}
+
+function showHint(html){ fb.className='fb'; fb.innerHTML = `<span class="hint">${html}</span>`; }
+
+/* ---------- Ziehen & Tippen ---------- */
+function attachDrag(w,f){
+  let start=null, dragging=false, ghost=null, hoverB=null;
+  f.addEventListener('pointerdown',e=>{
+    if(w.classList.contains('picked')) return;
+    start={x:e.clientX,y:e.clientY}; dragging=false;
+    try{ f.setPointerCapture(e.pointerId); }catch(_){}
+  });
+  f.addEventListener('pointermove',e=>{
+    if(!start) return;
+    if(!dragging && Math.hypot(e.clientX-start.x,e.clientY-start.y) > 8){
+      dragging = true;
+      if(selected && selected!==w) selected.classList.remove('sel');
+      selected = w; w.classList.add('sel','dragging'); basketsEl.classList.add('ready');
+      const r = f.getBoundingClientRect();
+      ghost = makeFlyer(w, r); ghost._ox = start.x - r.left; ghost._oy = start.y - r.top;
+    }
+    if(dragging){
+      ghost.style.transform = `translate(${e.clientX-ghost._ox}px,${e.clientY-ghost._oy}px) rotate(-4deg) scale(1.06)`;
+      const b = basketAt(e.clientX,e.clientY);
+      if(b!==hoverB){ hoverB && hoverB.classList.remove('hover'); b && b.classList.add('hover'); hoverB=b; }
+    }
+  });
+  const end = (e, cancelled)=>{
+    if(!start) return;
+    if(dragging){
+      const b = !cancelled && basketAt(e.clientX,e.clientY);
+      hoverB && hoverB.classList.remove('hover'); hoverB=null;
+      const r = ghost.getBoundingClientRect(); ghost.remove(); ghost=null;
+      w.classList.remove('dragging');
+      if(b) assign(w, b.dataset.cat, r);
+      else { w.classList.remove('sel'); selected=null; basketsEl.classList.remove('ready'); }
+    } else if(!cancelled){
+      select(w);
+    }
+    start=null; dragging=false;
+  };
+  f.addEventListener('pointerup',e=>end(e,false));
+  f.addEventListener('pointercancel',e=>end(e,true));
+  f.addEventListener('click',e=>{ if(e.detail===0) select(w); }); // Tastatur
+}
+
+function basketAt(x,y){
+  const el = document.elementFromPoint(x,y);
+  return el ? el.closest('.basket') : null;
+}
+
+function makeFlyer(w, rect){
+  const d = document.createElement('div');
+  d.className='flyer'; d.textContent = w._v.w;
+  d.style.setProperty('--f', w._shade.f);
+  d.style.width = rect.width+'px';
+  d.style.transform = `translate(${rect.left}px,${rect.top}px)`;
+  document.body.appendChild(d);
+  return d;
+}
+
+function fly(w, fromRect, toId){
+  return new Promise(res=>{
+    const d = makeFlyer(w, fromRect);
+    const tr = basketEl(toId).querySelector('.weave').getBoundingClientRect();
+    const x0 = fromRect.left, y0 = fromRect.top;
+    const x1 = tr.left + tr.width/2 - fromRect.width/2, y1 = tr.top - fromRect.height/2 + 6;
+    const lift = Math.min(90, Math.abs(y1-y0)*.35 + 40);
+    const anim = d.animate([
+      {transform:`translate(${x0}px,${y0}px) scale(1) rotate(0deg)`},
+      {transform:`translate(${(x0+x1)/2}px,${Math.min(y0,y1)-lift}px) scale(.85) rotate(${x1>x0?12:-12}deg)`, offset:.45},
+      {transform:`translate(${x1}px,${y1}px) scale(.3) rotate(${x1>x0?24:-24}deg)`, opacity:.2}
+    ],{duration: reduce?250:680, easing:'cubic-bezier(.45,.05,.4,1)'});
+    anim.onfinish = ()=>{ d.remove(); res(); };
+  });
+}
+
+function burst(b, color){
+  if(reduce) return;
+  const r = b.querySelector('.weave').getBoundingClientRect();
+  const cx = r.left + r.width/2, cy = r.top;
+  for(let i=0;i<12;i++){
+    const s = document.createElement('span'); s.className='spark';
+    s.style.background = i%3===0 ? '#ffffff' : color;
+    s.style.left = cx+'px'; s.style.top = cy+'px';
+    document.body.appendChild(s);
+    const a = Math.PI + Math.random()*Math.PI, dist = 30 + Math.random()*46;
+    s.animate([
+      {transform:'translate(-50%,-50%) scale(1)',opacity:1},
+      {transform:`translate(calc(-50% + ${Math.cos(a)*dist}px), calc(-50% + ${Math.sin(a)*dist}px)) scale(.3)`,opacity:0}
+    ],{duration:620+Math.random()*200,easing:'cubic-bezier(.2,.7,.3,1)'}).onfinish=()=>s.remove();
+  }
+}
+
+function flash(b, cls){
+  b.classList.remove('good','bad'); void b.offsetWidth; b.classList.add(cls);
+  setTimeout(()=>b.classList.remove(cls), 700);
+}
+
+/* ---------- Zuordnen ---------- */
+function assign(w, catId, fromRect){
+  const v = w._v, shade = w._shade, ok = v.cat === catId;
+  w.classList.remove('sel'); w.classList.add('picked');
+  if(selected===w){ selected=null; basketsEl.classList.remove('ready'); }
+  sPlop();
+  fly(w, fromRect, catId).then(()=>{
+    const b = basketEl(catId);
+    if(ok){
+      okCount++; addPip(catId, shade, false); flash(b,'good'); burst(b, shade.e); sGood();
+      fb.className='fb ok';
+      fb.innerHTML = `<div class="head">Richtig! <b>${v.w}</b> liegt im Korb „${catOf(catId).title}“.</div><div class="ex">${renderSentence(v.ex)}</div>`;
+      done();
+    } else {
+      noCount++; misses.push(v); flash(b,'bad'); sBad();
+      fb.className='fb no';
+      fb.innerHTML = `<div class="head">Nicht ganz – <b>${v.w}</b> gehört in den Korb „${catOf(v.cat).title}“. Schau, wie der Satz gebaut ist:</div><div class="ex">${renderSentence(v.ex)}</div>`;
+      setTimeout(()=>{
+        const r = b.querySelector('.weave').getBoundingClientRect();
+        const from = {left:r.left + r.width/2 - 55, top:r.top - 40, width:110, height:70};
+        fly(w, from, v.cat).then(()=>{ addPip(v.cat, shade, true); flash(basketEl(v.cat),'good'); tone(560,.15,'triangle',.035); done(); });
+      }, reduce?150:520);
+    }
+    updateStats();
+  });
+}
+
+function done(){
+  resolved++;
+  updateStats();
+  if(resolved === rounds[roundIdx].length) setTimeout(roundEnd, 650);
+}
+
+function roundEnd(){
+  const last = roundIdx === rounds.length-1;
+  const card = document.createElement('div'); card.className='roundcard';
+  if(!last){
+    const roundMiss = rounds[roundIdx].filter(v=>misses.includes(v)).length;
+    const n = rounds[roundIdx].length;
+    card.innerHTML = `<h2>Ernte ${roundIdx+1} ist eingebracht</h2>
+      <p>${n-roundMiss} von ${n} Früchten sind gleich im richtigen Korb gelandet.</p>
+      <button class="mainbtn" type="button">Zur nächsten Ernte</button>`;
+    card.querySelector('button').onclick = ()=>{ roundIdx++; renderRound(); showHint('Der Baum trägt neue Früchte. Pflück die erste.'); };
+  } else {
+    const total = VERBS.length;
+    const list = misses.length
+      ? `<p>Diese Früchte sind zuerst ins falsche Körbchen gekullert – schau sie dir noch einmal an:</p><ul>${misses.map(v=>`<li><b>${v.w}</b> · ${catOf(v.cat).title}<br>${renderSentence(v.ex)}</li>`).join('')}</ul>`
+      : `<p>Keine einzige Frucht ist danebengegangen. Eine makellose Ernte!</p>`;
+    card.innerHTML = `<h2>Der ganze Baum ist abgeerntet</h2>
+      <p><b>${okCount}</b> von ${total} Verben lagen beim ersten Versuch im richtigen Korb.</p>${list}
+      <button class="mainbtn" type="button">Noch einmal ernten</button>`;
+    card.querySelector('button').onclick = start;
+  }
+  branch.innerHTML=''; branch.appendChild(card);
+  card.querySelector('button').focus({preventScroll:true});
+}
+
+function updateStats(){
+  $('#sRound').textContent = Math.min(roundIdx+1, rounds.length);
+  $('#sRounds').textContent = rounds.length;
+  $('#sOk').textContent = okCount; $('#sNo').textContent = noCount;
+  $('#bar').style.width = ((okCount+noCount)/VERBS.length*100)+'%';
+}
+
+function start(){
+  roundIdx=0; okCount=0; noCount=0; misses=[];
+  buildRounds(); buildBaskets(); renderRound();
+  showHint('Pflück die erste Frucht vom Baum.');
+}
+
+$('#soundBtn').onclick = e => { soundOn = !soundOn; e.target.textContent = 'Ton: ' + (soundOn?'an':'aus'); };
+$('#restartBtn').onclick = start;
+start();
+</script>
+</body>
+</html>
