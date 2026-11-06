@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Akkusativ-Champion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fbf0f3; --card:#fffafb; --rose:#ecc3d0; --rose-soft:#f7e3ea;
+  --berry:#9c2f5c; --berry-deep:#6b1f41; --ink:#1d1418; --muted:#6b5a61;
+  --gold:#b48a35; --gold-deep:#8a6623; --gold-soft:#f6ebcf; --line:#ead2da;
+  --shadow:0 6px 22px rgba(107,31,65,.10);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:'Lexend',system-ui,sans-serif;font-size:20px;line-height:1.5;min-height:100vh}
+button{font-family:inherit;color:inherit;cursor:pointer}
+main{max-width:760px;margin:0 auto;padding:20px 16px 50px}
+.card{background:var(--card);border-radius:30px;box-shadow:var(--shadow);border:1px solid var(--line);padding:28px 24px;text-align:center}
+h1{font-size:2.1rem;margin:.2em 0 .2em;color:var(--berry-deep);line-height:1.2}
+.illu{display:block;margin:0 auto;max-width:100%;height:auto}
+.btn{background:var(--berry);color:#fff;border:none;border-radius:20px;padding:15px 34px;font-size:1.15rem;font-weight:500;box-shadow:0 4px 0 var(--berry-deep)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--berry-deep)}
+.bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px}
+.dots{display:flex;gap:6px;flex-wrap:wrap}
+.dots i{width:14px;height:14px;border-radius:50%;background:var(--rose-soft);border:1.5px solid var(--rose);display:block}
+.dots i.ok{background:var(--gold);border-color:var(--gold-deep)}
+.dots i.no{background:var(--berry);border-color:var(--berry-deep)}
+.dots i.now{border-color:var(--berry);border-width:3px}
+.stars{background:var(--ink);color:#f3dfa6;border-radius:14px;padding:5px 14px;font-weight:500;font-size:.95rem;white-space:nowrap}
+.pic{width:130px;height:130px;border-radius:50%;margin:6px auto 6px;display:grid;place-items:center;font-size:4.2rem;background:radial-gradient(circle at 35% 30%,#fff,var(--rose-soft));border:3px solid var(--rose)}
+.sentence{font-size:2.5rem;font-weight:600;margin:18px 0 26px;line-height:1.5}
+.gap{display:inline-block;min-width:120px;border-bottom:4px solid var(--berry);margin:0 8px;color:var(--gold-deep);text-align:center}
+.gap.fill{border-bottom-color:var(--gold);animation:pop .45s ease}
+.opts{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;max-width:480px;margin:0 auto}
+.opts.three{grid-template-columns:repeat(3,1fr)}
+.opt{background:var(--card);border:2.5px solid var(--rose);border-radius:22px;padding:18px 8px;font-size:1.7rem;font-weight:600;transition:all .15s}
+.opt:hover:not(:disabled){border-color:var(--berry);background:var(--rose-soft);transform:translateY(-2px)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--gold-soft);border-color:var(--gold);color:var(--gold-deep)}
+.opt.wrong{background:var(--rose-soft);border-color:var(--berry);color:var(--berry-deep);text-decoration:line-through}
+.tip{background:none;border:none;color:var(--muted);font-size:.9rem;margin-top:18px;text-decoration:underline;text-underline-offset:4px}
+.tiptext{display:inline-block;margin-top:8px;background:var(--rose-soft);border:1.5px dashed var(--berry);border-radius:14px;padding:3px 14px;color:var(--berry-deep);font-size:1rem}
+.next{margin-top:22px}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1)}}
+.big{font-size:2.6rem;color:var(--gold);margin:.1em 0}
+@media (max-width:560px){
+  body{font-size:18px}
+  .sentence{font-size:1.9rem}
+  .gap{min-width:90px}
+  .opt{font-size:1.45rem;padding:15px 6px}
+  .pic{width:110px;height:110px;font-size:3.5rem}
+}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+(function(){
+const ROUND = 15;
+const DEF = {m:'der', f:'die', n:'das', p:'die'};
+const AKK_D = {m:'den', f:'die', n:'das', p:'die'};
+const AKK_I = {m:'einen', f:'eine', n:'ein'};
+
+// [Satz, Nomen, Genus, bestimmt/unbestimmt, Bild]
+const POOL = [
+ ['Ich esse ___ Apfel.','Apfel','m','d','🍎'],
+ ['Ich trinke ___ Milch.','Milch','f','d','🥛'],
+ ['Ich sehe ___ Mond.','Mond','m','d','🌙'],
+ ['Ich öffne ___ Fenster.','Fenster','n','d','🪟'],
+ ['Ich finde ___ Schlüssel.','Schlüssel','m','d','🔑'],
+ ['Ich brauche ___ Bleistift.','Bleistift','m','d','✏️'],
+ ['Ich male ___ Sonne.','Sonne','f','d','☀️'],
+ ['Ich mag ___ Eis.','Eis','n','d','🍦'],
+ ['Ich packe ___ Tasche.','Tasche','f','d','👜'],
+ ['Ich trage ___ Rucksack.','Rucksack','m','d','🎒'],
+ ['Ich nehme ___ Löffel.','Löffel','m','d','🥄'],
+ ['Ich suche ___ Katze.','Katze','f','d','🐱'],
+ ['Ich liebe ___ Hund.','Hund','m','d','🐶'],
+ ['Ich rufe ___ Opa an.','Opa','m','d','👴'],
+ ['Ich räume ___ Zimmer auf.','Zimmer','n','d','🛏️'],
+ ['Ich mache ___ Tür auf.','Tür','f','d','🚪'],
+ ['Ich mache ___ Koffer zu.','Koffer','m','d','🧳'],
+ ['Ich hole ___ Paket ab.','Paket','n','d','📦'],
+ ['Ich besuche ___ Oma.','Oma','f','d','👵'],
+ ['Ich frage ___ Lehrer.','Lehrer','m','d','🙋'],
+ ['Ich kenne ___ Lied.','Lied','n','d','🎵'],
+ ['Ich verstehe ___ Witz.','Witz','m','d','😄'],
+ ['Ich bezahle ___ Pizza.','Pizza','f','d','🍕'],
+ ['Ich repariere ___ Fahrrad.','Fahrrad','n','d','🚲'],
+ ['Ich vergesse ___ Hut.','Hut','m','d','🎩'],
+ ['Ich nehme ___ Schirm mit.','Schirm','m','d','☂️'],
+ ['Ich wiederhole ___ Wort.','Wort','n','d','💬'],
+ ['Ich beantworte ___ Frage.','Frage','f','d','❓'],
+ ['Ich besichtige ___ Turm.','Turm','m','d','🏰'],
+ ['Ich lade ___ Tante ein.','Tante','f','d','👩'],
+ ['Ich lerne ___ ABC.','ABC','n','d','🔤'],
+ ['Ich sammle ___ Blätter.','Blätter','p','d','🍁'],
+ ['Ich habe ___ Hamster.','Hamster','m','i','🐹'],
+ ['Ich habe ___ Katze.','Katze','f','i','🐱'],
+ ['Hier gibt es ___ Baum.','Baum','m','i','🌳'],
+ ['Hier gibt es ___ Haus.','Haus','n','i','🏠'],
+ ['Ich backe ___ Kuchen.','Kuchen','m','i','🎂'],
+ ['Ich bastle ___ Stern.','Stern','m','i','⭐'],
+ ['Ich bekomme ___ Geschenk.','Geschenk','n','i','🎁'],
+ ['Ich bestelle ___ Kakao.','Kakao','m','i','🍫'],
+ ['Ich zeichne ___ Blume.','Blume','f','i','🌸'],
+ ['Ich zeichne ___ Fisch.','Fisch','m','i','🐟'],
+ ['Ich gewinne ___ Preis.','Preis','m','i','🥇'],
+ ['Ich lerne ___ Tanz.','Tanz','m','i','💃'],
+ ['Ich treffe ___ Freund.','Freund','m','i','🧒'],
+ ['Ich verliere ___ Handschuh.','Handschuh','m','i','🧤'],
+ ['Ich lerne ___ Mädchen kennen.','Mädchen','n','i','👧'],
+ ['Ich esse ___ Banane.','Banane','f','i','🍌'],
+ ['Ich trinke ___ Saft.','Saft','m','i','🧃'],
+ ['Ich sehe ___ Pferd.','Pferd','n','i','🐴'],
+ ['Ich brauche ___ Schere.','Schere','f','i','✂️'],
+ ['Ich male ___ Regenbogen.','Regenbogen','m','i','🌈'],
+ ['Ich nehme ___ Keks.','Keks','m','i','🍪'],
+ ['Ich öffne ___ Dose.','Dose','f','i','🥫']
+].map(([s,n,g,t,e])=>({s,n,g,t,e}));
+
+const CROWN = `<svg class="illu" width="190" viewBox="0 0 200 150" role="img" aria-label="Krone">
+  <ellipse cx="100" cy="138" rx="72" ry="8" fill="#ecc3d0" opacity=".7"/>
+  <path d="M30 118 L22 44 L66 80 L100 26 L134 80 L178 44 L170 118 Z" fill="#d9b25b" stroke="#8a6623" stroke-width="3" stroke-linejoin="round"/>
+  <rect x="28" y="108" width="144" height="20" rx="6" fill="#b48a35" stroke="#8a6623" stroke-width="3"/>
+  <circle cx="100" cy="86" r="10" fill="#9c2f5c"/><circle cx="62" cy="96" r="7" fill="#c2416f"/><circle cx="138" cy="96" r="7" fill="#c2416f"/>
+  <circle cx="22" cy="42" r="7" fill="#9c2f5c"/><circle cx="100" cy="24" r="7" fill="#9c2f5c"/><circle cx="178" cy="42" r="7" fill="#9c2f5c"/>
+  <g fill="#d9b25b"><path d="M12 92 l3 7 l7 3 l-7 3 l-3 7 l-3 -7 l-7 -3 l7 -3z"/><path d="M188 86 l3 7 l7 3 l-7 3 l-3 7 l-3 -7 l-7 -3 l7 -3z"/></g>
+</svg>`;
+
+const app = document.getElementById('app');
+const shuffle = a => { a=[...a]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const answer = it => it.t==='d' ? AKK_D[it.g] : AKK_I[it.g];
+
+let tasks, idx, results, stars;
+
+function start(){
+  app.innerHTML = `<div class="card">${CROWN}
+    <h1>Akkusativ-Champion</h1>
+    <p>Klick auf das richtige Wort!</p>
+    <p style="margin-top:22px"><button class="btn" id="go">Los geht's ✨</button></p></div>`;
+  document.getElementById('go').onclick = newRound;
+}
+
+function newRound(){
+  // ausgewogene Runde: etwa die Hälfte männlich
+  const m = shuffle(POOL.filter(x=>x.g==='m')).slice(0,8);
+  const o = shuffle(POOL.filter(x=>x.g!=='m')).slice(0,ROUND-8);
+  tasks = shuffle([...m,...o]);
+  idx = 0; stars = 0; results = [];
+  show();
+}
+
+function show(){
+  const it = tasks[idx];
+  const opts = it.t==='d' ? shuffle(['der','die','das','den']) : shuffle(['ein','eine','einen']);
+  const [a,b] = it.s.split('___');
+  const dots = tasks.map((_,k)=>`<i class="${results[k]===true?'ok':results[k]===false?'no':k===idx?'now':''}"></i>`).join('');
+  app.innerHTML = `<div class="card">
+    <div class="bar"><div class="dots">${dots}</div><div class="stars">★ ${stars}</div></div>
+    <div class="pic">${it.e}</div>
+    <div class="sentence">${a}<span class="gap" id="gap">&nbsp;</span>${b}</div>
+    <div class="opts ${opts.length===3?'three':''}">${opts.map(o=>`<button class="opt" data-o="${o}">${o}</button>`).join('')}</div>
+    <div id="tipbox"><button class="tip" id="tip">💡 Tipp</button></div>
+    <div id="after"></div>
+  </div>`;
+  document.getElementById('tip').onclick = ()=>{
+    document.getElementById('tipbox').innerHTML = `<span class="tiptext">${DEF[it.g]} ${it.n}</span>`;
+  };
+  const btns = [...app.querySelectorAll('.opt')];
+  btns.forEach(btn=>btn.onclick=()=>{
+    const ans = answer(it), ok = btn.dataset.o===ans;
+    btns.forEach(x=>{ x.disabled=true; if(x.dataset.o===ans) x.classList.add('right'); });
+    const gap = document.getElementById('gap');
+    gap.textContent = ans; gap.classList.add('fill');
+    results[idx] = ok;
+    if(ok){ stars++; setTimeout(next, 1000); }
+    else {
+      btn.classList.add('wrong');
+      document.getElementById('after').innerHTML = `<button class="btn next" id="nx">Weiter →</button>`;
+      document.getElementById('nx').onclick = next;
+    }
+  });
+}
+
+function next(){
+  idx++;
+  if(idx < tasks.length) show(); else end();
+}
+
+function end(){
+  const r = stars/tasks.length;
+  const s = r>=0.9?3:r>=0.7?2:1;
+  app.innerHTML = `<div class="card">${CROWN}
+    <h1>${s===3?'Du bist Champion!':s===2?'Super gemacht!':'Gut gemacht!'}</h1>
+    <p class="big">${'★'.repeat(s)}${'☆'.repeat(3-s)}</p>
+    <p><b>${stars}</b> von <b>${tasks.length}</b> richtig</p>
+    <p style="margin-top:22px"><button class="btn" id="again">Nochmal spielen</button></p></div>`;
+  document.getElementById('again').onclick = newRound;
+}
+
+start();
+})();
+</script>
+</body>
+</html>
