@@ -1,0 +1,892 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Frühstück & Gäste</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f1ec; --card:#ffffff; --ink:#1b1b1f; --muted:#5b5862; --line:#e4ddd2;
+  --sky:#34527e; --petrol:#1d6a70; --lilac:#5f4a72; --terra:#9a5a3c; --plum:#7b3f5e;
+  --ocean:#2e5d86; --amber:#8a6526; --rose:#9b4d5a; --indigo:#3f4a8a; --slate:#4a5568; --honey:#7a5a1e;
+  --ok:#1f6f78; --ok-bg:#e2f0f1; --bad:#a3463e; --bad-bg:#f6e4e1;
+}
+*{box-sizing:border-box}
+html,body{overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Lexend",system-ui,sans-serif;font-size:18px;line-height:1.6;font-weight:300}
+button,select,input{font-family:inherit;font-size:inherit;color:inherit}
+.bubbles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bubbles span{position:absolute;border-radius:50%;opacity:.13;animation:float 26s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0) translateX(0)}50%{transform:translateY(-40px) translateX(18px)}}
+.wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:24px 16px 80px}
+header.top{background:linear-gradient(135deg,#2c4669 0%,#1d6a70 55%,#5f4a72 100%);color:#fff;border-radius:26px;padding:30px 30px 26px;margin-bottom:22px;box-shadow:0 10px 30px rgba(30,40,60,.15)}
+header.top h1{margin:0 0 6px;font-size:2rem;font-weight:600;letter-spacing:-.01em}
+header.top p{margin:0;opacity:.94;font-size:1.05rem}
+.topbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:18px}
+.pill{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:6px 16px;font-size:.95rem}
+.pill select{background:transparent;color:#fff;border:none;outline:none;cursor:pointer}
+.pill select option{color:#000}
+nav.modes{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-bottom:24px}
+nav.modes button{display:flex;gap:12px;align-items:center;text-align:left;background:var(--card);border:2px solid transparent;border-radius:18px;padding:12px 14px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.05);transition:.15s}
+nav.modes button:hover{transform:translateY(-2px)}
+nav.modes button.active{border-color:var(--c)}
+nav.modes .num{flex:0 0 38px;height:38px;border-radius:12px;display:grid;place-items:center;color:#fff;background:var(--c);font-weight:600}
+nav.modes .t{font-weight:500;line-height:1.25}
+nav.modes .s{display:block;font-weight:300;font-size:.8rem;color:var(--muted)}
+.mode{display:none}.mode.show{display:block}
+.intro{background:var(--card);border-left:6px solid var(--c);border-radius:20px;padding:18px 22px;margin-bottom:18px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.intro h2{margin:0 0 4px;font-size:1.4rem;font-weight:600;color:var(--c)}
+.intro p{margin:0;color:var(--muted)}
+.card{background:var(--card);border-radius:22px;padding:22px;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.label{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:500}
+.btn{background:var(--c,var(--sky));color:#fff;border:none;border-radius:14px;padding:10px 20px;cursor:pointer;font-weight:500;transition:.15s}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--c,var(--sky));border:2px solid var(--c,var(--sky))}
+.btn.small{padding:6px 14px;font-size:.9rem}
+.spk{background:none;border:none;cursor:pointer;padding:2px 6px;vertical-align:middle;color:var(--c,var(--sky));opacity:.8}
+.spk:hover{opacity:1}
+.spk svg{width:20px;height:20px}
+/* Phrasebook */
+.pbtools{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:16px}
+.pbtools input{flex:1 1 260px;border:2px solid var(--line);border-radius:14px;padding:10px 16px;background:#fff}
+.topic h3{margin:22px 0 10px;font-size:1.15rem;font-weight:600;color:var(--c)}
+.phr{background:#fff;border-radius:18px;padding:16px 18px;margin-bottom:12px;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+.phr .g{font-weight:500;margin-bottom:8px}
+.phr .g::before{content:"Gast: ";color:var(--muted);font-weight:300}
+.ans{display:grid;gap:8px}
+.ans div{border-radius:12px;padding:8px 12px;background:var(--soft,#f1eef4);transition:filter .2s}
+.ans .lv{display:inline-block;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-right:8px;color:var(--c)}
+.selftest .ans div:not(.revealed){filter:blur(6px);cursor:pointer}
+/* MC */
+.prog{display:flex;justify-content:space-between;font-size:.9rem;color:var(--muted)}
+.bar{height:8px;background:#eee8df;border-radius:99px;margin:6px 0 18px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--c);border-radius:99px;transition:width .3s}
+.sit{color:var(--muted);margin-bottom:6px}
+.qtext{font-size:1.25rem;font-weight:500;margin:4px 0 16px}
+.gap{display:inline-block;min-width:70px;border-bottom:3px solid var(--c);margin:0 4px}
+.opts{display:grid;gap:10px}
+.opt{text-align:left;background:#faf8f5;border:2px solid var(--line);border-radius:16px;padding:12px 16px;cursor:pointer;transition:.15s;line-height:1.45}
+.opt:hover{border-color:var(--c)}
+.opt .why{display:block;font-size:.92rem;margin-top:6px;color:var(--muted)}
+.opt.right{border-color:var(--ok);background:var(--ok-bg)}
+.opt.right .why{color:var(--ok)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.opt.wrong .why{color:var(--bad)}
+.opt.dim{opacity:.75}
+.fbbox{margin-top:14px;border-radius:14px;padding:12px 16px;font-weight:400}
+.fbbox.good{background:var(--ok-bg);color:var(--ok)}
+.fbbox.bad{background:var(--bad-bg);color:var(--bad)}
+.nav2{margin-top:14px;text-align:right}
+.done{text-align:center}
+.done h3{font-size:1.5rem;margin:6px 0;color:var(--c)}
+.bubble{background:var(--soft,#eef2f7);border-radius:20px 20px 20px 6px;padding:14px 18px;font-size:1.15rem;font-weight:500;margin:6px 0 16px;display:inline-block}
+.storypick{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:16px}
+.storypick button{background:#fff;border:2px solid var(--line);border-radius:18px;padding:14px 16px;text-align:left;cursor:pointer}
+.storypick button.active{border-color:var(--c)}
+.storypick b{display:block;font-weight:600;color:var(--c)}
+.storypick span{font-size:.9rem;color:var(--muted)}
+/* Match */
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:700px){.mgrid{grid-template-columns:1fr}}
+.mcol{display:grid;gap:8px;align-content:start}
+.mq,.ma{text-align:left;background:#faf8f5;border:2px solid var(--line);border-radius:14px;padding:10px 14px;cursor:pointer;line-height:1.4}
+.mq b{color:var(--c);margin-right:6px}
+.mq.sel,.ma.sel{border-color:var(--c);background:var(--soft,#eef2f7)}
+.mq.ok,.ma.ok{border-color:var(--ok);background:var(--ok-bg);cursor:default}
+.ma .tag{font-weight:600;color:var(--ok);margin-right:6px}
+.shake{animation:shake .35s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.hint{color:var(--muted);margin-top:0}
+/* Gaps */
+.gs{background:#fff;border-radius:16px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+.chips{display:inline-flex;flex-wrap:wrap;gap:6px;vertical-align:middle;margin:2px 4px}
+.chip{border:2px solid var(--line);background:#faf8f5;border-radius:10px;padding:2px 12px;cursor:pointer}
+.chip:hover{border-color:var(--c)}
+.chip.right{border-color:var(--ok);background:var(--ok-bg);color:var(--ok);font-weight:500}
+.chip.wrong{border-color:var(--bad);background:var(--bad-bg);color:var(--bad);text-decoration:line-through}
+.gs .ex{font-size:.92rem;color:var(--muted);margin-top:8px;display:none}
+.gs.solved .ex{display:block}
+.gh{margin:22px 0 10px;font-weight:600;color:var(--c)}
+/* Build */
+.line{min-height:62px;border:2px dashed var(--line);border-radius:16px;padding:10px;display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px;align-items:center}
+.pool{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.tok{background:var(--soft,#eef2f7);border:2px solid transparent;border-radius:12px;padding:6px 14px;cursor:pointer;font-weight:400}
+.tok:hover{border-color:var(--c)}
+.line .tok{background:#fff;border-color:var(--c)}
+.playbig{display:block;margin:6px auto 10px;width:84px;height:84px;border-radius:50%;border:none;background:var(--c);color:#fff;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.15)}
+.playbig svg{width:38px;height:38px}
+.hiddenq{filter:blur(7px)}
+footer{margin-top:40px;text-align:center;color:var(--muted);font-size:.85rem}
+@media(max-width:600px){header.top{padding:22px 18px}header.top h1{font-size:1.5rem}.card{padding:16px}}
+</style>
+</head>
+<body>
+<div class="bubbles" id="bubbles"></div>
+<div class="wrap">
+<header class="top">
+  <h1>Frühstück & Gäste</h1>
+  <p>Deutsch im Hotel und im Frühstückscafé · Niveau B1 · Buffet, Zimmernummern, Reservierungen und echte Gästegespräche</p>
+  <div class="topbar">
+    <span class="pill">⭐ Punkte: <b id="score">0</b></span>
+    <span class="pill">🔊 Tempo:
+      <select id="rate"><option value="0.75">langsam</option><option value="0.9" selected>mittel</option><option value="1">normal</option></select>
+    </span>
+    <span class="pill">Tipp: Auf 🔊 klicken – jeder Satz wird vorgelesen</span>
+  </div>
+</header>
+<nav class="modes" id="nav"></nav>
+<main id="main"></main>
+<footer>Übungsmaterial Deutsch B1 · Hotel & Gastronomie</footer>
+</div>
+
+<script>
+/* ================= DATEN ================= */
+
+/* Phrasebook: [Gast, kurz, höflich, ausführlich & elegant] */
+const PHRASES=[
+{t:"Ankommen & Zimmernummer",e:"🛎️",items:[
+["Guten Morgen! Ist hier noch frei?","Ja, bitte sehr.","Guten Morgen! Ja, natürlich – setzen Sie sich gern.","Guten Morgen und herzlich willkommen beim Frühstück! Dieser Tisch ist frei – nehmen Sie gern Platz."],
+["Muss ich meine Zimmernummer sagen?","Ja, bitte.","Ja, bitte – dann kann ich Sie auf der Frühstücksliste abhaken.","Ja, wenn Sie so freundlich wären. Ich hake Sie dann kurz auf unserer Liste ab, und Sie können sofort ans Buffet."],
+["Wir wohnen in Zimmer vierzehn.","Danke, passt.","Vielen Dank, Zimmer vierzehn – ich habe Sie gefunden.","Herzlichen Dank, Zimmer vierzehn ist notiert. Darf ich Ihnen schon einen Kaffee oder Tee bringen, während Sie sich am Buffet bedienen?"],
+["Ich habe meine Zimmernummer vergessen.","Kein Problem. Ihr Name, bitte?","Das macht gar nichts. Darf ich nach Ihrem Nachnamen fragen?","Das passiert ganz oft, keine Sorge. Wenn Sie mir Ihren Nachnamen sagen, finde ich Sie sofort auf unserer Liste."],
+["Ist das Frühstück im Zimmerpreis inbegriffen?","Ja, inklusive.","Ja, das Frühstück ist in Ihrem Zimmerpreis schon inbegriffen.","Ja, selbstverständlich – das Frühstücksbuffet ist in Ihrer Buchung enthalten. Sie müssen also nichts extra bezahlen."],
+["Wir sind zu fünft. Haben Sie einen großen Tisch?","Ja, dort hinten.","Ja, gern – ich stelle Ihnen schnell zwei Tische zusammen.","Sehr gern. Geben Sie mir bitte eine Minute, dann stelle ich Ihnen zwei Tische zusammen, damit Sie alle bequem Platz haben."]]},
+{t:"Frühstückszeiten",e:"⏰",items:[
+["Bis wann gibt es Frühstück?","Bis halb elf.","Unter der Woche bis 10:30 Uhr, am Wochenende bis 11 Uhr.","Unser Buffet ist von Montag bis Freitag von 7 bis 10:30 Uhr geöffnet. Am Wochenende können Sie bis 11 Uhr in Ruhe frühstücken."],
+["Kann ich morgen schon um sechs frühstücken? Mein Zug fährt sehr früh.","Leider erst ab sieben.","Das Buffet öffnet leider erst um 7 Uhr. Wir können Ihnen aber ein Frühstückspaket vorbereiten.","Um 6 Uhr ist das Buffet leider noch nicht aufgebaut. Gern packen wir Ihnen aber ein Frühstückspaket, das Sie heute Abend an der Rezeption abholen können."],
+["Wann ist es hier am ruhigsten?","Vor acht Uhr.","Am ruhigsten ist es meistens vor 8 Uhr oder nach halb zehn.","Wenn Sie es gern ruhig haben, empfehle ich Ihnen die Zeit vor 8 Uhr. Auch nach halb zehn wird es wieder deutlich ruhiger."],
+["Schaffen wir es um zehn nach zehn noch?","Ja, das geht.","Ja, sicher – Sie haben dann noch zwanzig Minuten Zeit.","Selbstverständlich, kommen Sie gern. Wir räumen nicht hektisch ab, Sie können in Ruhe fertig frühstücken."],
+["Gibt es am Sonntag einen Brunch?","Nein, nur Frühstück.","Einen Brunch haben wir leider nicht, aber das Frühstück gibt es am Sonntag bis 11 Uhr.","Einen eigenen Brunch bieten wir leider nicht an. Am Sonntag ist unser Frühstücksbuffet aber bis 11 Uhr geöffnet – das ist fast dasselbe, nur ohne Mittagsgerichte."]]},
+{t:"Am Buffet",e:"🥐",items:[
+["Wo finde ich das Brot?","Dort beim Fenster.","Brot und Gebäck finden Sie auf dem Holztisch beim Fenster.","Brot, Semmeln und Gebäck stehen auf dem Holztisch beim Fenster. Direkt daneben gibt es auch einen Toaster."],
+["Gibt es auch warme Speisen?","Ja, Eier auf Wunsch.","Ja, wir machen Ihnen gern Spiegelei, Rührei oder ein Omelett.","Gern! Unsere Küche bereitet Ihnen frisch Spiegelei, Rührei oder ein Omelett mit Zutaten Ihrer Wahl zu. Sagen Sie mir einfach, was Sie möchten."],
+["Könnte ich ein weiches Ei bekommen?","Ja, gern.","Ja, gern. Soll es vier oder fünf Minuten kochen?","Sehr gern. Möchten Sie es ganz weich mit flüssigem Dotter, also etwa vier Minuten, oder lieber fünf Minuten?"],
+["Es gibt keine Croissants mehr. Kommen noch welche?","Ja, gleich.","Entschuldigung! Frische Croissants kommen in ein paar Minuten.","Danke für den Hinweis! Die nächsten Croissants kommen gerade aus dem Ofen – in etwa fünf Minuten stehen sie am Buffet."],
+["Ist der Orangensaft frisch gepresst?","Ja.","Ja, der Orangensaft wird jeden Morgen frisch gepresst.","Ja, wir pressen ihn jeden Morgen frisch. Und wenn Sie es lieber regional mögen: Der Apfelsaft kommt von einem Bauernhof ganz in der Nähe."],
+["Darf ich mir ein Stück Obst mitnehmen?","Ja, gern.","Ja, natürlich, ein Stück Obst für unterwegs ist kein Problem.","Selbstverständlich, ein Apfel oder eine Banane für unterwegs ist gern gesehen. Wenn Sie mehr brauchen, packen wir Ihnen gern ein Lunchpaket."],
+["Was ist Topfen?","Ein Frischkäse.","Topfen ist ein milder Frischkäse – in Deutschland sagt man Quark.","Topfen ist ein milder, cremiger Frischkäse, in Deutschland sagt man Quark dazu. Probieren Sie ihn mit Honig oder mit unserer hausgemachten Marmelade."]]},
+{t:"Kaffee & Tee",e:"☕",items:[
+["Kann ich einen Cappuccino haben?","Natürlich, sofort.","Selbstverständlich, ich bringe ihn Ihnen gleich an den Tisch.","Sehr gern. Möchten Sie ihn mit normaler Milch oder lieber mit Hafermilch? Ich bringe ihn Ihnen dann an den Tisch."],
+["Wie funktioniert die Kaffeemaschine?","Tasse drunter, Knopf drücken.","Sie stellen die Tasse unter den Auslauf und drücken auf Ihr Getränk.","Ganz einfach: Stellen Sie die Tasse unter den Auslauf und wählen Sie auf dem Bildschirm Ihr Getränk. Wenn Sie möchten, zeige ich es Ihnen kurz."],
+["Haben Sie laktosefreie Milch?","Ja, haben wir.","Ja, die laktosefreie Milch steht im Kühlschrank mit dem blauen Schild.","Ja, natürlich. Laktosefreie Milch und Hafermilch finden Sie im kleinen Kühlschrank mit dem blauen Schild. Soll ich Ihnen ein Kännchen an den Tisch bringen?"],
+["Welche Teesorten gibt es?","Schwarz, grün und Kräuter.","Wir haben Schwarztee, Grüntee, Pfefferminze und Kamille.","Zur Auswahl stehen Schwarztee, Grüntee, Pfefferminze, Kamille und ein Früchtetee. Das heiße Wasser kommt aus dem silbernen Spender neben den Tassen."],
+["Könnte ich bitte noch eine Kanne Kaffee bekommen?","Gern, kommt sofort.","Gern, ich bringe Ihnen sofort eine frische Kanne.","Aber gern. Ich bringe Ihnen gleich eine frische, heiße Kanne – darf es noch etwas Milch dazu sein?"]]},
+{t:"Allergien & Ernährung",e:"🌾",items:[
+["Ich vertrage kein Gluten. Was kann ich essen?","Wir haben glutenfreies Brot.","Wir haben glutenfreies Brot, das ich Ihnen gern frisch toaste.","Für Sie haben wir glutenfreies Brot und Gebäck, das extra gelagert wird. Ich toaste es Ihnen gern in einem eigenen Toaster, damit nichts mit Gluten in Berührung kommt."],
+["Gibt es etwas Veganes?","Ja, einiges.","Ja – Obst, Gemüse, Hummus, Haferflocken und Pflanzenmilch sind vegan.","Ja, sehr gern. Vegan sind zum Beispiel Obst, Gemüse, Hummus, die Haferflocken und alle Pflanzenmilchsorten. Alles ist mit einem kleinen Blatt-Symbol gekennzeichnet."],
+["Sind Nüsse im Müsli?","Ja, Haselnüsse.","Ja, in diesem Müsli sind Haselnüsse. Das nussfreie steht gleich daneben.","Ja, darin sind leider Haselnüsse. Wenn Sie eine Allergie haben, nehmen Sie bitte das Müsli mit dem blauen Schild – das ist garantiert nussfrei."],
+["Woran erkenne ich die Allergene?","An den Schildern.","Auf jedem Schild am Buffet stehen die Allergene.","Auf jedem kleinen Schild am Buffet sind die Allergene mit Buchstaben angegeben. Die Erklärung der Buchstaben finden Sie auf der Tafel beim Eingang – oder fragen Sie mich einfach."],
+["Ist im Rührei Milch?","Ja, ein bisschen.","Ja, ein bisschen. Wir können es aber auch ohne Milch zubereiten.","Normalerweise geben wir einen Schuss Milch dazu. Für Sie bereiten wir es aber gern ganz ohne Milch und mit Öl statt Butter zu."]]},
+{t:"Tisch & Service",e:"🍽️",items:[
+["Könnten wir einen Kinderhochstuhl bekommen?","Ja, sofort.","Natürlich, ich hole Ihnen gleich einen.","Selbstverständlich. Ich bringe Ihnen sofort einen Hochstuhl – und für die Kleinen haben wir auch Kinderbesteck und bunte Becher."],
+["Dürfen wir auf der Terrasse sitzen?","Ja, gern.","Ja, gern – ich decke Ihnen draußen einen Tisch.","Sehr gern. Die Morgensonne ist auf der Terrasse wunderschön. Ich decke Ihnen draußen einen Tisch und bringe Ihnen bei Bedarf auch eine Decke."],
+["Darf mein Hund mit in den Frühstücksraum?","Leider nein.","Im Frühstücksraum leider nicht, aber auf der Terrasse ist er herzlich willkommen.","Im Frühstücksraum dürfen wir aus Hygienegründen leider keine Hunde erlauben. Auf der Terrasse ist Ihr Hund aber herzlich willkommen, und eine Schüssel Wasser bringe ich auch gleich."],
+["Kann ich das Frühstück aufs Zimmer bestellen?","Ja, gegen Aufpreis.","Ja, das ist möglich. Der Zimmerservice kostet acht Euro extra.","Ja, sehr gern. Füllen Sie einfach die Karte auf Ihrem Zimmer aus und hängen Sie sie bis 22 Uhr an die Tür. Für den Zimmerservice berechnen wir acht Euro."],
+["Wie ist das WLAN-Passwort?","Es steht auf der Karte.","Das Passwort steht auf der kleinen Karte auf Ihrem Tisch.","Das Passwort finden Sie auf der kleinen Karte auf jedem Tisch. Es ist übrigens dasselbe wie auf Ihrem Zimmer."],
+["Wo ist die Toilette?","Dort hinten rechts.","Die Toiletten sind gleich neben der Rezeption, rechts.","Gehen Sie bitte hier hinaus und dann gleich rechts – die Toiletten sind direkt neben der Rezeption."]]},
+{t:"Reservierung & externe Gäste",e:"📞",items:[
+["Ich wohne nicht im Hotel. Kann ich trotzdem frühstücken?","Ja, für 18 Euro.","Ja, gern. Das Buffet kostet für externe Gäste 18 Euro pro Person.","Selbstverständlich, auch externe Gäste sind herzlich willkommen. Das Buffet kostet 18 Euro pro Person, Kinder bis sechs Jahre frühstücken gratis."],
+["Ich möchte für Sonntag einen Tisch für sechs Personen reservieren.","Gern. Um wie viel Uhr?","Sehr gern. Um wie viel Uhr möchten Sie kommen, und auf welchen Namen darf ich reservieren?","Sehr gern, für Sonntag, sechs Personen. Darf ich fragen, um wie viel Uhr Sie kommen möchten und auf welchen Namen ich den Tisch reservieren darf?"],
+["Muss man fürs Frühstück reservieren?","Hotelgäste nicht.","Als Hotelgast nicht. Externe Gäste sollten am Wochenende lieber reservieren.","Als Hotelgast brauchen Sie keine Reservierung. Wenn Sie aber Freunde mitbringen möchten, empfehle ich am Wochenende eine Reservierung, weil wir mit unseren dreißig Zimmern schnell voll sind."],
+["Ich muss meine Reservierung leider absagen.","Kein Problem, danke.","Kein Problem, danke, dass Sie Bescheid gegeben haben.","Das ist überhaupt kein Problem – vielen Dank, dass Sie uns rechtzeitig Bescheid geben. Ich storniere den Tisch sofort, und wir freuen uns, wenn Sie ein anderes Mal kommen."],
+["Können wir die Reservierung auf halb zehn verschieben?","Ja, das geht.","Ja, das geht. Ich ändere die Uhrzeit gleich auf 9:30 Uhr.","Sehr gern, das lässt sich einrichten. Ich habe Ihre Reservierung auf 9:30 Uhr geändert – der Tisch wartet auf Sie."],
+["Haben Sie am Samstag noch etwas frei?","Leider ausgebucht.","Am Samstag sind wir leider ausgebucht. Am Sonntag hätte ich noch einen Tisch.","Am Samstag sind wir leider schon ausgebucht. Am Sonntag um halb neun hätte ich aber noch einen schönen Tisch am Fenster – soll ich ihn für Sie reservieren?"]]},
+{t:"Rezeption & Zimmer",e:"🔑",items:[
+["Wann muss ich auschecken?","Bis elf Uhr.","Der Check-out ist bis 11 Uhr.","Der Check-out ist bis 11 Uhr. Wenn Sie etwas mehr Zeit brauchen, fragen Sie gern an der Rezeption nach einem späten Check-out."],
+["Ist ein später Check-out möglich?","Ich frage nach.","Ich frage gern an der Rezeption nach, ob das Zimmer bis 13 Uhr frei bleiben kann.","Das ist oft möglich. Ich kläre das gern für Sie an der Rezeption – bis 13 Uhr berechnen wir normalerweise nichts extra."],
+["Kann ich mein Gepäck nach dem Check-out hierlassen?","Ja, natürlich.","Ja, natürlich, wir bewahren es gern in unserem Gepäckraum auf.","Selbstverständlich. Geben Sie Ihr Gepäck einfach an der Rezeption ab – wir bewahren es sicher auf, bis Sie es am Nachmittag abholen."],
+["Können Sie den Kaffee auf meine Zimmerrechnung schreiben?","Ja, gern. Welches Zimmer?","Ja, gern. Darf ich noch einmal nach Ihrer Zimmernummer fragen?","Sehr gern, das buche ich direkt auf Ihr Zimmer. Würden Sie mir zur Sicherheit noch einmal Ihre Zimmernummer sagen und hier kurz unterschreiben?"],
+["In meinem Zimmer ist es kalt.","Ich sage es der Technik.","Das tut mir leid. Ich gebe es sofort an unsere Haustechnik weiter.","Das tut mir sehr leid. Ich gebe es sofort an unseren Haustechniker weiter, und bis die Heizung wieder läuft, bringen wir Ihnen gern eine zusätzliche Decke aufs Zimmer."]]},
+{t:"Bezahlen",e:"💳",items:[
+["Kann ich mit Karte zahlen?","Ja, natürlich.","Ja, natürlich, wir nehmen alle gängigen Karten.","Selbstverständlich. Sie können mit allen gängigen Karten bezahlen, auch kontaktlos mit dem Handy."],
+["Die Rechnung, bitte.","Gern, sofort.","Gern. Möchten Sie zusammen oder getrennt zahlen?","Sehr gern, ich bringe sie Ihnen sofort. Darf ich fragen, ob Sie zusammen oder getrennt bezahlen möchten?"],
+["Stimmt so.","Danke schön!","Vielen Dank, das ist sehr nett von Ihnen!","Herzlichen Dank, das ist sehr großzügig! Ich wünsche Ihnen noch einen wunderschönen Tag."],
+["Was kostet ein Kaffee extra?","3,50 Euro.","Beim Frühstück ist er gratis, sonst kostet er 3,50 Euro.","Beim Frühstück sind alle Kaffeespezialitäten im Preis inbegriffen. Außerhalb der Frühstückszeit kostet ein Kaffee 3,50 Euro."]]},
+{t:"Wenn etwas nicht passt",e:"🙏",items:[
+["Mein Kaffee ist kalt.","Oh, Entschuldigung!","Das tut mir leid, ich bringe Ihnen sofort einen frischen.","Das tut mir wirklich leid. Ich bringe Ihnen sofort einen frischen, heißen Kaffee – und diesmal achte ich selbst darauf."],
+["Wir warten schon zwanzig Minuten auf unser Omelett.","Es kommt gleich.","Entschuldigen Sie bitte die Wartezeit, ich frage sofort in der Küche nach.","Bitte entschuldigen Sie die lange Wartezeit. Ich gehe sofort in die Küche und sorge dafür, dass Ihr Omelett als Nächstes kommt. Darf ich Ihnen in der Zwischenzeit noch einen Kaffee bringen?"],
+["Unser Tisch ist noch nicht abgeräumt.","Ich räume gleich ab.","Entschuldigung, ich räume den Tisch sofort für Sie ab.","Oh, das tut mir leid! Ich räume sofort ab und decke frisch für Sie – einen Moment bitte."],
+["Es ist hier sehr laut.","Möchten Sie woanders sitzen?","Das verstehe ich. Darf ich Ihnen einen ruhigeren Tisch anbieten?","Das kann ich gut verstehen, gerade ist viel los. Im Wintergarten ist es deutlich ruhiger – darf ich Sie dorthin begleiten?"],
+["Das Rührei ist zu salzig.","Ich bringe ein neues.","Das tut mir leid, ich lasse Ihnen sofort ein neues machen.","Danke, dass Sie es mir sagen! Ich lasse Ihnen sofort ein frisches Rührei zubereiten – auf Wunsch ganz ohne Salz, dann können Sie selbst nachsalzen."]]},
+{t:"Tipps & Abreise",e:"🧳",items:[
+["Können Sie mir ein Taxi rufen?","Ja, gern. Für wann?","Gern. Für wann soll ich das Taxi bestellen?","Selbstverständlich. Sagen Sie mir einfach die Uhrzeit, dann bestelle ich das Taxi für Sie und sage Ihnen Bescheid, sobald es vor der Tür steht."],
+["Wo ist die nächste Bushaltestelle?","Zwei Minuten zu Fuß.","Die Haltestelle ist nur zwei Minuten entfernt, beim Ausgang links.","Die nächste Bushaltestelle erreichen Sie in zwei Minuten: einfach beim Ausgang links und die Straße hinunter. Den Fahrplan bekommen Sie gern an der Rezeption."],
+["Was kann man hier in der Gegend machen?","Wandern zum Beispiel.","Bei schönem Wetter kann man wunderbar wandern, bei Regen ins Museum gehen.","Da gibt es einiges! Bei schönem Wetter empfehle ich eine Wanderung, bei Regen ein Museum. An der Rezeption haben wir Karten und Prospekte für Sie."],
+["Wie wird das Wetter heute?","Sonnig, glaube ich.","Laut Wetterbericht soll es sonnig werden, am Abend vielleicht ein bisschen Regen.","Laut Wetterbericht wird es heute sonnig und mild. Am Abend kann es aber regnen – nehmen Sie zur Sicherheit lieber einen Schirm mit. Wir leihen Ihnen gern einen."],
+["Danke für alles, wir reisen heute ab.","Gute Reise!","Vielen Dank, dass Sie bei uns waren. Gute Reise!","Es war uns eine Freude, Sie bei uns zu haben. Ich wünsche Ihnen eine gute Heimreise – und wir freuen uns, wenn Sie bald wieder zu uns kommen."]]}
+];
+
+/* Knifflige Wahl: o = [Text, richtig?, Erklärung] */
+const MC=[
+{q:"Sie möchten am Eingang die Zimmernummer wissen. Welche Frage ist korrekt und höflich?",s:"",o:[
+["Welche Zimmernummer haben Sie, bitte?",1,"Richtig: „die Nummer“ ist feminin, also „welche“. Mit „Sie“ und „bitte“ ist die Frage höflich."],
+["Welches Zimmernummer haben Sie, bitte?",0,"„welches“ passt nur zu neutralen Wörtern (das Zimmer). Das letzte Wort im Kompositum bestimmt den Artikel: die Nummer → welche."],
+["Wie viel Zimmernummer haben Sie, bitte?",0,"„Wie viel“ fragt nach einer Menge (Wie viel Kaffee?). Eine Nummer ist keine Menge."],
+["Welche Zimmernummer hast du, bitte?",0,"Grammatisch richtig, aber Hotelgäste spricht man mit „Sie“ an – „du“ wirkt hier unprofessionell."]]},
+{q:"Ein Gast fragt nach den Frühstückszeiten.",s:"Das Frühstück gibt es ___ 7 ___ 10:30 Uhr.",o:[
+["von … bis",1,"„von … bis“ beschreibt einen Zeitraum mit Anfang und Ende."],
+["seit … bis",0,"„seit“ beschreibt etwas, das in der Vergangenheit begonnen hat und bis jetzt dauert (seit einer Woche). Für Öffnungszeiten passt es nicht."],
+["um … bis",0,"„um“ steht vor einem genauen Zeitpunkt (um 7 Uhr). Für einen Zeitraum braucht man „von … bis“."],
+["zwischen … bis",0,"„zwischen“ geht immer mit „und“: zwischen 7 und 10:30 Uhr. „zwischen … bis“ ist eine Mischung aus zwei Strukturen."]]},
+{q:"Sie bitten besonders höflich (Konjunktiv II).",s:"___ Sie mir bitte kurz Ihre Zimmernummer sagen?",o:[
+["Könnten",1,"„könnten“ ist Konjunktiv II von „können“ – die höflichste Form für eine Bitte."],
+["Konnten",0,"„konnten“ (ohne Umlaut) ist Präteritum, also Vergangenheit: „Waren Sie gestern fähig …?“ – das passt hier nicht."],
+["Könntet",0,"Das ist die ihr-Form (ihr könntet). Mit „Sie“ braucht man „könnten“."],
+["Kennten",0,"„kennen“ heißt „wissen, wer/was etwas ist“ (Ich kenne den Gast). Für eine Bitte braucht man „können“."]]},
+{q:"Sie bieten einem Gast Kaffee an.",s:"Ich bringe ___ gleich frischen Kaffee.",o:[
+["Ihnen",1,"„bringen“: jemandem (Dativ) etwas (Akkusativ). Dativ der Höflichkeitsform = Ihnen."],
+["Sie",0,"„Sie“ ist Nominativ oder Akkusativ. Dann hieße der Satz: Ich bringe Sie (= die Person) irgendwohin."],
+["Ihr",0,"„Ihr“ ist ein Possessivartikel (Ihr Kaffee), kein Personalpronomen."],
+["sich",0,"„sich“ ist reflexiv und bezieht sich auf das Subjekt. Das Subjekt ist „ich“ – also wäre es „mir“, und das ergibt hier keinen Sinn."]]},
+{q:"Wo steht das Buffet?",s:"Das Buffet steht ___ Frühstücksraum.",o:[
+["im",1,"Frage „Wo?“ → Wechselpräposition mit Dativ: in dem = im (der Raum)."],
+["in den",0,"„in den“ ist Akkusativ und antwortet auf „Wohin?“ (Ich gehe in den Frühstücksraum). „stehen“ beschreibt aber einen Ort."],
+["zum",0,"„zum“ zeigt eine Richtung (Ich gehe zum Frühstücksraum). Mit „stehen“ passt es nicht."],
+["ins",0,"„ins“ = in das. Es passt nur zu neutralen Wörtern und antwortet auf „Wohin?“. Raum ist maskulin."]]},
+{q:"Sie erklären die Kaffeemaschine.",s:"Stellen Sie die Tasse bitte ___ Auslauf.",o:[
+["unter den",1,"„stellen“ ist eine Bewegung (Wohin?) → Akkusativ: unter den Auslauf (der Auslauf)."],
+["unter dem",0,"„unter dem“ ist Dativ und antwortet auf „Wo?“: Die Tasse steht unter dem Auslauf. Mit „stellen“ braucht man Akkusativ."],
+["unter der",0,"„der“ wäre Dativ feminin. Auslauf ist maskulin."],
+["unter das",0,"„das“ passt nur zu neutralen Nomen. Es heißt „der Auslauf“."]]},
+{q:"Ein Gast fragt, ob noch ein Tisch frei ist. Sie wissen es nicht.",s:"Ich weiß leider nicht, …",o:[
+["ob noch ein Tisch frei ist.",1,"Nach „ob“ beginnt ein Nebensatz – das Verb steht ganz am Ende."],
+["ob ist noch ein Tisch frei.",0,"Im Nebensatz darf das Verb nicht auf Position 2 stehen. Es gehört ans Ende."],
+["ob noch ist ein Tisch frei.",0,"Auch hier steht das Verb zu früh. Richtig: … ob noch ein Tisch frei ist."],
+["dass noch ein Tisch frei ist.",0,"„dass“ verwendet man, wenn man etwas weiß oder sagt. Bei Unsicherheit (Ich weiß nicht …) braucht man „ob“."]]},
+{q:"Sie erklären, wie das Gebäck ins Hotel kommt (Passiv Präsens).",s:"Die Semmeln ___ jeden Morgen um sechs Uhr vom Bäcker geliefert.",o:[
+["werden",1,"Passiv Präsens: werden + Partizip II. „Die Semmeln“ ist Plural → werden."],
+["wird",0,"„wird“ ist Singular (Das Brot wird geliefert). „Die Semmeln“ ist Plural."],
+["würden",0,"„würden“ ist Konjunktiv II – damit klingt es wie eine Möglichkeit oder ein Wunsch, nicht wie eine Tatsache."],
+["worden",0,"„worden“ ist das Partizip von „werden“ im Passiv Perfekt und braucht „sind“: Die Semmeln sind geliefert worden."]]},
+{q:"Ein Gast bestellt bei Ihnen.",s:"Möchten Sie ein ___ Ei?",o:[
+["weich gekochtes",1,"Nach „ein“ (neutral, Akkusativ) bekommt das Adjektiv die Endung -es: ein weich gekochtes Ei."],
+["weich gekochter",0,"-er passt zu maskulinen Nomen im Nominativ (ein weicher Toast). „Ei“ ist neutral."],
+["weich gekochten",0,"-en braucht man z. B. nach dem bestimmten Artikel im Akkusativ maskulin oder im Dativ. Nach „ein“ + neutral steht -es."],
+["weich gekochte",0,"-e passt z. B. zu femininen Nomen (eine weiche Semmel). „Ei“ ist neutral."]]},
+{q:"Sie erzählen von gestern (Präteritum).",s:"Gestern ___ wir um zehn Uhr kein Brot mehr.",o:[
+["hatten",1,"Präteritum von „haben“, 1. Person Plural: wir hatten."],
+["haben",0,"„haben“ ist Präsens. Mit „gestern“ braucht man eine Vergangenheitsform."],
+["hätten",0,"„hätten“ ist Konjunktiv II (wir hätten gern …) und drückt einen Wunsch oder eine Möglichkeit aus, keine Tatsache."],
+["hatte",0,"„hatte“ ist die Form für ich/er/sie/es. Zu „wir“ gehört „hatten“."]]},
+{q:"Sie fragen einen Gast am Morgen (Perfekt).",s:"___ Sie gut geschlafen?",o:[
+["Haben",1,"„schlafen“ bildet das Perfekt mit „haben“: Haben Sie gut geschlafen?"],
+["Sind",0,"Mit „sein“ bilden vor allem Verben der Bewegung oder Veränderung das Perfekt (Sind Sie gut angekommen?). „schlafen“ geht mit „haben“."],
+["Hatten",0,"Das ist Plusquamperfekt (Hatten Sie geschlafen?) – eine Vorvergangenheit. Am Morgen fragt man im Perfekt."],
+["Werden",0,"„werden“ + Partizip ist Passiv oder Futur und ergibt hier keinen Sinn."]]},
+{q:"Sie informieren eine Kollegin (Perfekt).",s:"Der Gast aus Zimmer acht ___ heute schon um sechs Uhr abgereist.",o:[
+["ist",1,"„abreisen“ ist eine Bewegung von einem Ort weg → Perfekt mit „sein“."],
+["hat",0,"Verben der Ortsveränderung (abreisen, ankommen, fahren) bilden das Perfekt mit „sein“."],
+["war",0,"„war abgereist“ ist Plusquamperfekt. Gefragt ist das Perfekt."],
+["wird",0,"„wird abgereist“ wäre Passiv – aber niemand „reist“ einen Gast. Der Gast reist selbst ab."]]},
+{q:"Sie zeigen einem Gast mit Nussallergie das richtige Müsli.",s:"Das ist das Müsli, ___ keine Nüsse enthält.",o:[
+["das",1,"Relativpronomen: Bezugswort „das Müsli“ (neutral), im Relativsatz Subjekt → Nominativ: das."],
+["der",0,"„der“ passt zu maskulinen Nomen. Müsli ist neutral."],
+["dem",0,"„dem“ ist Dativ. Im Relativsatz ist das Müsli aber Subjekt (Das Müsli enthält …) → Nominativ."],
+["die",0,"„die“ passt zu femininen Nomen oder zum Plural. „Das Müsli“ ist neutral Singular."]]},
+{q:"Sie sprechen über einen Gast.",s:"Der Gast, ___ ich den Tee gebracht habe, möchte jetzt zahlen.",o:[
+["dem",1,"„bringen“: jemandem (Dativ) etwas bringen. Ich habe dem Gast den Tee gebracht → Relativpronomen im Dativ: dem."],
+["den",0,"„den“ ist Akkusativ. Der Akkusativ im Satz ist aber schon „den Tee“."],
+["der",0,"„der“ wäre Nominativ – dann wäre der Gast das Subjekt. Das Subjekt ist aber „ich“."],
+["dessen",0,"„dessen“ ist Genitiv und zeigt Besitz (der Gast, dessen Tee kalt ist). Hier passt es nicht."]]},
+{q:"Der Gast möchte die genaue Uhrzeit wissen.",s:"Können Sie mir sagen, ___ das Buffet morgen öffnet?",o:[
+["wann",1,"„wann“ fragt nach der Zeit – auch in der indirekten Frage."],
+["wenn",0,"„wenn“ leitet eine Bedingung ein (Wenn Sie möchten, …) – keine Frage nach der Uhrzeit."],
+["als",0,"„als“ verwendet man für einmalige Ereignisse in der Vergangenheit (Als ich kam, …)."],
+["ob",0,"„ob“ fragt nur Ja oder Nein (ob das Buffet öffnet). Der Gast möchte aber die Uhrzeit wissen."]]},
+{q:"Am Telefon: Für Samstag gibt es keinen freien Tisch mehr.",s:"Am Samstag sind wir leider schon ___.",o:[
+["ausgebucht",1,"„ausgebucht“ = alle Plätze oder Zimmer sind reserviert."],
+["gebucht",0,"„Wir sind gebucht“ heißt: jemand hat uns gebucht (z. B. eine Band). Das ist nicht gemeint."],
+["reserviert",0,"Reserviert sind Tische oder Zimmer, nicht das Team: „Alle Tische sind reserviert.“"],
+["verbucht",0,"„verbuchen“ ist ein Wort aus der Buchhaltung (eine Zahlung verbuchen)."]]},
+{q:"Ein Gast hat lange gewartet.",s:"Entschuldigen Sie bitte ___ lange Wartezeit.",o:[
+["die",1,"„entschuldigen“ + Akkusativ. „die Wartezeit“ ist feminin, Akkusativ = die."],
+["der",0,"„der“ wäre Dativ oder Genitiv feminin. „entschuldigen“ braucht Akkusativ."],
+["den",0,"„den“ ist Akkusativ maskulin. „Wartezeit“ ist feminin (die Zeit)."],
+["dem",0,"„dem“ ist Dativ maskulin/neutral und passt hier nicht."]]},
+{q:"Ein Gast meldet ein Problem.",s:"Ich kümmere mich sofort ___.",o:[
+["darum",1,"„sich kümmern um“ → Pronominaladverb: darum."],
+["dafür",0,"„dafür“ gehört zu Verben mit „für“ (sich interessieren für)."],
+["damit",0,"„damit“ gehört zu Verben mit „mit“ (anfangen mit)."],
+["davon",0,"„davon“ gehört zu Verben mit „von“ (erzählen von)."]]},
+{q:"Eine Gruppe hat für nächsten Sonntag reserviert.",s:"Wir freuen uns ___ Ihren Besuch am Sonntag.",o:[
+["auf",1,"„sich freuen auf“ = auf etwas in der Zukunft."],
+["über",0,"„sich freuen über“ = über etwas, das schon da ist oder passiert ist (Wir freuen uns über Ihr Kompliment). Der Besuch ist aber erst am Sonntag."],
+["für",0,"„sich freuen für“ jemanden = sich mit jemandem mitfreuen (Ich freue mich für dich). Passt hier nicht."],
+["an",0,"„sich freuen an“ gibt es nur selten (sich an den Blumen freuen). Für einen geplanten Besuch passt es nicht."]]},
+{q:"Sie fragen, wie zwei Gäste bezahlen möchten.",s:"Möchten Sie ___ oder getrennt zahlen?",o:[
+["zusammen",1,"„zusammen oder getrennt“ ist die feste Frage beim Bezahlen."],
+["zugleich",0,"„zugleich“ bedeutet „zur selben Zeit“ – es geht aber um eine oder zwei Rechnungen."],
+["zusammenhängend",0,"„zusammenhängend“ heißt „verbunden“ (ein zusammenhängender Text)."],
+["beieinander",0,"„beieinander“ beschreibt, dass Personen nahe beisammen sind (Sie sitzen beieinander)."]]},
+{q:"Ein Gast fragt nach dem Preis.",s:"Das Frühstück ist ___ Zimmerpreis inbegriffen.",o:[
+["im",1,"„inbegriffen in“ + Dativ: in dem = im Zimmerpreis."],
+["in den",0,"„in den“ ist Akkusativ (Richtung). „inbegriffen“ beschreibt einen Zustand → Dativ."],
+["am",0,"„am“ = an dem. Es heißt aber „in etwas inbegriffen“."],
+["beim",0,"„beim“ = bei dem. „beim Zimmerpreis“ ist keine feste Verbindung mit „inbegriffen“."]]},
+{q:"Sie vergleichen zwei Plätze.",s:"Am Fenster ist es ___ als an der Tür.",o:[
+["ruhiger",1,"Komparativ: Adjektiv + -er + „als“."],
+["mehr ruhig",0,"Im Deutschen bildet man den Komparativ mit der Endung -er, nicht mit „mehr“."],
+["am ruhigsten",0,"Das ist der Superlativ. Mit „als“ vergleicht man aber zwei Dinge → Komparativ."],
+["so ruhig",0,"„so … wie“ zeigt Gleichheit. Mit „als“ braucht man den Komparativ."]]},
+{q:"Sie bieten mehr Kaffee an.",s:"Darf ich Ihnen ___ Kaffee nachschenken?",o:[
+["noch einen",1,"„der Kaffee“ (maskulin), Akkusativ: einen."],
+["noch ein",0,"„ein“ passt im Akkusativ nur zu neutralen Nomen (noch ein Glas). Kaffee ist maskulin."],
+["noch einem",0,"„einem“ ist Dativ. „nachschenken“: jemandem (Ihnen) etwas (Akkusativ)."],
+["noch eine",0,"„eine“ passt zu femininen Nomen (noch eine Tasse). Kaffee ist maskulin."]]},
+{q:"Sie laden Gäste ein, sich selbst etwas zu nehmen.",s:"Bitte ___ am Buffet!",o:[
+["bedienen Sie sich",1,"Imperativ mit „Sie“: Verb – Sie – Reflexivpronomen: Bedienen Sie sich!"],
+["bedienen sich Sie",0,"Das Reflexivpronomen steht nach „Sie“, nicht davor."],
+["Sie bedienen sich",0,"Das ist ein Aussagesatz (eine Feststellung), keine Aufforderung."],
+["bediene dich",0,"Das ist die du-Form. Hotelgäste spricht man mit „Sie“ an."]]},
+{q:"Das Buffet ist geschlossen, Sie möchten dem Gast trotzdem etwas anbieten.",s:"Das Buffet ist schon geschlossen. ___ kann ich Ihnen noch einen Kaffee bringen.",o:[
+["Trotzdem",1,"„trotzdem“ zeigt einen Gegensatz: Obwohl das Buffet zu ist, gibt es noch Kaffee. Danach folgt das Verb (Position 2)."],
+["Deshalb",0,"„deshalb“ zeigt eine Folge. Der Kaffee ist aber keine Folge davon, dass das Buffet geschlossen ist."],
+["Obwohl",0,"„obwohl“ leitet einen Nebensatz ein – das Verb müsste am Ende stehen. „Obwohl kann ich …“ ist falsch."],
+["Weil",0,"„weil“ leitet einen Nebensatz mit Verb am Ende ein und nennt einen Grund. Beides passt hier nicht."]]},
+{q:"Sie informieren über glutenfreies Brot.",s:"Wir haben glutenfreies Brot, ___ Sie eine Unverträglichkeit haben.",o:[
+["falls",1,"„falls“ = für den Fall, dass … (eine Bedingung, die vielleicht zutrifft)."],
+["ob",0,"„ob“ leitet indirekte Fragen ein (Ich frage, ob …). Hier geht es um eine Bedingung."],
+["damit",0,"„damit“ nennt ein Ziel. Das Brot gibt es aber nicht, damit der Gast eine Unverträglichkeit hat."],
+["dass",0,"„dass“ leitet einen Inhalt ein (Ich weiß, dass …). Hier braucht man eine Bedingung."]]},
+{q:"Ein Gast hat einen frühen Zug.",s:"Ich rufe Ihnen ein Taxi, ___ Sie den Zug nicht verpassen.",o:[
+["damit",1,"„damit“ nennt ein Ziel und hat ein eigenes Subjekt (Sie)."],
+["um",0,"„um … zu“ braucht einen Infinitiv und dasselbe Subjekt: um den Zug nicht zu verpassen. Mit „Sie“ geht es nicht."],
+["weil",0,"„weil“ nennt einen Grund. „Sie verpassen den Zug nicht“ ist aber das Ziel, nicht der Grund."],
+["obwohl",0,"„obwohl“ zeigt einen Gegensatz und ergibt hier keinen Sinn."]]},
+{q:"Sie korrigieren eine Information.",s:"Das Frühstück ist nicht im Garten, ___ im Wintergarten.",o:[
+["sondern",1,"Nach einer Verneinung (nicht) korrigiert man mit „sondern“."],
+["aber",0,"„aber“ zeigt einen Gegensatz, korrigiert aber keine verneinte Information. Nach „nicht …“ steht „sondern“."],
+["oder",0,"„oder“ bietet eine Wahl an. Hier wird aber etwas richtiggestellt."],
+["sonst",0,"„sonst“ heißt „andernfalls“ (Kommen Sie früh, sonst ist es voll)."]]},
+{q:"Sie organisieren etwas für einen Gast.",s:"Ich ___ Ihnen das Frühstück aufs Zimmer bringen.",o:[
+["lasse",1,"„lassen“ = jemand anderen etwas tun lassen. 1. Person Singular: ich lasse."],
+["lässt",0,"„lässt“ ist die Form für du/er/sie/es."],
+["lassen",0,"„lassen“ ist die Form für wir/sie/Sie oder der Infinitiv. Zu „ich“ gehört „lasse“."],
+["lasst",0,"„lasst“ ist die ihr-Form."]]},
+{q:"Sie schreiben einen Text für die Hotel-Website.",s:"Wir bieten unseren ___ ein reichhaltiges Frühstücksbuffet.",o:[
+["Gästen",1,"„bieten“: jemandem (Dativ) etwas. Dativ Plural bekommt -n: den Gästen, unseren Gästen."],
+["Gäste",0,"„Gäste“ ist Nominativ oder Akkusativ Plural. Im Dativ Plural kommt ein -n dazu."],
+["Gast",0,"„Gast“ ist Singular. „unseren“ zeigt aber Plural (Dativ)."],
+["Gastes",0,"„Gastes“ ist Genitiv Singular (des Gastes). Hier braucht man Dativ Plural."]]},
+{q:"Sie fragen nach dem Wunsch eines Gastes.",s:"Darf ich fragen, ___ Sie heute noch Frühstück möchten?",o:[
+["ob",1,"Eine Ja/Nein-Frage wird indirekt mit „ob“ eingeleitet."],
+["wenn",0,"„wenn“ leitet eine Bedingung oder Zeit ein, keine indirekte Frage."],
+["dass",0,"„dass“ steht nach Verben des Sagens und Wissens, nicht nach „fragen“."],
+["was",0,"„was“ fragt nach einer Sache (was Sie möchten). Mit „Frühstück“ ist die Sache aber schon genannt – es bleibt nur Ja oder Nein."]]}
+];
+
+/* Satz vollenden */
+const FINISH=[
+{b:"Wenn Sie möchten, …",o:[
+["bringe ich Ihnen einen Tee.",1,"Der wenn-Satz steht auf Position 1, danach kommt sofort das Verb: bringe ich …"],
+["ich bringe Ihnen einen Tee.",0,"Nach einem vorangestellten Nebensatz muss das Verb direkt folgen – nicht das Subjekt."],
+["ich Ihnen einen Tee bringe.",0,"Das ist Nebensatz-Wortstellung. Der zweite Teil ist aber ein Hauptsatz."],
+["Ihnen bringe ich einen Tee.",0,"Hier stehen zwei Elemente vor dem Verb (wenn-Satz und „Ihnen“). Das Verb muss auf Position 2."]]},
+{b:"Leider ist das Buffet schon geschlossen, aber …",o:[
+["ich kann Ihnen noch ein Croissant bringen.",1,"„aber“ steht auf Position 0 – danach ganz normal: Subjekt, Verb."],
+["kann ich Ihnen noch ein Croissant bringen.",0,"Nach „aber“ gibt es keine Inversion. „aber“ zählt nicht als Position 1."],
+["ich Ihnen noch ein Croissant bringen kann.",0,"Das ist Nebensatz-Wortstellung. „aber“ verbindet zwei Hauptsätze."],
+["ich kann Ihnen noch ein Croissant zu bringen.",0,"Nach Modalverben steht der Infinitiv ohne „zu“."]]},
+{b:"Ich empfehle Ihnen, …",o:[
+["den Tisch am Fenster zu nehmen.",1,"Nach „empfehlen“ folgt ein Infinitivsatz mit „zu“ am Ende."],
+["den Tisch am Fenster nehmen.",0,"Im Infinitivsatz nach „empfehlen“ fehlt hier das „zu“."],
+["zu nehmen den Tisch am Fenster.",0,"Der Infinitiv mit „zu“ steht am Ende des Satzes."],
+["dass Sie nehmen den Tisch am Fenster.",0,"Mit „dass“ ginge es, aber dann muss das Verb ans Ende: dass Sie den Tisch am Fenster nehmen."]]},
+{b:"Könnten Sie mir bitte sagen, …",o:[
+["wo die Toilette ist?",1,"Indirekte Frage: Fragewort + … + Verb am Ende."],
+["wo ist die Toilette?",0,"Das ist die Wortstellung einer direkten Frage. In der indirekten Frage steht das Verb am Ende."],
+["ob wo die Toilette ist?",0,"„ob“ und ein Fragewort schließen sich aus – „ob“ nur bei Ja/Nein-Fragen."],
+["wo die Toilette sein?",0,"Das Verb muss konjugiert werden: ist."]]},
+{b:"Weil heute viele Gäste da sind, …",o:[
+["dauern die Eier etwas länger.",1,"Der weil-Satz ist Position 1, dann kommt sofort das Verb."],
+["die Eier dauern etwas länger.",0,"Nach dem vorangestellten Nebensatz muss das Verb direkt folgen."],
+["die Eier etwas länger dauern.",0,"Das ist Nebensatz-Wortstellung, gebraucht wird ein Hauptsatz."],
+["dauert die Eier etwas länger.",0,"„die Eier“ ist Plural → dauern."]]},
+{b:"Das Frühstück wird …",o:[
+["von 7 bis 10:30 Uhr serviert.",1,"Passiv Präsens: wird + Partizip II am Ende."],
+["von 7 bis 10:30 Uhr servieren.",0,"Mit „wird“ + Infinitiv entsteht Futur – dann müsste jemand das Frühstück servieren (Subjekt). Das Frühstück serviert aber nicht selbst."],
+["serviert von 7 bis 10:30 Uhr.",0,"Das Partizip gehört ans Satzende."],
+["von 7 bis 10:30 Uhr serviert worden.",0,"„serviert worden“ braucht „ist“ (Perfekt Passiv), nicht „wird“."]]},
+{b:"Falls Sie eine Allergie haben, …",o:[
+["sagen Sie es mir bitte.",1,"Nach dem Nebensatz folgt die Aufforderung mit dem Verb zuerst: sagen Sie …"],
+["Sie sagen es mir bitte.",0,"Nach dem vorangestellten Nebensatz muss das Verb direkt folgen."],
+["bitte Sie sagen es mir.",0,"Hier steht das Verb zu spät."],
+["sagen es mir bitte Sie.",0,"„Sie“ steht in der Aufforderung direkt nach dem Verb."]]},
+{b:"Im Moment ist leider kein Tisch frei, deshalb …",o:[
+["müssen Sie kurz warten.",1,"„deshalb“ steht auf Position 1 → das Verb kommt direkt danach."],
+["Sie müssen kurz warten.",0,"Nach „deshalb“ gibt es Inversion: Verb vor dem Subjekt."],
+["Sie kurz warten müssen.",0,"Das ist Nebensatz-Wortstellung; nach „deshalb“ folgt ein Hauptsatz."],
+["müssen Sie kurz zu warten.",0,"Nach Modalverben steht der Infinitiv ohne „zu“."]]},
+{b:"Darf ich Ihnen …",o:[
+["noch etwas Kaffee nachschenken?",1,"Modalverb „darf“ auf Position 1 (Frage), Infinitiv am Ende."],
+["noch etwas Kaffee nachschenkt?",0,"Nach dem Modalverb braucht man den Infinitiv, nicht die konjugierte Form."],
+["noch etwas Kaffee nachzuschenken?",0,"Nach Modalverben steht der Infinitiv ohne „zu“."],
+["nachschenken noch etwas Kaffee?",0,"Der Infinitiv steht am Satzende."]]},
+{b:"Hätten Sie gern …",o:[
+["einen Tisch auf der Terrasse?",1,"„haben“ + Akkusativ: einen Tisch. Wo? → auf der Terrasse (Dativ)."],
+["ein Tisch auf der Terrasse?",0,"Tisch ist maskulin, im Akkusativ: einen."],
+["einem Tisch auf der Terrasse?",0,"„einem“ ist Dativ. „haben“ braucht Akkusativ."],
+["einen Tisch auf die Terrasse?",0,"„auf die Terrasse“ antwortet auf „Wohin?“. Der Tisch steht aber an einem Ort → Wo? → Dativ."]]},
+{b:"Es tut mir leid, dass …",o:[
+["Sie so lange warten mussten.",1,"Im dass-Satz steht das konjugierte Verb ganz am Ende."],
+["Sie mussten so lange warten.",0,"Das ist Hauptsatz-Wortstellung."],
+["Sie so lange mussten warten.",0,"Das konjugierte Modalverb steht im Nebensatz nach dem Infinitiv: warten mussten."],
+["mussten Sie so lange warten.",0,"Nach „dass“ kommt zuerst das Subjekt, das Verb am Ende."]]},
+{b:"Bevor Sie abreisen, …",o:[
+["geben Sie bitte den Schlüssel an der Rezeption ab.",1,"„abgeben“ ist trennbar: „geben“ auf Position 2 bzw. 1, „ab“ ans Ende."],
+["geben Sie bitte den Schlüssel an der Rezeption.",0,"Ohne „ab“ heißt der Satz etwas anderes und klingt unvollständig: Es geht um „abgeben“."],
+["Sie geben bitte den Schlüssel an der Rezeption ab.",0,"Nach dem Nebensatz muss das Verb direkt folgen."],
+["abgeben Sie bitte den Schlüssel an der Rezeption.",0,"Trennbare Verben werden im Hauptsatz getrennt: geben … ab."]]},
+{b:"Ich hoffe, …",o:[
+["dass Ihnen das Frühstück geschmeckt hat.",1,"„schmecken“ + Dativ (Ihnen); im dass-Satz steht das Hilfsverb am Ende."],
+["dass Sie das Frühstück geschmeckt hat.",0,"„schmecken“ braucht Dativ: Ihnen."],
+["dass Ihnen das Frühstück hat geschmeckt.",0,"Im Nebensatz steht das Hilfsverb ganz am Ende: geschmeckt hat."],
+["dass Ihnen das Frühstück geschmeckt haben.",0,"Subjekt ist „das Frühstück“ (Singular) → hat."]]},
+{b:"Zum Frühstück gibt es …",o:[
+["frische Semmeln, Obst und Joghurt.",1,"„es gibt“ + Akkusativ. Plural ohne Artikel: frische Semmeln."],
+["frischen Semmeln, Obst und Joghurt.",0,"-en steht im Plural nach dem bestimmten Artikel (die frischen Semmeln) oder im Dativ. Ohne Artikel im Akkusativ: -e."],
+["frischer Semmeln, Obst und Joghurt.",0,"-er wäre Genitiv Plural ohne Artikel."],
+["frischem Semmeln, Obst und Joghurt.",0,"-em ist Dativ Singular (mit frischem Obst)."]]},
+{b:"Wir würden uns freuen, …",o:[
+["wenn Sie wieder zu uns kommen.",1,"„sich freuen, wenn …“ – Nebensatz mit Verb am Ende."],
+["wenn Sie kommen wieder zu uns.",0,"Im wenn-Satz steht das Verb am Ende."],
+["ob Sie wieder zu uns kommen.",0,"„ob“ leitet eine Frage ein. Nach „sich freuen“ passt „wenn“."],
+["wenn Sie wieder zu uns kommt.",0,"Zu „Sie“ gehört „kommen“."]]},
+{b:"Der Saft, der dort auf dem Tisch steht, …",o:[
+["ist frisch gepresst.",1,"Nach dem Relativsatz geht der Hauptsatz mit dem Verb weiter."],
+["frisch gepresst ist.",0,"Das wäre Nebensatz-Wortstellung. Der Hauptsatz lautet: Der Saft ist frisch gepresst."],
+["sind frisch gepresst.",0,"„der Saft“ ist Singular → ist."],
+["ist frisch pressen.",0,"Für den Zustand braucht man das Partizip II: gepresst."]]}
+];
+
+/* Höflich formulieren */
+const POLITE=[
+{r:"Zimmernummer?",tip:"„Darf ich …?“ oder „Darf ich Sie nach … fragen?“ macht jede Frage sofort freundlich.",o:[
+["Guten Morgen! Darf ich nach Ihrer Zimmernummer fragen?",1,"Begrüßung, „darf ich“ und ein ganzer Satz – professionell und warm."],
+["Sag mir bitte deine Zimmernummer.",0,"„du“ ist für Hotelgäste zu persönlich."],
+["Sie müssen mir jetzt Ihre Zimmernummer sagen.",0,"„müssen“ klingt wie ein Befehl."]]},
+{r:"Das Buffet ist zu.",tip:"Schlechte Nachricht + „leider“ + eine kleine Alternative = Der Gast geht trotzdem zufrieden.",o:[
+["Das Buffet ist leider schon geschlossen, aber ich bringe Ihnen gern noch einen Kaffee.",1,"„leider“ zeigt Mitgefühl, das Angebot zeigt guten Willen."],
+["Zu spät, das Buffet ist zu.",0,"Wirkt wie ein Vorwurf und lässt den Gast allein."],
+["Das Buffet ist geschlossen. Sie hätten früher kommen müssen.",0,"Grammatisch schön, inhaltlich ein Vorwurf – im Service tabu."]]},
+{r:"Warten Sie!",tip:"„Einen Moment bitte“ + „ich bin gleich bei Ihnen“ zeigt: Ich habe Sie gesehen.",o:[
+["Einen Moment bitte, ich bin gleich bei Ihnen.",1,"Der Gast weiß, dass er gesehen wurde und gleich drankommt."],
+["Warten Sie doch mal.",0,"„doch mal“ klingt ungeduldig."],
+["Sie sehen doch, dass ich beschäftigt bin.",0,"Das schiebt die Schuld auf den Gast."]]},
+{r:"Hier ist kein Platz.",tip:"Statt „nein“: sagen, was möglich ist.",o:[
+["Im Moment ist leider alles besetzt. Darf ich Ihnen Bescheid geben, sobald ein Tisch frei wird?",1,"Ehrlich, freundlich und mit Lösung."],
+["Kein Platz, kommen Sie später.",0,"Kurz angebunden, ohne „leider“ und ohne Angebot."],
+["Alles ist voll, das sehen Sie ja.",0,"Klingt genervt und belehrend."]]},
+{r:"Keine Hunde hier!",tip:"Regeln erklärt man mit einem Grund und einem Angebot.",o:[
+["Im Frühstücksraum dürfen wir leider keine Hunde erlauben, aber auf der Terrasse ist Ihr Hund herzlich willkommen.",1,"Die Regel bleibt, aber der Gast bekommt eine Lösung."],
+["Hunde sind verboten.",0,"Richtig, aber kalt – und ohne Alternative."],
+["Ihr Hund muss draußen bleiben, das weiß doch jeder.",0,"„das weiß doch jeder“ ist herablassend."]]},
+{r:"Das kostet extra.",tip:"Preise nennt man neutral und am besten zusammen mit dem, was der Gast bekommt.",o:[
+["Sehr gern. Für den Zimmerservice berechnen wir acht Euro – dafür bringen wir Ihnen alles warm ans Bett.",1,"Klarer Preis, positiv verpackt."],
+["Das müssen Sie aber zahlen.",0,"Klingt misstrauisch."],
+["Gratis ist das nicht.",0,"Negativ formuliert und ohne Information."]]},
+{r:"Weiß ich nicht.",tip:"Niemand weiß alles – aber man kann immer nachfragen.",o:[
+["Das weiß ich leider nicht genau, aber ich frage sofort für Sie nach.",1,"Ehrlich und hilfsbereit."],
+["Keine Ahnung.",0,"Umgangssprachlich und desinteressiert."],
+["Das ist nicht meine Aufgabe.",0,"Der Gast fühlt sich abgewiesen."]]},
+{r:"Sie haben nicht reserviert.",tip:"Den Gast nie als „schuldig“ hinstellen – lieber nach einer Lösung suchen.",o:[
+["Ich finde leider keine Reservierung auf Ihren Namen. Ich schaue aber gern, ob ich trotzdem einen Tisch für Sie habe.",1,"Neutral formuliert („ich finde keine“) und lösungsorientiert."],
+["Sie haben nicht reserviert, das ist Ihr Problem.",0,"Vorwurf und Abweisung."],
+["Ohne Reservierung geht gar nichts.",0,"Zu streng, keine Lösung."]]},
+{r:"Was wollen Sie?",tip:"„Was darf ich Ihnen bringen?“ ist die Standardfrage im Service.",o:[
+["Was darf ich Ihnen bringen?",1,"Die klassische, freundliche Service-Frage."],
+["Was willst du?",0,"„du“ und „wollen“ – doppelt zu direkt."],
+["Was wollen Sie denn?",0,"„denn“ klingt hier genervt."]]},
+{r:"Nein, geht nicht.",tip:"Wenn etwas nicht geht: „leider“ + Grund + Alternative.",o:[
+["Ein Check-out um 15 Uhr ist leider nicht möglich, weil das Zimmer wieder vermietet ist. Bis 12 Uhr kann ich es Ihnen aber gern einrichten.",1,"Grund und Alternative – der Gast versteht und bekommt etwas."],
+["Nein, auf keinen Fall.",0,"Hart und ohne Erklärung."],
+["Das geht nicht, das sind die Regeln.",0,"Versteckt sich hinter Regeln, statt zu helfen."]]},
+{r:"Das ist nicht Ihr Tisch!",tip:"Bei Fehlern des Gastes: Info freundlich geben und gleich einen neuen Platz anbieten.",o:[
+["Entschuldigen Sie, dieser Tisch ist leider schon reserviert. Darf ich Ihnen einen anderen schönen Platz zeigen?",1,"Höflich, klar und mit Angebot."],
+["Da dürfen Sie nicht sitzen.",0,"Klingt wie ein Verbot."],
+["Stehen Sie bitte auf, der Tisch ist reserviert.",0,"Zu direkt – der Gast fühlt sich vertrieben."]]},
+{r:"Der Kaffee ist doch nicht kalt!",tip:"Bei Beschwerden nie widersprechen – einfach ersetzen.",o:[
+["Das tut mir leid, ich bringe Ihnen sofort einen frischen, heißen Kaffee.",1,"Kein Streit, schnelle Lösung – das merkt sich der Gast positiv."],
+["Der Kaffee ist ganz normal.",0,"Widerspruch macht den Gast nur ärgerlicher."],
+["Andere Gäste haben sich nicht beschwert.",0,"Vergleiche mit anderen Gästen wirken rechthaberisch."]]}
+];
+
+/* Lückentext: erste Option richtig, wird gemischt */
+const GAPS=[
+{h:"Orte & Präpositionen",items:[
+["Das Frühstücksbuffet steht [[im|in den|ins]] Wintergarten.","Wo? → Dativ: in dem = im Wintergarten (der Wintergarten)."],
+["Bitte legen Sie das benutzte Besteck [[auf den|auf dem|auf die]] Teller.","„legen“ = Bewegung, Wohin? → Akkusativ: auf den Teller (der Teller)."],
+["Das Brot liegt [[neben dem|neben den|neben der]] Toaster.","„liegen“ = Ort, Wo? → Dativ maskulin: neben dem Toaster."],
+["Stellen Sie die Tassen bitte [[auf das|auf dem|auf der]] Tablett.","„stellen“ = Bewegung → Akkusativ neutral: auf das (aufs) Tablett."],
+["Wir öffnen das Buffet [[um|am|im]] sieben Uhr.","Uhrzeit → „um“."],
+["[[Am|Im|Um]] Wochenende frühstücken viele Gäste länger.","Wochentage und Wochenende → „am“ (in Österreich und Süddeutschland)."],
+["Die Familie [[aus|nach|zu]] Italien hat einen Tisch reserviert.","Herkunft → „aus“: Sie kommt aus Italien."],
+["Viele Gäste fragen [[nach dem|für das|um das]] WLAN-Passwort.","„fragen nach“ + Dativ: nach dem Passwort."]]},
+{h:"Artikel & Fälle",items:[
+["Ich bringe [[Ihnen|Sie|Ihr]] gleich die Rechnung.","„bringen“: jemandem (Dativ) etwas → Ihnen."],
+["Können Sie [[mir|mich|ich]] bitte helfen?","„helfen“ braucht immer Dativ: mir."],
+["Haben Sie [[einen|ein|eine]] Tisch für vier Personen?","„haben“ + Akkusativ, der Tisch → einen."],
+["Das Hotel hat dreißig [[Zimmer|Zimmern|Zimmers]].","Plural von „das Zimmer“ = die Zimmer (gleiche Form). „Zimmern“ gibt es nur im Dativ Plural."],
+["Wir haben leider [[keinen|kein|keine]] glutenfreien Toast mehr.","der Toast, Akkusativ maskulin → keinen."],
+["Der Kaffee schmeckt [[mir|mich|ich]] heute besonders gut.","„schmecken“ + Dativ: mir."],
+["Ich habe [[Ihren|Ihrem|Ihre]] Tisch schon vorbereitet.","„vorbereiten“ + Akkusativ, der Tisch → Ihren."],
+["Seit [[einer|einem|einen]] Woche haben wir eine neue Kaffeemaschine.","„seit“ + Dativ, die Woche (feminin) → einer."]]},
+{h:"Verben & Sätze",items:[
+["Der Gast [[ist|hat|wird]] gestern spät angekommen.","„ankommen“ = Ortsveränderung → Perfekt mit „sein“."],
+["Heute Morgen [[sind|haben|werden]] schon zwanzig Gäste zum Frühstück gekommen.","„kommen“ → Perfekt mit „sein“; Plural → sind."],
+["Die Eier [[werden|wird|worden]] in der Küche frisch zubereitet.","Passiv Präsens, Plural → werden + Partizip."],
+["Wenn Sie Hilfe brauchen, [[rufen|ruft|rufe]] Sie mich bitte.","Höflichkeitsform „Sie“ → rufen."],
+["Ich freue mich [[auf|über|an]] Ihren Besuch nächste Woche.","Zukunft → sich freuen auf."],
+["Wir warten noch [[auf|für|an]] die frischen Croissants.","„warten auf“ + Akkusativ."],
+["Das ist der Tisch, [[den|der|dem]] Sie reserviert haben.","Sie haben den Tisch reserviert → Akkusativ: den."],
+["Ich weiß nicht, ob das Müsli Nüsse [[enthält|enthalten|enthielt]].","Subjekt „das Müsli“, Präsens → enthält. „enthielt“ wäre Präteritum."]]}
+];
+
+/* Satzbau: w = Wörter in richtiger Reihenfolge, alt = weitere richtige Lösungen */
+const BUILD=[
+{w:["Darf","ich","Ihnen","einen","Kaffee","bringen?"],e:"Ja/Nein-Frage mit Modalverb: Modalverb auf Position 1, Infinitiv am Ende."},
+{w:["Das","Frühstück","ist","im","Zimmerpreis","inbegriffen."],alt:["Im Zimmerpreis ist das Frühstück inbegriffen."],e:"Aussagesatz: Das Verb steht immer auf Position 2."},
+{w:["Können","Sie","mir","sagen,","wo","die","Toilette","ist?"],e:"Indirekte Frage: Im Nebensatz mit „wo“ steht das Verb am Ende."},
+{w:["Möchten","Sie","das","Frühstück","aufs","Zimmer?"],e:"Frage mit Modalverb auf Position 1."},
+{w:["Wir","öffnen","das","Buffet","um","sieben","Uhr."],alt:["Um sieben Uhr öffnen wir das Buffet.","Das Buffet öffnen wir um sieben Uhr."],e:"Was auf Position 1 steht, kann wechseln – das Verb bleibt auf Position 2."},
+{w:["Weil","viele","Gäste","da","sind,","dauert","es","etwas","länger."],alt:["Es dauert etwas länger, weil viele Gäste da sind."],e:"weil-Satz: Verb am Ende. Steht er vorne, folgt sofort das Verb des Hauptsatzes."},
+{w:["Ich","rufe","Ihnen","gern","ein","Taxi."],alt:["Gern rufe ich Ihnen ein Taxi."],e:"Dativ (Ihnen) vor Akkusativ (ein Taxi), wenn beide Nomen bzw. das Dativpronomen kurz ist."},
+{w:["Haben","Sie","schon","reserviert?"],e:"Perfekt-Frage: Hilfsverb vorne, Partizip am Ende."},
+{w:["Bitte","bedienen","Sie","sich","am","Buffet."],alt:["Bedienen Sie sich bitte am Buffet."],e:"Imperativ mit „Sie“: Verb – Sie – sich."},
+{w:["Wann","möchten","Sie","morgen","frühstücken?"],e:"W-Frage: Fragewort, Verb, Subjekt … Infinitiv am Ende."},
+{w:["Der","Tisch","am","Fenster","ist","leider","schon","reserviert."],alt:["Leider ist der Tisch am Fenster schon reserviert."],e:"„Der Tisch am Fenster“ ist ein Block auf Position 1 – das Verb folgt danach."},
+{w:["Darf","ich","nach","Ihrer","Zimmernummer","fragen?"],e:"„fragen nach“ + Dativ; Infinitiv am Ende."},
+{w:["Es","tut","mir","leid,","dass","Sie","warten","mussten."],e:"dass-Satz: Das konjugierte Modalverb steht ganz am Ende."},
+{w:["Wenn","Sie","möchten,","packe","ich","Ihnen","ein","Lunchpaket."],alt:["Ich packe Ihnen ein Lunchpaket, wenn Sie möchten."],e:"Nebensatz vorne → Verb des Hauptsatzes direkt danach."},
+{w:["Das","glutenfreie","Brot","liegt","neben","dem","Toaster."],alt:["Neben dem Toaster liegt das glutenfreie Brot."],e:"Ortsangabe mit Dativ (neben dem Toaster)."},
+{w:["Ich","kümmere","mich","sofort","darum."],alt:["Darum kümmere ich mich sofort."],e:"Reflexives Verb: sich direkt nach dem Verb."},
+{w:["Die","Eier","werden","frisch","zubereitet."],e:"Passiv: werden auf Position 2, Partizip am Ende."},
+{w:["Hat","Ihnen","das","Frühstück","geschmeckt?"],alt:["Hat das Frühstück Ihnen geschmeckt?"],e:"Pronomen (Ihnen) stehen meist früh im Satz, vor Nomen wie „das Frühstück“."}
+];
+
+/* Ausdrücke */
+const EXPR=[
+["Lassen Sie es sich schmecken!","Ich wünsche Ihnen, dass Ihnen das Essen gut schmeckt."],
+["Das geht aufs Haus.","Das kostet nichts – das Hotel bezahlt."],
+["Ich bin gleich bei Ihnen.","Ich komme in einem Moment zu Ihnen."],
+["Bitte bedienen Sie sich.","Nehmen Sie sich selbst, was Sie möchten."],
+["Fühlen Sie sich wie zu Hause.","Machen Sie es sich bequem und entspannen Sie sich."],
+["Das lässt sich einrichten.","Das können wir möglich machen."],
+["Wir sind ausgebucht.","Alles ist schon reserviert, es gibt keinen Platz mehr."],
+["Darf es sonst noch etwas sein?","Möchten Sie noch etwas anderes?"],
+["Ich kümmere mich darum.","Ich übernehme das und löse das Problem."],
+["Einen schönen Aufenthalt!","Ich wünsche Ihnen eine gute Zeit in unserem Hotel."],
+["Gern geschehen.","Antwort auf „Danke“: Das habe ich gern gemacht."],
+["Stimmt so.","Der Gast sagt: Den Rest dürfen Sie als Trinkgeld behalten."],
+["Zum Wohl!","Wunsch beim Trinken, eleganter als „Prost“."],
+["Gute Heimreise!","Wunsch beim Abschied an Gäste, die nach Hause fahren."],
+["Das macht nichts.","Das ist überhaupt kein Problem."],
+["Ganz wie Sie möchten.","So, wie Sie es wünschen."],
+["Ich lege es Ihnen zurück.","Ich hebe es für Sie auf, bis Sie es holen."],
+["Herzlich willkommen!","Wir freuen uns sehr, dass Sie da sind."],
+["Nehmen Sie Platz.","Setzen Sie sich bitte."],
+["Die Croissants sind aus.","Es gibt keine Croissants mehr."],
+["Nur keine Eile!","Sie müssen sich nicht beeilen."],
+["im Handumdrehen","sehr schnell, fast sofort"],
+["auf Wunsch","wenn der Gast es möchte"],
+["Bescheid geben","jemandem eine wichtige Information mitteilen"]
+];
+
+/* Artikel am Buffet */
+const ART=[
+["Semmel","die","österreichisch für Brötchen; Plural: die Semmeln"],["Kipferl","das","österreichisch; Wörter auf -erl sind meist neutral"],["Topfen","der","österreichisch für Quark"],["Marmelade","die","Wörter auf -ade sind feminin"],["Aufschnitt","der","Wurst und Schinken in Scheiben"],["Rührei","das","Kompositum: das Ei bestimmt den Artikel"],["Spiegelei","das","Kompositum: das Ei bestimmt den Artikel"],["Besteck","das","Messer, Gabel und Löffel zusammen"],["Serviette","die","Wörter auf -ette sind feminin"],["Tablett","das","darauf trägt man Teller und Tassen"],["Toaster","der","Geräte auf -er sind oft maskulin"],["Kanne","die","viele Wörter auf -e sind feminin"],["Müsli","das","Plural: die Müslis"],["Butter","die","feminin, obwohl sie auf -er endet"],["Honig","der","Wörter auf -ig sind meist maskulin"],["Saft","der","Orangensaft, Apfelsaft – alle maskulin"],["Teller","der","Plural: die Teller"],["Tasse","die","viele Wörter auf -e sind feminin"],["Gabel","die","Besteck hat drei Artikel: die Gabel, der Löffel, das Messer"],["Löffel","der","Besteck hat drei Artikel: die Gabel, der Löffel, das Messer"],["Messer","das","Besteck hat drei Artikel: die Gabel, der Löffel, das Messer"],["Schinken","der","Plural: die Schinken"],["Käse","der","maskulin, obwohl auf -e"],["Zimmerschlüssel","der","Kompositum: der Schlüssel bestimmt den Artikel"],["Rezeption","die","Wörter auf -tion sind immer feminin"],["Rechnung","die","Wörter auf -ung sind immer feminin"],["Trinkgeld","das","Kompositum: das Geld bestimmt den Artikel"],["Frühstücksraum","der","Kompositum: der Raum bestimmt den Artikel"],["Kaffeemaschine","die","Kompositum: die Maschine bestimmt den Artikel"],["Reservierung","die","Wörter auf -ung sind immer feminin"]
+];
+
+/* Rollenspiele */
+const STORIES=[
+{t:"Ein Morgen mit Familie",d:"Hotelgäste mit zwei Kindern – Zimmernummer, Hochstuhl, ein kleines Missgeschick.",steps:[
+{g:"Guten Morgen! Wir sind zu viert – zwei Erwachsene und zwei Kinder.",o:[
+["Guten Morgen und herzlich willkommen! Darf ich nach Ihrer Zimmernummer fragen?",1,"Freundliche Begrüßung und gleich die wichtigste Frage – so arbeitet man professionell."],
+["Guten Morgen! Wie viele Personen sind Sie?",0,"Das hat der Gast gerade gesagt. Wer nachfragt, zeigt, dass er nicht zugehört hat."],
+["Morgen. Nummer?",0,"Viel zu knapp: Es fehlen Begrüßung, „bitte“ und ein ganzer Satz."]]},
+{g:"Zimmer dreiundzwanzig. Unsere Kleine ist erst zwei Jahre alt.",o:[
+["Danke, Zimmer dreiundzwanzig ist notiert. Ich bringe Ihnen gleich einen Kinderhochstuhl.",1,"Sie bestätigen die Nummer und reagieren aufmerksam auf das kleine Kind."],
+["Danke, Zimmer dreiundzwanzig. Wie alt ist sie denn?",0,"Das Alter wurde gerade genannt – hier fehlt eine passende Reaktion, zum Beispiel ein Hochstuhl."],
+["Danke. Kleine Kinder machen leider immer viel Schmutz.",0,"Eine solche Bemerkung kränkt die Eltern. Familien sollen sich willkommen fühlen."]]},
+{g:"Gibt es auch etwas Warmes für die Kinder?",o:[
+["Ja, gern! Unsere Küche macht Rührei, Spiegelei oder kleine Palatschinken.",1,"Konkretes Angebot. Palatschinken sind in Österreich dünne Pfannkuchen – Kinder lieben sie."],
+["Warm ist bei uns nur der Kaffee.",0,"Ein unpassender Witz ohne echte Information."],
+["Ja, die Kinder können sich warme Sachen selbst in der Küche holen.",0,"In die Küche dürfen Gäste nicht – und für kleine Kinder ist das gefährlich."]]},
+{g:"Ich hätte gern einen Cappuccino, und mein Mann trinkt Tee.",o:[
+["Sehr gern. Welchen Tee darf ich Ihrem Mann bringen – Schwarztee, Grüntee oder Kräutertee?",1,"Sie bestätigen und fragen gezielt nach, so bekommt der Gast genau das Richtige."],
+["Sehr gern. Welchen Tee darf ich Ihren Mann bringen?",0,"Grammatik: „bringen“ braucht für die Person den Dativ – „Ihrem Mann“."],
+["Kaffee und Tee holen Sie sich bitte selbst.",0,"Wenn ein Gast bestellt, nimmt man die Bestellung freundlich an."]]},
+{g:"Oh nein, unser Sohn hat seinen Saft umgeschüttet!",o:[
+["Das macht gar nichts, das passiert ständig. Ich bringe sofort ein Tuch und einen neuen Saft.",1,"Beruhigen, helfen, ersetzen. „Das macht gar nichts“ nimmt den Eltern die Peinlichkeit."],
+["Das macht gar nichts. Den neuen Saft muss ich Ihnen aber verrechnen.",0,"Für ein Missgeschick eines Kindes extra zu kassieren wirkt kleinlich."],
+["Bitte passen Sie besser auf Ihre Kinder auf.",0,"Vorwürfe an die Eltern sind im Service tabu."]]},
+{g:"Können wir uns ein paar Äpfel für den Ausflug mitnehmen?",o:[
+["Natürlich, nehmen Sie sich gern ein paar Äpfel mit. Soll ich Ihnen eine Papiertüte bringen?",1,"Großzügig und mit einem kleinen Extra-Service."],
+["Natürlich, nehmen Sie sich gern ein paar Äpfeln mit.",0,"Grammatik: Plural von „Apfel“ ist „Äpfel“. Die Endung -n kommt nur im Dativ Plural dazu (mit den Äpfeln)."],
+["Nein, Essen darf den Raum nicht verlassen.",0,"Ein Stück Obst für unterwegs ist in fast allen Hotels in Ordnung – dieses strenge Nein wirkt unfreundlich."]]},
+{g:"Danke, es war ein tolles Frühstück!",o:[
+["Das freut mich sehr! Ich wünsche Ihnen einen schönen Ausflug.",1,"Freude zeigen und einen guten Wunsch mitgeben."],
+["Bitte.",0,"Zu knapp – auf ein Kompliment reagiert man mit Freude."],
+["Das freut mich sehr! Ich wünsche Ihnen ein schönen Ausflug.",0,"Akkusativ maskulin: einen schönen Ausflug."]]}]},
+{t:"Telefon: ein Geburtstagsfrühstück",d:"Eine externe Gruppe reserviert für Sonntag – mit Deko-Wunsch und einem veganen Gast.",steps:[
+{g:"Guten Tag, ich würde gern für Sonntag ein Frühstück für acht Personen reservieren.",o:[
+["Guten Tag, sehr gern! Um wie viel Uhr möchten Sie kommen?",1,"Freundlich zusagen und die nächste wichtige Information erfragen."],
+["Guten Tag, wohnen Sie bei uns im Hotel? Sonst geht das leider nicht.",0,"Externe Gäste dürfen auch frühstücken – diese Antwort ist falsch und kostet Kunden."],
+["Hallo, kommen Sie einfach vorbei.",0,"Für acht Personen am Sonntag braucht man eine Reservierung, und „Hallo“ ist am Hoteltelefon zu locker."]]},
+{g:"So um halb zehn, wenn das geht.",o:[
+["Um halb zehn habe ich einen großen Tisch für Sie frei. Auf welchen Namen darf ich reservieren?",1,"„reservieren auf“ + Akkusativ: auf welchen Namen."],
+["Um halb zehn habe ich einen großen Tisch für Sie frei. Auf welchem Namen darf ich reservieren?",0,"„auf welchem“ ist Dativ. „reservieren auf“ verlangt den Akkusativ: auf welchen Namen."],
+["Halb zehn ist schlecht, da ist immer viel los.",0,"Negativ und ohne Alternative. Wenn es wirklich nicht geht, bietet man eine andere Uhrzeit an."]]},
+{g:"Auf meinen Namen, Huber. Es ist ein Geburtstag – könnten Sie vielleicht etwas dekorieren?",o:[
+["Sehr gern, das lässt sich einrichten! Wir dekorieren den Tisch mit Blumen und Kerzen.",1,"„Das lässt sich einrichten“ klingt elegant und positiv."],
+["Sehr gern, das lässt sich einrichten! Wir dekorieren den Tisch mit Blumen und Kerze.",0,"Grammatik: Entweder Plural (mit Kerzen) oder mit Artikel (mit einer Kerze)."],
+["Dekoration machen wir grundsätzlich nicht.",0,"Unflexibel – eine kleine Geste wie eine Kerze ist fast immer möglich."]]},
+{g:"Eine Freundin isst vegan. Ist das ein Problem?",o:[
+["Überhaupt nicht. Am Buffet sind alle veganen Speisen gekennzeichnet, und wir haben auch Pflanzenmilch.",1,"Beruhigend und konkret."],
+["Überhaupt nicht. Sie kann ja einfach Brot essen.",0,"Abwertend – nur Brot ist kein schönes Frühstück."],
+["Ja, das ist schwierig, mit vegan kennen wir uns nicht aus.",0,"Unprofessionell; ein gutes Buffet hat immer vegane Möglichkeiten."]]},
+{g:"Was kostet das Frühstück für Gäste, die nicht im Hotel wohnen?",o:[
+["Das Buffet kostet 18 Euro pro Person, Kaffee und Tee sind inbegriffen.",1,"Klarer Preis und eine Zusatzinformation, die Vertrauen schafft."],
+["Das Buffet kostet 18 Euro für Person, Kaffee und Tee sind inbegriffen.",0,"Feste Verbindung: „pro Person“ (oder „für jede Person“)."],
+["Das kommt darauf an, wie viel Sie essen.",0,"Ein Buffet hat einen festen Preis – diese Antwort verwirrt."]]},
+{g:"Und kann ich die Reservierung noch ändern, falls jemand absagt?",o:[
+["Natürlich, rufen Sie uns einfach bis Samstagabend an.",1,"Trennbares Verb „anrufen“: „an“ steht am Satzende, die Zeitangabe davor."],
+["Natürlich, rufen Sie uns einfach an bis Samstagabend.",0,"Wortstellung: Das „an“ von „anrufen“ gehört ans Satzende, nach der Zeitangabe."],
+["Nein, die Reservierung ist dann fix.",0,"Unflexibel – Änderungen bis zum Vortag sind üblich."]]},
+{g:"Perfekt, vielen Dank!",o:[
+["Sehr gern! Ich habe für Sonntag, 9:30 Uhr, acht Personen auf den Namen Huber notiert. Wir freuen uns auf Sie!",1,"Am Ende alles kurz wiederholen – so gibt es keine Missverständnisse."],
+["Sehr gern! Wir freuen uns über Sie!",0,"Für ein Ereignis in der Zukunft sagt man „sich freuen auf“."],
+["Tschüss!",0,"Zu locker für ein Hotel, und die wichtigen Daten wurden nicht bestätigt."]]}]},
+{t:"Ein schwieriger Morgen",d:"Ein Gast ist nicht auf der Liste, der Kaffee ist kalt, das Rührei kommt spät – bleiben Sie souverän.",steps:[
+{g:"Ich bin nicht auf Ihrer Liste? Ich wohne doch in Zimmer acht!",o:[
+["Entschuldigen Sie bitte, ich prüfe das sofort. Darf ich nach Ihrem Nachnamen fragen?",1,"Entschuldigen, prüfen, nachfragen – ruhig und korrekt."],
+["Entschuldigen Sie bitte, ich prüfe das sofort. Darf ich Ihren Nachnamen fragen?",0,"Es heißt „nach etwas fragen“: nach Ihrem Nachnamen."],
+["Wenn Sie nicht auf der Liste sind, können Sie nicht frühstücken.",0,"Listen haben auch Fehler – zuerst prüft man, dann entscheidet man."]]},
+{g:"Danke. Und mein Kaffee ist schon wieder kalt.",o:[
+["Das tut mir leid. Ich bringe Ihnen sofort einen frischen, heißen Kaffee.",1,"Kein Widerspruch, schnelle Lösung."],
+["Das tut mir leid. Ich bringe Ihnen sofort einen frischen, heißer Kaffee.",0,"Adjektivendungen: Nach „einen“ bekommen beide Adjektive -en: einen frischen, heißen Kaffee."],
+["Das kann nicht sein, die Maschine ist ganz neu.",0,"Mit dem Gast zu diskutieren macht alles schlimmer."]]},
+{g:"Und wo bleibt mein Rührei? Ich habe es vor zwanzig Minuten bestellt.",o:[
+["Bitte entschuldigen Sie die lange Wartezeit. Ich frage sofort in der Küche nach.",1,"Entschuldigung und konkrete Handlung."],
+["Bitte entschuldigen Sie der langen Wartezeit.",0,"„entschuldigen“ + Akkusativ: die lange Wartezeit."],
+["Heute ist eben viel los, da müssen Sie warten.",0,"Die Erklärung mag stimmen, aber es fehlen Entschuldigung und Lösung."]]},
+{g:"Ich darf außerdem kein Gluten essen. Ist dieses Brot glutenfrei?",o:[
+["Dieses Brot leider nicht, aber ich toaste Ihnen gern unser glutenfreies Brot.",1,"Ehrliche Antwort plus Alternative."],
+["Dieses Brot leider nicht, aber ich toaste Ihnen gern unseren glutenfreien Brot.",0,"„das Brot“ ist neutral: unser glutenfreies Brot."],
+["Ich glaube schon.",0,"Bei Unverträglichkeiten und Allergien nie raten!"]]},
+{g:"Na gut. Das Rührei ist jetzt aber sehr salzig.",o:[
+["Danke, dass Sie es mir sagen. Ich lasse Ihnen gern ein neues ohne Salz machen.",1,"Dank für die Rückmeldung und eine schnelle Lösung."],
+["Danke, dass Sie es mir sagen. Ich lasse Ihnen gern ein neues ohne Salz zu machen.",0,"Nach „lassen“ steht der Infinitiv ohne „zu“."],
+["Den anderen Gästen schmeckt es aber.",0,"Rechtfertigung statt Lösung."]]},
+{g:"Ehrlich gesagt bin ich heute nicht zufrieden.",o:[
+["Das verstehe ich gut, und es tut mir wirklich leid. Darf ich Ihnen als kleine Entschuldigung einen Kaffee zum Mitnehmen anbieten? Das geht aufs Haus.",1,"Verständnis, ehrliche Entschuldigung und eine kleine Wiedergutmachung."],
+["Das verstehe ich gut. Darf ich Ihnen einen Kaffee zum Mitnehmen anbieten? Das geht auf Haus.",0,"Die feste Wendung heißt „Das geht aufs Haus“ – der Artikel darf nicht fehlen."],
+["Das ist nicht meine Schuld.",0,"Auch wenn es stimmt: Der Gast braucht jetzt Verständnis, keine Verteidigung."]]},
+{g:"Das ist nett. Danke, dass Sie sich so bemüht haben.",o:[
+["Sehr gern geschehen. Ich wünsche Ihnen trotz allem einen schönen Tag!",1,"„trotz allem“ = obwohl einiges schiefgegangen ist – ein schöner, versöhnlicher Abschluss."],
+["Sehr gern geschehen. Ich wünsche Ihnen trotzdem allem einen schönen Tag!",0,"Hier sind „trotzdem“ und „trotz allem“ vermischt. Richtig ist eines von beiden."],
+["Kein Ding.",0,"Jugendsprache – im Hotel zu salopp."]]}]}
+];
+
+/* ================= HELFER ================= */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const SPK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg>';
+const PLAY='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+const spk=t=>`<button class="spk" data-say="${esc(t)}" aria-label="Vorlesen">${SPK}</button>`;
+const ALLP=[];PHRASES.forEach((c,ci)=>c.items.forEach(it=>ALLP.push({c:ci,it})));
+
+let rate=0.9,voice=null;
+function pickVoice(){const v=speechSynthesis.getVoices();voice=v.find(x=>/de[-_]AT/i.test(x.lang))||v.find(x=>/^de/i.test(x.lang))||null;}
+if("speechSynthesis" in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
+function speak(t){if(!("speechSynthesis" in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang=voice?voice.lang:"de-DE";if(voice)u.voice=voice;u.rate=rate;speechSynthesis.speak(u);}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-say]");if(b){e.stopPropagation();speak(b.dataset.say);}},true);
+$("#rate").onchange=e=>{rate=+e.target.value;};
+
+let score=0;
+try{score=+localStorage.getItem("fg_score")||0;}catch(e){}
+$("#score").textContent=score;
+function addPts(n){score+=n;$("#score").textContent=score;try{localStorage.setItem("fg_score",score);}catch(e){}}
+
+/* Hintergrund-Bubbles */
+(function(){const cols=["#34527e","#1d6a70","#5f4a72","#9a5a3c","#7b3f5e"],b=$("#bubbles");
+for(let i=0;i<14;i++){const s=document.createElement("span"),d=40+Math.random()*120;
+s.style.cssText=`width:${d}px;height:${d}px;left:${Math.random()*100}%;top:${Math.random()*100}%;background:${cols[i%5]};animation-delay:${-Math.random()*26}s;animation-duration:${20+Math.random()*14}s`;b.appendChild(s);}})();
+
+/* Multiple-Choice-Motor */
+function makeMC(root,getItems,cfg){
+  let items,idx,right;
+  function start(){items=getItems();idx=0;right=0;show();}
+  function show(){
+    if(idx>=items.length){
+      root.innerHTML=`<div class="card done"><div class="label">${esc(cfg.label)}</div><h3>Geschafft!</h3><p>Sie haben <b>${right} von ${items.length}</b> richtig beantwortet.${right===items.length?" Hervorragend – das war fehlerfrei!":right>=items.length*0.7?" Sehr gut gemacht!":" Wiederholen lohnt sich – beim zweiten Mal sitzt es schon viel besser."}</p><button class="btn again">Noch einmal</button></div>`;
+      root.querySelector(".again").onclick=start;return;
+    }
+    const it=items[idx];
+    const op=cfg.keep?it.o.map(o=>({t:o[0],ok:!!o[1],x:o[2]})):shuffle(it.o.map(o=>({t:o[0],ok:!!o[1],x:o[2]})));
+    root.innerHTML=`<div class="card"><div class="prog"><span>${esc(cfg.label)} · ${idx+1} / ${items.length}</span><span>${right} richtig</span></div><div class="bar"><i style="width:${idx/items.length*100}%"></i></div>
+      ${cfg.head(it)}
+      <div class="opts">${op.map((o,i)=>`<button class="opt" data-i="${i}"><span class="ot">${esc(o.t)}</span></button>`).join("")}</div>
+      <div class="fb"></div><div class="nav2"><button class="btn next" hidden>Weiter →</button></div></div>`;
+    let done=false;
+    root.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+      if(done)return;done=true;const o=op[+b.dataset.i];
+      if(o.ok){right++;addPts(cfg.pts||2);}
+      root.querySelectorAll(".opt").forEach((bb,j)=>{const oo=op[j];bb.classList.add(oo.ok?"right":(bb===b?"wrong":"dim"));
+        bb.insertAdjacentHTML("beforeend",`<span class="why">${oo.ok?"✓ ":"✗ "}${esc(oo.x)}</span>`);
+        if(cfg.speakOpts&&oo.ok)bb.insertAdjacentHTML("beforeend",spk(oo.t));});
+      root.querySelector(".fb").innerHTML=`<div class="fbbox ${o.ok?"good":"bad"}">${o.ok?"Richtig! ":"Leider nicht ganz. Die richtige Lösung ist markiert. "}${it.tip?esc(it.tip):""}</div>`;
+      if(cfg.after)cfg.after(root,it);
+      const n=root.querySelector(".next");n.hidden=false;n.onclick=()=>{idx++;show();root.scrollIntoView({behavior:"smooth",block:"start"});};
+    });
+  }
+  start();
+}
+
+/* Zuordnungs-Motor */
+function makeMatch(root,getPairs,cfg){
+  function start(){
+    const pairs=getPairs(),right=shuffle(pairs.map((p,i)=>({i,t:p[1]})));
+    let sel=null,solved=0,miss=0;
+    root.innerHTML=`<div class="card"><p class="hint">${esc(cfg.hint)}</p><div class="mgrid"><div class="mcol">${pairs.map((p,i)=>`<button class="mq" data-i="${i}"><b>${i+1}</b>${esc(p[0])}</button>`).join("")}</div><div class="mcol">${right.map(a=>`<button class="ma" data-i="${a.i}">${esc(a.t)}</button>`).join("")}</div></div><div class="fb"></div><div class="nav2"><button class="btn again">${esc(cfg.again)}</button></div></div>`;
+    const qs=root.querySelectorAll(".mq"),as=root.querySelectorAll(".ma");
+    qs.forEach(q=>q.onclick=()=>{if(q.classList.contains("ok"))return;qs.forEach(x=>x.classList.remove("sel"));q.classList.add("sel");sel=+q.dataset.i;if(cfg.say)speak(pairs[sel][0]);});
+    as.forEach(a=>a.onclick=()=>{
+      if(a.classList.contains("ok")||sel===null)return;
+      if(+a.dataset.i===sel){
+        a.classList.add("ok");a.insertAdjacentHTML("afterbegin",`<span class="tag">${sel+1}</span>`);
+        root.querySelector(`.mq[data-i="${sel}"]`).classList.replace("sel","ok");sel=null;solved++;addPts(1);
+        if(solved===pairs.length)root.querySelector(".fb").innerHTML=`<div class="fbbox good">Alles richtig zugeordnet${miss?` – mit ${miss} Fehlversuch${miss>1?"en":""}`:" – ohne einen einzigen Fehler"}! 🎉</div>`;
+      }else{miss++;a.classList.remove("shake");void a.offsetWidth;a.classList.add("shake");}
+    });
+    root.querySelector(".again").onclick=start;
+  }
+  start();
+}
+
+/* ================= MODI ================= */
+function renderPhrasebook(root){
+  root.innerHTML=`<div class="pbtools"><input type="search" id="pbq" placeholder="Suchen, z. B. Kaffee, Zimmer, Allergie …"><button class="btn ghost small" id="pbt">🙈 Selbsttest: Antworten verdecken</button></div><div id="pbl"></div>`;
+  const list=root.querySelector("#pbl"),lv=["Kurz","Höflich","Ausführlich & elegant"],soft=["#eef2f7","#e5f0f0","#efe9f3"];
+  function draw(f){f=(f||"").toLowerCase();
+    list.innerHTML=PHRASES.map(c=>{const its=c.items.filter(i=>!f||i.join(" ").toLowerCase().includes(f));if(!its.length)return"";
+      return `<div class="topic"><h3>${c.e} ${esc(c.t)}</h3>${its.map(i=>`<div class="phr"><div class="g">${esc(i[0])} ${spk(i[0])}</div><div class="ans">${[1,2,3].map(k=>`<div style="--soft:${soft[k-1]}"><span class="lv">${lv[k-1]}</span>${esc(i[k])} ${spk(i[k])}</div>`).join("")}</div></div>`).join("")}</div>`;}).join("")||`<p class="hint">Nichts gefunden – versuchen Sie ein anderes Wort.</p>`;}
+  draw();
+  root.querySelector("#pbq").oninput=e=>draw(e.target.value);
+  const t=root.querySelector("#pbt");
+  t.onclick=()=>{list.classList.toggle("selftest");list.querySelectorAll(".revealed").forEach(x=>x.classList.remove("revealed"));t.textContent=list.classList.contains("selftest")?"👀 Antworten wieder zeigen":"🙈 Selbsttest: Antworten verdecken";};
+  list.addEventListener("click",e=>{const d=e.target.closest(".ans div");if(d&&list.classList.contains("selftest"))d.classList.add("revealed");});
+}
+function renderMC(root){
+  makeMC(root,()=>shuffle(MC).slice(0,15),{label:"Knifflige Wahl",pts:2,head:it=>`<div class="sit">${esc(it.q)}</div>${it.s?`<div class="qtext">${esc(it.s).replace(/___/g,'<span class="gap"></span>')}</div>`:'<div style="height:8px"></div>'}`});
+}
+function renderExpr(root){
+  makeMatch(root,()=>shuffle(EXPR).slice(0,6),{hint:"Klicken Sie links auf einen Ausdruck und dann rechts auf die passende Bedeutung. Jede Runde bringt sechs neue Ausdrücke.",again:"Neue Runde",say:true});
+}
+function renderMatch10(root){
+  makeMatch(root,()=>shuffle(PHRASES.map((c,ci)=>ci)).slice(0,10).map(ci=>{const it=shuffle(PHRASES[ci].items)[0];return [it[0],it[2]];}),{hint:"Welche Antwort passt zu welcher Gastfrage? Klicken Sie links auf eine Frage (sie wird vorgelesen) und dann rechts auf die Antwort.",again:"Neue 10 Fragen",say:true});
+}
+function renderFinish(root){
+  makeMC(root,()=>shuffle(FINISH),{label:"Satz vollenden",pts:2,speakOpts:true,head:it=>`<div class="sit">Wie geht der Satz grammatisch richtig weiter?</div><div class="qtext">${esc(it.b)}</div>`});
+}
+function renderBuild(root){
+  let list,idx,right;
+  const norm=s=>s.toLowerCase().replace(/[.,?!]/g,"").replace(/\s+/g," ").trim();
+  function start(){list=shuffle(BUILD).slice(0,12);idx=0;right=0;show();}
+  function show(){
+    if(idx>=list.length){root.innerHTML=`<div class="card done"><h3>Geschafft!</h3><p><b>${right} von ${list.length}</b> Sätzen gleich beim ersten Versuch richtig gebaut.</p><button class="btn again">Neue Sätze</button></div>`;root.querySelector(".again").onclick=start;return;}
+    const it=list[idx],sol=it.w.join(" "),alts=[sol,...(it.alt||[])].map(norm);
+    const toks=shuffle(it.w.map((w,i)=>({w,i})));
+    let line=[],first=true;
+    root.innerHTML=`<div class="card"><div class="prog"><span>Satzbau · ${idx+1} / ${list.length}</span><span>${right} richtig</span></div><div class="bar"><i style="width:${idx/list.length*100}%"></i></div>
+      <div class="sit">Klicken Sie die Wörter in der richtigen Reihenfolge an. Ein Klick auf ein Wort in der Zeile nimmt es wieder heraus.</div>
+      <div class="line"></div><div class="pool"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn check">Prüfen</button><button class="btn ghost show">Lösung zeigen</button></div>
+      <div class="fb"></div><div class="nav2"><button class="btn next" hidden>Weiter →</button></div></div>`;
+    const L=root.querySelector(".line"),P=root.querySelector(".pool");
+    function draw(){L.innerHTML=line.map((t,k)=>`<button class="tok" data-k="${k}">${esc(t.w)}</button>`).join("")||'<span class="hint">Hier entsteht Ihr Satz …</span>';
+      P.innerHTML=toks.filter(t=>!line.includes(t)).map(t=>`<button class="tok" data-i="${t.i}">${esc(t.w)}</button>`).join("");}
+    draw();
+    P.onclick=e=>{const b=e.target.closest(".tok");if(!b)return;line.push(toks.find(t=>t.i===+b.dataset.i));draw();};
+    L.onclick=e=>{const b=e.target.closest(".tok");if(!b)return;line.splice(+b.dataset.k,1);draw();};
+    const fin=(ok,msg)=>{root.querySelector(".fb").innerHTML=`<div class="fbbox ${ok?"good":"bad"}">${msg}<br><b>${esc(sol)}</b> ${spk(sol)}${it.alt?`<br><span style="font-size:.92rem">Auch richtig: ${it.alt.map(esc).join(" · ")}</span>`:""}<br><span style="font-size:.92rem">${esc(it.e)}</span></div>`;
+      root.querySelector(".check").disabled=true;root.querySelector(".show").disabled=true;const n=root.querySelector(".next");n.hidden=false;n.onclick=()=>{idx++;show();};};
+    root.querySelector(".check").onclick=()=>{
+      if(line.length<it.w.length){root.querySelector(".fb").innerHTML=`<div class="fbbox bad">Es fehlen noch Wörter.</div>`;return;}
+      const guess=norm(line.map(t=>t.w).join(" "));
+      if(alts.includes(guess)){if(first){right++;addPts(3);}fin(true,"Perfekt gebaut!");}
+      else{first=false;root.querySelector(".fb").innerHTML=`<div class="fbbox bad">Noch nicht ganz – achten Sie auf die Position des Verbs. Versuchen Sie es noch einmal!</div>`;}
+    };
+    root.querySelector(".show").onclick=()=>fin(false,"Die Lösung:");
+  }
+  start();
+}
+function renderPolite(root){
+  makeMC(root,()=>shuffle(POLITE),{label:"Höflich formulieren",pts:2,speakOpts:true,head:it=>`<div class="sit">So klingt es zu direkt oder unhöflich:</div><div class="qtext" style="color:var(--bad)">„${esc(it.r)}“</div><div class="sit">Welche Version ist für Hotelgäste am besten?</div>`});
+}
+function renderGaps(root){
+  let h="";
+  GAPS.forEach((g,gi)=>{h+=`<div class="gh">${esc(g.h)}</div>`;
+    g.items.forEach((s,si)=>{const m=s[0].match(/\[\[(.*?)\]\]/),opts=m[1].split("|"),parts=s[0].split(m[0]);
+      h+=`<div class="gs" data-c="${esc(opts[0])}" data-full="${esc(parts[0]+opts[0]+parts[1])}">${esc(parts[0])}<span class="chips">${shuffle(opts).map(o=>`<button class="chip" data-o="${esc(o)}">${esc(o)}</button>`).join("")}</span>${esc(parts[1])}<div class="ex">✓ ${esc(s[1])}</div></div>`;});});
+  root.innerHTML=`<div class="card"><p class="hint" style="margin:0">Klicken Sie auf das richtige Wort. Nach der richtigen Lösung erscheint eine kurze Erklärung, und der ganze Satz kann vorgelesen werden.</p></div>${h}<div class="nav2"><button class="btn reset">Alles zurücksetzen</button></div>`;
+  root.addEventListener("click",e=>{const c=e.target.closest(".chip");if(!c)return;const s=c.closest(".gs");if(s.classList.contains("solved"))return;
+    if(c.dataset.o===s.dataset.c){c.classList.add("right");s.classList.add("solved");if(!s.dataset.miss)addPts(1);s.querySelector(".ex").insertAdjacentHTML("beforeend"," "+spk(s.dataset.full));s.querySelectorAll(".chip:not(.right)").forEach(x=>x.style.display="none");}
+    else{c.classList.add("wrong");s.dataset.miss=1;}});
+  root.querySelector(".reset").onclick=()=>renderGaps(root);
+}
+function renderStories(root){
+  root.innerHTML=`<div class="storypick">${STORIES.map((s,i)=>`<button data-i="${i}"><b>${i+1}. ${esc(s.t)}</b><span>${esc(s.d)}</span></button>`).join("")}</div><div class="sbody"></div>`;
+  const body=root.querySelector(".sbody"),pick=root.querySelectorAll(".storypick button");
+  function go(i){pick.forEach((b,j)=>b.classList.toggle("active",j===i));
+    makeMC(body,()=>STORIES[i].steps,{label:STORIES[i].t,pts:2,speakOpts:true,head:it=>`<div class="label">Der Gast sagt</div><div class="bubble">${esc(it.g)} ${spk(it.g)}</div><div class="sit">Was antworten Sie?</div>`});}
+  pick.forEach(b=>b.onclick=()=>go(+b.dataset.i));
+  go(0);
+}
+function renderListen(root){
+  makeMC(root,()=>shuffle(ALLP).slice(0,12).map(p=>{
+    const others=shuffle(ALLP.filter(x=>x.c!==p.c)).slice(0,3);
+    return {g:p.it[0],tip:"",o:[[p.it[2],1,"Diese Antwort passt genau zur Frage des Gastes."],...others.map(y=>[y.it[2],0,"Diese Antwort gehört zu einer anderen Frage: „"+y.it[0]+"“"])]};
+  }),{label:"Hören & antworten",pts:2,head:it=>`<div class="label" style="text-align:center">Hören Sie dem Gast zu</div><button class="playbig" data-say="${esc(it.g)}" aria-label="Abspielen">${PLAY}</button><div style="text-align:center"><span class="qtext hiddenq">„${esc(it.g)}“</span><br><button class="btn ghost small showq" style="margin-top:8px">Text anzeigen</button></div><div class="sit" style="margin-top:12px">Welche Antwort passt?</div>`,
+   after:r=>{const q=r.querySelector(".qtext");if(q)q.classList.remove("hiddenq");const s=r.querySelector(".showq");if(s)s.remove();}});
+  root.addEventListener("click",e=>{const s=e.target.closest(".showq");if(s){root.querySelector(".qtext").classList.remove("hiddenq");s.remove();}});
+}
+function renderArt(root){
+  makeMC(root,()=>shuffle(ART).slice(0,15).map(a=>({w:a[0],o:["der","die","das"].map(x=>[x+" "+a[0],x===a[1]?1:0,x===a[1]?"Richtig: "+a[1]+" "+a[0]+" – "+a[2]+".":"„"+x+" "+a[0]+"“ ist falsch – es heißt "+a[1]+" "+a[0]+"."])})),
+  {label:"Artikel am Buffet",pts:1,keep:true,speakOpts:true,head:it=>`<div class="sit">Welcher Artikel ist richtig?</div><div class="qtext">${esc(it.w)} ${spk(it.w)}</div>`});
+}
+
+const MODES=[
+{id:"pb",n:"Phrasebook",s:"Gastfragen & 3 Antworten",c:"var(--sky)",title:"Phrasebook",intro:"Typische Fragen von Gästen im Frühstückscafé und an der Rezeption – jeweils mit drei Antworten: kurz, höflich und ausführlich-elegant. Mit Suchfunktion und Selbsttest.",render:renderPhrasebook},
+{id:"mc",n:"Knifflige Wahl",s:"Grammatik mit Erklärungen",c:"var(--petrol)",title:"Knifflige Wahl",intro:"Vier Möglichkeiten, eine ist richtig – und zu jeder Antwort erfahren Sie, warum sie passt oder nicht passt. Jede Runde mischt 15 von 30 Aufgaben.",render:renderMC},
+{id:"ex",n:"Ausdrücke",s:"Feste Wendungen zuordnen",c:"var(--lilac)",title:"Ausdrücke zuordnen",intro:"Feste Wendungen, die man im Hotel und im Café jeden Tag braucht. Ordnen Sie jedem Ausdruck seine Bedeutung zu.",render:renderExpr},
+{id:"m10",n:"Zuordnen 1–10",s:"Frage ↔ Antwort",c:"var(--terra)",title:"Zuordnen 1–10",intro:"Zehn Gastfragen aus zehn verschiedenen Themen – finden Sie die passende Antwort. Jede Runde ist neu gemischt.",render:renderMatch10},
+{id:"fin",n:"Satz vollenden",s:"Wortstellung & Endungen",c:"var(--plum)",title:"Satz vollenden",intro:"Ein Satzanfang, vier mögliche Fortsetzungen. Nur eine ist grammatisch richtig – die Erklärungen zeigen, wo die Stolpersteine liegen.",render:renderFinish},
+{id:"bld",n:"Satzbau",s:"Wörter ordnen",c:"var(--ocean)",title:"Satzbau",intro:"Bauen Sie aus den Wörtern einen richtigen Satz. Besonders wichtig: Wo steht das Verb?",render:renderBuild},
+{id:"pol",n:"Höflich formulieren",s:"Vom Befehl zum Service",c:"var(--rose)",title:"Höflich formulieren",intro:"Wie wird aus einem zu direkten Satz eine freundliche, professionelle Antwort? Mit Profi-Tipp zu jeder Aufgabe.",render:renderPolite},
+{id:"gap",n:"Lückentext",s:"Präpositionen, Fälle, Verben",c:"var(--indigo)",title:"Lückentext",intro:"24 Sätze aus dem Hotelalltag in drei Gruppen. Klicken Sie das richtige Wort an – danach erscheint die Erklärung.",render:renderGaps},
+{id:"sto",n:"Rollenspiele",s:"3 komplette Gespräche",c:"var(--amber)",title:"Rollenspiele",intro:"Drei ganze Gespräche von Anfang bis Ende: eine Familie beim Frühstück, eine telefonische Reservierung und ein schwieriger Morgen mit Beschwerden.",render:renderStories},
+{id:"lis",n:"Hören & antworten",s:"Nur mit den Ohren",c:"var(--slate)",title:"Hören & antworten",intro:"Hören Sie die Frage des Gastes, ohne sie zu lesen, und wählen Sie die passende Antwort. Den Text können Sie bei Bedarf einblenden.",render:renderListen},
+{id:"art",n:"Artikel am Buffet",s:"der, die oder das?",c:"var(--honey)",title:"Artikel am Buffet",intro:"Wörter vom Buffet und aus dem Hotel – mit Merkhilfen, damit der Artikel beim nächsten Mal sitzt. Österreichische Wörter sind markiert.",render:renderArt}
+];
+
+const nav=$("#nav"),main=$("#main"),rendered={};
+MODES.forEach((m,k)=>{
+  nav.insertAdjacentHTML("beforeend",`<button data-k="${k}" style="--c:${m.c}"><span class="num">${k+1}</span><span class="t">${esc(m.n)}<span class="s">${esc(m.s)}</span></span></button>`);
+  main.insertAdjacentHTML("beforeend",`<section class="mode" id="sec-${m.id}" style="--c:${m.c}"><div class="intro"><h2>${k+1}. ${esc(m.title)}</h2><p>${esc(m.intro)}</p></div><div class="body"></div></section>`);
+});
+function openMode(k){
+  const m=MODES[k];
+  nav.querySelectorAll("button").forEach((b,j)=>b.classList.toggle("active",j===k));
+  main.querySelectorAll(".mode").forEach(s=>s.classList.remove("show"));
+  const sec=$("#sec-"+m.id);sec.classList.add("show");
+  if(!rendered[m.id]){m.render(sec.querySelector(".body"));rendered[m.id]=true;}
+}
+nav.onclick=e=>{const b=e.target.closest("button");if(b){openMode(+b.dataset.k);window.scrollTo({top:nav.offsetTop+nav.offsetHeight-10,behavior:"smooth"});}};
+openMode(0);
+</script>
+</body>
+</html>
