@@ -47,6 +47,8 @@ button:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px so
 .seg button{border:0;background:transparent;border-radius:99px;padding:8px 16px;font-size:15px;font-weight:500;cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
 .seg.modes button[aria-pressed="true"]{background:var(--vt);color:#fff}
+.seg.modes button.master{background:var(--gold-soft);color:#8a6418;font-weight:600}
+.seg.modes button.master[aria-pressed="true"]{background:var(--gold);color:#fff}
 .intro{margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
 .intro summary{cursor:pointer;font-weight:600;font-size:16px;color:var(--vt)}
 .intro .ib{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:12px}
@@ -194,6 +196,7 @@ td:first-child{font-weight:600;white-space:nowrap;padding-right:10px;color:var(-
         <button data-lvl="c1" aria-pressed="false">B2 / C1</button>
       </div>
       <div class="seg modes" role="group" aria-label="Übungsart">
+        <button data-mode="ms" aria-pressed="false" class="master">★ Master</button>
         <button data-mode="det" aria-pressed="true">1 · Detektiv</button>
         <button data-mode="vw" aria-pressed="false">2 · Verb-Wahl</button>
         <button data-mode="werk" aria-pressed="false">3 · Werkstatt</button>
@@ -859,6 +862,520 @@ N|einen Rat erteilen|raten|t|Perfekt|H||S=der Anwalt|hat|D=seiner Mandantin|eine
 N|den Beweis erbringen|beweisen|m|Präteritum mit „können“|H||S=die Forscherin|konnte||den Beweis|erbringen||P=für ihre These
 `;
 
+const M_B1 = `
+V|b1|Urlaub machen|frei haben und verreisen|Präsens, verneint|S:wir / F:machen / Z:dieses Jahr / N:nicht / T:Urlaub
+A|b1|Urlaub machen|den Urlaub buchen|Präsens, verneint|S:wir / F:buchen / A:den Urlaub / Z:dieses Jahr / N:nicht
+V|b1|Abschied nehmen|sich verabschieden|Perfekt, verneint|S:er / F:hat / Z:gestern / N:nicht / T:Abschied / R:genommen
+A|b1|Abschied nehmen|den Zug nehmen|Perfekt, verneint|S:er / F:hat / A:den Zug / Z:gestern / N:nicht / R:genommen
+V|b1|Angst haben|sich fürchten|Präsens, verneint mit „kein“|S:unser Hund / F:hat / Z:heute / T:keine Angst
+A|b1|Angst haben|die Angst verstehen|Präsens, verneint|S:ich / F:verstehe / A:deine Angst / Z:heute / N:nicht
+V|b1|Angst machen|ängstigen|Präsens, verneint mit „kein“|S:der Hund / F:macht / D:den Kindern / T:keine Angst
+A|b1|Angst machen|die Hausaufgaben machen|Präsens, verneint|S:die Kinder / F:machen / A:die Hausaufgaben / Z:heute / N:nicht
+V|b1|Anspruch haben|ein Recht haben|Präsens|S:jedes Kind / F:hat / Z:ab drei Jahren / T:Anspruch / Q:auf einen Kindergartenplatz
+A|b1|Anspruch haben|den Antrag haben|Präsens, verneint|S:wir / F:haben / A:das Formular / Z:noch / N:nicht
+V|b1|Auto fahren|mit dem Auto unterwegs sein|Präsens, verneint|S:meine Mutter / F:fährt / Z:im Winter / N:nicht / T:Auto
+A|b1|Auto fahren|das Auto waschen|Präsens, verneint|S:meine Mutter / F:wäscht / A:das Auto / Z:im Winter / N:nicht
+V|b1|Beifall spenden|klatschen|Perfekt|S:das Publikum / F:hat / Z:am Ende / T:Beifall / R:gespendet
+A|b1|Beifall spenden|das Geld spenden|Perfekt, verneint|S:die Firma / F:hat / A:das Geld / Z:dieses Jahr / N:nicht / R:gespendet
+V|b1|Bescheid geben|informieren|Perfekt, verneint|S:er / F:hat / D:seiner Chefin / Z:gestern / N:nicht / T:Bescheid / R:gegeben
+A|b1|Bescheid geben|den Schlüssel geben|Perfekt, verneint|S:er / F:hat / D:seiner Chefin / A:den Schlüssel / Z:gestern / N:nicht / R:gegeben
+V|b1|Bescheid sagen|informieren|Perfekt, verneint|S:du / F:hast / P:mir / Z:gestern / N:nicht / T:Bescheid / R:gesagt
+A|b1|Bescheid sagen|die Wahrheit sagen|Perfekt, verneint|S:du / F:hast / P:mir / A:die Wahrheit / Z:gestern / N:nicht / R:gesagt
+V|b1|Bescheid wissen|informiert sein|Präsens, verneint|S:mein Kollege / F:weiß / Z:noch / N:nicht / T:Bescheid
+A|b1|Bescheid wissen|die Antwort wissen|Präsens, verneint|S:mein Kollege / F:weiß / A:die Antwort / Z:noch / N:nicht
+V|b1|Eis laufen|Schlittschuh laufen|mit „können“, verneint|S:ich / F:kann / Z:leider / N:nicht / T:Eis / R:laufen
+A|b1|Eis laufen|das Eis essen|mit „können“, verneint|S:ich / F:kann / A:das Eis / Z:heute / N:nicht / R:essen
+V|b1|Feierabend machen|mit der Arbeit aufhören|Präsens, verneint|S:die Chefin / F:macht / Z:noch / N:nicht / T:Feierabend
+A|b1|Feierabend machen|den Abend genießen|Präsens, verneint|S:die Chefin / F:genießt / A:den Abend / Z:heute / N:nicht
+V|b1|Fußball spielen|kicken|Präsens, verneint|S:mein Sohn / F:spielt / Z:am Wochenende / N:nicht / T:Fußball
+A|b1|Fußball spielen|den Fußball finden|Präsens, verneint|S:mein Sohn / F:findet / A:seinen Fußball / Z:heute / N:nicht
+V|b1|Gesellschaft leisten|bei jemandem bleiben|Präsens|S:ich / F:leiste / D:meiner Oma / Z:am Sonntag / T:Gesellschaft
+A|b1|Gesellschaft leisten|die Party verlassen|Perfekt, verneint|S:wir / F:haben / A:die Party / Z:noch / N:nicht / R:verlassen
+V|b1|Gitarre spielen|Musik mit der Gitarre machen|Präsens, verneint|S:Jonas / F:spielt / Z:heute / N:nicht / T:Gitarre
+A|b1|Gitarre spielen|die Gitarre stimmen|Perfekt, verneint|S:Jonas / F:hat / A:seine Gitarre / Z:heute / N:nicht / R:gestimmt
+V|b1|Hilfe leisten|helfen|Perfekt|S:ein Passant / F:hat / D:dem Verletzten / Z:sofort / T:Erste Hilfe / R:geleistet
+A|b1|Hilfe leisten|die Hilfe ablehnen|Präsens, verneint|S:mein Opa / F:lehnt / A:die Hilfe / Z:heute / N:nicht / R:ab
+V|b1|Hunger haben|hungrig sein|Präsens, verneint mit „kein“|S:ich / F:habe / Z:jetzt / T:keinen Hunger
+A|b1|Hunger haben|den Kuchen mögen|Präsens, verneint|S:ich / F:mag / A:den Kuchen / Z:heute / N:nicht
+V|b1|Interesse wecken|neugierig machen|Perfekt|S:das Plakat / F:hat / Z:sofort / T:großes Interesse / R:geweckt
+A|b1|Interesse wecken|die Kinder wecken|Perfekt, verneint|S:der Wecker / F:hat / A:die Kinder / Z:heute / N:nicht / R:geweckt
+V|b1|Klavier spielen|am Klavier musizieren|Präsens, verneint|S:meine Tochter / F:spielt / Z:heute / N:nicht / T:Klavier
+A|b1|Klavier spielen|das Klavier verkaufen|Präsens, verneint|S:wir / F:verkaufen / A:das alte Klavier / M:doch / N:nicht
+V|b1|Kontakt aufnehmen|kontaktieren|Perfekt, verneint|S:die Firma / F:hat / Z:bisher / N:nicht / T:Kontakt / Q:mit mir / R:aufgenommen
+A|b1|Kontakt aufnehmen|das Interview aufnehmen|Perfekt, verneint|S:der Reporter / F:hat / A:das Interview / Z:leider / N:nicht / R:aufgenommen
+V|b1|Lust haben|etwas gern tun wollen|Präsens, verneint mit „kein“|S:ich / F:habe / Z:heute / T:keine Lust
+A|b1|Lust haben|die Idee verstehen|Präsens, verneint|S:ich / F:verstehe / A:die Idee / Z:noch / N:nicht
+V|b1|Pause machen|kurz aufhören|Präsens, verneint mit „kein“|S:wir / F:machen / Z:heute / T:keine Pause
+A|b1|Pause machen|das Fenster öffnen|Präsens, verneint|S:wir / F:öffnen / A:das Fenster / Z:heute / N:nicht
+V|b1|Platz finden|hineinpassen|Präsens, verneint mit „kein“|S:das Fahrrad / F:findet / Z:im Kofferraum / T:keinen Platz
+A|b1|Platz finden|den Platz finden|Präsens, verneint|S:ich / F:finde / A:meinen Sitzplatz / Z:heute / N:nicht
+V|b1|Platz nehmen|sich setzen|Imperativ (Sie-Form)|F:nehmen / S:Sie / Z:bitte / T:Platz
+A|b1|Platz nehmen|den Bus nehmen|Präsens, verneint|S:ich / F:nehme / A:den Bus / Z:heute / N:nicht
+V|b1|Protokoll führen|mitschreiben|Präsens, verneint|S:Maria / F:führt / Z:heute / N:nicht / T:Protokoll
+A|b1|Protokoll führen|das Protokoll lesen|Perfekt, verneint|S:Maria / F:hat / A:das Protokoll / Z:noch / N:nicht / R:gelesen
+V|b1|Rad fahren|mit dem Fahrrad fahren|Präsens, verneint|S:ich / F:fahre / Z:heute / N:nicht / T:Rad
+A|b1|Rad fahren|das Rad reparieren|Präsens, verneint|S:ich / F:repariere / A:das Rad / Z:heute / N:nicht
+V|b1|Recht haben|richtig liegen|Präsens, verneint|S:du / F:hast / Z:diesmal / N:nicht / T:Recht
+A|b1|Recht haben|das Rezept haben|Präsens, verneint|S:du / F:hast / A:das Rezept / Z:noch / N:nicht
+V|b1|Rücksicht nehmen|achtgeben|Präsens, verneint mit „kein“|S:der Nachbar / F:nimmt / Z:leider / T:keine Rücksicht
+A|b1|Rücksicht nehmen|den Aufzug nehmen|Präsens, verneint|S:der Nachbar / F:nimmt / A:den Aufzug / Z:heute / N:nicht
+V|b1|Schlange stehen|in einer Reihe warten|mit „müssen“, verneint|S:wir / F:müssen / Z:heute / N:nicht / T:Schlange / R:stehen
+A|b1|Schlange stehen|die Schlange sehen|Perfekt, verneint|S:wir / F:haben / A:die Schlange / Z:im Zoo / N:nicht / R:gesehen
+V|b1|Ski fahren|auf Skiern fahren|Präsens, verneint|S:mein Vater / F:fährt / Z:dieses Jahr / N:nicht / T:Ski
+A|b1|Ski fahren|die Skier kaufen|Präsens, verneint|S:mein Vater / F:kauft / A:die neuen Skier / Z:dieses Jahr / N:nicht
+V|b1|Spaß machen|Freude machen|Präsens, verneint mit „kein“|S:das Spiel / F:macht / D:den Kindern / T:keinen Spaß
+A|b1|Spaß machen|den Witz verstehen|Präsens, verneint|S:die Kinder / F:verstehen / A:den Witz / Z:leider / N:nicht
+V|b1|Sport machen|trainieren|Präsens, verneint mit „kein“|S:ich / F:mache / Z:heute / T:keinen Sport
+A|b1|Sport machen|die Übung machen|Präsens, verneint|S:ich / F:mache / A:diese Übung / Z:heute / N:nicht
+V|b1|Staub saugen|saugen|Perfekt, verneint|S:ich / F:habe / Z:heute / N:nicht / T:Staub / R:gesaugt
+A|b1|Staub saugen|den Teppich saugen|Perfekt, verneint|S:ich / F:habe / A:den Teppich / Z:heute / N:nicht / R:gesaugt
+V|b1|Tennis spielen|Tennis als Sport betreiben|Präsens, verneint|S:wir / F:spielen / Z:heute / N:nicht / T:Tennis
+A|b1|Tennis spielen|das Spiel gewinnen|Perfekt, verneint|S:wir / F:haben / A:das Spiel / Z:heute / N:nicht / R:gewonnen
+V|b1|Unterricht geben|unterrichten|Präsens, verneint mit „kein“|S:Frau Berger / F:gibt / Z:heute / T:keinen Unterricht
+A|b1|Unterricht geben|den Test korrigieren|Präsens, verneint|S:Frau Berger / F:korrigiert / A:den Test / Z:heute / N:nicht
+V|b1|Verständnis haben|verstehen|Präsens, verneint mit „kein“|S:mein Chef / F:hat / Z:dafür / T:kein Verständnis
+A|b1|Verständnis haben|den Text verstehen|Präsens, verneint|S:mein Chef / F:versteht / A:den Text / Z:noch / N:nicht
+V|b1|Zeitung lesen|die Nachrichten lesen|Präsens, verneint|S:mein Opa / F:liest / Z:heute / N:nicht / T:Zeitung
+A|b1|Zeitung lesen|die Zeitung von gestern lesen|Perfekt, verneint|S:mein Opa / F:hat / A:die Zeitung von gestern / Z:noch / N:nicht / R:gelesen
+V|b1|den Anfang machen|als Erster beginnen|Präsens|S:die Klasse 3b / F:macht / Z:heute / T:den Anfang
+A|b1|den Anfang machen|den Anfang verstehen|Perfekt, verneint|S:ich / F:habe / A:den Anfang des Buches / Z:noch / N:nicht / R:verstanden
+V|b1|die Erlaubnis geben|erlauben|Perfekt|S:die Eltern / F:haben / D:ihrem Sohn / Z:gestern / T:die Erlaubnis / R:gegeben
+A|b1|die Erlaubnis geben|den Brief geben|Perfekt, verneint|S:die Eltern / F:haben / D:ihrem Sohn / A:den Brief / Z:gestern / N:nicht / R:gegeben
+V|b1|ein Gespräch führen|miteinander sprechen|Perfekt|S:die Lehrerin / F:hat / Z:gestern / T:ein langes Gespräch / Q:mit den Eltern / R:geführt
+A|b1|ein Gespräch führen|den Hund führen|Präsens, verneint|S:die Lehrerin / F:führt / A:ihren Hund / Z:heute / N:nicht
+V|b1|ein Referat halten|vortragen|mit „müssen“|S:ich / F:muss / Z:morgen / T:ein Referat / R:halten
+A|b1|ein Referat halten|das Referat schreiben|Perfekt, verneint|S:ich / F:habe / A:das Referat / Z:noch / N:nicht / R:geschrieben
+V|b1|ein Versprechen geben|versprechen|Perfekt|S:er / F:hat / D:seiner Mutter / Z:gestern / T:ein Versprechen / R:gegeben
+A|b1|ein Versprechen geben|das Versprechen vergessen|Perfekt, verneint|S:er / F:hat / A:sein Versprechen / M:doch / N:nicht / R:vergessen
+V|b1|eine Antwort geben|antworten|Perfekt, verneint mit „kein“|S:der Verkäufer / F:hat / P:mir / Z:bisher / T:keine Antwort / R:gegeben
+A|b1|eine Antwort geben|die Antwort wissen|Präsens, verneint|S:der Schüler / F:weiß / A:die Antwort / Z:noch / N:nicht
+V|b1|eine Auswahl treffen|auswählen|mit „müssen“|S:du / F:musst / Z:jetzt / T:eine Auswahl / R:treffen
+A|b1|eine Auswahl treffen|die Freunde treffen|Präsens, verneint|S:du / F:triffst / A:deine Freunde / Z:heute / N:nicht
+V|b1|eine Entscheidung treffen|entscheiden|Perfekt, verneint mit „kein“|S:wir / F:haben / Z:noch / T:keine Entscheidung / R:getroffen
+A|b1|eine Entscheidung treffen|die Nachbarn treffen|Perfekt, verneint|S:wir / F:haben / A:die Nachbarn / Z:heute / N:nicht / R:getroffen
+V|b1|eine Frage stellen|fragen|Präsens, verneint mit „kein“|S:mein Sohn / F:stellt / Z:heute / T:keine Frage
+A|b1|eine Frage stellen|die Frage verstehen|Perfekt, verneint|S:mein Sohn / F:hat / A:die Frage / Z:leider / N:nicht / R:verstanden
+V|b1|eine Lösung finden|lösen|Perfekt, verneint mit „kein“|S:wir / F:haben / Z:noch / T:keine Lösung / R:gefunden
+A|b1|eine Lösung finden|den Schlüssel finden|Perfekt, verneint|S:wir / F:haben / A:den Schlüssel / Z:noch / N:nicht / R:gefunden
+V|b1|eine Rede halten|öffentlich sprechen|Präsens|S:die Bürgermeisterin / F:hält / Z:heute Abend / T:eine Rede
+A|b1|eine Rede halten|die Rede schreiben|Perfekt, verneint|S:die Bürgermeisterin / F:hat / A:ihre Rede / M:selbst / N:nicht / R:geschrieben
+V|b1|eine Rolle spielen|wichtig sein|Präsens, verneint mit „kein“|S:das Geld / F:spielt / Z:für mich / T:keine Rolle
+A|b1|eine Rolle spielen|die Hauptrolle spielen|Präsens, verneint|S:der Star / F:spielt / A:die Hauptrolle / Z:diesmal / N:nicht
+V|b1|eine Verabredung treffen|sich verabreden|Perfekt|S:ich / F:habe / Z:gestern / T:eine Verabredung / Q:mit Lena / R:getroffen
+A|b1|eine Verabredung treffen|die Freundin treffen|Perfekt, verneint|S:ich / F:habe / A:meine Freundin / Z:gestern / N:nicht / R:getroffen
+V|b1|eine Wahl treffen|wählen|mit „müssen“|S:du / F:musst / Z:jetzt / T:eine Wahl / R:treffen
+A|b1|eine Wahl treffen|die Wahl gewinnen|Perfekt, verneint|S:die Partei / F:hat / A:die Wahl / Z:diesmal / N:nicht / R:gewonnen
+V|b1|einen Auftrag bekommen|beauftragt werden|Perfekt|S:die Firma / F:hat / Z:gestern / T:einen großen Auftrag / R:bekommen
+A|b1|einen Auftrag bekommen|das Paket bekommen|Perfekt, verneint|S:die Firma / F:hat / A:das Paket / Z:gestern / N:nicht / R:bekommen
+V|b1|einen Auftrag geben|beauftragen|Perfekt|S:die Chefin / F:hat / P:mir / Z:heute / T:einen neuen Auftrag / R:gegeben
+A|b1|einen Auftrag geben|den Auftrag erledigen|Perfekt, verneint|S:ich / F:habe / A:den Auftrag / Z:noch / N:nicht / R:erledigt
+V|b1|einen Eindruck machen|auf andere wirken|Perfekt|S:die Bewerberin / F:hat / Z:sofort / T:einen guten Eindruck / R:gemacht
+A|b1|einen Eindruck machen|das Foto machen|Perfekt, verneint|S:die Bewerberin / F:hat / A:das Foto / M:selbst / N:nicht / R:gemacht
+V|b1|einen Fehler machen|sich irren|Perfekt, verneint mit „kein“|S:ich / F:habe / Z:heute / T:keinen Fehler / R:gemacht
+A|b1|einen Fehler machen|den Fehler finden|Perfekt, verneint|S:ich / F:habe / A:den Fehler / Z:noch / N:nicht / R:gefunden
+V|b1|einen Hinweis geben|hinweisen|Perfekt|S:ein Nachbar / F:hat / D:der Polizei / Z:gestern / T:einen Hinweis / R:gegeben
+A|b1|einen Hinweis geben|den Hinweis lesen|Perfekt, verneint|S:ich / F:habe / A:den Hinweis / Z:leider / N:nicht / R:gelesen
+V|b1|einen Rat geben|raten|Perfekt|S:mein Vater / F:hat / P:mir / Z:damals / T:einen guten Rat / R:gegeben
+A|b1|einen Rat geben|den Rat befolgen|Perfekt, verneint|S:ich / F:habe / A:seinen Rat / Z:damals / N:nicht / R:befolgt
+V|b1|einen Vorschlag machen|vorschlagen|Perfekt|S:meine Kollegin / F:hat / Z:gestern / T:einen Vorschlag / R:gemacht
+A|b1|einen Vorschlag machen|den Vorschlag annehmen|Präsens, verneint|S:wir / F:nehmen / A:den Vorschlag / Z:diesmal / N:nicht / R:an
+V|b1|in Aufregung geraten|sich aufregen|Präteritum, verneint|S:die Klasse / F:geriet / Z:diesmal / N:nicht / T:in Aufregung
+A|b1|in Aufregung geraten|die Aufregung verstehen|Präsens, verneint|S:ich / F:verstehe / A:die Aufregung / Z:heute / N:nicht
+V|b1|in Aufregung sein|aufgeregt sein|Präsens, verneint|S:die Kinder / F:sind / Z:heute / N:nicht / T:in Aufregung
+A|b1|in Aufregung sein|die Kinder beruhigen|Perfekt, verneint|S:die Lehrerin / F:hat / A:die Kinder / Z:heute / N:nicht / R:beruhigt
+V|b1|in Aufregung versetzen|aufregen|Präteritum|S:die Nachricht / F:versetzte / A:die Klasse / Z:sofort / T:in Aufregung
+A|b1|in Aufregung versetzen|die Nachricht lesen|Perfekt, verneint|S:die Klasse / F:hat / A:die Nachricht / Z:noch / N:nicht / R:gelesen
+V|b1|in Betrieb sein|laufen, funktionieren|Präsens, verneint|S:die Maschine / F:ist / Z:heute / N:nicht / T:in Betrieb
+A|b1|in Betrieb sein|den Betrieb besuchen|Perfekt, verneint|S:wir / F:haben / A:den Betrieb / Z:gestern / N:nicht / R:besucht
+V|b1|in Erfüllung gehen|wahr werden|Perfekt, verneint|S:sein Traum / F:ist / Z:leider / N:nicht / T:in Erfüllung / R:gegangen
+A|b1|in Erfüllung gehen|den Traum erzählen|Perfekt, verneint|S:er / F:hat / A:seinen Traum / Z:noch / N:nicht / R:erzählt
+V|b1|in Frage kommen|möglich sein|Präsens, verneint|S:ein Umzug / F:kommt / Z:jetzt / N:nicht / T:in Frage
+A|b1|in Frage kommen|die Frage beantworten|Präsens, verneint|S:ich / F:beantworte / A:diese Frage / Z:heute / N:nicht
+V|b1|in Gang bringen|starten|Perfekt, verneint|S:der Mechaniker / F:hat / A:den Motor / Z:heute / N:nicht / T:in Gang / R:gebracht
+A|b1|in Gang bringen|den Motor reparieren|Perfekt, verneint|S:der Mechaniker / F:hat / A:den Motor / Z:heute / N:nicht / R:repariert
+V|b1|in Gang kommen|anlaufen|Präsens, verneint|S:der Verkauf / F:kommt / Z:dieses Jahr / N:nicht / T:in Gang
+A|b1|in Gang kommen|den Gang putzen|Präsens, verneint|S:der Hausmeister / F:putzt / A:den Gang / Z:heute / N:nicht
+V|b1|in Gang sein|laufen|Präsens|S:die Bauarbeiten / F:sind / Z:seit Montag / T:in Gang
+A|b1|in Gang sein|den Gang betreten|Präsens, verneint|S:die Kinder / F:betreten / A:den Gang / Z:heute / N:nicht
+V|b1|in Kontakt bleiben|weiter Kontakt haben|mit „wollen“|S:wir / F:wollen / Z:auch nach dem Kurs / T:in Kontakt / R:bleiben
+A|b1|in Kontakt bleiben|den Kontakt verlieren|Perfekt, verneint mit „nie“|S:wir / F:haben / A:den Kontakt / Z:nie / R:verloren
+V|b1|in Ordnung bringen|reparieren, aufräumen|Perfekt, verneint|S:der Techniker / F:hat / A:die Heizung / Z:heute / N:nicht / T:in Ordnung / R:gebracht
+A|b1|in Ordnung bringen|die Ordnung lieben|Präsens, verneint|S:mein Bruder / F:liebt / A:die Ordnung / M:wirklich / N:nicht
+V|b1|in Pension gehen|in den Ruhestand gehen|Präsens, verneint|S:meine Mutter / F:geht / Z:dieses Jahr / N:nicht / T:in Pension
+A|b1|in Pension gehen|die Pension buchen|Präsens, verneint|S:meine Mutter / F:bucht / A:die Pension / Z:dieses Jahr / N:nicht
+V|b1|sich Hoffnungen machen|hoffen|Präsens, verneint mit „kein“|S:er / F:macht / P:sich / Z:diesmal / T:keine Hoffnungen
+A|b1|sich Hoffnungen machen|die Hoffnung verlieren|Präsens, verneint mit „nie“|S:er / F:verliert / A:die Hoffnung / Z:nie
+V|b1|sich Sorgen machen|sich sorgen|Präsens, verneint mit „kein“|S:ich / F:mache / P:mir / Z:heute / T:keine Sorgen
+A|b1|sich Sorgen machen|die Sorgen teilen|Präsens, verneint|S:ich / F:teile / A:deine Sorgen / Z:heute / N:nicht
+V|b1|sich eine Meinung machen|sich ein Urteil bilden|Perfekt|S:ich / F:habe / P:mir / Z:schon / T:eine Meinung / R:gemacht
+A|b1|sich eine Meinung machen|die Meinung sagen|Perfekt, verneint|S:ich / F:habe / A:meine Meinung / Z:gestern / N:nicht / R:gesagt
+V|b1|zu Ende bringen|fertig machen|mit „können“, verneint|S:ich / F:kann / A:das Projekt / Z:heute / N:nicht / T:zu Ende / R:bringen
+A|b1|zu Ende bringen|das Projekt präsentieren|mit „können“, verneint|S:ich / F:kann / A:das Projekt / Z:heute / N:nicht / R:präsentieren
+V|b1|zu Ende gehen|enden|Präsens, verneint|S:der Film / F:geht / Z:vor Mitternacht / N:nicht / T:zu Ende
+A|b1|zu Ende gehen|das Ende sehen|Perfekt, verneint|S:ich / F:habe / A:das Ende des Films / Z:gestern / N:nicht / R:gesehen
+V|b1|zu Ende kommen|aufhören|Präteritum, verneint|S:der Redner / F:kam / Z:lange / N:nicht / T:zu Ende
+A|b1|zu Ende kommen|den Redner hören|Präsens, verneint|S:wir / F:hören / A:den Redner / Z:hinten / N:nicht
+V|b1|zu Ende sein|vorbei sein|Präsens, verneint|S:der Kurs / F:ist / Z:noch / N:nicht / T:zu Ende
+A|b1|zu Ende sein|den Kurs beenden|Präsens, verneint|S:wir / F:beenden / A:den Kurs / Z:heute / N:nicht
+V|b1|zu Hilfe kommen|helfen|Perfekt, verneint|S:niemand / F:ist / D:dem Mann / Z:sofort / T:zu Hilfe / R:gekommen
+A|b1|zu Hilfe kommen|die Hilfe holen|Perfekt, verneint|S:wir / F:haben / A:die Hilfe / Z:leider / N:nicht / R:geholt
+V|b1|zur Auswahl stehen|wählbar sein|Präsens, verneint|S:das Menü / F:steht / Z:heute / N:nicht / T:zur Auswahl
+A|b1|zur Auswahl stehen|das Menü bestellen|Präsens, verneint|S:ich / F:bestelle / A:das Menü / Z:heute / N:nicht
+V|b1|zur Schule gehen|die Schule besuchen|Präsens, verneint|S:mein Sohn / F:geht / Z:heute / N:nicht / T:zur Schule
+A|b1|zur Schule gehen|die Schule wechseln|Präsens, verneint|S:mein Sohn / F:wechselt / A:die Schule / Z:dieses Jahr / N:nicht
+V|b1|zur Verfügung stehen|verfügbar sein|Präsens, verneint|S:der Raum / F:steht / Z:heute / N:nicht / T:zur Verfügung
+A|b1|zur Verfügung stehen|den Raum mieten|Präsens, verneint|S:wir / F:mieten / A:den Raum / Z:heute / N:nicht
+V|b1|zur Verfügung stellen|bereitstellen|Präsens, verneint|S:die Schule / F:stellt / A:die Laptops / Z:dieses Jahr / N:nicht / T:zur Verfügung
+A|b1|zur Verfügung stellen|die Laptops kaufen|Präsens, verneint|S:die Schule / F:kauft / A:die Laptops / Z:dieses Jahr / N:nicht
+V|b1|zur Welt kommen|geboren werden|Perfekt, verneint|S:das Baby / F:ist / Z:noch / N:nicht / T:zur Welt / R:gekommen
+A|b1|zur Welt kommen|die Welt sehen|Perfekt, verneint|S:wir / F:haben / A:die Welt / Z:noch / N:nicht / R:gesehen
+V|b1|der Meinung sein|meinen|Präsens|S:ich / F:bin / M:auch / T:der Meinung
+A|b1|der Meinung sein|die Meinung teilen|Präsens, verneint|S:ich / F:teile / A:deine Meinung / Z:diesmal / N:nicht
+V|b1|auf die Nerven gehen|stören|Präsens, verneint|S:der Lärm / F:geht / P:mir / Z:heute / N:nicht / T:auf die Nerven
+A|b1|auf die Nerven gehen|den Lärm hören|Präsens, verneint|S:ich / F:höre / A:den Lärm / Z:heute / N:nicht
+V|b1|ins Kino gehen|einen Film anschauen|Präsens, verneint|S:wir / F:gehen / Z:heute / N:nicht / T:ins Kino
+A|b1|ins Kino gehen|das Kino renovieren|Präsens, verneint|S:die Stadt / F:renoviert / A:das alte Kino / Z:dieses Jahr / N:nicht
+V|b1|nach Hause gehen|heimgehen|Präsens, verneint|S:die Gäste / F:gehen / Z:noch / N:nicht / T:nach Hause
+A|b1|nach Hause gehen|das Haus verkaufen|Präsens, verneint|S:die Familie / F:verkauft / A:das Haus / M:doch / N:nicht
+V|b1|nach Hause bringen|heimbringen|Perfekt, verneint|S:ich / F:habe / A:die Kinder / Z:heute / N:nicht / T:nach Hause / R:gebracht
+A|b1|nach Hause bringen|die Kinder abholen|Perfekt, verneint|S:ich / F:habe / A:die Kinder / Z:heute / N:nicht / R:abgeholt
+V|b1|ins Bett gehen|schlafen gehen|Präsens, verneint|S:die Kinder / F:gehen / Z:heute / N:nicht / T:ins Bett
+A|b1|ins Bett gehen|das Bett machen|Präsens, verneint|S:die Kinder / F:machen / A:ihr Bett / Z:heute / N:nicht
+V|b1|ins Büro bringen|vorbeibringen|Präsens, verneint|S:ich / F:bringe / A:die Unterlagen / Z:heute / N:nicht / T:ins Büro
+A|b1|ins Büro bringen|die Unterlagen vergessen|Perfekt, verneint|S:ich / F:habe / A:die Unterlagen / Z:heute / N:nicht / R:vergessen
+V|b1|zur Arbeit fahren|zum Arbeitsplatz fahren|Präsens, verneint|S:mein Vater / F:fährt / Z:heute / N:nicht / T:zur Arbeit
+A|b1|zur Arbeit fahren|die Arbeit erledigen|Perfekt, verneint|S:mein Vater / F:hat / A:die Arbeit / Z:heute / N:nicht / R:erledigt
+V|b1|zum Arzt gehen|einen Arzt besuchen|Präsens, verneint|S:mein Opa / F:geht / Z:heute / N:nicht / T:zum Arzt
+A|b1|zum Arzt gehen|den Arzt anrufen|Präsens, verneint|S:mein Opa / F:ruft / A:den Arzt / Z:heute / N:nicht / R:an
+V|b1|nach Wien fahren|in die Stadt Wien reisen|Präsens, verneint|S:wir / F:fahren / Z:am Samstag / N:nicht / T:nach Wien
+A|b1|nach Wien fahren|den Zug verpassen|Perfekt, verneint|S:wir / F:haben / A:den Zug nach Wien / Z:heute / N:nicht / R:verpasst
+V|b1|in die Stadt fahren|stadtwärts fahren|Präsens, verneint|S:ich / F:fahre / Z:morgen / N:nicht / T:in die Stadt
+A|b1|in die Stadt fahren|die Stadt besichtigen|Perfekt, verneint|S:wir / F:haben / A:die Stadt / Z:noch / N:nicht / R:besichtigt
+V|b1|in die Schweiz reisen|in die Schweiz fahren|Präsens, verneint|S:wir / F:reisen / Z:dieses Jahr / N:nicht / T:in die Schweiz
+A|b1|in die Schweiz reisen|die Reise planen|Perfekt, verneint|S:wir / F:haben / A:die Reise / Z:noch / N:nicht / R:geplant
+V|b1|nach Griechenland fliegen|nach Griechenland reisen|Perfekt, verneint|S:wir / F:sind / Z:letztes Jahr / N:nicht / T:nach Griechenland / R:geflogen
+A|b1|nach Griechenland fliegen|den Flug buchen|Perfekt, verneint|S:wir / F:haben / A:den Flug / Z:noch / N:nicht / R:gebucht
+V|b1|aufs Land ziehen|umziehen|mit „wollen“, verneint|S:meine Großeltern / F:wollen / Z:jetzt / N:nicht / T:aufs Land / R:ziehen
+A|b1|aufs Land ziehen|das Land kennen|Präsens, verneint|S:meine Großeltern / F:kennen / A:das Land / Z:noch / N:nicht
+V|b1|auf den Tisch legen|hinlegen|Präsens, verneint|S:er / F:legt / A:die Schlüssel / Z:heute / N:nicht / T:auf den Tisch
+A|b1|auf den Tisch legen|den Tisch decken|Präsens, verneint|S:er / F:deckt / A:den Tisch / Z:heute / N:nicht
+V|b1|in den Kühlschrank stellen|hineinstellen|Perfekt, verneint|S:ich / F:habe / A:die Milch / Z:heute / N:nicht / T:in den Kühlschrank / R:gestellt
+A|b1|in den Kühlschrank stellen|den Kühlschrank putzen|Perfekt, verneint|S:ich / F:habe / A:den Kühlschrank / Z:heute / N:nicht / R:geputzt
+V|b1|in den Müll werfen|wegwerfen|mit „dürfen“, verneint|S:man / F:darf / A:Batterien / N:nicht / T:in den Müll / R:werfen
+A|b1|in den Müll werfen|den Müll trennen|Präsens, verneint|S:mein Nachbar / F:trennt / A:den Müll / Z:leider / N:nicht
+V|b1|in die Garage fahren|hineinfahren|Perfekt, verneint|S:du / F:hast / A:das Auto / Z:noch / N:nicht / T:in die Garage / R:gefahren
+A|b1|in die Garage fahren|die Garage aufräumen|Perfekt, verneint|S:du / F:hast / A:die Garage / Z:noch / N:nicht / R:aufgeräumt
+V|b1|in den Keller tragen|hinuntertragen|Perfekt, verneint|S:ich / F:habe / A:die Kiste / Z:noch / N:nicht / T:in den Keller / R:getragen
+A|b1|in den Keller tragen|den Keller aufräumen|Perfekt, verneint|S:ich / F:habe / A:den Keller / Z:noch / N:nicht / R:aufgeräumt
+`;
+const M_C1 = `
+V|c1|in Anspruch nehmen|nutzen|Präsens, verneint|S:die Familie / F:nimmt / A:die Förderung / Z:bisher / N:nicht / T:in Anspruch
+A|c1|in Anspruch nehmen|den Anspruch prüfen|Präsens, verneint|S:das Amt / F:prüft / A:den Anspruch / Z:bisher / N:nicht
+V|c1|in Zweifel ziehen|bezweifeln|Präsens, verneint mit „niemand“|S:niemand / F:zieht / A:die Ergebnisse / Z:ernsthaft / T:in Zweifel
+A|c1|in Zweifel ziehen|den Zweifel äußern|Präsens, verneint|S:die Forscherin / F:teilt / A:den Zweifel / Z:diesmal / N:nicht
+V|c1|zum Ausdruck bringen|ausdrücken|Präteritum, verneint|S:sie / F:brachte / A:ihre Enttäuschung / Z:damals / N:nicht / T:zum Ausdruck
+A|c1|zum Ausdruck bringen|den Ausdruck verstehen|Präteritum, verneint|S:sie / F:verstand / A:den Ausdruck / Z:damals / N:nicht
+V|c1|in Betracht ziehen|erwägen|Präsens, verneint|S:wir / F:ziehen / A:einen Umzug / Z:derzeit / N:nicht / T:in Betracht
+A|c1|in Betracht ziehen|den Umzug planen|Präsens, verneint|S:wir / F:planen / A:den Umzug / Z:derzeit / N:nicht
+V|c1|sich eine Meinung bilden|zu einem Urteil kommen|Perfekt|S:jeder / F:hat / P:sich / Z:schon / T:eine eigene Meinung / R:gebildet
+A|c1|sich eine Meinung bilden|die Meinung ändern|Perfekt, verneint|S:jeder / F:hat / A:seine Meinung / Z:bisher / N:nicht / R:geändert
+V|c1|Anklage erheben|anklagen|Perfekt, verneint mit „kein“|S:die Staatsanwaltschaft / F:hat / Z:bisher / T:keine Anklage / R:erhoben
+A|c1|Anklage erheben|die Anklage lesen|Perfekt, verneint|S:der Anwalt / F:hat / A:die Anklage / Z:bisher / N:nicht / R:gelesen
+V|c1|Beifall finden|gelobt werden|Präteritum, verneint mit „kein“|S:der Vorschlag / F:fand / Z:diesmal / T:keinen Beifall
+A|c1|Beifall finden|den Weg finden|Präteritum, verneint|S:der Vorschlag / F:fand / A:den Weg ins Parlament / Z:diesmal / N:nicht
+V|c1|zur Einsicht kommen|einsehen|Präteritum, verneint|S:er / F:kam / Z:lange / N:nicht / T:zur Einsicht
+A|c1|zur Einsicht kommen|die Einsicht vermissen|Präteritum, verneint|S:er / F:zeigte / A:die nötige Einsicht / Z:lange / N:nicht
+V|c1|die Konsequenzen ziehen|Folgerungen ableiten und handeln|Perfekt|S:die Firma / F:hat / Z:sofort / T:die Konsequenzen / R:gezogen
+A|c1|die Konsequenzen ziehen|die Konsequenzen tragen|Präsens, verneint|S:die Firma / F:trägt / A:die Konsequenzen / N:nicht / M:allein
+V|c1|in Vergessenheit geraten|vergessen werden|Perfekt, verneint|S:das Handwerk / F:ist / Z:zum Glück / N:nicht / T:in Vergessenheit / R:geraten
+A|c1|in Vergessenheit geraten|das Handwerk vergessen|Perfekt, verneint|S:wir / F:haben / A:das alte Handwerk / Z:zum Glück / N:nicht / R:vergessen
+V|c1|in Erfahrung bringen|herausfinden|Präteritum mit „können“, verneint|S:sie / F:konnte / A:den Namen / Z:leider / N:nicht / T:in Erfahrung / R:bringen
+A|c1|in Erfahrung bringen|die Erfahrung teilen|Präteritum mit „können“, verneint|S:sie / F:konnte / A:ihre Erfahrung / Z:leider / N:nicht / R:teilen
+V|c1|einen Auftrag erteilen|beauftragen|Perfekt|S:die Stadt / F:hat / D:einem Architekten / Z:gestern / T:den Auftrag / R:erteilt
+A|c1|einen Auftrag erteilen|den Auftrag ablehnen|Perfekt, verneint|S:der Architekt / F:hat / A:den Auftrag / Z:gestern / N:nicht / R:abgelehnt
+V|c1|zur Auswahl stellen|zum Wählen anbieten|Präsens, verneint|S:das Hotel / F:stellt / A:das vegane Menü / Z:heute / N:nicht / T:zur Auswahl
+A|c1|zur Auswahl stellen|die Auswahl erweitern|Präsens, verneint|S:das Hotel / F:erweitert / A:die Auswahl / Z:heute / N:nicht
+V|c1|zur Diskussion stellen|diskutieren lassen|Präsens, verneint|S:der Ausschuss / F:stellt / A:den Entwurf / Z:heute / N:nicht / T:zur Diskussion
+A|c1|zur Diskussion stellen|die Diskussion leiten|Präsens, verneint|S:der Ausschuss / F:leitet / A:die Diskussion / Z:heute / N:nicht
+V|c1|zur Diskussion stehen|diskutiert werden|Präsens, verneint|S:der Entwurf / F:steht / Z:heute / N:nicht / T:zur Diskussion
+A|c1|zur Diskussion stehen|die Diskussion verfolgen|Präsens, verneint|S:wir / F:verfolgen / A:die Diskussion / Z:heute / N:nicht
+V|c1|unter Druck setzen|bedrängen|Präsens, verneint|S:die Chefin / F:setzt / A:das Team / Z:diesmal / N:nicht / T:unter Druck
+A|c1|unter Druck setzen|den Druck spüren|Präsens, verneint|S:das Team / F:spürt / A:den Druck / Z:diesmal / N:nicht
+V|c1|unter Druck stehen|bedrängt sein|Präsens, verneint|S:das Team / F:steht / Z:diesmal / N:nicht / T:unter Druck
+A|c1|unter Druck stehen|den Druck erhöhen|Präsens, verneint|S:die Chefin / F:erhöht / A:den Druck / Z:diesmal / N:nicht
+V|c1|sich in Verbindung setzen|kontaktieren|Perfekt, verneint|S:die Firma / F:hat / P:sich / Z:bisher / Q:mit mir / N:nicht / T:in Verbindung / R:gesetzt
+A|c1|sich in Verbindung setzen|die Verbindung prüfen|Perfekt, verneint|S:der Techniker / F:hat / A:die Verbindung / Z:bisher / N:nicht / R:geprüft
+V|c1|in Verbindung stehen|Kontakt haben|Präsens, verneint|S:wir / F:stehen / Z:derzeit / Q:mit der Firma / N:nicht / T:in Verbindung
+A|c1|in Verbindung stehen|die Verbindung trennen|Präsens, verneint|S:wir / F:trennen / A:die Verbindung / Z:derzeit / N:nicht
+V|c1|einen Antrag stellen|beantragen|Perfekt|S:die Familie / F:hat / Z:gestern / T:einen Antrag / Q:auf Förderung / R:gestellt
+A|c1|einen Antrag stellen|den Antrag ablehnen|Perfekt, verneint|S:das Amt / F:hat / A:den Antrag / Z:bisher / N:nicht / R:abgelehnt
+V|c1|eine Aufgabe stellen|zu lösen geben|Präsens|S:die Lehrerin / F:stellt / D:der Klasse / Z:heute / T:eine schwierige Aufgabe
+A|c1|eine Aufgabe stellen|die Aufgabe lösen|Perfekt, verneint|S:die Klasse / F:hat / A:die Aufgabe / Z:heute / N:nicht / R:gelöst
+V|c1|Anerkennung finden|anerkannt werden|Präsens, verneint mit „kein“|S:ihre Arbeit / F:findet / Z:hier / T:keine Anerkennung
+A|c1|Anerkennung finden|die Arbeit finden|Präsens, verneint|S:sie / F:findet / A:ihre Arbeit / Z:hier / N:nicht
+V|c1|Anerkennung genießen|geachtet werden|Präsens|S:die Ärztin / F:genießt / Z:in der Stadt / T:hohe Anerkennung
+A|c1|Anerkennung genießen|den Abend genießen|Präsens, verneint|S:die Ärztin / F:genießt / A:den Abend / Z:heute / N:nicht
+V|c1|Trost finden|getröstet werden|Präteritum|S:er / F:fand / Z:damals / T:Trost / Q:in der Musik
+A|c1|Trost finden|den Brief finden|Präteritum, verneint|S:er / F:fand / A:den Brief / Z:damals / N:nicht
+V|c1|Beachtung finden|beachtet werden|Präteritum, verneint mit „kaum“|S:der Film / F:fand / Z:damals / T:kaum Beachtung
+A|c1|Beachtung finden|den Film gut finden|Präteritum, verneint|S:ich / F:fand / A:den Film / Z:damals / N:nicht / M:gut
+V|c1|Beachtung schenken|beachten|Präsens, verneint mit „kein“|S:der Lehrer / F:schenkt / D:den Störungen / T:keine Beachtung
+A|c1|Beachtung schenken|das Buch verschenken|Perfekt, verneint|S:der Lehrer / F:hat / A:das Buch / Z:noch / N:nicht / R:verschenkt
+V|c1|Unterstützung finden|unterstützt werden|Präteritum, verneint mit „kaum“|S:die Idee / F:fand / Z:anfangs / T:kaum Unterstützung
+A|c1|Unterstützung finden|die Idee gut finden|Präteritum, verneint mit „niemand“|S:niemand / F:fand / A:die Idee / Z:anfangs / M:gut
+V|c1|Unterstützung genießen|unterstützt werden|Präsens|S:die Initiative / F:genießt / Z:seit Jahren / T:breite Unterstützung
+A|c1|Unterstützung genießen|die Unterstützung brauchen|Präsens, verneint|S:die Initiative / F:braucht / A:die Unterstützung / Z:jetzt / N:nicht
+V|c1|Zustimmung finden|befürwortet werden|Präteritum, verneint mit „kein“|S:der Vorschlag / F:fand / Z:diesmal / T:keine Zustimmung
+A|c1|Zustimmung finden|die Zustimmung geben|Perfekt, verneint|S:der Rat / F:hat / A:seine Zustimmung / Z:noch / N:nicht / R:gegeben
+V|c1|Hoffnungen wecken|hoffen lassen|Präsens|S:die neuen Zahlen / F:wecken / Z:schon / T:große Hoffnungen
+A|c1|Hoffnungen wecken|die Kinder wecken|Präsens, verneint|S:der Lärm / F:weckt / A:die Kinder / Z:heute / N:nicht
+V|c1|Erinnerungen wecken|erinnern|Präsens|S:der Duft / F:weckt / Z:sofort / T:Erinnerungen / Q:an meine Kindheit
+A|c1|Erinnerungen wecken|die Erinnerungen aufschreiben|Perfekt, verneint mit „nie“|S:meine Oma / F:hat / A:ihre Erinnerungen / Z:nie / R:aufgeschrieben
+V|c1|Erwartungen wecken|hoffen lassen|Präsens|S:die Werbung / F:weckt / Z:oft / T:zu hohe Erwartungen
+A|c1|Erwartungen wecken|die Erwartungen erfüllen|Perfekt, verneint|S:das Produkt / F:hat / A:die Erwartungen / Z:leider / N:nicht / R:erfüllt
+V|c1|Emotionen wecken|berühren|Präsens|S:das Lied / F:weckt / Z:immer wieder / T:starke Emotionen
+A|c1|Emotionen wecken|die Emotionen zeigen|Präsens|S:der Sänger / F:zeigt / A:seine Emotionen / Z:selten / M:offen
+V|c1|Assoziationen wecken|an etwas denken lassen|Präsens|S:der Name / F:weckt / Z:sofort / T:falsche Assoziationen
+A|c1|Assoziationen wecken|den Namen ändern|Perfekt, verneint|S:die Firma / F:hat / A:den Namen / Z:trotzdem / N:nicht / R:geändert
+V|c1|einen Unterschied machen|viel verändern|Präsens|S:ein Lächeln / F:macht / Z:oft / T:einen großen Unterschied
+A|c1|einen Unterschied machen|den Unterschied erkennen|Präsens, verneint|S:viele / F:erkennen / A:den Unterschied / Z:leider / N:nicht
+V|c1|einen Vorwurf machen|vorwerfen|Perfekt|S:die Opposition / F:hat / D:der Regierung / Z:gestern / T:schwere Vorwürfe / R:gemacht
+A|c1|einen Vorwurf machen|den Vorwurf zurückweisen|Perfekt|S:die Regierung / F:hat / A:den Vorwurf / Z:sofort / R:zurückgewiesen
+V|c1|auf Kritik stoßen|kritisiert werden|Präsens|S:die Erhöhung / F:stößt / Z:sofort / T:auf Kritik
+A|c1|auf Kritik stoßen|die Kritik ernst nehmen|Präsens, verneint|S:die Stadt / F:nimmt / A:die Kritik / Z:leider / N:nicht / M:ernst
+V|c1|auf Unverständnis stoßen|nicht verstanden werden|Präteritum|S:die Entscheidung / F:stieß / Z:damals / T:auf Unverständnis
+A|c1|auf Unverständnis stoßen|die Entscheidung verstehen|Präteritum, verneint|S:viele / F:verstanden / A:die Entscheidung / Z:damals / N:nicht
+V|c1|auf Ablehnung stoßen|abgelehnt werden|Perfekt|S:der Plan / F:ist / Z:gestern / T:auf Ablehnung / R:gestoßen
+A|c1|auf Ablehnung stoßen|den Plan ablehnen|Perfekt, verneint|S:der Gemeinderat / F:hat / A:den Plan / Z:gestern / N:nicht / R:abgelehnt
+V|c1|auf Zustimmung stoßen|befürwortet werden|Präteritum|S:der Plan / F:stieß / Z:sofort / T:auf breite Zustimmung
+A|c1|auf Zustimmung stoßen|den Plan unterstützen|Präteritum, verneint|S:die Partei / F:unterstützte / A:den Plan / Z:anfangs / N:nicht
+V|c1|auf Resonanz stoßen|gut ankommen|Präteritum|S:der Song / F:stieß / Z:sofort / T:auf große Resonanz
+A|c1|auf Resonanz stoßen|den Song hören|Perfekt, verneint|S:ich / F:habe / A:den Song / Z:noch / N:nicht / R:gehört
+V|c1|Stellung nehmen|sich äußern|Perfekt, verneint|S:die Ministerin / F:hat / Z:bisher / N:nicht / T:Stellung / R:genommen
+A|c1|Stellung nehmen|die Stellung halten|Perfekt|S:die Ministerin / F:hat / A:ihre Stellung / Z:lange / R:gehalten
+V|c1|in Besitz nehmen|sich aneignen|Perfekt, verneint|S:die Erben / F:haben / A:das Haus / Z:noch / N:nicht / T:in Besitz / R:genommen
+A|c1|in Besitz nehmen|den Besitz verkaufen|Perfekt, verneint|S:die Erben / F:haben / A:das Haus / Z:noch / N:nicht / R:verkauft
+V|c1|Bezug nehmen|sich beziehen|Präsens, verneint|S:die Antwort / F:nimmt / Z:leider / N:nicht / T:Bezug / Q:auf meine Frage
+A|c1|Bezug nehmen|den Bezug wechseln|Perfekt, verneint|S:wir / F:haben / A:den Bezug des Sofas / Z:noch / N:nicht / R:gewechselt
+V|c1|Folge leisten|befolgen|Präteritum, verneint|S:die Bürger / F:leisteten / D:der Anordnung / N:nicht / T:Folge
+A|c1|Folge leisten|die Anordnung befolgen|Präteritum, verneint|S:die Bürger / F:befolgten / A:die Anordnung / Z:anfangs / N:nicht
+V|c1|Verzicht leisten|verzichten|Perfekt|S:der Kläger / F:hat / Z:schließlich / T:Verzicht / R:geleistet
+A|c1|Verzicht leisten|die Entschädigung fordern|Perfekt, verneint|S:der Kläger / F:hat / A:die Entschädigung / Z:bisher / N:nicht / R:gefordert
+V|c1|gute Dienste leisten|sehr nützlich sein|Perfekt|S:das Wörterbuch / F:hat / P:mir / Z:jahrelang / T:gute Dienste / R:geleistet
+A|c1|gute Dienste leisten|das Wörterbuch benutzen|Perfekt, verneint|S:ich / F:habe / A:das Wörterbuch / Z:lange / N:nicht / R:benutzt
+V|c1|einen Beitrag leisten|beitragen|mit „können“|S:jeder / F:kann / Z:hier / T:einen Beitrag / R:leisten
+A|c1|einen Beitrag leisten|den Beitrag bezahlen|Perfekt, verneint|S:er / F:hat / A:den Mitgliedsbeitrag / Z:noch / N:nicht / R:bezahlt
+V|c1|Widerstand leisten|sich wehren|Präteritum|S:die Bevölkerung / F:leistete / Z:lange / T:heftigen Widerstand
+A|c1|Widerstand leisten|den Widerstand brechen|Präteritum, verneint|S:die Regierung / F:brach / A:den Widerstand / Z:damals / N:nicht
+V|c1|ein Verbrechen begehen|kriminell handeln|Perfekt, verneint mit „kein“|S:der Mann / F:hat / Z:nachweislich / T:kein Verbrechen / R:begangen
+A|c1|ein Verbrechen begehen|das Verbrechen aufklären|Perfekt, verneint|S:die Polizei / F:hat / A:das Verbrechen / Z:bisher / N:nicht / R:aufgeklärt
+V|c1|einen Mord begehen|morden|Perfekt, verneint mit „kein“|S:der Angeklagte / F:hat / Z:nachweislich / T:keinen Mord / R:begangen
+A|c1|einen Mord begehen|den Mord aufklären|Perfekt, verneint|S:die Kommissarin / F:hat / A:den Mord / Z:bisher / N:nicht / R:aufgeklärt
+V|c1|eine Straftat begehen|kriminell handeln|Perfekt|S:der Jugendliche / F:hat / Z:damals / T:eine Straftat / R:begangen
+A|c1|eine Straftat begehen|die Straftat melden|Perfekt, verneint|S:der Zeuge / F:hat / A:die Straftat / Z:leider / N:nicht / R:gemeldet
+V|c1|einen Diebstahl begehen|stehlen|Perfekt|S:zwei Jugendliche / F:haben / Z:gestern / T:einen Diebstahl / R:begangen
+A|c1|einen Diebstahl begehen|den Diebstahl bemerken|Perfekt, verneint|S:der Verkäufer / F:hat / A:den Diebstahl / Z:zunächst / N:nicht / R:bemerkt
+V|c1|einen Fehler begehen|einen Fehler machen|Perfekt|S:der Minister / F:hat / Z:damals / T:einen schweren Fehler / R:begangen
+A|c1|einen Fehler begehen|den Fehler zugeben|Perfekt, verneint|S:der Minister / F:hat / A:den Fehler / Z:lange / N:nicht / R:zugegeben
+V|c1|in Verdacht geraten|verdächtigt werden|Perfekt, verneint|S:der Buchhalter / F:ist / Z:zunächst / N:nicht / T:in Verdacht / R:geraten
+A|c1|in Verdacht geraten|den Verdacht äußern|Perfekt, verneint|S:die Polizei / F:hat / A:den Verdacht / Z:zunächst / N:nicht / R:geäußert
+V|c1|in Verdacht kommen|verdächtigt werden|Präteritum, verneint|S:der Nachbar / F:kam / Z:zunächst / N:nicht / T:in Verdacht
+A|c1|in Verdacht kommen|den Nachbarn verdächtigen|Präteritum, verneint|S:die Polizei / F:verdächtigte / A:den Nachbarn / Z:zunächst / N:nicht
+V|c1|in Verdacht bringen|verdächtig machen|Präteritum, verneint|S:der Hinweis / F:brachte / A:den Buchhalter / Z:zunächst / N:nicht / T:in Verdacht
+A|c1|in Verdacht bringen|den Buchhalter befragen|Präteritum, verneint|S:die Polizei / F:befragte / A:den Buchhalter / Z:zunächst / N:nicht
+V|c1|unter Verdacht stehen|verdächtigt sein|Präsens, verneint|S:der Buchhalter / F:steht / N:nicht mehr / T:unter Verdacht
+A|c1|unter Verdacht stehen|den Verdacht ausräumen|Perfekt|S:der Buchhalter / F:hat / A:den Verdacht / Z:endlich / R:ausgeräumt
+V|c1|Verdacht schöpfen|misstrauisch werden|Präteritum, verneint mit „kein“|S:die Nachbarin / F:schöpfte / Z:zunächst / T:keinen Verdacht
+A|c1|Verdacht schöpfen|das Wasser schöpfen|Präteritum|S:die Bäuerin / F:schöpfte / A:das Wasser / Z:jeden Morgen / M:aus dem Brunnen
+V|c1|Verdacht hegen|misstrauisch sein|Präsens|S:die Polizei / F:hegt / Z:schon lange / T:einen Verdacht / Q:gegen ihn
+A|c1|Verdacht hegen|den Garten pflegen|Präsens, verneint|S:die Nachbarin / F:pflegt / A:ihren Garten / N:nicht mehr
+V|c1|Hoffnung hegen|hoffen|Präsens|S:die Familie / F:hegt / Z:noch immer / T:Hoffnung
+A|c1|Hoffnung hegen|die Hoffnung aufgeben|Präsens, verneint|S:die Familie / F:gibt / A:die Hoffnung / Z:noch / N:nicht / R:auf
+V|c1|Einfluss ausüben|beeinflussen|Präsens|S:Lobbygruppen / F:üben / Z:seit Jahren / T:starken Einfluss / Q:auf die Politik / R:aus
+A|c1|Einfluss ausüben|den Beruf ausüben|Präsens, verneint|S:sie / F:übt / A:ihren Beruf / N:nicht mehr / R:aus
+V|c1|Einfluss nehmen|beeinflussen|Präsens, verneint mit „kein“|S:die Eltern / F:nehmen / Z:bewusst / T:keinen Einfluss / Q:auf die Wahl
+A|c1|Einfluss nehmen|den Einfluss kennen|Präsens, verneint|S:die Eltern / F:kennen / A:ihren Einfluss / Z:oft / N:nicht
+V|c1|unter Einfluss stehen|beeinflusst sein|Präsens, verneint|S:der Sänger / F:steht / N:nicht mehr / T:unter dem Einfluss seines Managers
+A|c1|unter Einfluss stehen|den Manager wechseln|Perfekt, verneint|S:der Sänger / F:hat / A:seinen Manager / Z:noch / N:nicht / R:gewechselt
+V|c1|in Erstaunen versetzen|erstaunen|Präteritum|S:das Ergebnis / F:versetzte / A:alle Experten / Z:damals / T:in Erstaunen
+A|c1|in Erstaunen versetzen|das Ergebnis erwarten|Präteritum, verneint|S:die Experten / F:erwarteten / A:das Ergebnis / Z:damals / N:nicht
+V|c1|in Erstaunen geraten|staunen|Präteritum, verneint|S:die Experten / F:gerieten / Z:diesmal / N:nicht / T:in Erstaunen
+A|c1|in Erstaunen geraten|das Staunen verlernen|Perfekt, verneint mit „nie“|S:die Experten / F:haben / A:das Staunen / Z:nie / R:verlernt
+V|c1|eine Absage erteilen|absagen|Perfekt|S:die Firma / F:hat / D:dem Bewerber / Z:gestern / T:eine Absage / R:erteilt
+A|c1|eine Absage erteilen|die Absage lesen|Perfekt, verneint|S:der Bewerber / F:hat / A:die Absage / Z:noch / N:nicht / R:gelesen
+V|c1|in Kraft treten|gültig werden|Präsens, verneint|S:das Gesetz / F:tritt / Z:vor 2028 / N:nicht / T:in Kraft
+A|c1|in Kraft treten|das Gesetz beschließen|Perfekt, verneint|S:das Parlament / F:hat / A:das Gesetz / Z:noch / N:nicht / R:beschlossen
+V|c1|ein Geschäft abschließen|einen Handel vereinbaren|Perfekt, verneint mit „kein“|S:die Firmen / F:haben / Z:diesmal / T:kein Geschäft / R:abgeschlossen
+A|c1|ein Geschäft abschließen|das Geschäft zusperren|Perfekt, verneint|S:der Besitzer / F:hat / A:sein Geschäft / Z:gestern / N:nicht / R:zugesperrt
+V|c1|sich in Acht nehmen|aufpassen|mit „müssen“|S:ihr / F:müsst / P:euch / Z:heute / T:in Acht / R:nehmen
+A|c1|sich in Acht nehmen|die Acht schreiben|Präsens, verneint|S:der Kleine / F:schreibt / A:die Acht / Z:noch / N:nicht / M:richtig
+V|c1|ein Risiko eingehen|riskieren|Perfekt, verneint mit „kein“|S:der Investor / F:ist / Z:diesmal / T:kein Risiko / R:eingegangen
+A|c1|ein Risiko eingehen|das Risiko kennen|Präsens, verneint|S:der Investor / F:kennt / A:das Risiko / Z:noch / N:nicht
+V|c1|die Initiative ergreifen|aktiv werden|Perfekt|S:die Bürgermeisterin / F:hat / Z:schließlich / T:die Initiative / R:ergriffen
+A|c1|die Initiative ergreifen|die Initiative unterstützen|Perfekt, verneint|S:der Gemeinderat / F:hat / A:die Initiative / Z:bisher / N:nicht / R:unterstützt
+V|c1|Kritik üben|kritisieren|Präsens, verneint mit „kein“|S:die Verbände / F:üben / Z:diesmal / T:keine Kritik / Q:an der Reform
+A|c1|Kritik üben|die Rede üben|Präsens, verneint|S:der Minister / F:übt / A:seine Rede / Z:heute / N:nicht
+V|c1|einen Vertrag schließen|vertraglich vereinbaren|Perfekt|S:die Partner / F:haben / Z:gestern / T:einen Vertrag / R:geschlossen
+A|c1|einen Vertrag schließen|den Vertrag unterschreiben|Perfekt, verneint|S:die Partner / F:haben / A:den Vertrag / Z:noch / N:nicht / R:unterschrieben
+V|c1|in Schwung kommen|lebhaft werden|Präteritum, verneint|S:die Party / F:kam / Z:lange / N:nicht / T:in Schwung
+A|c1|in Schwung kommen|den Schwung verlieren|Präteritum, verneint|S:die Party / F:verlor / A:ihren Schwung / Z:lange / N:nicht
+V|c1|in Schwung bringen|beleben|Präsens|S:die neue Chefin / F:bringt / A:das Projekt / Z:endlich / T:in Schwung
+A|c1|in Schwung bringen|das Projekt leiten|Präsens, verneint|S:die neue Chefin / F:leitet / A:das Projekt / N:nicht mehr
+V|c1|Verhandlungen führen|verhandeln|Präsens, verneint mit „kein“|S:die Gewerkschaft / F:führt / Z:derzeit / T:keine Verhandlungen
+A|c1|Verhandlungen führen|die Verhandlungen abbrechen|Perfekt, verneint|S:die Gewerkschaft / F:hat / A:die Verhandlungen / Z:bisher / N:nicht / R:abgebrochen
+V|c1|in Streik treten|streiken|Präsens, verneint|S:die Lokführer / F:treten / Z:morgen / N:nicht / T:in Streik
+A|c1|in Streik treten|den Streik beenden|Perfekt, verneint|S:die Lokführer / F:haben / A:den Streik / Z:noch / N:nicht / R:beendet
+V|c1|in Kenntnis setzen|informieren|Perfekt, verneint|S:wir / F:haben / A:die Behörde / Z:noch / N:nicht / T:in Kenntnis / R:gesetzt
+A|c1|in Kenntnis setzen|die Behörde anrufen|Perfekt, verneint|S:wir / F:haben / A:die Behörde / Z:noch / N:nicht / R:angerufen
+V|c1|Auswirkungen haben|sich auswirken|Präsens, verneint mit „kein“|S:die Krise / F:hat / Z:bisher / T:keine Auswirkungen / Q:auf den Arbeitsmarkt
+A|c1|Auswirkungen haben|die Auswirkungen untersuchen|Perfekt, verneint|S:die Forscher / F:haben / A:die Auswirkungen / Z:noch / N:nicht / R:untersucht
+V|c1|einen Vorschlag unterbreiten|vorschlagen|Perfekt|S:die Beraterin / F:hat / D:dem Vorstand / Z:gestern / T:einen Vorschlag / R:unterbreitet
+A|c1|einen Vorschlag unterbreiten|den Vorschlag prüfen|Perfekt, verneint|S:der Vorstand / F:hat / A:den Vorschlag / Z:noch / N:nicht / R:geprüft
+V|c1|eine Erlaubnis erteilen|erlauben|Perfekt, verneint mit „kein“|S:die Behörde / F:hat / P:uns / Z:bisher / T:keine Erlaubnis / R:erteilt
+A|c1|eine Erlaubnis erteilen|die Erlaubnis verlängern|Perfekt, verneint|S:die Behörde / F:hat / A:die Erlaubnis / Z:bisher / N:nicht / R:verlängert
+V|c1|zur Sprache bringen|ansprechen|Perfekt, verneint|S:der Ausschuss / F:hat / A:das Problem / Z:bisher / N:nicht / T:zur Sprache / R:gebracht
+A|c1|zur Sprache bringen|die Sprache lernen|Perfekt, verneint|S:er / F:hat / A:die Sprache / Z:bisher / N:nicht / R:gelernt
+V|c1|zur Sprache kommen|besprochen werden|Präteritum, verneint|S:die Finanzierung / F:kam / Z:gestern / N:nicht / T:zur Sprache
+A|c1|zur Sprache kommen|die Finanzierung klären|Präteritum, verneint|S:die Sitzung / F:klärte / A:die Finanzierung / Z:gestern / N:nicht
+V|c1|Anstrengungen unternehmen|sich bemühen|Präsens|S:die Schule / F:unternimmt / Z:seit Jahren / T:große Anstrengungen
+A|c1|Anstrengungen unternehmen|die Reise unternehmen|Perfekt, verneint|S:die Schule / F:hat / A:die geplante Reise / Z:leider / N:nicht / R:unternommen
+V|c1|Bemühungen unternehmen|sich bemühen|Präsens|S:die Stadt / F:unternimmt / Z:derzeit / T:große Bemühungen
+A|c1|Bemühungen unternehmen|die Bemühungen sehen|Präsens, verneint|S:viele / F:sehen / A:die Bemühungen der Stadt / Z:leider / N:nicht
+V|c1|sich in Abhängigkeit befinden|abhängig sein|Präsens, verneint|S:die Firma / F:befindet / P:sich / N:nicht mehr / T:in Abhängigkeit
+A|c1|sich in Abhängigkeit befinden|die Abhängigkeit verringern|Perfekt, verneint|S:die Firma / F:hat / A:ihre Abhängigkeit / Z:bisher / N:nicht / R:verringert
+V|c1|eine Absprache treffen|vereinbaren|Perfekt, verneint mit „kein“|S:wir / F:haben / Z:bisher / T:keine Absprache / R:getroffen
+A|c1|eine Absprache treffen|den Vermieter treffen|Perfekt, verneint|S:wir / F:haben / A:den Vermieter / Z:bisher / N:nicht / R:getroffen
+V|c1|zur Anwendung kommen|angewendet werden|Präsens, verneint|S:die Methode / F:kommt / Z:dieses Jahr / N:nicht / T:zur Anwendung
+A|c1|zur Anwendung kommen|die Methode anwenden|Präsens, verneint|S:wir / F:wenden / A:die Methode / Z:dieses Jahr / N:nicht / R:an
+V|c1|sich im Bau befinden|gebaut werden|Präsens|S:die Brücke / F:befindet / P:sich / Z:noch / T:im Bau
+A|c1|sich im Bau befinden|den Bau stoppen|Perfekt, verneint|S:die Stadt / F:hat / A:den Bau / Z:bisher / N:nicht / R:gestoppt
+V|c1|Anspruch erheben|beanspruchen|Präsens, verneint mit „kein“|S:die Erben / F:erheben / Z:inzwischen / T:keinen Anspruch mehr / Q:auf das Haus
+A|c1|Anspruch erheben|die Hand erheben|Präteritum, verneint|S:der Schüler / F:hob / A:die Hand / Z:diesmal / N:nicht
+V|c1|einen guten Eindruck hinterlassen|positiv wirken|Perfekt|S:die Bewerberin / F:hat / Z:gestern / T:einen guten Eindruck / R:hinterlassen
+A|c1|einen guten Eindruck hinterlassen|die Nachricht hinterlassen|Perfekt, verneint|S:die Bewerberin / F:hat / A:ihre Nummer / Z:leider / N:nicht / R:hinterlassen
+V|c1|unter Beobachtung stehen|beobachtet werden|Präsens, verneint|S:das Gelände / F:steht / N:nicht mehr / T:unter Beobachtung
+A|c1|unter Beobachtung stehen|das Gelände beobachten|Präsens, verneint|S:die Kamera / F:beobachtet / A:das Gelände / N:nicht mehr
+V|c1|in Rechnung stellen|berechnen|Präsens, verneint|S:die Werkstatt / F:stellt / A:die Arbeitszeit / Z:diesmal / N:nicht / T:in Rechnung
+A|c1|in Rechnung stellen|die Rechnung bezahlen|Perfekt, verneint|S:der Kunde / F:hat / A:die Rechnung / Z:noch / N:nicht / R:bezahlt
+V|c1|einen Beschluss fassen|beschließen|Perfekt, verneint mit „kein“|S:der Gemeinderat / F:hat / Z:gestern / T:keinen Beschluss / R:gefasst
+A|c1|einen Beschluss fassen|den Beschluss umsetzen|Perfekt, verneint|S:die Stadt / F:hat / A:den Beschluss / Z:bisher / N:nicht / R:umgesetzt
+V|c1|einen Entschluss fassen|sich entschließen|Perfekt|S:sie / F:hat / Z:endlich / T:einen Entschluss / R:gefasst
+A|c1|einen Entschluss fassen|den Dieb fassen|Perfekt, verneint|S:die Polizei / F:hat / A:den Dieb / Z:bisher / N:nicht / R:gefasst
+V|c1|in Bewegung geraten|sich zu bewegen beginnen|Präteritum|S:der Hang / F:geriet / Z:plötzlich / T:in Bewegung
+A|c1|in Bewegung geraten|die Bewegung bemerken|Präteritum, verneint mit „niemand“|S:niemand / F:bemerkte / A:die Bewegung / Z:zunächst
+V|c1|in Bewegung kommen|vorankommen|Präteritum, verneint|S:die Verhandlungen / F:kamen / Z:lange / N:nicht / T:in Bewegung
+A|c1|in Bewegung kommen|die Bewegung gründen|Perfekt|S:die Studierenden / F:haben / A:die Bewegung / Z:damals / R:gegründet
+V|c1|unter Beweis stellen|zeigen, was man kann|Präteritum|S:sie / F:stellte / A:ihr Talent / Z:beim Wettbewerb / T:unter Beweis
+A|c1|unter Beweis stellen|den Beweis vorlegen|Präteritum, verneint|S:der Anwalt / F:legte / A:den Beweis / Z:damals / N:nicht / R:vor
+V|c1|den Beweis erbringen|beweisen|Präteritum mit „können“|S:die Forscherin / F:konnte / Z:schließlich / T:den Beweis / Q:für ihre These / R:erbringen
+A|c1|den Beweis erbringen|den Beweis verlieren|Perfekt, verneint|S:die Polizei / F:hat / A:den Beweis / Z:zum Glück / N:nicht / R:verloren
+V|c1|in Empfang nehmen|entgegennehmen|Präteritum, verneint|S:der Sieger / F:nahm / A:den Preis / Z:gestern / N:nicht / T:in Empfang
+A|c1|in Empfang nehmen|den Empfang organisieren|Perfekt, verneint|S:die Firma / F:hat / A:den Empfang / Z:dieses Jahr / N:nicht / R:organisiert
+V|c1|im Gegensatz stehen|widersprechen|Präsens, verneint|S:seine Worte / F:stehen / Z:hier / N:nicht / T:im Gegensatz / Q:zu seinen Taten
+A|c1|im Gegensatz stehen|den Gegensatz erkennen|Präsens, verneint|S:viele / F:erkennen / A:den Gegensatz / Z:leider / N:nicht
+V|c1|in Erwägung ziehen|erwägen|Präsens, verneint|S:wir / F:ziehen / A:einen Verkauf / Z:derzeit / N:nicht / T:in Erwägung
+A|c1|in Erwägung ziehen|den Verkauf planen|Präsens, verneint|S:wir / F:planen / A:den Verkauf / Z:derzeit / N:nicht
+V|c1|zur Folge haben|bewirken|Präsens|S:die Regelung / F:hat / Z:sicher / A:höhere Kosten / T:zur Folge
+A|c1|zur Folge haben|die Folge kennen|Präsens, verneint|S:viele / F:kennen / A:die Folgen / Z:noch / N:nicht
+V|c1|eine Forderung stellen|fordern|Präsens|S:die Gewerkschaft / F:stellt / D:der Regierung / Z:heute / T:klare Forderungen
+A|c1|eine Forderung stellen|die Forderung erfüllen|Präsens, verneint|S:die Regierung / F:erfüllt / A:die Forderung / Z:vorerst / N:nicht
+V|c1|in Gefahr bringen|gefährden|Perfekt, verneint mit „niemand“|S:der Fahrer / F:hat / Z:dabei / A:niemanden / T:in Gefahr / R:gebracht
+A|c1|in Gefahr bringen|die Gefahr erkennen|Perfekt|S:der Fahrer / F:hat / A:die Gefahr / Z:zu spät / R:erkannt
+V|c1|in Gefahr schweben|in Lebensgefahr sein|Präsens, verneint|S:der Bergsteiger / F:schwebt / N:nicht mehr / T:in Gefahr
+A|c1|in Gefahr schweben|den Bergsteiger retten|Perfekt|S:die Bergrettung / F:hat / A:den Bergsteiger / Z:rechtzeitig / R:gerettet
+V|c1|in Gefahr sein|gefährdet sein|Präsens, verneint|S:das Kind / F:ist / N:nicht mehr / T:in Gefahr
+A|c1|in Gefahr sein|das Kind beruhigen|Perfekt|S:die Ärztin / F:hat / A:das Kind / Z:sofort / R:beruhigt
+V|c1|sich in Gefahr befinden|in Gefahr sein|Präteritum|S:die Wanderer / F:befanden / P:sich / Z:plötzlich / T:in großer Gefahr
+A|c1|sich in Gefahr befinden|den Weg finden|Präteritum, verneint|S:die Wanderer / F:fanden / A:den Weg / Z:lange / N:nicht
+V|c1|Maßnahmen treffen|handeln|Perfekt|S:die Schule / F:hat / Z:sofort / T:Maßnahmen / Q:gegen Mobbing / R:getroffen
+A|c1|Maßnahmen treffen|die Maßnahmen erklären|Perfekt, verneint|S:die Schule / F:hat / A:die Maßnahmen / Z:bisher / N:nicht / R:erklärt
+V|c1|Maßnahmen ergreifen|handeln|Präsens|S:die Regierung / F:ergreift / Z:endlich / T:Maßnahmen / Q:gegen die Teuerung
+A|c1|Maßnahmen ergreifen|die Gelegenheit ergreifen|Präteritum, verneint|S:er / F:ergriff / A:die Gelegenheit / Z:damals / N:nicht
+V|c1|sich im Irrtum befinden|sich irren|Präsens|S:Sie / F:befinden / P:sich / Z:da / T:im Irrtum
+A|c1|sich im Irrtum befinden|den Irrtum zugeben|Präsens, verneint|S:er / F:gibt / A:seinen Irrtum / Z:ungern / R:zu
+V|c1|im Irrtum sein|sich irren|Präsens|S:du / F:bist / Z:da / T:im Irrtum
+A|c1|im Irrtum sein|den Irrtum aufklären|Perfekt, verneint|S:wir / F:haben / A:den Irrtum / Z:noch / N:nicht / R:aufgeklärt
+V|c1|eine Meinung vertreten|eine Meinung verteidigen|Präsens|S:sie / F:vertritt / Z:in dieser Frage / T:eine klare Meinung
+A|c1|eine Meinung vertreten|die Kollegin vertreten|Präsens, verneint|S:sie / F:vertritt / A:ihre Kollegin / Z:heute / N:nicht
+V|c1|einen Standpunkt vertreten|eine Meinung verteidigen|Präteritum|S:die Expertin / F:vertrat / Z:in der Debatte / T:einen klaren Standpunkt
+A|c1|einen Standpunkt vertreten|den Standpunkt verstehen|Präsens, verneint|S:ich / F:verstehe / A:ihren Standpunkt / Z:wirklich / N:nicht
+V|c1|der Ansicht sein|meinen|Präsens|S:die Expertin / F:ist / Z:heute / T:anderer Ansicht
+A|c1|der Ansicht sein|die Ansicht teilen|Präsens, verneint|S:ich / F:teile / A:diese Ansicht / Z:heute / N:nicht
+V|c1|einen Rat erteilen|raten|Perfekt|S:der Anwalt / F:hat / D:seiner Mandantin / Z:damals / T:einen klugen Rat / R:erteilt
+A|c1|einen Rat erteilen|den Rat ignorieren|Perfekt, verneint|S:die Mandantin / F:hat / A:den Rat / Z:damals / N:nicht / R:ignoriert
+V|c1|das Wort ergreifen|zu sprechen beginnen|Präteritum, verneint|S:die Direktorin / F:ergriff / Z:diesmal / N:nicht / T:das Wort
+A|c1|das Wort ergreifen|das Wort verstehen|Präteritum, verneint|S:die Schülerin / F:verstand / A:das Wort / Z:zunächst / N:nicht
+V|c1|im Stich lassen|allein lassen, nicht helfen|Perfekt, verneint|S:seine Freunde / F:haben / P:ihn / Z:nie / T:im Stich / R:gelassen
+A|c1|im Stich lassen|den Schlüssel stecken lassen|Perfekt, verneint|S:ich / F:habe / A:den Schlüssel / Z:diesmal / N:nicht / R:stecken lassen
+V|c1|Verbesserungen vornehmen|verbessern|Perfekt|S:die Firma / F:hat / Z:im letzten Jahr / T:zahlreiche Verbesserungen / R:vorgenommen
+A|c1|Verbesserungen vornehmen|die Verbesserungen testen|Perfekt, verneint|S:die Firma / F:hat / A:die Verbesserungen / Z:noch / N:nicht / R:getestet
+V|c1|eine Vereinbarung treffen|vereinbaren|Perfekt, verneint mit „kein“|S:die Partner / F:haben / Z:bisher / T:keine Vereinbarung / R:getroffen
+A|c1|eine Vereinbarung treffen|die Vereinbarung einhalten|Perfekt, verneint|S:die Partner / F:haben / A:die Vereinbarung / Z:leider / N:nicht / R:eingehalten
+V|c1|einen Versuch unternehmen|versuchen|mit „wollen“|S:die Forscher / F:wollen / Z:nächstes Jahr / T:einen neuen Versuch / R:unternehmen
+A|c1|einen Versuch unternehmen|den Versuch wiederholen|Perfekt, verneint|S:die Forscher / F:haben / A:den Versuch / Z:noch / N:nicht / R:wiederholt
+V|c1|Vorbereitungen treffen|vorbereiten|Präsens|S:das Team / F:trifft / Z:schon jetzt / T:Vorbereitungen / Q:für das Fest
+A|c1|Vorbereitungen treffen|die Gäste treffen|Präsens, verneint|S:das Team / F:trifft / A:die Gäste / Z:heute / N:nicht
+V|c1|Abstand nehmen von|verzichten|Perfekt|S:der Investor / F:hat / Z:schließlich / T:Abstand / Q:vom Projekt / R:genommen
+A|c1|Abstand nehmen von|den Abstand messen|Perfekt, verneint|S:der Polizist / F:hat / A:den Abstand / N:nicht / M:genau / R:gemessen
+V|c1|großen Anklang finden|gut ankommen|Präsens|S:das Konzept / F:findet / Z:überall / T:großen Anklang
+A|c1|großen Anklang finden|das Konzept finden|Präsens, verneint|S:ich / F:finde / A:das Konzept / Z:leider / N:nicht / M:überzeugend
+V|c1|großen Wert legen auf|sehr wichtig finden|Präsens|S:unser Betrieb / F:legt / Z:seit Jahren / T:großen Wert / Q:auf Nachhaltigkeit
+A|c1|großen Wert legen auf|den Wert schätzen|Präsens, verneint|S:viele / F:schätzen / A:den Wert der Arbeit / Z:leider / N:nicht
+V|c1|Gebrauch machen von|nutzen|Präsens, verneint|S:die Kunden / F:machen / M:kaum / T:Gebrauch / Q:von dem Angebot
+A|c1|Gebrauch machen von|das Angebot verlängern|Perfekt, verneint|S:der Händler / F:hat / A:das Angebot / Z:noch / N:nicht / R:verlängert
+V|c1|außer Acht lassen|ignorieren|mit „dürfen“, verneint|S:man / F:darf / A:diesen Aspekt / N:nicht / T:außer Acht / R:lassen
+A|c1|außer Acht lassen|den Aspekt betonen|Präsens, verneint|S:der Autor / F:betont / A:diesen Aspekt / N:nicht / M:genug
+V|c1|in Angriff nehmen|beginnen|Perfekt, verneint|S:die Stadt / F:hat / A:die Sanierung / Z:noch / N:nicht / T:in Angriff / R:genommen
+A|c1|in Angriff nehmen|den Angriff abwehren|Perfekt|S:die Verteidigung / F:hat / A:den Angriff / Z:geschickt / R:abgewehrt
+V|c1|in Auftrag geben|beauftragen|Perfekt, verneint|S:das Ministerium / F:hat / A:die Studie / Z:bisher / N:nicht / T:in Auftrag / R:gegeben
+A|c1|in Auftrag geben|die Studie lesen|Perfekt, verneint|S:der Minister / F:hat / A:die Studie / Z:bisher / N:nicht / R:gelesen
+V|c1|in Aussicht stellen|versprechen|Perfekt, verneint|S:die Firma / F:hat / A:eine Prämie / Z:diesmal / N:nicht / T:in Aussicht / R:gestellt
+A|c1|in Aussicht stellen|die Aussicht genießen|Präsens, verneint|S:wir / F:genießen / A:die Aussicht / Z:heute / N:nicht
+V|c1|in Erinnerung rufen|erinnern an|mit „möchten“|S:ich / F:möchte / P:Ihnen / A:die Frist / Z:kurz / T:in Erinnerung / R:rufen
+A|c1|in Erinnerung rufen|den Kunden anrufen|Perfekt, verneint|S:ich / F:habe / A:den Kunden / Z:noch / N:nicht / R:angerufen
+V|c1|in Kauf nehmen|akzeptieren|Präsens, verneint|S:wir / F:nehmen / A:die Verspätung / Z:diesmal / N:nicht / T:in Kauf
+A|c1|in Kauf nehmen|den Kauf bereuen|Präsens, verneint mit „keineswegs“|S:wir / F:bereuen / A:den Kauf / M:keineswegs
+V|c1|in Mitleidenschaft ziehen|beschädigen|Perfekt, verneint|S:das Hochwasser / F:hat / A:den Keller / Z:zum Glück / N:nicht / T:in Mitleidenschaft / R:gezogen
+A|c1|in Mitleidenschaft ziehen|den Keller ausräumen|Perfekt, verneint|S:wir / F:haben / A:den Keller / Z:noch / N:nicht / R:ausgeräumt
+V|c1|in Panik geraten|panisch werden|Präteritum, verneint|S:die Passagiere / F:gerieten / Z:zum Glück / N:nicht / T:in Panik
+A|c1|in Panik geraten|die Panik verstehen|Präsens, verneint|S:ich / F:verstehe / A:die Panik / Z:heute / N:nicht
+V|c1|in Schwierigkeiten geraten|Probleme bekommen|Präteritum, verneint|S:der Betrieb / F:geriet / Z:damals / N:nicht / T:in Schwierigkeiten
+A|c1|in Schwierigkeiten geraten|die Schwierigkeiten lösen|Präteritum, verneint|S:der Betrieb / F:löste / A:die Schwierigkeiten / N:nicht / M:allein
+V|c1|unter Kontrolle bringen|eindämmen|Perfekt, verneint|S:die Feuerwehr / F:hat / A:den Brand / Z:noch / N:nicht / T:unter Kontrolle / R:gebracht
+A|c1|unter Kontrolle bringen|die Kontrolle verlieren|Perfekt, verneint|S:der Fahrer / F:hat / A:die Kontrolle / Z:zum Glück / N:nicht / R:verloren
+V|c1|zu Rate ziehen|um Rat fragen|Perfekt, verneint|S:wir / F:haben / A:einen Anwalt / Z:bisher / N:nicht / T:zu Rate / R:gezogen
+A|c1|zu Rate ziehen|den Rat befolgen|Perfekt, verneint|S:wir / F:haben / A:den Rat des Anwalts / Z:bisher / N:nicht / R:befolgt
+V|c1|zum Abschluss bringen|abschließen|Perfekt, verneint|S:die Parteien / F:haben / A:die Verhandlungen / Z:noch / N:nicht / T:zum Abschluss / R:gebracht
+A|c1|zum Abschluss bringen|den Abschluss feiern|Perfekt, verneint|S:die Studierenden / F:haben / A:ihren Abschluss / Z:noch / N:nicht / R:gefeiert
+V|c1|zum Einsatz kommen|eingesetzt werden|Perfekt, verneint|S:die Drohnen / F:sind / Z:diesmal / N:nicht / T:zum Einsatz / R:gekommen
+A|c1|zum Einsatz kommen|den Einsatz loben|Perfekt, verneint|S:der Bürgermeister / F:hat / A:den Einsatz / Z:noch / N:nicht / R:gelobt
+V|c1|zum Stillstand kommen|stoppen|Perfekt, verneint|S:der Verkehr / F:ist / Z:diesmal / N:nicht / T:zum Stillstand / R:gekommen
+A|c1|zum Stillstand kommen|den Verkehr regeln|Präsens, verneint|S:die Ampel / F:regelt / A:den Verkehr / Z:heute / N:nicht
+V|c1|zum Vorschein kommen|sichtbar werden|Perfekt|S:alte Fresken / F:sind / Z:beim Umbau / T:zum Vorschein / R:gekommen
+A|c1|zum Vorschein kommen|die Fresken restaurieren|Perfekt, verneint|S:die Experten / F:haben / A:die Fresken / Z:noch / N:nicht / R:restauriert
+V|c1|zur Geltung kommen|gut wirken|Präsens, verneint|S:die Farben / F:kommen / Z:hier / N:nicht / T:zur Geltung
+A|c1|zur Geltung kommen|die Farben mischen|Perfekt, verneint|S:die Malerin / F:hat / A:die Farben / Z:noch / N:nicht / R:gemischt
+V|c1|zur Kenntnis nehmen|registrieren|Perfekt, verneint|S:die Kommission / F:hat / A:den Bericht / Z:bisher / N:nicht / T:zur Kenntnis / R:genommen
+A|c1|zur Kenntnis nehmen|den Bericht lesen|Perfekt, verneint|S:die Kommission / F:hat / A:den Bericht / Z:bisher / N:nicht / R:gelesen
+V|c1|zur Last fallen|belasten|mit „möchten“, verneint|S:ich / F:möchte / D:meinen Kindern / N:nicht / T:zur Last / R:fallen
+A|c1|zur Last fallen|die Last tragen|mit „müssen“, verneint|S:du / F:musst / A:die Last / N:nicht / M:allein / R:tragen
+V|c1|zur Rede stellen|konfrontieren|Perfekt, verneint|S:die Trainerin / F:hat / A:den Spieler / Z:noch / N:nicht / T:zur Rede / R:gestellt
+A|c1|zur Rede stellen|die Rede halten|Perfekt, verneint|S:die Trainerin / F:hat / A:die Rede / Z:noch / N:nicht / R:gehalten
+V|c1|zur Verantwortung ziehen|verantwortlich machen|Perfekt, verneint|S:man / F:hat / A:die Betreiber / Z:bisher / N:nicht / T:zur Verantwortung / R:gezogen
+A|c1|zur Verantwortung ziehen|die Verantwortung übernehmen|Perfekt, verneint|S:die Betreiber / F:haben / A:die Verantwortung / Z:bisher / N:nicht / R:übernommen
+V|c1|zustande kommen|entstehen, gelingen|Perfekt, verneint|S:der Vertrag / F:ist / Z:leider / N:nicht / T:zustande / R:gekommen
+A|c1|zustande kommen|den Zustand verbessern|Perfekt, verneint|S:die Stadt / F:hat / A:den Zustand der Straßen / Z:bisher / N:nicht / R:verbessert
+V|c1|ins Gewicht fallen|wichtig sein|Präsens, verneint|S:die Mehrkosten / F:fallen / M:kaum / T:ins Gewicht
+A|c1|ins Gewicht fallen|das Gewicht halten|Präsens, verneint|S:der Sportler / F:hält / A:sein Gewicht / Z:diesmal / N:nicht
+V|c1|eine Rolle spielen|wichtig sein|Präsens|S:der Preis / F:spielt / Z:bei der Entscheidung / T:eine wichtige Rolle
+A|c1|eine Rolle spielen|die Rolle lernen|Perfekt, verneint|S:der Schauspieler / F:hat / A:seine Rolle / Z:noch / N:nicht / R:gelernt
+V|c1|Erste Hilfe leisten|helfen|Perfekt, verneint|S:niemand / F:hat / D:dem Verletzten / Z:sofort / T:Erste Hilfe / R:geleistet
+A|c1|Erste Hilfe leisten|den Verbandskasten holen|Perfekt, verneint|S:der Kellner / F:hat / A:den Verbandskasten / Z:leider / N:nicht / R:geholt
+V|c1|einen Auftrag erhalten|beauftragt werden|Perfekt|S:unsere Firma / F:hat / Z:gestern / T:einen wichtigen Auftrag / R:erhalten
+A|c1|einen Auftrag erhalten|das Paket erhalten|Perfekt, verneint|S:unsere Firma / F:hat / A:das Paket / Z:gestern / N:nicht / R:erhalten
+V|c1|in Frage stellen|bezweifeln|Präsens, verneint mit „niemand“|S:niemand / F:stellt / A:die Ergebnisse / Z:ernsthaft / T:in Frage
+A|c1|in Frage stellen|die Frage beantworten|Perfekt, verneint|S:die Ministerin / F:hat / A:die Frage / Z:bisher / N:nicht / R:beantwortet
+`;
 /* ===================== LOGIK ===================== */
 const ROLE={S:'Subjekt',D:'Dativobjekt',A:'Akkusativobjekt',Z:'Zeitangabe',O:'Ortsangabe',M:'Angabe',N:'Verneinung',P:'Präpositionalobjekt',R:'Pronomen',W:'Fragewort'};
 const CAT={F:'Funktionsverbgefüge',N:'Nomen + Verb',R:'Richtung (wohin?)'};
@@ -875,7 +1392,63 @@ function parseD(txt){return txt.trim().split('\n').map((line,id)=>{const f=line.
   return {id,fvg:f[0],m:f[1],g:f[2]||f[1],parts};});}
 function parseV(txt){return txt.trim().split('\n').map((line,id)=>{const f=line.split('|');
   return {id,cue:f[0],fvg:f[1],sent:f[2],ok:f[3],wrong:f[4].split(','),note:f[5]||''};});}
-const DATA={b1:{W:parseW(W_B1.trim()+'\n'+W_B1_ADD.trim()),D:parseD(D_B1),V:parseV(V_B1)},c1:{W:parseW(W_C1.trim()+'\n'+W_C1_ADD.trim()),D:parseD(D_C1),V:parseV(V_C1)}};
+/* ===== Master: Verbgefüge oder Akkusativobjekt? ===== */
+function parseM(txt){return txt.trim().split('\n').filter(Boolean).map((line,id)=>{const f=line.split('|');
+  const blocks=f[5].split(' / ').map((x,k)=>{const i=x.indexOf(':');return {r:x.slice(0,i),t:x.slice(i+1),k};});
+  return {id,kind:f[0],lvl:f[1],fvg:f[2],mean:f[3],label:f[4],blocks};});}
+const isPrepT=t=>/^(in|ins|im|zu|zur|zum|unter|außer|auf|aufs|nach|ums)\b/i.test(t);
+function mVariants(it){
+  const B=it.blocks;const out=[];const seen=new Set();
+  const push=a=>{const key=a.map(x=>x.k).join(',');if(!seen.has(key)){seen.add(key);out.push(a);}};
+  const bases=[B.slice()];
+  if(B[0].r==='S'&&B[1].r==='F'){B.forEach(b=>{if(b.r==='Z'){bases.push([b,B[1],B[0],...B.slice(2).filter(x=>x!==b)]);}});}
+  const swapAZ=a=>{const res=[a];for(let i=0;i<a.length-1;i++){if((a[i].r==='A'&&a[i+1].r==='Z')||(a[i].r==='Z'&&a[i+1].r==='A')){const c=a.slice();[c[i],c[i+1]]=[c[i+1],c[i]];res.push(c);}}return res;};
+  const qPlace=a=>{const q=a.find(x=>x.r==='Q');if(!q)return [a];const rest=a.filter(x=>x!==q);const res=[];
+    const tI=rest.findIndex(x=>x.r==='T');const nI=rest.findIndex(x=>x.r==='N');
+    res.push(a);const pre=nI>=0?nI:tI;res.push([...rest.slice(0,pre),q,...rest.slice(pre)]);
+    if(!isPrepT(rest[tI].t))res.push([...rest.slice(0,tI+1),q,...rest.slice(tI+1)]);
+    res.push([...rest,q]);
+    return res;};
+  bases.forEach(b=>swapAZ(b).forEach(c=>qPlace(c).forEach(push)));
+  return out;}
+const mText=arr=>arr.map(x=>x.t).join(' ');
+const mNorm=s=>s.toLowerCase().replace(/ß/g,'ss').replace(/\s+/g,' ').trim();
+const mPunct=it=>it.blocks[0].r==='F'?'!':'.';
+function mPron(a){const w=a.toLowerCase().split(' ')[0];
+  if(/^(den|einen|meinen|deinen|seinen|ihren|unseren|euren|diesen|keinen)$/.test(w))return 'ihn';
+  if(/^(das|ein|mein|dein|sein|unser|euer|dieses|kein)$/.test(w))return 'es';
+  return 'sie';}
+function mAnalyze(it,seq){
+  const acc=mVariants(it).map(v=>mNorm(mText(v)));const s=mNorm(seq.map(x=>x.t).join(' '));
+  if(acc.includes(s))return {ok:true,canonical:acc[0]===s};
+  const errs=[];const idx=r=>seq.findIndex(x=>x.r===r);
+  const fI=idx('F'),first=it.blocks[0].r;
+  if(first==='F'){if(fI!==0)errs.push(`Beim Imperativ steht das Verb «${esc(seq[fI].t)}» ganz vorn.`);}
+  else if(fI!==1)errs.push(`Das konjugierte Verb «${esc(it.blocks.find(b=>b.r==='F').t)}» steht auf Position 2 – davor genau ein Satzglied.`);
+  const rs=seq.filter(x=>x.r==='R');
+  if(rs.length){const last=seq.filter(x=>x.r!=='Q');if(last[last.length-1].r!=='R')errs.push(`«${esc(rs[0].t)}» bildet das Satzende – danach kommt kein Satzglied mehr.`);}
+  const T=it.blocks.find(b=>b.r==='T'),A=it.blocks.find(b=>b.r==='A'),N=it.blocks.find(b=>b.r==='N');
+  if(it.kind==='V'){const tI=seq.indexOf(T);
+    const after=seq.slice(tI+1).filter(x=>x.r!=='R'&&x.r!=='Q');
+    if(after.length)errs.push(`«${esc(T.t)}» ist ein Verb-Teil – er rückt ganz nach hinten, direkt vor das Verb-Ende. Hinter ihm steht bei dir noch «${esc(after[0].t)}».`);
+    if(N&&seq[tI-1]!==N)errs.push(`Beim Verbgefüge verneint «${esc(N.t)}» das ganze Gefüge und steht direkt vor dem Verb-Teil: «${esc(N.t)} ${esc(T.t)}».`);}
+  else{if(A&&N){const aI=seq.indexOf(A),nI=seq.indexOf(N);
+      if(aI>nI)errs.push(`«${esc(A.t)}» ist hier ein normales Akkusativobjekt (Pronomen-Probe: «${mPron(A.t)}»). Es steht im Mittelfeld <b>vor</b> «${esc(N.t)}». Mit «${esc(N.t)} ${esc(A.t)}» würdest du nur das Objekt verneinen (… sondern ein anderes).`);}
+    if(A){const aI=seq.indexOf(A);const rI=seq.findIndex(x=>x.r==='R');if(rI>=0&&aI>rI)errs.push(`Das Akkusativobjekt «${esc(A.t)}» gehört ins Mittelfeld, nicht hinter das Verb-Ende.`);}}
+  if(!errs.length)errs.push('Die Reihenfolge stimmt noch nicht ganz – vergleiche mit der Lösung.');
+  return {ok:false,errs};}
+function mExplain(it,partner){
+  const T=it.blocks.find(b=>b.r==='T'),A=it.blocks.find(b=>b.r==='A'),N=it.blocks.find(b=>b.r==='N');
+  if(it.kind==='V')return `«${esc(T.t)}» gehört zum Verbgefüge <b>«${esc(it.fvg)}»</b> (≈ ${esc(it.mean)}). Es lässt sich nicht durch ein Pronomen ersetzen und man kann nicht sinnvoll danach fragen – also ist es ein <b>Verb-Teil</b>. Er steht ganz hinten${N?`, «${esc(N.t)}» direkt davor`:''}.`;
+  const p=mPron(A.t);const inf=it.mean.split(' ').pop();
+  let trap='';if(partner){const nouns=(partner.fvg.match(/[A-ZÄÖÜ][a-zäöüß]+/g)||[]).filter(n=>!/^(Ein|Eine|Einen|Den|Die|Das|Der)$/.test(n));
+    const shared=nouns.find(n=>A.t.includes(n));const pv=partner.fvg.split(' ').pop();
+    if(shared)trap=`Achtung, Falle! «${esc(shared)}» kennst du aus dem Verbgefüge «${esc(partner.fvg)}» – aber hier ist es ein ganz normales Objekt. `;
+    else if(it.mean.split(' ').pop()===pv)trap=`Achtung, Falle! Das Verb «${esc(pv)}» kennst du aus «${esc(partner.fvg)}» – hier hat es aber ein normales Objekt. `;}
+  return `${trap}«${esc(A.t)}» ist ein <b>Akkusativobjekt</b> von «${esc(inf)}»: Pronomen-Probe – «${esc(p)} ${esc(inf)}» ✓. Es ist ein eigenes Satzglied, ein „Gast“ im Mittelfeld${N?`, und «${esc(N.t)}» kommt <b>dahinter</b>`:''}.`;}
+
+const DATA_M={b1:null,c1:null};
+const DATA={b1:{W:parseW(W_B1.trim()+'\n'+W_B1_ADD.trim()),D:parseD(D_B1),V:parseV(V_B1),M:parseM(M_B1)},c1:{W:parseW(W_C1.trim()+'\n'+W_C1_ADD.trim()),D:parseD(D_C1),V:parseV(V_C1),M:parseM(M_C1)}};
 
 function norm(s){return (s||'').toLowerCase().replace(/ß/g,'ss')
   .replace(/[.,!?;:„“"«»‚‘'’()–—]/g,' ').replace(/-/g,' ')
@@ -1036,29 +1609,29 @@ const pkey=()=>ST.lvl+'-'+ST.mode;
 const solved=()=>(PROG[pkey()]=PROG[pkey()]||{});
 const ST={lvl:'b1',mode:'det',filter:'all',pos:{},step:0,blk:null,puz:null,det:null};
 
-function list(){const d=DATA[ST.lvl];if(ST.mode==='det')return d.D;if(ST.mode==='vw')return d.V;
+function list(){const d=DATA[ST.lvl];if(ST.mode==='ms'){if(!d.MS)d.MS=shuffled(d.M,ST.lvl==='c1'?77:41);return d.MS;}if(ST.mode==='det')return d.D;if(ST.mode==='vw')return d.V;
   return ST.filter==='all'?d.W:d.W.filter(x=>x.tag===ST.filter);}
 function curIndex(){const k=ST.lvl+ST.mode+ST.filter;return ST.pos[k]||0;}
-function setIndex(i){const k=ST.lvl+ST.mode+ST.filter;const n=list().length;ST.pos[k]=((i%n)+n)%n;ST.step=0;ST.blk=null;ST.puz=null;ST.det=null;ST.vw=null;render();}
+function setIndex(i){const k=ST.lvl+ST.mode+ST.filter;const n=list().length;ST.pos[k]=((i%n)+n)%n;ST.step=0;ST.blk=null;ST.puz=null;ST.det=null;ST.vw=null;ST.ms=null;render();}
 function rng(seed){return ()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
 function shuffled(arr,seed){const a=arr.slice(),r=rng(seed);for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
 /* ---- Render ---- */
 const $=id=>document.getElementById(id);
 function renderChips(){const c=$('chips');
-  if(ST.mode==='det'||ST.mode==='vw'){c.innerHTML='';c.style.display='none';return;}c.style.display='';
+  if(ST.mode==='det'||ST.mode==='vw'||ST.mode==='ms'){c.innerHTML='';c.style.display='none';return;}c.style.display='';
   const all=DATA[ST.lvl].W;const counts={};all.forEach(x=>counts[x.tag]=(counts[x.tag]||0)+1);
   c.innerHTML=Object.keys(TAGS).filter(t=>t==='all'||counts[t]).map(t=>`<button class="chip" data-f="${t}" aria-pressed="${ST.filter===t}">${TAGS[t]}<span>${t==='all'?all.length:counts[t]}</span></button>`).join('');
   c.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{ST.filter=b.dataset.f;setIndex(curIndex());});}
-function renderProg(){const n=list().length&&(ST.mode==='det'?DATA[ST.lvl].D.length:ST.mode==='vw'?DATA[ST.lvl].V.length:DATA[ST.lvl].W.length);const k=Object.keys(solved()).length;
-  const nm={det:'Detektiv',vw:'Verb-Wahl',werk:'Werkstatt',puz:'Puzzle'}[ST.mode];
+function renderProg(){const n=list().length;const k=Object.keys(solved()).length;
+  const nm={ms:'Master',det:'Detektiv',vw:'Verb-Wahl',werk:'Werkstatt',puz:'Puzzle'}[ST.mode];
   $('progtxt').innerHTML=`${nm} · ${ST.lvl==='b1'?'A2/B1':'B2/C1'}: <b>${k}</b> von ${n} geschafft`;
   $('progbar').style.width=(n?100*k/n:0)+'%';}
 function render(){
   document.querySelectorAll('[data-lvl]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lvl===ST.lvl));
   document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===ST.mode));
   renderChips();renderProg();
-  if(ST.mode==='det')renderDet();else if(ST.mode==='vw')renderVW();else renderWerk();}
+  if(ST.mode==='ms')renderMS();else if(ST.mode==='det')renderDet();else if(ST.mode==='vw')renderVW();else renderWerk();}
 
 function navHTML(){return `<span class="spacer"></span><button class="btn soft" id="prev" aria-label="Vorherige Aufgabe">←</button><button class="btn soft" id="rand">Zufall</button><button class="btn soft" id="next" aria-label="Nächste Aufgabe">→</button>`;}
 function bindNav(){$('prev').onclick=()=>setIndex(curIndex()-1);$('next').onclick=()=>setIndex(curIndex()+1);
@@ -1201,9 +1774,50 @@ function renderVW(){
   if(S.done)$('vnext').onclick=()=>setIndex(curIndex()+1);
   bindNav();}
 
+/* Master */
+function renderMS(){
+  const L=list();const i=curIndex();const it=L[i];const m=$('main');
+  const partner=DATA[ST.lvl].M.find(x=>x.fvg===it.fvg&&x.kind!==it.kind);
+  if(!ST.ms)ST.ms={phase:'class',pool:shuffled(it.blocks,it.id*19+(ST.lvl==='c1'?4:8)),placed:[],wrong:0,log:[],res:null};const M=ST.ms;
+  const focus=it.blocks.find(b=>b.r===(it.kind==='V'?'T':'A'));const done=!!solved()[it.id];
+  const tileCls=b=>b.r==='F'||b.r==='R'?'k-fin':'k-b';
+  const solHTML=v=>{const t=v.map((b,k)=>{let tx=esc(k===0?b.t[0].toUpperCase()+b.t.slice(1):b.t);
+      const c=b.r==='T'?'u-vt':(b.r==='F'||b.r==='R')?'u-fin':b.r==='A'?'u-A':b.r==='D'?'u-D':b.r==='N'?'u-N':b.r==='Q'?'u-P':'';return c?`<span class="${c}">${tx}</span>`:tx;}).join(' ');return t+mPunct(it);};
+  let body='';
+  if(M.phase==='class'){
+    body=`<p class="optq" style="margin-top:0"><b>Schritt 1:</b> Ist <b>«${esc(focus.t)}»</b> in diesem Satz ein Verb-Teil (Verbgefüge) oder ein normales Akkusativobjekt?</p>
+    <div class="blocks">${M.pool.map(b=>`<span class="blk" style="cursor:default${b===focus?';border-color:var(--sun);background:var(--gold-soft);font-weight:600':''}">${esc(b.t)}</span>`).join('')}</div>
+    <div class="opts" style="margin-top:12px"><button class="opt o-VT" data-c="V">Verb-Teil<small>gehört fest zum Verb – Verbgefüge</small></button><button class="opt o-A" data-c="A">Akkusativobjekt<small>eigenes Satzglied – Was? Wen?</small></button></div>`;}
+  else{
+    const tray=M.placed.length?M.placed.map((b,k)=>`<button class="tile ${tileCls(b)}" data-p="${k}"${M.phase==='done'?' disabled':''}>${esc(b.t)}</button>`).join(''):'<span class="ph">Tippe unten die Bausteine in der richtigen Reihenfolge an …</span>';
+    body=`<p class="optq" style="margin-top:0"><b>Schritt 2:</b> Bau den Satz${it.kind?'':''} – <b>${esc(it.label)}</b>. Achte darauf, wo «${esc(focus.t)}» und ${it.blocks.some(b=>b.r==='N')?'«'+esc(it.blocks.find(b=>b.r==='N').t)+'»':'die Verbformen'} stehen.</p>
+    <div class="tray" id="mplaced">${tray}</div>
+    ${M.phase==='build'?`<label class="ans">Bausteine</label><div class="tray pool" id="mpool">${M.pool.map((b,k)=>`<button class="tile ${tileCls(b)}" data-q="${k}">${esc(b.t)}</button>`).join('')||'<span class="ph">Alle Bausteine liegen im Satz – jetzt «Prüfen».</span>'}</div>`:''}`;}
+  const log=M.log.map(l=>`<div class="${l.ok?'ok':'bad'}">${l.ok?'✓ ':'✗ '}${l.t}</div>`).join('');
+  let fb='';
+  if(M.res&&M.phase==='build')fb=`<div class="fb err" style="display:block"><b class="h">Noch nicht ganz.</b><ul>${M.res.errs.slice(0,3).map(e=>`<li>${e}</li>`).join('')}</ul></div>`;
+  if(M.phase==='done')fb=`<div class="fb ok" style="display:block"><b class="h">${M.wrong?'Geschafft – im zweiten Anlauf.':'✓ Meisterhaft!'}</b><span class="sol">${solHTML(M.sol)}</span>${M.alt?`<div style="margin-top:6px;font-size:15px">Auch richtig: ${solHTML(M.alt)}</div>`:''}<div style="margin-top:8px">${mExplain(it,partner)}</div></div>`;
+  m.innerHTML=`<div class="meta"><span class="counter">Aufgabe ${i+1} / ${L.length}</span>${done?'<span class="badge done">✓ geschafft</span>':''}<span class="badge" style="background:var(--gold-soft);color:#8a6418">★ Master</span><span class="badge task">${esc(it.label)}</span></div>
+   ${body}<div class="dexp">${log}</div>${fb}
+   <div class="actions">${M.phase==='build'?'<button class="btn primary" id="mcheck">Prüfen</button><button class="btn" id="mreset">Neu legen</button><button class="btn" id="msolve">Lösung zeigen</button>':''}${M.phase==='done'?'<button class="btn primary" id="mnext">Nächste Aufgabe →</button>':''}${navHTML()}</div>`;
+  m.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const ok=b.dataset.c===it.kind;if(!ok)M.wrong++;
+    M.log.push({ok,t:(ok?'Richtig erkannt. ':'Leider nicht. ')+mExplain(it,partner)});M.phase='build';renderMS();});
+  if(M.phase==='build'){
+    m.querySelectorAll('#mpool .tile').forEach(b=>b.onclick=()=>{M.placed.push(M.pool.splice(+b.dataset.q,1)[0]);M.res=null;renderMS();});
+    m.querySelectorAll('#mplaced .tile').forEach(b=>b.onclick=()=>{M.pool.push(M.placed.splice(+b.dataset.p,1)[0]);M.res=null;renderMS();});
+    $('mreset').onclick=()=>{M.pool=[...M.pool,...M.placed];M.placed=[];M.res=null;renderMS();};
+    $('msolve').onclick=()=>{M.wrong++;M.sol=mVariants(it)[0];M.placed=M.sol.slice();M.pool=[];M.phase='done';M.log=[];renderMS();};
+    $('mcheck').onclick=()=>{if(M.pool.length){M.res={errs:['Leg zuerst alle Bausteine in den Satz.']};renderMS();return;}
+      const r=mAnalyze(it,M.placed);
+      if(r.ok){M.phase='done';M.sol=M.placed.slice();const vs=mVariants(it);M.alt=r.canonical?null:vs[0];M.log=[];if(!M.wrong){solved()[it.id]=1;saveProg();renderProg();}}
+      else{M.wrong++;M.res=r;}
+      renderMS();};}
+  if(M.phase==='done')$('mnext').onclick=()=>setIndex(curIndex()+1);
+  bindNav();}
+
 /* Steuerung */
-document.querySelectorAll('[data-lvl]').forEach(b=>b.onclick=()=>{ST.lvl=b.dataset.lvl;ST.filter='all';ST.step=0;ST.blk=null;ST.puz=null;ST.det=null;ST.vw=null;render();});
-document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{ST.mode=b.dataset.mode;ST.filter='all';ST.step=0;ST.blk=null;ST.puz=null;ST.det=null;ST.vw=null;render();});
+document.querySelectorAll('[data-lvl]').forEach(b=>b.onclick=()=>{ST.lvl=b.dataset.lvl;ST.filter='all';ST.step=0;ST.blk=null;ST.puz=null;ST.det=null;ST.vw=null;ST.ms=null;render();});
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{ST.mode=b.dataset.mode;ST.filter='all';ST.step=0;ST.blk=null;ST.puz=null;ST.det=null;ST.vw=null;ST.ms=null;render();});
 $('reset').onclick=function(){if(this.classList.contains('armed')){PROG[pkey()]={};saveProg();this.classList.remove('armed');this.textContent='Fortschritt dieser Übung zurücksetzen';render();}
   else{this.classList.add('armed');this.textContent='Wirklich zurücksetzen? Nochmal tippen';setTimeout(()=>{this.classList.remove('armed');this.textContent='Fortschritt dieser Übung zurücksetzen';},3500);}};
 render();

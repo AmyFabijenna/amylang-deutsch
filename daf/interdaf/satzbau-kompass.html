@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="/daf/interdaf/passwort.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Satzbau-Kompass</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap">
+<style>
+:root{
+  --sky1:#121a2e; --sky2:#223252; --sky3:#3d4d70;
+  --card:#fbfaf7; --card2:#f4f1ea; --line:#e6e2d8;
+  --ink:#151515; --muted:#5a5d68;
+  --sun:#f0c548; --gold:#b48528; --gold-soft:#fbf0d3;
+  --rose:#cf5679; --rose-soft:#fbe7ed;
+  --font:"Lexend","Segoe UI","Helvetica Neue",Arial,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;color:var(--ink);font-family:var(--font);font-size:18px;line-height:1.55;
+  background:
+    radial-gradient(120% 60% at 50% 115%, rgba(224,148,132,.30), transparent 60%),
+    radial-gradient(80% 50% at 85% 0%, rgba(120,140,190,.25), transparent 70%),
+    linear-gradient(180deg,var(--sky1) 0%,var(--sky2) 50%,var(--sky3) 100%) fixed;
+  background-color:var(--sky2)}
+#bubbles{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:16px}
+.panel{background:var(--card);border-radius:24px;box-shadow:0 14px 40px rgba(5,10,30,.30)}
+button{font:inherit;color:inherit}
+button:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+
+.head{padding:26px 28px 22px}
+.eyebrow{font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.head h1{font-weight:700;font-size:clamp(30px,4.4vw,44px);line-height:1.05;letter-spacing:-.02em;margin:6px 0 10px}
+.head h1 em{font-style:normal;color:#14707a}
+.head p{margin:0;color:var(--muted);max-width:72ch;font-size:17px}
+.chips{display:flex;gap:8px;margin-top:16px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
+.chip{flex:none;border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:7px 15px;font-size:15px;font-weight:500;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.chip span{opacity:.6;margin-left:4px;font-variant-numeric:tabular-nums}
+.stats{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin-top:14px;font-size:15px;color:var(--muted)}
+.stats b{color:var(--ink)}
+.bar{flex:1;min-width:140px;height:10px;border-radius:99px;background:#ece8dd;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--sun),var(--gold));border-radius:99px;transition:width .5s}
+.reset{border:1.5px solid var(--line);background:transparent;border-radius:99px;padding:5px 13px;font-size:14px;cursor:pointer}
+.reset.armed{background:var(--rose-soft);border-color:var(--rose)}
+
+main.panel{padding:24px 26px}
+@media (max-width:560px){main.panel,.head,.schema-panel{padding:18px 16px!important}}
+.meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.counter{font-size:14px;font-weight:500;color:var(--muted);margin-right:auto}
+.badge{font-size:13px;font-weight:600;padding:4px 11px;border-radius:99px;background:#e7ebf4;color:#3f5a85}
+.badge.done{background:var(--gold-soft);color:#8a6418}
+.ask{font-size:16.5px;color:var(--muted);margin:0 0 12px}
+.ask b{color:var(--ink)}
+.sent{display:flex;flex-wrap:wrap;gap:10px 8px;align-items:flex-end;font-size:clamp(21px,2.8vw,26px);line-height:1.3;margin:6px 0 4px}
+.ck{border:0;background:#fff;border-radius:12px;padding:6px 11px 7px;cursor:pointer;box-shadow:0 0 0 1.5px var(--line);display:inline-flex;flex-direction:column;align-items:center;gap:3px;transition:transform .15s}
+.ck:hover{box-shadow:0 0 0 1.5px #cfc8b6}
+.ck.sel{background:var(--sun);box-shadow:0 0 0 2px var(--gold);transform:translateY(-2px)}
+.ck.done{cursor:default;color:var(--fg);background:var(--bg);box-shadow:none}
+.ck small{font-size:11.5px;font-weight:600;letter-spacing:.02em;line-height:1.1;opacity:.95}
+.dot{font-size:26px;align-self:flex-end;padding-bottom:8px}
+.fb{margin-top:16px;padding:13px 16px;border-radius:16px;font-size:16.5px;display:none}
+.fb.ok{display:block;background:var(--gold-soft);border-left:5px solid var(--gold)}
+.fb.err{display:block;background:var(--rose-soft);border-left:5px solid var(--rose)}
+.fb.fin{display:block;background:#e7ebf4;border-left:5px solid #3f6aa0}
+.fb b.h{display:block;margin-bottom:3px}
+.fb .note{display:block;margin-top:5px;font-size:15px;color:var(--muted)}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;align-items:center}
+.btn{border-radius:12px;padding:9px 16px;font-size:16px;font-weight:600;cursor:pointer;border:1.5px solid var(--ink);background:#fff}
+.btn.primary{background:var(--ink);color:#fff}
+.btn.soft{border-color:var(--line)}
+.spacer{flex:1}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.shake{animation:shake .3s}
+
+/* Schema */
+.schema-panel{padding:20px 22px}
+.schema-panel h2{font-size:19px;font-weight:600;margin:0 0 4px}
+.schema-panel p.sub{margin:0 0 14px;font-size:15px;color:var(--muted)}
+.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(122px,1fr));gap:8px}
+.cat{border:0;border-radius:14px;padding:10px 10px 11px;cursor:pointer;background:var(--bg);color:var(--fg);text-align:left;min-height:74px;display:flex;flex-direction:column;gap:2px;transition:transform .12s,box-shadow .12s}
+.cat:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(0,0,0,.18)}
+.cat .n{font-size:12px;font-weight:600;opacity:.85}
+.cat .t{font-size:15px;font-weight:600;line-height:1.2}
+.cat .q{font-size:12px;opacity:.85;line-height:1.2}
+.tblwrap{overflow-x:auto;margin-top:16px;border-radius:14px;border:1px solid var(--line)}
+table{border-collapse:collapse;min-width:1100px;width:100%;font-size:14px}
+th{background:var(--bg);color:var(--fg);font-weight:600;padding:7px 6px;text-align:center;font-size:12px;line-height:1.2;vertical-align:bottom}
+td{padding:9px 6px;text-align:center;border-left:1px solid var(--line);font-size:15px;vertical-align:middle;min-width:58px}
+td:first-child{border-left:0}
+td.f{background:var(--tint);font-weight:500}
+details.help{margin-top:16px}
+details.help summary{cursor:pointer;font-weight:600;color:#3f5a85}
+.hg{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;margin-top:10px}
+.hg div{background:var(--card2);border-radius:14px;padding:11px 14px;font-size:15px}
+.hg b{display:block;margin-bottom:3px}
+@media (prefers-reduced-motion:no-preference){.fb{animation:in .3s ease-out both}@keyframes in{from{transform:translateY(5px);opacity:.3}to{transform:none;opacity:1}}}
+</style>
+</head>
+<body>
+<canvas id="bubbles" aria-hidden="true"></canvas>
+<div class="wrap">
+  <header class="panel head">
+    <div class="eyebrow">Deutsch · Wortstellung · Mittelfeld</div>
+    <h1>Satzbau-<em>Kompass</em></h1>
+    <p>Jeder deutsche Satz folgt einer inneren Ordnung. Hier bekommst du Sätze in ihrer neutralen Grundstellung – das Subjekt steht immer auf Position 1. Ordne jedes Satzglied der richtigen Spalte im Schema zu. Das markierte Satzglied ist dran; wenn dir zuerst ein anderes einfällt, tippe es einfach an.</p>
+    <div class="chips" id="chips"></div>
+    <div class="stats">
+      <span>richtig: <b id="sOk">0</b></span><span>daneben: <b id="sNo">0</b></span>
+      <span id="progtxt"></span><div class="bar"><i id="progbar"></i></div>
+      <button class="reset" id="reset">Fortschritt zurücksetzen</button>
+    </div>
+  </header>
+
+  <main class="panel" id="main" aria-live="polite"></main>
+
+  <section class="panel schema-panel">
+    <h2>Das Schema der Wortstellung</h2>
+    <p class="sub">Von links nach rechts: so ist die neutrale, unbetonte Reihenfolge. Tippe auf die Spalte, in die das markierte Satzglied gehört.</p>
+    <div class="cats" id="cats"></div>
+    <div class="tblwrap"><table id="tbl"></table></div>
+    <details class="help">
+      <summary>Merkhilfen zum Schema</summary>
+      <div class="hg">
+        <div><b>Definit oder indefinit?</b>Definit: bestimmter Begleiter – der, die, das, dem, den; mein, dein, ihr, unser … Indefinit: ein, eine, einen, einem, kein, Zahlen, viele – oder gar kein Artikel.</div>
+        <div><b>Pronomen zuerst</b>Kurze Wörter drängen nach vorn: Reflexivpronomen → Akkusativpronomen → Dativpronomen (Ich gebe <i>es ihm</i>.). Nomen mit Begleiter kommen danach.</div>
+        <div><b>Bekanntes vor Neuem</b>Definite Nomen (Bekanntes) stehen vor den Angaben, indefinite Nomen (Neues) erst danach, kurz vor dem Satzende.</div>
+        <div><b>Te – Ka – Mo – Lo</b>Die Angaben folgen dieser Reihenfolge: temporal (wann?) – kausal (warum?) – modal (wie?) – lokal (wo? wohin?). Dazwischen: „auch“ und „nicht“.</div>
+        <div><b>Verbgefährten</b>Teile, die fest zum Verb gehören: Präpositionalobjekte (warten <i>auf den Bus</i>) und feste Verbindungen (<i>Klavier</i> spielen, <i>eine Rolle</i> spielen, <i>zur Verfügung</i> stellen). Sie stehen ganz hinten, direkt vor Verb(teil) 2.</div>
+        <div><b>Die Satzklammer</b>Verb 1 (konjugiert) steht auf Position 2. Verb(teil) 2 – Partizip, Infinitiv oder abgetrennte Vorsilbe – schließt den Satz ab.</div>
+      </div>
+    </details>
+  </section>
+</div>
+
+<script>
+const RAW=`T|{Der Igel|S} {rollt|V1} {sich|RF} {aus Angst|KA} {blitzschnell|MO} {zusammen|V2}.
+T|{Unsere Katze|S} {hat|V1} {mir|PD} {heute Morgen|TE} {eine tote Maus|AI} {geschenkt|V2}.
+T|{Mein Hund|S} {holt|V1} {mir|PD} {die Zeitung|AD} {jeden Morgen|TE} {mit großer Begeisterung|MO}.
+T|{Delfine|S} {schlafen|V1} {nachts|TE} {nur mit einer Gehirnhälfte|MO}.
+T|{Eichhörnchen|S} {vergessen|V1} {jedes Jahr|TE} {viele ihrer Verstecke|AI:«viele» ist kein bestimmter Begleiter → indefinit}.
+T|{Die Kuh|S} {schaut|V1} {den Zug|AD} {jeden Tag|TE} {mit großem Interesse|MO} {an|V2}.
+T|{Unsere Katze|S} {hat|V1} {sich|RF} {gestern|TE} {heimlich|MO} {im Kleiderschrank|LO} {versteckt|V2}.
+T|{Der Papagei|S} {erzählt|V1} {den Gästen|DD} {beim Essen|TE:beim + Tätigkeit beantwortet «Wann?»} {peinliche Familiengeschichten|AI}.
+T|{Elefanten|S} {können|V1} {sich|RF} {noch nach Jahrzehnten|TE} {an alte Freunde|VG:sich erinnern an} {erinnern|V2}.
+T|{Mein Kater|S} {spielt|V1} {nachts|TE} {gern|MO} {mit meinen Socken|MO} {Fußball|VG:Fußball spielen}.
+T|{Der Hund|S} {hat|V1} {dem Postboten|DD} {die Pfote|AD} {heute|TE} {zum ersten Mal|TE} {gegeben|V2}.
+T|{Krähen|S} {merken|V1} {sich|RF} {jahrelang|TE:Wie lange?} {unfreundliche Gesichter|AI}.
+T|{Die Schnecke|S} {trägt|V1} {ihr Haus|AD} {seit ihrer Geburt|TE} {mit großer Würde|MO}.
+T|{Pinguinmännchen|S} {schenken|V1} {ihrer Partnerin|DD} {aus Liebe|KA} {einen besonders glatten Stein|AI}.
+T|{Der Fuchs|S} {hat|V1} {sich|RF} {in der Nacht|TE} {lautlos|MO} {im Garten|LO} {umgesehen|V2}.
+T|{Mein Hamster|S} {hat|V1} {seine Lieblingsnuss|AD} {vor Aufregung|KA} {verloren|V2}.
+T|{Ein Krake|S} {hat|V1} {drei Herzen und blaues Blut|AI}.
+T|{Die Ente|S} {watschelt|V1} {jeden Sonntag|TE} {mit ihren Küken|MO} {durch den Park|LO}.
+T|{Der Hund|S} {wartet|V1} {schon seit einer Stunde|TE} {an der Tür|LO} {auf sein Herrchen|VG:warten auf}.
+T|{Die Katze|S} {fürchtet|V1} {sich|RF} {seit Jahren|TE} {vor dem Staubsauger|VG:sich fürchten vor}.
+T|{Meine Katze|S} {interessiert|V1} {sich|RF} {leidenschaftlich|MO} {für Kartons|VG:sich interessieren für}.
+T|{Die Möwe|S} {hat|V1} {mir|PD} {mein Eis|AD} {gestern|TE} {am Strand|LO} {geklaut|V2}.
+T|{Der Kater|S} {schläft|V1} {tagsüber|TE} {zufrieden|MO} {auf der Heizung|LO}.
+T|{Die Eule|S} {jagt|V1} {nachts|TE} {völlig lautlos|MO}.
+T|{Der Hund|S} {hat|V1} {sich|RF} {genüsslich|MO} {im Schlamm|LO} {gewälzt|V2}.
+T|{Das Lama|S} {hat|V1} {meinen Onkel|AD} {aus Protest|KA} {im Zoo|LO} {angespuckt|V2}.
+T|{Die Ameisen|S} {tragen|V1} {gemeinsam|MO} {ein riesiges Blatt|AI}.
+T|{Der Kuckuck|S} {legt|V1} {seine Eier|AD} {heimlich|MO} {in fremde Nester|LO}.
+T|{Mein Kater|S} {hat|V1} {mir|PD} {heute Nacht|TE} {aus Liebe|KA} {eine Spinne|AI} {gebracht|V2}.
+T|{Die Zugvögel|S} {fliegen|V1} {im Herbst|TE} {in riesigen Schwärmen|MO} {nach Süden|LO}.
+T|{Der Igel|S} {hält|V1} {von November bis März|TE} {Winterschlaf|VG:Winterschlaf halten}.
+T|{Schmetterlinge|S} {schmecken|V1} {mit ihren Füßen|MO}.
+T|{Haie|S} {leben|V1} {schon seit über 400 Millionen Jahren|TE} {in den Meeren|LO}.
+T|{Ein Kamel|S} {kann|V1} {wochenlang|TE:Wie lange?} {ohne Wasser|MO} {in der Wüste|LO} {überleben|V2}.
+T|{Die Bienen|S} {sammeln|V1} {im Sommer|TE} {fleißig|MO} {eine riesige Menge Nektar|AI}.
+T|{Der Hund|S} {freut|V1} {sich|RF} {jeden Abend|TE} {auf seinen Spaziergang|VG:sich freuen auf}.
+N|{Der Herbst|S} {malt|V1} {den Wald|AD} {jedes Jahr|TE} {in den schönsten Farben|MO}.
+N|{Der Regen|S} {hat|V1} {gestern|TE} {den ganzen Tag|TE} {nicht|NI} {aufgehört|V2}.
+N|{Die Sonne|S} {geht|V1} {heute|TE} {um sieben Uhr|TE} {auf|V2}.
+N|{Ein alter Baum|S} {erzählt|V1} {uns|PD} {seine ganze Lebensgeschichte|AD} {mit seinen Jahresringen|MO}.
+N|{Die Berge|S} {haben|V1} {mir|PD} {im Urlaub|TE} {neue Kraft|AI} {geschenkt|V2}.
+N|{Die Blumen|S} {öffnen|V1} {sich|RF} {am Morgen|TE} {ganz langsam|MO}.
+N|{Der Mond|S} {beeinflusst|V1} {die Gezeiten|AD} {seit Milliarden Jahren|TE}.
+N|{Der Nebel|S} {hat|V1} {sich|RF} {gegen Mittag|TE} {langsam|MO} {aufgelöst|V2}.
+N|{Ein Gewitter|S} {hat|V1} {uns|PA} {gestern|TE} {auf dem Gipfel|LO} {überrascht|V2}.
+N|{Die Vögel|S} {singen|V1} {schon um vier Uhr morgens|TE} {aus voller Kehle|MO}.
+N|{Der Gletscher|S} {schmilzt|V1} {jedes Jahr|TE} {wegen der Erderwärmung|KA} {ein Stück weiter|MO:Wie stark? – Maßangaben zählen zu «modal»}.
+N|{Die Wellen|S} {haben|V1} {meine Sandburg|AD} {in wenigen Sekunden|TE} {zerstört|V2}.
+N|{Die Kinder|S} {haben|V1} {im Wald|LO} {einen riesigen Pilz|AI} {gefunden|V2}.
+N|{Der Schnee|S} {verwandelt|V1} {die Stadt|AD} {über Nacht|TE} {in ein Märchenland|VG:verwandeln in}.
+N|{Das Meer|S} {schenkt|V1} {uns|PD} {jeden Tag|TE} {am Strand|LO} {neue Muscheln|AI}.
+N|{Die Kirschbäume|S} {blühen|V1} {im April|TE} {in voller Pracht|MO}.
+N|{Die Sterne|S} {leuchten|V1} {in klaren Nächten|TE} {besonders hell|MO}.
+N|{Der Wanderer|S} {genießt|V1} {die Stille|AD} {am frühen Morgen|TE} {auf dem Berg|LO}.
+N|{Die Kinder|S} {bauen|V1} {im Winter|TE} {vor dem Haus|LO} {einen riesigen Schneemann|AI}.
+N|{Die Kinder|S} {fahren|V1} {im Winter|TE} {mit großer Freude|MO} {Schlitten|VG:Schlitten fahren}.
+N|{Bananen|S} {wachsen|V1} {nicht|NI} {auf Bäumen|LO}.
+F|{Meine Freundin|S} {hat|V1} {mir|PD} {heute|TE} {einen lustigen Zettel|AI} {geschrieben|V2}.
+F|{Ein guter Freund|S} {hört|V1} {dir|PD} {um drei Uhr nachts|TE} {geduldig|MO} {zu|V2}.
+F|{Wir|S} {haben|V1} {uns|RF} {vor dreißig Jahren|TE} {im Kindergarten|LO} {kennengelernt|V2}.
+F|{Mein bester Freund|S} {leiht|V1} {mir|PD} {seine Bücher|AD} {nur ungern|MO}.
+F|{Echte Freunde|S} {lassen|V1} {dich|PA} {in schweren Zeiten|TE} {nicht|NI} {im Stich|VG:im Stich lassen}.
+F|{Lena|S} {hat|V1} {ihrer Freundin|DD} {gestern|TE} {ein Geheimnis|AI} {verraten|V2}.
+F|{Mein Nachbar|S} {gießt|V1} {meine Blumen|AD} {im Urlaub|TE} {zuverlässig|MO}.
+F|{Wir|S} {treffen|V1} {uns|RF} {jeden Freitag|TE} {im Café an der Ecke|LO}.
+F|{Tom|S} {hat|V1} {seinem Freund|DD} {sein letztes Stück Kuchen|AD} {aus Mitleid|KA} {geschenkt|V2}.
+F|{Mein Freund|S} {hat|V1} {mich|PA} {zum Geburtstag|TE:Wann? – zu welchem Anlass} {mit einer Torte|MO} {überrascht|V2}.
+F|{Oma|S} {erzählt|V1} {uns|PD} {am Abend|TE} {gern|MO} {Geschichten aus ihrer Jugend|AI}.
+F|{Ich|S} {habe|V1} {meiner Freundin|DD} {gestern|TE} {nicht|NI} {Bescheid|VG:Bescheid sagen} {gesagt|V2}.
+F|{Meine Freunde|S} {haben|V1} {mir|PD} {beim Umzug|TE:beim + Tätigkeit beantwortet «Wann?»} {geholfen|V2}.
+F|{Ich|S} {leihe|V1} {es|PA} {dir|PD} {gern|MO}.
+F|{Meine Mutter|S} {hat|V1} {sie|PA} {mir|PD} {zum Geburtstag|TE:Wann? – zu welchem Anlass} {geschenkt|V2}.
+F|{Ich|S} {freue|V1} {mich|RF} {schon jetzt|TE} {auf die Sommerferien|VG:sich freuen auf}.
+F|{Wir|S} {denken|V1} {oft|TE:Wie oft? – Häufigkeit zählt zu «temporal»} {an unsere Reise nach Island|VG:denken an}.
+F|{Ich|S} {habe|V1} {meinem Freund|DD} {das Buch|AD} {auch|AU} {empfohlen|V2}.
+F|{Mein Bruder|S} {hat|V1} {seine Hausaufgaben|AD} {heute|TE} {auch|AU} {nicht|NI} {gemacht|V2}.
+F|{Mein Freund|S} {kocht|V1} {uns|PD} {am Wochenende|TE} {eine echte italienische Pasta|AI}.
+F|{Die Studentin|S} {schreibt|V1} {ihren Großeltern|DD} {jede Woche|TE} {einen langen Brief|AI}.
+F|{Die Großmutter|S} {strickt|V1} {ihrem Enkel|DD} {jedes Jahr|TE} {einen bunten Schal|AI}.
+F|{Mein kleiner Bruder|S} {hat|V1} {sich|RF} {vor Lachen|KA} {verschluckt|V2}.
+F|{Ein Freund|S} {hat|V1} {mir|PD} {einmal|TE:Wann? – einmal, irgendwann früher} {einen wunderbaren Satz|AI} {gesagt|V2}.
+F|{Mein Opa|S} {hat|V1} {mir|PD} {das Schachspielen|AD} {mit viel Geduld|MO} {beigebracht|V2}.
+F|{Mein Freund|S} {hat|V1} {in der Stadt|LO} {einem Straßenmusiker|DI} {zehn Euro|AI} {gegeben|V2}.
+F|{Wir|S} {schreiben|V1} {jedes Jahr|TE} {einer Brieffreundin in Japan|DI} {eine Weihnachtskarte|AI}.
+F|{Ich|S} {habe|V1} {meinen Platz|AD} {im Zug|LO} {einer alten Dame|DI} {angeboten|V2}.
+F|{Die beiden Freundinnen|S} {telefonieren|V1} {jeden Abend|TE} {stundenlang|TE:Wie lange?}.
+K|{Meine Oma|S} {liest|V1} {mir|PD} {jeden Abend|TE} {ein Märchen|AI} {vor|V2}.
+K|{Das Buch|S} {hat|V1} {mich|PA} {vom ersten Satz an|TE} {gefesselt|V2}.
+K|{Ich|S} {habe|V1} {den Roman|AD} {in einer einzigen Nacht|TE} {ausgelesen|V2}.
+K|{Bücher|S} {schenken|V1} {uns|PD} {in jedem Alter|TE} {neue Welten|AI}.
+K|{Die Bibliothekarin|S} {empfiehlt|V1} {den Kindern|DD} {jede Woche|TE} {spannende Bücher|AI}.
+K|{Mein Bruder|S} {liest|V1} {aus Neugier|KA} {heimlich|MO} {unter der Bettdecke|LO}.
+K|{Shakespeare|S} {hat|V1} {fast 40 Theaterstücke|AI} {geschrieben|V2}.
+K|{Die Schauspielerin|S} {hat|V1} {dem Publikum|DD} {nach der Vorstellung|TE} {Autogramme|AI} {gegeben|V2}.
+K|{Wir|S} {haben|V1} {uns|RF} {die Mona Lisa|AD:Was haben wir uns angesehen? – Akkusativ mit bestimmtem Artikel} {gestern|TE} {im Louvre|LO} {angesehen|V2}.
+K|{Das Orchester|S} {spielt|V1} {heute Abend|TE} {zum ersten Mal|TE} {im Stadtpark|LO}.
+K|{Gute Geschichten|S} {lassen|V1} {uns|PA} {nach Jahren|TE} {nicht|NI} {los|V2}.
+K|{Der Dichter|S} {hat|V1} {seiner Frau|DD} {jeden Morgen|TE} {ein kleines Gedicht|AI} {geschrieben|V2}.
+K|{Mein Vater|S} {spielt|V1} {seit seiner Kindheit|TE} {mit großer Leidenschaft|MO} {Klavier|VG:Klavier spielen}.
+K|{Die Kinder|S} {haben|V1} {vor Weihnachten|TE} {in der Schule|LO} {ein Theaterstück|AI} {aufgeführt|V2}.
+K|{Der Buchhändler|S} {reserviert|V1} {mir|PD} {die neuesten Krimis|AD} {jeden Monat|TE}.
+K|{Ich|S} {lese|V1} {das Buch|AD} {zum dritten Mal|TE} {wegen des überraschenden Endes|KA}.
+K|{Die Autorin|S} {signiert|V1} {ihren Lesern|DD} {die Bücher|AD} {nach der Lesung|TE} {geduldig|MO}.
+K|{Der Opa|S} {erklärt|V1} {seinem Enkel|DD} {die Sternbilder|AD} {am Abend|TE} {auf dem Balkon|LO}.
+K|{Der Junge|S} {hat|V1} {sich|RF} {beim Lesen|TE:beim + Tätigkeit beantwortet «Wann?»} {in der Geschichte|VG:sich verlieren in} {verloren|V2}.
+K|{Die Lehrerin|S} {liest|V1} {der Klasse|DD} {jeden Freitag|TE} {ein Kapitel|AI} {vor|V2}.
+K|{Das Buch|S} {hat|V1} {mir|PD} {in einer schweren Zeit|TE} {Trost|VG:Trost spenden} {gespendet|V2}.
+K|{Die Bibliothek|S} {leiht|V1} {ihren Lesern|DD} {seit kurzem|TE} {auch|AU} {Werkzeuge und Spiele|AI} {aus|V2}.
+K|{Gutenberg|S} {hat|V1} {den modernen Buchdruck|AD} {um 1450|TE} {in Mainz|LO} {erfunden|V2}.
+K|{Die Kinder|S} {haben|V1} {dem Clown|DD} {vor Begeisterung|KA} {eine Blume|AI} {geschenkt|V2}.
+K|{Der Clown|S} {hat|V1} {die Kinder|AD} {mit seinen Tricks|MO} {zum Lachen|VG:zum Lachen bringen} {gebracht|V2}.
+M|{Wir|S} {schauen|V1} {uns|RF} {am Samstag|TE} {zusammen|MO} {einen alten Film|AI} {an|V2}.
+M|{Mein Opa|S} {weint|V1} {bei jedem Liebesfilm|TE:Wann? – immer dann, wenn ein Liebesfilm läuft} {vor Rührung|KA}.
+M|{Die Band|S} {hat|V1} {ihren Fans|DD} {nach dem Konzert|TE} {noch drei Zugaben|AI} {geschenkt|V2}.
+M|{Der Regisseur|S} {hat|V1} {den Film|AD} {in nur zwei Wochen|TE} {in Island|LO} {gedreht|V2}.
+M|{Meine Schwester|S} {singt|V1} {morgens|TE} {laut|MO} {unter der Dusche|LO}.
+M|{Der Schauspieler|S} {hat|V1} {seinen Text|AD} {vor Aufregung|KA} {vergessen|V2}.
+M|{Musik|S} {spielt|V1} {seit meiner Kindheit|TE} {eine große Rolle|VG:eine Rolle spielen}.
+M|{Der Pianist|S} {hat|V1} {das ganze Stück|AD} {ohne Noten|MO} {gespielt|V2}.
+M|{Die Zuschauer|S} {haben|V1} {am Ende|TE} {begeistert|MO} {Beifall|VG:Beifall spenden} {gespendet|V2}.
+M|{Mein Sohn|S} {kann|V1} {die Dialoge aus seinem Lieblingsfilm|AD} {auswendig|MO} {mitsprechen|V2}.
+M|{Die Popcornmaschine|S} {hat|V1} {mitten im Film|TE:Wann? – mitten während des Films (eine Zeit, kein Ort)} {laut|MO} {geknallt|V2}.
+M|{Unser Nachbar|S} {spielt|V1} {jeden Abend|TE} {sehr laut|MO} {Trompete|VG:Trompete spielen}.
+A|{Wir|S} {sind|V1} {im Sommer|TE} {mit dem Zug|MO} {quer durch Europa|LO} {gefahren|V2}.
+A|{Der Bergsteiger|S} {hat|V1} {sich|RF} {gestern|TE} {in den Bergen|LO} {verlaufen|V2}.
+A|{Die Reisenden|S} {haben|V1} {sich|RF} {am Abend|TE} {am Lagerfeuer|LO} {Gruselgeschichten|AI} {erzählt|V2}.
+A|{Meine Tante|S} {ist|V1} {mit siebzig Jahren|TE:Wann? – in welchem Alter} {allein|MO} {durch Südamerika|LO} {gereist|V2}.
+A|{Der Kapitän|S} {hat|V1} {den Passagieren|DD} {während des Sturms|TE} {Mut|VG:Mut machen} {gemacht|V2}.
+A|{Ich|S} {habe|V1} {meinen Pass|AD} {kurz vor dem Abflug|TE} {am Flughafen|LO} {verloren|V2}.
+A|{Die Forscher|S} {haben|V1} {letztes Jahr|TE} {im Dschungel|LO} {eine neue Froschart|AI} {entdeckt|V2}.
+A|{Marco Polo|S} {hat|V1} {den Europäern|DD} {nach seiner Reise|TE} {von China|VG:erzählen von} {erzählt|V2}.
+A|{Wir|S} {haben|V1} {uns|RF} {aus Neugier|KA} {in Venedig|LO} {eine Gondel|AI} {gemietet|V2}.
+A|{Der Pilot|S} {begrüßt|V1} {die Passagiere|AD} {vor dem Start|TE} {mit einem Witz|MO}.
+A|{Die Wanderer|S} {haben|V1} {vor Freude|KA} {auf dem Gipfel|LO} {getanzt|V2}.
+A|{Mein Koffer|S} {ist|V1} {ohne mich|MO} {nach Mallorca|LO} {geflogen|V2}.
+A|{Die Wikinger|S} {sind|V1} {schon um das Jahr 1000|TE} {mit ihren Schiffen|MO} {bis nach Amerika|LO} {gesegelt|V2}.
+A|{Ein Tourist|S} {hat|V1} {mich|PA} {in Rom|LO} {nach dem Weg|VG:fragen nach} {gefragt|V2}.
+A|{Unser Navi|S} {hat|V1} {uns|PA} {gestern|TE} {in die Irre|VG:in die Irre führen} {geführt|V2}.
+A|{Die Abenteurerin|S} {hat|V1} {den ganzen Amazonas|AD} {in drei Monaten|TE} {mit einem Kanu|MO} {befahren|V2}.
+A|{Wir|S} {haben|V1} {die ganze Nacht|TE} {wegen des Schnarchens im Nachbarzelt|KA} {kein Auge|VG:feste Redewendung «kein Auge zutun» = nicht schlafen können} {zugetan|V2}.
+A|{Der Zug|S} {hält|V1} {wegen einer Kuhherde|KA} {mitten auf der Strecke|LO}.
+A|{Der Leuchtturmwärter|S} {hat|V1} {den Fischern|DD} {den Weg|AD} {jahrzehntelang|TE:Wie lange?} {gezeigt|V2}.
+A|{Der Clown|S} {hat|V1} {im Park|LO} {einem kleinen Mädchen|DI} {einen Luftballon|AI} {geschenkt|V2}.
+A|{Die Astronautin|S} {hat|V1} {die Erde|AD} {sechs Monate lang|TE} {von der Raumstation aus|LO} {beobachtet|V2}.
+A|{Der Junge|S} {träumt|V1} {jede Nacht|TE} {von einem eigenen Pferd|VG:träumen von}.
+A|{Die Tierärztin|S} {hat|V1} {gestern|TE} {einem verletzten Reh|DI} {geholfen|V2}.
+W|{Das menschliche Herz|S} {pumpt|V1} {jeden Tag|TE} {etwa 7000 Liter Blut|AI}.
+W|{Honig|S} {verdirbt|V1} {selbst nach Jahrhunderten|TE} {nicht|NI}.
+W|{Die Römer|S} {haben|V1} {schon vor 2000 Jahren|TE} {in vielen Städten|LO} {öffentliche Toiletten|AI} {gebaut|V2}.
+W|{Der Eiffelturm|S} {wächst|V1} {im Sommer|TE} {wegen der Hitze|KA} {um einige Zentimeter|MO:Um wie viel? – Maßangaben zählen zu «modal»}.
+W|{Die Ägypter|S} {haben|V1} {ihre Toten|AD} {vor Tausenden von Jahren|TE} {sorgfältig|MO} {einbalsamiert|V2}.
+W|{Das Gehirn|S} {verbraucht|V1} {rund zwanzig Prozent unserer Energie|AI}.
+W|{Kleine Kinder|S} {lernen|V1} {in den ersten Jahren|TE} {jeden Tag|TE} {mehrere neue Wörter|AI}.
+W|{Der Detektiv|S} {hat|V1} {den Fall|AD} {mit Hilfe seines Hundes|MO} {gelöst|V2}.
+W|{Die Turmuhr|S} {schlägt|V1} {seit 300 Jahren|TE} {zuverlässig|MO}.
+W|{Der Wissenschaftler|S} {erklärt|V1} {es|PA} {uns|PD} {mit einem einfachen Beispiel|MO}.
+W|{Der Kellner|S} {bringt|V1} {ihn|PA} {Ihnen|PD:höfliche Form im Dativ: Wem? – Ihnen} {sofort|TE}.
+W|{Wir|S} {haben|V1} {uns|RF} {auch|AU} {nicht|NI} {verlaufen|V2}.
+W|{Die Lehrerin|S} {hat|V1} {uns|PD} {heute|TE} {keine Hausaufgaben|AI} {gegeben|V2}.
+W|{Mein Vater|S} {hat|V1} {mir|PD} {beim Kochen|TE:beim + Tätigkeit beantwortet «Wann?»} {ein altes Familienrezept|AI} {verraten|V2}.
+W|{Die Stadt|S} {stellt|V1} {den Bürgern|DD} {im Sommer|TE} {kostenlose Fahrräder|AI} {zur Verfügung|VG:zur Verfügung stellen}.
+W|{Die Schüler|S} {haben|V1} {der Lehrerin|DD} {am letzten Schultag|TE} {ein Lied|AI} {gesungen|V2}.
+W|{Der Bäcker|S} {schenkt|V1} {den Kindern|DD} {jeden Samstag|TE} {ein Stück Kuchen|AI}.
+W|{Wir|S} {haben|V1} {beim Umgraben|TE:beim + Tätigkeit beantwortet «Wann?»} {im Garten|LO} {eine alte Münze|AI} {ausgegraben|V2}.
+W|{Mein Großvater|S} {hat|V1} {mir|PD} {seine alte Kamera|AD} {nach der Matura|TE} {geschenkt|V2}.
+T|{Der Igel|S} {frisst|V1} {nachts|TE} {auch|AU} {Schnecken|AI}.
+K|{Mein Opa|S} {liest|V1} {mit neunzig Jahren|TE:Wann? – in welchem Alter} {auch|AU} {Comics|AI}.
+T|{Delfine|S} {geben|V1} {sich|RF} {auch|AU} {eigene Namen|AI}.`;
+const CATS=[
+ ['S','Subjekt','Wer? Was?','#5f6470','#fff'],
+ ['V1','Verb 1','konjugiert, Pos. 2','#14707a','#fff'],
+ ['RF','Reflexiv­pronomen','sich, mich, uns …','#4e4378','#fff'],
+ ['PA','Pronomen im Akkusativ','ihn, sie, es …','#8a6418','#fff'],
+ ['PD','Pronomen im Dativ','ihm, ihr, mir …','#9c3f5a','#fff'],
+ ['DD','Nomen im Dativ definit','dem / der …','#b8506d','#fff'],
+ ['AD','Nomen im Akkusativ definit','den / die / das …','#a97c26','#fff'],
+ ['TE','temporal','Wann? Wie lange?','#3f6aa0','#fff'],
+ ['KA','kausal','Warum?','#7b5530','#fff'],
+ ['AU','auch','','#77798a','#fff'],
+ ['NI','nicht','','#22242c','#fff'],
+ ['MO','modal','Wie? Womit?','#9a5c45','#fff'],
+ ['LO','lokal','Wo? Wohin?','#2f4f7a','#fff'],
+ ['DI','Nomen im Dativ indefinit','einem / einer …','#e3a6b6','#3a1220'],
+ ['AI','Nomen im Akkusativ indefinit','einen / eine / ein …','#e2c58a','#3a2a08'],
+ ['VG','Verbgefährte','fest zum Verb','#76508c','#fff'],
+ ['V2','Verb(teil) 2','Partizip, Infinitiv …','#0e555c','#fff']];
+const CI={};CATS.forEach((c,i)=>CI[c[0]]=i);
+const NAME=c=>CATS[CI[c]][1].replace('­','');
+const THEMES={all:'Alle Themen',T:'Tiere',N:'Natur',F:'Freundschaft & Alltag',K:'Bücher & Kultur',M:'Film & Musik',A:'Abenteuer & Reisen',W:'Wissen & Kurioses'};
+const DATA=RAW.trim().split('\n').map((l,id)=>{const i=l.indexOf('|');const th=l.slice(0,i),s=l.slice(i+1);
+  const ch=[];const re=/\{([^}|]+)\|([A-Z0-9]+)(?::([^}]*))?\}/g;let m;while((m=re.exec(s)))ch.push({t:m[1],c:m[2],note:m[3]||''});
+  return {id,th,ch,end:s.trim().slice(-1)};});
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=id=>document.getElementById(id);
+function rng(seed){return ()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
+function shuffled(a,seed){a=a.slice();const r=rng(seed);for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+/* Erklärungen */
+const CATEX={
+ S:'Subjekt – wer oder was tut etwas? Es bestimmt die Form des Verbs und steht hier auf Position 1.',
+ V1:'Verb 1 – das konjugierte Verb. Im Aussagesatz steht es immer auf Position 2.',
+ RF:'Reflexivpronomen – es zeigt zurück auf das Subjekt (ich – mich/mir, wir – uns, er/sie – sich).',
+ PA:'Pronomen im Akkusativ (Was? Wen?). Kurze Pronomen stehen ganz vorn im Mittelfeld.',
+ PD:'Pronomen im Dativ (Wem?). Es steht direkt nach dem Akkusativpronomen.',
+ DD:'Nomen im Dativ (Wem?) mit bestimmtem Begleiter – dem, der, den, meinem, ihrer …',
+ AD:'Nomen im Akkusativ (Was? Wen?) mit bestimmtem Begleiter – den, die, das, mein, ihr …',
+ TE:'Temporale Angabe – Wann? Wie lange? Wie oft? Seit wann?',
+ KA:'Kausale Angabe – Warum? Aus welchem Grund? (wegen …, aus …, vor …)',
+ AU:'«auch» hat im Schema eine eigene Spalte – nach den kausalen Angaben.',
+ NI:'«nicht» hat eine eigene Spalte – es steht vor den modalen und lokalen Angaben und vor den Verbgefährten.',
+ MO:'Modale Angabe – Wie? Auf welche Art? Womit? Mit wem?',
+ LO:'Lokale Angabe – Wo? Wohin? Woher?',
+ DI:'Nomen im Dativ (Wem?) mit unbestimmtem oder ohne Begleiter – einem, einer …',
+ AI:'Nomen im Akkusativ (Was? Wen?) mit unbestimmtem oder ohne Begleiter – einen, eine, ein, kein, Zahlen, viele …',
+ VG:'Verbgefährte – gehört fest zum Verb: ein Präpositionalobjekt oder der feste Teil einer Verbindung. Er steht ganz hinten, direkt vor Verb(teil) 2.',
+ V2:'Verb(teil) 2 – Partizip, Infinitiv oder abgetrennte Vorsilbe. Damit schließt sich die Satzklammer.'};
+const NOUN={DD:['D',1],AD:['A',1],DI:['D',0],AI:['A',0]};
+const PRON=['RF','PA','PD'];
+const ANG={TE:'Wann? / Wie lange?',KA:'Warum?',MO:'Wie? / Womit?',LO:'Wo? / Wohin?'};
+const DEF=/^(der|die|das|dem|den|des|mein|meine|meinem|meinen|meiner|dein|deine|deinem|deinen|deiner|sein|seine|seinem|seinen|seiner|ihr|ihre|ihrem|ihren|ihrer|unser|unsere|unserem|unseren|unserer|euer|eure|eurem|euren|dieser|diese|diesem|diesen|dieses)$/i;
+function wrongMsg(ch,pick,S){const t=`«${esc(ch.t)}»`,c=ch.c,first=ch.t.split(' ')[0];
+  if(NOUN[c]&&NOUN[pick]){
+    if(NOUN[c][0]===NOUN[pick][0])return `Der Fall stimmt, aber schau auf den Begleiter: «${esc(first)}» ist ${NOUN[c][1]?'ein <b>bestimmter</b> Begleiter → definit':'<b>kein bestimmter</b> Begleiter → indefinit'}.`;
+    return `Frag nach dem Fall: ${t} antwortet auf <b>${NOUN[c][0]==='D'?'Wem?':'Was? oder Wen?'}</b> → ${NOUN[c][0]==='D'?'Dativ':'Akkusativ'}.`;}
+  if(PRON.includes(c)&&PRON.includes(pick)){
+    if(c==='RF')return `${t} zeigt zurück auf das Subjekt «${esc(S)}» – das ist ein <b>Reflexivpronomen</b>.`;
+    if(pick==='RF')return `${t} meint nicht das Subjekt selbst, sondern jemand anderen – also kein Reflexivpronomen.`;
+    return `Frag nach dem Fall: ${t} antwortet auf <b>${c==='PD'?'Wem?':'Was? oder Wen?'}</b> → ${c==='PD'?'Dativ':'Akkusativ'}.`;}
+  if(PRON.includes(c)&&NOUN[pick])return `${t} ist ein <b>Pronomen</b>, kein Nomen.`;
+  if(NOUN[c]&&PRON.includes(pick))return `${t} ist ein <b>Nomen</b> mit Begleiter, kein Pronomen.`;
+  if(ANG[c]&&ANG[pick])return `Frag genauer: ${t} antwortet auf <b>${ANG[c]}</b>, nicht auf ${ANG[pick]}.`;
+  if(c==='VG')return `${t} gehört fest zum Verb${ch.note?` (${esc(ch.note)})`:''}. Darum ist es ein <b>Verbgefährte</b>.`;
+  if(pick==='VG')return `${t} ist ein freies Satzglied, keine feste Verbindung mit dem Verb.`;
+  if(c==='V1')return `${t} ist konjugiert und passt zum Subjekt – das ist <b>Verb 1</b> auf Position 2.`;
+  if(c==='V2')return `${t} ist nicht konjugiert und steht am Satzende – das ist <b>Verb(teil) 2</b>.`;
+  if(c==='S')return `${t} ist das <b>Subjekt</b>: Wer oder was tut hier etwas?`;
+  if(NOUN[c])return `${t} ist ein Nomen mit Begleiter. Frag: <b>${NOUN[c][0]==='D'?'Wem?':'Was? / Wen?'}</b> – und schau, ob der Begleiter bestimmt ist.`;
+  if(ANG[c])return `${t} ist eine Angabe. Sie antwortet auf <b>${ANG[c]}</b>.`;
+  return `${t} gehört nicht in die Spalte «${NAME(pick)}».`;}
+
+/* Zustand */
+const LS='satzbau-kompass-v1';let PROG={};try{PROG=JSON.parse(localStorage.getItem(LS)||'{}')||{};}catch(e){}
+const save=()=>{try{localStorage.setItem(LS,JSON.stringify(PROG));}catch(e){}};
+const ST={th:'all',pos:{},cur:null,ok:0,no:0};
+function list(){const L=ST.th==='all'?shuffled(DATA,7):DATA.filter(d=>d.th===ST.th);return L;}
+function idx(){return ST.pos[ST.th]||0;}
+function go(i){const n=list().length;ST.pos[ST.th]=((i%n)+n)%n;ST.cur=null;render();}
+function fresh(it){return {as:it.ch.map(()=>null),sel:0,wrong:0,fb:null,shake:-1};}
+
+function renderChips(){const c=$('chips');const cnt={};DATA.forEach(d=>cnt[d.th]=(cnt[d.th]||0)+1);
+  c.innerHTML=Object.keys(THEMES).map(k=>`<button class="chip" data-t="${k}" aria-pressed="${ST.th===k}">${THEMES[k]}<span>${k==='all'?DATA.length:cnt[k]}</span></button>`).join('');
+  c.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{ST.th=b.dataset.t;ST.cur=null;render();});}
+function renderProg(){const k=Object.keys(PROG).length;$('progtxt').innerHTML=`geschafft: <b>${k}</b> von ${DATA.length} Sätzen`;$('progbar').style.width=(100*k/DATA.length)+'%';$('sOk').textContent=ST.ok;$('sNo').textContent=ST.no;}
+function renderCats(){$('cats').innerHTML=CATS.map((c,i)=>`<button class="cat" data-c="${c[0]}" style="--bg:${c[3]};--fg:${c[4]}"><span class="n">${i+1}</span><span class="t">${c[1]}</span>${c[2]?`<span class="q">${c[2]}</span>`:''}</button>`).join('');
+  $('cats').querySelectorAll('.cat').forEach(b=>b.onclick=()=>pick(b.dataset.c,b));}
+function renderTable(it,cur){
+  const head=CATS.map(c=>`<th style="--bg:${c[3]};--fg:${c[4]}">${c[1]}</th>`).join('');
+  const cells=CATS.map(c=>{const parts=it.ch.filter((x,i)=>cur.as[i]===c[0]).map(x=>esc(x.t));
+    return `<td class="${parts.length?'f':''}" style="--tint:${c[3]}22">${parts.join('<br>')}</td>`;}).join('');
+  $('tbl').innerHTML=`<thead><tr>${head}</tr></thead><tbody><tr>${cells}</tr></tbody>`;}
+function render(){renderChips();renderProg();
+  const L=list(),i=idx(),it=L[i];if(!ST.cur)ST.cur=fresh(it);const C=ST.cur;const m=$('main');
+  const all=C.as.every(Boolean);const done=!!PROG[it.id];
+  const sent=it.ch.map((x,k)=>{const a=C.as[k];
+    if(a){const c=CATS[CI[a]];return `<span class="ck done" style="--bg:${c[3]};--fg:${c[4]}">${esc(x.t)}<small>${c[1]}</small></span>`;}
+    return `<button class="ck${C.sel===k?' sel':''}${C.shake===k?' shake':''}" data-k="${k}">${esc(x.t)}<small>&nbsp;</small></button>`;}).join('')+`<span class="dot">${esc(it.end)}</span>`;
+  const cur=all?null:it.ch[C.sel];
+  m.innerHTML=`<div class="meta"><span class="counter">Satz ${i+1} / ${L.length}</span>${done?'<span class="badge done">✓ geschafft</span>':''}<span class="badge">${THEMES[it.th]}</span></div>
+   ${all?'':`<p class="ask">Wohin gehört <b>«${esc(cur.t)}»</b>? Wähle unten die Spalte im Schema.</p>`}
+   <div class="sent">${sent}</div>
+   ${C.fb?`<div class="fb ${C.fb.k}"><b class="h">${C.fb.h}</b>${C.fb.t}${C.fb.n?`<span class="note">${C.fb.n}</span>`:''}</div>`:''}
+   ${all?`<div class="fb fin"><b class="h">${C.wrong?`Satz fertig – mit ${C.wrong} ${C.wrong===1?'Fehlversuch':'Fehlversuchen'}.`:'✓ Fehlerfrei eingeordnet!'}</b>Schau dir den Satz unten im Schema an: Jedes Satzglied steht in seiner Spalte – von links nach rechts ergibt das genau die Wortstellung.</div>`:''}
+   <div class="actions">${all?'<button class="btn primary" id="next2">Nächster Satz →</button>':''}<button class="btn soft" id="again">Satz neu</button><span class="spacer"></span>
+   <button class="btn soft" id="prev">←</button><button class="btn soft" id="rand">Zufall</button><button class="btn soft" id="next">→</button></div>`;
+  C.shake=-1;
+  m.querySelectorAll('button.ck').forEach(b=>b.onclick=()=>{C.sel=+b.dataset.k;C.fb=null;render();});
+  $('prev').onclick=()=>go(i-1);$('next').onclick=()=>go(i+1);$('again').onclick=()=>{ST.cur=null;render();};
+  $('rand').onclick=()=>{const open=L.map((x,k)=>k).filter(k=>!PROG[L[k].id]);const pool=open.length?open:L.map((x,k)=>k);go(pool[Math.floor(Math.random()*pool.length)]);};
+  if(all)$('next2').onclick=()=>go(i+1);
+  renderTable(it,C);}
+function pick(code,btn){const L=list(),it=L[idx()],C=ST.cur;if(!C||C.as.every(Boolean))return;
+  const k=C.sel,ch=it.ch[k];
+  if(code===ch.c){C.as[k]=code;ST.ok++;C.fb={k:'ok',h:`✓ «${esc(ch.t)}» → ${esc(NAME(code))}`,t:CATEX[code],n:ch.note?esc(ch.note):''};
+    const nx=C.as.findIndex(a=>!a);C.sel=nx<0?null:nx;
+    if(nx<0&&!C.wrong){PROG[it.id]=1;save();}}
+  else{C.wrong++;ST.no++;C.shake=k;C.fb={k:'err',h:`«${esc(ch.t)}» gehört nicht zu «${esc(NAME(code))}».`,t:wrongMsg(ch,code,it.ch[0].t),n:''};
+    if(btn){btn.classList.remove('shake');void btn.offsetWidth;btn.classList.add('shake');}}
+  render();}
+$('reset').onclick=function(){if(this.classList.contains('armed')){PROG={};save();this.classList.remove('armed');this.textContent='Fortschritt zurücksetzen';render();}
+  else{this.classList.add('armed');this.textContent='Wirklich? Nochmal tippen';setTimeout(()=>{this.classList.remove('armed');this.textContent='Fortschritt zurücksetzen';},3500);}};
+renderCats();render();
+
+/* Bubbles */
+(function(){const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const cv=$('bubbles'),cx=cv.getContext('2d');let W,H;const B=[];
+function size(){W=cv.width=innerWidth*devicePixelRatio;H=cv.height=innerHeight*devicePixelRatio;}
+size();addEventListener('resize',size);
+const tint=['255,255,255','240,197,72','190,160,215','255,255,255'];
+for(let i=0;i<20;i++)B.push({x:Math.random(),y:Math.random(),r:8+Math.random()*46,s:.0001+Math.random()*.0003,d:Math.random()*6.28,c:tint[i%4]});
+function draw(){cx.clearRect(0,0,W,H);const dp=devicePixelRatio;
+  B.forEach(b=>{b.y-=b.s;b.d+=.004;if(b.y<-.1){b.y=1.1;b.x=Math.random();}
+    const x=(b.x+Math.sin(b.d)*.02)*W,y=b.y*H,r=b.r*dp;
+    const g=cx.createRadialGradient(x-r*.35,y-r*.35,r*.1,x,y,r);g.addColorStop(0,`rgba(${b.c},.13)`);g.addColorStop(1,`rgba(${b.c},.02)`);
+    cx.beginPath();cx.arc(x,y,r,0,7);cx.fillStyle=g;cx.fill();cx.lineWidth=1*dp;cx.strokeStyle=`rgba(${b.c},.3)`;cx.stroke();
+    cx.beginPath();cx.arc(x-r*.4,y-r*.4,r*.13,0,7);cx.fillStyle='rgba(255,255,255,.3)';cx.fill();});}
+if(reduce)draw();else(function loop(){draw();requestAnimationFrame(loop);})();})();
+</script>
+</body>
+</html>
