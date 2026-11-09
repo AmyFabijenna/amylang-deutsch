@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="/daf/interdaf/passwort.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verbgefüge-Werkstatt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap">
+<style>
+:root{
+  --sky1:#121a2e; --sky2:#223252; --sky3:#3d4d70;
+  --card:#fbfaf7; --card2:#f4f1ea; --line:#e6e2d8;
+  --ink:#151515; --muted:#5a5d68;
+  --verb:#14707a; --verb-soft:#e2f0f0;
+  --vt:#76508c; --vt-soft:#efe7f3;
+  --akk:#a87a1f; --akk-soft:#fbf0d3;
+  --dat:#c04d6f; --dat-soft:#fbe7ed;
+  --ang:#4a5a80; --ang-soft:#e7ebf4;
+  --sun:#f0c548; --gold:#b48528; --gold-soft:#fbf0d3;
+  --rose:#cf5679; --rose-soft:#fbe7ed;
+  --font:"Lexend","Segoe UI","Helvetica Neue",Arial,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;color:var(--ink);font-family:var(--font);font-size:18px;line-height:1.55;
+  background:
+    radial-gradient(120% 60% at 50% 115%, rgba(224,148,132,.30), transparent 60%),
+    radial-gradient(80% 50% at 85% 0%, rgba(120,140,190,.25), transparent 70%),
+    linear-gradient(180deg,var(--sky1) 0%,var(--sky2) 50%,var(--sky3) 100%) fixed;
+  background-color:var(--sky2)}
+#bubbles{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.panel{background:var(--card);border-radius:24px;box-shadow:0 14px 40px rgba(5,10,30,.30)}
+button{font:inherit;color:inherit}
+button:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+
+/* Kopf */
+.head{padding:26px 28px 22px;margin-bottom:16px}
+.eyebrow{font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.head h1{font-weight:700;font-size:clamp(30px,4.4vw,44px);line-height:1.05;letter-spacing:-.02em;margin:6px 0 10px}
+.head h1 em{font-style:normal;color:var(--vt)}
+.head p.sub{margin:0;color:var(--muted);max-width:68ch;font-size:17px}
+.controls{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center;margin-top:18px}
+.seg{display:inline-flex;background:var(--card2);border-radius:99px;padding:4px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;border-radius:99px;padding:8px 16px;font-size:15px;font-weight:500;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.seg.modes button[aria-pressed="true"]{background:var(--vt);color:#fff}
+.intro{margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+.intro summary{cursor:pointer;font-weight:600;font-size:16px;color:var(--vt)}
+.intro .ib{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:12px}
+.intro .ib div{background:var(--card2);border-radius:16px;padding:14px 16px;font-size:16px}
+.intro .ib b{display:block;margin-bottom:4px}
+
+.chips{display:flex;gap:8px;margin:0 0 14px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
+.chip{flex:none;border:1.5px solid rgba(255,255,255,.35);background:rgba(255,255,255,.08);color:#fff;border-radius:99px;padding:7px 15px;font-size:15px;font-weight:500;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--card);color:var(--ink);border-color:var(--card)}
+.chip span{opacity:.65;margin-left:4px;font-variant-numeric:tabular-nums}
+
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 370px;gap:18px;align-items:start}
+@media (max-width:960px){.grid{grid-template-columns:minmax(0,1fr)}}
+main.panel{padding:24px 26px}
+@media (max-width:560px){main.panel{padding:18px 16px}.head{padding:20px 18px}.seg button{padding:7px 11px;font-size:14px}.btn{padding:8px 12px;font-size:15px}.actions .spacer{flex-basis:100%;height:0}}
+.meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px}
+.counter{font-size:14px;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums;margin-right:auto}
+.badge{font-size:13px;font-weight:600;padding:4px 11px;border-radius:99px;background:var(--vt-soft);color:var(--vt)}
+.badge.task{background:var(--verb-soft);color:var(--verb)}
+.badge.done{background:var(--gold-soft);color:#8a6418}
+
+/* Verbgefüge-Kasten */
+.fvg{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline;background:var(--vt-soft);border-radius:18px;padding:14px 18px;margin-bottom:14px;cursor:pointer;border:0;width:100%;text-align:left}
+.fvg .lab{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--vt);width:100%}
+.fvg .inf{font-size:clamp(22px,3vw,27px);font-weight:600;color:var(--vt)}
+.fvg .ers{font-size:16px;color:var(--muted)}
+.blabel{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:4px 0 8px}
+.blocks{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.blk{border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:7px 13px;font-size:18px;cursor:pointer}
+.blk:hover{border-color:#cfc8b6}
+.blk.on{border-color:var(--ink)}
+.binfo{font-size:15.5px;background:var(--card2);border-radius:12px;padding:10px 14px;margin:6px 0 10px;display:none}
+.binfo.show{display:block}
+.prefix{font-size:20px;margin:14px 0 6px;color:var(--ink)}
+.prefix b{font-weight:600}
+label.ans{display:block;font-size:14px;font-weight:600;margin:14px 0 6px;color:var(--muted)}
+textarea{width:100%;min-height:84px;resize:vertical;font-family:var(--font);font-size:19px;line-height:1.5;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px}
+
+/* Puzzle */
+.tray{display:flex;flex-wrap:wrap;gap:8px;min-height:58px;background:#fff;border:1.5px dashed #cfc8b6;border-radius:14px;padding:10px;margin-top:6px;align-items:center}
+.tray.pool{background:var(--card2);border-style:solid;border-color:var(--line)}
+.tray .ph{color:var(--muted);font-size:15px;padding:0 6px}
+.tile{border:0;border-radius:11px;padding:8px 13px;font-size:18px;cursor:pointer;background:#fff;box-shadow:0 1px 0 rgba(0,0,0,.08),0 0 0 1.5px var(--line)}
+.tray:not(.pool) .tile{background:var(--card2)}
+.tile.k-fin,.tile.k-rk{color:var(--verb);font-weight:600}
+.tile.k-vt{color:var(--vt);font-weight:600}
+
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;align-items:center}
+.btn{border-radius:12px;padding:9px 16px;font-size:16px;font-weight:600;cursor:pointer;border:1.5px solid var(--ink);background:#fff}
+.btn.primary{background:var(--ink);color:#fff}
+.btn.soft{border-color:var(--line)}
+.btn:disabled{opacity:.4;cursor:default}
+.spacer{flex:1}
+
+.fb{margin-top:14px;padding:14px 16px;border-radius:16px;display:none;font-size:16.5px}
+.fb.ok{display:block;background:var(--gold-soft);border-left:5px solid var(--gold)}
+.fb.err{display:block;background:var(--rose-soft);border-left:5px solid var(--rose)}
+.fb b.h{display:block;font-size:17.5px;margin-bottom:4px}
+.fb ul{margin:6px 0 0;padding-left:20px}
+.fb li{margin:4px 0}
+.fb .sol{display:block;margin-top:8px;font-size:19px;background:#fff;border-radius:10px;padding:8px 12px}
+
+/* farbige Satzteile */
+.u-fin,.u-rk{color:var(--verb);font-weight:600}
+.u-vt{color:var(--vt);font-weight:600;background:var(--vt-soft);border-radius:5px;padding:0 .15em}
+.u-A{text-decoration:underline;text-decoration-color:var(--akk);text-decoration-thickness:3px;text-underline-offset:5px}
+.u-D{text-decoration:underline;text-decoration-color:var(--dat);text-decoration-thickness:3px;text-underline-offset:5px}
+.u-N{font-weight:600;color:var(--dat)}
+.u-P{text-decoration:underline dotted;text-decoration-color:var(--ang);text-decoration-thickness:2px;text-underline-offset:5px}
+
+/* Schritte */
+.steps{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:12px;counter-reset:st}
+.steps li{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;padding-top:12px;border-top:1px dashed var(--line);counter-increment:st}
+.steps li::before{content:counter(st);width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--vt);color:#fff;font-size:15px;font-weight:600}
+.steps h3{margin:0 0 3px;font-size:16.5px;font-weight:600}
+.steps p{margin:3px 0;font-size:16px}
+.steps .frame{font-size:19px;background:#fff;border-radius:10px;padding:6px 12px;display:inline-block;margin:4px 0}
+.steps .gap{color:var(--muted);letter-spacing:.1em}
+.mfline{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0}
+.mfline span.r{background:#fff;border-radius:10px;padding:4px 10px;font-size:16px}
+.mfline span.r small{display:block;font-size:11.5px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.mfline .arr{color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.steps li,.fb{animation:in .3s ease-out both}@keyframes in{from{transform:translateY(5px);opacity:.3}to{transform:none;opacity:1}}}
+
+/* Detektiv */
+.dsent{font-size:clamp(21px,2.8vw,25px);line-height:2.1;margin:6px 0 16px}
+.seg-b{border:0;background:transparent;padding:1px 4px;border-radius:7px;cursor:pointer;font-size:inherit;line-height:1.4;border-bottom:3px solid #cfc8b6}
+.seg-b.active{background:var(--sun);border-bottom-color:var(--gold)}
+.seg-b.c-VT{background:var(--vt-soft);border-bottom-color:var(--vt);color:var(--vt);font-weight:600}
+.seg-b.c-A{background:var(--akk-soft);border-bottom-color:var(--akk)}
+.seg-b.c-D{background:var(--dat-soft);border-bottom-color:var(--dat)}
+.seg-b.c-W{background:var(--ang-soft);border-bottom-color:var(--ang)}
+.seg-b .mark{font-size:13px;margin-left:3px;vertical-align:super}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:6px}
+.opt{border:1.5px solid var(--line);background:#fff;border-radius:14px;padding:11px 12px;cursor:pointer;font-size:16.5px;font-weight:600;text-align:left}
+.opt small{display:block;font-weight:400;font-size:13.5px;color:var(--muted)}
+.opt.o-VT{border-left:6px solid var(--vt)}.opt.o-A{border-left:6px solid var(--akk)}.opt.o-D{border-left:6px solid var(--dat)}.opt.o-W{border-left:6px solid var(--ang)}
+.optq{font-size:16px;margin:0 0 8px;color:var(--muted)}
+.optq b{color:var(--ink)}
+.dexp{display:grid;gap:8px;margin-top:12px}
+.dexp div{padding:10px 14px;border-radius:14px;font-size:16px}
+.dexp .ok{background:var(--gold-soft)}
+.dexp .bad{background:var(--rose-soft)}
+
+/* Seitenleiste */
+aside{display:grid;gap:14px}
+aside .panel{padding:20px 22px}
+aside h2{font-size:19px;font-weight:600;margin:0 0 10px}
+aside .probe{display:grid;gap:10px;font-size:15.5px}
+aside .probe div{background:var(--card2);border-radius:14px;padding:10px 12px}
+aside .probe div>b:first-child{display:block;font-size:15.5px}
+aside .probe .y{color:var(--verb);font-weight:600}
+aside .probe .n{color:var(--dat);font-weight:600}
+table{border-collapse:collapse;width:100%;font-size:15px}
+td{border-bottom:1px solid var(--line);padding:7px 4px;vertical-align:top}
+td:first-child{font-weight:600;white-space:nowrap;padding-right:10px;color:var(--muted);font-size:13.5px}
+.legend{display:grid;gap:6px;font-size:15px}
+.legend span{display:flex;gap:8px;align-items:center}
+.sw{width:22px;height:14px;border-radius:4px;flex:none}
+.bar{height:10px;border-radius:99px;background:#ece8dd;overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--sun),var(--gold));border-radius:99px;transition:width .5s}
+.prog{font-size:15px;color:var(--muted)}
+.prog b{color:var(--ink)}
+.reset{border:1.5px solid var(--line);background:transparent;border-radius:99px;padding:5px 13px;font-size:14px;cursor:pointer;margin-top:6px}
+.reset.armed{background:var(--rose-soft);border-color:var(--rose)}
+.merk{font-size:15.5px;background:var(--vt-soft);border-radius:14px;padding:12px 14px;margin-top:10px}
+</style>
+</head>
+<body>
+<canvas id="bubbles" aria-hidden="true"></canvas>
+<div class="wrap">
+
+  <header class="panel head">
+    <div class="eyebrow">Deutsch · Satzbau · Satzklammer</div>
+    <h1>Verbgefüge-<em>Werkstatt</em></h1>
+    <p class="sub">Manche Wörter gehören so fest zum Verb, dass sie sich wie ein Teil des Verbs benehmen: <b>Rad</b> fahren, <b>Bescheid</b> sagen, <b>ins Kino</b> gehen, <b>zur Verfügung</b> stellen. Hier lernst du, sie vom Akkusativobjekt zu unterscheiden – und sie im Satz an die richtige Stelle zu setzen.</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Niveau">
+        <button data-lvl="b1" aria-pressed="true">A2 / B1</button>
+        <button data-lvl="c1" aria-pressed="false">B2 / C1</button>
+      </div>
+      <div class="seg modes" role="group" aria-label="Übungsart">
+        <button data-mode="det" aria-pressed="true">1 · Detektiv</button>
+        <button data-mode="werk" aria-pressed="false">2 · Werkstatt</button>
+        <button data-mode="puz" aria-pressed="false">3 · Puzzle</button>
+      </div>
+    </div>
+    <details class="intro">
+      <summary>Worum geht es? Die Idee in 30 Sekunden</summary>
+      <div class="ib">
+        <div><b>Das Objekt ist ein Gast.</b>Ein Akkusativobjekt („den Bus“, „die Laptops“) ist ein eigenes Satzglied. Man kann danach fragen (Was? Wen?), es durch ein Pronomen ersetzen und im Mittelfeld verschieben.</div>
+        <div><b>Der Verb-Teil ist Familie.</b>Ein Verb-Teil („Platz“, „Bescheid“, „zur Verfügung“, „ins Kino“) bildet mit dem Verb eine Einheit. Er sitzt immer direkt beim Verb-Ende – genau wie die Vorsilbe „an“ bei „Ich rufe dich morgen <b>an</b>“.</div>
+        <div><b>Darum gilt:</b> Erst kommen alle Gäste ins Mittelfeld (Objekte, Angaben), dann ganz hinten der Verb-Teil, danach die übrigen Verbformen.<br>Die Firma stellt <u>den Mitarbeitern</u> <u>neue Laptops</u> <b>zur Verfügung</b>.</div>
+      </div>
+    </details>
+  </header>
+
+  <div class="chips" id="chips"></div>
+
+  <div class="grid">
+    <main class="panel" id="main" aria-live="polite"></main>
+
+    <aside>
+      <section class="panel">
+        <h2>Verb-Teil oder Objekt? Die Proben</h2>
+        <div class="probe">
+          <div><b>1 · Pronomen-Probe</b>Ich nehme <u>den Bus</u>. → Ich nehme <span class="y">ihn</span>. ✓ Objekt<br>Ich nehme <b>Platz</b>. → <span class="n">Ich nehme ihn.</span> ✗ Verb-Teil</div>
+          <div><b>2 · Frage-Probe</b>Was nimmst du? – <u>Den Bus</u>. ✓<br>Was nimmst du? – <span class="n">Platz.</span> ✗ klingt falsch → Verb-Teil</div>
+          <div><b>3 · Ersatz-Probe</b>Oft passt ein einziges Verb: Platz nehmen → <span class="y">sich setzen</span>, zur Verfügung stellen → <span class="y">bereitstellen</span>.</div>
+          <div><b>4 · Feste Form</b>Verb-Teile ändern sich nicht: zur Verfügung – <span class="n">zu einer Verfügung</span>, Bescheid – <span class="n">die Bescheide</span>.</div>
+          <div><b>5 · Richtung (Wohin?)</b>„ins Kino, nach Hause, auf den Tisch“ – das Verb braucht sie direkt. Sie stehen wie ein Verb-Teil am Ende. Aber: Ort (<i>Wo?</i>) ist nur eine Angabe.</div>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>Wo steht der Verb-Teil?</h2>
+        <table>
+          <tr><td>Präsens</td><td>Ich gebe dir morgen <span class="u-vt">Bescheid</span>.</td></tr>
+          <tr><td>Perfekt</td><td>Ich habe dir gestern <span class="u-vt">Bescheid</span> <span class="u-rk">gegeben</span>.</td></tr>
+          <tr><td>Modalverb</td><td>Ich kann dir morgen <span class="u-vt">Bescheid</span> <span class="u-rk">geben</span>.</td></tr>
+          <tr><td>Nebensatz</td><td>…, weil ich dir morgen <span class="u-vt">Bescheid</span> <span class="u-fin">gebe</span>.</td></tr>
+          <tr><td>zu-Infinitiv</td><td>…, dir morgen <span class="u-vt">Bescheid</span> <span class="u-rk">zu geben</span>.</td></tr>
+          <tr><td>Verneinung</td><td>Er hat mir <span class="u-N">nicht</span> <span class="u-vt">Bescheid</span> <span class="u-rk">gesagt</span>.</td></tr>
+        </table>
+        <div class="merk"><b>Merksatz:</b> Der Verb-Teil steht <b>direkt vor</b> den Verbformen am Satzende. Zwischen Verb-Teil und Verb-Ende passt nichts – kein Objekt, keine Angabe. „nicht“ steht direkt davor.</div>
+      </section>
+      <section class="panel">
+        <h2>Farben</h2>
+        <div class="legend">
+          <span><i class="sw" style="background:var(--verb)"></i>Verbformen (konjugiert, Infinitiv, Partizip)</span>
+          <span><i class="sw" style="background:var(--vt)"></i>Verb-Teil / Verbgefüge</span>
+          <span><i class="sw" style="background:var(--akk)"></i>Akkusativobjekt</span>
+          <span><i class="sw" style="background:var(--dat)"></i>Dativobjekt · „nicht“</span>
+          <span><i class="sw" style="background:var(--ang)"></i>Angabe (wann, wo, wie …)</span>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>Fortschritt</h2>
+        <div class="prog" id="progtxt"></div>
+        <div class="bar"><i id="progbar"></i></div>
+        <button class="reset" id="reset">Fortschritt dieser Übung zurücksetzen</button>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<script>
+/* ===================== DATEN =====================
+Werkstatt/Puzzle, eine Zeile pro Aufgabe:
+Kategorie|Verbgefüge|Bedeutung|Fokus|Aufgabe|Satzart|Satzanfang|Vorfeld|konj. Verb|Mittelfeld|Verb-Teil|Verbformen am Ende (+ trennt Bausteine)|Nachfeld|nach dem Verb-Teil
+Kategorie: F = Funktionsverbgefüge, N = Nomen + Verb, R = Richtung (wohin?)
+Satzart: H Aussagesatz, W W-Frage, F Ja/Nein-Frage, B Imperativ, N Nebensatz, I zu-Infinitiv
+Rollen: S Subjekt, D Dativobjekt, A Akkusativobjekt, Z Zeit, O Ort, M Angabe, N nicht, P Präpositionalobjekt, R Pronomen, W Fragewort
+*/
+const W_B1 = `
+N|Rad fahren|mit dem Fahrrad fahren|p|Präsens|H||S=mein Bruder|fährt|Z=jeden Morgen|Rad||
+N|Klavier spielen|Musik am Klavier machen|p|Präsens|H||S=meine Tochter|spielt|Z=seit drei Jahren|Klavier||
+N|Gitarre spielen|Musik mit der Gitarre machen|p|Präsens|H||Z=am Wochenende|spielt|S=Jonas;O=im Park|Gitarre||
+N|Ski fahren|auf Skiern fahren|t|Perfekt|H||S=wir|sind|Z=letzten Winter;O=in Tirol|Ski|gefahren|
+N|Fußball spielen|kicken|m|mit „wollen“|H||S=die Kinder|wollen|Z=nach der Schule|Fußball|spielen|
+N|Angst haben|sich fürchten|p|Präsens|H||S=unser Hund|hat|Z=bei Gewitter;Z=immer|Angst||
+N|Bescheid sagen|informieren|m|mit „können“|H||S=du|kannst|R=mir;Z=morgen|Bescheid|sagen|
+N|Bescheid geben|informieren|q|Imperativ (du-Form)|B|||gib|R=mir;M=bitte;Z=bis Freitag|Bescheid||
+N|Platz nehmen|sich setzen|q|Imperativ (Sie-Form)|B|||nehmen|S=Sie;M=bitte|Platz||
+N|Pause machen|kurz aufhören|p|Präsens|H||Z=um zehn Uhr|machen|S=wir;M=kurz|Pause||
+N|Urlaub machen|frei haben und verreisen|t|Perfekt|H||S=meine Eltern|haben|Z=im Sommer;O=in Kroatien|Urlaub|gemacht|
+N|Feierabend machen|mit der Arbeit aufhören|p|Präsens|H||Z=heute|macht|S=die Chefin;M=früher|Feierabend||
+N|Schlange stehen|in einer Reihe warten|m|mit „müssen“|H||S=wir|müssen|O=vor dem Museum;Z=eine Stunde|Schlange|stehen|
+N|Rad fahren|mit dem Fahrrad fahren|ng|verneint mit „nicht“ · Präsens|H||Z=heute|fahre|S=ich;N=nicht|Rad||
+N|Auto fahren|mit dem Auto unterwegs sein|ns|Nebensatz mit „weil“|N|Sie nimmt lieber den Zug, weil||fährt|S=sie;M=nicht gern|Auto||
+R|ins Kino gehen|einen Film anschauen|p|Präsens|H||Z=heute Abend|gehe|S=ich;M=mit meiner Freundin|ins Kino||
+R|nach Hause gehen|heimgehen|t|Perfekt|H||S=die Gäste|sind|Z=erst um Mitternacht|nach Hause|gegangen|
+R|in die Stadt fahren||m|mit „müssen“|H||S=ich|muss|Z=morgen;M=mit dem Bus|in die Stadt|fahren|
+R|auf den Tisch legen|hinlegen|q|Imperativ (du-Form)|B|||leg|A=die Schlüssel;M=bitte|auf den Tisch||
+R|in den Kühlschrank stellen|hineinstellen|t|Perfekt|H||S=ich|habe|A=die Milch;Z=schon|in den Kühlschrank|gestellt|
+R|ins Büro bringen|vorbeibringen|p|Präsens|H||Z=morgen|bringe|S=ich;R=dir;A=die Unterlagen|ins Büro||
+R|zur Arbeit fahren||t|Präteritum|H||Z=früher|fuhr|S=mein Vater;M=mit dem Zug|zur Arbeit||
+R|nach Wien fahren||ns|Nebensatz mit „dass“|N|Ich freue mich, dass||fahren|S=wir;Z=am Samstag;M=zusammen|nach Wien||
+R|in die Schweiz reisen||q|Ja/Nein-Frage|F|||reist|S=ihr;Z=im Frühling|in die Schweiz||
+R|ins Bett gehen|schlafen gehen|ng|verneint mit „nicht“ · mit „wollen“|H||S=die Kinder|wollen|Z=heute;N=nicht|ins Bett|gehen|
+F|zur Verfügung stellen|bereitstellen|p|Präsens|H||S=die Schule|stellt|D=den Schülern;A=kostenlose Tablets|zur Verfügung||
+F|zur Verfügung stellen|bereitstellen|t|Perfekt|H||S=der Vermieter|hat|R=uns;A=einen Parkplatz|zur Verfügung|gestellt|
+F|in Frage kommen|möglich sein|ng|verneint mit „nicht“ · Präsens|H||S=das|kommt|M=für mich;N=nicht|in Frage||
+F|zu Ende gehen|enden|t|Perfekt|H||S=der Sommerkurs|ist|Z=gestern|zu Ende|gegangen|
+F|zu Ende bringen|fertig machen|m|mit „möchten“|H||S=ich|möchte|A=das Projekt;Z=noch vor Weihnachten|zu Ende|bringen|
+F|in Ordnung bringen|reparieren|t|Perfekt|H||S=der Techniker|hat|A=die Heizung;M=schnell|in Ordnung|gebracht|
+F|zur Welt kommen|geboren werden|t|Perfekt|H||S=die kleinen Kätzchen|sind|Z=im Mai|zur Welt|gekommen|
+F|auf die Nerven gehen|stören|p|Präsens|H||S=der Lärm|geht|R=mir;M=total|auf die Nerven||
+N|Spaß machen|Freude machen|p|Präsens|H||S=das neue Spiel|macht|D=den Kindern|Spaß||
+N|Recht haben|richtig liegen|p|Präsens|H||M=vielleicht|hast|S=du|Recht||
+N|Rücksicht nehmen|achtgeben|q|Imperativ (Sie-Form)|B|||nehmen|S=Sie;M=bitte|Rücksicht||P=auf die Nachbarn
+N|Abschied nehmen|sich verabschieden|t|Perfekt|H||S=wir|haben|O=am Bahnhof;P=von unseren Freunden|Abschied|genommen|
+N|Staub saugen|saugen|m|mit „müssen“|H||S=ich|muss|Z=heute noch|Staub|saugen|
+N|Tennis spielen||ns|Nebensatz mit „wenn“|N|Er ist glücklich, wenn||spielt|S=er;Z=am Wochenende|Tennis||
+N|Eis laufen|Schlittschuh laufen|q|Ja/Nein-Frage mit „können“|F|||kannst|S=du|Eis|laufen|
+R|zum Arzt gehen||ns|Nebensatz mit „weil“|N|Ich komme heute später, weil||muss|S=ich;Z=noch|zum Arzt|gehen|
+R|nach Griechenland fliegen||t|Perfekt|H||Z=letztes Jahr|sind|S=wir;Z=im August|nach Griechenland|geflogen|
+R|aufs Land ziehen|umziehen|m|mit „wollen“|H||S=meine Großeltern|wollen|Z=im Frühling|aufs Land|ziehen|
+R|in die Garage fahren||q|Ja/Nein-Frage im Perfekt|F|||hast|S=du;A=das Auto;Z=schon|in die Garage|gefahren|
+F|zur Verfügung stehen|verfügbar sein|p|Präsens|H||Z=ab sofort|steht|D=allen Gästen;S=ein neuer Wellnessbereich|zur Verfügung||
+F|in Kontakt bleiben|weiter Kontakt haben|m|mit „wollen“|H||S=wir|wollen|Z=auch nach dem Kurs|in Kontakt|bleiben|
+F|in Erfüllung gehen|wahr werden|t|Perfekt|H||S=sein großer Traum|ist|Z=endlich|in Erfüllung|gegangen|
+F|zur Schule gehen|die Schule besuchen|p|Präsens|H||S=mein Sohn|geht|Z=seit September;O=in Wien|zur Schule||
+N|Hunger haben|hungrig sein|q|W-Frage|W||W=wer|hat||Hunger||
+N|Lust haben|etwas gern tun wollen|q|Ja/Nein-Frage|F|||hast|S=du;Z=heute|Lust||P=auf Pizza
+N|Sport machen|trainieren|p|Präsens|H||S=ich|mache|Z=dreimal pro Woche|Sport||
+N|Zeitung lesen|die Nachrichten lesen|p|Präsens|H||S=mein Opa|liest|Z=jeden Morgen;M=beim Frühstück|Zeitung||
+F|zu Hilfe kommen|helfen|t|Perfekt|H||S=ein Passant|ist|D=der alten Dame;Z=sofort|zu Hilfe|gekommen|
+N|Bescheid wissen|informiert sein|q|Ja/Nein-Frage|F|||weißt|S=du;Z=schon|Bescheid||
+F|in Pension gehen|in den Ruhestand gehen|ns|Nebensatz mit „wenn“|N|Meine Mutter möchte viel reisen, wenn||geht|S=sie;Z=nächstes Jahr|in Pension||
+R|nach Hause bringen|heimbringen|q|Imperativ (du-Form)|B|||bring|A=die Kinder;M=bitte;Z=um fünf|nach Hause||
+R|in den Müll werfen|wegwerfen|ng|verneint mit „nicht“ · mit „dürfen“|H||A=Batterien|darf|S=man;N=nicht|in den Müll|werfen|
+F|zur Verfügung stellen|bereitstellen|ns|Nebensatz mit „dass“|N|Es ist toll, dass||stellt|S=die Stadt;D=den Bürgern;A=kostenlose Parkplätze|zur Verfügung||
+N|Fußball spielen|kicken|t|Präteritum|H||Z=als Kind|spielte|S=ich;Z=jeden Tag|Fußball||
+R|ins Bett gehen|schlafen gehen|t|Präteritum|H||Z=gestern|ging|S=sie;M=sehr früh|ins Bett||
+N|Platz nehmen|sich setzen|q|Imperativ (du-Form)|B|||nimm|M=bitte|Platz||
+N|Rad fahren|mit dem Fahrrad fahren|zu|zu-Infinitiv|I|Ich habe keine Lust,|||Z=heute|Rad|zu fahren|
+N|Rücksicht nehmen|achtgeben|zu|zu-Infinitiv|I|Es ist wichtig,|||O=im Bus;P=auf ältere Menschen|Rücksicht|zu nehmen|
+F|in Ordnung bringen|aufräumen|zu|zu-Infinitiv|I|Ich habe vor,|||Z=am Samstag;A=mein Zimmer|in Ordnung|zu bringen|
+N|Bescheid sagen|informieren|ng|verneint mit „nicht“ · Perfekt|H||S=er|hat|R=mir;M=leider;N=nicht|Bescheid|gesagt|
+R|in den Keller tragen|hinuntertragen|q|Ja/Nein-Frage mit „können“|F|||kannst|S=du;R=mir;A=die Kiste|in den Keller|tragen|
+`;
+
+const W_C1 = `
+F|in Anspruch nehmen|nutzen|p|Präsens|H||S=immer mehr Familien|nehmen|A=staatliche Unterstützung|in Anspruch||
+F|in Anspruch nehmen|nutzen|m|Perfekt mit „müssen“ (Ersatzinfinitiv), verneint|H||S=wir|haben|A=die Hilfe;Z=bisher;N=nicht|in Anspruch|nehmen+müssen|
+F|zur Kenntnis nehmen|registrieren|pa|Passiv Perfekt|H||S=der Einwand|ist|M=lediglich|zur Kenntnis|genommen+worden|
+F|in Betracht ziehen|erwägen|pa|Passiv Präsens|H||Z=derzeit|wird|S=eine Verlegung des Termins|in Betracht|gezogen|
+F|zur Diskussion stellen|diskutieren lassen|ns|Relativsatz im Perfekt|N|Das ist der Entwurf, den||hat|S=der Ausschuss;Z=gestern|zur Diskussion|gestellt|
+F|unter Druck setzen|bedrängen|p|Präsens|H||S=die knappe Frist|setzt|A=das ganze Team;M=enorm|unter Druck||
+F|in Frage stellen|bezweifeln|t|Perfekt|H||S=mehrere Fachleute|haben|Z=inzwischen;A=die Ergebnisse der Studie|in Frage|gestellt|
+F|unter Beweis stellen|zeigen, beweisen|zu|zu-Infinitiv|I|Beim Probetag hatte sie die Chance,|||A=ihr Können|unter Beweis|zu stellen|
+F|zum Ausdruck bringen|ausdrücken|k2|Konjunktiv II der Vergangenheit|H||S=ich|hätte|A=meine Bedenken;M=gern;Z=früher|zum Ausdruck|gebracht|
+F|zur Sprache bringen|ansprechen|k2|mit „sollte“ (Konjunktiv II)|H||S=man|sollte|A=das Problem;O=in der nächsten Sitzung|zur Sprache|bringen|
+F|in Kraft treten|gültig werden|ns|Nebensatz mit „sobald“|N|Die neuen Regeln gelten, sobald||tritt|S=die Verordnung;Z=Anfang des Jahres|in Kraft||
+F|zum Einsatz kommen|eingesetzt werden|t|Perfekt|H||Z=bei der Suchaktion|sind|S=auch Drohnen|zum Einsatz|gekommen|
+F|in Gang bringen|anstoßen|t|Plusquamperfekt|H||S=die Initiative|hatte|Z=bereits;A=eine breite Debatte|in Gang|gebracht|
+F|zum Abschluss bringen|abschließen|pa|Passiv mit „müssen“|H||S=die Verhandlungen|müssen|Z=bis Ende Juni|zum Abschluss|gebracht+werden|
+F|in Rechnung stellen|berechnen|p|Präsens|H||S=die Werkstatt|stellt|R=Ihnen;A=nur die Ersatzteile|in Rechnung||
+F|zur Verantwortung ziehen|verantwortlich machen|pa|Passiv mit „müssen“|H||S=die Betreiber der Anlage|müssen||zur Verantwortung|gezogen+werden|
+F|sich in Verbindung setzen|kontaktieren|p|Präsens|H||S=unser Kundenservice|setzt|R=sich;Z=innerhalb von 24 Stunden;P=mit Ihnen|in Verbindung||
+F|in Kauf nehmen|akzeptieren (einen Nachteil)|ns|Nebensatz mit „obwohl“|N|Viele pendeln täglich, obwohl||müssen|S=sie;M=dafür;A=lange Fahrzeiten|in Kauf|nehmen|
+F|außer Acht lassen|ignorieren|ng|verneint mit „nicht“ · mit „dürfen“|H||S=man|darf|A=diesen Aspekt;N=nicht|außer Acht|lassen|
+N|Stellung nehmen|sich äußern|ng|verneint mit „nicht“ · Perfekt|H||P=zu den Vorwürfen|hat|S=die Ministerin;Z=bisher;N=nicht|Stellung|genommen|
+N|Einfluss nehmen|beeinflussen|p|Präsens|H||S=Interessengruppen|nehmen|Z=zunehmend|Einfluss|||P=auf politische Entscheidungen
+N|(großen) Wert legen auf|sehr wichtig finden|p|Präsens|H||S=unser Betrieb|legt||großen Wert|||P=auf Nachhaltigkeit
+N|Gebrauch machen von|nutzen|p|Präsens|H||S=nur wenige Kunden|machen|P=von diesem Angebot|Gebrauch||
+N|Rücksicht nehmen auf|achtgeben|ns|Nebensatz mit „dass“|N|Wir erwarten, dass||nehmen|S=alle Bewohner;P=auf die Ruhezeiten|Rücksicht||
+F|zur Last fallen|belasten|m|mit „möchten“|H||S=ich|möchte|D=niemandem|zur Last|fallen|
+F|in Schwierigkeiten geraten|Probleme bekommen|t|Präteritum|H||M=durch die Inflation|gerieten|S=viele Betriebe|in Schwierigkeiten||
+F|in Vergessenheit geraten|vergessen werden|t|Perfekt|H||S=die alte Handwerkstechnik|ist|M=fast|in Vergessenheit|geraten|
+F|zur Geltung kommen|gut wirken|ns|Nebensatz mit „damit“|N|Wir haben das Licht verändert, damit||kommen|S=die Farben;M=besser|zur Geltung||
+F|zum Stillstand kommen|stoppen|t|Perfekt|H||Z=nach dem Unfall|ist|S=der Verkehr auf der Autobahn;M=völlig|zum Stillstand|gekommen|
+F|auf Kritik stoßen|kritisiert werden|p|Präsens|H||S=die geplante Gebührenerhöhung|stößt|M=bei vielen Eltern|auf Kritik||
+F|in Erwägung ziehen|erwägen|k2|Ja/Nein-Frage · Konjunktiv II (würde)|F|||würden|S=Sie;A=einen Umzug ins Ausland|in Erwägung|ziehen|
+F|in Aussicht stellen|versprechen|t|Perfekt|H||S=die Geschäftsführung|hat|D=den Beschäftigten;A=eine Prämie|in Aussicht|gestellt|
+F|in Auftrag geben|beauftragen|pa|Passiv Präteritum|H||S=die Studie|wurde|M=vom Bildungsministerium|in Auftrag|gegeben|
+F|zur Folge haben|bewirken|k2|Konjunktiv II der Gegenwart|H||S=die neue Regelung|hätte|A=höhere Kosten|zur Folge||
+N|Abstand nehmen von|verzichten|t|Perfekt|H||S=der Investor|hat|M=schließlich;P=vom Projekt|Abstand|genommen|
+N|(großen) Anklang finden|gut ankommen|p|Präsens|H||S=das neue Konzept|findet|M=bei den Gästen|großen Anklang||
+F|zum Vorschein kommen|sichtbar werden|t|Perfekt|H||Z=beim Umbau|sind|S=alte Fresken|zum Vorschein|gekommen|
+F|in Mitleidenschaft ziehen|beschädigen|pa|Passiv Präteritum|H||M=durch das Hochwasser|wurden|S=zahlreiche Keller|in Mitleidenschaft|gezogen|
+F|zu Rate ziehen|um Rat fragen|zu|zu-Infinitiv|I|Es ist ratsam,|||M=bei Vertragsfragen;A=einen Anwalt|zu Rate|zu ziehen|
+F|unter Kontrolle bringen|eindämmen|t|Plusquamperfekt|H||S=die Feuerwehr|hatte|A=den Brand;Z=nach drei Stunden|unter Kontrolle|gebracht|
+F|ins Gewicht fallen|wichtig sein|p|Präsens|H||S=die geringen Mehrkosten|fallen|M=kaum|ins Gewicht||
+F|in Erinnerung rufen|erinnern an|m|mit „möchten“|H||S=ich|möchte|R=Ihnen;M=kurz;A=die wichtigsten Fristen|in Erinnerung|rufen|
+F|zur Verfügung stehen|bereitstehen|ns|Nebensatz mit „falls“|N|Bitte melden Sie sich, falls||stehen|S=Sie;M=für ein Interview|zur Verfügung||
+N|Erste Hilfe leisten|helfen|t|Perfekt|H||S=mehrere Passanten|haben|D=dem Verletzten;Z=sofort|Erste Hilfe|geleistet|
+N|Widerstand leisten|sich wehren|t|Präteritum|H||S=die Bevölkerung|leistete|P=gegen die Pläne|heftigen Widerstand||
+F|eine Entscheidung treffen|entscheiden|t|Futur I|H||S=der Vorstand|wird|Z=erst nächste Woche|eine Entscheidung|treffen|
+N|Maßnahmen ergreifen|handeln|m|mit „müssen“|H||S=die Regierung|muss|M=dringend|Maßnahmen|ergreifen||P=gegen die Teuerung
+F|einen Beitrag leisten|beitragen|m|mit „können“|H||S=jeder|kann||einen Beitrag|leisten||P=zum Klimaschutz
+N|Kritik üben an|kritisieren|t|Perfekt|H||S=mehrere Verbände|haben||Kritik|geübt||P=an der Reform
+N|Bezug nehmen auf|sich beziehen auf|p|Präsens (Briefstil)|H||O=in meinem Schreiben|nehme|S=ich|Bezug|||P=auf Ihr Angebot vom 3. März
+F|zur Kenntnis nehmen|registrieren|ns|Nebensatz mit „nachdem“ (Plusquamperfekt)|N|Die Sitzung wurde beendet, nachdem||hatte|S=die Kommission;A=den Bericht|zur Kenntnis|genommen|
+F|in Betracht ziehen|erwägen|ns|Relativsatz mit „sollte“|N|Das ist eine Möglichkeit, die||sollte|S=man;M=unbedingt|in Betracht|ziehen|
+F|unter Beweis stellen|beweisen|t|Perfekt|H||S=sie|hat|Z=beim Wettbewerb;A=ihr Talent|unter Beweis|gestellt|
+F|in Anspruch nehmen|nutzen|q|Ja/Nein-Frage im Perfekt|F|||haben|S=Sie;A=die Unterstützung;Z=schon|in Anspruch|genommen|
+F|in Kraft treten|gültig werden|q|W-Frage|W||W=wann|tritt|S=die neue Regelung|in Kraft||
+F|sich in Verbindung setzen|kontaktieren|q|Imperativ (Sie-Form)|B|||setzen|S=Sie;R=sich;M=bitte;Z=umgehend;P=mit der Hausverwaltung|in Verbindung||
+F|zum Ausdruck bringen|ausdrücken|t|Präteritum|H||S=die Lehrerin|brachte|A=ihre Freude über die Ergebnisse;M=deutlich|zum Ausdruck||
+F|zur Sprache bringen|ansprechen|pa|Passiv Präteritum|H||O=in der Sitzung|wurde|M=auch;S=die Frage der Finanzierung|zur Sprache|gebracht|
+F|zustande kommen|entstehen, gelingen|k2|Konjunktiv II der Vergangenheit|H||M=ohne Ihre Unterstützung|wäre|S=das Projekt;M=nie|zustande|gekommen|
+F|in Frage kommen|möglich sein|ng|verneint mit „nicht“ · Konjunktiv II|H||S=eine Verschiebung|käme|M=für uns;N=nicht|in Frage||
+F|zur Verfügung stellen|bereitstellen|zu|zu-Infinitiv|I|Die Gemeinde hat sich verpflichtet,|||D=den Vereinen;A=den Saal;M=kostenlos|zur Verfügung|zu stellen|
+F|in Angriff nehmen|beginnen|pa|Passiv mit „sollen“|H||S=die Sanierung der Schule|soll|Z=im Frühjahr|in Angriff|genommen+werden|
+F|zur Rede stellen|konfrontieren|t|Perfekt|H||S=die Trainerin|hat|A=den Spieler;Z=nach dem Spiel|zur Rede|gestellt|
+F|in Panik geraten|panisch werden|ng|Imperativ (Sie-Form), verneint|B|||geraten|S=Sie;M=bitte;N=nicht|in Panik||
+`;
+
+/* Detektiv: {Satzteil|Code:Notiz}
+   F/N/R = Verb-Teil (Funktionsverbgefüge / Nomen+Verb / Richtung), A = Akkusativobjekt (Notiz: Pronomen),
+   D = Dativobjekt (Notiz: Pronomen), W = Angabe (Notiz: Frage)  */
+const D_B1 = `
+Mein Nachbar fährt {jeden Tag|W:wann?} {Rad|N:mit dem Fahrrad fahren}.
+Mein Nachbar fährt {heute|W:wann?} {das neue Rad seines Sohnes|A:es}.
+Die Kinder spielen {nach dem Essen|W:wann?} {Fußball|N:kicken}.
+Die Kinder suchen {den Fußball|A:ihn} {im Garten|W:wo?}.
+Bitte nehmen Sie {Platz|N:sich setzen}!
+Ich nehme {morgen|W:wann?} {den ersten Zug|A:ihn}.
+Im Treppenhaus nehmen wir {Rücksicht|N:achtgeben}.
+Die Schule stellt {den Schülern|D:ihnen} {Laptops|A:sie} {zur Verfügung|F:bereitstellen}.
+Ich stelle {die Blumen|A:sie} {auf den Balkon|R:}.
+Der Lärm geht {meiner Mutter|D:ihr} {auf die Nerven|F:stören}.
+Das Spiel macht {den Kindern|D:ihnen} {Spaß|N:Freude machen}.
+Unsere Katze hat {bei Gewitter|W:wann?} {Angst|N:sich fürchten}.
+Wir gehen {heute Abend|W:wann?} {ins Kino|R:}.
+Ich habe {meinem Chef|D:ihm} {gestern|W:wann?} {Bescheid|N:informieren} gesagt.
+Ich habe {meinem Chef|D:ihm} {die Wahrheit|A:sie} gesagt.
+Der Techniker bringt {die Heizung|A:sie} {in Ordnung|F:reparieren}.
+Der Techniker bringt {das Werkzeug|A:es} {in den Keller|R:}.
+Der Kurs geht {morgen|W:wann?} {zu Ende|F:enden}.
+Leg {die Schlüssel|A:sie} {bitte|W:Höflichkeit} {auf den Tisch|R:}!
+Meine Oma liest {jeden Morgen|W:wann?} {Zeitung|N:die Nachrichten lesen}.
+Meine Oma liest {den Brief ihrer Enkelin|A:ihn} {zweimal|W:wie oft?}.
+Das kommt {leider|W:Kommentar} nicht {in Frage|F:möglich sein}.
+Wir haben {im Sommer|W:wann?} {Urlaub|N:frei haben und verreisen} gemacht.
+Wir haben {im Sommer|W:wann?} {einen Kuchen|A:ihn} gemacht.
+Ein Passant ist {der alten Dame|D:ihr} {zu Hilfe|F:helfen} gekommen.
+Mein Sohn geht {seit September|W:seit wann?} {zur Schule|F:die Schule besuchen}.
+Mein Sohn bringt {seinem Lehrer|D:ihm} {einen Apfel|A:ihn} mit.
+Die Kinder fahren {im Winter|W:wann?} {Ski|N:auf Skiern fahren}.
+Die Kinder kaufen {im Winter|W:wann?} {neue Skier|A:sie}.
+Spielst du {am Wochenende|W:wann?} {Tennis|N:}?
+Hast du {heute|W:wann?} {Zeit|N:frei sein}?
+Sein Traum ist {endlich|W:Kommentar} {in Erfüllung|F:wahr werden} gegangen.
+Wir fahren {morgen|W:wann?} {nach Salzburg|R:}.
+Wir besuchen {morgen|W:wann?} {unsere Freunde|A:sie} {in Salzburg|W:wo?}.
+Der Kellner bringt {den Gästen|D:ihnen} {die Rechnung|A:sie}.
+Bring {die Rechnung|A:sie} {bitte|W:Höflichkeit} {zur Post|R:}!
+`;
+
+const D_C1 = `
+Die Firma nimmt {staatliche Förderungen|A:sie} {in Anspruch|F:nutzen}.
+Der Ausschuss stellt {den Entwurf|A:ihn} {am Montag|W:wann?} {zur Diskussion|F:diskutieren lassen}.
+Die Frist setzt {das Team|A:es} {gewaltig|W:wie stark?} {unter Druck|F:bedrängen}.
+Die Kommission nimmt {den Bericht|A:ihn} {zur Kenntnis|F:registrieren}.
+Viele Experten stellen {die Ergebnisse|A:sie} {in Frage|F:bezweifeln}.
+Viele Experten stellen {der Regierung|D:ihr} {kritische Fragen|A:sie}.
+Die neue Regelung tritt {Anfang des Jahres|W:wann?} {in Kraft|F:gültig werden}.
+Die Werkstatt stellt {dem Kunden|D:ihm} {die Ersatzteile|A:sie} {in Rechnung|F:berechnen}.
+Die Werkstatt schickt {dem Kunden|D:ihm} {die Rechnung|A:sie} {per E-Mail|W:wie?}.
+Wir ziehen {einen Umzug|A:ihn} {ernsthaft|W:wie?} {in Erwägung|F:erwägen}.
+Wir ziehen {nächstes Jahr|W:wann?} {nach Salzburg|R:}.
+Die Bevölkerung leistet {heftigen Widerstand|N:sich wehren}.
+Nur wenige Kunden machen von dem Angebot {Gebrauch|N:nutzen}.
+Der Fotograf macht {für die Zeitung|W:wofür?} {ein Porträt der Künstlerin|A:es}.
+Das Konzept findet {bei den Gästen|W:bei wem?} {großen Anklang|N:gut ankommen}.
+Das Ministerium gab {die Studie|A:sie} {im Herbst|W:wann?} {in Auftrag|F:beauftragen}.
+Das Ministerium gab {den Medien|D:ihnen} {im Herbst|W:wann?} {ein Interview|A:es}.
+Die Inflation brachte {viele Betriebe|A:sie} {in Schwierigkeiten|F:belasten}.
+{Beim Umbau|W:wann?} kamen alte Fresken {zum Vorschein|F:sichtbar werden}.
+Man sollte {diesen Aspekt|A:ihn} {keinesfalls|W:Verneinung} {außer Acht|F:ignorieren} lassen.
+Die geringen Mehrkosten fallen {kaum|W:wie stark?} {ins Gewicht|F:wichtig sein}.
+Die Ärztin hat {dem Verletzten|D:ihm} {sofort|W:wann?} {Erste Hilfe|N:helfen} geleistet.
+Die Ärztin hat {dem Verletzten|D:ihm} {eine Spritze|A:sie} gegeben.
+Die Opposition bringt {das Thema|A:es} {im Parlament|W:wo?} {zur Sprache|F:ansprechen}.
+Die Abgeordnete trägt {die Akten|A:sie} {ins Büro|R:}.
+Der Brand wurde {nach drei Stunden|W:wann?} {unter Kontrolle|F:eindämmen} gebracht.
+Ich lege {großen Wert|N:sehr wichtig finden} auf Pünktlichkeit.
+Ich lege {die Unterlagen|A:sie} {in die oberste Schublade|R:}.
+Die Trainerin stellt {den Spieler|A:ihn} {nach dem Spiel|W:wann?} {zur Rede|F:konfrontieren}.
+Die Trainerin stellt {dem Spieler|D:ihm} {einen neuen Plan|A:ihn} vor.
+Der Vorstand wird {erst nächste Woche|W:wann?} {eine Entscheidung|F:entscheiden} treffen.
+Der Vorstand wird {erst nächste Woche|W:wann?} {den Vertrag|A:ihn} unterschreiben.
+Die Gemeinde stellt {den Vereinen|D:ihnen} {den Saal|A:ihn} {kostenlos|W:wie?} {zur Verfügung|F:bereitstellen}.
+Ohne Hilfe wäre das Projekt {nie|W:Verneinung} {zustande|F:entstehen, gelingen} gekommen.
+`;
+
+/* ===================== LOGIK ===================== */
+const ROLE={S:'Subjekt',D:'Dativobjekt',A:'Akkusativobjekt',Z:'Zeitangabe',O:'Ortsangabe',M:'Angabe',N:'Verneinung',P:'Präpositionalobjekt',R:'Pronomen',W:'Fragewort'};
+const CAT={F:'Funktionsverbgefüge',N:'Nomen + Verb',R:'Richtung (wohin?)'};
+const TAGS={all:'Alle',p:'Präsens',t:'andere Zeiten',m:'Modalverben',ng:'Verneinung',ns:'Nebensatz',q:'Frage & Imperativ',zu:'zu-Infinitiv',pa:'Passiv',k2:'Konjunktiv II'};
+const PREPS=['zur','zum','zu','in','ins','im','unter','außer','auf','aufs','ums','um','an','am','aus','vor','nach','über','bei','mit','von','vom','gegen'];
+
+function blk(s){return s?s.split(';').filter(Boolean).map(x=>{const i=x.indexOf('=');return {r:x.slice(0,i),t:x.slice(i+1)}}):[];}
+function parseW(txt){return txt.trim().split('\n').map((line,id)=>{const f=line.split('|');
+  return {id,cat:f[0],fvg:f[1],ers:f[2],tag:f[3],label:f[4],kind:f[5],prefix:f[6],vf:blk(f[7])[0]||null,fin:f[8],mf:blk(f[9]),vt:f[10],rk:f[11]?f[11].split('+'):[],nf:blk(f[12]||''),af:blk(f[13]||'')};});}
+function parseD(txt){return txt.trim().split('\n').map((s,id)=>{const parts=[];const re=/\{([^}|]+)\|([A-Z]):?([^}]*)\}/g;let last=0,m;
+  while((m=re.exec(s))){if(m.index>last)parts.push({txt:s.slice(last,m.index)});parts.push({seg:m[1],code:m[2],note:m[3]});last=re.lastIndex;}
+  if(last<s.length)parts.push({txt:s.slice(last)});return {id,parts};});}
+const DATA={b1:{W:parseW(W_B1),D:parseD(D_B1)},c1:{W:parseW(W_C1),D:parseD(D_C1)}};
+
+function norm(s){return (s||'').toLowerCase().replace(/ß/g,'ss')
+  .replace(/[.,!?;:„“"«»‚‘'’()–—]/g,' ').replace(/-/g,' ')
+  .replace(/\binfrage\b/g,'in frage').replace(/\bzurate\b/g,'zu rate').replace(/\bstaubsaugen\b/g,'staub saugen')
+  .replace(/\beislaufen\b/g,'eis laufen').replace(/\bradfahren\b/g,'rad fahren').replace(/\bskifahren\b/g,'ski fahren')
+  .replace(/\s+/g,' ').trim();}
+const cap=s=>s?s[0].toUpperCase()+s.slice(1):s;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const nounVT=it=>it.cat!=='R'&&!PREPS.includes(it.vt.split(' ')[0].toLowerCase());
+const punct=it=>(it.kind==='F'||it.kind==='W')?'?':(it.kind==='B'?'!':'.');
+const verbOf=it=>{const w=it.fvg.split(' ');return w[w.length-1];};
+
+function units(it,v){const u=[],K=it.kind;
+  if(K==='H'||K==='W'){u.push({t:v.vf.t,k:v.vf.r});u.push({t:it.fin,k:'fin'});}
+  if(K==='F'||K==='B')u.push({t:it.fin,k:'fin'});
+  v.mf.forEach(b=>u.push({t:b.t,k:b.r}));
+  u.push({t:it.vt,k:'vt'});
+  v.af.forEach(b=>u.push({t:b.t,k:b.r}));
+  it.rk.forEach(r=>u.push({t:r,k:'rk'}));
+  if(K==='N')u.push({t:it.fin,k:'fin'});
+  v.nf.forEach(b=>u.push({t:b.t,k:b.r}));
+  return u;}
+const base=it=>({vf:it.vf,mf:it.mf.slice(),af:it.af.slice(),nf:it.nf.slice()});
+function variants(it){
+  const out=[base(it)];
+  if(it.kind==='H'&&it.vf){const b=base(it);
+    if(it.vf.r==='S'){b.mf.forEach(x=>{if('ZOM'.includes(x.r))out.push({vf:x,mf:[it.vf,...b.mf.filter(y=>y!==x)],af:b.af,nf:b.nf});});}
+    else{const s=b.mf.find(y=>y.r==='S');if(s)out.push({vf:s,mf:[it.vf,...b.mf.filter(y=>y!==s)],af:b.af,nf:b.nf});}}
+  const res=[];
+  out.forEach(v=>{const Ps=[...v.mf.filter(x=>x.r==='P'),...v.af,...v.nf];
+    if(!Ps.length){res.push(v);return;}
+    const places=nounVT(it)?['mf','af','nf']:['mf','nf'];
+    let combos=[[]];Ps.forEach(p=>{const nc=[];combos.forEach(c=>places.forEach(pl=>nc.push([...c,[p,pl]])));combos=nc;});
+    combos.forEach(c=>{const where=new Map(c);
+      const mf=v.mf.filter(x=>x.r!=='P'||where.get(x)==='mf');const af=[],nf=[];
+      c.forEach(([p,pl])=>{if(pl==='mf'){if(!mf.includes(p)){const ni=mf.findIndex(x=>x.r==='N');if(ni>=0)mf.splice(ni,0,p);else mf.push(p);}}else if(pl==='af')af.push(p);else nf.push(p);});
+      res.push({vf:v.vf,mf,af,nf});});});
+  // Kanonische Fassung zuerst
+  const key=v=>units(it,v).map(x=>x.t).join(' ');const k0=key(base(it));
+  res.sort((a,b)=>(key(a)===k0?-1:0)-(key(b)===k0?-1:0));
+  return res;}
+function sentenceHTML(it,v){v=v||base(it);const u=units(it,v);
+  const html=u.map((x,i)=>{let t=esc(x.t);if(i===0&&!it.prefix)t=esc(cap(x.t));
+    const c=x.k==='fin'?'u-fin':x.k==='rk'?'u-rk':x.k==='vt'?'u-vt':('u-'+x.k);return `<span class="${c}">${t}</span>`;}).join(' ')+punct(it);
+  return (it.prefix?esc(it.prefix)+' ':'')+html;}
+function sentenceText(it,v){const u=units(it,v||base(it)).map(x=>x.t);if(!it.prefix)u[0]=cap(u[0]);return (it.prefix?it.prefix+' ':'')+u.join(' ')+punct(it);}
+
+/* ---- Prüfen ---- */
+function analyze(it,raw){
+  let a=norm(raw);const pre=norm(it.prefix||'');
+  if(pre&&(a===pre||a.startsWith(pre+' ')))a=a.slice(pre.length).trim();
+  else if(pre){const lw=pre.split(' ').pop();if(a.startsWith(lw+' '))a=a.slice(lw.length).trim();}
+  if(!a)return {lv:'empty'};
+  const vs=variants(it);const strs=vs.map(v=>norm(units(it,v).map(x=>x.t).join(' ')));
+  const ei=strs.indexOf(a);if(ei>=0)return {lv:'ok',v:vs[ei],canonical:ei===0};
+  const tok=a.split(' ');const used=tok.map(()=>false);
+  const find=t=>{const w=norm(t).split(' ');for(let i=0;i<=tok.length-w.length;i++){let ok=true;for(let j=0;j<w.length;j++){if(used[i+j]||tok[i+j]!==w[j]){ok=false;break;}}if(ok){for(let j=0;j<w.length;j++)used[i+j]=true;return i;}}return -1;};
+  const errs=[];const U=[];
+  // Verb-Teil
+  const vi=find(it.vt);
+  if(vi<0){const key=norm(it.vt).split(' ').pop();
+    if(tok.includes(key))errs.push(`Der Verb-Teil heißt genau <b>«${esc(it.vt)}»</b>. Verb-Teile sind feste Formen: kein anderer Artikel, keine andere Präposition, kein Plural.`);
+    else errs.push(`Der Verb-Teil <b>«${esc(it.vt)}»</b> fehlt in deinem Satz.`);}
+  else U.push({k:'vt',i:vi,t:it.vt});
+  // Satzglieder (längste zuerst)
+  const blocks=[...(it.vf?[it.vf]:[]),...it.mf,...it.af,...it.nf].slice().sort((x,y)=>y.t.length-x.t.length);
+  const missing=[];
+  blocks.forEach(b=>{const i=find(b.t);if(i<0)missing.push(b);else U.push({k:b.r,i,t:b.t,b});});
+  // Verbformen
+  let fi=-1;if(it.fin){fi=find(it.fin);if(fi<0)errs.push(`Prüfe das konjugierte Verb: Gesucht ist <b>«${esc(it.fin)}»</b> (${esc(it.label)}).`);else U.push({k:'fin',i:fi,t:it.fin});}
+  it.rk.forEach(r=>{const i=find(r);if(i<0)errs.push(`Am Ende fehlt die Verbform <b>«${esc(r)}»</b>.`);else U.push({k:'rk',i,t:r});});
+  if(missing.length)errs.push(`Es ${missing.length>1?'fehlen ein paar Bausteine':'fehlt ein Baustein'}: ${missing.map(b=>`<b>«${esc(b.t)}»</b>`).join(', ')}.`);
+  const extra=tok.filter((w,i)=>!used[i]);
+  if(extra.length)errs.push(`Diese Wörter passen zu keinem Baustein: <b>«${esc(extra.join(' '))}»</b> – vergleiche die Schreibung mit den Bausteinen.`);
+  if(errs.length)return {lv:'err',errs};
+  // Positionen
+  U.sort((x,y)=>x.i-y.i);
+  const iv=U.findIndex(x=>x.k==='vt'),ifin=U.findIndex(x=>x.k==='fin');const K=it.kind;
+  const L=x=>`«${esc(x.t)}»`;
+  if(K==='H'||K==='W'){const before=U.slice(0,ifin);
+    if(before.length===0)errs.push(`Im Aussagesatz steht vor dem konjugierten Verb <b>genau ein</b> Satzglied (Position 1). Bei dir steht «${esc(it.fin)}» ganz vorn – so baut man eine Ja/Nein-Frage.`);
+    else if(before.length>1)errs.push(`Vor dem konjugierten Verb «${esc(it.fin)}» darf nur <b>ein</b> Satzglied stehen. Bei dir stehen dort: ${before.map(L).join(' + ')}.`);
+    else if(before[0].k==='vt')errs.push(`Der Verb-Teil ${L(before[0])} gehört nicht auf Position 1 – er bleibt hinten, direkt bei den Verbformen.`);
+    else if(K==='W'&&before[0].k!=='W')errs.push(`Bei der W-Frage steht das Fragewort <b>«${esc(it.vf.t)}»</b> auf Position 1.`);}
+  if((K==='F'||K==='B')&&ifin!==0)errs.push(`${K==='F'?'Bei der Ja/Nein-Frage':'Beim Imperativ'} steht das konjugierte Verb <b>«${esc(it.fin)}»</b> ganz vorn.`);
+  if(errs.length)return {lv:'err',errs};
+  // Schluss
+  let j=iv+1;if(nounVT(it))while(U[j]&&U[j].k==='P')j++;
+  const tailExp=[...it.rk.map(r=>({k:'rk',t:r})),...(K==='N'?[{k:'fin',t:it.fin}]:[])];
+  let tailOk=true;
+  for(const e of tailExp){if(U[j]&&U[j].k===e.k&&U[j].t===e.t){j++;continue;}tailOk=false;break;}
+  if(!tailOk){const nx=U[j];const vtPhrase=`«${esc(it.vt)} ${esc(tailExp.map(e=>e.t).join(' '))}»`;
+    const rkBefore=U.slice(0,iv).filter(x=>x.k==='rk'||(K==='N'&&x.k==='fin'));
+    if(nx&&nx.b){errs.push(`Der Verb-Teil steht zu früh: Dahinter steht noch ${L(nx)} (${ROLE[nx.k]}). ${nx.k==='A'?'Das Akkusativobjekt ist ein „Gast“ im Mittelfeld – es steht <b>vor</b> dem Verb-Teil.':'Satzglieder kommen ins Mittelfeld, <b>vor</b> den Verb-Teil.'} Richtig: «… ${esc(nx.t)} ${esc(it.vt)} ${esc(tailExp.map(e=>e.t).join(' '))}».`);}
+    else if(K==='N'&&U.slice(0,iv).some(x=>x.k==='fin'))errs.push(`Im Nebensatz wandert das konjugierte Verb <b>«${esc(it.fin)}»</b> ganz ans Ende – der Verb-Teil steht direkt davor: ${vtPhrase}.`);
+    else if(rkBefore.length)errs.push(`Der Verb-Teil steht <b>direkt vor</b> der Verbform am Ende, nicht dahinter: ${vtPhrase}.`);
+    else errs.push(`Prüfe das Satzende. Die Reihenfolge muss so sein: ${vtPhrase}.`);}
+  else{const rest=U.slice(j).filter(x=>x.k!=='P'&&x.k!=='N');
+    if(rest.length){const tl=tailExp.map(e=>' '+esc(e.t)).join('');const hasA=rest.some(x=>x.k==='A');
+      errs.push(`Der Verb-Teil steht zu früh: Hinter «${esc(it.vt)}${tl}» steht noch ${rest.map(x=>`${L(x)} (${ROLE[x.k]||'Verb'})`).join(', ')}. ${hasA?'Das Akkusativobjekt ist ein „Gast“ im Mittelfeld – es steht <b>vor</b> dem Verb-Teil.':'Satzglieder kommen ins Mittelfeld, <b>vor</b> den Verb-Teil.'} Der Verb-Teil bildet ${tl?'mit den Verbformen ':''}das Satzende: «… ${esc(rest[rest.length-1].t)} ${esc(it.vt)}${tl}».`);}}
+  if([...it.mf].some(b=>b.r==='N')&&!(U[iv-1]&&U[iv-1].k==='N'))errs.push(`«nicht» verneint hier das ganze Verbgefüge und steht <b>direkt vor dem Verb-Teil</b>: «nicht ${esc(it.vt)}».`);
+  if(errs.length)return {lv:'err',errs};
+  return {lv:'order'};}
+
+/* ---- Erklärtexte ---- */
+function vtWhy(it){
+  if(it.cat==='F')return `«${esc(it.fvg)}» ist ein <b>Funktionsverbgefüge</b>${it.ers?` und bedeutet ungefähr «${esc(it.ers)}»`:''}. Der Verb-Teil ist <span class="u-vt">${esc(it.vt)}</span>: Er hat eine feste Form, man kann nicht nach ihm fragen und ihn nicht durch ein Pronomen ersetzen.`;
+  if(it.cat==='N')return `«${esc(it.fvg)}» ist eine feste Verbindung aus <b>Nomen + Verb</b>${it.ers?` (≈ «${esc(it.ers)}»)`:''}. <span class="u-vt">${esc(it.vt)}</span> ist hier kein normales Objekt, sondern bildet mit dem Verb eine Einheit – darum benimmt es sich wie ein Verb-Teil.`;
+  return `<span class="u-vt">${esc(it.vt)}</span> antwortet auf die Frage <b>Wohin?</b> Diese Richtung braucht das Verb «${esc(verbOf(it))}» direkt – sie wird wie ein Verb-Teil behandelt und steht ganz hinten.`;}
+const BLKINFO={
+  S:'Subjekt (Wer? Was?) – es bestimmt die Form des konjugierten Verbs.',
+  A:'Akkusativobjekt (Was? Wen?). Es lässt sich durch ein Pronomen ersetzen und ist ein eigenes Satzglied – ein „Gast“ im Mittelfeld. Es steht <b>vor</b> dem Verb-Teil.',
+  D:'Dativobjekt (Wem?). Es steht im Mittelfeld, meist vor dem Akkusativobjekt.',
+  Z:'Zeitangabe (Wann? Wie lange? Seit wann?). Eine Zusatzinformation – sie kann auch auf Position 1 stehen.',
+  O:'Ortsangabe (Wo?). Eine Zusatzinformation. Nicht verwechseln mit einer Richtung (Wohin?), die wie ein Verb-Teil hinten steht.',
+  M:'Angabe (Wie? Womit? Warum? …). Eine Zusatzinformation im Mittelfeld.',
+  N:'«nicht» verneint hier das ganze Verbgefüge und steht direkt vor dem Verb-Teil.',
+  P:'Präpositionalobjekt – es gehört zum Verbgefüge dazu. Es steht meist vor dem Verb-Teil, darf aber auch dahinter stehen.',
+  R:'Pronomen – kurze Wörter stehen im Mittelfeld ganz vorn, direkt nach dem Verb (bzw. nach dem Subjekt).',
+  W:'Fragewort – es steht auf Position 1.'};
+
+function stepsFor(it){
+  const s=[];const B=base(it);const allB=[...it.mf,...it.af,...it.nf,...(it.vf?[it.vf]:[])];
+  const A=allB.find(b=>b.r==='A'),D=allB.find(b=>b.r==='D');
+  let p1=`<p>${vtWhy(it)}</p>`;
+  if(A)p1+=`<p>Vergleiche: <span class="u-A">${esc(A.t)}</span> ist das <b>Akkusativobjekt</b>. Die Frage «Was? / Wen?» funktioniert, und man kann es durch ein Pronomen ersetzen. Es ist ein „Gast“ und bleibt ein eigenes Satzglied im Mittelfeld.</p>`;
+  if(D)p1+=`<p><span class="u-D">${esc(D.t)}</span> ist das <b>Dativobjekt</b> (Wem?).</p>`;
+  s.push({h:'Verbgefüge erkennen',b:p1});
+  const tail=[...it.rk,...(it.kind==='N'?[it.fin]:[])];
+  const tailH=tail.map((t,i)=>`<span class="${it.kind==='N'&&i===tail.length-1?'u-fin':'u-rk'}">${esc(t)}</span>`).join(' ');
+  let fr='',ex='';const vtH=`<span class="u-vt">${esc(it.vt)}</span>`;const G='<span class="gap">…</span>';
+  if(it.kind==='H')fr=`${esc(cap(it.vf.t))} <span class="u-fin">${esc(it.fin)}</span> ${G} ${vtH} ${tailH}.`,ex=`Das konjugierte Verb <b>«${esc(it.fin)}»</b> steht auf Position 2. Ganz hinten bilden der Verb-Teil${it.rk.length?' und die übrigen Verbformen':''} das Ende der Satzklammer.`;
+  if(it.kind==='W')fr=`${esc(cap(it.vf.t))} <span class="u-fin">${esc(it.fin)}</span> ${G} ${vtH} ${tailH}?`,ex=`Das Fragewort steht auf Position 1, das konjugierte Verb auf Position 2, der Verb-Teil am Ende.`;
+  if(it.kind==='F'||it.kind==='B')fr=`<span class="u-fin">${esc(cap(it.fin))}</span> ${G} ${vtH} ${tailH}${punct(it)}`,ex=`${it.kind==='F'?'Bei der Ja/Nein-Frage':'Beim Imperativ'} steht das konjugierte Verb ganz vorn – der Verb-Teil trotzdem hinten.`;
+  if(it.kind==='N')fr=`${esc(it.prefix)} ${G} ${vtH} ${tailH}.`,ex=`Im Nebensatz wandert das konjugierte Verb <b>«${esc(it.fin)}»</b> ans Ende. Der Verb-Teil steht direkt davor.`;
+  if(it.kind==='I')fr=`${esc(it.prefix)} ${G} ${vtH} ${tailH}.`,ex=`Beim zu-Infinitiv steht «zu» direkt vor dem Infinitiv – und der Verb-Teil direkt davor.`;
+  s.push({h:'Satzklammer bauen',b:`<div class="frame">${fr}</div><p>${ex}</p>`});
+  let p3='';
+  if(!tail.length)p3=`<p>Es gibt hier kein zweites Verb. Darum steht der Verb-Teil <b>ganz am Satzende</b> – genau wie die Vorsilbe bei einem trennbaren Verb: «Ich rufe dich morgen <b>an</b>.» → «… ${vtH}${punct(it)}»</p>`;
+  else p3=`<p>Der Verb-Teil steht <b>direkt vor</b> ${tailH}. Dazwischen passt nichts: «${vtH} ${tailH}».</p>`;
+  if(it.mf.some(b=>b.r==='N'))p3+=`<p><span class="u-N">nicht</span> steht direkt vor dem Verb-Teil: «<span class="u-N">nicht</span> ${vtH}».</p>`;
+  const P=allB.find(b=>b.r==='P');
+  if(P)p3+=`<p>Das Präpositionalobjekt <span class="u-P">${esc(P.t)}</span> gehört zum Gefüge. Es steht ${it.nf.length||it.af.length?'hier hinter dem Verb-Teil – das ist üblich; es dürfte auch davor stehen':'meist vor dem Verb-Teil; es darf aber auch dahinter stehen'}.</p>`;
+  s.push({h:'Verb-Teil an seinen Platz',b:p3});
+  const mfl=B.mf.map(b=>`<span class="r u-${b.r}">${esc(b.t)}<small>${ROLE[b.r]}</small></span>`).join('<span class="arr">→</span>');
+  let p4=B.mf.length?`<div class="mfline">${mfl}<span class="arr">→</span><span class="r u-vt">${esc(it.vt)}<small>Verb-Teil</small></span></div>`:`<p>Das Mittelfeld bleibt hier leer – der Verb-Teil rückt direkt nach vorn an das Verb heran.</p>`;
+  if(A)p4+=`<p>Achtung: Das Akkusativobjekt steht <b>vor</b> dem Verb-Teil – «${esc(A.t)} ${esc(it.vt)}», nie «${esc(it.vt)} ${esc(A.t)}».</p>`;
+  else p4+=`<p>Faustregel im Mittelfeld: Pronomen zuerst, Dativ meist vor Akkusativ, Angaben dazwischen – der Verb-Teil immer zuletzt.</p>`;
+  s.push({h:'Mittelfeld füllen',b:p4});
+  s.push({h:'Fertiger Satz',b:`<div class="frame">${sentenceHTML(it)}</div>`});
+  return s;}
+
+/* ---- Zustand ---- */
+const LS='vgw-progress-v1';
+let PROG={};try{PROG=JSON.parse(localStorage.getItem(LS)||'{}')||{};}catch(e){PROG={};}
+const saveProg=()=>{try{localStorage.setItem(LS,JSON.stringify(PROG));}catch(e){}};
+const pkey=()=>ST.lvl+'-'+(ST.mode==='det'?'det':ST.mode);
+const solved=()=>(PROG[pkey()]=PROG[pkey()]||{});
+const ST={lvl:'b1',mode:'det',filter:'all',pos:{},step:0,blk:null,puz:null,det:null};
+
+function list(){const d=DATA[ST.lvl];if(ST.mode==='det')return d.D;
+  return ST.filter==='all'?d.W:d.W.filter(x=>x.tag===ST.filter);}
+function curIndex(){const k=ST.lvl+ST.mode+ST.filter;return ST.pos[k]||0;}
+function setIndex(i){const k=ST.lvl+ST.mode+ST.filter;const n=list().length;ST.pos[k]=((i%n)+n)%n;ST.step=0;ST.blk=null;ST.puz=null;ST.det=null;render();}
+function rng(seed){return ()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
+function shuffled(arr,seed){const a=arr.slice(),r=rng(seed);for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+/* ---- Render ---- */
+const $=id=>document.getElementById(id);
+function renderChips(){const c=$('chips');
+  if(ST.mode==='det'){c.innerHTML='';c.style.display='none';return;}c.style.display='';
+  const all=DATA[ST.lvl].W;const counts={};all.forEach(x=>counts[x.tag]=(counts[x.tag]||0)+1);
+  c.innerHTML=Object.keys(TAGS).filter(t=>t==='all'||counts[t]).map(t=>`<button class="chip" data-f="${t}" aria-pressed="${ST.filter===t}">${TAGS[t]}<span>${t==='all'?all.length:counts[t]}</span></button>`).join('');
+  c.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{ST.filter=b.dataset.f;setIndex(curIndex());});}
+function renderProg(){const n=ST.mode==='det'?DATA[ST.lvl].D.length:DATA[ST.lvl].W.length;const k=Object.keys(solved()).length;
+  const nm={det:'Detektiv',werk:'Werkstatt',puz:'Puzzle'}[ST.mode];
+  $('progtxt').innerHTML=`${nm} · ${ST.lvl==='b1'?'A2/B1':'B2/C1'}: <b>${k}</b> von ${n} geschafft`;
+  $('progbar').style.width=(n?100*k/n:0)+'%';}
+function render(){
+  document.querySelectorAll('[data-lvl]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lvl===ST.lvl));
+  document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===ST.mode));
+  renderChips();renderProg();
+  if(ST.mode==='det')renderDet();else renderWerk();}
+
+function navHTML(){return `<span class="spacer"></span><button class="btn soft" id="prev" aria-label="Vorherige Aufgabe">←</button><button class="btn soft" id="rand">Zufall</button><button class="btn soft" id="next" aria-label="Nächste Aufgabe">→</button>`;}
+function bindNav(){$('prev').onclick=()=>setIndex(curIndex()-1);$('next').onclick=()=>setIndex(curIndex()+1);
+  $('rand').onclick=()=>{const n=list().length;const sv=solved();const open=list().map((x,i)=>i).filter(i=>!sv[list()[i].id]);const pool=open.length?open:list().map((x,i)=>i);setIndex(pool[Math.floor(Math.random()*pool.length)]);};}
+
+/* Werkstatt + Puzzle */
+function renderWerk(){
+  const L=list();const i=curIndex();const it=L[i];const m=$('main');const puz=ST.mode==='puz';
+  const shown=shuffled([...(it.vf?[it.vf]:[]),...it.mf,...it.af,...it.nf],it.id*31+(ST.lvl==='c1'?7:1));
+  const done=!!solved()[it.id];
+  m.innerHTML=`
+   <div class="meta"><span class="counter">Aufgabe ${i+1} / ${L.length}</span>${done?'<span class="badge done">✓ geschafft</span>':''}<span class="badge">${CAT[it.cat]}</span><span class="badge task">${esc(it.label)}</span></div>
+   <button class="fvg" id="fvg"><span class="lab">Verbgefüge · antippen für die Erklärung</span><span class="inf">${esc(it.fvg)}</span>${it.ers?`<span class="ers">≈ ${esc(it.ers)}</span>`:''}</button>
+   ${puz?'':`<div class="blabel">Bausteine für den Satz – tippe einen an, um ihn zu prüfen</div>
+   <div class="blocks">${shown.map((b,k)=>`<button class="blk${ST.blk===k?' on':''}" data-k="${k}">${esc(b.t)}</button>`).join('')}</div>`}
+   <div class="binfo${ST.blk!==null?' show':''}" id="binfo"></div>
+   ${puz?puzHTML(it):`
+   ${it.prefix?`<div class="prefix">Satzanfang: <b>${esc(it.prefix)} …</b></div>`:''}
+   <label class="ans" for="answer">${it.prefix?'Schreib den Satz weiter':'Dein Satz'} (${esc(it.label)})</label>
+   <textarea id="answer" spellcheck="false" autocomplete="off" placeholder="${it.prefix?'… hier weiterschreiben':'Schreibe hier deinen Satz …'}"></textarea>`}
+   <div class="actions">
+     <button class="btn primary" id="check">Prüfen</button>
+     <button class="btn" id="hint">Nächster Schritt</button>
+     <button class="btn" id="solve">Lösung zeigen</button>
+     ${navHTML()}
+   </div>
+   <div class="fb" id="fb"></div>
+   <ol class="steps" id="steps"></ol>`;
+  const bi=$('binfo');
+  $('fvg').onclick=()=>{ST.blk='vt';bi.innerHTML=`<b>Verb-Teil:</b> ${vtWhy(it)}`;bi.classList.add('show');m.querySelectorAll('.blk').forEach(x=>x.classList.remove('on'));};
+  m.querySelectorAll('.blk').forEach(b=>b.onclick=()=>{const k=+b.dataset.k;ST.blk=k;const x=shown[k];
+    m.querySelectorAll('.blk').forEach(y=>y.classList.toggle('on',y===b));
+    bi.innerHTML=`<b>«${esc(x.t)}» – ${ROLE[x.r]}:</b> ${BLKINFO[x.r]}`;bi.classList.add('show');});
+  if(ST.blk!==null){if(ST.blk==='vt')$('fvg').click();else{const b=m.querySelector(`.blk[data-k="${ST.blk}"]`);if(b)b.click();}}
+  const stepsEl=$('steps');const allSteps=stepsFor(it);
+  const drawSteps=()=>{stepsEl.innerHTML=allSteps.slice(0,ST.step).map(x=>`<li><div><h3>${x.h}</h3>${x.b}</div></li>`).join('');$('hint').disabled=ST.step>=allSteps.length;};
+  drawSteps();
+  $('hint').onclick=()=>{ST.step=Math.min(allSteps.length,ST.step+1);drawSteps();};
+  $('solve').onclick=()=>{ST.step=allSteps.length;drawSteps();
+    const fb=$('fb');fb.className='fb ok';fb.innerHTML=`<b class="h">So lautet der Satz:</b><span class="sol">${sentenceHTML(it)}</span><div style="margin-top:8px">Der Verb-Teil <span class="u-vt">${esc(it.vt)}</span> steht ${it.rk.length||it.kind==='N'?'direkt vor den Verbformen am Ende':'ganz am Satzende'}. Versuch es danach selbst – zur Übung zählt nur ein eigener Satz.</div>`;};
+  const getAns=()=>puz?ST.puz.placed.map(x=>x.t).join(' '):$('answer').value;
+  $('check').onclick=()=>{const r=analyze(it,getAns());const fb=$('fb');
+    if(r.lv==='empty'){fb.className='fb err';fb.innerHTML=`<b class="h">Noch leer.</b>${puz?'Tippe die Bausteine in der richtigen Reihenfolge an.':'Schreib zuerst deinen Satz.'}`;return;}
+    if(r.lv==='ok'||r.lv==='order'){solved()[it.id]=1;saveProg();renderProg();
+      const where=it.rk.length||it.kind==='N'?`direkt vor «${esc([...it.rk,...(it.kind==='N'?[it.fin]:[])].join(' '))}»`:'ganz am Satzende';
+      let h;
+      if(r.lv==='ok')h=`<b class="h">✓ Richtig!</b>Der Verb-Teil <span class="u-vt">${esc(it.vt)}</span> steht ${where}${it.mf.some(b=>b.r==='A')||it.af.length?' – und das Akkusativobjekt bleibt davor im Mittelfeld':''}.${r.canonical?'':` Deine Wortstellung ist korrekt. Eine weitere übliche Variante:`}<span class="sol">${r.canonical?sentenceHTML(it,r.v):sentenceHTML(it)}</span>`;
+      else h=`<b class="h">✓ Der Verb-Teil steht richtig!</b>«${esc(it.vt)}» steht ${where} – genau darum geht es hier. Im Mittelfeld klingt diese Reihenfolge allerdings natürlicher:<span class="sol">${sentenceHTML(it)}</span><div style="margin-top:6px;font-size:15px">Faustregel: Pronomen zuerst, Dativ meist vor Akkusativ, unbetonte Angaben eher früh.</div>`;
+      fb.className='fb ok';fb.innerHTML=h+`<div class="actions" style="margin-top:10px"><button class="btn primary" id="go">Nächste Aufgabe →</button></div>`;
+      $('go').onclick=()=>setIndex(curIndex()+1);}
+    else{fb.className='fb err';fb.innerHTML=`<b class="h">Noch nicht ganz.</b><ul>${r.errs.slice(0,3).map(e=>`<li>${e}</li>`).join('')}</ul><div style="margin-top:8px;font-size:15px">Tipp: Mit «Nächster Schritt» baust du den Satz Stück für Stück.</div>`;}};
+  if(!puz){$('answer').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('check').click();}});}
+  else bindPuz(it);
+  bindNav();}
+function puzHTML(it){
+  if(!ST.puz){const u=units(it,base(it)).map((x,n)=>({t:x.t,k:x.k,n}));ST.puz={pool:shuffled(u,it.id*17+(ST.lvl==='c1'?3:5)),placed:[]};}
+  const P=ST.puz;
+  return `${it.prefix?`<div class="prefix">Satzanfang: <b>${esc(it.prefix)} …</b></div>`:''}
+   <label class="ans">Dein Satz (${esc(it.label)}) – tippe ein Wort an, um es zurückzulegen</label>
+   <div class="tray" id="placed">${P.placed.length?P.placed.map((x,i)=>`<button class="tile k-${x.k==='fin'||x.k==='rk'||x.k==='vt'?x.k:'b'}" data-i="${i}">${esc(x.t)}</button>`).join(''):'<span class="ph">Tippe unten die Bausteine in der richtigen Reihenfolge an …</span>'}</div>
+   <label class="ans">Bausteine</label>
+   <div class="tray pool" id="pool">${P.pool.map((x,i)=>`<button class="tile k-${x.k==='fin'||x.k==='rk'||x.k==='vt'?x.k:'b'}" data-i="${i}">${esc(x.t)}</button>`).join('')||'<span class="ph">Alle Bausteine liegen im Satz – jetzt «Prüfen».</span>'}</div>`;}
+function bindPuz(it){const P=ST.puz;
+  $('pool').querySelectorAll('.tile').forEach(b=>b.onclick=()=>{P.placed.push(P.pool.splice(+b.dataset.i,1)[0]);rerenderPuz(it);});
+  $('placed').querySelectorAll('.tile').forEach(b=>b.onclick=()=>{P.pool.push(P.placed.splice(+b.dataset.i,1)[0]);rerenderPuz(it);});}
+function rerenderPuz(it){const keepSteps=ST.step;const fbHTML=null;renderWerk();ST.step=keepSteps;}
+
+/* Detektiv */
+const OPT=[{c:'VT',t:'Verb-Teil',s:'gehört fest zum Verb'},{c:'A',t:'Akkusativobjekt',s:'Was? Wen?'},{c:'D',t:'Dativobjekt',s:'Wem?'},{c:'W',t:'Angabe',s:'wann, wo, wie …'}];
+const grp=c=>'FNR'.includes(c)?'VT':c;
+function detExpl(p){const n=p.note;
+  switch(p.code){
+  case 'F':return `<b>Verb-Teil (Funktionsverbgefüge):</b> «${esc(p.seg)}» gehört fest zum Verb${n?` – zusammen bedeutet es ungefähr «${esc(n)}»`:''}. Die Form ist fest (kein anderer Artikel, kein Plural), man kann nicht danach fragen und es nicht durch ein Pronomen ersetzen. Darum steht es direkt beim Verb-Ende.`;
+  case 'N':return `<b>Verb-Teil (Nomen + Verb):</b> «${esc(p.seg)}» bildet mit dem Verb eine feste Einheit${n?` (≈ «${esc(n)}»)`:''}. Es ist kein „Gast“ wie ein Objekt – Pronomen-Probe und Frage-Probe klingen falsch. Darum steht es direkt beim Verb-Ende.`;
+  case 'R':return `<b>Verb-Teil (Richtung):</b> «${esc(p.seg)}» antwortet auf <b>Wohin?</b> Das Verb braucht diese Information direkt; sie steht deshalb ganz hinten, wie ein Verb-Teil.`;
+  case 'A':return `<b>Akkusativobjekt:</b> «Was? / Wen?» → «${esc(p.seg)}». Pronomen-Probe: «${esc(n)}» ✓. Es ist ein eigenes Satzglied und steht im Mittelfeld <b>vor</b> einem Verb-Teil.`;
+  case 'D':return `<b>Dativobjekt:</b> «Wem?» → «${esc(p.seg)}». Pronomen-Probe: «${esc(n)}» ✓.`;
+  case 'W':return `<b>Angabe (${esc(n)}):</b> «${esc(p.seg)}» ist eine Zusatzinformation – ohne sie bleibt der Satz vollständig.`;}}
+function renderDet(){
+  const L=list();const i=curIndex();const it=L[i];const m=$('main');
+  if(!ST.det)ST.det={ans:{},active:null,wrong:0};const D=ST.det;
+  const segs=it.parts.map((p,k)=>p.seg?k:null).filter(k=>k!==null);
+  if(D.active===null||D.ans[D.active]){D.active=segs.find(k=>!D.ans[k]);if(D.active===undefined)D.active=null;}
+  const done=!!solved()[it.id];
+  const sentHTML=it.parts.map((p,k)=>{if(!p.seg)return esc(p.txt);const a=D.ans[k];
+    const cls=a?`c-${grp(p.code)}`:(D.active===k?'active':'');
+    return `<button class="seg-b ${cls}" data-k="${k}">${esc(p.seg)}${a?`<span class="mark">${a.ok?'✓':'✗'}</span>`:''}</button>`;}).join('');
+  const act=D.active!==null?it.parts[D.active]:null;
+  const exps=segs.filter(k=>D.ans[k]).map(k=>{const a=D.ans[k],p=it.parts[k];
+    return `<div class="${a.ok?'ok':'bad'}">${a.ok?'✓':`✗ Du hast «${OPT.find(o=>o.c===a.pick).t}» gewählt. Richtig ist:`} ${detExpl(p)}</div>`;}).join('');
+  const all=segs.every(k=>D.ans[k]);
+  m.innerHTML=`
+   <div class="meta"><span class="counter">Satz ${i+1} / ${L.length}</span>${done?'<span class="badge done">✓ geschafft</span>':''}<span class="badge">Detektiv</span></div>
+   <p class="optq" style="margin-top:0">Was ist das markierte Satzglied? Tippe auf einen unterstrichenen Teil und wähle.</p>
+   <div class="dsent">${sentHTML}</div>
+   ${act?`<p class="optq">«<b>${esc(act.seg)}</b>» ist …</p><div class="opts">${OPT.map(o=>`<button class="opt o-${o.c}" data-c="${o.c}">${o.t}<small>${o.s}</small></button>`).join('')}</div>`:''}
+   <div class="dexp">${exps}</div>
+   ${all?`<div class="fb ok" style="display:block"><b class="h">${D.wrong?'Satz geschafft – schau dir die Erklärungen noch einmal an.':'✓ Alles richtig erkannt!'}</b>Denk daran: Verb-Teile stehen direkt beim Verb-Ende, Objekte und Angaben davor im Mittelfeld.</div>`:''}
+   <div class="actions">${all?'<button class="btn primary" id="dnext">Nächster Satz →</button>':''}${navHTML()}</div>`;
+  m.querySelectorAll('.seg-b').forEach(b=>b.onclick=()=>{const k=+b.dataset.k;if(!D.ans[k]){D.active=k;renderDet();}});
+  m.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const p=it.parts[D.active];const ok=grp(p.code)===b.dataset.c;
+    D.ans[D.active]={pick:b.dataset.c,ok};if(!ok)D.wrong++;D.active=null;
+    if(segs.every(k=>D.ans[k])&&!D.wrong){solved()[it.id]=1;saveProg();renderProg();}renderDet();});
+  if(all)$('dnext').onclick=()=>setIndex(curIndex()+1);
+  bindNav();}
+
+/* Steuerung */
+document.querySelectorAll('[data-lvl]').forEach(b=>b.onclick=()=>{ST.lvl=b.dataset.lvl;ST.filter='all';ST.step=0;ST.blk=null;ST.puz=null;ST.det=null;render();});
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{ST.mode=b.dataset.mode;ST.filter='all';ST.step=0;ST.blk=null;ST.puz=null;ST.det=null;render();});
+$('reset').onclick=function(){if(this.classList.contains('armed')){PROG[pkey()]={};saveProg();this.classList.remove('armed');this.textContent='Fortschritt dieser Übung zurücksetzen';render();}
+  else{this.classList.add('armed');this.textContent='Wirklich zurücksetzen? Nochmal tippen';setTimeout(()=>{this.classList.remove('armed');this.textContent='Fortschritt dieser Übung zurücksetzen';},3500);}};
+render();
+
+/* Bubbles */
+(function(){const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const cv=$('bubbles'),cx=cv.getContext('2d');let W,H;const B=[];
+function size(){W=cv.width=innerWidth*devicePixelRatio;H=cv.height=innerHeight*devicePixelRatio;}
+size();addEventListener('resize',size);
+const tint=['255,255,255','240,197,72','190,160,215','255,255,255'];
+for(let i=0;i<20;i++)B.push({x:Math.random(),y:Math.random(),r:8+Math.random()*46,s:.0001+Math.random()*.0003,d:Math.random()*6.28,c:tint[i%4]});
+function draw(){cx.clearRect(0,0,W,H);const dp=devicePixelRatio;
+  B.forEach(b=>{b.y-=b.s;b.d+=.004;if(b.y<-.1){b.y=1.1;b.x=Math.random();}
+    const x=(b.x+Math.sin(b.d)*.02)*W,y=b.y*H,r=b.r*dp;
+    const g=cx.createRadialGradient(x-r*.35,y-r*.35,r*.1,x,y,r);g.addColorStop(0,`rgba(${b.c},.13)`);g.addColorStop(1,`rgba(${b.c},.02)`);
+    cx.beginPath();cx.arc(x,y,r,0,7);cx.fillStyle=g;cx.fill();cx.lineWidth=1*dp;cx.strokeStyle=`rgba(${b.c},.3)`;cx.stroke();
+    cx.beginPath();cx.arc(x-r*.4,y-r*.4,r*.13,0,7);cx.fillStyle='rgba(255,255,255,.3)';cx.fill();});}
+if(reduce)draw();else(function loop(){draw();requestAnimationFrame(loop);})();})();
+</script>
+</body>
+</html>
