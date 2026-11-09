@@ -139,6 +139,11 @@ textarea{width:100%;min-height:84px;resize:vertical;font-family:var(--font);font
 .seg-b.c-A{background:var(--akk-soft);border-bottom-color:var(--akk)}
 .seg-b.c-D{background:var(--dat-soft);border-bottom-color:var(--dat)}
 .seg-b.c-W{background:var(--ang-soft);border-bottom-color:var(--ang)}
+.seg-b.c-V{background:var(--verb-soft);border-bottom-color:var(--verb);color:var(--verb);font-weight:600}
+.seg-b.c-plain{border-bottom-color:transparent}
+.seg-b[disabled]{cursor:default}
+.vgap{display:inline-block;min-width:3.5em;border-bottom:3px solid var(--gold);background:var(--gold-soft);border-radius:7px;padding:0 .3em;text-align:center}
+.vgap.ok{background:var(--verb-soft);border-bottom-color:var(--verb)}
 .seg-b .mark{font-size:13px;margin-left:3px;vertical-align:super}
 .opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:6px}
 .opt{border:1.5px solid var(--line);background:#fff;border-radius:14px;padding:11px 12px;cursor:pointer;font-size:16.5px;font-weight:600;text-align:left}
@@ -190,8 +195,9 @@ td:first-child{font-weight:600;white-space:nowrap;padding-right:10px;color:var(-
       </div>
       <div class="seg modes" role="group" aria-label="Übungsart">
         <button data-mode="det" aria-pressed="true">1 · Detektiv</button>
-        <button data-mode="werk" aria-pressed="false">2 · Werkstatt</button>
-        <button data-mode="puz" aria-pressed="false">3 · Puzzle</button>
+        <button data-mode="vw" aria-pressed="false">2 · Verb-Wahl</button>
+        <button data-mode="werk" aria-pressed="false">3 · Werkstatt</button>
+        <button data-mode="puz" aria-pressed="false">4 · Puzzle</button>
       </div>
     </div>
     <details class="intro">
@@ -396,83 +402,461 @@ F|zur Rede stellen|konfrontieren|t|Perfekt|H||S=die Trainerin|hat|A=den Spieler;
 F|in Panik geraten|panisch werden|ng|Imperativ (Sie-Form), verneint|B|||geraten|S=Sie;M=bitte;N=nicht|in Panik||
 `;
 
-/* Detektiv: {Satzteil|Code:Notiz}
-   F/N/R = Verb-Teil (Funktionsverbgefüge / Nomen+Verb / Richtung), A = Akkusativobjekt (Notiz: Pronomen),
-   D = Dativobjekt (Notiz: Pronomen), W = Angabe (Notiz: Frage)  */
+/* Detektiv: Verbgefüge|Bedeutung|Bedeutungsgruppe|Satz mit {Teil|Rolle}
+   Rollen: T Nomen-Teil des Gefüges, V Funktionsverb (alle Teile), X Hilfs-/Modalverb,
+   S Subjekt, A Akkusativobjekt, D Dativobjekt, P Präpositionalobjekt, W Angabe, R Pronomen, N nicht */
 const D_B1 = `
-Mein Nachbar fährt {jeden Tag|W:wann?} {Rad|N:mit dem Fahrrad fahren}.
-Mein Nachbar fährt {heute|W:wann?} {das neue Rad seines Sohnes|A:es}.
-Die Kinder spielen {nach dem Essen|W:wann?} {Fußball|N:kicken}.
-Die Kinder suchen {den Fußball|A:ihn} {im Garten|W:wo?}.
-Bitte nehmen Sie {Platz|N:sich setzen}!
-Ich nehme {morgen|W:wann?} {den ersten Zug|A:ihn}.
-Im Treppenhaus nehmen wir {Rücksicht|N:achtgeben}.
-Die Schule stellt {den Schülern|D:ihnen} {Laptops|A:sie} {zur Verfügung|F:bereitstellen}.
-Ich stelle {die Blumen|A:sie} {auf den Balkon|R:}.
-Der Lärm geht {meiner Mutter|D:ihr} {auf die Nerven|F:stören}.
-Das Spiel macht {den Kindern|D:ihnen} {Spaß|N:Freude machen}.
-Unsere Katze hat {bei Gewitter|W:wann?} {Angst|N:sich fürchten}.
-Wir gehen {heute Abend|W:wann?} {ins Kino|R:}.
-Ich habe {meinem Chef|D:ihm} {gestern|W:wann?} {Bescheid|N:informieren} gesagt.
-Ich habe {meinem Chef|D:ihm} {die Wahrheit|A:sie} gesagt.
-Der Techniker bringt {die Heizung|A:sie} {in Ordnung|F:reparieren}.
-Der Techniker bringt {das Werkzeug|A:es} {in den Keller|R:}.
-Der Kurs geht {morgen|W:wann?} {zu Ende|F:enden}.
-Leg {die Schlüssel|A:sie} {bitte|W:Höflichkeit} {auf den Tisch|R:}!
-Meine Oma liest {jeden Morgen|W:wann?} {Zeitung|N:die Nachrichten lesen}.
-Meine Oma liest {den Brief ihrer Enkelin|A:ihn} {zweimal|W:wie oft?}.
-Das kommt {leider|W:Kommentar} nicht {in Frage|F:möglich sein}.
-Wir haben {im Sommer|W:wann?} {Urlaub|N:frei haben und verreisen} gemacht.
-Wir haben {im Sommer|W:wann?} {einen Kuchen|A:ihn} gemacht.
-Ein Passant ist {der alten Dame|D:ihr} {zu Hilfe|F:helfen} gekommen.
-Mein Sohn geht {seit September|W:seit wann?} {zur Schule|F:die Schule besuchen}.
-Mein Sohn bringt {seinem Lehrer|D:ihm} {einen Apfel|A:ihn} mit.
-Die Kinder fahren {im Winter|W:wann?} {Ski|N:auf Skiern fahren}.
-Die Kinder kaufen {im Winter|W:wann?} {neue Skier|A:sie}.
-Spielst du {am Wochenende|W:wann?} {Tennis|N:}?
-Hast du {heute|W:wann?} {Zeit|N:frei sein}?
-Sein Traum ist {endlich|W:Kommentar} {in Erfüllung|F:wahr werden} gegangen.
-Wir fahren {morgen|W:wann?} {nach Salzburg|R:}.
-Wir besuchen {morgen|W:wann?} {unsere Freunde|A:sie} {in Salzburg|W:wo?}.
-Der Kellner bringt {den Gästen|D:ihnen} {die Rechnung|A:sie}.
-Bring {die Rechnung|A:sie} {bitte|W:Höflichkeit} {zur Post|R:}!
+Platz nehmen|sich setzen||{Bitte|W} {nehmen|V} {Sie|S} {Platz|T}!
+Rücksicht nehmen|achtgeben||{Im Bus|W} {nehmen|V} {wir|S} {Rücksicht|T} {auf ältere Menschen|P}.
+Abschied nehmen|sich verabschieden||{Am Bahnhof|W} {haben|X} {wir|S} {von unseren Freunden|P} {Abschied|T} {genommen|V}.
+eine Frage stellen|fragen||{Der Schüler|S} {stellt|V} {der Lehrerin|D} {eine Frage|T}.
+eine Antwort geben|antworten||{Leider|W} {hat|X} {mir|R} {niemand|S} {eine Antwort|T} {gegeben|V}.
+Unterricht geben|unterrichten||{Meine Schwester|S} {gibt|V} {seit zwei Jahren|W} {Unterricht|T}.
+einen Rat geben|raten|rat|{Mein Vater|S} {hat|X} {mir|R} {einen guten Rat|T} {gegeben|V}.
+die Erlaubnis geben|erlauben||{Der Chef|S} {hat|X} {uns|R} {die Erlaubnis|T} {gegeben|V}.
+ein Versprechen geben|versprechen||{Er|S} {hat|X} {seiner Mutter|D} {ein Versprechen|T} {gegeben|V}.
+einen Vorschlag machen|vorschlagen|rat|{Meine Kollegin|S} {macht|V} {einen guten Vorschlag|T}.
+sich Sorgen machen|sich sorgen||{Die Eltern|S} {machen|V} {sich|R} {große Sorgen|T}.
+Angst machen|ängstigen|angst|{Das Gewitter|S} {macht|V} {dem Hund|D} {Angst|T}.
+einen Fehler machen|sich irren||{Im Test|W} {habe|X} {ich|S} {einen dummen Fehler|T} {gemacht|V}.
+eine Rede halten|öffentlich sprechen|rede|{Die Bürgermeisterin|S} {hält|V} {heute Abend|W} {eine Rede|T}.
+ein Referat halten|vor der Klasse vortragen|rede|{Morgen|W} {muss|X} {ich|S} {in Biologie|W} {ein Referat|T} {halten|V}.
+eine Entscheidung treffen|entscheiden||{Wir|S} {müssen|X} {bis Freitag|W} {eine Entscheidung|T} {treffen|V}.
+eine Verabredung treffen|sich verabreden||{Ich|S} {habe|X} {mit meiner Freundin|P} {eine Verabredung|T} {getroffen|V}.
+eine Rolle spielen|wichtig sein||{Das Wetter|S} {spielt|V} {bei der Planung|W} {eine große Rolle|T}.
+Hilfe leisten|helfen||{Ein Passant|S} {hat|X} {dem Verletzten|D} {sofort|W} {Hilfe|T} {geleistet|V}.
+Gesellschaft leisten|bei jemandem bleiben||{Am Abend|W} {leistet|V} {die Katze|S} {meiner Oma|D} {Gesellschaft|T}.
+zu Ende gehen|enden|ende|{Der Film|S} {geht|V} {um zehn Uhr|W} {zu Ende|T}.
+zu Ende bringen|fertig machen|ende|{Ich|S} {möchte|X} {das Projekt|A} {heute|W} {zu Ende|T} {bringen|V}.
+zur Verfügung stellen|bereitstellen|verf|{Die Schule|S} {stellt|V} {den Kindern|D} {Laptops|A} {zur Verfügung|T}.
+zur Verfügung stehen|verfügbar sein|verf|{Ab sofort|W} {steht|V} {den Gästen|D} {ein Fahrradraum|S} {zur Verfügung|T}.
+in Frage kommen|möglich sein|moegl|{Ein Umzug|S} {kommt|V} {für uns|W} {nicht|N} {in Frage|T}.
+einen Eindruck machen|auf andere wirken||{Die neue Kollegin|S} {macht|V} {einen guten Eindruck|T}.
+Interesse wecken|neugierig machen||{Das Plakat|S} {weckt|V} {bei den Kindern|W} {Interesse|T}.
+Kontakt aufnehmen|kontaktieren|info|{Bitte|W} {nehmen|V} {Sie|S} {mit uns|P} {Kontakt|T} {auf|V}!
+eine Lösung finden|lösen||{Zum Glück|W} {haben|X} {wir|S} {eine Lösung|T} {gefunden|V}.
+Verständnis haben|verstehen||{Mein Chef|S} {hat|V} {viel Verständnis|T} {für meine Situation|P}.
+Rad fahren|mit dem Fahrrad fahren||{Mein Bruder|S} {fährt|V} {jeden Morgen|W} {Rad|T}.
+Klavier spielen|am Klavier musizieren||{Meine Tochter|S} {spielt|V} {seit drei Jahren|W} {Klavier|T}.
+Tennis spielen|||{Am Wochenende|W} {spielen|V} {wir|S} {im Park|W} {Tennis|T}.
+ein Gespräch führen|miteinander sprechen|rede|{Die Lehrerin|S} {führt|V} {morgen|W} {ein Gespräch|T} {mit den Eltern|P}.
+Protokoll führen|mitschreiben||{In jeder Sitzung|W} {führt|V} {ein anderer Kollege|S} {Protokoll|T}.
+Platz finden|hineinpassen||{Im Kofferraum|W} {findet|V} {auch das Fahrrad|S} {Platz|T}.
+zur Auswahl stehen|wählbar sein|moegl|{Heute|W} {stehen|V} {drei Menüs|S} {zur Auswahl|T}.
+in Gang kommen|anlaufen|gang|{Nach dem Winter|W} {kommt|V} {der Verkauf|S} {langsam|W} {in Gang|T}.
+in Gang bringen|starten|gang|{Der Mechaniker|S} {bringt|V} {den alten Motor|A} {wieder|W} {in Gang|T}.
+Beifall spenden|klatschen||{Am Ende|W} {spendet|V} {das Publikum|S} {lauten Beifall|T}.
+Bescheid sagen|informieren|info|{Kannst|X} {du|S} {mir|R} {morgen|W} {Bescheid|T} {sagen|V}?
+Angst haben|sich fürchten|angst|{Unser Hund|S} {hat|V} {bei Gewitter|W} {Angst|T}.
+Recht haben|richtig liegen||{Vielleicht|W} {hast|V} {du|S} {Recht|T}.
+Pause machen|kurz aufhören||{Um zehn Uhr|W} {machen|V} {wir|S} {eine kurze Pause|T}.
+zur Welt kommen|geboren werden||{Die Kätzchen|S} {sind|X} {im Mai|W} {zur Welt|T} {gekommen|V}.
+auf die Nerven gehen|stören||{Der Lärm|S} {geht|V} {mir|R} {auf die Nerven|T}.
+in Erfüllung gehen|wahr werden||{Sein Traum|S} {ist|X} {endlich|W} {in Erfüllung|T} {gegangen|V}.
+in Aufregung geraten|sich aufregen||{Bei der Nachricht|W} {geriet|V} {die ganze Klasse|S} {in Aufregung|T}.
+sich eine Meinung machen|sich ein Urteil bilden||{Mach|V} {dir|R} {selbst|W} {eine Meinung|T}!
+eine Auswahl treffen|auswählen||{Im Geschäft|W} {treffe|V} {ich|S} {schnell|W} {eine Auswahl|T}.
+einen Hinweis geben|hinweisen||{Ein Nachbar|S} {hat|X} {der Polizei|D} {einen Hinweis|T} {gegeben|V}.
+den Anfang machen|als Erster beginnen||{Heute|W} {macht|V} {die Klasse 3b|S} {den Anfang|T}.
+einen Auftrag geben|beauftragen||{Die Chefin|S} {gibt|V} {mir|R} {einen neuen Auftrag|T}.
 `;
 
 const D_C1 = `
-Die Firma nimmt {staatliche Förderungen|A:sie} {in Anspruch|F:nutzen}.
-Der Ausschuss stellt {den Entwurf|A:ihn} {am Montag|W:wann?} {zur Diskussion|F:diskutieren lassen}.
-Die Frist setzt {das Team|A:es} {gewaltig|W:wie stark?} {unter Druck|F:bedrängen}.
-Die Kommission nimmt {den Bericht|A:ihn} {zur Kenntnis|F:registrieren}.
-Viele Experten stellen {die Ergebnisse|A:sie} {in Frage|F:bezweifeln}.
-Viele Experten stellen {der Regierung|D:ihr} {kritische Fragen|A:sie}.
-Die neue Regelung tritt {Anfang des Jahres|W:wann?} {in Kraft|F:gültig werden}.
-Die Werkstatt stellt {dem Kunden|D:ihm} {die Ersatzteile|A:sie} {in Rechnung|F:berechnen}.
-Die Werkstatt schickt {dem Kunden|D:ihm} {die Rechnung|A:sie} {per E-Mail|W:wie?}.
-Wir ziehen {einen Umzug|A:ihn} {ernsthaft|W:wie?} {in Erwägung|F:erwägen}.
-Wir ziehen {nächstes Jahr|W:wann?} {nach Salzburg|R:}.
-Die Bevölkerung leistet {heftigen Widerstand|N:sich wehren}.
-Nur wenige Kunden machen von dem Angebot {Gebrauch|N:nutzen}.
-Der Fotograf macht {für die Zeitung|W:wofür?} {ein Porträt der Künstlerin|A:es}.
-Das Konzept findet {bei den Gästen|W:bei wem?} {großen Anklang|N:gut ankommen}.
-Das Ministerium gab {die Studie|A:sie} {im Herbst|W:wann?} {in Auftrag|F:beauftragen}.
-Das Ministerium gab {den Medien|D:ihnen} {im Herbst|W:wann?} {ein Interview|A:es}.
-Die Inflation brachte {viele Betriebe|A:sie} {in Schwierigkeiten|F:belasten}.
-{Beim Umbau|W:wann?} kamen alte Fresken {zum Vorschein|F:sichtbar werden}.
-Man sollte {diesen Aspekt|A:ihn} {keinesfalls|W:Verneinung} {außer Acht|F:ignorieren} lassen.
-Die geringen Mehrkosten fallen {kaum|W:wie stark?} {ins Gewicht|F:wichtig sein}.
-Die Ärztin hat {dem Verletzten|D:ihm} {sofort|W:wann?} {Erste Hilfe|N:helfen} geleistet.
-Die Ärztin hat {dem Verletzten|D:ihm} {eine Spritze|A:sie} gegeben.
-Die Opposition bringt {das Thema|A:es} {im Parlament|W:wo?} {zur Sprache|F:ansprechen}.
-Die Abgeordnete trägt {die Akten|A:sie} {ins Büro|R:}.
-Der Brand wurde {nach drei Stunden|W:wann?} {unter Kontrolle|F:eindämmen} gebracht.
-Ich lege {großen Wert|N:sehr wichtig finden} auf Pünktlichkeit.
-Ich lege {die Unterlagen|A:sie} {in die oberste Schublade|R:}.
-Die Trainerin stellt {den Spieler|A:ihn} {nach dem Spiel|W:wann?} {zur Rede|F:konfrontieren}.
-Die Trainerin stellt {dem Spieler|D:ihm} {einen neuen Plan|A:ihn} vor.
-Der Vorstand wird {erst nächste Woche|W:wann?} {eine Entscheidung|F:entscheiden} treffen.
-Der Vorstand wird {erst nächste Woche|W:wann?} {den Vertrag|A:ihn} unterschreiben.
-Die Gemeinde stellt {den Vereinen|D:ihnen} {den Saal|A:ihn} {kostenlos|W:wie?} {zur Verfügung|F:bereitstellen}.
-Ohne Hilfe wäre das Projekt {nie|W:Verneinung} {zustande|F:entstehen, gelingen} gekommen.
+in Anspruch nehmen|nutzen||{Immer mehr Familien|S} {nehmen|V} {staatliche Unterstützung|A} {in Anspruch|T}.
+in Zweifel ziehen|bezweifeln||{Mehrere Fachleute|S} {ziehen|V} {die Ergebnisse|A} {in Zweifel|T}.
+zum Ausdruck bringen|ausdrücken|aeuss|{Die Lehrerin|S} {brachte|V} {ihre Freude|A} {deutlich|W} {zum Ausdruck|T}.
+in Betracht ziehen|erwägen||{Wir|S} {ziehen|V} {einen Umzug|A} {ernsthaft|W} {in Betracht|T}.
+sich eine Meinung bilden|zu einem Urteil kommen|meinung|{Jeder|S} {sollte|X} {sich|R} {selbst|W} {eine Meinung|T} {bilden|V}.
+Anklage erheben|anklagen||{Die Staatsanwaltschaft|S} {hat|X} {gegen den Manager|P} {Anklage|T} {erhoben|V}.
+Beifall spenden|klatschen||{Das Publikum|S} {spendete|V} {lange|W} {Beifall|T}.
+zur Einsicht kommen|einsehen||{Nach dem Gespräch|W} {kam|V} {er|S} {endlich|W} {zur Einsicht|T}.
+die Konsequenzen ziehen|Folgerungen ableiten und handeln|handeln|{Die Firma|S} {hat|X} {aus dem Skandal|P} {die Konsequenzen|T} {gezogen|V}.
+in Vergessenheit geraten|vergessen werden||{Das alte Handwerk|S} {ist|X} {fast|W} {in Vergessenheit|T} {geraten|V}.
+in Erfahrung bringen|herausfinden||{Die Journalistin|S} {konnte|X} {den Namen des Täters|A} {nicht|N} {in Erfahrung|T} {bringen|V}.
+einen Auftrag erteilen|beauftragen||{Die Stadt|S} {hat|X} {einem Architekten|D} {den Auftrag|T} {erteilt|V}.
+zur Auswahl stellen|zum Wählen anbieten||{Das Hotel|S} {stellt|V} {den Gästen|D} {drei Menüs|A} {zur Auswahl|T}.
+zur Diskussion stellen|diskutieren lassen||{Der Ausschuss|S} {stellt|V} {den Entwurf|A} {am Montag|W} {zur Diskussion|T}.
+unter Druck setzen|bedrängen||{Die Frist|S} {setzt|V} {das ganze Team|A} {unter Druck|T}.
+sich in Verbindung setzen|kontaktieren|info|{Unser Service|S} {setzt|V} {sich|R} {umgehend|W} {mit Ihnen|P} {in Verbindung|T}.
+einen Antrag stellen|beantragen|antrag|{Die Familie|S} {hat|X} {beim Amt|W} {einen Antrag|T} {auf Förderung|P} {gestellt|V}.
+Anerkennung finden|anerkannt werden|pos|{Ihre Arbeit|S} {findet|V} {international|W} {große Anerkennung|T}.
+Trost finden|getröstet werden||{In der Musik|W} {fand|V} {er|S} {Trost|T}.
+Zustimmung finden|befürwortet werden|pos|{Der Vorschlag|S} {fand|V} {bei allen Beteiligten|W} {Zustimmung|T}.
+Hoffnungen wecken|hoffen lassen||{Die neuen Zahlen|S} {wecken|V} {bei den Anlegern|W} {Hoffnungen|T}.
+Erinnerungen wecken|erinnern||{Der Duft|S} {weckt|V} {in mir|W} {Erinnerungen|T} {an meine Kindheit|P}.
+einen Vorwurf machen|vorwerfen|krit|{Die Opposition|S} {macht|V} {der Regierung|D} {schwere Vorwürfe|T}.
+auf Kritik stoßen|kritisiert werden|krit|{Die Gebührenerhöhung|S} {stößt|V} {bei den Eltern|W} {auf Kritik|T}.
+auf Unverständnis stoßen|nicht verstanden werden|krit|{Die Entscheidung|S} {stieß|V} {in der Bevölkerung|W} {auf Unverständnis|T}.
+auf Ablehnung stoßen|abgelehnt werden|krit|{Der Plan|S} {ist|X} {im Gemeinderat|W} {auf Ablehnung|T} {gestoßen|V}.
+Stellung nehmen|sich äußern|aeuss|{Die Ministerin|S} {hat|X} {zu den Vorwürfen|P} {bisher|W} {nicht|N} {Stellung|T} {genommen|V}.
+Bezug nehmen|sich beziehen|aeuss|{In meinem Schreiben|W} {nehme|V} {ich|S} {Bezug|T} {auf Ihr Angebot|P}.
+Folge leisten|befolgen||{Die Bürger|S} {leisteten|V} {der Anordnung|D} {Folge|T}.
+Verzicht leisten|verzichten||{Der Kläger|S} {hat|X} {auf eine Entschädigung|P} {Verzicht|T} {geleistet|V}.
+Widerstand leisten|sich wehren|gegen|{Die Bevölkerung|S} {leistete|V} {gegen die Pläne|P} {heftigen Widerstand|T}.
+eine Straftat begehen|kriminell handeln||{Der Verdächtige|S} {soll|X} {mehrere Diebstähle|T} {begangen|V} {haben|X}.
+in Verdacht geraten|verdächtigt werden|verdacht|{Der Buchhalter|S} {ist|X} {in Verdacht|T} {geraten|V}.
+Einfluss ausüben|beeinflussen|einfluss|{Lobbygruppen|S} {üben|V} {großen Einfluss|T} {auf die Politik|P} {aus|V}.
+Beachtung schenken|beachten||{Der Lehrer|S} {schenkt|V} {den Störungen|D} {keine Beachtung|T}.
+in Erstaunen versetzen|erstaunen||{Das Ergebnis|S} {versetzte|V} {alle Experten|A} {in Erstaunen|T}.
+eine Absage erteilen|absagen||{Die Firma|S} {hat|X} {dem Bewerber|D} {eine Absage|T} {erteilt|V}.
+in Kraft treten|gültig werden|gelten|{Das Gesetz|S} {tritt|V} {Anfang des Jahres|W} {in Kraft|T}.
+ein Geschäft abschließen|einen Handel vereinbaren|beschl|{Die beiden Firmen|S} {haben|X} {ein großes Geschäft|T} {abgeschlossen|V}.
+sich in Acht nehmen|aufpassen||{Auf dem Eis|W} {müsst|X} {ihr|S} {euch|R} {in Acht|T} {nehmen|V}.
+ein Risiko eingehen|riskieren|gefahr|{Der Investor|S} {ist|X} {ein hohes Risiko|T} {eingegangen|V}.
+die Initiative ergreifen|aktiv werden|handeln|{Die Bürgermeisterin|S} {hat|X} {die Initiative|T} {ergriffen|V}.
+Kritik üben|kritisieren|krit|{Mehrere Verbände|S} {üben|V} {Kritik|T} {an der Reform|P}.
+in Schwung kommen|lebhaft werden||{Nach dem Essen|W} {kam|V} {die Party|S} {richtig|W} {in Schwung|T}.
+Verhandlungen führen|verhandeln|beschl|{Die Gewerkschaft|S} {führt|V} {seit Wochen|W} {Verhandlungen|T} {mit den Arbeitgebern|P}.
+in Streik treten|streiken||{Die Lokführer|S} {sind|X} {gestern|W} {in Streik|T} {getreten|V}.
+in Kenntnis setzen|informieren|info|{Wir|S} {haben|X} {die Behörde|A} {bereits|W} {in Kenntnis|T} {gesetzt|V}.
+Auswirkungen haben|sich auswirken||{Die Krise|S} {hat|V} {starke Auswirkungen|T} {auf den Arbeitsmarkt|P}.
+Anstrengungen unternehmen|sich bemühen|handeln|{Die Schule|S} {unternimmt|V} {große Anstrengungen|T}.
+zur Anwendung kommen|angewendet werden|gelten|{Die neue Methode|S} {kommt|V} {ab Herbst|W} {zur Anwendung|T}.
+eine Absprache treffen|vereinbaren|beschl|{Wir|S} {haben|X} {mit dem Vermieter|P} {eine Absprache|T} {getroffen|V}.
+sich im Bau befinden|gebaut werden||{Die neue Brücke|S} {befindet|V} {sich|R} {noch|W} {im Bau|T}.
+Anspruch erheben|beanspruchen|antrag|{Beide Erben|S} {erheben|V} {Anspruch|T} {auf das Haus|P}.
+unter Beobachtung stehen|beobachtet werden||{Das Gelände|S} {steht|V} {rund um die Uhr|W} {unter Beobachtung|T}.
+einen Beschluss fassen|beschließen|beschl|{Der Gemeinderat|S} {hat|X} {gestern|W} {einen Beschluss|T} {gefasst|V}.
+in Empfang nehmen|entgegennehmen||{Die Siegerin|S} {nahm|V} {den Preis|A} {strahlend|W} {in Empfang|T}.
+im Gegensatz stehen|widersprechen|gegen|{Seine Taten|S} {stehen|V} {im Gegensatz|T} {zu seinen Worten|P}.
+in Gefahr bringen|gefährden|gefahr|{Der Fahrer|S} {hat|X} {die Fußgänger|A} {in Gefahr|T} {gebracht|V}.
+sich im Irrtum befinden|sich irren||{Da|W} {befinden|V} {Sie|S} {sich|R} {im Irrtum|T}.
+das Wort ergreifen|zu sprechen beginnen|aeuss|{Nach der Pause|W} {ergriff|V} {die Direktorin|S} {das Wort|T}.
+im Stich lassen|allein lassen, nicht helfen||{Seine Freunde|S} {haben|X} {ihn|R} {nie|W} {im Stich|T} {gelassen|V}.
+Verdacht schöpfen|misstrauisch werden|verdacht|{Die Nachbarin|S} {schöpfte|V} {sofort|W} {Verdacht|T}.
+einen Versuch unternehmen|versuchen|handeln|{Die Forscher|S} {unternehmen|V} {einen neuen Versuch|T}.
+Vorbereitungen treffen|vorbereiten||{Das Team|S} {trifft|V} {schon jetzt|W} {Vorbereitungen|T} {für das Fest|P}.
+eine Rolle spielen|wichtig sein||{Der Preis|S} {spielt|V} {bei der Entscheidung|W} {eine wichtige Rolle|T}.
+einen Standpunkt vertreten|eine Meinung verteidigen|meinung|{Die Expertin|S} {vertritt|V} {einen klaren Standpunkt|T}.
+Maßnahmen ergreifen|etwas dagegen tun|handeln|{Die Regierung|S} {ergreift|V} {Maßnahmen|T} {gegen die Teuerung|P}.
+unter Einfluss stehen|beeinflusst sein|einfluss|{Viele Jugendliche|S} {stehen|V} {unter dem Einfluss ihrer Freunde|T}.
+zur Sprache bringen|ansprechen|aeuss|{Die Opposition|S} {bringt|V} {das Thema|A} {im Parlament|W} {zur Sprache|T}.
+in Rechnung stellen|berechnen||{Die Werkstatt|S} {stellt|V} {dem Kunden|D} {die Ersatzteile|A} {in Rechnung|T}.
+eine Forderung stellen|fordern||{Die Gewerkschaft|S} {stellt|V} {der Regierung|D} {klare Forderungen|T}.
+einen Entschluss fassen|sich entschließen|beschl|{Nach langem Überlegen|W} {fasste|V} {sie|S} {einen Entschluss|T}.
+Verdacht hegen|misstrauisch sein|verdacht|{Die Polizei|S} {hegt|V} {schon lange|W} {einen Verdacht|T} {gegen ihn|P}.
+Bemühungen unternehmen|sich bemühen|handeln|{Die Stadt|S} {unternimmt|V} {große Bemühungen|T}.
+unter Beweis stellen|zeigen, was man kann|beweis|{Beim Wettbewerb|W} {stellte|V} {sie|S} {ihr Talent|A} {unter Beweis|T}.
+einen Beitrag leisten|beitragen||{Jeder|S} {kann|X} {einen Beitrag|T} {zum Klimaschutz|P} {leisten|V}.
+zur Folge haben|bewirken||{Die neue Regelung|S} {hat|V} {höhere Kosten|A} {zur Folge|T}.
+in Erwägung ziehen|erwägen||{Würden|X} {Sie|S} {einen Umzug|A} {in Erwägung|T} {ziehen|V}?
+eine Vereinbarung treffen|vereinbaren|beschl|{Wir|S} {haben|X} {mit allen Partnern|P} {eine Vereinbarung|T} {getroffen|V}.
+Einfluss nehmen|beeinflussen|einfluss|{Eltern|S} {nehmen|V} {großen Einfluss|T} {auf ihre Kinder|P}.
+den Beweis erbringen|beweisen|beweis|{Die Forscherin|S} {konnte|X} {den Beweis|T} {für ihre These|P} {erbringen|V}.
+Unterstützung genießen|unterstützt werden|pos|{Die Initiative|S} {genießt|V} {breite Unterstützung|T}.
+einen Vorschlag unterbreiten|vorschlagen||{Die Beraterin|S} {hat|X} {dem Vorstand|D} {einen Vorschlag|T} {unterbreitet|V}.
+einen guten Eindruck hinterlassen|positiv wirken||{Die Bewerberin|S} {hat|X} {einen guten Eindruck|T} {hinterlassen|V}.
+zur Sprache kommen|besprochen werden|aeuss|{In der Sitzung|W} {kam|V} {auch die Finanzierung|S} {zur Sprache|T}.
+`;
+
+/* Verb-Wahl: Art|Verbgefüge|Satz mit ___|richtig|falsch,falsch,falsch|Hinweis
+   Art: F feste Verbindung, K Bewirken, V Vorgang, Z Zustand */
+const V_B1 = `
+F|Platz nehmen|Bitte ___ Sie doch Platz!|nehmen|machen,geben,stellen|bedeutet «sich setzen».
+F|eine Frage stellen|Darf ich Ihnen eine Frage ___?|stellen|legen,nehmen,halten|bedeutet «fragen».
+F|eine Antwort geben|Kannst du mir bitte eine Antwort ___?|geben|stellen,nehmen,halten|bedeutet «antworten».
+F|ein Referat halten|Morgen ___ ich in Geschichte ein Referat.|halte|nehme,stelle,treffe|Auch eine Rede oder einen Vortrag «hält» man.
+F|eine Rede halten|Der Präsident ___ eine lange Rede.|hielt|stellte,nahm,trat|Reden, Referate und Vorträge «hält» man.
+F|eine Entscheidung treffen|Wir müssen bis morgen eine Entscheidung ___.|treffen|stellen,halten,nehmen|Gehoben auch: eine Entscheidung fällen.
+F|einen Vorschlag machen|Meine Kollegin ___ einen interessanten Vorschlag.|macht|stellt,nimmt,trifft|Gehoben auch: einen Vorschlag unterbreiten.
+F|Angst machen|Große Hunde ___ meiner kleinen Schwester Angst.|machen|stellen,nehmen,halten|Jemandem Angst machen = ihn ängstigen.
+F|sich Sorgen machen|Ich ___ mir große Sorgen um meinen Opa.|mache|nehme,stelle,halte|bedeutet «sich sorgen».
+F|einen Fehler machen|Im Test habe ich leider einen Fehler ___.|gemacht|genommen,gestellt,getroffen|Gehoben auch: einen Fehler begehen.
+F|Rücksicht nehmen|Bitte ___ Sie Rücksicht auf die Nachbarn!|nehmen|machen,geben,halten|bedeutet «achtgeben auf».
+F|Abschied nehmen|Am Bahnhof haben wir von unseren Freunden Abschied ___.|genommen|gemacht,gegeben,gehalten|bedeutet «sich verabschieden».
+F|Hilfe leisten|Ein Passant hat dem Verletzten Erste Hilfe ___.|geleistet|getroffen,genommen,gestellt|«Erste Hilfe leisten» ist die feste Form.
+F|Gesellschaft leisten|Am Wochenende ___ ich meiner Oma Gesellschaft.|leiste|gebe,mache,halte|bedeutet «bei jemandem bleiben, damit er nicht allein ist».
+F|eine Rolle spielen|Der Preis ___ für mich keine große Rolle.|spielt|macht,hat,stellt|Keine Rolle spielen = nicht wichtig sein.
+F|eine Verabredung treffen|Ich habe mit meiner Freundin eine Verabredung für Samstag ___.|getroffen|gestellt,genommen,gehalten|bedeutet «sich verabreden».
+F|Unterricht geben|Meine Mutter ___ seit 20 Jahren Unterricht in Mathematik.|gibt|stellt,trifft,leistet|Unterricht geben = unterrichten. (Unterricht nehmen = selbst lernen.)
+F|einen Rat geben|Mein Vater hat mir einen guten Rat ___.|gegeben|gestellt,genommen,getroffen|bedeutet «raten».
+F|die Erlaubnis geben|Die Eltern ___ ihrem Sohn die Erlaubnis.|geben|stellen,nehmen,treffen|bedeutet «erlauben».
+F|ein Versprechen geben|Er hat seiner Mutter ein Versprechen ___.|gegeben|gestellt,genommen,getroffen|Ein Versprechen geben = versprechen; ein Versprechen halten = es erfüllen.
+F|einen Eindruck machen|Die neue Kollegin ___ einen sehr guten Eindruck.|macht|stellt,nimmt,trifft|bedeutet «gut auf andere wirken».
+F|Interesse wecken|Das bunte Plakat ___ das Interesse der Kinder.|weckt|macht,stellt,nimmt|Interesse, Hoffnungen, Erinnerungen «weckt» man.
+F|Kontakt aufnehmen|Bitte ___ Sie bis Freitag mit uns Kontakt auf!|nehmen|stellen,geben,treffen|Kontakt aufnehmen = kontaktieren.
+F|eine Lösung finden|Endlich haben wir eine Lösung für das Problem ___.|gefunden|gestellt,genommen,gehalten|bedeutet «lösen».
+F|ein Gespräch führen|Die Lehrerin ___ morgen ein Gespräch mit den Eltern.|führt|stellt,nimmt,trifft|Gespräche, Verhandlungen und Protokoll «führt» man.
+F|Protokoll führen|In jeder Sitzung ___ jemand Protokoll.|führt|stellt,nimmt,hält|Auch möglich: Protokoll schreiben.
+F|Beifall spenden|Am Ende ___ das Publikum lauten Beifall.|spendete|stellte,nahm,leistete|bedeutet «klatschen».
+F|Bescheid sagen|Kannst du mir morgen Bescheid ___?|sagen|stellen,nehmen,machen|Auch möglich: Bescheid geben.
+F|Rad fahren|Mein Bruder ___ jeden Tag Rad.|fährt|spielt,macht,geht|Rad fahren, Auto fahren, Ski fahren.
+F|Klavier spielen|Meine Tochter ___ seit drei Jahren Klavier.|spielt|macht,fährt,hält|Instrumente und Ballspiele «spielt» man: Klavier, Tennis, Fußball.
+F|Pause machen|Um zehn Uhr ___ wir eine kurze Pause.|machen|stellen,treffen,halten|Pause machen, Urlaub machen, Feierabend machen.
+F|Recht haben|Vielleicht ___ du Recht.|hast|machst,nimmst,stellst|Recht haben = richtig liegen.
+F|Platz finden|Im Kofferraum ___ auch das Fahrrad noch Platz.|findet|stellt,gibt,trifft|Platz finden = hineinpassen.
+F|zur Verfügung stellen|Die Schule ___ den Kindern Laptops zur Verfügung.|stellt|setzt,legt,bringt|zur Verfügung stellen = bereitstellen.
+F|zur Verfügung stehen|Ab sofort ___ den Gästen ein Fahrradraum zur Verfügung.|steht|stellt,kommt,liegt|Mit «stehen» ist es ein Zustand: Der Raum ist verfügbar.
+F|zur Auswahl stehen|Heute ___ drei Menüs zur Auswahl.|stehen|stellen,kommen,liegen|Mit «stehen»: Man kann daraus wählen.
+F|in Frage kommen|Ein Umzug ___ für uns nicht in Frage.|kommt|geht,stellt,bringt|in Frage kommen = möglich sein.
+F|auf die Nerven gehen|Der Lärm ___ mir total auf die Nerven.|geht|kommt,fällt,steht|bedeutet «stören».
+F|zur Welt kommen|Die Kätzchen sind im Mai zur Welt ___.|gekommen|gegangen,gestellt,getreten|bedeutet «geboren werden».
+F|in Erfüllung gehen|Sein Traum ist endlich in Erfüllung ___.|gegangen|gekommen,getreten,geraten|bedeutet «wahr werden».
+V|in Gang kommen|Nach dem Winter ___ der Verkauf langsam in Gang.|kommt|bringt,setzt,stellt|Der Verkauf beginnt von selbst – niemand wird genannt, der ihn startet.
+K|in Gang bringen|Der Mechaniker ___ den alten Motor wieder in Gang.|bringt|kommt,geht,ist|Der Mechaniker bewirkt es – «den Motor» ist das Akkusativobjekt.
+Z|in Betrieb sein|Seit Montag ___ die neue Maschine in Betrieb.|ist|bringt,kommt,setzt|«seit Montag» zeigt den Zustand: Die Maschine läuft.
+K|zu Ende bringen|Ich möchte das Projekt noch vor Weihnachten zu Ende ___.|bringen|gehen,sein,kommen|Ich bewirke, dass das Projekt fertig wird.
+V|zu Ende gehen|Der Film ___ um zehn Uhr zu Ende.|geht|bringt,setzt,stellt|Der Film endet von selbst.
+Z|zu Ende sein|Endlich ___ der Unterricht zu Ende.|ist|bringt,setzt,stellt|Zustand: Der Unterricht ist vorbei.
+K|in Aufregung versetzen|Die Nachricht ___ die ganze Klasse in Aufregung.|versetzte|geriet,war,kam|Die Nachricht bewirkt die Aufregung – «die ganze Klasse» ist Akkusativobjekt.
+V|in Aufregung geraten|Bei der Nachricht ___ die ganze Klasse in Aufregung.|geriet|versetzte,stellte,brachte|Die Klasse regt sich auf – sie ist hier das Subjekt.
+F|eine Auswahl treffen|Im Laden ___ ich schnell eine Auswahl.|treffe|stelle,nehme,halte|Auswahl, Wahl, Entscheidung «trifft» man.
+F|eine Wahl treffen|Du musst jetzt eine Wahl ___.|treffen|stellen,halten,leisten|eine Wahl treffen = wählen.
+F|den Anfang machen|Wer ___ heute den Anfang?|macht|stellt,nimmt,trifft|den Anfang machen = als Erster beginnen.
+F|einen Hinweis geben|Ein Nachbar hat der Polizei einen wichtigen Hinweis ___.|gegeben|gestellt,genommen,getroffen|einen Hinweis geben = hinweisen.
+F|sich Hoffnungen machen|Er ___ sich große Hoffnungen auf die Stelle.|macht|stellt,nimmt,hält|sich Hoffnungen machen = hoffen.
+F|der Meinung sein|Ich ___ der Meinung, dass du Recht hast.|bin|habe,mache,stelle|der Meinung sein = meinen. Ebenso: der Ansicht sein.
+F|einen Auftrag geben|Die Chefin hat mir einen neuen Auftrag ___.|gegeben|gestellt,genommen,gezogen|Gehoben: einen Auftrag erteilen.
+F|einen Auftrag bekommen|Die kleine Firma hat einen großen Auftrag ___.|bekommen|gestellt,geleistet,gezogen|Wer den Auftrag gibt, «erteilt» ihn; wer ihn bekommt, «erhält» ihn.
+F|Anspruch haben|Jedes Kind ___ Anspruch auf einen Kindergartenplatz.|hat|macht,stellt,leistet|Zustand; aktiv: Anspruch erheben.
+Z|in Gang sein|Die Bauarbeiten ___ schon seit Montag in Gang.|sind|bringen,setzen,stellen|«seit Montag» zeigt den Zustand: Sie laufen.
+V|zu Ende kommen|Endlich ___ der Redner zu Ende.|kam|brachte,setzte,stellte|Vorgang: Er hört auf.
+Z|in Aufregung sein|Die ganze Klasse ___ seit der Nachricht in Aufregung.|ist|versetzt,bringt,stellt|Zustand: Sie ist aufgeregt.
+`;
+
+const V_C1 = `
+F|in Zweifel ziehen|Mehrere Fachleute ___ die Ergebnisse der Studie in Zweifel.|ziehen|setzen,bringen,legen|in Zweifel ziehen = bezweifeln.
+F|zum Ausdruck bringen|Die Lehrerin ___ ihre Freude deutlich zum Ausdruck.|brachte|stellte,setzte,zog|zum Ausdruck bringen = ausdrücken.
+F|in Betracht ziehen|Wir ___ einen Umzug ins Ausland ernsthaft in Betracht.|ziehen|nehmen,stellen,bringen|in Betracht ziehen = erwägen.
+F|sich eine Meinung bilden|Jeder sollte sich selbst eine Meinung ___.|bilden|stellen,ziehen,leisten|Umgangssprachlich auch: sich eine Meinung machen.
+F|Anklage erheben|Die Staatsanwaltschaft hat gegen den Manager Anklage ___.|erhoben|gestellt,gemacht,gezogen|Anklage, Anspruch und Einspruch «erhebt» man.
+F|Beifall spenden|Das Publikum ___ lange Beifall.|spendete|leistete,stellte,zog|Beifall spenden = klatschen.
+F|zur Einsicht kommen|Nach dem Gespräch ___ er endlich zur Einsicht.|kam|ging,trat,fiel|zur Einsicht kommen = einsehen.
+F|die Konsequenzen ziehen|Die Firma hat aus dem Skandal die Konsequenzen ___.|gezogen|genommen,gestellt,gemacht|Konsequenzen und Schlüsse «zieht» man.
+F|in Erfahrung bringen|Die Journalistin konnte den Namen des Täters nicht in Erfahrung ___.|bringen|ziehen,stellen,nehmen|in Erfahrung bringen = herausfinden.
+F|einen Auftrag erteilen|Die Stadt hat einem Architekten den Auftrag ___.|erteilt|gestellt,geleistet,gezogen|Auch möglich: einen Auftrag geben.
+F|zur Auswahl stellen|Das Hotel ___ den Gästen drei Menüs zur Auswahl.|stellt|setzt,bringt,legt|Mit «stellen» bewirkt jemand etwas; mit «stehen» ist es ein Zustand.
+F|zur Diskussion stellen|Der Ausschuss ___ den Entwurf am Montag zur Diskussion.|stellt|setzt,zieht,legt|zur Diskussion stellen = diskutieren lassen.
+F|unter Druck setzen|Die knappe Frist ___ das ganze Team unter Druck.|setzt|zieht,legt,nimmt|unter Druck setzen = bedrängen.
+Z|unter Druck stehen|Seit Wochen ___ das ganze Team unter Druck.|steht|setzt,zieht,gerät|«seit Wochen» zeigt den Zustand.
+F|sich in Verbindung setzen|Unser Kundenservice ___ sich umgehend mit Ihnen in Verbindung.|setzt|stellt,bringt,legt|sich in Verbindung setzen = kontaktieren.
+Z|in Verbindung stehen|Wir ___ seit Jahren mit dieser Firma in Verbindung.|stehen|setzen,bringen,treten|«seit Jahren» zeigt den Zustand.
+F|einen Antrag stellen|Die Familie hat beim Amt einen Antrag auf Förderung ___.|gestellt|genommen,gezogen,geleistet|Anträge, Fragen, Forderungen «stellt» man.
+F|eine Aufgabe stellen|Die Lehrerin ___ der Klasse eine schwierige Aufgabe.|stellt|nimmt,zieht,leistet|Auch möglich: eine Aufgabe geben.
+F|Anerkennung finden|Ihre Arbeit ___ international große Anerkennung.|findet|leistet,zieht,stellt|Auch möglich: Anerkennung genießen.
+F|Trost finden|In der Musik ___ er Trost.|fand|zog,stellte,leistete|Trost finden = getröstet werden.
+F|Beachtung schenken|Der Lehrer ___ den Störungen keine Beachtung.|schenkt|findet,stellt,zieht|Wer beachtet, «schenkt» Beachtung; wer beachtet wird, «findet» sie.
+F|Beachtung finden|Der Film ___ kaum Beachtung.|fand|schenkte,stellte,zog|Der Film wird (kaum) beachtet – er «findet» Beachtung.
+F|Hoffnungen wecken|Die neuen Zahlen ___ bei den Anlegern große Hoffnungen.|wecken|stellen,ziehen,leisten|Hoffnungen, Erwartungen, Interesse «weckt» man.
+F|Erinnerungen wecken|Der Duft ___ in mir Erinnerungen an meine Kindheit.|weckt|stellt,zieht,leistet|Erinnerungen wecken = erinnern.
+F|einen Unterschied machen|Ein Lächeln kann einen großen Unterschied ___.|machen|stellen,ziehen,leisten|einen Unterschied machen = viel verändern.
+F|einen Vorwurf machen|Die Opposition ___ der Regierung schwere Vorwürfe.|macht|stellt,leistet,zieht|Gehoben auch: Vorwürfe erheben.
+F|auf Kritik stoßen|Die Gebührenerhöhung ___ bei vielen Eltern auf Kritik.|stößt|fällt,kommt,geht|auf Kritik, Ablehnung, Zustimmung, Unverständnis «stößt» man.
+F|auf Unverständnis stoßen|Die Entscheidung ___ in der Bevölkerung auf Unverständnis.|stieß|fiel,kam,ging|auf Unverständnis stoßen = nicht verstanden werden.
+F|auf Resonanz stoßen|Der neue Song ___ bei den Fans auf große Resonanz.|stieß|fiel,kam,ging|auf Resonanz stoßen = gut ankommen.
+F|Stellung nehmen|Die Ministerin hat zu den Vorwürfen bisher nicht Stellung ___.|genommen|gestellt,gegeben,gemacht|Stellung nehmen = sich äußern.
+F|in Besitz nehmen|Die neuen Bewohner haben das Haus in Besitz ___.|genommen|gestellt,gesetzt,gezogen|in Besitz nehmen = sich etwas aneignen.
+F|Bezug nehmen|In meinem Schreiben ___ ich Bezug auf Ihr Angebot.|nehme|stelle,mache,leiste|Bezug nehmen auf = sich beziehen auf.
+F|Folge leisten|Die Bürger ___ der Anordnung Folge.|leisteten|nahmen,machten,stellten|Folge leisten = befolgen.
+F|Verzicht leisten|Der Kläger hat auf eine Entschädigung Verzicht ___.|geleistet|genommen,gemacht,gestellt|Verzicht leisten = verzichten.
+F|gute Dienste leisten|Dieses alte Wörterbuch hat mir gute Dienste ___.|geleistet|genommen,gestellt,gezogen|gute Dienste leisten = sehr nützlich sein.
+F|eine Straftat begehen|Der Täter hat mehrere Diebstähle ___.|begangen|geleistet,getroffen,gezogen|Verbrechen, Straftaten, Diebstähle – und gehoben auch Fehler – «begeht» man.
+F|Verhandlungen führen|Die Gewerkschaft ___ seit Wochen Verhandlungen mit den Arbeitgebern.|führt|hält,stellt,leistet|Verhandlungen führen = verhandeln.
+F|in Streik treten|Die Lokführer sind gestern in Streik ___.|getreten|gekommen,gefallen,gestellt|Auch möglich: in den Streik gehen.
+F|in Kraft treten|Das neue Gesetz ___ Anfang des Jahres in Kraft.|tritt|kommt,geht,fällt|in Kraft treten = gültig werden.
+F|in Kenntnis setzen|Wir haben die Behörde bereits in Kenntnis ___.|gesetzt|gestellt,gebracht,genommen|in Kenntnis setzen = informieren.
+F|Auswirkungen haben|Die Krise ___ starke Auswirkungen auf den Arbeitsmarkt.|hat|macht,leistet,stellt|Auswirkungen haben auf = sich auswirken auf.
+F|Anstrengungen unternehmen|Die Schule ___ große Anstrengungen, um alle Kinder zu fördern.|unternimmt|leistet,stellt,zieht|Anstrengungen, Versuche, Schritte «unternimmt» man.
+F|zur Anwendung kommen|Die neue Methode ___ ab Herbst zur Anwendung.|kommt|geht,tritt,fällt|zur Anwendung kommen = angewendet werden.
+F|eine Absprache treffen|Wir haben mit dem Vermieter eine Absprache ___.|getroffen|gestellt,geleistet,gezogen|Absprachen, Vereinbarungen, Vorbereitungen «trifft» man.
+Z|sich im Bau befinden|Die neue Brücke ___ sich noch im Bau.|befindet|stellt,setzt,hält|Zustand: Sie wird gerade gebaut.
+F|Anspruch erheben|Beide Erben ___ Anspruch auf das Haus.|erheben|stellen,leisten,ziehen|Auch möglich: Anspruch haben auf (Zustand).
+F|einen Beschluss fassen|Der Gemeinderat hat gestern einen Beschluss ___.|gefasst|gestellt,geleistet,gezogen|Beschlüsse und Entschlüsse «fasst» man.
+F|in Empfang nehmen|Die Siegerin ___ den Preis strahlend in Empfang.|nahm|stellte,setzte,brachte|in Empfang nehmen = entgegennehmen.
+Z|im Gegensatz stehen|Seine Taten ___ im Gegensatz zu seinen Worten.|stehen|setzen,stellen,kommen|Zustand: Taten und Worte widersprechen sich.
+K|in Gefahr bringen|Der Fahrer hat die Fußgänger in Gefahr ___.|gebracht|gesetzt,gestellt,gezogen|Der Fahrer bewirkt die Gefahr – «die Fußgänger» ist Akkusativobjekt.
+Z|in Gefahr schweben|Das Leben des Bergsteigers ___ in Gefahr.|schwebt|bringt,setzt,stellt|Zustand, gehoben; auch möglich: ist in Gefahr.
+Z|sich im Irrtum befinden|Da ___ Sie sich aber im Irrtum!|befinden|setzen,stellen,bringen|sich im Irrtum befinden = sich irren.
+F|das Wort ergreifen|Nach der Pause ___ die Direktorin das Wort.|ergriff|stellte,leistete,zog|Das Wort, die Initiative, Maßnahmen «ergreift» man.
+F|im Stich lassen|Seine Freunde haben ihn nie im Stich ___.|gelassen|gestellt,gesetzt,gebracht|im Stich lassen = allein lassen, nicht helfen.
+F|Verdacht schöpfen|Die Nachbarin ___ Verdacht, als sie das Licht sah.|schöpfte|stellte,leistete,zog|Verdacht schöpfen = misstrauisch werden.
+F|einen Versuch unternehmen|Die Forscher ___ einen neuen Versuch.|unternehmen|stellen,leisten,ziehen|Auch möglich: einen Versuch machen.
+F|Vorbereitungen treffen|Das Team ___ schon jetzt Vorbereitungen für das Fest.|trifft|stellt,leistet,zieht|Vorbereitungen treffen = vorbereiten.
+F|Maßnahmen ergreifen|Die Regierung ___ endlich Maßnahmen gegen die Teuerung.|ergreift|stellt,leistet,zieht|Auch möglich: Maßnahmen treffen.
+F|die Initiative ergreifen|Die Bürgermeisterin hat die Initiative ___.|ergriffen|gestellt,geleistet,gezogen|die Initiative ergreifen = als Erste aktiv werden.
+F|ein Risiko eingehen|Der Investor ist ein hohes Risiko ___.|eingegangen|gekommen,getreten,gefallen|ein Risiko eingehen = riskieren (Perfekt mit «sein»).
+F|sich in Acht nehmen|Auf dem Eis müsst ihr euch in Acht ___!|nehmen|stellen,setzen,halten|sich in Acht nehmen = aufpassen.
+F|einen Vertrag schließen|Die beiden Firmen haben einen Vertrag ___.|geschlossen|gestellt,geleistet,gezogen|Auch möglich: einen Vertrag abschließen.
+F|einen Standpunkt vertreten|Die Expertin ___ einen klaren Standpunkt.|vertritt|stellt,leistet,zieht|Standpunkte, Meinungen, Ansichten «vertritt» man.
+F|eine Absage erteilen|Die Firma hat dem Bewerber eine Absage ___.|erteilt|gestellt,geleistet,gezogen|Absagen, Aufträge, Erlaubnisse, Ratschläge «erteilt» man (gehoben).
+F|Einfluss ausüben|Lobbygruppen ___ großen Einfluss auf die Politik aus.|üben|stellen,ziehen,leisten|Auch möglich: Einfluss nehmen auf.
+Z|unter Einfluss stehen|Viele Jugendliche ___ unter dem Einfluss ihrer Freunde.|stehen|üben,nehmen,setzen|Zustand: Sie werden beeinflusst.
+F|Kritik üben|Mehrere Verbände ___ scharfe Kritik an der Reform.|üben|leisten,ziehen,stellen|Kritik üben = kritisieren.
+K|in Erstaunen versetzen|Das Ergebnis ___ alle Experten in Erstaunen.|versetzte|geriet,war,kam|Das Ergebnis bewirkt das Staunen – «alle Experten» ist Akkusativobjekt.
+V|in Erstaunen geraten|Beim Anblick der Zahlen ___ alle Experten in Erstaunen.|gerieten|versetzten,stellten,brachten|Die Experten beginnen zu staunen – sie sind Subjekt.
+K|in Verdacht bringen|Ein anonymer Hinweis ___ den Buchhalter in Verdacht.|brachte|geriet,stand,kam|Der Hinweis bewirkt den Verdacht – «den Buchhalter» ist Akkusativobjekt.
+V|in Verdacht geraten|Durch die fehlenden Belege ___ der Buchhalter in Verdacht.|geriet|brachte,setzte,stellte|Vorgang: Er wird nach und nach verdächtig. Auch möglich: in Verdacht kommen.
+Z|unter Verdacht stehen|Der Buchhalter ___ seit Monaten unter Verdacht.|steht|bringt,setzt,gerät|«seit Monaten» zeigt den Zustand.
+K|in Schwung bringen|Die neue Chefin ___ das Projekt endlich in Schwung.|bringt|kommt,ist,gerät|Die Chefin bewirkt es – «das Projekt» ist Akkusativobjekt.
+V|in Schwung kommen|Nach dem Essen ___ die Party richtig in Schwung.|kam|brachte,setzte,stellte|Die Party wird von selbst lebhaft.
+V|in Bewegung kommen|Nach der Ankündigung ___ die Verhandlungen wieder in Bewegung.|kamen|brachten,setzten,stellten|Vorgang: Es geht wieder voran.
+K|zu Ende bringen|Die Mediatorin ___ die Verhandlungen zu Ende.|brachte|kam,ging,war|Die Mediatorin bewirkt das Ende.
+V|zu Ende gehen|Die Verhandlungen ___ nach drei Tagen zu Ende.|gingen|brachten,setzten,stellten|Vorgang: Sie enden.
+Z|zu Ende sein|Die Verhandlungen ___ jetzt endlich zu Ende.|sind|bringen,setzen,stellen|Zustand: Sie sind vorbei.
+K|in Aufregung versetzen|Der laute Knall ___ die Kinder in Aufregung.|versetzte|geriet,war,kam|Der Knall bewirkt die Aufregung.
+F|den Beweis erbringen|Die Forscherin konnte den Beweis für ihre These ___.|erbringen|stellen,ziehen,fassen|Gehoben: den Beweis erbringen oder liefern; einfacher: einen Beweis finden.
+Z|zur Diskussion stehen|Der Entwurf ___ seit Montag zur Diskussion.|steht|stellt,setzt,bringt|Zustand; aktiv: zur Diskussion stellen.
+F|Beifall finden|Der Vorschlag ___ bei allen großen Beifall.|fand|spendete,leistete,zog|Wer klatscht, «spendet» Beifall; was gelobt wird, «findet» Beifall.
+F|Unterstützung finden|Die Idee ___ sofort viel Unterstützung.|fand|leistete,zog,stellte|Auch: Unterstützung genießen (Zustand).
+F|Unterstützung genießen|Die Initiative ___ in der Bevölkerung breite Unterstützung.|genießt|leistet,zieht,stellt|Zustand: Sie wird unterstützt.
+F|Emotionen wecken|Das Lied ___ bei vielen Zuhörern starke Emotionen.|weckt|stellt,leistet,zieht|Emotionen, Erwartungen, Assoziationen «weckt» man.
+F|Erwartungen wecken|Die Werbung ___ hohe Erwartungen.|weckt|leistet,zieht,fasst|Erwartungen wecken = hoffen lassen.
+F|Assoziationen wecken|Der Name ___ bei vielen falsche Assoziationen.|weckt|leistet,zieht,fasst|Assoziationen wecken = an etwas denken lassen.
+F|auf Zustimmung stoßen|Der Plan ___ im Gemeinderat auf breite Zustimmung.|stieß|fiel,kam,ging|auf Zustimmung stoßen = befürwortet werden.
+F|ein Verbrechen begehen|Der Mann hat ein schweres Verbrechen ___.|begangen|geleistet,getroffen,gezogen|Verbrechen, Straftaten, Morde «begeht» man.
+F|einen Mord begehen|Der Angeklagte soll den Mord im Jahr 2019 ___ haben.|begangen|geleistet,getroffen,gezogen|einen Mord begehen = morden.
+F|einen Diebstahl begehen|Die Jugendlichen haben im Supermarkt einen Diebstahl ___.|begangen|geleistet,genommen,gestellt|einen Diebstahl begehen = stehlen.
+F|einen Fehler begehen|Der Minister gab zu, einen schweren Fehler ___ zu haben.|begangen|geleistet,genommen,gestellt|Gehoben für: einen Fehler machen.
+V|in Verdacht kommen|Durch einen Zeugen ___ auch der Nachbar in Verdacht.|kam|brachte,setzte,stellte|Vorgang; ebenso: in Verdacht geraten.
+F|eine Erlaubnis erteilen|Die Behörde hat uns die Erlaubnis für den Umbau ___.|erteilt|gestellt,geleistet,gezogen|Gehoben für: die Erlaubnis geben.
+F|Anerkennung genießen|Die Ärztin ___ in der ganzen Stadt hohe Anerkennung.|genießt|leistet,zieht,stellt|Zustand; Vorgang: Anerkennung finden.
+Z|sich in Abhängigkeit befinden|Viele Zulieferer ___ sich in starker Abhängigkeit von einem Konzern.|befinden|stellen,setzen,bringen|Zustand: Sie sind abhängig.
+F|Bemühungen unternehmen|Die Stadt ___ große Bemühungen, um Wohnraum zu schaffen.|unternimmt|leistet,stellt,zieht|Bemühungen unternehmen = sich bemühen.
+V|in Bewegung geraten|Durch das Erdbeben ___ der ganze Hang in Bewegung.|geriet|brachte,setzte,stellte|Vorgang: Der Hang beginnt sich zu bewegen.
+F|einen Entschluss fassen|Nach langem Überlegen ___ sie einen Entschluss.|fasste|stellte,leistete,zog|einen Entschluss fassen = sich entschließen.
+F|eine Forderung stellen|Die Gewerkschaft ___ klare Forderungen an die Regierung.|stellt|leistet,zieht,fasst|Forderungen, Anträge, Fragen «stellt» man.
+Z|sich in Gefahr befinden|Die Wanderer ___ sich in großer Gefahr.|befanden|stellten,setzten,brachten|Zustand, gehoben für: in Gefahr sein.
+Z|in Gefahr sein|Das Leben des Kindes ___ nicht mehr in Gefahr.|ist|bringt,setzt,stellt|Zustand; Bewirken: in Gefahr bringen.
+F|Maßnahmen treffen|Die Schule hat Maßnahmen gegen Mobbing ___.|getroffen|gestellt,geleistet,gezogen|Auch möglich: Maßnahmen ergreifen.
+F|Hoffnung hegen|Die Familie ___ noch immer die Hoffnung, ihn zu finden.|hegt|stellt,leistet,zieht|gehoben für: die Hoffnung haben.
+Z|im Irrtum sein|Wer glaubt, das sei einfach, ___ im Irrtum.|ist|bringt,setzt,stellt|gehoben: sich im Irrtum befinden.
+F|eine Meinung vertreten|Sie ___ in dieser Frage eine klare Meinung.|vertritt|stellt,leistet,zieht|Meinungen, Ansichten, Standpunkte «vertritt» man.
+F|der Ansicht sein|Die Expertin ___ der Ansicht, dass das Gesetz zu spät kommt.|ist|hat,macht,stellt|der Ansicht sein = meinen.
+F|einen Rat erteilen|Der Anwalt hat seiner Mandantin einen klugen Rat ___.|erteilt|gestellt,geleistet,gezogen|gehoben für: einen Rat geben.
+F|Verbesserungen vornehmen|Die Firma hat zahlreiche Verbesserungen ___.|vorgenommen|gestellt,geleistet,gezogen|Auch: Verbesserungen durchführen.
+F|Verdacht hegen|Die Polizei ___ schon lange einen Verdacht gegen ihn.|hegt|stellt,leistet,zieht|Verdacht hegen = misstrauisch sein (Zustand); Verdacht schöpfen = misstrauisch werden.
+F|einen Auftrag erhalten|Unsere Firma hat gestern einen wichtigen Auftrag ___.|erhalten|gezogen,geleistet,gestellt|einen Auftrag erhalten = beauftragt werden.
+F|in Frage stellen|Mehrere Experten ___ die Ergebnisse in Frage.|stellen|setzen,bringen,ziehen|in Frage stellen = bezweifeln; ebenso: in Zweifel ziehen.
+F|einen Beitrag leisten|Jeder kann einen Beitrag zum Klimaschutz ___.|leisten|stellen,ziehen,fassen|einen Beitrag leisten = beitragen.
+F|Einfluss nehmen|Eltern ___ großen Einfluss auf die Entwicklung ihrer Kinder.|nehmen|stellen,fassen,leisten|Auch: Einfluss ausüben.
+F|einen Vorschlag unterbreiten|Die Beraterin hat dem Vorstand einen Vorschlag ___.|unterbreitet|gestellt,geleistet,gezogen|gehoben für: einen Vorschlag machen.
+V|zur Sprache kommen|In der Sitzung ___ auch die Finanzierung zur Sprache.|kam|ging,trat,fiel|Vorgang; aktiv: zur Sprache bringen.
+F|einen guten Eindruck hinterlassen|Die Bewerberin hat einen guten Eindruck ___.|hinterlassen|gestellt,geleistet,gezogen|Auch: einen guten Eindruck machen.
+F|unter Beweis stellen|Beim Wettbewerb ___ sie ihr Talent unter Beweis.|stellte|setzte,brachte,zog|unter Beweis stellen = zeigen, was man kann.
+F|in Erwägung ziehen|Wir ___ einen Umzug ins Ausland in Erwägung.|ziehen|nehmen,stellen,bringen|in Erwägung ziehen = erwägen.
+F|zur Folge haben|Die neue Regelung ___ höhere Kosten zur Folge.|hat|macht,bringt,stellt|zur Folge haben = bewirken.
+F|eine Vereinbarung treffen|Wir haben mit allen Partnern eine Vereinbarung ___.|getroffen|gestellt,geleistet,gezogen|Vereinbarungen, Absprachen, Entscheidungen «trifft» man.
+`;
+
+/* Zusätzliche Werkstatt-Aufgaben (gleiches Format wie oben) */
+const W_B1_ADD = `
+N|eine Frage stellen|fragen|q|Ja/Nein-Frage mit „dürfen“|F|||darf|S=ich;R=Ihnen|eine Frage|stellen|
+N|eine Antwort geben|antworten|t|Perfekt|H||S=niemand|hat|R=mir;M=bisher|eine Antwort|gegeben|
+N|ein Referat halten|vortragen|m|mit „müssen“|H||Z=morgen|muss|S=ich;M=in Biologie|ein Referat|halten|
+N|eine Rede halten|öffentlich sprechen|t|Präteritum|H||S=die Bürgermeisterin|hielt|O=beim Stadtfest|eine kurze Rede||
+N|eine Entscheidung treffen|entscheiden|ns|Nebensatz mit „bevor“|N|Wir sprechen noch einmal darüber, bevor||treffen|S=wir|eine Entscheidung||
+N|einen Vorschlag machen|vorschlagen|t|Perfekt|H||S=meine Kollegin|hat|Z=gestern|einen guten Vorschlag|gemacht|
+N|Angst machen|ängstigen|p|Präsens|H||S=große Hunde|machen|D=meiner kleinen Schwester|Angst||
+N|sich Sorgen machen|sich sorgen|q|Imperativ (du-Form), verneint mit „kein“|B|||mach|R=dir;M=bitte|keine Sorgen||
+N|einen Fehler machen|sich irren|t|Perfekt|H||O=im Test|habe|S=ich;M=leider|einen Fehler|gemacht|
+N|Unterricht geben|unterrichten|p|Präsens|H||S=meine Mutter|gibt|Z=seit 20 Jahren|Unterricht||
+N|einen Rat geben|raten|t|Perfekt|H||S=mein Vater|hat|R=mir;Z=damals|einen guten Rat|gegeben|
+N|die Erlaubnis geben|erlauben|ns|Nebensatz mit „dass“|N|Ich hoffe, dass||geben|S=die Eltern;D=ihrem Sohn|die Erlaubnis||
+N|ein Versprechen geben|versprechen|t|Perfekt|H||S=er|hat|D=seiner Mutter|ein Versprechen|gegeben|
+N|Hilfe leisten|helfen|t|Perfekt|H||S=ein Passant|hat|D=dem Verletzten;Z=sofort|Erste Hilfe|geleistet|
+N|Gesellschaft leisten|bei jemandem bleiben|p|Präsens|H||Z=am Wochenende|leiste|S=ich;D=meiner Oma|Gesellschaft||
+N|eine Rolle spielen|wichtig sein|ng|verneint mit „kein“ · Präsens|H||S=der Preis|spielt|M=für mich|keine große Rolle||
+N|eine Verabredung treffen|sich verabreden|t|Perfekt|H||S=ich|habe|P=mit meiner Freundin|eine Verabredung|getroffen|
+N|einen Eindruck machen|gut wirken|p|Präsens|H||S=die neue Kollegin|macht|P=auf alle|einen sehr guten Eindruck||
+N|Interesse wecken|neugierig machen|t|Perfekt|H||S=das Plakat|hat|O=bei vielen Kindern|Interesse|geweckt|
+N|Kontakt aufnehmen|kontaktieren|q|Imperativ (Sie-Form)|B|||nehmen|S=Sie;M=bitte;Z=bis Freitag;P=mit uns|Kontakt|auf|
+N|eine Lösung finden|lösen|t|Perfekt|H||M=zum Glück|haben|S=wir;Z=schnell|eine Lösung|gefunden|
+N|ein Gespräch führen|miteinander sprechen|m|mit „müssen“|H||S=die Lehrerin|muss|Z=morgen;P=mit den Eltern|ein Gespräch|führen|
+N|Protokoll führen|mitschreiben|p|Präsens|H||O=in jeder Sitzung|führt|S=ein anderer Kollege|Protokoll||
+N|Beifall spenden|klatschen|t|Präteritum|H||Z=am Ende|spendete|S=das Publikum|lauten Beifall||
+N|Platz finden|hineinpassen|p|Präsens|H||O=im Kofferraum|findet|S=auch das Fahrrad|Platz||
+F|zur Auswahl stehen|wählbar sein|p|Präsens|H||Z=heute|stehen|S=drei Menüs|zur Auswahl||
+F|in Gang kommen|anlaufen|p|Präsens|H||Z=nach dem Winter|kommt|S=der Verkauf;M=langsam|in Gang||
+F|in Gang bringen|starten|t|Perfekt|H||S=der Mechaniker|hat|A=den alten Motor;M=wieder|in Gang|gebracht|
+F|zu Ende sein|vorbei sein|q|W-Frage|W||W=wann|ist|S=der Kurs|zu Ende||
+F|in Aufregung geraten|sich aufregen|t|Präteritum|H||O=bei der Nachricht|geriet|S=die ganze Klasse|in Aufregung||
+N|Bescheid geben|informieren|zu|zu-Infinitiv|I|Vergiss bitte nicht,|||R=mir;Z=morgen|Bescheid|zu geben|
+N|den Anfang machen|als Erster beginnen|q|W-Frage|W||W=wer|macht|Z=heute|den Anfang||
+N|eine Auswahl treffen|auswählen|m|mit „müssen“|H||S=du|musst|Z=jetzt|eine Auswahl|treffen|
+N|einen Hinweis geben|hinweisen|t|Perfekt|H||S=ein Nachbar|hat|D=der Polizei|einen wichtigen Hinweis|gegeben|
+N|einen Auftrag geben|beauftragen|t|Perfekt|H||S=die Chefin|hat|R=mir;Z=heute|einen neuen Auftrag|gegeben|
+N|Anspruch haben|ein Recht haben|p|Präsens|H||S=jedes Kind|hat||Anspruch||P=auf einen Kindergartenplatz
+`;
+
+const W_C1_ADD = `
+F|in Zweifel ziehen|bezweifeln|p|Präsens|H||S=mehrere Fachleute|ziehen|A=die Ergebnisse der Studie|in Zweifel||
+N|sich eine Meinung bilden|zu einem Urteil kommen|m|mit „sollte“|H||S=jeder|sollte|R=sich;M=selbst|eine Meinung|bilden|
+N|Anklage erheben|anklagen|t|Perfekt|H||S=die Staatsanwaltschaft|hat|P=gegen den Manager|Anklage|erhoben|
+F|zur Einsicht kommen|einsehen|t|Präteritum|H||Z=nach dem Gespräch|kam|S=er;M=endlich|zur Einsicht||
+N|die Konsequenzen ziehen|Folgerungen ableiten und handeln|t|Perfekt|H||S=die Firma|hat|P=aus dem Skandal|die Konsequenzen|gezogen|
+F|in Erfahrung bringen|herausfinden|ng|verneint · Präteritum mit „können“|H||S=die Journalistin|konnte|A=den Namen des Täters;N=nicht|in Erfahrung|bringen|
+N|einen Auftrag erteilen|beauftragen|t|Perfekt|H||S=die Stadt|hat|D=einem Architekten|den Auftrag|erteilt|
+F|zur Auswahl stellen|zum Wählen anbieten|p|Präsens|H||S=das Hotel|stellt|D=den Gästen;A=drei Menüs|zur Auswahl||
+N|einen Antrag stellen|beantragen|t|Perfekt|H||S=die Familie|hat|O=beim Amt|einen Antrag|gestellt||P=auf Förderung
+N|Anerkennung finden|anerkannt werden|p|Präsens|H||S=ihre Arbeit|findet|M=international|große Anerkennung||
+N|Beachtung schenken|beachten|ng|verneint mit „kein“ · Präsens|H||S=der Lehrer|schenkt|D=den Störungen|keine Beachtung||
+N|Hoffnungen wecken|hoffen lassen|p|Präsens|H||S=die neuen Zahlen|wecken|M=bei den Anlegern|große Hoffnungen||
+N|einen Vorwurf machen|vorwerfen|t|Perfekt|H||S=die Opposition|hat|D=der Regierung|schwere Vorwürfe|gemacht|
+F|auf Ablehnung stoßen|abgelehnt werden|t|Perfekt|H||S=der Plan|ist|O=im Gemeinderat|auf Ablehnung|gestoßen|
+F|auf Unverständnis stoßen|nicht verstanden werden|ns|Nebensatz mit „obwohl“|N|Die Regierung hält an der Entscheidung fest, obwohl||stößt|S=sie;M=in der Bevölkerung|auf Unverständnis||
+F|in Besitz nehmen|sich aneignen|t|Perfekt|H||S=die neuen Bewohner|haben|A=das Haus;Z=gestern|in Besitz|genommen|
+N|Folge leisten|befolgen|t|Präteritum|H||S=die Bürger|leisteten|D=der Anordnung;M=sofort|Folge||
+N|Verzicht leisten|verzichten|t|Perfekt|H||S=der Kläger|hat|P=auf eine Entschädigung|Verzicht|geleistet|
+N|gute Dienste leisten|sehr nützlich sein|t|Perfekt|H||S=das alte Wörterbuch|hat|R=mir;Z=jahrelang|gute Dienste|geleistet|
+N|eine Straftat begehen|kriminell handeln|m|mit „sollen“ (Vermutung) · Infinitiv Perfekt|H||S=der Verdächtige|soll|Z=im Sommer|mehrere Diebstähle|begangen+haben|
+N|einen Fehler begehen|einen Fehler machen|ns|Nebensatz mit „weil“ (Plusquamperfekt)|N|Er entschuldigte sich, weil||hatte|S=er;M=bei der Abrechnung|einen schweren Fehler|begangen|
+F|in Verdacht geraten|verdächtigt werden|t|Perfekt|H||S=der Buchhalter|ist|M=durch die fehlenden Belege|in Verdacht|geraten|
+F|unter Verdacht stehen|verdächtigt sein|p|Präsens|H||S=der Buchhalter|steht|Z=seit Monaten|unter Verdacht||
+F|in Verdacht bringen|verdächtig machen|t|Präteritum|H||S=ein anonymer Hinweis|brachte|A=den Buchhalter|in Verdacht||
+N|Einfluss ausüben|beeinflussen|p|Präsens|H||S=Lobbygruppen|üben|P=auf die Politik|großen Einfluss|aus|
+F|unter Einfluss stehen|beeinflusst sein|p|Präsens|H||S=viele Jugendliche|stehen|M=stark|unter dem Einfluss ihrer Freunde||
+F|in Erstaunen versetzen|erstaunen|t|Präteritum|H||S=das Ergebnis|versetzte|A=alle Experten|in Erstaunen||
+F|in Erstaunen geraten|staunen|t|Präteritum|H||O=beim Anblick der Zahlen|gerieten|S=alle Experten|in Erstaunen||
+N|eine Absage erteilen|absagen|t|Perfekt|H||S=die Firma|hat|D=dem Bewerber;M=leider|eine Absage|erteilt|
+N|ein Geschäft abschließen|einen Handel vereinbaren|t|Perfekt|H||S=die beiden Firmen|haben|Z=gestern|ein großes Geschäft|abgeschlossen|
+F|sich in Acht nehmen|aufpassen|m|mit „müssen“|H||O=auf dem Eis|müsst|S=ihr;R=euch|in Acht|nehmen|
+N|ein Risiko eingehen|riskieren|t|Perfekt|H||S=der Investor|ist|M=bewusst|ein hohes Risiko|eingegangen|
+N|die Initiative ergreifen|aktiv werden|t|Perfekt|H||S=die Bürgermeisterin|hat|M=schließlich|die Initiative|ergriffen|
+N|einen Vertrag schließen|vertraglich vereinbaren|ns|Nebensatz mit „nachdem“ (Plusquamperfekt)|N|Die Arbeiten begannen, nachdem||hatten|S=die Partner|einen Vertrag|geschlossen|
+F|in Schwung kommen|lebhaft werden|t|Präteritum|H||Z=nach dem Essen|kam|S=die Party;M=richtig|in Schwung||
+N|Verhandlungen führen|verhandeln|p|Präsens|H||S=die Gewerkschaft|führt|Z=seit Wochen|Verhandlungen||P=mit den Arbeitgebern
+F|in Streik treten|streiken|t|Perfekt|H||S=die Lokführer|sind|Z=gestern|in Streik|getreten|
+F|in Kenntnis setzen|informieren|t|Perfekt|H||S=wir|haben|A=die Behörde;Z=bereits|in Kenntnis|gesetzt|
+N|Auswirkungen haben|sich auswirken|p|Präsens|H||S=die Krise|hat|Z=schon jetzt|starke Auswirkungen||P=auf den Arbeitsmarkt
+N|einen Vorschlag unterbreiten|vorschlagen|t|Perfekt|H||S=die Beraterin|hat|D=dem Vorstand|einen neuen Vorschlag|unterbreitet|
+N|Anstrengungen unternehmen|sich bemühen|p|Präsens|H||S=die Schule|unternimmt|Z=seit Jahren|große Anstrengungen||
+F|zur Anwendung kommen|angewendet werden|ns|Nebensatz mit „wenn“|N|Die Regel gilt nur, wenn||kommt|S=das neue Verfahren|zur Anwendung||
+N|eine Absprache treffen|vereinbaren|t|Perfekt|H||S=wir|haben|P=mit dem Vermieter|eine Absprache|getroffen|
+F|sich im Bau befinden|gebaut werden|p|Präsens|H||S=die neue Brücke|befindet|R=sich;Z=noch|im Bau||
+N|Anspruch erheben|beanspruchen|p|Präsens|H||S=beide Erben|erheben||Anspruch||P=auf das Haus
+F|unter Beobachtung stehen|beobachtet werden|p|Präsens|H||S=das Gelände|steht|Z=rund um die Uhr|unter Beobachtung||
+N|einen Beschluss fassen|beschließen|t|Perfekt|H||S=der Gemeinderat|hat|Z=gestern|einen Beschluss|gefasst|
+F|in Empfang nehmen|entgegennehmen|t|Präteritum|H||S=die Siegerin|nahm|A=den Preis;M=strahlend|in Empfang||
+F|im Gegensatz stehen|widersprechen|p|Präsens|H||S=seine Taten|stehen||im Gegensatz||P=zu seinen Worten
+F|in Gefahr bringen|gefährden|t|Perfekt|H||S=der Fahrer|hat|A=die Fußgänger;M=durch sein Tempo|in Gefahr|gebracht|
+F|in Gefahr schweben|in Lebensgefahr sein|ng|verneint mit „nicht mehr“ · Präsens|H||S=das Leben des Bergsteigers|schwebt|N=nicht mehr|in Gefahr||
+F|sich im Irrtum befinden|sich irren|p|Präsens|H||M=da|befinden|S=Sie;R=sich;M=leider|im Irrtum||
+N|das Wort ergreifen|zu sprechen beginnen|t|Präteritum|H||Z=nach der Pause|ergriff|S=die Direktorin|das Wort||
+F|im Stich lassen|allein lassen, nicht helfen|t|Perfekt|H||S=seine Freunde|haben|R=ihn;M=nie|im Stich|gelassen|
+N|Verdacht schöpfen|misstrauisch werden|ns|Nebensatz mit „als“|N|Die Nachbarin rief an, als||schöpfte|S=sie;M=endlich|Verdacht||
+N|einen Versuch unternehmen|versuchen|m|mit „wollen“|H||S=die Forscher|wollen|Z=nächstes Jahr|einen neuen Versuch|unternehmen|
+N|Vorbereitungen treffen|vorbereiten|p|Präsens|H||S=das Team|trifft|Z=schon jetzt|Vorbereitungen||P=für das Fest
+N|einen Standpunkt vertreten|eine Meinung verteidigen|t|Präteritum|H||O=in der Debatte|vertrat|S=die Expertin|einen klaren Standpunkt||
+N|eine Rolle spielen|wichtig sein|ns|Nebensatz mit „dass“|N|Es ist klar, dass||spielt|S=der Preis;O=bei der Entscheidung|eine wichtige Rolle||
+N|Unterstützung genießen|unterstützt werden|p|Präsens|H||S=die Initiative|genießt|O=in der Bevölkerung|breite Unterstützung||
+N|eine Vereinbarung treffen|vereinbaren|zu|zu-Infinitiv|I|Es ist gelungen,|||P=mit allen Partnern|eine Vereinbarung|zu treffen|
+N|einen guten Eindruck hinterlassen|positiv wirken|t|Perfekt|H||S=die Bewerberin|hat|O=beim Gespräch|einen guten Eindruck|hinterlassen|
+F|zur Sprache kommen|besprochen werden|t|Perfekt|H||O=in der Sitzung|ist|M=auch;S=die Finanzierung|zur Sprache|gekommen|
+N|Kontakt aufnehmen|kontaktieren|zu|zu-Infinitiv|I|Wir bitten Sie,|||Z=umgehend;P=mit uns|Kontakt|aufzunehmen|
+F|in Bewegung kommen|vorankommen|t|Präteritum|H||Z=nach der Ankündigung|kamen|S=die Verhandlungen;M=wieder|in Bewegung||
+N|eine Forderung stellen|fordern|p|Präsens|H||S=die Gewerkschaft|stellt|D=der Regierung|klare Forderungen||
+N|einen Entschluss fassen|sich entschließen|t|Präteritum|H||Z=nach langem Überlegen|fasste|S=sie|einen Entschluss||
+N|Maßnahmen treffen|handeln|t|Perfekt|H||S=die Schule|hat||Maßnahmen|getroffen||P=gegen Mobbing
+N|Verbesserungen vornehmen|verbessern|t|Perfekt|H||S=die Firma|hat|Z=im letzten Jahr|zahlreiche Verbesserungen|vorgenommen|
+N|Verdacht hegen|misstrauisch sein|p|Präsens|H||S=die Polizei|hegt|Z=schon lange|einen Verdacht||P=gegen ihn
+N|Emotionen wecken|berühren|p|Präsens|H||S=das Lied|weckt|M=bei vielen Zuhörern|starke Emotionen||
+N|Anerkennung genießen|geachtet werden|p|Präsens|H||S=die Ärztin|genießt|O=in der ganzen Stadt|hohe Anerkennung||
+F|sich in Gefahr befinden|in Gefahr sein|t|Präteritum|H||S=die Wanderer|befanden|R=sich|in großer Gefahr||
+N|einen Mord begehen|morden|m|mit „sollen“ (Vermutung) · Infinitiv Perfekt|H||S=der Angeklagte|soll|Z=im Jahr 2019|den Mord|begangen+haben|
+N|Hoffnung hegen|hoffen|p|Präsens|H||S=die Familie|hegt|Z=noch immer|Hoffnung||
+F|in Bewegung geraten|sich zu bewegen beginnen|t|Präteritum|H||M=durch das Erdbeben|geriet|S=der ganze Hang|in Bewegung||
+N|einen Rat erteilen|raten|t|Perfekt|H||S=der Anwalt|hat|D=seiner Mandantin|einen klugen Rat|erteilt|
+N|den Beweis erbringen|beweisen|m|Präteritum mit „können“|H||S=die Forscherin|konnte||den Beweis|erbringen||P=für ihre These
 `;
 
 /* ===================== LOGIK ===================== */
@@ -484,10 +868,14 @@ const PREPS=['zur','zum','zu','in','ins','im','unter','außer','auf','aufs','ums
 function blk(s){return s?s.split(';').filter(Boolean).map(x=>{const i=x.indexOf('=');return {r:x.slice(0,i),t:x.slice(i+1)}}):[];}
 function parseW(txt){return txt.trim().split('\n').map((line,id)=>{const f=line.split('|');
   return {id,cat:f[0],fvg:f[1],ers:f[2],tag:f[3],label:f[4],kind:f[5],prefix:f[6],vf:blk(f[7])[0]||null,fin:f[8],mf:blk(f[9]),vt:f[10],rk:f[11]?f[11].split('+'):[],nf:blk(f[12]||''),af:blk(f[13]||'')};});}
-function parseD(txt){return txt.trim().split('\n').map((s,id)=>{const parts=[];const re=/\{([^}|]+)\|([A-Z]):?([^}]*)\}/g;let last=0,m;
-  while((m=re.exec(s))){if(m.index>last)parts.push({txt:s.slice(last,m.index)});parts.push({seg:m[1],code:m[2],note:m[3]});last=re.lastIndex;}
-  if(last<s.length)parts.push({txt:s.slice(last)});return {id,parts};});}
-const DATA={b1:{W:parseW(W_B1),D:parseD(D_B1)},c1:{W:parseW(W_C1),D:parseD(D_C1)}};
+function parseD(txt){return txt.trim().split('\n').map((line,id)=>{const f=line.split('|');const sent=f.slice(3).join('|');
+  const parts=[];const re=/\{([^}|]+)\|([A-Z])\}/g;let last=0,m;
+  while((m=re.exec(sent))){if(m.index>last)parts.push({txt:sent.slice(last,m.index)});parts.push({seg:m[1],r:m[2]});last=re.lastIndex;}
+  if(last<sent.length)parts.push({txt:sent.slice(last)});
+  return {id,fvg:f[0],m:f[1],g:f[2]||f[1],parts};});}
+function parseV(txt){return txt.trim().split('\n').map((line,id)=>{const f=line.split('|');
+  return {id,cue:f[0],fvg:f[1],sent:f[2],ok:f[3],wrong:f[4].split(','),note:f[5]||''};});}
+const DATA={b1:{W:parseW(W_B1.trim()+'\n'+W_B1_ADD.trim()),D:parseD(D_B1),V:parseV(V_B1)},c1:{W:parseW(W_C1.trim()+'\n'+W_C1_ADD.trim()),D:parseD(D_C1),V:parseV(V_C1)}};
 
 function norm(s){return (s||'').toLowerCase().replace(/ß/g,'ss')
   .replace(/[.,!?;:„“"«»‚‘'’()–—]/g,' ').replace(/-/g,' ')
@@ -644,33 +1032,33 @@ function stepsFor(it){
 const LS='vgw-progress-v1';
 let PROG={};try{PROG=JSON.parse(localStorage.getItem(LS)||'{}')||{};}catch(e){PROG={};}
 const saveProg=()=>{try{localStorage.setItem(LS,JSON.stringify(PROG));}catch(e){}};
-const pkey=()=>ST.lvl+'-'+(ST.mode==='det'?'det':ST.mode);
+const pkey=()=>ST.lvl+'-'+ST.mode;
 const solved=()=>(PROG[pkey()]=PROG[pkey()]||{});
 const ST={lvl:'b1',mode:'det',filter:'all',pos:{},step:0,blk:null,puz:null,det:null};
 
-function list(){const d=DATA[ST.lvl];if(ST.mode==='det')return d.D;
+function list(){const d=DATA[ST.lvl];if(ST.mode==='det')return d.D;if(ST.mode==='vw')return d.V;
   return ST.filter==='all'?d.W:d.W.filter(x=>x.tag===ST.filter);}
 function curIndex(){const k=ST.lvl+ST.mode+ST.filter;return ST.pos[k]||0;}
-function setIndex(i){const k=ST.lvl+ST.mode+ST.filter;const n=list().length;ST.pos[k]=((i%n)+n)%n;ST.step=0;ST.blk=null;ST.puz=null;ST.det=null;render();}
+function setIndex(i){const k=ST.lvl+ST.mode+ST.filter;const n=list().length;ST.pos[k]=((i%n)+n)%n;ST.step=0;ST.blk=null;ST.puz=null;ST.det=null;ST.vw=null;render();}
 function rng(seed){return ()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
 function shuffled(arr,seed){const a=arr.slice(),r=rng(seed);for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
 /* ---- Render ---- */
 const $=id=>document.getElementById(id);
 function renderChips(){const c=$('chips');
-  if(ST.mode==='det'){c.innerHTML='';c.style.display='none';return;}c.style.display='';
+  if(ST.mode==='det'||ST.mode==='vw'){c.innerHTML='';c.style.display='none';return;}c.style.display='';
   const all=DATA[ST.lvl].W;const counts={};all.forEach(x=>counts[x.tag]=(counts[x.tag]||0)+1);
   c.innerHTML=Object.keys(TAGS).filter(t=>t==='all'||counts[t]).map(t=>`<button class="chip" data-f="${t}" aria-pressed="${ST.filter===t}">${TAGS[t]}<span>${t==='all'?all.length:counts[t]}</span></button>`).join('');
   c.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{ST.filter=b.dataset.f;setIndex(curIndex());});}
-function renderProg(){const n=ST.mode==='det'?DATA[ST.lvl].D.length:DATA[ST.lvl].W.length;const k=Object.keys(solved()).length;
-  const nm={det:'Detektiv',werk:'Werkstatt',puz:'Puzzle'}[ST.mode];
+function renderProg(){const n=list().length&&(ST.mode==='det'?DATA[ST.lvl].D.length:ST.mode==='vw'?DATA[ST.lvl].V.length:DATA[ST.lvl].W.length);const k=Object.keys(solved()).length;
+  const nm={det:'Detektiv',vw:'Verb-Wahl',werk:'Werkstatt',puz:'Puzzle'}[ST.mode];
   $('progtxt').innerHTML=`${nm} · ${ST.lvl==='b1'?'A2/B1':'B2/C1'}: <b>${k}</b> von ${n} geschafft`;
   $('progbar').style.width=(n?100*k/n:0)+'%';}
 function render(){
   document.querySelectorAll('[data-lvl]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lvl===ST.lvl));
   document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===ST.mode));
   renderChips();renderProg();
-  if(ST.mode==='det')renderDet();else renderWerk();}
+  if(ST.mode==='det')renderDet();else if(ST.mode==='vw')renderVW();else renderWerk();}
 
 function navHTML(){return `<span class="spacer"></span><button class="btn soft" id="prev" aria-label="Vorherige Aufgabe">←</button><button class="btn soft" id="rand">Zufall</button><button class="btn soft" id="next" aria-label="Nächste Aufgabe">→</button>`;}
 function bindNav(){$('prev').onclick=()=>setIndex(curIndex()-1);$('next').onclick=()=>setIndex(curIndex()+1);
@@ -738,48 +1126,84 @@ function bindPuz(it){const P=ST.puz;
   $('placed').querySelectorAll('.tile').forEach(b=>b.onclick=()=>{P.pool.push(P.placed.splice(+b.dataset.i,1)[0]);rerenderPuz(it);});}
 function rerenderPuz(it){const keepSteps=ST.step;const fbHTML=null;renderWerk();ST.step=keepSteps;}
 
-/* Detektiv */
-const OPT=[{c:'VT',t:'Verb-Teil',s:'gehört fest zum Verb'},{c:'A',t:'Akkusativobjekt',s:'Was? Wen?'},{c:'D',t:'Dativobjekt',s:'Wem?'},{c:'W',t:'Angabe',s:'wann, wo, wie …'}];
-const grp=c=>'FNR'.includes(c)?'VT':c;
-function detExpl(p){const n=p.note;
-  switch(p.code){
-  case 'F':return `<b>Verb-Teil (Funktionsverbgefüge):</b> «${esc(p.seg)}» gehört fest zum Verb${n?` – zusammen bedeutet es ungefähr «${esc(n)}»`:''}. Die Form ist fest (kein anderer Artikel, kein Plural), man kann nicht danach fragen und es nicht durch ein Pronomen ersetzen. Darum steht es direkt beim Verb-Ende.`;
-  case 'N':return `<b>Verb-Teil (Nomen + Verb):</b> «${esc(p.seg)}» bildet mit dem Verb eine feste Einheit${n?` (≈ «${esc(n)}»)`:''}. Es ist kein „Gast“ wie ein Objekt – Pronomen-Probe und Frage-Probe klingen falsch. Darum steht es direkt beim Verb-Ende.`;
-  case 'R':return `<b>Verb-Teil (Richtung):</b> «${esc(p.seg)}» antwortet auf <b>Wohin?</b> Das Verb braucht diese Information direkt; sie steht deshalb ganz hinten, wie ein Verb-Teil.`;
-  case 'A':return `<b>Akkusativobjekt:</b> «Was? / Wen?» → «${esc(p.seg)}». Pronomen-Probe: «${esc(n)}» ✓. Es ist ein eigenes Satzglied und steht im Mittelfeld <b>vor</b> einem Verb-Teil.`;
-  case 'D':return `<b>Dativobjekt:</b> «Wem?» → «${esc(p.seg)}». Pronomen-Probe: «${esc(n)}» ✓.`;
-  case 'W':return `<b>Angabe (${esc(n)}):</b> «${esc(p.seg)}» ist eine Zusatzinformation – ohne sie bleibt der Satz vollständig.`;}}
+/* Detektiv: Verbgefüge finden */
+const WRONG0={
+  V:x=>`«${esc(x)}» ist ein Verb. Gesucht ist zuerst der <b>Nomen-Teil</b> des Gefüges – der feste Teil, der wie ein Verb-Teil hinten steht.`,
+  X:x=>`«${esc(x)}» ist ein Hilfs- oder Modalverb. Gesucht ist zuerst der <b>Nomen-Teil</b> des Gefüges.`,
+  A:x=>`«${esc(x)}» ist das <b>Akkusativobjekt</b> – das, womit etwas geschieht. Du kannst es durch ein Pronomen ersetzen (ihn/sie/es). Der Nomen-Teil eines Gefüges dagegen ist fest und lässt sich nicht ersetzen.`,
+  D:x=>`«${esc(x)}» ist das <b>Dativobjekt</b> (Wem?). Es lässt sich durch ein Pronomen ersetzen – der Nomen-Teil eines Gefüges nicht.`,
+  S:x=>`«${esc(x)}» ist das <b>Subjekt</b> (Wer? Was?).`,
+  W:x=>`«${esc(x)}» ist eine <b>Angabe</b> – eine Zusatzinformation, die man weglassen kann.`,
+  P:x=>`«${esc(x)}» ist ein <b>Präpositionalobjekt</b>. Es hängt am Gefüge, gehört aber nicht zu seinem festen Kern.`,
+  R:x=>`«${esc(x)}» ist ein <b>Pronomen</b>. Der Nomen-Teil eines Gefüges ist nie ein Pronomen.`,
+  N:x=>`«nicht» verneint das Gefüge und steht direkt davor – es gehört aber nicht dazu.`};
 function renderDet(){
   const L=list();const i=curIndex();const it=L[i];const m=$('main');
-  if(!ST.det)ST.det={ans:{},active:null,wrong:0};const D=ST.det;
-  const segs=it.parts.map((p,k)=>p.seg?k:null).filter(k=>k!==null);
-  if(D.active===null||D.ans[D.active]){D.active=segs.find(k=>!D.ans[k]);if(D.active===undefined)D.active=null;}
-  const done=!!solved()[it.id];
-  const sentHTML=it.parts.map((p,k)=>{if(!p.seg)return esc(p.txt);const a=D.ans[k];
-    const cls=a?`c-${grp(p.code)}`:(D.active===k?'active':'');
-    return `<button class="seg-b ${cls}" data-k="${k}">${esc(p.seg)}${a?`<span class="mark">${a.ok?'✓':'✗'}</span>`:''}</button>`;}).join('');
-  const act=D.active!==null?it.parts[D.active]:null;
-  const exps=segs.filter(k=>D.ans[k]).map(k=>{const a=D.ans[k],p=it.parts[k];
-    return `<div class="${a.ok?'ok':'bad'}">${a.ok?'✓':`✗ Du hast «${OPT.find(o=>o.c===a.pick).t}» gewählt. Richtig ist:`} ${detExpl(p)}</div>`;}).join('');
-  const all=segs.every(k=>D.ans[k]);
+  if(!ST.det)ST.det={stage:0,log:[],wrong:0,pick:null};const D=ST.det;
+  const hasM=!!it.m;const done=!!solved()[it.id];
+  const pool=L.filter(x=>x.m&&x.g!==it.g&&x.m!==it.m);
+  const opts=hasM?shuffled([it.m,...shuffled(pool,it.id*13+5).slice(0,2).map(x=>x.m)],it.id*7+3):[];
+  const finished=D.stage>=(hasM?3:2);
+  const sentHTML=it.parts.map((p,k)=>{if(!p.seg)return esc(p.txt);
+    let cls='';if(D.stage>=1&&p.r==='T')cls='c-VT';if(D.stage>=2&&p.r==='V')cls='c-V';
+    if(finished&&!cls){cls='c-'+({A:'A',D:'D',W:'W'}[p.r]||'plain');}
+    const dis=finished||(cls&&cls!=='c-plain');
+    return `<button class="seg-b ${cls}" data-k="${k}"${dis?' disabled':''}>${esc(p.seg)}</button>`;}).join('');
+  const q=D.stage===0?'<b>Schritt 1:</b> Tippe auf den <b>Nomen-Teil</b> des Verbgefüges – den festen Teil, der zum Verb gehört.'
+        :D.stage===1?'<b>Schritt 2:</b> Und welches <b>Verb</b> gehört dazu? Tippe es an.'
+        :D.stage===2&&hasM?`<b>Schritt 3:</b> Was bedeutet <b>«${esc(it.fvg)}»</b> ungefähr?`:'';
   m.innerHTML=`
    <div class="meta"><span class="counter">Satz ${i+1} / ${L.length}</span>${done?'<span class="badge done">✓ geschafft</span>':''}<span class="badge">Detektiv</span></div>
-   <p class="optq" style="margin-top:0">Was ist das markierte Satzglied? Tippe auf einen unterstrichenen Teil und wähle.</p>
+   ${q?`<p class="optq" style="margin-top:0">${q}</p>`:''}
    <div class="dsent">${sentHTML}</div>
-   ${act?`<p class="optq">«<b>${esc(act.seg)}</b>» ist …</p><div class="opts">${OPT.map(o=>`<button class="opt o-${o.c}" data-c="${o.c}">${o.t}<small>${o.s}</small></button>`).join('')}</div>`:''}
-   <div class="dexp">${exps}</div>
-   ${all?`<div class="fb ok" style="display:block"><b class="h">${D.wrong?'Satz geschafft – schau dir die Erklärungen noch einmal an.':'✓ Alles richtig erkannt!'}</b>Denk daran: Verb-Teile stehen direkt beim Verb-Ende, Objekte und Angaben davor im Mittelfeld.</div>`:''}
-   <div class="actions">${all?'<button class="btn primary" id="dnext">Nächster Satz →</button>':''}${navHTML()}</div>`;
-  m.querySelectorAll('.seg-b').forEach(b=>b.onclick=()=>{const k=+b.dataset.k;if(!D.ans[k]){D.active=k;renderDet();}});
-  m.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const p=it.parts[D.active];const ok=grp(p.code)===b.dataset.c;
-    D.ans[D.active]={pick:b.dataset.c,ok};if(!ok)D.wrong++;D.active=null;
-    if(segs.every(k=>D.ans[k])&&!D.wrong){solved()[it.id]=1;saveProg();renderProg();}renderDet();});
-  if(all)$('dnext').onclick=()=>setIndex(curIndex()+1);
+   ${D.stage===2&&hasM?`<div class="opts">${opts.map(o=>`<button class="opt o-VT" data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div>`:''}
+   <div class="dexp">${D.log.map(l=>`<div class="${l.ok?'ok':'bad'}">${l.ok?'✓ ':'✗ '}${l.t}</div>`).join('')}</div>
+   ${finished?`<div class="fb ok" style="display:block"><b class="h">${D.wrong?'Geschafft – lies dir die Hinweise oben noch einmal durch.':'✓ Perfekt erkannt!'}</b>Das Verbgefüge heißt <span class="u-vt">${esc(it.fvg)}</span>${hasM?` (≈ ${esc(it.m)})`:''}. Sieh dir an, wo der Nomen-Teil steht: ${it.parts.some(p=>p.r==='V'&&it.parts.indexOf(p)>it.parts.findIndex(x=>x.r==='T'))?'direkt vor dem Verb am Satzende':'ganz hinten im Mittelfeld'} – genau wie ein Verb-Teil.</div>`:''}
+   <div class="actions">${finished?'<button class="btn primary" id="dnext">Nächster Satz →</button>':''}${navHTML()}</div>`;
+  const add=(ok,t)=>{D.log.push({ok,t});if(D.log.length>4)D.log.shift();};
+  m.querySelectorAll('.seg-b:not([disabled])').forEach(b=>b.onclick=()=>{const p=it.parts[+b.dataset.k];
+    if(D.stage===0){if(p.r==='T'){D.stage=1;add(true,`«${esc(p.seg)}» ist der feste Nomen-Teil. Kein Pronomen, keine Frage möglich – er gehört zum Verb.`);}
+      else{D.wrong++;add(false,WRONG0[p.r](p.seg));}}
+    else if(D.stage===1){if(p.r==='V'){D.stage=2;const vs=it.parts.filter(x=>x.r==='V').map(x=>x.seg).join(' … ');
+        add(true,`«${esc(vs)}» ist das Funktionsverb. Zusammen: <b>«${esc(it.fvg)}»</b>.`);if(!hasM){D.stage=2;}}
+      else if(p.r==='X'){D.wrong++;add(false,`«${esc(p.seg)}» ist ein Hilfs- oder Modalverb – es bildet nur die Zeit oder die Modalität. Such das Verb, das mit «${esc(it.parts.find(x=>x.r==='T').seg)}» zusammen eine Bedeutung ergibt.`);}
+      else{D.wrong++;add(false,`«${esc(p.seg)}» ist kein Verb. Such das Verb, das mit «${esc(it.parts.find(x=>x.r==='T').seg)}» zusammengehört.`);}}
+    if(D.stage===2&&!hasM)D.stage=2;
+    if(D.stage>=(hasM?3:2)&&!D.wrong){solved()[it.id]=1;saveProg();renderProg();}
+    renderDet();});
+  m.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const o=b.dataset.o;
+    if(o===it.m){D.stage=3;add(true,`«${esc(it.fvg)}» bedeutet ungefähr «${esc(it.m)}».`);if(!D.wrong){solved()[it.id]=1;saveProg();renderProg();}}
+    else{D.wrong++;add(false,`«${esc(o)}» passt nicht. Lies den Satz noch einmal: Was passiert hier?`);}
+    renderDet();});
+  if(finished)$('dnext').onclick=()=>setIndex(curIndex()+1);
+  bindNav();}
+
+/* Verb-Wahl */
+const CUE={F:['Feste Verbindung','Nur ein Verb passt zu diesem Nomen.'],K:['Bewirken','Jemand oder etwas löst es aus (Subjekt + Akkusativobjekt).'],V:['Vorgang','Es passiert oder beginnt – ohne dass jemand es bewirkt.'],Z:['Zustand','So ist es gerade oder seit einer gewissen Zeit.']};
+const FAM={K:'Bewirken: «bringen, setzen, versetzen, stellen» – das Subjekt verursacht etwas, darum gibt es ein Akkusativobjekt.',V:'Vorgang: «kommen, geraten, gehen, treten» – etwas beginnt oder verändert sich von selbst.',Z:'Zustand: «sein, stehen, sich befinden, schweben» – so ist die Lage.'};
+function renderVW(){
+  const L=list();const i=curIndex();const it=L[i];const m=$('main');
+  if(!ST.vw)ST.vw={tried:[],done:false};const S=ST.vw;const sv=!!solved()[it.id];
+  const opts=shuffled([it.ok,...it.wrong],it.id*11+(ST.lvl==='c1'?2:9));
+  const gap=S.done?`<span class="u-fin vgap ok">${esc(it.ok)}</span>`:'<span class="vgap">&nbsp;?&nbsp;</span>';
+  const sent=esc(it.sent).replace('___',gap);
+  const fb=S.done?`<div class="fb ok" style="display:block"><b class="h">${S.tried.length?'Richtig – im zweiten Anlauf.':'✓ Richtig!'}</b>Es heißt <span class="u-vt">${esc(it.fvg)}</span>${it.note?` – ${esc(it.note)}`:''}${it.cue!=='F'?`<div style="margin-top:6px">${FAM[it.cue]}</div>`:''}</div>`
+     :(S.tried.length?`<div class="fb err" style="display:block"><b class="h">«${esc(S.tried[S.tried.length-1])}» passt hier nicht.</b>${it.cue==='F'?`Dieses Nomen verbindet sich mit einem anderen Verb – probier noch einmal.`:`Gesucht ist ein Verb für «${CUE[it.cue][0]}»: ${CUE[it.cue][1]}`}</div>`:'');
+  m.innerHTML=`
+   <div class="meta"><span class="counter">Satz ${i+1} / ${L.length}</span>${sv?'<span class="badge done">✓ geschafft</span>':''}<span class="badge">Verb-Wahl</span><span class="badge task">Gesucht: ${CUE[it.cue][0]}</span></div>
+   <p class="optq" style="margin-top:0">Welches Verb passt in die Lücke? <span style="color:var(--muted)">${CUE[it.cue][1]}</span></p>
+   <div class="dsent">${sent}</div>
+   ${S.done?'':`<div class="opts">${opts.map(o=>`<button class="opt"${S.tried.includes(o)?' disabled style="opacity:.4"':''} data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div>`}
+   ${fb}
+   <div class="actions">${S.done?'<button class="btn primary" id="vnext">Nächster Satz →</button>':''}${navHTML()}</div>`;
+  m.querySelectorAll('.opt:not([disabled])').forEach(b=>b.onclick=()=>{const o=b.dataset.o;
+    if(o===it.ok){S.done=true;if(!S.tried.length){solved()[it.id]=1;saveProg();renderProg();}}else S.tried.push(o);renderVW();});
+  if(S.done)$('vnext').onclick=()=>setIndex(curIndex()+1);
   bindNav();}
 
 /* Steuerung */
-document.querySelectorAll('[data-lvl]').forEach(b=>b.onclick=()=>{ST.lvl=b.dataset.lvl;ST.filter='all';ST.step=0;ST.blk=null;ST.puz=null;ST.det=null;render();});
-document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{ST.mode=b.dataset.mode;ST.filter='all';ST.step=0;ST.blk=null;ST.puz=null;ST.det=null;render();});
+document.querySelectorAll('[data-lvl]').forEach(b=>b.onclick=()=>{ST.lvl=b.dataset.lvl;ST.filter='all';ST.step=0;ST.blk=null;ST.puz=null;ST.det=null;ST.vw=null;render();});
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{ST.mode=b.dataset.mode;ST.filter='all';ST.step=0;ST.blk=null;ST.puz=null;ST.det=null;ST.vw=null;render();});
 $('reset').onclick=function(){if(this.classList.contains('armed')){PROG[pkey()]={};saveProg();this.classList.remove('armed');this.textContent='Fortschritt dieser Übung zurücksetzen';render();}
   else{this.classList.add('armed');this.textContent='Wirklich zurücksetzen? Nochmal tippen';setTimeout(()=>{this.classList.remove('armed');this.textContent='Fortschritt dieser Übung zurücksetzen';},3500);}};
 render();
