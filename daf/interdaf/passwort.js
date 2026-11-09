@@ -1,3 +1,40 @@
+/* Zurück-Button: Ein goldener Link ganz oben auf jeder Übungsseite führt zur Übersicht (daf/index.html). */
+(function () {
+  var skript = document.currentScript;
+  var ziel;
+  try { ziel = new URL("../index.html", skript && skript.src ? skript.src : location.href).href; }
+  catch (e) { ziel = "../index.html"; }
+
+  function einbauen() {
+    if (document.getElementById("al-zurueck")) return;
+    if (location.href.split("#")[0].split("?")[0] === ziel) return;
+    var stil = document.createElement("style");
+    stil.textContent =
+      "#al-zurueck{display:block;box-sizing:border-box;width:100%;padding:12px 16px 4px;position:relative;z-index:50}" +
+      "#al-zurueck.al-fix{position:fixed;top:0;left:0;width:auto;padding:10px 12px}" +
+      "#al-zurueck a{display:inline-flex;align-items:center;gap:8px;font-family:'Lexend',system-ui,-apple-system,'Segoe UI',sans-serif;" +
+      "font-size:14.5px;font-weight:600;line-height:1;letter-spacing:.01em;text-decoration:none;color:#fff;" +
+      "background:linear-gradient(135deg,#d0a64c 0%,#b48528 100%);padding:9px 16px 9px 12px;border-radius:999px;" +
+      "box-shadow:0 2px 8px rgba(80,55,10,.28),inset 0 1px 0 rgba(255,255,255,.35);transition:transform .15s,box-shadow .15s,filter .15s}" +
+      "#al-zurueck a:hover{transform:translateY(-1px);filter:brightness(1.05);box-shadow:0 4px 12px rgba(80,55,10,.32),inset 0 1px 0 rgba(255,255,255,.35)}" +
+      "#al-zurueck a:focus-visible{outline:3px solid #f0c548;outline-offset:2px}" +
+      "#al-zurueck svg{flex:none}" +
+      "@media print{#al-zurueck{display:none!important}}";
+    document.head.appendChild(stil);
+    var leiste = document.createElement("nav");
+    leiste.id = "al-zurueck";
+    leiste.setAttribute("aria-label", "Zurück zur Übersicht");
+    leiste.innerHTML =
+      '<a href="' + ziel + '"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Alle Übungen</a>';
+    var anzeige = getComputedStyle(document.body).display;
+    if (anzeige === "flex" || anzeige === "grid" || anzeige === "inline-flex") leiste.className = "al-fix";
+    document.body.insertBefore(leiste, document.body.firstChild);
+  }
+  if (document.body) einbauen();
+  else document.addEventListener("DOMContentLoaded", einbauen);
+})();
+
 /* Passwort-Schleuse für alle Übungsseiten im Ordner interdaf – mit Monatspasswörtern.
    Die Passwörter stehen hier nur als verschlüsselter Fingerabdruck (SHA-256),
    niemand kann sie aus dieser Datei herauslesen.
