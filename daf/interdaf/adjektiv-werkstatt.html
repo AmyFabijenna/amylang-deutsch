@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="/daf/interdaf/passwort.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adjektiv-Werkstatt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap">
+<style>
+:root{
+  --sky1:#121a2e; --sky2:#223252; --sky3:#3d4d70;
+  --card:#fbfaf7; --card2:#f4f1ea; --line:#e6e2d8;
+  --ink:#151515; --muted:#5a5d68;
+  --verb:#14707a; --verb-soft:#e2f0f0;
+  --vt:#76508c; --vt-soft:#efe7f3;
+  --akk:#a87a1f; --akk-soft:#fbf0d3;
+  --dat:#c04d6f; --dat-soft:#fbe7ed;
+  --ang:#4a5a80; --ang-soft:#e7ebf4;
+  --sun:#f0c548; --gold:#b48528; --gold-soft:#fbf0d3;
+  --rose:#cf5679; --rose-soft:#fbe7ed;
+  --font:"Lexend","Segoe UI","Helvetica Neue",Arial,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;color:var(--ink);font-family:var(--font);font-size:18px;line-height:1.55;
+  background:
+    radial-gradient(120% 60% at 50% 115%, rgba(224,148,132,.30), transparent 60%),
+    radial-gradient(80% 50% at 85% 0%, rgba(120,140,190,.25), transparent 70%),
+    linear-gradient(180deg,var(--sky1) 0%,var(--sky2) 50%,var(--sky3) 100%) fixed;
+  background-color:var(--sky2)}
+#bubbles{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.panel{background:var(--card);border-radius:24px;box-shadow:0 14px 40px rgba(5,10,30,.30)}
+button{font:inherit;color:inherit}
+button:focus-visible,input:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.head{padding:26px 28px 22px;margin-bottom:16px}
+.eyebrow{font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.head h1{font-weight:700;font-size:clamp(30px,4.4vw,44px);line-height:1.05;letter-spacing:-.02em;margin:6px 0 10px}
+.head h1 em{font-style:normal;color:var(--vt)}
+.head p.sub{margin:0;color:var(--muted);max-width:70ch;font-size:17px}
+.controls{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center;margin-top:18px}
+.seg{display:inline-flex;background:var(--card2);border-radius:99px;padding:4px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;border-radius:99px;padding:8px 16px;font-size:15px;font-weight:500;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.seg.modes button[aria-pressed="true"]{background:var(--vt);color:#fff}
+.chips{display:flex;gap:8px;margin:0 0 14px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
+.chip{flex:none;border:1.5px solid rgba(255,255,255,.35);background:rgba(255,255,255,.08);color:#fff;border-radius:99px;padding:7px 15px;font-size:15px;font-weight:500;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--card);color:var(--ink);border-color:var(--card)}
+.chip span{opacity:.65;margin-left:4px;font-variant-numeric:tabular-nums}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:18px;align-items:start}
+@media (max-width:980px){.grid{grid-template-columns:minmax(0,1fr)}}
+main.panel{padding:24px 26px}
+@media (max-width:560px){main.panel{padding:18px 16px}.head{padding:20px 18px}.seg button{padding:7px 11px;font-size:14px}.btn{padding:8px 12px;font-size:15px}}
+.meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.counter{font-size:14px;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums;margin-right:auto}
+.badge{font-size:13px;font-weight:600;padding:4px 11px;border-radius:99px;background:var(--vt-soft);color:var(--vt)}
+.badge.done{background:var(--gold-soft);color:#8a6418}
+.badge.sp{background:var(--rose-soft);color:#a83558}
+.sentence{font-size:clamp(21px,2.8vw,26px);line-height:1.6;margin:6px 0 14px}
+.gap{display:inline-block;background:var(--gold-soft);border-bottom:3px solid var(--gold);border-radius:8px;padding:0 .25em;font-weight:600}
+.gap.ok{background:var(--vt-soft);border-bottom-color:var(--vt);color:var(--vt)}
+.gap i{font-style:normal;color:var(--gold)}
+.gap.ok i{color:var(--vt)}
+.q{font-size:16.5px;margin:4px 0 8px;color:var(--muted)}
+.q b{color:var(--ink)}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;margin:6px 0}
+.opt{border:1.5px solid var(--line);background:#fff;border-radius:14px;padding:11px 12px;cursor:pointer;font-size:17px;font-weight:600;text-align:left}
+.opt small{display:block;font-weight:400;font-size:13px;color:var(--muted)}
+.opt:hover{border-color:#cfc8b6}
+.opt[disabled]{opacity:.4;cursor:default}
+.opt.end{text-align:center;font-size:20px}
+.steps{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:10px;counter-reset:st}
+.steps li{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;padding-top:10px;border-top:1px dashed var(--line);counter-increment:st}
+.steps li::before{content:counter(st);width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--vt);color:#fff;font-size:15px;font-weight:600}
+.steps li.cur::before{background:var(--sun);color:var(--ink)}
+.steps h3{margin:0 0 3px;font-size:16.5px;font-weight:600}
+.steps .ans{font-size:16px;margin:2px 0}
+.steps .why{font-size:15.5px;margin:4px 0 0;background:var(--card2);border-radius:12px;padding:8px 12px}
+.steps .why.bad{background:var(--rose-soft)}
+.fb{margin-top:14px;padding:13px 16px;border-radius:16px;font-size:16.5px}
+.fb.ok{background:var(--gold-soft);border-left:5px solid var(--gold)}
+.fb.err{background:var(--rose-soft);border-left:5px solid var(--rose)}
+.fb b.h{display:block;font-size:17.5px;margin-bottom:3px}
+.fb .sol{display:block;margin-top:8px;font-size:19px;background:#fff;border-radius:10px;padding:8px 12px}
+.fb .note{display:block;margin-top:8px;font-size:15.5px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;align-items:center}
+.btn{border-radius:12px;padding:9px 16px;font-size:16px;font-weight:600;cursor:pointer;border:1.5px solid var(--ink);background:#fff}
+.btn.primary{background:var(--ink);color:#fff}
+.btn.soft{border-color:var(--line)}
+.spacer{flex:1}
+.score{display:flex;gap:14px;flex-wrap:wrap;font-size:15px;color:var(--muted);margin-bottom:10px}
+.score b{color:var(--ink);font-size:17px}
+input.txt{width:100%;font:inherit;font-size:20px;padding:11px 14px;border-radius:14px;border:1.5px solid var(--line);background:#fff;margin-top:6px}
+.base{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}
+.base span{background:var(--card2);border-radius:10px;padding:5px 11px;font-size:17px}
+.w-bad{color:var(--rose);text-decoration:underline wavy var(--rose);text-underline-offset:4px}
+.w-ok{color:var(--vt);font-weight:600}
+@media (prefers-reduced-motion:no-preference){.steps li,.fb{animation:in .3s ease-out both}@keyframes in{from{transform:translateY(5px);opacity:.3}to{transform:none;opacity:1}}}
+aside{display:grid;gap:14px}
+aside .panel{padding:20px 22px}
+aside h2{font-size:19px;font-weight:600;margin:0 0 6px}
+aside p.s{font-size:14.5px;color:var(--muted);margin:0 0 8px}
+table{border-collapse:collapse;width:100%;font-size:15px;text-align:center}
+th{font-size:12.5px;font-weight:600;color:var(--muted);padding:4px}
+td{padding:6px 4px;border-top:1px solid var(--line)}
+td:first-child,th:first-child{text-align:left;font-weight:600;color:var(--muted);font-size:13px}
+td.sig{color:var(--vt);font-weight:700}
+.tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.tabs button{border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:5px 12px;font-size:14px;cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--vt);border-color:var(--vt);color:#fff}
+.list{display:grid;gap:8px;font-size:15px}
+.list div{background:var(--card2);border-radius:12px;padding:9px 12px}
+.list b{display:block}
+.bar{height:10px;border-radius:99px;background:#ece8dd;overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--sun),var(--gold));border-radius:99px;transition:width .5s}
+.prog{font-size:15px;color:var(--muted)}
+.prog b{color:var(--ink)}
+.reset{border:1.5px solid var(--line);background:transparent;border-radius:99px;padding:5px 13px;font-size:14px;cursor:pointer;margin-top:6px}
+.reset.armed{background:var(--rose-soft);border-color:var(--rose)}
+</style>
+</head>
+<body>
+<canvas id="bubbles" aria-hidden="true"></canvas>
+<div class="wrap">
+  <header class="panel head">
+    <div class="eyebrow">Deutsch · Grammatik · Adjektivdeklination</div>
+    <h1>Adjektiv-<em>Werkstatt</em></h1>
+    <p class="sub">Warum heißt es „ein alt<b>er</b> Baum“, aber „der alt<b>e</b> Baum“ – und „viele gut<b>e</b> Freunde“, aber „meine gut<b>en</b> Freunde“? Hier findest du die Endung Schritt für Schritt: Kasus, Genus, Artikelwort – und dann das Signal.</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Niveau">
+        <button data-lvl="b1" aria-pressed="true">A2 / B1</button>
+        <button data-lvl="c1" aria-pressed="false">B2 / C1</button>
+      </div>
+      <div class="seg modes" role="group" aria-label="Übungsart">
+        <button data-mode="werk" aria-pressed="true">1 · Werkstatt</button>
+        <button data-mode="sprint" aria-pressed="false">2 · Endungs-Sprint</button>
+        <button data-mode="bau" aria-pressed="false">3 · Baukasten</button>
+      </div>
+    </div>
+  </header>
+  <div class="chips" id="chips"></div>
+  <div class="grid">
+    <main class="panel" id="main" aria-live="polite"></main>
+    <aside>
+      <section class="panel">
+        <h2>Das Signal-Prinzip</h2>
+        <p class="s">Irgendein Wort vor dem Nomen muss zeigen, welcher Kasus und welches Genus gemeint sind. Steht ein Artikelwort mit klarem Signal da, reicht dem Adjektiv -e oder -en. Fehlt das Signal, übernimmt es das Adjektiv.</p>
+        <div class="tabs" id="tabs">
+          <button data-t="b" aria-pressed="true">nach der-Wort</button>
+          <button data-t="u" aria-pressed="false">nach ein-Wort</button>
+          <button data-t="o" aria-pressed="false">ohne Artikel</button>
+        </div>
+        <div id="tbl"></div>
+      </section>
+      <section class="panel">
+        <h2>Was zählt als Artikelwort?</h2>
+        <div class="list">
+          <div><b>der-Wörter → -e / -en</b>der, die, das · dieser · jener · jeder · welcher · alle · beide (nach „die“) · alles · sämtliche</div>
+          <div><b>ein-Wörter → im Singular gemischt</b>ein · kein · mein, dein, sein, ihr, unser, euer, Ihr · irgendein · solch ein</div>
+          <div><b>Plural: ein-Wörter werden zu der-Wörtern</b>meine gut<u>en</u> Freunde · keine frisch<u>en</u> Eier · unsere neu<u>en</u> Möbel</div>
+          <div><b>Kein Artikelwort → starke Endung</b>Zahlen (zwei, drei) · viele · einige · wenige · mehrere · ein paar · etliche · zahlreiche · andere · etwas · nichts · dessen · deren</div>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>Besonderheiten</h2>
+        <div class="list">
+          <div><b>Genitiv ohne Artikel (m/n): -en</b>wegen stark<u>en</u> Regens – das Nomen zeigt mit -s schon den Genitiv.</div>
+          <div><b>Mehrere Adjektive: gleiche Endung</b>ein groß<u>er</u>, stark<u>er</u> Bär</div>
+          <div><b>e fällt weg</b>dunkel → dunkle · teuer → teure · sauer → saure · hoch → hohe</div>
+          <div><b>Keine Endung</b>nach sein/werden/bleiben (Der Tee ist heiß.) · als Adverb · lila, rosa, prima · Wiener, Grazer …</div>
+          <div><b>Nominalisierte Adjektive</b>ein Bekannt<u>er</u>, der Bekannt<u>e</u> · etwas Neu<u>es</u> · alles Gut<u>e</u></div>
+          <div><b>Partizipien, Komparativ, Superlativ, Ordnungszahlen</b>werden dekliniert wie Adjektive: der schlafend<u>e</u> Hund · ein besser<u>es</u> Leben · der dritt<u>e</u> Versuch</div>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>Fortschritt</h2>
+        <div class="prog" id="progtxt"></div>
+        <div class="bar"><i id="progbar"></i></div>
+        <button class="reset" id="reset">Fortschritt dieser Übung zurücksetzen</button>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<script>
+const RAW={b1:`N|m|b|Subjekt (Wer oder was steht?)||Der {alte} Leuchtturm steht seit hundert Jahren am Meer.
+N|f|b|Subjekt (Wer schläft?)||Die {kleine} Katze schläft auf dem Sofa.
+N|n|b|Subjekt (Was hat Kuchen?)||Das {neue} Café hat sehr guten Kuchen.
+N|m|u|Subjekt (Wer bringt die Karte?)||Ein {freundlicher} Kellner bringt uns die Karte.
+N|f|u|Subjekt (Wer füttert?)||Eine {alte} Dame füttert die Tauben.
+N|n|u|Subjekt (Wer singt?)||Ein {kleines} Mädchen singt im Park.
+N|m|o|Subjekt (Was duftet?)||{Frischer} Kaffee duftet in der Küche.
+N|f|o|Subjekt (Was schmeckt?)||{Kalte} Milch schmeckt im Sommer am besten.
+N|n|o|Subjekt (Was ist gesund?)||{Kaltes} Wasser ist gesund.
+N|m|u|Subjekt (Wer geht hinaus?)|«kein» funktioniert im Singular genau wie «ein».|Kein {vernünftiger} Mensch geht bei diesem Sturm hinaus.
+N|n|u|Subjekt (Was ist rot?)|«mein, dein, sein …» funktionieren im Singular wie «ein».|Mein {neues} Fahrrad ist rot.
+N|f|b|Subjekt (Was ist alt?)|«dieser, diese, dieses» funktionieren wie «der, die, das».|Diese {schöne} Brücke ist sehr alt.
+N|m|b|Subjekt (Was bringt etwas?)|«jeder, jede, jedes» funktionieren wie «der, die, das».|Jeder {neue} Tag bringt eine Überraschung.
+N|m|b|nach «sein»: Wer oder was ist das?||Das ist der {beste} Tag des Jahres.
+N|m|u|nach «sein»: Was ist mein Opa?||Mein Opa ist ein {lustiger} Mensch.
+N|f|u|nach «sein»: Was ist das?||Das ist eine {gute} Idee!
+N|n|u|nach «sein»: Was ist unser Haus?||Unser Haus ist ein {altes} Bauernhaus.
+N|m|b|Subjekt (Welcher ist süßer?)|«welcher, welche, welches» funktionieren wie «der, die, das».|Welcher {rote} Apfel ist süßer?
+N|f|u|Subjekt (Was ist das Kochen?)||Seine {große} Leidenschaft ist das Kochen.
+N|n|b|Subjekt (Was liegt dort?)||Das {kleine} Dorf liegt hinter den Bergen.
+N|m|o|Subjekt (Was braucht Zeit?)||{Guter} Wein braucht Zeit.
+N|f|o|Subjekt (Was ist selten?)||{Echte} Freundschaft ist selten.
+N|n|o|Subjekt (Was ist gesund?)||{Frisches} Obst ist gesund.
+N|m|u|Subjekt (Wer spielt?)||Unser {neuer} Nachbar spielt Saxophon.
+N|f|b|Subjekt (Wer heißt Mimi?)||Die {dicke} Katze meines Nachbarn heißt Mimi.
+N|n|u|Subjekt (Was liegt da?)||Ein {spannendes} Buch liegt auf dem Tisch.
+N|m|b|Subjekt (Wer sagt etwas?)||Der {freche} Papagei begrüßt jeden Gast.
+N|f|u|Subjekt (Was ist so schön?)|«kein» funktioniert im Singular wie «ein».|Keine {andere} Stadt ist so schön wie Salzburg.
+N|n|b|Subjekt (Was zeigt etwas?)||Dieses {alte} Foto zeigt meine Großeltern.
+N|m|u|Subjekt (Wer ist frech?)||Ihr {kleiner} Bruder ist sehr frech.
+N|n|o|Subjekt (Was ist angesagt?)||{Schönes} Wetter ist für morgen angesagt.
+N|m|b|Subjekt (Was fährt?)||Der {letzte} Bus fährt um Mitternacht.
+N|f|u|Subjekt (Was rollt?)||Eine {riesige} Welle rollt auf den Strand zu.
+N|n|u|Subjekt (Wer galoppiert?)||Ein {wildes} Pferd galoppiert über die Wiese.
+N|m|o|Subjekt (Was weht?)||{Starker} Wind weht vom Meer.
+A|m|b|Akkusativobjekt (Wen oder was sehe ich?)||Ich sehe den {alten} Leuchtturm.
+A|f|b|Akkusativobjekt (Wen besuchen wir?)||Wir besuchen die {schöne} Altstadt.
+A|n|b|Akkusativobjekt (Was liest er?)||Er liest das {neue} Buch.
+A|m|u|Akkusativobjekt (Was suche ich?)||Ich suche einen {warmen} Pullover.
+A|f|u|Akkusativobjekt (Was hat sie?)||Sie hat eine {gute} Idee.
+A|n|u|Akkusativobjekt (Was kaufen wir?)||Wir kaufen ein {kleines} Haus am See.
+A|m|o|Akkusativobjekt (Was trinke ich?)||Ich trinke gern {schwarzen} Tee.
+A|f|o|Akkusativobjekt (Was brauchen wir?)||Wir brauchen {frische} Luft.
+A|n|o|Akkusativobjekt (Was isst sie?)||Sie isst gern {frisches} Brot.
+A|m|u|Akkusativobjekt (Was habe ich nicht?)|«kein» funktioniert im Singular wie «ein».|Ich habe keinen {großen} Hunger.
+A|m|u|Akkusativobjekt (Was hast du gesehen?)|«mein, dein, sein …» funktionieren im Singular wie «ein».|Hast du meinen {blauen} Schal gesehen?
+A|n|b|Akkusativobjekt (Was siehst du?)||Siehst du das {kleine} Eichhörnchen dort?
+A|m|b|«durch» verlangt den Akkusativ|«dunkel» verliert vor der Endung das e: dunkel → dunkl-en.|Wir gehen durch den {dunklen|dunkl} Wald.
+A|f|u|«für» verlangt den Akkusativ||Das ist ein Geschenk für eine {liebe} Freundin.
+A|n|o|Akkusativobjekt (Was trinken wir?)||Wir trinken nur {stilles} Wasser.
+A|m|b|«um» verlangt den Akkusativ||Wir spazieren um den {großen} See.
+A|f|b|«gegen» verlangt den Akkusativ||Die Kinder spielen gegen die {andere} Klasse.
+A|m|u|Akkusativobjekt (Was hat der Hund?)||Der Hund hat einen {langen} Schwanz.
+A|f|u|Akkusativobjekt (Was wünsche ich dir?)||Ich wünsche dir eine {schöne} Reise!
+A|n|u|Akkusativobjekt (Was haben wir gesehen?)||Wir haben ein {spannendes} Spiel gesehen.
+A|m|o|Akkusativobjekt (Was trinken wir?)||Im Winter trinken wir {heißen} Kakao.
+A|f|o|Akkusativobjekt (Was hört er?)||Mein Opa hört gern {klassische} Musik.
+A|n|o|Akkusativobjekt (Was hat sie gehabt?)||Sie hat {großes} Glück gehabt.
+A|m|u|Akkusativobjekt (Was machen wir?)||Wir machen einen {langen} Spaziergang.
+A|f|b|Akkusativobjekt (Wen kennst du?)||Kennst du die {neue} Lehrerin?
+A|n|b|Akkusativobjekt (Was vergesse ich nie?)||Ich vergesse das {schöne} Konzert nie.
+A|m|b|Akkusativobjekt (Was werde ich nicht vergessen?)|«diesen» funktioniert wie «den».|Diesen {wunderbaren} Abend werde ich nie vergessen.
+A|n|u|Akkusativobjekt (Was habe ich nicht?)|«kein» funktioniert im Singular wie «ein».|Ich habe noch kein {eigenes} Auto.
+A|f|u|Akkusativobjekt (Was mag ich?)|«deine» funktioniert im Singular wie «eine».|Ich mag deine {neue} Frisur.
+A|m|b|Akkusativobjekt (Was genieße ich?)|«jeden» funktioniert wie «den».|Ich genieße jeden {sonnigen} Tag.
+A|n|o|Akkusativobjekt (Was backt der Bäcker?)||Der Bäcker backt jeden Morgen {frisches} Brot.
+A|m|u|Akkusativobjekt (Was hat er gefunden?)||Er hat einen {neuen} Job gefunden.
+A|f|o|Akkusativobjekt (Was wünschen wir?)||Wir wünschen dir {gute} Besserung!
+A|n|b|Akkusativobjekt (Was besichtigen wir?)||Wir besichtigen das {berühmte} Museum.
+A|m|o|Akkusativobjekt (Was hat das Kind?)||Das Kind hat {großen} Durst.
+D|m|b|«mit» verlangt den Dativ|«Nachbar» bekommt auch im Dativ ein -n (n-Deklination).|Ich spreche mit dem {netten} Nachbarn.
+D|f|b|«in» + Dativ (Wo?)||Wir wohnen in der {kleinen} Stadt.
+D|n|b|«auf» + Dativ (Wo?)||Die Katze schläft auf dem {weichen} Sofa.
+D|m|u|«mit» verlangt den Dativ||Ich gehe mit einem {guten} Freund ins Kino.
+D|f|u|«von» verlangt den Dativ||Das Geschenk ist von einer {alten} Freundin.
+D|n|u|«in» + Dativ (Wo?)||Sie wohnt in einem {schönen} Haus.
+D|m|o|«mit» verlangt den Dativ|Ohne Artikel trägt das Adjektiv das Signal selbst: -em wie bei «dem».|Ich backe mit {braunem} Zucker.
+D|f|o|«mit» verlangt den Dativ|Ohne Artikel trägt das Adjektiv das Signal selbst: -er wie bei «der».|Wir kochen mit {frischer} Butter.
+D|n|o|«mit» verlangt den Dativ|Ohne Artikel trägt das Adjektiv das Signal selbst: -em wie bei «dem».|Wir kochen mit {frischem} Gemüse.
+D|n|u|«mit» verlangt den Dativ|«meinem» funktioniert wie «einem».|Ich fahre mit meinem {alten} Fahrrad zur Arbeit.
+D|f|b|Dativobjekt (Wem helfe ich?)||Ich helfe der {alten} Dame über die Straße.
+D|m|b|Dativobjekt (Wem danken wir?)||Wir danken dem {freundlichen} Busfahrer.
+D|m|u|«nach» verlangt den Dativ||Nach einem {langen} Tag bin ich müde.
+D|n|b|«bei» verlangt den Dativ||Bei dem {schönen} Wetter gehen wir baden.
+D|f|u|«aus» verlangt den Dativ||Er kommt aus einer {großen} Familie.
+D|n|o|«nach» verlangt den Dativ|«Zögern» ist ein Nomen (das Zögern) – ohne Artikel: -em.|Nach {kurzem} Zögern sagte sie Ja.
+D|f|o|«bei» verlangt den Dativ|Ohne Artikel: -er wie bei «der».|Bei {schlechter} Laune hilft Schokolade.
+D|m|o|«mit» verlangt den Dativ||Das Publikum begrüßt die Band mit {großem} Applaus.
+D|n|b|«zum» = zu dem|«zum» ist zusammengezogen aus «zu dem» – also ein bestimmter Artikel.|Wir gehen heute zum {neuen} Restaurant.
+D|f|b|«zur» = zu der|«zur» ist zusammengezogen aus «zu der» – also ein bestimmter Artikel.|Ich gehe zur {nächsten} Haltestelle.
+D|m|b|«im» = in dem|«im» = «in dem» (bestimmter Artikel); «dunkel» verliert das e: dunkl-en.|Im {dunklen|dunkl} Keller wohnt eine Spinne.
+D|m|u|«mit» verlangt den Dativ||Sie spielt mit einem {kleinen} Hund.
+D|f|u|«mit» verlangt den Dativ|«keiner» funktioniert im Singular wie «einer».|Ich habe mit keiner {anderen} Person gesprochen.
+D|n|u|Dativobjekt (Wem schenke ich etwas?)||Ich schenke einem {kleinen} Kind meinen alten Ball.
+D|f|b|«seit» verlangt den Dativ||Seit der {letzten} Woche regnet es.
+D|m|b|«von» verlangt den Dativ||Das ist das Auto von dem {jungen} Mann.
+D|n|o|«aus» verlangt den Dativ|Ohne Artikel: -em wie bei «dem».|Die Tasse ist aus {feinem} Porzellan.
+D|f|o|«aus» verlangt den Dativ|Ohne Artikel: -er wie bei «der».|Das Kleid ist aus {echter} Seide.
+D|m|o|«aus» verlangt den Dativ|Ohne Artikel: -em wie bei «dem».|Die Statue ist aus {weißem} Marmor.
+D|n|b|Dativobjekt (Wem liest sie vor?)||Die Mutter liest dem {kranken} Kind eine Geschichte vor.
+D|m|u|«es geht» + Dativ (Wem geht es gut?)||Wie geht es deinem {kleinen} Bruder?
+D|f|b|«in» + Dativ (Wo?)|«dieser» funktioniert wie «der».|Ich wohne gern in dieser {ruhigen} Gegend.
+D|n|u|«in» + Dativ (Wo?)||Wir übernachten in einem {gemütlichen} Hotel.
+D|m|o|«auf» + Dativ (Wo?)||Wir stehen endlich wieder auf {festem} Boden.
+D|f|o|«mit» verlangt den Dativ||Sie spricht mit {leiser} Stimme.
+G|m|b|Genitivattribut (Wessen Auto?)||Das ist das Auto des {neuen} Lehrers.
+G|f|b|Genitivattribut (Wessen Farbe?)||Die Farbe der {alten} Tür ist blau.
+G|m|b|Genitivattribut (Wessen Ende?)||Das Ende des {spannenden} Films war traurig.
+G|m|u|Genitivattribut (Wessen Hund?)||Das ist der Hund eines {guten} Freundes.
+G|f|u|Genitivattribut (Wessen Haus?)||Das ist das Haus einer {berühmten} Malerin.
+G|n|u|Genitivattribut (Wessen Fenster?)||Die Fenster eines {alten} Hauses sind oft klein.
+G|m|b|«wegen» verlangt den Genitiv||Wegen des {starken} Regens bleiben wir zu Hause.
+G|f|b|«während» verlangt den Genitiv||Während der {langen} Fahrt schlafen die Kinder.
+G|n|b|«trotz» verlangt den Genitiv||Trotz des {schlechten} Wetters gehen wir wandern.
+G|m|o|«wegen» verlangt den Genitiv|Ausnahme! Genitiv maskulin/neutral ohne Artikel: -en (nicht -es), denn das Nomen zeigt mit -s schon den Genitiv.|Wegen {starken} Regens fällt das Spiel aus.
+G|n|o|«trotz» verlangt den Genitiv|Ausnahme! Genitiv maskulin/neutral ohne Artikel: -en, denn «Wetters» zeigt den Genitiv schon.|Trotz {schlechten} Wetters gehen wir wandern.
+G|f|o|«trotz» verlangt den Genitiv|Genitiv feminin ohne Artikel: -er wie bei «der».|Trotz {großer} Müdigkeit arbeitet er weiter.
+G|m|u|Genitivattribut (Wessen Zimmer?)|«meines» funktioniert wie «eines».|Das ist das Zimmer meines {kleinen} Bruders.
+G|f|u|Genitivattribut (Wessen Fahrrad?)|«ihrer» funktioniert wie «einer».|Das ist das Fahrrad ihrer {besten} Freundin.
+G|n|b|«innerhalb» verlangt den Genitiv||Innerhalb des {nächsten} Jahres ziehen wir um.
+G|n|b|Genitivattribut (Wessen Geschichte?)|«dieses» funktioniert wie «des».|Die Geschichte dieses {alten} Schlosses ist spannend.
+G|f|b|Genitivattribut (Am Ende wessen?)||Am Ende der {langen} Straße steht eine Kirche.
+G|n|u|Genitivattribut (Wessen Wert?)||Der Wert eines {guten} Buches ist unbezahlbar.
+G|m|b|Genitivattribut (Wessen Stimme?)||Die Stimme des {jungen} Sängers ist wunderschön.
+G|f|u|Genitivattribut (Wessen Idee?)||Das ist die Idee einer {kleinen} Gruppe.
+G|m|o|«statt» verlangt den Genitiv|Ausnahme: Genitiv maskulin ohne Artikel → -en.|Statt {heißen} Kaffees bekommen wir Tee.
+G|f|o|«wegen» verlangt den Genitiv|Genitiv feminin ohne Artikel: -er.|Wegen {schlechter} Sicht ist die Straße gesperrt.
+G|n|o|«trotz» verlangt den Genitiv|Ausnahme: Genitiv neutral ohne Artikel → -en.|Trotz {starken} Gewitters landete das Flugzeug sicher.
+G|n|b|Genitivattribut (Wessen Besitzer?)||Der Besitzer des {roten} Autos wohnt nebenan.
+G|f|b|«wegen» verlangt den Genitiv|«hoch» wird vor einer Endung zu «hoh-».|Wegen der {hohen|hoh} Miete ziehen wir um.
+G|m|u|Genitivattribut (Wessen Krallen?)|«Bär» hat auch im Genitiv nur -en (n-Deklination).|Die Krallen eines {großen} Bären sind gefährlich.
+G|n|b|Genitivattribut (Wessen Duft?)||Der Duft des {frischen} Brotes weckt mich.
+G|m|b|Genitivattribut (Am Anfang wessen?)|«jedes» funktioniert wie «des».|Am Anfang jedes {neuen} Monats zahle ich die Miete.
+G|n|u|Genitivattribut (Wessen Farbe?)|«unseres» funktioniert wie «eines».|Die Farbe unseres {neuen} Autos ist silbern.
+N|p|b|Subjekt Plural (Was steht dort?)||Die {alten} Bäume stehen am Fluss.
+N|p|o|Subjekt Plural ohne Artikel|Ohne Artikel trägt das Adjektiv das Signal: -e wie bei «die».|{Alte} Bäume brauchen viel Platz.
+N|p|b|Subjekt Plural (Wer wohnt dort?)|Wichtig: Im Plural zählen «meine, deine, keine …» als bestimmte Artikelwörter – das Adjektiv bekommt -en.|Meine {besten} Freunde wohnen in Wien.
+A|p|b|Akkusativobjekt Plural|Auch «keine» zählt im Plural als bestimmtes Artikelwort → -en.|Wir haben keine {frischen} Eier mehr.
+A|p|o|Akkusativobjekt Plural|Falle: «viele» ist kein Artikel, sondern selbst ein Adjektiv → das nächste Adjektiv bekommt die starke Endung -e.|Ich habe viele {gute} Freunde.
+A|p|o|Akkusativobjekt Plural|Zahlen (zwei, drei …) sind keine Artikelwörter – sie zeigen keinen Kasus → starke Endung.|Wir haben zwei {kleine} Katzen.
+N|p|b|Subjekt Plural|«alle» funktioniert wie «die» → -en.|Alle {neuen} Schüler stellen sich vor.
+D|p|b|«mit» verlangt den Dativ|Im Dativ Plural bekommt auch das Nomen ein -n: die Kinder → mit den Kindern.|Ich spiele mit den {kleinen} Kindern.
+D|p|o|«mit» verlangt den Dativ|Ohne Artikel trägt das Adjektiv das Signal -en wie bei «den».|Ich spreche gern mit {alten} Leuten.
+G|p|b|Genitivattribut Plural (Wessen Spielsachen?)||Die Spielsachen der {kleinen} Kinder liegen überall.
+G|p|o|Genitivattribut Plural ohne Artikel|Genitiv Plural ohne Artikel: -er wie bei «der».|Das ist die Meinung {junger} Leute.
+N|p|o|Subjekt Plural|«einige» ist kein Artikelwort → starke Endung -e.|Einige {mutige} Kinder springen ins kalte Wasser.
+A|p|o|Akkusativobjekt Plural|«ein paar» bedeutet «einige» – kein Artikelwort → starke Endung.|Ich kaufe ein paar {reife} Bananen.
+N|p|b|Subjekt Plural|«diese» funktioniert wie «die».|Diese {bunten} Blumen sind für dich.
+A|p|b|Akkusativobjekt Plural (Wen kennst du?)||Kennst du die {neuen} Nachbarn?
+D|p|b|«mit» verlangt den Dativ|«meinen» zählt im Plural als bestimmtes Artikelwort → -en.|Ich fahre mit meinen {alten} Freunden in den Urlaub.
+N|p|o|Subjekt Plural|«wenige» ist kein Artikelwort → starke Endung.|Nur wenige {wilde} Tiere leben hier noch.
+A|p|o|Akkusativobjekt Plural|«mehrere» ist kein Artikelwort → starke Endung.|Wir haben mehrere {interessante} Museen besucht.
+D|p|o|«mit» verlangt den Dativ|«vielen» ist kein Artikelwort → stark; im Dativ Plural heißt das aber auch -en.|Ich habe mit vielen {netten} Menschen gesprochen.
+A|p|b|Akkusativobjekt Plural («es gibt» + Akkusativ)|«keine» = bestimmtes Artikelwort im Plural; «hoch» wird zu «hoh-».|Hier gibt es keine {hohen|hoh} Berge.
+A|p|b|Akkusativobjekt Plural (Was magst du?)|«welche» funktioniert wie «die».|Welche {süßen} Früchte magst du?
+N|p|o|Subjekt Plural|Ohne Artikel: -e.|{Kleine} Kinder brauchen viel Schlaf.
+A|p|o|Akkusativobjekt Plural||Im Herbst sammeln wir {bunte} Blätter.
+G|p|b|Genitivattribut Plural (Wessen Geschichte?)||Die Geschichte der {alten} Römer ist spannend.
+G|p|b|Genitivattribut Plural (Wessen Fotos?)|«meiner» zählt im Plural als bestimmtes Artikelwort → -en.|Das sind die Fotos meiner {besten} Freundinnen.
+N|p|o|Subjekt Plural|«viele» ist kein Artikelwort → starke Endung.|Viele {junge} Leute wohnen in der Stadt.
+N|p|b|Subjekt Plural|«alle» funktioniert wie «die».|Alle {guten} Dinge sind drei.
+A|p|o|Akkusativobjekt Plural|Zahlen sind keine Artikelwörter → starke Endung.|Ich habe drei {lustige} Bücher gelesen.
+D|p|o|«mit» verlangt den Dativ|Zahl + Dativ Plural: starke Endung -en; das Nomen bekommt -n.|Ich wohne mit zwei {netten} Mitbewohnern zusammen.
+G|p|o|«trotz» verlangt den Genitiv|Genitiv Plural ohne Artikel: -er; «hoch» wird zu «hoh-».|Trotz {hoher|hoh} Preise kaufen viele Leute Bio.
+N|p|b|Subjekt Plural|«unsere» zählt im Plural als bestimmtes Artikelwort.|Unsere {neuen} Möbel kommen morgen.
+A|p|o|Akkusativobjekt Plural|«andere» ist selbst ein Adjektiv – ohne Artikel also -e.|Ich habe noch {andere} Pläne.
+D|p|b|«unter» + Dativ (Wo?)||Wir sitzen unter den {großen} Bäumen.
+A|p|b|Akkusativobjekt Plural|«alle» funktioniert wie «die».|Ich kenne alle {österreichischen} Bundesländer.
+N|p|o|Subjekt Plural|«zahlreiche» ist kein Artikelwort → starke Endung.|Zahlreiche {neugierige} Besucher kommen ins Museum.
+N|x|pr|nach «sein»|Steht das Adjektiv nach «sein, werden, bleiben» (prädikativ), bekommt es keine Endung.|Der Kaffee ist {heiß}.
+N|x|pr|nach «werden»|Nach «werden» steht das Adjektiv prädikativ – ohne Endung.|Das Wetter wird morgen {schön}.
+N|x|pr|als Adverb beim Verb|Beschreibt das Adjektiv, wie jemand etwas tut (Adverb), bekommt es keine Endung.|Meine Oma singt sehr {schön}.
+N|x|pr|nach «bleiben»|Prädikativ nach «bleiben» – ohne Endung.|Die Tür bleibt heute {offen}.`,c1:`N|m|u|Subjekt (Wer erkennt?)||Ein {wahrer} Freund erkennt deine Sorgen, bevor du sie aussprichst.
+A|f|o|Akkusativobjekt (Was sucht man?)||Wer {innere} Ruhe sucht, findet sie oft in der Natur.
+D|n|b|«in» + Dativ (Wo?)||In dem {unscheinbaren} Samenkorn steckt ein ganzer Baum.
+G|m|b|Genitivattribut (Wessen Wurzeln?)||Die Wurzeln des {mächtigen} Ahorns reichen tief in die Erde.
+G|f|u|«im Schatten» + Genitiv (Wessen Schatten?)||Im Schatten einer {uralten} Eiche machten wir Rast.
+A|p|b|Akkusativobjekt (Was hütet die Bibliothek?)||Die Bibliothek hütet die {wertvollen} Handschriften des Klosters.
+D|p|o|«mit» verlangt den Dativ|Ohne Artikel: -en wie bei «den».|Mit {kleinen} Schritten kommt man auch ans Ziel.
+N|n|o|Subjekt (Was ist halbes Leid?)|Sprichwort ohne Artikel → starke Endung -es.|{Geteiltes} Leid ist halbes Leid.
+N|f|o|Subjekt (Was ist doppelte Freude?)|Sprichwort ohne Artikel → starke Endung -e.|{Geteilte} Freude ist doppelte Freude.
+N|m|b|Subjekt (Wer fängt den Wurm?)||Der {frühe} Vogel fängt den Wurm.
+A|m|u|Akkusativobjekt (Was braucht jeder Roman?)||Jeder Roman braucht einen {überraschenden} Wendepunkt.
+G|m|b|«trotz» verlangt den Genitiv|Partizipien werden wie Adjektive dekliniert: strömend + en.|Trotz des {strömenden} Regens tanzten die Leute auf der Straße.
+D|m|u|«nach» verlangt den Dativ||Nach einem {anstrengenden} Aufstieg genossen wir die Aussicht.
+D|f|b|«mit» verlangt den Dativ|Partizip I (zunehmend) wird wie ein Adjektiv dekliniert.|Mit der {zunehmenden} Digitalisierung verändert sich auch das Lesen.
+N|p|o|Subjekt Plural ohne Artikel||{Gute} Bücher sind Freunde, die nie widersprechen.
+A|p|o|Akkusativobjekt Plural ohne Artikel||Kraniche legen jedes Jahr {riesige} Strecken zurück.
+D|m|o|«auf» + Dativ (Wo?)|Ohne Artikel: -em wie bei «dem».|Die Kapelle wurde auf {heiligem} Boden errichtet.
+N|m|u|Subjekt (Was lebt im Wald?)|Mehrere Adjektive hintereinander bekommen alle dieselbe Endung.|Ein {großer}, {starker} Bär lebt im Wald.
+A|n|o|Akkusativobjekt (Was trinken wir?)|Mehrere Adjektive ohne Artikel: alle tragen die starke Endung -es.|Wir trinken {frisches}, {kühles} Quellwasser.
+D|f|b|«in» + Dativ (Wo?)|Mehrere Adjektive: alle bekommen -en.|In der {alten}, {verlassenen} Mühle soll es spuken.
+N|m|u|Subjekt (Wer arbeitet beim ORF?)|Nominalisierte Adjektive (großgeschrieben) werden dekliniert wie Adjektive: ein Bekannter, der Bekannte.|Ein {Bekannter} von mir arbeitet beim ORF.
+N|m|b|Subjekt (Wer ist Koch?)|Nominalisiertes Adjektiv nach bestimmtem Artikel: -e.|Der {Bekannte} meiner Schwester ist Koch.
+D|p|o|«mit» verlangt den Dativ|Nominalisiertes Adjektiv im Dativ Plural ohne Artikel: -en.|Ich habe mit {Deutschen} über Fußball gesprochen.
+N|p|o|Subjekt Plural|Nach «viele» starke Endung – auch beim nominalisierten Adjektiv: viele Deutsche.|Viele {Deutsche} verbringen ihren Urlaub in Österreich.
+N|p|b|Subjekt Plural|Nominalisiertes Partizip: reisen → die Reisenden.|Die {Reisenden} warten seit einer Stunde auf den Zug.
+A|n|o|Akkusativobjekt (Was habe ich erlebt?)|Nach «etwas, nichts, viel, wenig» steht das nominalisierte Adjektiv stark: etwas Schönes.|Ich habe gestern etwas {Schönes} erlebt.
+A|n|o|Akkusativobjekt («es gibt» + Akk)|Nach «nichts» → starke Endung -es.|Es gibt leider nichts {Neues}.
+A|n|b|Akkusativobjekt (Was wünsche ich dir?)|Falle: «alles» funktioniert wie «das» → schwache Endung -e.|Ich wünsche dir alles {Gute} zum Geburtstag!
+D|n|o|«mit» verlangt den Dativ|Nach «etwas» stark – im Dativ also -em.|Wir überraschen sie mit etwas {Besonderem}.
+N|n|o|Subjekt (Was hat sich getan?)|Nach «viel» → starke Endung -es.|Hier hat sich viel {Neues} getan.
+N|m|b|Subjekt (Wer liegt dort?)|Partizip I (schlafend) wird wie ein Adjektiv dekliniert.|Der {schlafende} Hund liegt vor dem Kamin.
+A|n|o|Akkusativobjekt (Was gibt es?)|«frisch» ist hier ein Adverb zu «gebacken» und bleibt ohne Endung; dekliniert wird nur das Partizip.|Zum Frühstück gibt es frisch {gebackenes} Brot.
+A|n|u|Akkusativobjekt (Was wünschen wir uns?)|Auch der Komparativ bekommt die Adjektivendung: besser + es.|Wir wünschen uns ein {besseres} Leben.
+N|f|b|nach «sein»: Was ist Salzburg?|Auch der Superlativ wird dekliniert: schönst + e.|Salzburg ist für mich die {schönste} Stadt der Welt.
+A|p|o|Akkusativobjekt Plural|Komparativ ohne Artikel: größer + e.|Wir brauchen {größere} Räume.
+N|x|pr|«am …sten» (Superlativ als Adverb)|«am schönsten» ist eine feste Form ohne weitere Endung.|Im Mai ist es hier am {schönsten}.
+D|n|u|«in» + Dativ (Wo?)|«dunkel» verliert vor einer Endung das e: dunkel → dunkl-en.|Wir schliefen in einem {dunklen|dunkl} Zimmer.
+A|p|o|Akkusativobjekt Plural|Bei «-euer/-auer» fällt das e weg: teuer → teur-e.|Sie trägt gern {teure|teur} Schuhe.
+A|p|o|Akkusativobjekt Plural|sauer → saur-e (das e fällt weg).|Mein Opa isst gern {saure|saur} Gurken.
+N|m|u|nach «sein»: Was ist der Großglockner?|«hoch» wird vor einer Endung zu «hoh-».|Der Großglockner ist ein sehr {hoher|hoh} Berg.
+A|n|x|Akkusativobjekt (Was trägt sie?)|Farbadjektive wie «lila, rosa» bleiben unverändert.|Sie trägt ein {lila} Kleid.
+A|f|x|Akkusativobjekt (Was mag ich?)|«rosa» bleibt unverändert.|Ich mag die {rosa} Bluse.
+N|n|x|Subjekt (Was ist berühmt?)|Adjektive von Ortsnamen auf -er (Wiener, Grazer, Berliner) werden nie dekliniert.|Das {Wiener} Riesenrad ist weltberühmt.
+D|n|x|«in» + Dativ (Wo?)|Ortsadjektiv auf -er: unveränderlich.|Wir trinken Kaffee in einem {Grazer} Kaffeehaus.
+N|f|x|nach «sein»: Was ist das?|Umgangssprachliche Adjektive wie «prima, super» bleiben unverändert.|Das ist eine {prima} Idee!
+N|m|o|Subjekt (Wer bellt?)|Falle: Nach «dessen» und «deren» steht das Adjektiv stark – sie zeigen den Kasus des Nomens nicht.|Der Nachbar, dessen {alter} Hund immer bellt, ist sehr nett.
+A|n|o|Akkusativobjekt im Relativsatz (Was lese ich?)|Nach «deren» → starke Endung, wie ohne Artikel.|Die Autorin, deren {neues} Buch ich lese, kommt aus Graz.
+D|f|o|«mit» verlangt den Dativ|Nach «dessen» → stark: im Dativ feminin -er.|Das ist der Mann, mit dessen {junger} Tochter ich studiere.
+A|n|u|Akkusativobjekt (Was hatten wir nicht?)|«solch ein» funktioniert wie «ein»: «solch» bleibt unverändert.|Solch ein {schönes} Wetter hatten wir lange nicht.
+D|m|b|«mit» verlangt den Dativ|«Herr» gehört zur n-Deklination: dem Herrn.|Ich habe mit dem {netten} Herrn am Schalter gesprochen.
+G|m|u|Genitivattribut (Wessen Büro?)|«Kollege» (n-Deklination): eines Kollegen – ohne -s.|Das ist das Büro eines {jungen} Kollegen.
+G|m|o|Genitivattribut ohne Artikel|Genitiv maskulin ohne Artikel → -en (das Nomen trägt schon -s).|Er ist ein Mensch {guten} Willens.
+G|m|o|Genitivattribut ohne Artikel|Genitiv maskulin ohne Artikel → -en.|Das ist ein Wein {französischen} Ursprungs.
+G|n|o|Genitivattribut ohne Artikel|Genitiv neutral ohne Artikel → -en.|Kinder {jüngeren} Alters zahlen weniger.
+N|p|b|Subjekt Plural|«beide» nach «die» ist selbst ein Adjektiv → -en.|Die {beiden} Brüder sehen sich sehr ähnlich.
+N|m|b|Subjekt (Was war erfolgreich?)|Ordnungszahlen werden wie Adjektive dekliniert.|Der {dritte} Versuch war endlich erfolgreich.
+D|m|b|«am» = an dem|Ordnungszahl nach «am» (= an dem): -en.|Am {ersten} Mai haben die meisten frei.
+G|p|o|Genitivattribut Plural (Wessen Wunsch?)|«vieler» ist selbst ein Adjektiv – das folgende Adjektiv ebenfalls stark: vieler alter Menschen.|Das ist der Wunsch vieler {alter} Menschen.
+D|p|o|«mit» verlangt den Dativ|Nach «einigen» starke Endung – im Dativ Plural -en.|Mit einigen {guten} Freunden fahre ich ans Meer.
+D|p|b|«mit» verlangt den Dativ|«allen» funktioniert wie «den».|Mit allen {neuen} Kollegen verstehe ich mich gut.
+N|m|u|Subjekt (Wer hat das gesagt?)|«irgendein» funktioniert wie «ein».|Irgendein {kluger} Mensch hat das einmal gesagt.
+N|f|b|Subjekt (Was kennt jeder?)|«jene» funktioniert wie «die».|Jene {alte} Geschichte kennt jeder im Dorf.
+N|f|b|Subjekt (Wer lacht?)|Nominalisiertes Adjektiv: die Kleine (= das kleine Mädchen).|Die {Kleine} lacht den ganzen Tag.
+A|n|u|Akkusativobjekt (Was zeigt das Museum?)|Nur das Partizip wird dekliniert; «verschollen» ist hier Adverb.|Das Museum zeigt ein verschollen {geglaubtes} Gemälde.
+G|n|b|Genitivattribut (Wessen Geheimnis?)|Partizip II (gestohlen) wird wie ein Adjektiv dekliniert.|Das Geheimnis des {gestohlenen} Gemäldes wurde nie gelüftet.
+N|m|u|Subjekt (Was riecht so gut?)|Partizip I: duften + d → duftend + er.|Ein {duftender} Apfelstrudel steht auf dem Tisch.
+A|m|b|Akkusativobjekt (Was sucht er?)|Superlativ nach bestimmtem Artikel: -en im Akkusativ maskulin.|Der Bergsteiger sucht den {kürzesten} Weg zum Gipfel.
+D|f|o|«mit» verlangt den Dativ|Ohne Artikel, Dativ feminin: -er.|Sie liest jeden Abend mit {großer} Begeisterung.
+G|f|b|«aufgrund» verlangt den Genitiv||Aufgrund der {anhaltenden} Trockenheit sind die Flüsse niedrig.
+G|p|o|«mangels» verlangt den Genitiv|Genitiv Plural ohne Artikel: -er wie bei «der».|Mangels {ausreichender} Beweise wurde er freigesprochen.
+G|m|o|«angesichts» verlangt den Genitiv|Genitiv maskulin ohne Artikel → -en.|Angesichts {steigenden} Drucks lenkte die Regierung ein.
+G|p|o|«trotz» verlangt den Genitiv|Genitiv Plural ohne Artikel: -er.|Trotz {zahlreicher} Warnungen ging er aufs Eis.
+N|n|u|Subjekt (Was ist erschienen?)|«kein» wie «ein»: kein + neues.|Seit Jahren ist kein {neues} Album der Band erschienen.
+A|m|u|Akkusativobjekt (Was hat jeder?)|«seinen» wie «einen».|Jeder hat seinen {eigenen} Weg zum Glück.
+D|n|u|«aus» verlangt den Dativ||Die Geschichte stammt aus einem {vergessenen} Tagebuch.
+A|p|b|Akkusativobjekt Plural|«sämtliche» wird nach Duden heute meist wie «alle» behandelt → -en.|Wir haben sämtliche {alten} Briefe gelesen.
+N|p|o|Subjekt Plural|«etliche» ist kein Artikelwort → starke Endung.|Etliche {seltene} Vogelarten brüten hier.
+D|p|o|«von» verlangt den Dativ|Zahl + Dativ Plural ohne Artikel: -en.|Das Rätsel wurde von drei {neugierigen} Kindern gelöst.
+A|p|o|Akkusativobjekt Plural|«ein paar» → stark.|Wir haben ein paar {ruhige} Tage am See verbracht.
+G|p|b|Genitivattribut Plural (Wessen Briefe?)||Die Briefe der {berühmten} Geschwister wurden versteigert.
+D|m|b|«zum» = zu dem|«zum» enthält den bestimmten Artikel «dem».|Wir gratulieren dir zum {bestandenen} Examen.
+D|n|b|«beim» = bei dem|«beim» = bei dem → schwache Endung -en.|Beim {nächsten} Mal machen wir es besser.
+N|f|o|Subjekt (Was ist kostbar?)||{Freie} Zeit ist kostbar.
+A|m|o|Akkusativobjekt (Was hat die Stadt?)||Wien hat {weltberühmten} Charme.
+N|n|o|Subjekt (Was kommt?)||{Neues} Leben erwacht im Frühling.
+D|m|u|Dativobjekt (Wem schenkt sie Vertrauen?)||Sie schenkt einem {fremden} Menschen ihr Vertrauen.
+A|f|u|Akkusativobjekt (Was hält sie?)||Die Präsidentin hält eine {bewegende} Rede.
+G|n|u|Genitivattribut (Wessen Klang?)||Der Klang eines {verstimmten} Klaviers ist schwer zu ertragen.
+N|x|pr|nach «sein»|Prädikativ nach «sein» – auch Partizipien bekommen keine Endung.|Das Buch ist leider schon {vergriffen}.
+N|x|pr|nach «wirken»|Nach «wirken, scheinen, aussehen» steht das Adjektiv prädikativ – ohne Endung.|Die alte Dame wirkt sehr {zufrieden}.
+N|x|pr|als Adverb|Beschreibt das Adjektiv die Handlung (Adverb), bleibt es ohne Endung.|Der Pianist spielte {wunderbar}.
+N|x|pr|nachgestellt|Nachgestellte Adjektive bleiben ohne Endung: Forelle blau, Hänschen klein.|Zum Essen gab es Forelle {blau}.`};
+const RAWBK=`b1|Ich sehe ___.|der · groß · Hund|den großen Hund|A|m|b|
+b1|Wir wohnen in ___.|die · klein · Stadt|der kleinen Stadt|D|f|b|
+b1|___ steht am Meer.|ein · alt · Leuchtturm|Ein alter Leuchtturm|N|m|u|
+b1|Ich trinke gern ___.|(kein Artikel) · heiß · Tee|heißen Tee|A|m|o|
+b1|Er fährt mit ___ zur Arbeit.|sein · neu · Fahrrad|seinem neuen Fahrrad|D|n|u|
+b1|Das ist das Haus ___.|mein · best · Freundin|meiner besten Freundin|G|f|u|
+b1|Wir spielen mit ___.|die · klein · Kinder (Plural)|den kleinen Kindern|D|p|b|Im Dativ Plural bekommt auch das Nomen ein -n.
+b1|Ich habe ___.|viele · gut · Ideen (Plural)|viele gute Ideen|A|p|o|«viele» ist kein Artikelwort → starke Endung.
+b1|Wegen ___ bleiben wir zu Hause.|(kein Artikel) · stark · Regen|starken Regens|G|m|o|Genitiv maskulin ohne Artikel: -en; das Nomen bekommt -s.
+b1|Sie kauft ___.|ein · schön · Kleid|ein schönes Kleid|A|n|u|
+b1|___ schmeckt herrlich.|(kein Artikel) · frisch · Brot|Frisches Brot|N|n|o|
+b1|Ich helfe ___.|die · alt · Dame|der alten Dame|D|f|b|
+b1|Wir danken ___.|der · nett · Busfahrer|dem netten Busfahrer|D|m|b|
+b1|Er hat ___.|kein · groß · Hunger|keinen großen Hunger|A|m|u|
+b1|___ wohnen in Wien.|mein · best · Freunde (Plural)|Meine besten Freunde|N|p|b|Im Plural zählt «meine» als bestimmtes Artikelwort → -en.
+b1|Wir kochen mit ___.|(kein Artikel) · frisch · Gemüse|frischem Gemüse|D|n|o|
+b1|Ich suche ___.|ein · warm · Jacke|eine warme Jacke|A|f|u|
+b1|Trotz ___ gehen wir wandern.|das · schlecht · Wetter|des schlechten Wetters|G|n|b|
+b1|___ ist sehr alt.|dieser · schön · Brücke|Diese schöne Brücke|N|f|b|
+b1|Ich spreche gern mit ___.|(kein Artikel) · alt · Leute (Plural)|alten Leuten|D|p|o|
+b1|Wir haben ___.|zwei · klein · Katzen (Plural)|zwei kleine Katzen|A|p|o|Zahlen sind keine Artikelwörter → starke Endung.
+b1|Das ist die Meinung ___.|(kein Artikel) · jung · Leute (Plural)|junger Leute|G|p|o|
+b1|Sie wohnt in ___.|ein · schön · Haus|einem schönen Haus|D|n|u|
+b1|Wir gehen durch ___.|der · dunkel · Wald|den dunklen Wald|A|m|b|dunkel → dunkl-en: das e fällt weg.
+b1|___ ist gesund.|(kein Artikel) · kalt · Wasser|Kaltes Wasser|N|n|o|
+b1|Ich wünsche dir ___.|ein · schön · Reise|eine schöne Reise|A|f|u|
+b1|Hast du ___ gesehen?|mein · blau · Schal|meinen blauen Schal|A|m|u|
+b1|Während ___ schlafen die Kinder.|die · lang · Fahrt|der langen Fahrt|G|f|b|
+b1|Ich fahre mit ___ in den Urlaub.|mein · alt · Freunde (Plural)|meinen alten Freunden|D|p|b|
+b1|___ stellen sich vor.|alle · neu · Schüler (Plural)|Alle neuen Schüler|N|p|b|«alle» funktioniert wie «die».
+b1|Wir haben ___ mehr.|kein · frisch · Eier (Plural)|keine frischen Eier|A|p|b|
+b1|Das Kleid ist aus ___.|(kein Artikel) · echt · Seide|echter Seide|D|f|o|
+b1|___ bringt uns die Karte.|ein · freundlich · Kellnerin|Eine freundliche Kellnerin|N|f|u|
+b1|Der Duft ___ weckt mich.|das · frisch · Brot|des frischen Brotes|G|n|b|
+b1|Hier gibt es ___.|kein · hoch · Berge (Plural)|keine hohen Berge|A|p|b|hoch → hoh-en.
+c1|Er ist ein Mensch ___.|(kein Artikel) · gut · Wille|guten Willens|G|m|o|Genitiv maskulin ohne Artikel: -en.
+c1|Ich wünsche dir ___!|alles · gut (nominalisiert)|alles Gute|A|n|b|«alles» funktioniert wie «das» → -e.
+c1|Es gibt ___.|nichts · neu (nominalisiert)|nichts Neues|A|n|o|Nach «nichts» stark: -es.
+c1|Wir überraschen sie mit ___.|etwas · besonders (nominalisiert)|etwas Besonderem|D|n|o|
+c1|___ von mir arbeitet beim ORF.|ein · bekannt (nominalisiert, männlich)|Ein Bekannter|N|m|u|
+c1|Ich habe mit ___ gesprochen.|(kein Artikel) · deutsch (nominalisiert, Plural)|Deutschen|D|p|o|
+c1|Das ist der Wunsch ___.|viele · alt · Menschen (Plural)|vieler alter Menschen|G|p|o|«vieler» ist selbst stark – das Adjektiv auch.
+c1|Der Nachbar, ___ immer bellt, ist nett.|dessen · alt · Hund|dessen alter Hund|N|m|o|Nach «dessen» → stark.
+c1|Das ist der Mann, mit ___ ich studiere.|dessen · jung · Tochter|dessen junger Tochter|D|f|o|
+c1|Ich habe mit ___ gesprochen.|der · nett · Herr|dem netten Herrn|D|m|b|«Herr» (n-Deklination): dem Herrn.
+c1|Das ist das Büro ___.|ein · jung · Kollege|eines jungen Kollegen|G|m|u|«Kollege» (n-Deklination): eines Kollegen.
+c1|Sie trägt ___.|ein · lila · Kleid|ein lila Kleid|A|n|u|«lila» bleibt unverändert.
+c1|Wir sitzen in ___.|ein · Grazer · Kaffeehaus|einem Grazer Kaffeehaus|D|n|u|Ortsadjektive auf -er bleiben unverändert.
+c1|Sie trägt ___.|(kein Artikel) · teuer · Schuhe (Plural)|teure Schuhe|A|p|o|teuer → teur-e.
+c1|Der Großglockner ist ___.|ein · hoch · Berg|ein hoher Berg|N|m|u|hoch → hoh-er.
+c1|Mangels ___ wurde er freigesprochen.|(kein Artikel) · ausreichend · Beweise (Plural)|ausreichender Beweise|G|p|o|
+c1|Angesichts ___ lenkte die Regierung ein.|(kein Artikel) · steigend · Druck|steigenden Drucks|G|m|o|
+c1|Wir brauchen ___.|(kein Artikel) · groß (Komparativ) · Räume (Plural)|größere Räume|A|p|o|
+c1|Salzburg ist ___ der Welt.|die · schön (Superlativ) · Stadt|die schönste Stadt|N|f|b|
+c1|Wir wünschen uns ___.|ein · gut (Komparativ) · Leben|ein besseres Leben|A|n|u|
+c1|___ liegt vor dem Kamin.|der · schlafen (Partizip I) · Hund|Der schlafende Hund|N|m|b|
+c1|Zum Frühstück gibt es ___.|(kein Artikel) · frisch · backen (Partizip II) · Brot|frisch gebackenes Brot|A|n|o|«frisch» ist Adverb – nur das Partizip wird dekliniert.
+c1|___ warten auf den Zug.|die · reisen (nominalisiertes Partizip I, Plural)|Die Reisenden|N|p|b|
+c1|Trotz ___ ging er aufs Eis.|(kein Artikel) · zahlreich · Warnungen (Plural)|zahlreicher Warnungen|G|p|o|
+c1|Mit ___ fahre ich ans Meer.|einige · gut · Freunde (Plural)|einigen guten Freunden|D|p|o|
+c1|Mit ___ verstehe ich mich gut.|alle · neu · Kollegen (Plural)|allen neuen Kollegen|D|p|b|
+c1|Wir trinken ___.|(kein Artikel) · frisch · kühl · Quellwasser|frisches, kühles Quellwasser|A|n|o|Mehrere Adjektive: dieselbe Endung.
+c1|Kinder ___ zahlen weniger.|(kein Artikel) · jung (Komparativ) · Alter|jüngeren Alters|G|n|o|
+c1|___ haben die meisten frei.|an + der · erst · Mai|Am ersten Mai|D|m|b|an + dem = am.
+c1|___ hatten wir lange nicht.|solch · ein · schön · Wetter|Solch ein schönes Wetter|A|n|u|
+c1|Das ist ein Wein ___.|(kein Artikel) · französisch · Ursprung|französischen Ursprungs|G|m|o|
+c1|Die Autorin, ___ ich lese, kommt aus Graz.|deren · neu · Buch|deren neues Buch|A|n|o|
+c1|In ___ soll es spuken.|die · alt · verlassen · Mühle|der alten, verlassenen Mühle|D|f|b|
+c1|___ lacht den ganzen Tag.|die · klein (nominalisiert, Mädchen)|Die Kleine|N|f|b|`;
+const KN={N:'Nominativ',A:'Akkusativ',D:'Dativ',G:'Genitiv'};
+const GN={m:'maskulin',f:'feminin',n:'neutral',p:'Plural'};
+const GART={m:'der',f:'die',n:'das',p:'die'};
+const DEFART={N:{m:'der',f:'die',n:'das',p:'die'},A:{m:'den',f:'die',n:'das',p:'die'},D:{m:'dem',f:'der',n:'dem',p:'den'},G:{m:'des',f:'der',n:'des',p:'der'}};
+function END(K,G,T){if(T==='pr'||T==='x')return '';
+ if(T==='b'||(T==='u'&&G==='p')){if(G==='p')return 'en';if(K==='N')return 'e';if(K==='A')return G==='m'?'en':'e';return 'en';}
+ if(T==='u'){if(K==='N')return {m:'er',f:'e',n:'es'}[G];if(K==='A')return {m:'en',f:'e',n:'es'}[G];return 'en';}
+ return {N:{m:'er',f:'e',n:'es',p:'e'},A:{m:'en',f:'e',n:'es',p:'e'},D:{m:'em',f:'er',n:'em',p:'en'},G:{m:'en',f:'er',n:'en',p:'er'}}[K][G];}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=id=>document.getElementById(id);
+function rng(seed){return ()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
+function shuffled(a,seed){a=a.slice();const r=rng(seed);for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function parse(txt){return txt.trim().split('\n').map((l,id)=>{const f=l.split('|');const [K,G,T,reason,note]=f;const s=f.slice(5).join('|');
+  const parts=[];const re=/\{([^}|]+)(?:\|([^}]+))?\}/g;let last=0,m;const e=END(K,G,T);
+  while((m=re.exec(s))){if(m.index>last)parts.push({txt:s.slice(last,m.index)});const w=m[1];const stem=m[2]||w.slice(0,w.length-e.length);parts.push({slot:true,w,stem});last=re.lastIndex;}
+  if(last<s.length)parts.push({txt:s.slice(last)});
+  const before=parts[0].slot?'':parts[parts.findIndex(p=>p.slot)-1].txt;
+  const prevWord=(before.trim().split(/\s+/).pop()||'').replace(/[„“"«»(),.]/g,'');
+  const afterIdx=parts.map((p,i)=>p.slot?i:-1).filter(i=>i>=0).pop();
+  const after=parts.slice(afterIdx+1).map(p=>p.txt||'').join(' ');
+  const noun=(after.match(/[A-ZÄÖÜ][a-zäöüß]+/)||[''])[0];
+  return {id,K,G,T,reason,note,parts,e,prevWord,noun};});}
+const DATA={b1:parse(RAW.b1),c1:parse(RAW.c1)};
+const BK=RAWBK.trim().split('\n').map((l,id)=>{const [lvl,frame,base,ans,K,G,T,note]=l.split('|');return {id,lvl,frame,base,ans,K,G,T,note:note||''};});
+
+/* Erklärungen */
+const PREP=/^(mit|nach|bei|von|aus|seit|zu|in|auf|an|unter|über|vor|hinter|neben|zwischen|durch|für|gegen|ohne|um|wegen|trotz|während|statt|innerhalb|außerhalb|mangels|angesichts|aufgrund)$/i;
+function typeWhy(it){const w=it.prevWord;
+  if(it.T==='b'){let s=`«${esc(w)}» ist ein <b>bestimmtes Artikelwort</b> (der-Wort). Es zeigt Kasus und Genus schon deutlich – das Adjektiv braucht kein eigenes Signal.`;
+    if(it.G==='p'&&/^(mein|dein|sein|ihr|unser|euer|kein)/i.test(w))s=`Wichtig: Im <b>Plural</b> zählt «${esc(w)}» wie «die» als bestimmtes Artikelwort – denn im Plural gibt es kein «ein».`;
+    if(/^(zum|zur|im|am|beim|vom|ins)$/i.test(w))s=`«${esc(w)}» enthält den bestimmten Artikel (${{zum:'zu dem',zur:'zu der',im:'in dem',am:'an dem',beim:'bei dem',vom:'von dem',ins:'in das'}[w.toLowerCase()]}).`;
+    return s;}
+  if(it.T==='u')return `«${esc(w)}» ist ein <b>ein-Wort</b> (ein, kein, mein …). Bei «ein Mann», «ein Kind» zeigt es das Genus nicht – dann muss das Adjektiv das Signal tragen.`;
+  const QUANT=/^(viele|vielen|vieler|viel|einige|einigen|einiger|wenige|wenigen|weniger|mehrere|mehreren|zwei|drei|vier|fünf|paar|etliche|zahlreiche|andere|etwas|nichts|wenig)$/i;
+  if(/^(dessen|deren)$/i.test(w))return `<b>Kein Artikelwort:</b> «${esc(w)}» zeigt nur, wem etwas gehört – aber nicht den Kasus des folgenden Nomens. Also trägt das Adjektiv das Signal selbst (starke Endung).`;
+  if(QUANT.test(w))return `<b>Kein Artikelwort:</b> «${esc(w)}» ist ein Zahl- oder Mengenwort, kein Artikel – es zeigt den Kasus nicht. Also trägt das Adjektiv das Signal selbst (starke Endung).`;
+  return `Vor dem Adjektiv steht <b>kein Artikelwort</b>${w&&PREP.test(w)?` – «${esc(w)}» ist eine Präposition`:''}. Also muss das Adjektiv selbst das Signal tragen (starke Endung).`;}
+function endWhy(it){const e=it.e,K=it.K,G=it.G,T=it.T;const art=DEFART[K][G];
+  if(T==='pr'||T==='x')return it.note||'Hier bekommt das Adjektiv keine Endung.';
+  if(T==='b'||(T==='u'&&G==='p'))return `Nach einem bestimmten Artikelwort ist die Endung immer <b>-e</b> oder <b>-en</b>. ${e==='e'?'Im Nominativ Singular (und im Akkusativ feminin/neutral) steht -e.':'In allen anderen Fällen – Dativ, Genitiv, Akkusativ maskulin und im ganzen Plural – steht -en.'}`;
+  if(T==='u'){if(e==='er'||e==='es')return `«${esc(it.prevWord)}» sieht hier aus wie bei «ein» – es zeigt das Genus nicht. Darum übernimmt das Adjektiv das Signal von «${art}»: <b>-${e}</b>.`;
+    return `Hier zeigt das ein-Wort selbst schon ein klares Signal («${esc(it.prevWord)}») – dem Adjektiv reicht <b>-${e}</b>.`;}
+  if(K==='G'&&(G==='m'||G==='n'))return `Ausnahme im Genitiv: Eigentlich wäre das Signal «des» → -es. Weil aber das Nomen den Genitiv schon mit -s zeigt, bekommt das Adjektiv nur <b>-en</b>.`;
+  return `Ohne Artikelwort übernimmt das Adjektiv die Endung des bestimmten Artikels: «${art}» → <b>-${e}</b>.`;}
+function nounWhy(it){if(it.G==='x')return '';
+  if(it.noun)return it.G==='p'?`«${esc(it.noun)}» steht im <b>Plural</b>.`:`«${esc(it.noun)}» ist <b>${GN[it.G]}</b> (im Nominativ: ${GART[it.G]} …).`;
+  return `Das Adjektiv ist hier selbst das Nomen (nominalisiert) – gemeint ist ${it.G==='p'?'eine Gruppe (Plural)':GN[it.G]+' ('+GART[it.G]+' …)'}.`;}
+
+/* Zustand */
+const LS='adjektiv-werkstatt-v1';let PROG={};try{PROG=JSON.parse(localStorage.getItem(LS)||'{}')||{};}catch(e){}
+const save=()=>{try{localStorage.setItem(LS,JSON.stringify(PROG));}catch(e){}};
+const ST={lvl:'b1',mode:'werk',filter:'all',pos:{},cur:null,sp:{pts:0,streak:0,best:0}};
+const pkey=()=>ST.lvl+'-'+ST.mode;const solved=()=>(PROG[pkey()]=PROG[pkey()]||{});
+const FILT={all:['Alle',x=>true],N:['nur Nominativ',x=>x.K==='N'&&x.G!=='p'&&x.T!=='pr'],A:['nur Akkusativ',x=>x.K==='A'&&x.G!=='p'],D:['nur Dativ',x=>x.K==='D'&&x.G!=='p'],G:['nur Genitiv',x=>x.K==='G'&&x.G!=='p'],P:['nur Plural',x=>x.G==='p'],b:['nach der-Wort',x=>x.T==='b'],u:['nach ein-Wort',x=>x.T==='u'],o:['ohne Artikel',x=>x.T==='o'],S:['Spezialfälle',x=>!!x.note]};
+function list(){if(ST.mode==='bau')return BK.filter(b=>b.lvl===ST.lvl);
+  const base=ST.filter==='all'?shuffled(DATA[ST.lvl],ST.lvl==='b1'?13:29):DATA[ST.lvl].filter(FILT[ST.filter][1]);
+  return ST.mode==='werk'?base.filter(x=>x.T!=='pr'||true):base;}
+function idx(){return ST.pos[ST.lvl+ST.mode+ST.filter]||0;}
+function go(i){const n=list().length;ST.pos[ST.lvl+ST.mode+ST.filter]=((i%n)+n)%n;ST.cur=null;render();}
+function renderChips(){const c=$('chips');if(ST.mode==='bau'){c.style.display='none';return;}c.style.display='';
+  const D=DATA[ST.lvl];c.innerHTML=Object.keys(FILT).map(k=>{const n=D.filter(FILT[k][1]).length;return n?`<button class="chip" data-f="${k}" aria-pressed="${ST.filter===k}">${FILT[k][0]}<span>${n}</span></button>`:'';}).join('');
+  c.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{ST.filter=b.dataset.f;ST.cur=null;render();});}
+function renderProg(){const n=ST.mode==='bau'?BK.filter(b=>b.lvl===ST.lvl).length:DATA[ST.lvl].length;const k=Object.keys(solved()).length;
+  $('progtxt').innerHTML=`${{werk:'Werkstatt',sprint:'Endungs-Sprint',bau:'Baukasten'}[ST.mode]} · ${ST.lvl==='b1'?'A2/B1':'B2/C1'}: <b>${k}</b> von ${n} geschafft`;$('progbar').style.width=(100*k/n)+'%';}
+function render(){
+  document.querySelectorAll('[data-lvl]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lvl===ST.lvl));
+  document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===ST.mode));
+  renderChips();renderProg();
+  if(ST.mode==='werk')renderWerk();else if(ST.mode==='sprint')renderSprint();else renderBau();}
+function navHTML(){return `<span class="spacer"></span><button class="btn soft" id="prev">←</button><button class="btn soft" id="rand">Zufall</button><button class="btn soft" id="next">→</button>`;}
+function bindNav(){$('prev').onclick=()=>go(idx()-1);$('next').onclick=()=>go(idx()+1);
+  $('rand').onclick=()=>{const L=list(),sv=solved();const open=L.map((x,k)=>k).filter(k=>!sv[L[k].id]);const pool=open.length?open:L.map((x,k)=>k);go(pool[Math.floor(Math.random()*pool.length)]);};}
+function sentHTML(it,filled){return it.parts.map(p=>{if(!p.slot)return esc(p.txt);
+  return filled?`<span class="gap ok">${esc(p.stem)}<i>${esc(it.e)}</i></span>`:`<span class="gap">${esc(p.stem)}<i>___</i></span>`;}).join('');}
+const ENDS=['e','en','er','es','em',''];
+const endLabel=e=>e?'-'+e:'— (keine)';
+
+/* Werkstatt */
+function renderWerk(){const L=list(),i=idx(),it=L[i],m=$('main');
+  const simple=it.T==='pr'||it.T==='x';
+  const STEPS=simple?['end']:['K','G','T','end'];
+  if(!ST.cur)ST.cur={step:0,ans:{},wrong:0,bad:{}};const C=ST.cur;const done=C.step>=STEPS.length;
+  const opts={K:Object.keys(KN).map(k=>[k,KN[k],{N:'Wer? Was?',A:'Wen? Was?',D:'Wem?',G:'Wessen?'}[k]]),
+    G:['m','f','n','p'].map(g=>[g,GN[g],g==='p'?'mehrere':GART[g]]),
+    T:[['b','der-Wort','der, dieser, alle, Plural: meine …'],['u','ein-Wort','ein, kein, mein … (Singular)'],['o','kein Artikelwort','oder Zahl-/Mengenwort']],
+    end:ENDS.map(e=>[e,endLabel(e),''])};
+  const right={K:it.K,G:it.G,T:it.T,end:it.e};
+  const q={K:'Welcher <b>Kasus</b>?',G:'Welches <b>Genus</b> – oder Plural?',T:'Welches <b>Artikelwort</b> steht vor dem Adjektiv?',end:'Welche <b>Endung</b> bekommt das Adjektiv?'};
+  const why={K:()=>`${esc(it.reason)} → <b>${KN[it.K]}</b>.`,G:()=>nounWhy(it),T:()=>typeWhy(it),end:()=>endWhy(it)};
+  const title={K:'Kasus bestimmen',G:'Genus und Numerus',T:'Artikelwort prüfen',end:'Endung wählen'};
+  const lab={K:x=>KN[x],G:x=>GN[x],T:x=>({b:'der-Wort',u:'ein-Wort',o:'kein Artikelwort'})[x],end:endLabel};
+  const stepsHTML=STEPS.map((s,k)=>{if(k>C.step)return '';const cur=k===C.step&&!done;
+    return `<li class="${cur?'cur':''}"><div><h3>${title[s]}</h3>${cur?`<p class="q">${q[s]}</p><div class="opts">${opts[s].map(o=>`<button class="opt${s==='end'?' end':''}" data-v="${o[0]}"${C.bad[s+o[0]]?' disabled':''}>${o[1]}${o[2]?`<small>${o[2]}</small>`:''}</button>`).join('')}</div>${C.ans[s]?`<div class="why bad">${C.ans[s]}</div>`:''}`
+      :`<p class="ans">✓ <b>${lab[s](right[s])}</b></p><div class="why">${why[s]()}</div>`}</div></li>`;}).join('');
+  const sv=!!solved()[it.id];
+  m.innerHTML=`<div class="meta"><span class="counter">Satz ${i+1} / ${L.length}</span>${sv?'<span class="badge done">✓ geschafft</span>':''}${it.note?'<span class="badge sp">Spezialfall</span>':''}<span class="badge">${simple?'ohne Endung?':KN[it.K]+(it.G==='p'?' · Plural':'')}</span></div>
+   <div class="sentence">${sentHTML(it,done)}</div>
+   <ol class="steps">${stepsHTML}</ol>
+   ${done?`<div class="fb ok"><b class="h">${C.wrong?'Geschafft!':'✓ Fehlerfrei gelöst!'}</b>Die Endung ist <b>${endLabel(it.e)}</b>.${it.note?`<span class="note">💡 ${esc(it.note)}</span>`:''}</div>`:''}
+   <div class="actions">${done?'<button class="btn primary" id="nx">Nächster Satz →</button>':'<button class="btn soft" id="skip">Lösung zeigen</button>'}${navHTML()}</div>`;
+  m.querySelectorAll('.opt:not([disabled])').forEach(b=>b.onclick=()=>{const s=STEPS[C.step],v=b.dataset.v;
+    if(v===right[s]){C.ans[s]=null;C.step++;if(C.step>=STEPS.length&&!C.wrong){solved()[it.id]=1;save();renderProg();}}
+    else{C.wrong++;C.bad[s+v]=1;C.ans[s]=wrongWhy(it,s,v);}
+    renderWerk();});
+  if(done)$('nx').onclick=()=>go(i+1);else $('skip').onclick=()=>{C.wrong++;C.step=STEPS.length;renderWerk();};
+  bindNav();}
+function wrongWhy(it,s,v){
+  if(s==='K')return `Nicht ${KN[v]}. Tipp: ${esc(it.reason)}.`;
+  if(s==='G')return it.noun?`Schau auf das Nomen: «${esc(it.noun)}»${it.G==='p'?' – sind es mehrere?':' – welcher Artikel passt im Nominativ?'}`:'Überlege, wer oder was gemeint ist.';
+  if(s==='T'){if(v==='u'&&it.T==='b'&&it.G==='p')return 'Achtung: Im Plural gibt es kein «ein» – darum zählen «meine, keine …» dort als bestimmte Artikelwörter.';
+    if(v!=='o'&&it.T==='o')return `«${esc(it.prevWord)||'—'}» ist kein Artikelwort. Zahlen, «viele, einige, wenige, mehrere, ein paar» oder Präpositionen sind keine Artikel.`;
+    if(v==='o')return `Doch – «${esc(it.prevWord)}» ist ein Artikelwort.`;
+    return `«${esc(it.prevWord)}» gehört zur anderen Gruppe: ${it.T==='b'?'der-Wörter: der, dieser, jeder, alle …':'ein-Wörter: ein, kein, mein, dein …'}.`;}
+  const e=it.e;if(it.T==='pr'||it.T==='x')return `Hier bekommt das Adjektiv keine Endung. ${esc(it.note)}`;
+  if(v===''&&e)return 'Das Adjektiv steht vor einem Nomen – dann braucht es immer eine Endung.';
+  return `«-${esc(v)}» passt nicht. Denk an das Signal: ${it.T==='o'?'ohne Artikel trägt das Adjektiv selbst die Endung des bestimmten Artikels.':it.T==='u'?'zeigt das ein-Wort das Genus schon, oder muss das Adjektiv es zeigen?':'nach einem der-Wort gibt es nur -e oder -en.'}`;}
+
+/* Sprint */
+function renderSprint(){const L=list(),i=idx(),it=L[i],m=$('main');const S=ST.sp;
+  if(!ST.cur)ST.cur={state:'ask',pick:null};const C=ST.cur;
+  m.innerHTML=`<div class="score"><span>Punkte <b>${S.pts}</b></span><span>Serie <b>${S.streak}</b></span><span>Rekord <b>${S.best}</b></span></div>
+   <div class="meta"><span class="counter">Satz ${i+1} / ${L.length}</span>${it.note?'<span class="badge sp">Spezialfall</span>':''}</div>
+   <div class="sentence">${sentHTML(it,C.state!=='ask')}</div>
+   ${C.state==='ask'?`<div class="opts">${ENDS.map(e=>`<button class="opt end" data-v="${e}">${endLabel(e)}</button>`).join('')}</div>`:''}
+   ${C.state==='ok'?`<div class="fb ok"><b class="h">✓ Richtig! +${10+Math.min(S.streak,10)*2}</b>${endWhy(it)}${it.note?`<span class="note">💡 ${esc(it.note)}</span>`:''}</div>`:''}
+   ${C.state==='bad'?`<div class="fb err"><b class="h">«${endLabel(C.pick)}» passt nicht – richtig ist ${endLabel(it.e)}.</b>${it.T==='pr'||it.T==='x'?'':`${KN[it.K]}, ${GN[it.G]} · ${typeWhy(it)}<br>`}${endWhy(it)}${it.note?`<span class="note">💡 ${esc(it.note)}</span>`:''}</div>`:''}
+   <div class="actions">${C.state!=='ask'?'<button class="btn primary" id="nx">Weiter →</button>':''}${navHTML()}</div>`;
+  m.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const v=b.dataset.v;
+    if(v===it.e){S.streak++;S.pts+=10+Math.min(S.streak-1,10)*2;S.best=Math.max(S.best,S.streak);C.state='ok';solved()[it.id]=1;save();renderProg();}
+    else{S.streak=0;C.state='bad';C.pick=v;}
+    renderSprint();});
+  if(C.state!=='ask')$('nx').onclick=()=>go(i+1);
+  bindNav();}
+
+/* Baukasten */
+const bnorm=s=>s.toLowerCase().replace(/[.,!?;:„“"«»]/g,' ').replace(/ß/g,'ss').replace(/\s+/g,' ').trim();
+function renderBau(){const L=list(),i=idx(),it=L[i],m=$('main');
+  if(!ST.cur)ST.cur={state:'ask',val:'',tries:0};const C=ST.cur;const sv=!!solved()[it.id];
+  const e=END(it.K,it.G,it.T);
+  const rule=()=>`<b>${KN[it.K]}, ${GN[it.G]}</b>, ${({b:'nach der-Wort',u:'nach ein-Wort',o:'ohne Artikelwort',x:'unveränderliches Adjektiv',pr:'ohne Endung'})[it.T]} → Adjektivendung <b>${endLabel(e)}</b>.`;
+  let diff='';if(C.state==='bad'){const a=bnorm(it.ans).split(' '),u=bnorm(C.val).split(' ');diff=a.map((w,k)=>u[k]===w?`<span class="w-ok">${esc(it.ans.split(/[ ,]+/)[k]||w)}</span>`:`<span class="w-bad">${esc(C.val.split(/\s+/)[k]||'…')}</span>`).join(' ');}
+  m.innerHTML=`<div class="meta"><span class="counter">Aufgabe ${i+1} / ${L.length}</span>${sv?'<span class="badge done">✓ geschafft</span>':''}${it.note?'<span class="badge sp">Spezialfall</span>':''}</div>
+   <p class="q">Setze die Wortgruppe richtig ein – Artikel, Adjektiv und Nomen:</p>
+   <div class="sentence">${esc(it.frame).replace('___','<span class="gap"><i>___</i></span>')}</div>
+   <div class="base">${it.base.split(' · ').map(b=>`<span>${esc(b)}</span>`).join('')}</div>
+   <input class="txt" id="inp" autocomplete="off" spellcheck="false" placeholder="Wortgruppe schreiben …" value="${esc(C.val)}"${C.state==='ok'?' disabled':''}>
+   ${C.state==='ok'?`<div class="fb ok"><b class="h">✓ Richtig!</b><span class="sol">${esc(it.frame).replace('___','<b>'+esc(it.ans)+'</b>')}</span><span class="note">${rule()}${it.note?' '+esc(it.note):''}</span></div>`:''}
+   ${C.state==='bad'?`<div class="fb err"><b class="h">Noch nicht ganz.</b>Rot markiert ist, was nicht stimmt: <span class="sol">${diff}</span><span class="note">${rule()}${it.note?' '+esc(it.note):''}</span>${C.tries>=2?`<span class="note">Lösung: <b>${esc(it.ans)}</b></span>`:''}</div>`:''}
+   <div class="actions">${C.state==='ok'?'<button class="btn primary" id="nx">Nächste Aufgabe →</button>':'<button class="btn primary" id="chk">Prüfen</button>'}${navHTML()}</div>`;
+  const inp=$('inp');
+  if(C.state!=='ok'){inp.oninput=()=>{C.val=inp.value;};inp.onkeydown=ev=>{if(ev.key==='Enter')$('chk').click();};
+    $('chk').onclick=()=>{C.val=inp.value;if(bnorm(C.val)===bnorm(it.ans)){C.state='ok';if(!C.tries){solved()[it.id]=1;save();renderProg();}}else{C.state='bad';C.tries++;}renderBau();$('inp')&&$('inp').focus();};}
+  else $('nx').onclick=()=>go(i+1);
+  bindNav();}
+
+/* Tabellen */
+function renderTbl(t){const rows=['N','A','D','G'];const cols=['m','f','n','p'];
+  $('tbl').innerHTML=`<table><tr><th></th><th>mask.</th><th>fem.</th><th>neutr.</th><th>Plural</th></tr>${rows.map(K=>`<tr><td>${KN[K].slice(0,3)}.</td>${cols.map(G=>{const e=END(K,G,t==='u'&&G==='p'?'b':t);const sig=(t==='u'&&(e==='er'||e==='es'))||(t==='o'&&!(K==='G'&&(G==='m'||G==='n')));return `<td class="${sig?'sig':''}">-${e}</td>`;}).join('')}</tr>`).join('')}</table>
+   <p class="s" style="margin-top:8px">${t==='b'?'der alte Baum · den alten Baum · dem alten Baum · die alten Bäume':t==='u'?'ein alter Baum · ein altes Haus · einem alten Baum · <i>Plural:</i> meine alten Bäume (wie der-Wort!)':'alter Baum · altes Holz · mit altem Holz · wegen alten Holzes · alte Bäume'}${t!=='b'?' – farbig: hier trägt das Adjektiv das Signal.':''}</p>`;}
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button').forEach(x=>x.setAttribute('aria-pressed',x===b));renderTbl(b.dataset.t);});
+renderTbl('b');
+document.querySelectorAll('[data-lvl]').forEach(b=>b.onclick=()=>{ST.lvl=b.dataset.lvl;ST.filter='all';ST.cur=null;render();});
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{ST.mode=b.dataset.mode;ST.cur=null;render();});
+$('reset').onclick=function(){if(this.classList.contains('armed')){PROG[pkey()]={};save();this.classList.remove('armed');this.textContent='Fortschritt dieser Übung zurücksetzen';render();}
+  else{this.classList.add('armed');this.textContent='Wirklich? Nochmal tippen';setTimeout(()=>{this.classList.remove('armed');this.textContent='Fortschritt dieser Übung zurücksetzen';},3500);}};
+render();
+
+(function(){const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const cv=$('bubbles'),cx=cv.getContext('2d');let W,H;const B=[];
+function size(){W=cv.width=innerWidth*devicePixelRatio;H=cv.height=innerHeight*devicePixelRatio;}
+size();addEventListener('resize',size);
+const tint=['255,255,255','240,197,72','190,160,215','255,255,255'];
+for(let i=0;i<20;i++)B.push({x:Math.random(),y:Math.random(),r:8+Math.random()*46,s:.0001+Math.random()*.0003,d:Math.random()*6.28,c:tint[i%4]});
+function draw(){cx.clearRect(0,0,W,H);const dp=devicePixelRatio;
+  B.forEach(b=>{b.y-=b.s;b.d+=.004;if(b.y<-.1){b.y=1.1;b.x=Math.random();}
+    const x=(b.x+Math.sin(b.d)*.02)*W,y=b.y*H,r=b.r*dp;
+    const g=cx.createRadialGradient(x-r*.35,y-r*.35,r*.1,x,y,r);g.addColorStop(0,`rgba(${b.c},.13)`);g.addColorStop(1,`rgba(${b.c},.02)`);
+    cx.beginPath();cx.arc(x,y,r,0,7);cx.fillStyle=g;cx.fill();cx.lineWidth=1*dp;cx.strokeStyle=`rgba(${b.c},.3)`;cx.stroke();
+    cx.beginPath();cx.arc(x-r*.4,y-r*.4,r*.13,0,7);cx.fillStyle='rgba(255,255,255,.3)';cx.fill();});}
+if(reduce)draw();else(function loop(){draw();requestAnimationFrame(loop);})();})();
+</script>
+</body>
+</html>
