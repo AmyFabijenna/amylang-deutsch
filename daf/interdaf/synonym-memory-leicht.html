@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Synonym-Memory A2/B1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Unbounded:wght@500;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Bangers&family=Comic+Neue:wght@700&family=Caveat:wght@600;700&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ---------- Grundgerüst & Themen ---------- */
+:root{
+  --ink:#1b1b1f; --muted:#5a5a66;
+  --tile-w:118px; --tile-h:62px; --gap:8px;
+}
+body[data-theme="orient"]{
+  --bg:#f6efe2; --bg2:#efe4cf; --panel:#fffaf0; --line:#d9c08a;
+  --accent:#9a7429; --accent-soft:#f2e3b8; --title-font:'Cormorant Garamond',serif;
+  --back:#6e1f2b; --back2:#4f1520; --gold:#d4af5f;
+  --face:#fffaf0; --face-line:#e4cf9d;
+  --match-bg:#f5e6bd; --match-line:#b8923f; --badge:#9a7429;
+  --radius:8px; --btn-bg:#6e1f2b; --btn-ink:#fff7e6;
+}
+body[data-theme="urban"]{
+  --bg:#eceff6; --bg2:#e2e5f0; --panel:#ffffff; --line:#cdd2e3;
+  --accent:#4a5f92; --accent-soft:#e3e3f3; --title-font:'Unbounded',sans-serif;
+  --back:#34507e; --back2:#6a5a92; --gold:#ffffff;
+  --face:#ffffff; --face-line:#d5d9ea;
+  --match-bg:#e7e1f4; --match-line:#6a5a92; --badge:#6a5a92;
+  --radius:14px; --btn-bg:#3d4f7c; --btn-ink:#ffffff;
+}
+body[data-theme="klassik"]{
+  --bg:#f4f1ec; --bg2:#ebe6de; --panel:#fdfbf8; --line:#d8cfc1;
+  --accent:#2f4858; --accent-soft:#e6e1d8; --title-font:'Playfair Display',serif;
+  --back:#2f4858; --back2:#263b48; --gold:#d6c4a0;
+  --face:#fdfbf8; --face-line:#ddd3c4;
+  --match-bg:#ece4d6; --match-line:#8a7457; --badge:#8a7457;
+  --radius:6px; --btn-bg:#2f4858; --btn-ink:#fbf8f2;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  font-family:'Lexend',system-ui,sans-serif; color:var(--ink);
+  background:var(--bg); min-height:100vh; transition:background .4s;
+}
+body[data-theme="orient"]{
+  background:
+    radial-gradient(circle at 50% 100%, transparent 38%, rgba(212,175,95,.10) 39% 41%, transparent 42%) 0 0/36px 18px,
+    var(--bg);
+}
+body[data-theme="urban"]{
+  background:
+    radial-gradient(circle at 15% 0%, rgba(106,90,146,.10), transparent 45%),
+    radial-gradient(circle at 90% 10%, rgba(52,80,126,.10), transparent 40%),
+    var(--bg);
+}
+body[data-theme="klassik"]{
+  background:linear-gradient(180deg,var(--bg),var(--bg2));
+}
+
+.wrap{max-width:1400px; margin:0 auto; padding:14px 16px 40px}
+
+/* ---------- Kopfbereich ---------- */
+header{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px 20px; margin-bottom:10px}
+.brand{display:flex; flex-direction:column; align-items:flex-start}
+h1{font-family:var(--title-font); font-weight:600; margin:0; line-height:1.1; font-size:1.7rem; color:var(--accent)}
+body[data-theme="urban"] h1{font-size:1.3rem; letter-spacing:.01em}
+body[data-theme="klassik"] h1{font-style:italic; font-weight:500}
+.sub{font-size:.85rem; color:var(--muted); margin-top:2px}
+.flourish{display:none; width:220px; height:22px; margin-top:2px}
+body[data-theme="orient"] .flourish{display:block}
+
+.controls{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.seg{display:flex; background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:3px}
+.seg button{
+  font:inherit; font-size:.82rem; border:0; background:transparent; color:var(--ink);
+  padding:6px 12px; border-radius:999px; cursor:pointer; transition:background .2s,color .2s;
+}
+.seg button.on{background:var(--btn-bg); color:var(--btn-ink)}
+select, .btn{
+  font:inherit; font-size:.85rem; border:1px solid var(--line); background:var(--panel);
+  color:var(--ink); border-radius:999px; padding:7px 14px; cursor:pointer;
+}
+.btn.primary{background:var(--btn-bg); color:var(--btn-ink); border-color:transparent}
+
+.stats{display:flex; gap:8px; flex-wrap:wrap; margin:6px 0 12px}
+.stat{background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:5px 14px; font-size:.85rem; color:var(--muted)}
+.stat b{color:var(--ink); font-weight:600; margin-left:4px}
+
+/* ---------- Spielfeld ---------- */
+#board{
+  display:grid; gap:var(--gap);
+  grid-template-columns:repeat(auto-fill,minmax(var(--tile-w),1fr));
+}
+.tile{height:var(--tile-h); perspective:700px; cursor:pointer; border:0; padding:0; background:none; font:inherit}
+.tile:focus-visible{outline:3px solid var(--accent); outline-offset:2px; border-radius:var(--radius)}
+.inner{position:relative; width:100%; height:100%; transform-style:preserve-3d; transition:transform .45s cubic-bezier(.3,.7,.3,1)}
+.tile.open .inner, .tile.matched .inner{transform:rotateY(180deg)}
+.side{
+  position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden;
+  border-radius:var(--radius); display:flex; align-items:center; justify-content:center;
+}
+.front{
+  transform:rotateY(180deg); background:var(--face); border:1px solid var(--face-line);
+  padding:4px 7px; text-align:center; font-size:.86rem; font-weight:500; line-height:1.15;
+  hyphens:auto; -webkit-hyphens:auto; overflow-wrap:break-word;
+  box-shadow:0 1px 3px rgba(0,0,0,.06);
+}
+.front.small{font-size:.76rem}
+.tile.matched .front{background:var(--match-bg); border-color:var(--match-line)}
+.badge{
+  position:absolute; top:3px; right:5px; font-size:.62rem; font-weight:600; color:var(--badge); opacity:0;
+}
+.tile.matched .badge{opacity:1}
+.tile.wrong .front{animation:shake .4s}
+@keyframes shake{0%,100%{transform:rotateY(180deg) translateX(0)}25%{transform:rotateY(180deg) translateX(-3px)}75%{transform:rotateY(180deg) translateX(3px)}}
+
+/* Rückseiten */
+.back{box-shadow:0 2px 5px rgba(0,0,0,.15); overflow:hidden}
+.back::after{content:""; position:absolute; inset:4px; border-radius:calc(var(--radius) - 3px)}
+.back .mark{position:relative; z-index:1; line-height:1}
+
+body[data-theme="orient"] .back{
+  background:
+    radial-gradient(circle at 50% 100%, transparent 36%, rgba(212,175,95,.55) 37% 41%, transparent 42% 54%, rgba(212,175,95,.35) 55% 58%, transparent 59%) 0 0/20px 10px,
+    linear-gradient(160deg,var(--back),var(--back2));
+}
+body[data-theme="orient"] .back::after{border:1px solid rgba(212,175,95,.8); box-shadow:inset 0 0 0 2px rgba(110,31,43,.9), inset 0 0 0 3px rgba(212,175,95,.45)}
+body[data-theme="orient"] .back .mark{
+  width:22px; height:22px; border-radius:50%;
+  background:radial-gradient(circle,#6e1f2b 0 34%, #d4af5f 36% 48%, #6e1f2b 50% 60%, #d4af5f 62% 70%, transparent 72%);
+}
+
+body[data-theme="urban"] .back{
+  background:
+    radial-gradient(rgba(255,255,255,.16) 1px, transparent 1.5px) 0 0/9px 9px,
+    linear-gradient(135deg,var(--back),var(--back2));
+}
+body[data-theme="urban"] .back .mark{color:rgba(255,255,255,.85); font-family:'Unbounded',sans-serif; font-weight:700; font-size:1.15rem}
+
+body[data-theme="klassik"] .back{
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.045) 0 1px, transparent 1px 6px),
+    linear-gradient(180deg,var(--back),var(--back2));
+}
+body[data-theme="klassik"] .back::after{border:1px solid rgba(214,196,160,.65)}
+body[data-theme="klassik"] .back .mark{color:#d6c4a0; font-family:'Playfair Display',serif; font-style:italic; font-size:1.2rem}
+
+.tile:hover:not(.open):not(.matched) .inner{transform:translateY(-2px)}
+
+/* ---------- Gefundene Paare ---------- */
+.found{margin-top:18px; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:12px 14px}
+.found h2{font-family:var(--title-font); font-size:1.05rem; margin:0 0 8px; color:var(--accent); font-weight:600}
+#foundList{display:flex; flex-wrap:wrap; gap:6px}
+.chip{font-size:.8rem; background:var(--accent-soft); border-radius:999px; padding:4px 11px}
+.chip i{font-style:normal; color:var(--badge); font-weight:600; margin-right:5px}
+.empty{font-size:.85rem; color:var(--muted)}
+
+/* ---------- Ergebnisfenster ---------- */
+.overlay{position:fixed; inset:0; background:rgba(20,20,28,.45); display:none; align-items:center; justify-content:center; padding:16px; z-index:10}
+.overlay.show{display:flex}
+.modal{background:var(--panel); border:1px solid var(--line); border-radius:18px; max-width:720px; width:100%; max-height:88vh; overflow:auto; padding:22px 22px 18px; box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.modal h2{font-family:var(--title-font); color:var(--accent); margin:0 0 6px; font-size:1.6rem; font-weight:600}
+.modal p{margin:0 0 12px; color:var(--muted); line-height:1.5}
+.pairtable{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:4px 16px; margin:10px 0 16px; font-size:.88rem}
+.pairtable div{padding:5px 0; border-bottom:1px dotted var(--line)}
+.pairtable span{color:var(--accent); margin:0 6px}
+
+@media (max-width:600px){
+  :root{--tile-w:96px; --tile-h:56px; --gap:6px}
+  .front{font-size:.78rem} .front.small{font-size:.7rem}
+  h1{font-size:1.4rem}
+}
+
+/* ===== Punkt-Fix: Rückseite wird nach der halben Drehung ganz ausgeblendet ===== */
+.back, .back *{backface-visibility:hidden; -webkit-backface-visibility:hidden}
+.tile.open .back, .tile.matched .back{visibility:hidden; transition:visibility 0s linear .2s}
+.tile .back{transition:visibility 0s linear .2s}
+
+/* ===== Neues Design 1: COMIC ===== */
+body[data-theme="comic"]{
+  --bg:#dcefff; --bg2:#cfe6fb; --panel:#ffffff; --line:#1b1b1f;
+  --accent:#d8343c; --accent-soft:#fff1a8; --title-font:'Bangers',cursive;
+  --face:#ffffff; --face-line:#1b1b1f; --match-bg:#fff1a8; --match-line:#1b1b1f; --badge:#d8343c;
+  --radius:14px; --btn-bg:#ffd23f; --btn-ink:#1b1b1f;
+  background:radial-gradient(rgba(41,98,170,.16) 1.6px, transparent 2px) 0 0/12px 12px, var(--bg);
+}
+body[data-theme="comic"] h1{font-size:2.3rem; letter-spacing:.04em; color:#d8343c; text-shadow:2px 2px 0 #1b1b1f; -webkit-text-stroke:1px #1b1b1f}
+body[data-theme="comic"] .sub{color:#1b1b1f; font-weight:500}
+body[data-theme="comic"] .seg, body[data-theme="comic"] select, body[data-theme="comic"] .btn, body[data-theme="comic"] .stat{border:2px solid #1b1b1f; box-shadow:2px 2px 0 #1b1b1f}
+body[data-theme="comic"] .seg button.on{border:0}
+body[data-theme="comic"] .back{
+  border:2.5px solid #1b1b1f; box-shadow:3px 3px 0 #1b1b1f;
+  background:
+    radial-gradient(#e2493f 1.7px, transparent 2.2px) 0 0/8px 8px,
+    repeating-conic-gradient(from 0deg at 0% 100%, #ffd23f 0 6deg, #ffe27a 6deg 12deg);
+}
+body[data-theme="comic"] .back::after{inset:auto 6px 3px auto; content:"?!"; font-family:'Bangers',cursive; font-size:1rem; color:#1b1b1f; letter-spacing:.05em}
+body[data-theme="comic"] .back .mark{display:none}
+body[data-theme="comic"] .front{border:2.5px solid #1b1b1f; box-shadow:3px 3px 0 #1b1b1f; font-family:'Comic Neue','Lexend',sans-serif; font-weight:700; font-size:.92rem; overflow:visible}
+body[data-theme="comic"] .front.small{font-size:.8rem}
+body[data-theme="comic"] .front::before{content:""; position:absolute; left:14px; bottom:-9px; width:12px; height:12px; background:inherit; border-right:2.5px solid #1b1b1f; border-bottom:2.5px solid #1b1b1f; transform:rotate(45deg) skew(10deg,10deg)}
+body[data-theme="comic"] .tile.matched .front{background:#fff1a8}
+body[data-theme="comic"] .badge{font-family:'Bangers',cursive; font-size:.8rem; letter-spacing:.05em}
+body[data-theme="comic"] .found, body[data-theme="comic"] .modal{border:2.5px solid #1b1b1f; box-shadow:4px 4px 0 #1b1b1f}
+body[data-theme="comic"] .found h2, body[data-theme="comic"] .modal h2{font-size:1.5rem; letter-spacing:.04em; color:#2962aa}
+body[data-theme="comic"] .chip{border:1.5px solid #1b1b1f}
+
+/* ===== Neues Design 2: PINNWAND ===== */
+body[data-theme="pinn"]{
+  --bg:#c7a37a; --panel:#fffdf6; --line:#b89468;
+  --accent:#5a3b22; --accent-soft:#fdf1c4; --title-font:'Caveat',cursive;
+  --face:#fffefa; --face-line:#e2dccd; --match-bg:#fffefa; --match-line:#e2dccd; --badge:#a8365a;
+  --radius:3px; --btn-bg:#5a3b22; --btn-ink:#fff7e6;
+  background:
+    radial-gradient(rgba(90,59,34,.30) 1px, transparent 1.6px) 0 0/7px 9px,
+    radial-gradient(rgba(255,235,200,.35) 1px, transparent 1.8px) 3px 4px/11px 8px,
+    linear-gradient(160deg,#cfab80,#bf9a6f);
+}
+body[data-theme="pinn"] .wrap>header, body[data-theme="pinn"] .stats{background:rgba(255,253,246,.92); border-radius:6px; padding:10px 14px; box-shadow:0 3px 8px rgba(60,35,15,.25)}
+body[data-theme="pinn"] .stats{padding:8px 10px}
+body[data-theme="pinn"] h1{font-size:2.6rem; font-weight:700; color:#5a3b22}
+body[data-theme="pinn"] .tile:nth-child(4n+1){transform:rotate(-1.6deg)}
+body[data-theme="pinn"] .tile:nth-child(4n+2){transform:rotate(1.2deg)}
+body[data-theme="pinn"] .tile:nth-child(4n+3){transform:rotate(-.6deg)}
+body[data-theme="pinn"] .tile:nth-child(4n){transform:rotate(1.8deg)}
+body[data-theme="pinn"] .back{box-shadow:1px 3px 5px rgba(60,35,15,.35); overflow:visible;
+  background:linear-gradient(170deg,rgba(255,255,255,.35),rgba(255,255,255,0) 40%,rgba(0,0,0,.06)),var(--note,#ffe58a)}
+body[data-theme="pinn"] .tile:nth-child(5n+1) .back{--note:#ffe58a}
+body[data-theme="pinn"] .tile:nth-child(5n+2) .back{--note:#ffc4cf}
+body[data-theme="pinn"] .tile:nth-child(5n+3) .back{--note:#bfe0f7}
+body[data-theme="pinn"] .tile:nth-child(5n+4) .back{--note:#dccbf2}
+body[data-theme="pinn"] .tile:nth-child(5n) .back{--note:#ffd3a8}
+body[data-theme="pinn"] .back::after{inset:-6px auto auto 30%; width:40%; height:13px; border-radius:1px; background:rgba(255,255,255,.55); box-shadow:0 1px 2px rgba(0,0,0,.12); transform:rotate(-3deg)}
+body[data-theme="pinn"] .back .mark{display:none}
+body[data-theme="pinn"] .front{border:0; box-shadow:1px 3px 5px rgba(60,35,15,.35);
+  background:repeating-linear-gradient(180deg,transparent 0 13px,rgba(70,110,170,.22) 13px 14px),linear-gradient(90deg,transparent 0 10px,rgba(200,70,90,.35) 10px 11px,transparent 11px),var(--face)}
+body[data-theme="pinn"] .tile.matched .front{background:repeating-linear-gradient(180deg,transparent 0 13px,rgba(70,110,170,.22) 13px 14px),linear-gradient(90deg,transparent 0 10px,rgba(200,70,90,.35) 10px 11px,transparent 11px),#fdf1c4}
+body[data-theme="pinn"] .badge{top:auto; bottom:3px; right:4px; width:18px; height:18px; border-radius:50%; border:1.5px solid #a8365a; color:#a8365a; display:flex; align-items:center; justify-content:center; font-size:.6rem; transform:rotate(-12deg); background:rgba(255,255,255,.6)}
+body[data-theme="pinn"] .found, body[data-theme="pinn"] .modal{border:0; border-radius:4px; box-shadow:0 4px 12px rgba(60,35,15,.3)}
+body[data-theme="pinn"] .found h2, body[data-theme="pinn"] .modal h2{font-size:1.7rem; font-weight:700}
+body[data-theme="pinn"] .chip{background:#fdf1c4; border-radius:3px; box-shadow:0 1px 2px rgba(0,0,0,.15)}
+
+/* ===== Neues Design 3: ZUCKERL ===== */
+body[data-theme="zuckerl"]{
+  --bg:#fff4f1; --panel:#ffffff; --line:#f1cfdc;
+  --accent:#a8467a; --accent-soft:#fde3ee; --title-font:'Fredoka',sans-serif;
+  --face:#fffdfb; --face-line:#f1cfdc; --match-bg:#fde3ee; --match-line:#d77aa6; --badge:#a8467a;
+  --radius:22px; --btn-bg:#d16a9c; --btn-ink:#ffffff;
+  background:
+    radial-gradient(ellipse 3px 1.6px at 20% 30%, #f6a5c0 98%, transparent) 0 0/46px 40px,
+    radial-gradient(ellipse 1.6px 3px at 70% 60%, #a8c8f0 98%, transparent) 0 0/52px 44px,
+    radial-gradient(ellipse 3px 1.6px at 45% 80%, #f7cf7a 98%, transparent) 0 0/38px 50px,
+    radial-gradient(ellipse 1.6px 3px at 85% 15%, #c8b0ec 98%, transparent) 0 0/60px 36px,
+    var(--bg);
+}
+body[data-theme="zuckerl"] h1{font-size:2rem; font-weight:700; color:#a8467a}
+body[data-theme="zuckerl"] .seg, body[data-theme="zuckerl"] select, body[data-theme="zuckerl"] .btn, body[data-theme="zuckerl"] .stat{border-width:2px}
+body[data-theme="zuckerl"] .back{box-shadow:0 4px 0 rgba(168,70,122,.25), inset 0 3px 6px rgba(255,255,255,.7), inset 0 -4px 6px rgba(0,0,0,.08);
+  background:repeating-linear-gradient(-45deg,var(--c1,#f6a5c0) 0 8px,#fff 8px 13px,var(--c2,#c8b0ec) 13px 21px,#fff 21px 26px)}
+body[data-theme="zuckerl"] .tile:nth-child(3n+1) .back{--c1:#f6a5c0;--c2:#c8b0ec}
+body[data-theme="zuckerl"] .tile:nth-child(3n+2) .back{--c1:#a8c8f0;--c2:#f7cf7a}
+body[data-theme="zuckerl"] .tile:nth-child(3n) .back{--c1:#f7b28f;--c2:#a8c8f0}
+body[data-theme="zuckerl"] .back::after{inset:5px 10px auto 10px; height:9px; border-radius:99px; background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,0))}
+body[data-theme="zuckerl"] .back .mark{display:none}
+body[data-theme="zuckerl"] .front{border:2px solid var(--face-line); font-family:'Fredoka','Lexend',sans-serif; font-weight:600; font-size:.9rem; box-shadow:0 4px 0 rgba(168,70,122,.15)}
+body[data-theme="zuckerl"] .front.small{font-size:.78rem}
+body[data-theme="zuckerl"] .tile.matched .front{background:
+  radial-gradient(ellipse 2.5px 1.3px at 30% 20%, #f6a5c0 98%, transparent) 0 0/28px 22px,
+  radial-gradient(ellipse 1.3px 2.5px at 70% 75%, #a8c8f0 98%, transparent) 0 0/30px 24px,
+  #fde3ee}
+body[data-theme="zuckerl"] .found, body[data-theme="zuckerl"] .modal{border:2px solid var(--line); border-radius:24px}
+body[data-theme="zuckerl"] .chip{border-radius:99px}
+@media (max-width:600px){
+  body[data-theme="comic"] h1{font-size:1.9rem}
+  body[data-theme="pinn"] h1{font-size:2.2rem}
+  body[data-theme="comic"] .front{font-size:.82rem}
+}
+
+/* ===== A2/B1: Beispielsätze zu den gefundenen Paaren ===== */
+.last{
+  background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:8px 14px; margin:0 0 12px; font-size:.92rem; line-height:1.45; color:var(--ink);
+  min-height:2.9em; display:flex; align-items:center;
+}
+.lastpair b, .chip b, .pairtable b{font-weight:600}
+.lastpair b{margin-right:10px; white-space:nowrap}
+.lastpair i, .chip i{font-style:normal; color:var(--badge); font-weight:600; margin-right:6px}
+#foundList{display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:8px}
+.chip{border-radius:12px; padding:8px 12px; font-size:.86rem; line-height:1.4}
+.chip b, .pairtable b{display:block; margin-bottom:2px}
+.chip span, .pairtable span{color:var(--ink); margin:0}
+.pairtable{grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:4px 18px}
+.pairtable div{padding:7px 0; line-height:1.4}
+.pairtable b{color:var(--accent)}
+body[data-theme="comic"] .last{border:2px solid #1b1b1f; box-shadow:2px 2px 0 #1b1b1f}
+body[data-theme="comic"] .pairtable b{color:#2962aa}
+body[data-theme="pinn"] .last{border:0; border-radius:6px; box-shadow:0 3px 8px rgba(60,35,15,.25)}
+body[data-theme="pinn"] .chip{border-radius:3px}
+body[data-theme="zuckerl"] .last{border-width:2px; border-radius:18px}
+body[data-theme="zuckerl"] .chip{border-radius:16px}
+@media (max-width:600px){
+  .last{font-size:.86rem; min-height:4.2em}
+  .lastpair b{display:block; white-space:normal}
+  .seg{flex-wrap:wrap; border-radius:20px}
+}
+</style>
+</head>
+<body data-theme="comic">
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>Synonym-Memory</h1>
+      <svg class="flourish" viewBox="0 0 240 24" fill="none" stroke="#c9a14f" stroke-width="1.3" stroke-linecap="round" aria-hidden="true">
+        <path d="M120 12 C108 2 92 2 88 10 C85 17 95 20 98 14 C100 9 93 8 93 12"/>
+        <path d="M120 12 C132 2 148 2 152 10 C155 17 145 20 142 14 C140 9 147 8 147 12"/>
+        <path d="M88 10 C70 20 42 20 14 12 M152 10 C170 20 198 20 226 12"/>
+        <path d="M58 16 C52 8 44 10 46 15 M182 16 C188 8 196 10 194 15"/>
+        <circle cx="120" cy="12" r="2.4" fill="#c9a14f" stroke="none"/>
+        <circle cx="10" cy="11" r="1.4" fill="#c9a14f" stroke="none"/><circle cx="230" cy="11" r="1.4" fill="#c9a14f" stroke="none"/>
+      </svg>
+      <div class="sub">Niveau A2/B1 · Deck zwei Kärtchen auf. Bedeuten die Wörter dasselbe? Dann bleiben sie offen.</div>
+    </div>
+    <div class="controls">
+      <div class="seg" id="themeSeg" role="group" aria-label="Design wählen">
+        <button data-t="comic">Comic</button>
+        <button data-t="pinn">Pinnwand</button>
+        <button data-t="zuckerl">Zuckerl</button>
+        <button data-t="orient">Goldener Osten</button>
+        <button data-t="urban">Urban</button>
+        <button data-t="klassik">Klassik</button>
+      </div>
+      <select id="count" aria-label="Anzahl der Paare">
+        <option value="12">12 Paare</option>
+        <option value="18">18 Paare</option>
+        <option value="24" selected>24 Paare</option>
+        <option value="32">32 Paare</option>
+        <option value="40">40 Paare</option>
+      </select>
+      <button class="btn primary" id="newGame">Neues Spiel</button>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="stat">Paare<b id="sPairs">0 / 24</b></div>
+    <div class="stat">Züge<b id="sMoves">0</b></div>
+    <div class="stat">Zeit<b id="sTime">0:00</b></div>
+  </div>
+
+  <div class="last" id="last" aria-live="polite"></div>
+
+  <main id="board" aria-label="Spielfeld"></main>
+
+  <section class="found">
+    <h2>Gefundene Paare</h2>
+    <div id="foundList"><span class="empty">Noch keine – viel Freude beim Suchen!</span></div>
+  </section>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2>Wunderbar – alle Paare gefunden!</h2>
+    <p id="resultText"></p>
+    <div class="pairtable" id="pairTable"></div>
+    <button class="btn primary" id="again">Noch eine Runde</button>
+  </div>
+</div>
+
+<script>
+/* Synonympaare A2/B1 – eigener Wortschatz mit eigenen Beispielsätzen.
+   Feld 3 markiert Bedeutungsgruppen: aus einer Gruppe kommt pro Spiel höchstens ein Paar,
+   damit jede Zuordnung eindeutig bleibt. Feld 4 ist der Beispielsatz bzw. die kurze Erklärung. */
+const PAIRS = [
+  /* ---- Verben ---- */
+  ["beginnen","anfangen","anfang","Wann wollen wir beginnen / anfangen?"],
+  ["bekommen","erhalten","","Du wirst morgen eine E-Mail bekommen / erhalten. „Erhalten“ klingt etwas formeller."],
+  ["benutzen","verwenden","","Darf ich kurz deinen Stift benutzen / verwenden?"],
+  ["reden","sprechen","sprech","Wir müssen über das Problem reden / sprechen."],
+  ["erzählen","berichten","sprech","Sie will von ihrer Reise erzählen / berichten."],
+  ["sich unterhalten","plaudern","sprech","In der Pause kann man sich nett unterhalten / nett plaudern."],
+  ["anschauen","ansehen","","Möchtest du den Film anschauen / ansehen?"],
+  ["zumachen","schließen","","Kannst du bitte das Fenster zumachen / schließen?"],
+  ["aufmachen","öffnen","auf","Kannst du bitte die Tür aufmachen / öffnen?"],
+  ["mögen","gernhaben","","Diese Lehrerin muss man einfach mögen / gernhaben."],
+  ["verstehen","begreifen","","Diese Regel kann ich nicht verstehen / begreifen."],
+  ["passieren","geschehen","","Was ist hier passiert / geschehen?"],
+  ["sich ausruhen","sich erholen","","Im Urlaub möchte ich mich ausruhen / mich erholen."],
+  ["enden","zu Ende gehen","ende","Der Kurs wird im Juni enden / zu Ende gehen."],
+  ["aufhören","Schluss machen","ende","Für heute können wir aufhören / Schluss machen."],
+  ["wählen","aussuchen","","Du darfst ein Eis wählen / aussuchen."],
+  ["probieren","versuchen","","Das möchte ich auch einmal probieren / versuchen."],
+  ["teilnehmen","mitmachen","","Alle Kinder dürfen teilnehmen / mitmachen."],
+  ["sich beeilen","schnell machen","schnell","Der Bus kommt schon, wir müssen uns beeilen / schnell machen."],
+  ["zurückkommen","zurückkehren","","Wann wirst du aus dem Urlaub zurückkommen / zurückkehren?"],
+  ["hinfallen","stürzen","","Auf dem Eis kann man leicht hinfallen / stürzen."],
+  ["merken","bemerken","","Hast du den Fehler gemerkt / bemerkt?"],
+  ["brauchen","benötigen","noetig","Für die Reise wirst du einen Pass brauchen / benötigen."],
+  ["wohnen","leben","","Meine Schwester möchte in Wien wohnen / leben."],
+  ["arbeiten","tätig sein","arbeit","Sie möchte als Köchin arbeiten / tätig sein."],
+  ["gewinnen","siegen","","Unsere Mannschaft will heute gewinnen / siegen."],
+  ["schicken","senden","","Kannst du mir das Foto schicken / senden?"],
+  ["rennen","laufen","","Zum Bus mussten wir rennen / laufen."],
+  ["aufpassen","achtgeben","","Auf der Straße musst du gut aufpassen / achtgeben."],
+  ["helfen","unterstützen","","Gute Freunde wollen einander helfen / unterstützen."],
+  ["glauben","denken","","Ich glaube / denke, dass er recht hat."],
+  ["sich ärgern","sich aufregen","aufreg","Über so etwas muss man sich nicht ärgern / aufregen."],
+  ["sich fürchten","Angst haben","furcht","Du musst dich nicht fürchten. = Du musst keine Angst haben."],
+  ["Bescheid sagen","informieren","","Kannst du mir bitte Bescheid sagen? = Kannst du mich bitte informieren?"],
+  ["putzen","sauber machen","haushalt","Am Samstag muss ich die Wohnung putzen / sauber machen."],
+  ["aufräumen","Ordnung machen","haushalt","Du sollst dein Zimmer aufräumen. = Du sollst in deinem Zimmer Ordnung machen."],
+  ["sich verspäten","zu spät kommen","","Ich möchte mich nicht verspäten. = Ich möchte nicht zu spät kommen."],
+  ["herstellen","produzieren","","Die Firma will Fahrräder herstellen / produzieren."],
+  ["klappen","funktionieren","","Keine Sorge, das wird schon klappen / funktionieren. „Klappen“ ist Umgangssprache."],
+  ["sich wundern","erstaunt sein","","Über den Preis wird er sich wundern / erstaunt sein."],
+  ["bezahlen","zahlen","","Ich möchte bitte bezahlen / zahlen."],
+  ["leihen","borgen","","Kannst du mir zehn Euro leihen / borgen?"],
+  ["kontrollieren","überprüfen","pruef","Bitte alle Antworten noch einmal kontrollieren / überprüfen."],
+  ["verbessern","korrigieren","pruef","Kannst du bitte meinen Text verbessern / korrigieren?"],
+
+  /* ---- Adjektive und Adverbien ---- */
+  ["schön","hübsch","toll","Das ist ein schönes / hübsches Kleid."],
+  ["nett","freundlich","","Die neue Kollegin ist sehr nett / freundlich."],
+  ["glücklich","froh","","Ich bin glücklich / froh, dass du da bist."],
+  ["traurig","unglücklich","","Warum schaust du so traurig / unglücklich?"],
+  ["lustig","witzig","lustig","Der Film war sehr lustig / witzig."],
+  ["komisch","seltsam","lustig","Das Auto macht ein komisches / seltsames Geräusch."],
+  ["schnell","rasch","schnell","Wir brauchen eine schnelle / rasche Antwort."],
+  ["schwer","schwierig","","Die Prüfung war ziemlich schwer / schwierig."],
+  ["leicht","einfach","","Die erste Aufgabe ist ganz leicht / einfach."],
+  ["kaputt","defekt","","Der Drucker ist leider kaputt / defekt."],
+  ["billig","günstig","","Die Schuhe waren wirklich billig / günstig."],
+  ["richtig","korrekt","","Deine Antwort ist richtig / korrekt."],
+  ["klug","intelligent","","Sie ist eine kluge / intelligente Frau."],
+  ["müde","erschöpft","muede","Nach der Arbeit bin ich oft müde / erschöpft. „Erschöpft“ ist noch stärker als „müde“."],
+  ["anstrengend","ermüdend","muede","Die lange Wanderung war anstrengend / ermüdend."],
+  ["toll","großartig","toll","Das Konzert war toll / großartig!"],
+  ["wunderbar","herrlich","toll","Heute ist ein wunderbarer / herrlicher Tag."],
+  ["schrecklich","furchtbar","furcht","Das Wetter war schrecklich / furchtbar."],
+  ["ruhig","still","","Im Wald ist es ganz ruhig / still."],
+  ["schmutzig","dreckig","","Deine Schuhe sind ganz schmutzig / dreckig."],
+  ["lecker","köstlich","","Die Suppe schmeckt lecker / köstlich."],
+  ["sicher","bestimmt","sicher","Sie kommt sicher / bestimmt noch."],
+  ["natürlich","selbstverständlich","sicher","Natürlich / Selbstverständlich helfe ich dir!"],
+  ["unbedingt","auf jeden Fall","sicher","Diesen Film musst du unbedingt / auf jeden Fall sehen."],
+  ["klar","deutlich","sicher","Bitte sprich langsam und klar / deutlich."],
+  ["vielleicht","eventuell","vielleicht","Vielleicht / Eventuell komme ich etwas später."],
+  ["wahrscheinlich","vermutlich","vielleicht","Er ist wahrscheinlich / vermutlich noch im Büro."],
+  ["sofort","gleich","jetzt","Warte kurz, ich komme sofort / gleich!"],
+  ["jetzt","nun","jetzt","Was machen wir jetzt / nun?"],
+  ["bald","in Kürze","jetzt","Der Zug fährt bald / in Kürze ab."],
+  ["bisher","bis jetzt","jetzt","Bisher / Bis jetzt hat alles gut funktioniert."],
+  ["oft","häufig","oft","Wir gehen oft / häufig ins Kino."],
+  ["normal","üblich","oft","Das ist bei uns ganz normal / üblich."],
+  ["manchmal","ab und zu","","Manchmal / Ab und zu koche ich indisch."],
+  ["nie","niemals","","Das habe ich nie / niemals gesagt."],
+  ["fast","beinahe","fast","Es ist schon fast / beinahe Mitternacht."],
+  ["ungefähr","etwa","fast","Die Fahrt dauert ungefähr / etwa zwei Stunden."],
+  ["genug","ausreichend","","Haben wir genug / ausreichend Brot für alle?"],
+  ["nur","bloß","","Ich habe nur / bloß fünf Euro dabei."],
+  ["auch","ebenfalls","auch","Meine Schwester lernt auch / ebenfalls Deutsch."],
+  ["außerdem","zusätzlich","auch","Wir brauchen Brot und außerdem / zusätzlich Milch."],
+  ["aber","jedoch","","Das Hotel war schön, aber / jedoch sehr laut."],
+  ["deshalb","deswegen","","Es regnet, deshalb / deswegen nehme ich den Bus."],
+  ["zuerst","zunächst","zuerst","Zuerst / Zunächst müssen wir einkaufen."],
+  ["vorher","davor","zuerst","Um acht beginnt der Film, vorher / davor essen wir etwas."],
+  ["danach","anschließend","danach","Wir essen, danach / anschließend gehen wir spazieren."],
+  ["später","nachher","danach","Ich rufe dich später / nachher an."],
+  ["plötzlich","auf einmal","","Plötzlich / Auf einmal ging das Licht aus."],
+  ["ganz","völlig","","Den Termin habe ich ganz / völlig vergessen."],
+  ["wirklich","tatsächlich","","Ist das wirklich / tatsächlich wahr?"],
+  ["zusammen","gemeinsam","","Heute kochen wir zusammen / gemeinsam."],
+  ["draußen","im Freien","","Im Sommer essen wir oft draußen / im Freien."],
+  ["berühmt","bekannt","","Er ist ein berühmter / bekannter Sänger."],
+  ["bequem","gemütlich","","Dieser Sessel ist sehr bequem / gemütlich."],
+  ["kostenlos","gratis","","Der Eintritt ist heute kostenlos / gratis."],
+  ["geöffnet","offen","auf","Der Supermarkt ist bis 20 Uhr geöffnet / offen."],
+  ["spannend","aufregend","aufreg","Das Buch ist wirklich spannend / aufregend."],
+  ["langweilig","uninteressant","","Der Vortrag war leider langweilig / uninteressant."],
+  ["riesig","sehr groß","toll","In der Stadt gibt es einen riesigen / sehr großen Park."],
+  ["winzig","sehr klein","","Die Wohnung hat eine winzige / sehr kleine Küche."],
+  ["gefährlich","riskant","","Ohne Helm zu fahren ist gefährlich / riskant."],
+  ["böse","wütend","aufreg","Bist du noch böse / wütend auf mich?"],
+  ["stark","kräftig","","Für diese Arbeit braucht man starke / kräftige Arme."],
+  ["verschieden","unterschiedlich","","Wir haben verschiedene / unterschiedliche Meinungen."],
+  ["passend","geeignet","","Das ist ein passendes / geeignetes Geschenk für sie."],
+  ["nötig","notwendig","noetig","Ein Visum ist nicht nötig / notwendig."],
+  ["kühl","frisch","","Am Abend wird es kühl / frisch."],
+  ["morgens","am Morgen","","Morgens / Am Morgen trinke ich immer Tee."],
+  ["täglich","jeden Tag","","Ich übe täglich / jeden Tag Deutsch."],
+  ["zu Hause","daheim","","Am Sonntag bleibe ich zu Hause / daheim. „Daheim“ hört man oft in Österreich und Süddeutschland."],
+  ["ein bisschen","ein wenig","","Kannst du bitte ein bisschen / ein wenig lauter sprechen?"],
+  ["viele","zahlreiche","","Im Park sind heute viele / zahlreiche Menschen."],
+  ["inzwischen","mittlerweile","","Inzwischen / Mittlerweile spricht sie sehr gut Deutsch."],
+  ["zum Schluss","am Ende","ende","Zum Schluss / Am Ende singen alle zusammen."],
+
+  /* ---- Nomen ---- */
+  ["das Auto","der Wagen","","Mein Auto / Mein Wagen steht in der Garage."],
+  ["die Arbeit","der Job","arbeit","Sie sucht eine neue Arbeit / einen neuen Job."],
+  ["der Fehler","der Irrtum","","Entschuldigung, das war ein Fehler / ein Irrtum."],
+  ["die Möglichkeit","die Gelegenheit","","Das ist eine gute Möglichkeit / Gelegenheit, Deutsch zu üben."],
+  ["der Urlaub","die Ferien","","Im August haben wir Urlaub / Ferien."],
+  ["das Handy","das Mobiltelefon","","Mein Handy / Mein Mobiltelefon liegt auf dem Tisch."],
+  ["der Arzt","der Doktor","","Mit diesem Husten solltest du zum Arzt / zum Doktor gehen."],
+  ["das Krankenhaus","das Spital","","Er liegt seit Montag im Krankenhaus / im Spital. „Spital“ sagt man in Österreich und in der Schweiz."],
+  ["die Kartoffel","der Erdapfel","","Ein Kilo Kartoffeln / Erdäpfel, bitte! „Erdapfel“ sagt man in Österreich."],
+  ["die Tomate","der Paradeiser","","Ich schneide eine Tomate / einen Paradeiser für den Salat. „Paradeiser“ sagt man in Österreich."],
+  ["die Aprikose","die Marille","","Im Juli sind die Aprikosen / Marillen reif. „Marille“ sagt man in Österreich."],
+  ["der Quark","der Topfen","","Für den Kuchen brauche ich Quark / Topfen. „Topfen“ sagt man in Österreich."],
+  ["das Brötchen","die Semmel","","Zum Frühstück esse ich ein Brötchen / eine Semmel. „Semmel“ sagt man in Österreich und Bayern."],
+  ["die Tüte","das Sackerl","","Brauchen Sie eine Tüte / ein Sackerl? „Sackerl“ sagt man in Österreich."],
+  ["die Treppe","die Stiege","","Ich nehme lieber die Treppe / die Stiege. „Stiege“ sagt man in Österreich."],
+  ["der Januar","der Jänner","","Im Januar / Im Jänner ist es oft sehr kalt. „Jänner“ sagt man in Österreich."],
+  ["der Kühlschrank","der Eiskasten","","Die Milch steht im Kühlschrank / im Eiskasten. „Eiskasten“ hört man in Österreich."],
+  ["die Kleidung","das Gewand","","Für den Winter brauche ich warme Kleidung / ein warmes Gewand. „Gewand“ sagt man in Österreich."],
+  ["der Junge","der Bub","","Der Junge / Der Bub spielt im Hof. „Bub“ sagt man in Österreich und Süddeutschland."],
+  ["der Bürgersteig","der Gehsteig","","Bitte bleib auf dem Bürgersteig / auf dem Gehsteig! „Gehsteig“ sagt man in Österreich und Süddeutschland."],
+  ["die Hausaufgabe","die Hausübung","","Hast du deine Hausaufgabe / deine Hausübung schon gemacht? „Hausübung“ sagt man in Österreich."],
+  ["das Abitur","die Matura","","Nach dem Abitur / Nach der Matura möchte sie studieren. „Matura“ sagt man in Österreich und in der Schweiz."],
+  ["die Orange","die Apfelsine","","Ich esse jeden Morgen eine Orange / eine Apfelsine. „Apfelsine“ hört man vor allem in Norddeutschland."],
+  ["der Aufzug","der Lift","","Der Aufzug / Der Lift ist heute außer Betrieb."],
+  ["das Erdgeschoss","das Parterre","","Unsere Wohnung liegt im Erdgeschoss / im Parterre."],
+  ["der Stock","die Etage","","Wir wohnen im dritten Stock / in der dritten Etage."],
+  ["der Laden","das Geschäft","firma","Der Laden / Das Geschäft liegt direkt um die Ecke."],
+  ["die Firma","das Unternehmen","firma","Sie arbeitet in einer großen Firma / in einem großen Unternehmen."],
+  ["der Lärm","der Krach","krach","Was ist das für ein Lärm / ein Krach?"],
+  ["der Streit","der Konflikt","krach","Zwischen den beiden Brüdern gab es einen Streit / einen Konflikt."],
+  ["die Meinung","die Ansicht","","Da bin ich anderer Meinung / anderer Ansicht."],
+  ["der Anfang","der Beginn","anfang","Am Anfang / Zu Beginn war alles neu für mich."],
+  ["das Ende","der Schluss","ende","Das Ende / Der Schluss des Films war traurig."],
+  ["der Chef","der Vorgesetzte","","Der Chef / Der Vorgesetzte hat heute frei."],
+  ["der Lohn","das Gehalt","","Am Monatsende kommt der Lohn / das Gehalt aufs Konto."],
+  ["die Fahrkarte","das Ticket","","Hast du schon eine Fahrkarte / ein Ticket?"],
+  ["das Fahrrad","das Rad","","Ich fahre mit dem Fahrrad / mit dem Rad zur Arbeit."],
+  ["der Computer","der Rechner","","Mein Computer / Mein Rechner ist schon sehr alt."],
+  ["das Gericht","die Speise","essen","Auf der Karte stehen viele Gerichte / Speisen."],
+  ["die Lebensmittel","die Nahrungsmittel","essen","Lebensmittel / Nahrungsmittel werden immer teurer."],
+  ["die Leute","die Menschen","","Auf dem Platz waren viele Leute / Menschen."],
+  ["der Freund","der Kumpel","","Am Samstag treffe ich einen Freund / einen Kumpel. „Kumpel“ ist Umgangssprache."],
+  ["die Nachricht","die Mitteilung","post","Ich habe eine Nachricht / eine Mitteilung für dich."],
+  ["der Brief","das Schreiben","post","Heute kam ein Brief / ein Schreiben von der Bank."],
+  ["die Postkarte","die Ansichtskarte","post","Aus dem Urlaub schreibe ich dir eine Postkarte / eine Ansichtskarte."],
+  ["das Amt","die Behörde","","Morgen muss ich zum Amt / zur Behörde."],
+  ["der Müll","der Abfall","","Wohin kommt der Müll / der Abfall?"],
+  ["die Geldbörse","das Portemonnaie","","Ich habe meine Geldbörse / mein Portemonnaie vergessen."],
+  ["das Zimmer","der Raum","","Dieses Zimmer / Dieser Raum ist sehr hell."],
+  ["die Toilette","das WC","","Entschuldigung, wo ist die Toilette / das WC?"],
+  ["die Prüfung","der Test","pruef","Morgen schreiben wir eine Prüfung / einen Test."],
+  ["der Spaß","das Vergnügen","","Viel Spaß / Viel Vergnügen im Kino!"],
+  ["das Gespräch","die Unterhaltung","sprech","Das war ein interessantes Gespräch / eine interessante Unterhaltung."],
+  ["der Moment","der Augenblick","","Einen Moment / Einen Augenblick, bitte!"],
+  ["die Gegend","die Region","","In dieser Gegend / Region gibt es viele Seen."],
+  ["die Dinge","die Sachen","","Pack bitte deine Dinge / deine Sachen ein!"],
+  ["der Gast","der Besucher","","Die Gäste / Die Besucher kommen um acht."],
+  ["das Sofa","die Couch","","Am Abend sitzen wir auf dem Sofa / auf der Couch."],
+  ["der Vater","der Papa","","Mein Vater / Mein Papa kocht sehr gern."],
+  ["die Großmutter","die Oma","","Meine Großmutter / Meine Oma wohnt auf dem Land."],
+  ["der Fotoapparat","die Kamera","","Vergiss den Fotoapparat / die Kamera nicht!"]
+];
+
+const $ = id => document.getElementById(id);
+const board = $('board');
+let state = {};
+let timerId = null;
+
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+function pickPairs(n){
+  const used = new Set(), out = [];
+  for(const p of shuffle(PAIRS.slice())){
+    const g = p[2];
+    if(g && used.has(g)) continue;
+    if(g) used.add(g);
+    out.push(p);
+    if(out.length===n) break;
+  }
+  return out;
+}
+
+function newGame(){
+  clearInterval(timerId); timerId=null;
+  const n = +$('count').value;
+  const pairs = pickPairs(n);
+  state = {pairs, open:[], lock:false, moves:0, found:0, foundOrder:[], start:null, total:pairs.length};
+  const cards = [];
+  pairs.forEach((p,i)=>{ cards.push({w:p[0],id:i}); cards.push({w:p[1],id:i}); });
+  shuffle(cards);
+  board.innerHTML = '';
+  cards.forEach(c=>{
+    const b = document.createElement('button');
+    b.className='tile'; b.dataset.id=c.id;
+    b.setAttribute('aria-label','verdeckte Karte');
+    const small = c.w.length>13 ? ' small' : '';
+    b.innerHTML = `<div class="inner"><div class="side back"><span class="mark">≈</span></div><div class="side front${small}"><span class="badge"></span><span class="w">${c.w}</span></div></div>`;
+    b.dataset.word=c.w;
+    b.addEventListener('click',()=>flip(b));
+    board.appendChild(b);
+  });
+  $('foundList').innerHTML='<span class="empty">Noch keine – viel Freude beim Suchen!</span>';
+  $('last').textContent=LAST_HINT;
+  $('overlay').classList.remove('show');
+  updateStats();
+  $('sTime').textContent='0:00';
+}
+
+function closeOpen(){
+  state.open.forEach(t=>{t.classList.remove('open','wrong'); t.setAttribute('aria-label','verdeckte Karte');});
+  state.open=[]; state.lock=false;
+}
+
+function flip(t){
+  if(t.classList.contains('matched') || t.classList.contains('open')) return;
+  if(state.lock){ clearTimeout(state.closeT); closeOpen(); }
+  if(!state.start){ state.start=Date.now(); timerId=setInterval(tick,1000); }
+  t.classList.add('open'); t.setAttribute('aria-label',t.dataset.word);
+  state.open.push(t);
+  if(state.open.length<2) return;
+  state.moves++;
+  const [a,b] = state.open;
+  if(a.dataset.id===b.dataset.id){
+    state.found++;
+    const nr = state.found;
+    [a,b].forEach(x=>{ x.classList.remove('open'); x.classList.add('matched'); x.querySelector('.badge').textContent=nr; });
+    state.foundOrder.push([a.dataset.word,b.dataset.word]);
+    addChip(nr,+a.dataset.id);
+    state.open=[];
+    if(state.found===state.total) finish();
+  } else {
+    state.lock=true;
+    setTimeout(()=>{ a.classList.add('wrong'); b.classList.add('wrong'); },420);
+    state.closeT = setTimeout(closeOpen,1300);
+  }
+  updateStats();
+}
+
+const LAST_HINT = 'Tipp: Nach jedem gefundenen Paar steht hier ein Beispielsatz.';
+
+function pairLine(tag,nr,p){
+  const box=document.createElement(tag);
+  const h=document.createElement('b');
+  if(nr){ const i=document.createElement('i'); i.textContent=nr; h.append(i); }
+  h.append(p[0]+' ≈ '+p[1]);
+  const ex=document.createElement('span'); ex.textContent=p[3];
+  box.append(h,ex);
+  return box;
+}
+
+function addChip(nr,id){
+  const p=state.pairs[id];
+  const list=$('foundList');
+  const e=list.querySelector('.empty'); if(e) e.remove();
+  const c=pairLine('div',nr,p); c.className='chip';
+  list.appendChild(c);
+  const last=$('last'); last.textContent='';
+  const l=pairLine('div',nr,p); l.className='lastpair';
+  last.appendChild(l);
+}
+
+function fmt(s){ return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
+function tick(){ $('sTime').textContent = fmt(Math.floor((Date.now()-state.start)/1000)); }
+function updateStats(){
+  $('sPairs').textContent = state.found+' / '+state.total;
+  $('sMoves').textContent = state.moves;
+}
+
+function finish(){
+  clearInterval(timerId);
+  const secs = Math.floor((Date.now()-state.start)/1000);
+  const ideal = state.total;
+  const ratio = state.moves/ideal;
+  let lob = ratio<1.6 ? 'Du hast ein super Gedächtnis und kennst die Wörter wirklich gut!' :
+            ratio<2.3 ? 'Sehr schön gespielt – du kennst schon viele Synonyme.' :
+                        'Geschafft! Mit jeder Runde merkst du dir die Paare besser.';
+  $('resultText').textContent = `${state.total} Paare in ${state.moves} Zügen und ${fmt(secs)} Minuten. ${lob} Hier sind alle Paare dieser Runde mit Beispielsätzen:`;
+  const tbl=$('pairTable'); tbl.textContent='';
+  state.pairs.forEach(p=>tbl.appendChild(pairLine('div',0,p)));
+  setTimeout(()=>$('overlay').classList.add('show'),600);
+}
+
+function setTheme(t){
+  document.body.dataset.theme=t;
+  document.querySelectorAll('#themeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  try{ localStorage.setItem('synMemTheme',t); }catch(e){}
+}
+document.querySelectorAll('#themeSeg button').forEach(b=>b.addEventListener('click',()=>setTheme(b.dataset.t)));
+let saved='comic'; try{ saved = localStorage.getItem('synMemTheme') || 'comic'; }catch(e){}
+setTheme(saved);
+
+$('newGame').addEventListener('click',newGame);
+$('count').addEventListener('change',newGame);
+$('again').addEventListener('click',newGame);
+newGame();
+</script>
+</body>
+</html>
