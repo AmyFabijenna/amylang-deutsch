@@ -1,32 +1,55 @@
-/* Zurück-Button: Ein goldener Link ganz oben auf jeder Übungsseite führt zur Übersicht (daf/index.html). */
+/* Navigations-Knopf: Auf jeder Übungsseite sitzt ganz oben ein zweigeteilter Knopf in Gold und Schwarz.
+   Goldene Hälfte   -> Übungsliste  (daf/index.html, eine Ebene über dem Ordner interdaf)
+   Schwarze Hälfte  -> Startseite   (index.html ganz oben, zwei Ebenen höher)
+   Die Ziele werden vom Speicherort dieser Datei aus berechnet – sie stimmen also auf jeder Seite. */
 (function () {
   var skript = document.currentScript;
-  var ziel;
-  try { ziel = new URL("../index.html", skript && skript.src ? skript.src : location.href).href; }
-  catch (e) { ziel = "../index.html"; }
+  var basis = skript && skript.src ? skript.src : location.href;
+  var zielUebungen, zielStart;
+  try {
+    zielUebungen = new URL("../index.html", basis).href;      // daf/index.html
+    zielStart = new URL("../../index.html", basis).href;      // index.html der Hauptseite
+  } catch (e) { zielUebungen = "../index.html"; zielStart = "../../index.html"; }
 
   function einbauen() {
     if (document.getElementById("al-zurueck")) return;
-    if (location.href.split("#")[0].split("?")[0] === ziel) return;
+    var hier = location.href.split("#")[0].split("?")[0];
+    if (hier === zielUebungen || hier === zielStart) return;
+
     var stil = document.createElement("style");
     stil.textContent =
-      "#al-zurueck{display:block;box-sizing:border-box;width:100%;padding:12px 16px 4px;position:relative;z-index:50}" +
+      "#al-zurueck{display:block;box-sizing:border-box;width:100%;height:auto;margin:0;padding:12px 16px 4px;position:relative;" +
+      "z-index:50;background:none;border:0;box-shadow:none;text-align:left;line-height:1}" +
       "#al-zurueck.al-fix{position:fixed;top:0;left:0;width:auto;padding:10px 12px}" +
-      "#al-zurueck a{display:inline-flex;align-items:center;gap:8px;font-family:'Lexend',system-ui,-apple-system,'Segoe UI',sans-serif;" +
-      "font-size:14.5px;font-weight:600;line-height:1;letter-spacing:.01em;text-decoration:none;color:#fff;" +
-      "background:linear-gradient(135deg,#d0a64c 0%,#b48528 100%);padding:9px 16px 9px 12px;border-radius:999px;" +
-      "box-shadow:0 2px 8px rgba(80,55,10,.28),inset 0 1px 0 rgba(255,255,255,.35);transition:transform .15s,box-shadow .15s,filter .15s}" +
-      "#al-zurueck a:hover{transform:translateY(-1px);filter:brightness(1.05);box-shadow:0 4px 12px rgba(80,55,10,.32),inset 0 1px 0 rgba(255,255,255,.35)}" +
-      "#al-zurueck a:focus-visible{outline:3px solid #f0c548;outline-offset:2px}" +
-      "#al-zurueck svg{flex:none}" +
+      "#al-zurueck .al-knopf{display:inline-flex;align-items:stretch;border-radius:999px;overflow:hidden;" +
+      "border:1.5px solid #b08a34;box-shadow:0 2px 9px rgba(60,40,5,.28);background:#15130f}" +
+      "#al-zurueck a{display:inline-flex;align-items:center;gap:7px;margin:0;border:0;border-radius:0;white-space:nowrap;" +
+      "font-family:'Lexend',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:14.5px;font-weight:600;line-height:1;" +
+      "letter-spacing:.01em;text-decoration:none;text-transform:none;text-shadow:none;transition:filter .15s,background .15s,color .15s}" +
+      "#al-zurueck a.al-gold{color:#1d1608;background:linear-gradient(135deg,#e2c373 0%,#cfa348 55%,#b98a2e 100%);" +
+      "padding:9px 15px 9px 11px;box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}" +
+      "#al-zurueck a.al-schwarz{color:#ecca7c;background:#15130f;padding:9px 16px 9px 13px;border-left:1.5px solid #b08a34}" +
+      "#al-zurueck a.al-gold:hover{filter:brightness(1.07)}" +
+      "#al-zurueck a.al-schwarz:hover{background:#2a2419;color:#f6dc9a}" +
+      "#al-zurueck a:focus-visible{outline:3px solid #f0c548;outline-offset:-3px}" +
+      "#al-zurueck svg{flex:none;display:block}" +
+      "@media (max-width:480px){#al-zurueck a{font-size:13px}#al-zurueck a.al-gold{padding:8px 11px 8px 9px}" +
+      "#al-zurueck a.al-schwarz{padding:8px 12px 8px 10px}}" +
       "@media print{#al-zurueck{display:none!important}}";
     document.head.appendChild(stil);
+
+    var svg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
     var leiste = document.createElement("nav");
     leiste.id = "al-zurueck";
-    leiste.setAttribute("aria-label", "Zurück zur Übersicht");
+    leiste.setAttribute("aria-label", "Zurück zur Übungsliste oder zur Startseite");
     leiste.innerHTML =
-      '<a href="' + ziel + '"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
-      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Alle Übungen</a>';
+      '<span class="al-knopf">' +
+        '<a class="al-gold" href="' + zielUebungen + '" title="Zurück zur Liste aller Übungen">' + svg +
+          '<path d="M15 18l-6-6 6-6"/></svg>Alle Übungen</a>' +
+        '<a class="al-schwarz" href="' + zielStart + '" title="Zur Startseite von Amy Lang">' + svg +
+          '<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/></svg>Startseite</a>' +
+      '</span>';
     var anzeige = getComputedStyle(document.body).display;
     if (anzeige === "flex" || anzeige === "grid" || anzeige === "inline-flex") leiste.className = "al-fix";
     document.body.insertBefore(leiste, document.body.firstChild);
