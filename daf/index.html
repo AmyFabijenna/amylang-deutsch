@@ -716,7 +716,11 @@ const DATA = EX.map(e => {
 });
 
 /* ── Zustand (wird in der Adresse gespeichert, damit man gefilterte Links teilen kann) ── */
-const S = {n:"", t:"", s:"", o:"niveau", q:"", v:"kacheln"};
+/* Standard beim Öffnen der Seite – hier ändern, falls gewünscht:
+   Reihenfolge: "neu" | "niveau" | "lernweg"   ·   Ansicht: "liste" | "kacheln" */
+const STANDARD_REIHENFOLGE = "neu";
+const STANDARD_ANSICHT = "liste";
+const S = {n:"", t:"", s:"", o:STANDARD_REIHENFOLGE, q:"", v:STANDARD_ANSICHT};
 try{ const gespeichert = localStorage.getItem("daf-ansicht"); if(gespeichert==="liste"||gespeichert==="kacheln") S.v = gespeichert; }catch(e){}
 (function ladeAusAdresse(){
   try{
@@ -735,9 +739,9 @@ function schreibeAdresse(){
     if(S.n) p.set("niveau",S.n);
     if(S.t) p.set("thema",S.t);
     if(S.s) p.set("sprache",S.s);
-    if(S.o!=="niveau") p.set("sort",S.o);
+    if(S.o!==STANDARD_REIHENFOLGE) p.set("sort",S.o);
     if(S.q) p.set("suche",S.q);
-    if(S.v!=="kacheln") p.set("ansicht",S.v);
+    if(S.v!==STANDARD_ANSICHT) p.set("ansicht",S.v);
     const qs = p.toString();
     history.replaceState(null,"",location.pathname+(qs?"?"+qs:"")+location.hash);
   }catch(e){}
@@ -828,13 +832,13 @@ function zeichnen(){
   chipsZeichnen("fLevel", NIVEAUS, S.n, v=>ohneN.filter(e=>passtNiveau(e,v)).length, v=>S.n=v, "Alle");
   chipsZeichnen("fTheme", THEMEN, S.t, v=>ohneT.filter(e=>passtThema(e,v)).length, v=>S.t=v, "Alle Themen");
   chipsZeichnen("fLang", SPRACHEN, S.s, v=>ohneS.filter(e=>passtSprache(e,v)).length, v=>S.s=v, "egal");
-  chipsZeichnen("fSort", SORTEN, S.o, null, v=>S.o=v||"niveau", null);
-  chipsZeichnen("fView", ANSICHTEN, S.v, null, v=>{ S.v=v||"kacheln"; try{localStorage.setItem("daf-ansicht",S.v);}catch(e){} }, null);
+  chipsZeichnen("fSort", SORTEN, S.o, null, v=>S.o=v||STANDARD_REIHENFOLGE, null);
+  chipsZeichnen("fView", ANSICHTEN, S.v, null, v=>{ S.v=v||STANDARD_ANSICHT; try{localStorage.setItem("daf-ansicht",S.v);}catch(e){} }, null);
 
   const liste = sortieren(filtern());
   const out = document.getElementById("out");
   const aktiv = S.n||S.t||S.s||S.q;
-  document.getElementById("reset").classList.toggle("show", !!(aktiv||S.o!=="niveau"));
+  document.getElementById("reset").classList.toggle("show", !!(aktiv||S.o!==STANDARD_REIHENFOLGE));
 
   let beschr = [];
   if(S.n) beschr.push((NIVEAUS.find(x=>x[0]===S.n)||[0,S.n])[1]);
@@ -876,7 +880,7 @@ qIn.addEventListener("input", () => {
 });
 qClear.onclick = () => { qIn.value=""; S.q=""; qClear.classList.remove("show"); zeichnen(); qIn.focus(); };
 document.getElementById("reset").onclick = () => {
-  S.n=S.t=S.s=S.q=""; S.o="niveau"; qIn.value=""; qClear.classList.remove("show"); zeichnen();
+  S.n=S.t=S.s=S.q=""; S.o=STANDARD_REIHENFOLGE; qIn.value=""; qClear.classList.remove("show"); zeichnen();
 };
 
 /* ── WhatsApp ── */
