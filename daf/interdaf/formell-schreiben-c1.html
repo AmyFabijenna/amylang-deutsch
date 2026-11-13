@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Formell schreiben auf C1 – Ton, Redemittel, Genauigkeit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F5F1EA;--card:#FFFDF9;--ink:#141414;--soft:#4A4A4A;--blue:#2B4667;--petrol:#256A73;--lila:#66557F;--ocker:#B9853A;--line:#E2DACD;--ok:#256A73;--okbg:#E3F0F1;--no:#A9503A;--nobg:#F7E6E0;--fs:18px}
+body.gross{--fs:21px}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:'Lexend',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:var(--fs);line-height:1.65;color:var(--ink);background:var(--bg);font-weight:400}
+.bubbles{position:fixed;inset:0;overflow:hidden;z-index:0;pointer-events:none}
+.bubbles i{position:absolute;border-radius:50%;opacity:.13;animation:float 26s ease-in-out infinite}
+.bubbles i:nth-child(1){width:260px;height:260px;background:var(--blue);left:-70px;top:12%}
+.bubbles i:nth-child(2){width:180px;height:180px;background:var(--lila);right:-40px;top:38%;animation-delay:-8s}
+.bubbles i:nth-child(3){width:320px;height:320px;background:var(--petrol);left:55%;bottom:-140px;animation-delay:-15s}
+.bubbles i:nth-child(4){width:120px;height:120px;background:var(--ocker);left:12%;bottom:8%;animation-delay:-4s}
+@keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(18px,-28px)}}
+@media (prefers-reduced-motion:reduce){.bubbles i{animation:none}}
+.wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:22px 16px 90px}
+header.top{background:linear-gradient(135deg,#DCE6EF,#E9E2F0);border-radius:28px;padding:30px 26px;border:1px solid var(--line)}
+header.top h1{margin:0 0 8px;font-size:1.75em;line-height:1.2;color:var(--blue);font-weight:700}
+header.top p{margin:0;color:var(--ink);max-width:60ch}
+.tools{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+button{font-family:inherit;font-size:1em;cursor:pointer}
+.pill{border:1.5px solid var(--blue);background:var(--card);color:var(--ink);padding:9px 16px;border-radius:999px;font-weight:500}
+.pill:hover{background:#EEF2F7}
+.total{margin:20px 2px 6px;font-weight:500}
+.bar{height:12px;background:#E4DCCF;border-radius:999px;overflow:hidden}
+.bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--petrol),var(--blue));border-radius:999px;transition:width .4s}
+nav{display:flex;gap:10px;overflow-x:auto;padding:16px 2px 10px;position:sticky;top:0;background:linear-gradient(var(--bg) 80%,transparent);z-index:5}
+nav button{flex:0 0 auto;border:1.5px solid var(--line);background:var(--card);color:var(--ink);padding:10px 16px;border-radius:16px;font-weight:500;white-space:nowrap}
+nav button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+nav button small{display:block;font-weight:400;font-size:.72em;opacity:.85}
+section h2{font-size:1.4em;color:var(--blue);margin:22px 2px 6px;line-height:1.25}
+section>p.intro{margin:0 2px 14px;color:var(--ink)}
+.rule{background:#EDE7F3;border-left:6px solid var(--lila);border-radius:18px;padding:16px 18px;margin:0 0 18px}
+.rule b{color:#3E2F5C}
+.rule ul{margin:8px 0 0;padding-left:20px}
+.rule li{margin:4px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px 20px 16px;margin:0 0 16px;box-shadow:0 3px 14px rgba(43,70,103,.06)}
+.card .n{display:inline-block;font-size:.78em;font-weight:600;color:var(--petrol);letter-spacing:.04em;margin-bottom:4px}
+.card .q{font-weight:500;margin:0 0 12px}
+.card .q em{font-style:normal;background:#F3EAD9;border-radius:8px;padding:1px 7px}
+.opts{display:grid;gap:10px}
+.opt{text-align:left;border:1.5px solid var(--line);background:#fff;color:var(--ink);border-radius:16px;padding:13px 16px;line-height:1.5;transition:border-color .15s,background .15s}
+.opt:hover:not(:disabled){border-color:var(--blue);background:#F2F5F9}
+.opt:disabled{cursor:default;color:var(--ink)}
+.opt.right{border-color:var(--ok);background:var(--okbg);font-weight:500}
+.opt.wrong{border-color:var(--no);background:var(--nobg)}
+.fb{margin-top:12px;border-radius:16px;padding:13px 16px;background:#F3EFE7;border:1px solid var(--line)}
+.fb strong{display:block;margin-bottom:2px}
+.fb.good strong{color:var(--ok)}
+.fb.bad strong{color:var(--no)}
+textarea{width:100%;min-height:86px;font-family:inherit;font-size:1em;line-height:1.5;border:1.5px solid var(--line);border-radius:16px;padding:12px 14px;background:#fff;color:var(--ink);resize:vertical}
+textarea:focus{outline:2px solid var(--blue);border-color:var(--blue)}
+.salopp{background:#F7E6E0;border-radius:14px;padding:10px 14px;margin:0 0 12px;font-weight:500}
+.muster{background:var(--okbg);border-radius:14px;padding:10px 14px;margin:0 0 8px;font-weight:500}
+.act{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.btn{border:none;background:var(--blue);color:#fff;border-radius:14px;padding:11px 18px;font-weight:500}
+.btn.alt{background:var(--card);color:var(--ink);border:1.5px solid var(--blue)}
+.btn.chosen{background:var(--lila);color:#fff;border-color:var(--lila)}
+.done{background:linear-gradient(135deg,#DCE6EF,#E3F0F1);border-radius:22px;padding:20px;margin:6px 0 20px;border:1px solid var(--line);font-weight:500}
+footer{margin-top:30px;color:var(--soft);font-size:.85em;text-align:center}
+@media (max-width:520px){header.top h1{font-size:1.45em}.card{padding:17px 15px 14px}}
+</style>
+</head>
+<body>
+<div class="bubbles"><i></i><i></i><i></i><i></i></div>
+<div class="wrap">
+<header class="top">
+<h1>Formell schreiben auf C1</h1>
+<p>Der richtige Ton in E-Mails, treffsichere Redemittel für Grafiken und die kleinen Genauigkeiten, die den Unterschied machen. Nach jeder Antwort bekommst du eine Erklärung, damit du das Muster dahinter verstehst und beim nächsten Mal spürst, was passt.</p>
+<div class="tools">
+<button class="pill" id="bGross">Größere Schrift</button>
+<button class="pill" id="bReset">Alles zurücksetzen</button>
+</div>
+</header>
+<div class="total" id="totalTxt"></div>
+<div class="bar"><span id="totalBar"></span></div>
+<nav id="nav"></nav>
+<main id="main"></main>
+<footer>Formell schreiben auf C1 · Übungsreihe für Deutsch als Fremdsprache</footer>
+</div>
+<script>
+// Aufbau jeder Aufgabe: q = Frage, o = Antworten (die ERSTE ist richtig, wird beim Anzeigen gemischt), e = Erklärung
+var S=[
+{id:'a',t:'Anrede und Gruß',s:'Der Rahmen',intro:'Anrede, erster Satz und Grußformel sind der Rahmen deines Schreibens. Wer hier sicher ist, hat die Leserin oder den Leser schon gewonnen.',
+rule:'<b>Merke dir:</b><ul><li>Nach <b>Frau / Herr</b> steht immer der <b>Nachname</b>, niemals der Vorname.</li><li>Nach der Anrede steht ein Komma, danach schreibst du <b>klein</b> weiter.</li><li><b>Sie, Ihnen, Ihr</b> als höfliche Anrede schreibst du immer groß.</li><li>Nach der Grußformel steht <b>kein Komma</b>.</li></ul>',
+items:[
+{q:'Du schreibst an Herrn Dr. Tobias Wieland, den Leiter eines Sprachinstituts. Welche Anrede ist richtig?',o:['Sehr geehrter Herr Dr. Wieland,','Sehr geehrter Herr Tobias,','Sehr geehrter Dr. Tobias,'],e:'Im Deutschen folgt auf „Herr“ oder „Frau“ (und einen Titel) immer der Nachname. „Herr Tobias“ klingt für deutschsprachige Ohren ungewohnt und unsicher, in einem formellen Schreiben fällt das sofort auf.'},
+{q:'Deine Ansprechpartnerin im Sekretariat heißt Carla Brandner. Welche Anrede ist in einem formellen Schreiben korrekt?',o:['Sehr geehrte Frau Brandner,','Sehr geehrte Frau Carla,','Geehrte Brandner,'],e:'„Sehr geehrte Frau“ + Nachname ist die feste Formel. Der Vorname nach „Frau“ ist im Deutschen nicht üblich, und „Geehrte“ ohne „Sehr“ und ohne „Frau“ wirkt unhöflich.'},
+{q:'Du kennst den Namen der zuständigen Person nicht. Wie beginnst du?',o:['Sehr geehrte Damen und Herren,','Sehr geehrte Dame und Herr,','Liebe Leute vom Sekretariat,'],e:'Wenn du keinen Namen kennst, verwendest du die feste Formel im Plural: „Sehr geehrte Damen und Herren,“. „Liebe Leute“ gehört in eine Nachricht an Freunde.'},
+{q:'Die Anrede endet mit einem Komma. Wie geht der erste Satz richtig weiter?',o:['ich wende mich an Sie, weil ich eine Frage zu meinem Antrag habe.','Ich wende mich an Sie, weil ich eine Frage zu meinem Antrag habe.','ich wende mich an sie, weil ich eine Frage zu meinem Antrag habe.'],e:'Nach dem Komma der Anrede geht der Satz klein weiter, also „ich“. Das höfliche „Sie“ wird dagegen immer großgeschrieben. Kleines „sie“ würde eine dritte Person oder mehrere Personen meinen.'},
+{q:'Welche Schlussformel ist richtig geschrieben und passt in ein formelles Schreiben?',o:['Mit freundlichen Grüßen','Mit freundlichen Grüßen,','Mit freundlichem Grüßen'],e:'Nach der Grußformel steht im Deutschen kein Komma, der Name folgt einfach in der nächsten Zeile. Die Endung ist „freundlichen“, weil „Grüßen“ im Dativ Plural steht.'},
+{q:'Du möchtest um mehr Zeit für das Einreichen deiner Stipendienunterlagen bitten. Welcher Betreff passt?',o:['Bitte um Fristverlängerung für die Einreichung meiner Unterlagen','Hallo, ich habe eine Frage','Dringend!!! Bitte sofort lesen'],e:'Ein guter Betreff nennt das Anliegen in wenigen Wörtern, meistens als Nominalgruppe („Bitte um …“, „Anfrage zu …“). Grüße und Ausrufezeichen haben im Betreff nichts zu suchen.'},
+{q:'Du antwortest auf einen Brief der Hausverwaltung. Welcher erste Satz ist formell und korrekt?',o:['ich beziehe mich auf Ihr Schreiben vom 3. März.','ich habe Ihren Brief gekriegt.','ich beziehe mich an Ihr Schreiben vom 3. März.'],e:'Die Wendung heißt „sich beziehen auf“ + Akkusativ. „Kriegen“ ist Alltagssprache; formell sagt man „erhalten“.'},
+{q:'Welche Formen passen? „Ich danke ___ für ___ Unterstützung.“',o:['Ihnen / Ihre','ihnen / ihre','Sie / Ihre'],e:'„Danken“ verlangt den Dativ: Ich danke Ihnen. Die höflichen Formen „Ihnen“ und „Ihre“ werden großgeschrieben, sonst bedeuten sie „diesen Leuten“ und „deren“.'},
+{q:'Welcher Schlusssatz passt am besten in ein formelles Schreiben?',o:['Für Ihre Bemühungen bedanke ich mich im Voraus.','Danke schon mal und schönen Tag noch!','Ich bedanke mich im Voraus und erwarte Ihre Antwort bis morgen.'],e:'Der formelle Schluss bedankt sich ruhig und setzt niemanden unter Druck. „Schon mal“ ist gesprochene Sprache, und „ich erwarte … bis morgen“ klingt wie ein Befehl.'},
+{q:'Du schreibst an Frau Professor Helene Sattler. Welche Anrede ist richtig?',o:['Sehr geehrte Frau Professor Sattler,','Sehr geehrte Frau Helene,','Sehr geehrte Professorin Helene,'],e:'Auch mit Titel gilt: Frau + Titel + Nachname. Der Vorname erscheint in der formellen Anrede gar nicht.'}
+]},
+{id:'b',t:'Ton-Gespür',s:'Was klingt formell?',intro:'Hier trainierst du dein Ohr. In jeder Aufgabe sagen alle drei Sätze ungefähr dasselbe, aber nur einer passt in ein formelles Schreiben. Achte darauf, was die anderen beiden so unpassend macht.',
+rule:'<b>Formeller Ton in drei Schritten:</b><ul><li><b>Bedauern</b> statt rechtfertigen: „Leider war mir nicht bekannt, dass …“</li><li><b>Beschreiben</b> statt vorwerfen, am besten aus der Ich-Perspektive: „Ich konnte keinen Hinweis finden.“</li><li><b>Bitten</b> statt fordern, mit Konjunktiv II: „Ich wäre Ihnen dankbar, wenn Sie … könnten.“</li></ul>',
+items:[
+{q:'Eine wichtige Information fehlte auf der Website.',o:['Leider konnte ich auf Ihrer Website keinen Hinweis darauf finden.','Das steht bei Ihnen nirgends!','Auf Ihrer Website findet man ja überhaupt nichts.'],e:'Die formelle Version bleibt bei dir selbst („ich konnte nicht finden“). Die beiden anderen Sätze zeigen mit dem Finger auf die andere Person und klingen wie ein Vorwurf.'},
+{q:'Die angebotene Lösung hilft dir nicht.',o:['Dieser Vorschlag hilft mir in meiner Situation leider nicht weiter.','Das bringt mir gar nichts.','Damit kann ich echt nichts anfangen.'],e:'„Das bringt mir nichts“ und „echt“ sind Alltagssprache und wirken schroff. „Hilft mir leider nicht weiter“ sagt dasselbe, aber respektvoll.'},
+{q:'Du brauchst ein Dokument.',o:['Für meine Bewerbung benötige ich eine Bestätigung über meine Teilnahme.','Ich brauch unbedingt so eine Bestätigung.','Sie müssen mir eine Bestätigung schicken.'],e:'„Benötigen“ ist die formelle Entsprechung von „brauchen“. „Sie müssen“ gibt einen Befehl, und „so eine“ ist gesprochene Sprache.'},
+{q:'Du möchtest den Grund für eine Ablehnung erfahren.',o:['Könnten Sie mir bitte mitteilen, weshalb mein Antrag abgelehnt wurde?','Warum haben Sie meinen Antrag einfach abgelehnt?','Ich verstehe nicht, was das soll.'],e:'Die indirekte Frage mit „Könnten Sie mir bitte mitteilen, …“ klingt interessiert. Die direkte Warum-Frage mit „einfach“ klingt nach Anklage.'},
+{q:'Du hast selbst einen Termin übersehen.',o:['Ich bedaure sehr, dass ich die Frist übersehen habe.','Sorry, die Frist habe ich verschwitzt.','Die Frist war aber auch wirklich schlecht angegeben.'],e:'Wer einen eigenen Fehler ruhig zugibt, wirkt souverän. „Sorry“ und „verschwitzen“ sind salopp, und der dritte Satz schiebt die Schuld weiter.'},
+{q:'Du bittest um eine Ausnahme.',o:['Ich wäre Ihnen sehr dankbar, wenn Sie eine Ausnahme machen könnten.','Machen Sie bitte eine Ausnahme, das geht sicher.','Ich will, dass Sie eine Ausnahme machen.'],e:'Der Konjunktiv II („wäre“, „könnten“) lässt der anderen Person die Freiheit zu entscheiden. Genau das macht eine Bitte höflich. Ein Imperativ oder „ich will“ nimmt diese Freiheit weg.'},
+{q:'Die Sache ist dringend.',o:['Da die Einschreibefrist in Kürze endet, bitte ich Sie um eine rasche Rückmeldung.','Antworten Sie schnell, ich habe keine Zeit.','Bitte ganz schnell melden, sonst wird es eng!'],e:'Formell begründest du die Eile sachlich und bittest dann. „Es wird eng“ ist eine Redewendung aus dem Alltag, und „Antworten Sie schnell“ ist ein Befehl.'},
+{q:'Du erklärst, welche Folgen eine Absage für dich hätte.',o:['Andernfalls würde sich mein Studienbeginn um ein halbes Jahr verzögern.','Sonst ist das halbe Jahr für mich futsch.','Sonst verliere ich wegen Ihnen ein halbes Jahr.'],e:'„Andernfalls würde …“ beschreibt die Folge sachlich. „Futsch“ ist sehr umgangssprachlich, und „wegen Ihnen“ macht die andere Person verantwortlich.'},
+{q:'Du möchtest wissen, ob es nur wenige Plätze gibt.',o:['Darf ich fragen, ob die Zahl der Plätze begrenzt ist?','Es gibt nur ein paar Plätze, oder?','Die Plätze sind begrenzt?'],e:'Ein Aussagesatz mit Fragezeichen oder mit „oder?“ gehört zum Gespräch. Schriftlich und formell stellst du eine echte Frage, am elegantesten als indirekte Frage.'},
+{q:'Du bist mit einer Entscheidung nicht einverstanden.',o:['Ich kann Ihre Entscheidung leider nicht ganz nachvollziehen.','Ihre Entscheidung ist total unfair.','So geht das wirklich nicht.'],e:'„Nicht ganz nachvollziehen können“ drückt Widerspruch aus, ohne zu verletzen. Bewertungen wie „unfair“ und Ausrufe wie „So geht das nicht“ schließen das Gespräch, statt es zu öffnen.'},
+{q:'Du gibst weiter, was du über eine Frist weißt.',o:['Nach meinen Informationen läuft die Frist noch bis Ende des Monats.','Ich habe es so gehört, dass die Frist noch läuft.','Irgendwer hat gesagt, dass die Frist noch läuft.'],e:'„Nach meinen Informationen“ oder „Soweit ich informiert bin“ sind die formellen Wendungen. „Ich habe es so gehört, dass“ ist kein deutsches Satzmuster, und „irgendwer“ klingt unsicher.'},
+{q:'Du wünschst dir eine Antwort.',o:['Über eine baldige Antwort würde ich mich sehr freuen.','Schreiben Sie mir bald zurück!','Melden Sie sich halt, wenn Sie Zeit haben.'],e:'Die formelle Version spricht über deine Freude, nicht über die Pflicht der anderen Person. „Halt“ ist ein Füllwort der gesprochenen Sprache.'},
+{q:'Du weist auf einen Fehler in einer Rechnung hin.',o:['Bei der Durchsicht der Rechnung ist mir eine Unstimmigkeit aufgefallen.','Sie haben sich bei der Rechnung verrechnet.','Die Rechnung stimmt hinten und vorne nicht.'],e:'„Mir ist eine Unstimmigkeit aufgefallen“ nennt das Problem, ohne jemanden zu beschuldigen. So kann die andere Person den Fehler korrigieren, ohne das Gesicht zu verlieren.'},
+{q:'Du hast auf dein erstes Schreiben keine Antwort bekommen.',o:['Leider habe ich auf mein Schreiben vom 12. Mai bisher keine Rückmeldung erhalten.','Warum antwortet bei Ihnen eigentlich niemand?','Ich warte jetzt schon ewig auf eine Antwort.'],e:'Formell nennst du die Tatsache mit Datum und bleibst ruhig. „Eigentlich niemand“ und „schon ewig“ transportieren Ärger, und Ärger gehört nicht in den Ton.'}
+]},
+{id:'c',t:'Satzbau',s:'Wohin mit dem Verb?',intro:'Höfliche Fragen und Bitten bestehen fast immer aus Hauptsatz und Nebensatz. Wähle jeweils den Satz, der grammatisch richtig gebaut ist.',
+rule:'<b>Die Verb-Regeln auf einen Blick:</b><ul><li>Indirekte Frage, <b>dass, weil, ob, wenn</b>: das konjugierte Verb steht <b>am Ende</b>.</li><li>Nach <b>denn</b> folgt ein Hauptsatz: Verb an <b>Position zwei</b>.</li><li>Steht der Nebensatz vorne, folgt <b>sofort das Verb</b> des Hauptsatzes.</li><li>Nach <b>hoffen</b> und bei echten Tatsachen steht der <b>Indikativ</b>; der Konjunktiv II gehört zur höflichen Bitte.</li></ul>',
+items:[
+{q:'Indirekte Frage mit „warum“:',o:['Ich würde gerne wissen, warum der Kurs abgesagt wurde.','Ich würde gerne wissen, warum wurde der Kurs abgesagt.','Ich würde gerne wissen, warum der Kurs wurde abgesagt.'],e:'In der indirekten Frage wandert das konjugierte Verb ans Ende: „… abgesagt wurde“. Die Wortstellung der direkten Frage („warum wurde …“) darfst du nicht übernehmen.'},
+{q:'Indirekte Frage mit „wann“:',o:['Könnten Sie mir sagen, wann die Ergebnisse veröffentlicht werden?','Könnten Sie mir sagen, wann werden die Ergebnisse veröffentlicht?','Könnten Sie mir sagen, wann die Ergebnisse werden veröffentlicht?'],e:'Auch hier steht „werden“ ganz am Ende. Das Fragezeichen gehört zum Hauptsatz „Könnten Sie mir sagen“.'},
+{q:'Indirekte Frage mit „ob“:',o:['Ich möchte fragen, ob noch Plätze frei sind.','Ich möchte fragen, ob sind noch Plätze frei.','Ich möchte fragen, ob noch Plätze sind frei.'],e:'„Ob“ leitet einen Nebensatz ein, das Verb „sind“ steht am Ende.'},
+{q:'Indirekte Frage mit „wie lange“:',o:['Mir ist nicht klar, wie lange die Bearbeitung dauern wird.','Mir ist nicht klar, wie lange wird die Bearbeitung dauern.','Mir ist nicht klar, wie lange die Bearbeitung wird dauern.'],e:'Bei zwei Verbteilen steht der Infinitiv vor dem konjugierten Verb: „dauern wird“.'},
+{q:'Modalverb im Nebensatz:',o:['Es tut mir leid, dass ich die Unterlagen nicht rechtzeitig einreichen konnte.','Es tut mir leid, dass ich die Unterlagen nicht rechtzeitig eingereicht konnte.','Es tut mir leid, dass ich die Unterlagen nicht rechtzeitig konnte einreichen.'],e:'Ein Modalverb verbindet sich mit dem Infinitiv, nicht mit dem Partizip: „einreichen konnte“. Im Nebensatz steht das Modalverb ganz am Ende.'},
+{q:'Was folgt nach „hoffen“?',o:['Ich hoffe, dass eine Teilnahme noch möglich ist.','Ich hoffe, dass eine Teilnahme noch möglich wäre.','Ich hoffe, dass eine Teilnahme ist noch möglich.'],e:'Nach „hoffen“ steht der Indikativ, denn du hältst die Sache für möglich. „Wäre“ würde bedeuten, dass du selbst nicht daran glaubst.'},
+{q:'Du hast etwas wirklich nicht gewusst. Welche Form passt?',o:['Leider wusste ich nicht, dass eine persönliche Anmeldung nötig ist.','Leider hätte ich nicht gewusst, dass eine persönliche Anmeldung nötig ist.','Leider wüsste ich nicht, dass eine persönliche Anmeldung nötig ist.'],e:'Eine Tatsache in der Vergangenheit steht im Indikativ: „wusste“. „Hätte gewusst“ und „wüsste“ sind Konjunktiv II und beschreiben etwas Irreales.'},
+{q:'Welche Bitte ist korrekt und höflich?',o:['Wäre es möglich, den Termin zu verschieben?','Ist es möglich, dass Sie verschieben den Termin?','Verschieben Sie den Termin.'],e:'„Wäre es möglich, … zu + Infinitiv?“ ist eine der nützlichsten Formeln für formelle Bitten. Im zweiten Satz steht das Verb im dass-Satz falsch, der dritte ist ein Befehl.'},
+{q:'Begründung mit „denn“:',o:['Der Termin kommt für mich zu spät, denn die Frist ist dann bereits abgelaufen.','Der Termin kommt für mich zu spät, denn die Frist dann bereits abgelaufen ist.','Der Termin kommt für mich zu spät, denn ist die Frist dann bereits abgelaufen.'],e:'„Denn“ verbindet zwei Hauptsätze und zählt selbst nicht als Position. Danach kommt das Subjekt, dann das Verb: „denn die Frist ist …“.'},
+{q:'Begründung mit „weil“:',o:['Der Termin kommt für mich zu spät, weil die Frist dann bereits abgelaufen ist.','Der Termin kommt für mich zu spät, weil die Frist ist dann bereits abgelaufen.','Der Termin kommt für mich zu spät, weil ist die Frist dann bereits abgelaufen.'],e:'„Weil“ leitet einen Nebensatz ein, das konjugierte Verb steht am Ende. Vergleiche mit der vorigen Aufgabe: gleiche Bedeutung, anderer Satzbau.'},
+{q:'Der Nebensatz steht vorne. Wie geht es weiter?',o:['Wenn man die Zahlen genauer betrachtet, fällt ein deutlicher Unterschied auf.','Wenn man die Zahlen genauer betrachtet, ein deutlicher Unterschied fällt auf.','Wenn man die Zahlen genauer betrachtet, ein deutlicher Unterschied auffällt.'],e:'Der ganze Nebensatz besetzt Position eins. Deshalb folgt direkt nach dem Komma das Verb des Hauptsatzes: „…, fällt … auf“.'},
+{q:'Welche Entschuldigung ist richtig gebaut?',o:['Bitte entschuldigen Sie, dass ich mich erst jetzt melde.','Bitte entschuldigen Sie mir, dass ich mich erst jetzt melde.','Bitte entschuldigen Sie sich, dass ich mich erst jetzt melde.'],e:'„Entschuldigen Sie“ steht ohne Dativ. (Mit Dativ heißt es „Verzeihen Sie mir“.) „Entschuldigen Sie sich“ würde bedeuten, dass die andere Person um Entschuldigung bitten soll.'},
+{q:'Ein ob-Satz braucht einen Hauptsatz. Welcher Satz ist vollständig und richtig?',o:['Ich kann nicht erkennen, ob das Angebot noch gilt.','Ob das Angebot gilt noch.','Ich kann nicht erkennen, ob gilt das Angebot noch.'],e:'Ein Satz mit „ob“ kann nicht allein stehen, er hängt immer an einem Hauptsatz. Und sein Verb steht am Ende: „… noch gilt“.'},
+{q:'Höfliche Bitte mit „wenn“:',o:['Ich wäre Ihnen dankbar, wenn Sie mir die Unterlagen zusenden könnten.','Ich wäre Ihnen dankbar, wenn Sie könnten mir die Unterlagen zusenden.','Ich wäre Ihnen dankbar, wenn Sie mir die Unterlagen zugesendet könnten.'],e:'Im wenn-Satz steht „könnten“ am Ende, davor der Infinitiv „zusenden“. Diese Formel kannst du in fast jeder formellen E-Mail verwenden.'},
+{q:'dass-Satz mit trennbarem Verb:',o:['Ich habe gesehen, dass die Anmeldung erst im Oktober stattfindet.','Ich habe gesehen, dass die Anmeldung findet erst im Oktober statt.','Ich habe gesehen, dass die Anmeldung erst im Oktober findet statt.'],e:'Im Nebensatz wird ein trennbares Verb nicht getrennt. Es steht zusammengeschrieben am Ende: „stattfindet“.'}
+]},
+{id:'d',t:'Grafik beschreiben',s:'Redemittel genau',intro:'Stell dir eine Umfrage unter Studierenden zu ihren Freizeitaktivitäten vor. Redemittel für Grafiken haben einen festen Bauplan. Finde jeweils die Version, in der die Wendung richtig eingesetzt ist.',
+rule:'<b>Der Bauplan für Rangfolgen:</b> Subjekt ist immer die <b>Sache</b>, nie die Menschen.<ul><li>An erster Stelle <b>steht</b> mit … % + Nominativ.</li><li>Auf Platz zwei <b>liegt</b> oder <b>folgt</b> mit … % + Nominativ.</li><li>Das Schlusslicht <b>bildet</b> mit … % + Nominativ.</li><li>Über <b>Menschen</b> sprichst du mit einem Verb des Sagens: … % der Befragten <b>geben an, nennen, möchten</b> …</li><li>Der Abstand zwischen zwei Prozentwerten heißt <b>Prozentpunkt</b>.</li></ul>',
+items:[
+{q:'71 % der Studierenden treffen in ihrer Freizeit Freunde. Das ist der höchste Wert.',o:['An erster Stelle steht mit 71 % das Treffen mit Freunden.','An erster Stelle stehen 71 % der Befragten, die Freunde treffen.','An erster Stelle liegen die Studierenden mit 71 %, die Freunde treffen.'],e:'An einer „Stelle“ steht die Aktivität, nicht die Personen. Die Befragten selbst haben keinen Rang, sie nennen nur etwas. Und zur „Stelle“ gehört das Verb „stehen“.'},
+{q:'Sport kommt mit 64 % auf Rang zwei.',o:['Auf dem zweiten Platz folgt mit 64 % der Sport.','Auf dem zweiten Platz folgt mit 64 % den Sport.','Auf dem zweiten Platz folgen die Befragten mit 64 %, die Sport machen.'],e:'Das, was folgt, ist das Subjekt des Satzes und steht im Nominativ: „der Sport“. Wieder gilt: Die Sache hat den Rang, nicht die Menschen.'},
+{q:'Platz zwei hat 64 %, Platz drei 61 %. „Der Unterschied beträgt drei ___.“',o:['Prozentpunkte','Prozente','Prozentsätze'],e:'Die Differenz zwischen zwei Prozentwerten misst man in Prozentpunkten. „Drei Prozent weniger als 64 %“ wäre rechnerisch etwas anderes (ungefähr 62 %).'},
+{q:'„Kochen folgt mit nur ___ Prozentpunkt Abstand.“',o:['einem','ein','einen'],e:'„Mit“ verlangt immer den Dativ: mit einem Prozentpunkt.'},
+{q:'Musikhören und Lesen haben beide 48 %. „Beide Aktivitäten kommen auf den gleichen ___.“',o:['Prozentsatz','Prozenteinsatz','Prozentpunkt'],e:'Der Anteil in Prozent heißt „Prozentsatz“. Ein „Einsatz“ gehört zum Spiel oder zur Arbeit, und der „Prozentpunkt“ bezeichnet nur den Abstand zwischen zwei Werten.'},
+{q:'Nur 9 % gehen regelmäßig ins Theater. Das ist der niedrigste Wert.',o:['Das Schlusslicht bildet mit 9 % der Theaterbesuch.','Am Ende befindet sich mit 9 % der Befragten, die ins Theater gehen.','Das Schlusslicht bilden mit 9 % ins Theater gehen.'],e:'„Das Schlusslicht bildet“ + Nominativ ist die feste Wendung für den letzten Rang. Im zweiten Satz fehlt das Subjekt: Was befindet sich am Ende?'},
+{q:'Jetzt sollen die Menschen das Subjekt sein. Welcher Satz ist richtig?',o:['71 % der Befragten geben an, sich regelmäßig mit Freunden zu treffen.','71 % der Befragten gibt an, sich regelmäßig mit Freunden treffen.','71 % von Befragten geben an, regelmäßig mit Freunden zu treffen.'],e:'„… % der Befragten“ (Genitiv) + Verb im Plural + „zu“ + Infinitiv. „Sich treffen“ ist reflexiv, das „sich“ darf nicht fehlen.'},
+{q:'Einleitungssatz:',o:['Die Grafik zeigt, wie Studierende ihre Freizeit verbringen.','Die Grafik zeigt, wie verbringen Studierende ihre Freizeit.','Die Grafik zeigt über die Freizeit von Studierenden.'],e:'Nach „Die Grafik zeigt“ folgt ein Akkusativ oder ein Nebensatz mit dem Verb am Ende. „Zeigen über“ gibt es nicht (möglich wäre: „gibt Auskunft über“).'},
+{q:'Quelle der Daten:',o:['Die Daten stammen aus einer Umfrage aus dem Jahr 2024.','Die Daten stammen von einer Umfrage aus das Jahr 2024.','Die Daten stammt aus einer Umfrage vom Jahr 2024.'],e:'„Stammen aus“ + Dativ, und „Daten“ ist Plural, also „stammen“. Auch „aus dem Jahr“ steht im Dativ.'},
+{q:'Art der Grafik:',o:['Bei der Grafik handelt es sich um ein Säulendiagramm.','Bei der Grafik handelt sich um ein Säulendiagramm.','Die Grafik handelt es sich um ein Säulendiagramm.'],e:'Die Wendung ist fest: „Bei … handelt es sich um …“. Das „es“ und das „bei“ gehören beide dazu. Damit klingt dein Einstieg eleganter als mit „Es ist ein Säulendiagramm“.'},
+{q:'Musikhören und Lesen haben beide 48 %. „Die beiden Aktivitäten liegen mit jeweils 48 % ___.“',o:['gleichauf','gleichzeitig','gleichmäßig'],e:'„Gleichauf liegen“ bedeutet: denselben Rang haben. „Gleichzeitig“ bezieht sich auf die Zeit, „gleichmäßig“ auf eine regelmäßige Verteilung.'},
+{q:'„48 % erreichen ___ das Musikhören ___ das Lesen.“',o:['sowohl … als auch','einerseits … andererseits','weder … noch'],e:'Zwei Dinge, die einfach nebeneinanderstehen, verbindest du mit „sowohl … als auch“. „Einerseits … andererseits“ wägt Gegensätze ab, und „weder … noch“ verneint beides.'},
+{q:'Eine Auffälligkeit nennen:',o:['Auffällig ist, dass nur wenige Befragte kulturelle Angebote nutzen.','Auffällig ist, dass nur wenige Befragte nutzen kulturelle Angebote.','Auffällig, dass nur wenige von Befragte kulturelle Angebote nutzen.'],e:'„Auffällig ist, dass …“ + Verb am Ende. Diese Wendung leitet elegant von der Beschreibung zur Interpretation über.'},
+{q:'„Der ___ derjenigen, die regelmäßig lesen, liegt bei 48 %.“',o:['Anteil','Prozent','Anzahl'],e:'„Der Anteil … liegt bei … %“ ist eine feste Verbindung. „Anzahl“ ist feminin (die Anzahl) und meint eine absolute Zahl, keinen Prozentwert.'},
+{q:'Die Befragten sind zwischen 20 und 29 Jahre alt. Wie nennst du diese Gruppe?',o:['junge Erwachsene','Jugendliche','Kinder und Jugendliche'],e:'„Jugendliche“ sind im Deutschen etwa 14 bis 18 Jahre alt. Wer über 20 ist, gehört zu den jungen Erwachsenen. Genauigkeit bei solchen Begriffen zeigt C1-Niveau.'},
+{q:'Die Werte ergeben zusammen mehr als 100 %.',o:['Da die Werte zusammen mehr als 100 % ergeben, waren offenbar Mehrfachnennungen möglich.','Da die Werte zusammen mehr als 100 % ergeben, offenbar waren Mehrfachnennungen möglich.','Da die Werte ergeben zusammen mehr als 100 %, waren offenbar Mehrfachnennungen möglich.'],e:'Im da-Satz steht „ergeben“ am Ende, und nach dem Komma folgt sofort das Verb des Hauptsatzes: „waren“. Solche Beobachtungen machen deine Beschreibung besonders stark.'},
+{q:'Nur 18 % der Befragten gehen regelmäßig ins Museum. Welche Aussage passt zu dieser Zahl?',o:['Museumsbesuche spielen nur für eine Minderheit eine Rolle.','Die meisten Befragten gehen regelmäßig ins Museum.','Museumsbesuche sind bei den Befragten meistens beliebt.'],e:'18 % sind weniger als ein Fünftel, also eine Minderheit. „Die meisten“ und „meistens“ passen erst bei mehr als der Hälfte. Prüfe immer, ob dein Wort zur Zahl passt.'},
+{q:'Die Ergebnisse deuten:',o:['Freundschaften haben für die Mehrheit der Befragten einen hohen Stellenwert.','Freundschaften haben für die Mehrheit der Befragten eine hohe Stelle.','Freundschaften sind für die Mehrheit der Befragten in dem Mittelpunkt.'],e:'Die Wendungen heißen „einen hohen Stellenwert haben“ und „im Mittelpunkt stehen“. Feste Wendungen musst du Wort für Wort genau übernehmen.'},
+{q:'Zwei Werte vergleichen:',o:['Sport ist deutlich beliebter als der Theaterbesuch.','Sport ist deutlich beliebter wie der Theaterbesuch.','Sport ist deutlich mehr beliebt als der Theaterbesuch.'],e:'Nach dem Komparativ steht „als“. Und „beliebt“ wird regelmäßig gesteigert: beliebter, nicht „mehr beliebt“.'}
+]},
+{id:'e',t:'Fälle und Artikel',s:'Die Endungen',intro:'Kleine Endungen, große Wirkung. Wähle die Form, die in die Lücke passt.',
+rule:'<b>Zum Erinnern:</b><ul><li><b>bitten, stören, entschuldigen</b> + Akkusativ: Ich bitte <b>Sie</b>.</li><li><b>danken, helfen, passieren</b> + Dativ: Ich danke <b>Ihnen</b>. <b>Mir</b> ist etwas passiert.</li><li><b>mit, zu, aus, bei, von</b> + immer Dativ.</li><li><b>Wohin?</b> Akkusativ (ins Büro). <b>Wo?</b> Dativ (im Büro).</li><li><b>das</b> Foto, <b>das</b> Thema, <b>der</b> Anteil, <b>die</b> Welt.</li></ul>',
+items:[
+{q:'„Ich bitte ___ um Verständnis.“',o:['Sie','Ihnen','Ihr'],e:'„Bitten“ verlangt den Akkusativ: jemanden um etwas bitten.'},
+{q:'„___ ist leider ein Missgeschick passiert.“',o:['Mir','Mich','Mit mir'],e:'„Passieren“ verlangt den Dativ für die Person: Mir ist etwas passiert. Das Ereignis (ein Missgeschick) steht im Nominativ.'},
+{q:'„Ich wollte ___ am Wochenende nicht stören.“',o:['Sie','Ihnen','Ihre'],e:'„Stören“ verlangt den Akkusativ: jemanden stören.'},
+{q:'„Wir mussten sofort ___ Krankenhaus fahren.“',o:['ins','im','in dem'],e:'„Fahren“ beschreibt eine Bewegung zu einem Ziel (wohin?), deshalb Akkusativ: ins Krankenhaus. „Im“ antwortet auf die Frage „wo?“.'},
+{q:'„Für ___ Thema eignet sich das erste Foto besser.“',o:['unser','unsere','unserem'],e:'„Das Thema“ ist Neutrum, und „für“ verlangt den Akkusativ: für unser Thema.'},
+{q:'„___ Foto wirkt sehr sachlich.“',o:['Dieses','Diese','Dieser'],e:'„Das Foto“ ist Neutrum, also „dieses Foto“.'},
+{q:'„___ der Männer trinkt einen Kaffee.“',o:['Einer','Eine','Einen'],e:'„Der Mann“ ist maskulin, und das Wort ist Subjekt des Satzes: einer der Männer. Danach folgt der Genitiv Plural.'},
+{q:'„Im ___ Glas könnte auch Saft sein.“',o:['zweiten','zweiter','zweites'],e:'Nach „im“ (in dem, Dativ) hat das Adjektiv die Endung -en: im zweiten Glas.'},
+{q:'„An dritter Stelle folgt ___.“',o:['ein sicherer Arbeitsplatz','einen sicheren Arbeitsplatz','einem sicheren Arbeitsplatz'],e:'Das, was folgt, ist das Subjekt und steht im Nominativ: ein sicherer Arbeitsplatz folgt.'},
+{q:'„Deshalb liegt ___ Anteil bei nur 21 %.“',o:['dieser','diese','dieses'],e:'„Der Anteil“ ist maskulin, hier im Nominativ: dieser Anteil.'},
+{q:'„Viele möchten reisen und ___ Welt erkunden.“',o:['die','der','den'],e:'„Erkunden“ verlangt den Akkusativ, und „Welt“ ist feminin: die Welt erkunden.'},
+{q:'„Sie wollen das Leben in vollen ___ genießen.“',o:['Zügen','Züge','Zug'],e:'Die Wendung heißt „in vollen Zügen“. Im Dativ Plural bekommt das Nomen ein -n.'},
+{q:'„Ich benötige das Zeugnis für die Zulassung zu ___ Studium.“',o:['meinem','meinen','meines'],e:'„Zu“ verlangt den Dativ, „das Studium“ ist Neutrum: zu meinem Studium. Achtung: „zum“ bedeutet schon „zu dem“, „zum meinem“ wäre doppelt.'},
+{q:'„Ich möchte zur ___ Prüfung antreten.“',o:['schriftlichen','schriftliche','schriftlicher'],e:'„Zur“ ist „zu der“, also Dativ feminin. Das Adjektiv endet auf -en: zur schriftlichen Prüfung.'},
+{q:'„Viele ___ Befragten wünschen sich mehr Freizeit.“',o:['der','von','den'],e:'Nach „viele“ steht der Genitiv Plural: viele der Befragten. Mit „von“ bräuchtest du zusätzlich den Artikel: viele von den Befragten.'},
+{q:'„Für viele steht die Familie ___ Mittelpunkt.“',o:['im','in den','am'],e:'Die Wendung heißt „im Mittelpunkt stehen“ (wo? Dativ).'},
+{q:'„Ich danke ___ für die schnelle Antwort.“',o:['Ihnen','Sie','Ihre'],e:'„Danken“ verlangt den Dativ: Ich danke Ihnen.'},
+{q:'„Der Mann ___ eine Tasse in der Hand.“',o:['hält','haltet','halt'],e:'„Halten“ wechselt den Vokal: ich halte, du hältst, er hält. „Haltet“ ist die Form für „ihr“.'},
+{q:'„Ich habe mich ___ Prüfung angemeldet.“',o:['zur','für der','an die'],e:'„Sich anmelden zu“ + Dativ (zur Prüfung) oder „für“ + Akkusativ (für die Prüfung). „Für der“ und „an die“ sind hier nicht möglich.'},
+{q:'„Ich interessiere ___ für den Abendkurs.“',o:['mich','mir','sich'],e:'„Sich interessieren für“ ist reflexiv mit Akkusativ: ich interessiere mich.'},
+{q:'„Ich benötige das Zertifikat für ___ Inskription.“',o:['die','der','—'],e:'Im Deutschen braucht das Nomen hier einen Artikel. „Für“ verlangt den Akkusativ, „Inskription“ ist feminin: für die Inskription.'}
+]},
+{id:'f',t:'Wort und Schreibung',s:'Genau hinsehen',intro:'Ein einzelner Buchstabe oder ein Wort aus dem falschen Register kann den Eindruck trüben. Welche Form ist richtig?',
+rule:'<b>Tipp:</b> Lies deinen Text am Ende einmal nur auf Rechtschreibung durch, Wort für Wort und langsam. Besonders aufmerksam bei Monatsnamen, zusammengesetzten Nomen und bei <b>ihr / Ihr</b>.',
+items:[
+{q:'„Im ___ des Seminars habe ich mich mit Statistik beschäftigt.“',o:['Rahmen','Ramen','Rahm'],e:'„Im Rahmen“ schreibt man mit h. „Ramen“ ist eine japanische Nudelsuppe, und „Rahm“ ist Sahne.'},
+{q:'„Ein Hinweis darauf war ___ zu finden.“',o:['nirgendwo','niergendwo','nirgentwo'],e:'„Nirgendwo“ kommt von „nirgends“, mit kurzem i (kein ie) und mit d.'},
+{q:'„Die Prüfung findet noch im ___ statt.“',o:['September','Septembar','Septemper'],e:'Der Monat heißt „September“, mit b und mit e in der letzten Silbe.'},
+{q:'„Die Frist läuft ___ Ende August.“',o:['bis','bist','biss'],e:'Die Präposition heißt „bis“. „Bist“ ist die Form von „sein“ (du bist), „biss“ kommt von „beißen“.'},
+{q:'Wie heißt das zusammengesetzte Nomen?',o:['die Anmeldefrist','die Anmeldungfrist','die Anmeldenfrist'],e:'Im zusammengesetzten Wort verwendet man hier den Verbstamm: Anmelde-frist. Ebenso: Anmeldeformular, Anmeldeschluss.'},
+{q:'„Viele junge Menschen möchten ___ Wissen erweitern.“',o:['ihr','Ihr','ihre'],e:'Gemeint ist das Wissen der jungen Menschen, also kleines „ihr“. Großes „Ihr“ ist nur die höfliche Anrede. „Das Wissen“ ist Neutrum, deshalb ohne -e.'},
+{q:'„Die ___ Entwicklung interessiert nur wenige Befragte.“',o:['politische','Politische','politischen'],e:'Adjektive schreibt man klein, auch vor einem Nomen. Im Nominativ feminin nach „die“ lautet die Endung -e.'},
+{q:'„Das erste Foto wirkt nüchtern und ___.“',o:['sachlich','sachtlich','sächlich'],e:'„Sachlich“ bedeutet objektiv und nüchtern. „Sächlich“ ist ein Grammatikwort für das Neutrum.'},
+{q:'Welche Schreibung ist richtig?',o:['die Unter-30-Jährigen','die Unter 30-Jährigen','die unter-30-jährigen'],e:'Die ganze Gruppe wird mit Bindestrichen verbunden, und weil es ein Nomen ist, schreibt man den Anfang und „Jährigen“ groß.'},
+{q:'Welche Schreibung ist richtig?',o:['die C1-Prüfung','die C1 Prüfung','die c1-Prüfung'],e:'Zusammensetzungen mit Buchstaben oder Ziffern bekommen einen Bindestrich: C1-Prüfung, B2-Kurs, E-Mail-Adresse.'},
+{q:'Welches Verb passt in ein formelles Schreiben? „Ich ___ das Zertifikat für meine Bewerbung.“',o:['benötige','brauch','will … haben'],e:'„Benötigen“ ist die formelle Variante. „Brauch“ ohne -e ist gesprochene Sprache, und „ich will haben“ klingt fordernd.'},
+{q:'Welches Verb passt in ein formelles Schreiben? „Ich habe Ihre Nachricht ___.“',o:['erhalten','gekriegt','reingekriegt'],e:'„Erhalten“ ist das formelle Wort für „bekommen“. „Kriegen“ gehört nur in die Alltagssprache.'},
+{q:'„Die Einschreibefrist ist bereits ___.“',o:['abgelaufen','vorbeigeworden','abgegangen'],e:'Fristen „laufen ab“. Das ist die feste Verbindung, die du für formelle Schreiben brauchst: Die Frist ist abgelaufen.'}
+]},
+{id:'g',t:'Umformulieren',s:'Selbst schreiben',open:true,intro:'Jetzt bist du dran. Du siehst einen Satz, wie man ihn im Alltag sagen würde. Schreibe ihn so um, dass er in ein formelles Schreiben passt. Danach vergleichst du mit dem Muster und liest, was die formelle Version ausmacht.',
+rule:'<b>So gehst du vor:</b> Frage dich bei jedem Satz: Kann ich aus dem Vorwurf eine Beobachtung machen? Aus der Forderung eine Bitte im Konjunktiv II? Aus dem Alltagswort ein formelles Wort? Es gibt immer mehrere gute Lösungen, das Muster ist nur eine davon.',
+items:[
+{q:'Das hat mir keiner gesagt.',m:'Darüber wurde ich leider nicht informiert.',e:'Das Passiv nennt keinen Schuldigen. So bleibt die Aussage gleich, aber der Vorwurf verschwindet. „Keiner“ wird ganz vermieden.'},
+{q:'Ich brauche den Platz unbedingt.',m:'Ich bin dringend auf diesen Platz angewiesen.',e:'„Auf etwas angewiesen sein“ drückt die Dringlichkeit aus und klingt trotzdem ruhig. Ein Grund im nächsten Satz macht die Bitte noch überzeugender.'},
+{q:'Warum dauert das so lange?',m:'Könnten Sie mir bitte mitteilen, wann ich mit einer Antwort rechnen kann?',e:'Die Frage nach dem „Warum“ klingt schnell nach Kritik. Die formelle Version fragt nach dem, was du wirklich wissen willst, nämlich nach dem Zeitpunkt, und zwar als indirekte Frage.'},
+{q:'Das geht für mich nicht.',m:'Dieser Termin ist für mich leider nicht möglich.',e:'Formell nennst du genau, was nicht möglich ist, und fügst „leider“ hinzu. Noch besser: gleich einen Gegenvorschlag anschließen.'},
+{q:'Schicken Sie mir das Formular.',m:'Ich bitte Sie, mir das Formular zuzusenden.',e:'Aus dem Imperativ wird „Ich bitte Sie, … zu + Infinitiv“. Ebenso gut: „Könnten Sie mir bitte das Formular zusenden?“'},
+{q:'Ich habe das nicht gewusst.',m:'Dieser Umstand war mir leider nicht bekannt.',e:'„Etwas ist mir nicht bekannt“ ist die formelle Entsprechung von „ich weiß nicht“. Das Wort „Umstand“ fasst die Sache sachlich zusammen.'},
+{q:'Ihre Kollegin hat mir was Falsches gesagt.',m:'Offenbar ist es zu einem Missverständnis gekommen.',e:'„Es ist zu einem Missverständnis gekommen“ beschreibt das Problem, ohne eine Person zu beschuldigen. Das ist diplomatisch und hilft, schneller eine Lösung zu finden.'},
+{q:'Ich will mein Geld zurück.',m:'Ich bitte Sie um die Rückerstattung des Betrags.',e:'Nominalstil ist typisch für formelle Schreiben: aus „Geld zurückgeben“ wird „die Rückerstattung des Betrags“. „Ich will“ wird zu „Ich bitte Sie um“.'},
+{q:'Sonst habe ich ein Riesenproblem.',m:'Andernfalls würden mir erhebliche Nachteile entstehen.',e:'„Andernfalls“ ersetzt „sonst“, „erhebliche Nachteile“ ersetzt „Riesenproblem“, und der Konjunktiv II zeigt, dass die Folge noch vermeidbar ist.'},
+{q:'Geht das vielleicht doch noch?',m:'Besteht eventuell noch die Möglichkeit, eine Ausnahme zu machen?',e:'„Besteht die Möglichkeit, … zu + Infinitiv?“ ist eine sehr höfliche Art zu fragen. „Eventuell“ ist die formelle Schwester von „vielleicht“.'},
+{q:'Ich habe mich schon vor zwei Wochen gemeldet und nichts gehört.',m:'Auf meine Anfrage von vor zwei Wochen habe ich leider noch keine Rückmeldung erhalten.',e:'Die formelle Version stellt die Anfrage an den Satzanfang und verwendet „Rückmeldung erhalten“. Sie stellt fest, ohne zu klagen.'},
+{q:'Können Sie mir sagen, was ich jetzt machen soll?',m:'Ich wäre Ihnen dankbar, wenn Sie mir die nächsten Schritte erläutern könnten.',e:'Aus „was ich machen soll“ wird das Nomen „die nächsten Schritte“, und die Bitte steht im Konjunktiv II. So klingst du selbstständig und höflich zugleich.'}
+]}
+];
+var KEY='formell_c1_v1',st={};
+try{st=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){st={}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+var perm={},cur=st._cur||'a';
+function shuf(n){var a=[],i,j,t;for(i=0;i<n;i++)a.push(i);for(i=n-1;i>0;i--){j=Math.floor(Math.random()*(i+1));t=a[i];a[i]=a[j];a[j]=t}return a}
+function el(tag,cls,html){var x=document.createElement(tag);if(cls)x.className=cls;if(html!=null)x.innerHTML=html;return x}
+function count(sec){var d=0,r=0;sec.items.forEach(function(it,i){var v=st[sec.id+i];if(v!=null&&v!==''){d++;if(!sec.open&&v===0)r++}});return{d:d,r:r,n:sec.items.length}}
+function totals(){var d=0,n=0;S.forEach(function(s){var c=count(s);d+=c.d;n+=c.n});document.getElementById('totalTxt').textContent='Dein Fortschritt: '+d+' von '+n+' Aufgaben';document.getElementById('totalBar').style.width=(n?d/n*100:0)+'%'}
+function nav(){var n=document.getElementById('nav');n.innerHTML='';S.forEach(function(s){var c=count(s);var b=el('button',s.id===cur?'on':'',s.t+'<small>'+c.d+' / '+c.n+'</small>');b.onclick=function(){cur=s.id;st._cur=cur;save();render();window.scrollTo({top:document.getElementById('nav').offsetTop-4,behavior:'smooth'})};n.appendChild(b)})}
+function render(){nav();totals();var sec=S.filter(function(s){return s.id===cur})[0],m=document.getElementById('main');m.innerHTML='';var box=el('section');box.appendChild(el('h2',null,sec.t+' · '+sec.s));box.appendChild(el('p','intro',sec.intro));box.appendChild(el('div','rule',sec.rule));
+sec.items.forEach(function(it,i){box.appendChild(sec.open?openCard(sec,it,i):mcCard(sec,it,i))});
+var c=count(sec);if(c.d===c.n){var txt=sec.open?'Du hast alle Sätze dieses Teils bearbeitet. Lies die Muster ruhig noch einmal laut, so prägt sich der Klang ein.':'Geschafft: '+c.r+' von '+c.n+' auf Anhieb richtig. '+(c.r===c.n?'Dieser Teil sitzt.':'Lies die Erklärungen zu den anderen Aufgaben noch einmal in Ruhe durch und wiederhole den Teil in ein paar Tagen.');var dn=el('div','done',txt);var rb=el('button','btn alt','Diesen Teil neu starten');rb.style.marginTop='12px';rb.style.display='block';rb.onclick=function(){sec.items.forEach(function(_,i){delete st[sec.id+i];delete st[sec.id+i+'t'];delete perm[sec.id+i]});save();render()};dn.appendChild(rb);box.appendChild(dn)}
+m.appendChild(box)}
+function mcCard(sec,it,i){var id=sec.id+i,card=el('div','card');card.appendChild(el('span','n','Aufgabe '+(i+1)));card.appendChild(el('p','q',it.q));var wrap=el('div','opts');if(!perm[id])perm[id]=shuf(it.o.length);var ans=st[id];
+perm[id].forEach(function(k){var b=el('button','opt',it.o[k]);if(ans!=null){b.disabled=true;if(k===0)b.className='opt right';else if(k===ans)b.className='opt wrong'}else b.onclick=function(){st[id]=k;save();render()};wrap.appendChild(b)});card.appendChild(wrap);
+if(ans!=null){card.appendChild(el('div','fb '+(ans===0?'good':'bad'),'<strong>'+(ans===0?'Richtig.':'Noch nicht ganz. Die passende Lösung ist markiert.')+'</strong>'+it.e))}return card}
+function openCard(sec,it,i){var id=sec.id+i,card=el('div','card');card.appendChild(el('span','n','Satz '+(i+1)));card.appendChild(el('div','salopp','„'+it.q+'“'));var ta=el('textarea');ta.placeholder='Deine formelle Version …';ta.value=st[id+'t']||'';ta.oninput=function(){st[id+'t']=ta.value;save()};card.appendChild(ta);
+if(st[id]==null||st[id]===''){var a=el('div','act'),b=el('button','btn','Mit dem Muster vergleichen');b.onclick=function(){st[id]='x';save();render()};a.appendChild(b);card.appendChild(a)}else{var f=el('div','fb');f.appendChild(el('div','muster',it.m));f.appendChild(el('div',null,it.e));var a2=el('div','act');[['s','Hatte ich ähnlich'],['u','Übe ich noch einmal']].forEach(function(p){var b=el('button','btn alt'+(st[id]===p[0]?' chosen':''),p[1]);b.onclick=function(){st[id]=p[0];save();render()};a2.appendChild(b)});f.appendChild(a2);card.appendChild(f)}return card}
+document.getElementById('bGross').onclick=function(){document.body.classList.toggle('gross');st._g=document.body.classList.contains('gross');save();this.textContent=st._g?'Normale Schrift':'Größere Schrift'};
+if(st._g){document.body.classList.add('gross');document.getElementById('bGross').textContent='Normale Schrift'}
+var armed=false;document.getElementById('bReset').onclick=function(){if(!armed){armed=true;this.textContent='Wirklich alles löschen? Noch einmal tippen';var t=this;setTimeout(function(){armed=false;t.textContent='Alles zurücksetzen'},4000);return}st={};perm={};cur='a';save();armed=false;this.textContent='Alles zurücksetzen';document.body.classList.remove('gross');document.getElementById('bGross').textContent='Größere Schrift';render()};
+render();
+</script>
+</body>
+</html>
