@@ -1,8 +1,26 @@
-name: Passwortschutz interdaf
+name: Passwortschutz und Übungsliste
 
 # Läuft bei jedem Hochladen ins Repository (und auf Knopfdruck unter "Actions").
-# Fügt jeder HTML-Datei im Ordner daf/interdaf, die noch keinen Passwortschutz hat,
-# die Zeile <script src="/daf/interdaf/passwort.js"></script> in den <head> ein.
+#
+# 1. Fügt jeder HTML-Datei im Ordner daf/interdaf, die noch keinen Passwortschutz hat,
+#    die Zeile <script src="/daf/interdaf/passwort.js"></script> in den <head> ein.
+#
+# 2. Trägt jede HTML-Datei aus daf/interdaf, die in der Übungsliste (daf/index.html)
+#    noch nicht verlinkt ist, dort automatisch ein – mit Titel, Niveau, Thema,
+#    Schlagwörtern, Beschreibung und Datum. Bestehende Einträge werden nie verändert
+#    oder gelöscht.
+#
+#    Die Angaben werden aus der Seite selbst gelesen (Titel, Überschrift, Untertitel).
+#    Wer es ganz genau haben möchte, schreibt diese Zeilen in den <head> der neuen Übung –
+#    sie haben immer Vorrang vor dem automatischen Erraten:
+#
+#      <meta name="daf-niveau" content="B1 B2">            (A1 … C2, alle, Kids, Schule)
+#      <meta name="daf-thema" content="verben satzbau">     (Kürzel aus der Liste THEMEN)
+#      <meta name="daf-tags" content="Perfekt, Partizip II">
+#      <meta name="daf-sprache" content="hu en">            (optional)
+#      <meta name="daf-emoji" content="🌻">
+#      <meta name="description" content="Kurze Beschreibung der Übung.">
+#      <meta name="daf-index" content="nein">               (Seite NICHT in die Liste aufnehmen)
 
 on:
   push:
@@ -11,11 +29,17 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: pflege-interdaf
+  cancel-in-progress: false
+
 jobs:
-  schuetzen:
+  pflegen:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Passwort-Zeile in alle Übungen einfügen
         run: |
@@ -43,14 +67,236 @@ jobs:
           print(f"Fertig – {geaendert} Datei(en) neu geschützt.")
           PY
 
+      - name: Neue Übungen in die Übungsliste eintragen
+        run: |
+          python3 - <<'PY'
+          import pathlib, re, html, json, subprocess, datetime, urllib.parse
+
+          ORDNER = pathlib.Path("daf/interdaf")
+          INDEX = pathlib.Path("daf/index.html")
+          # Dateien, die NICHT in der Übungsliste erscheinen sollen:
+          AUSLASSEN = {"index.html"}
+
+          CEFR = ["A1", "A2", "B1", "B2", "C1", "C2"]
+          # Abschnitts-Überschriften in daf/index.html (// ── … ──) je erstem Niveau
+          ABSCHNITT = {"A1": "A1", "A2": "A2", "B1": "B1", "B2": "B2", "C1": "C1", "C2": "C2",
+                       "alle": "Für alle Niveaus", "Kids": "Kinder", "Schule": "Schule"}
+
+          # Thema -> (Suchmuster, Emoji, Schlagwörter zum Anzeigen)
+          THEMEN = [
+              ("artikel", r"artikel|genus|der[ ,/·–-]+die[ ,/·–-]+das", "🇩🇪"),
+              ("kasus", r"akkusativ|dativ|genitiv|nominativ|kasus|\bfälle\b", "🎯"),
+              ("pronomen", r"pronomen", "👥"),
+              ("adjektive", r"adjektiv|steiger|komparativ|superlativ", "🎨"),
+              ("verben", r"verb|perfekt|präteritum|präsens|plusquamperfekt|futur|konjunktiv|passiv|zeitform|zeiten|partizip|konjug|imperativ", "⏳"),
+              ("praepositionen", r"präposition", "📍"),
+              ("konnektoren", r"konnektor|konjunktion|bindew", "🔗"),
+              ("satzbau", r"satzbau|nebens[aä]tz|relativs[aä]tz|wortstellung|satzglied|satzstellung|infinitivs", "🧱"),
+              ("negation", r"negation|vernein", "🚫"),
+              ("wortbildung", r"wortbildung|komposit|suffix|präfix|vorsilbe|nachsilbe|zusammengesetzt", "🧩"),
+              ("wortarten", r"wortart|\bnomen\b|namenw|tunw|wiew", "🎪"),
+              ("wortschatz", r"wortschatz|vokabel|synonym|antonym|memory|redemittel|redewendung|wörter lernen", "📇"),
+              ("rechtschreibung", r"rechtschreib|zeichensetzung|komma|das ?/ ?dass|groß- und kleinschreibung|großschreibung", "✏️"),
+              ("lesen", r"\blesen\b|lesetext|leseverstehen|lesetraining|lese-", "📖"),
+              ("sprechen", r"sprechen|dialog|gespräch|aussprache|mündlich", "💬"),
+              ("gemischt", r"\btest\b|prüfung|schularbeit|ösd|goethe|telc|gemischt", "📝"),
+          ]
+          SCHLAGWOERTER = [
+              "Nominativ", "Akkusativ", "Dativ", "Genitiv", "Perfekt", "Präteritum", "Präsens", "Plusquamperfekt",
+              "Futur", "Konjunktiv I", "Konjunktiv II", "Passiv", "Partizip", "Imperativ", "Modalverben",
+              "trennbare Verben", "Reflexivverben", "Relativsätze", "Nebensätze", "Infinitivsätze", "indirekte Rede",
+              "Adjektivdeklination", "Steigerung", "Personalpronomen", "Possessivpronomen", "Wechselpräpositionen",
+              "Komposita", "Synonyme", "Antonyme", "Redemittel", "Funktionsverbgefüge", "Nomen-Verb-Verbindungen",
+              "Zeichensetzung", "das/dass", "Schularbeit", "ÖSD", "Leserbrief", "Kommentar", "Zusammenfassung",
+              "Memory", "Champion", "Hotel", "Restaurant", "Beruf", "Alltag",
+          ]
+
+          def sauber(s):
+              s = re.sub(r"</?(b|strong|em|i|u|span|mark|small|sub|sup|a|code)\b[^>]*>", "", s or "", flags=re.I)
+              s = re.sub(r"<[^>]+>", " ", s)
+              s = html.unescape(s)
+              return re.sub(r"\s+", " ", s).strip()
+
+          def meta(text, name):
+              for m in re.finditer(r"<meta\b[^>]*>", text, flags=re.I):
+                  tag = m.group(0)
+                  n = re.search(r'\bname\s*=\s*["\']([^"\']+)["\']', tag, flags=re.I)
+                  if n and n.group(1).strip().lower() == name:
+                      c = re.search(r'\bcontent\s*=\s*"([^"]*)"', tag, flags=re.I) or \
+                          re.search(r"\bcontent\s*=\s*'([^']*)'", tag, flags=re.I)
+                      if c:
+                          return html.unescape(c.group(1)).strip()
+              return ""
+
+          def kuerzen(s, laenge=230):
+              if len(s) <= laenge:
+                  return s
+              teil = s[:laenge]
+              ende = max(teil.rfind(". "), teil.rfind("! "), teil.rfind("? "))
+              if ende > 90:
+                  return teil[:ende + 1]
+              return teil[:teil.rfind(" ")].rstrip(" ,;:–-") + " …"
+
+          def datum(datei):
+              try:
+                  aus = subprocess.run(["git", "log", "--diff-filter=A", "--follow", "--format=%as", "--", str(datei)],
+                                       capture_output=True, text=True).stdout.split()
+                  if aus:
+                      return aus[-1]
+              except Exception:
+                  pass
+              return (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1)).strftime("%Y-%m-%d")
+
+          def beschreiben(datei):
+              roh = datei.read_text(encoding="utf-8", errors="replace")
+              if meta(roh, "daf-index").lower() in ("nein", "no", "aus", "0"):
+                  return None
+              if re.search(r'http-equiv\s*=\s*["\']?refresh', roh[:3000], flags=re.I):
+                  return None  # reine Weiterleitungsseite
+              ohne = re.sub(r"<(script|style|svg|template)\b.*?</\1>", " ", roh, flags=re.I | re.S)
+              ohne = re.sub(r"<!--.*?-->", " ", ohne, flags=re.S)
+
+              t = re.search(r"<title[^>]*>(.*?)</title>", roh, flags=re.I | re.S)
+              titel = sauber(t.group(1)) if t else ""
+              titel = re.sub(r"\s*[|–-]\s*Amy Lang.*$", "", titel).strip()
+              h = re.search(r"<h1[^>]*>(.*?)</h1>", ohne, flags=re.I | re.S)
+              h1 = sauber(h.group(1)) if h else ""
+              if not titel:
+                  titel = h1 or datei.stem.replace("-", " ").replace("_", " ").title()
+
+              # Untertitel: erster sinnvoller Absatz nach der Hauptüberschrift
+              nach = ohne[h.end():] if h else ohne
+              unter = ""
+              for m in re.finditer(r"<p\b[^>]*>(.*?)</p>", nach[:6000], flags=re.I | re.S):
+                  kandidat = sauber(m.group(1))
+                  if 25 <= len(kandidat) <= 600:
+                      unter = kandidat
+                      break
+              beschreibung = meta(roh, "description") or unter
+              if not beschreibung:
+                  beschreibung = "Interaktive Übung: " + titel.rstrip(".!?") + "."
+              beschreibung = kuerzen(beschreibung)
+
+              kopf1 = " ".join([titel, h1, datei.stem.replace("-", " ").replace("_", " ")]).lower()
+              kopf = (kopf1 + " " + unter).lower()
+              rumpf = sauber(ohne)[:9000].lower()
+
+              # ── Niveau ──
+              nv = meta(roh, "daf-niveau").split()
+              if not nv:
+                  muster = r"(?<![a-z0-9])(a1|a2|b1|b2|c1|c2)(?![a-z0-9])"
+                  gefunden = {x.upper() for x in re.findall(muster, kopf)}
+                  schule = bool(re.search(r"schulstufe|schularbeit|\bklasse\b|matura|gymnasium|unterstufe|oberstufe|volksschule", kopf))
+                  kinder = bool(re.search(r"\bkinder\b|\bkids\b|für kinder", kopf))
+                  if not gefunden and not schule and not kinder:
+                      gefunden = {x.upper() for x in re.findall(muster, rumpf)}
+                      schule = bool(re.search(r"schulstufe|schularbeit", rumpf))
+                  nv = [x for x in CEFR if x in gefunden]
+                  if len(nv) >= 2:  # Spanne auffüllen, z. B. A2 … B2
+                      a, b = CEFR.index(nv[0]), CEFR.index(nv[-1])
+                      nv = CEFR[a:b + 1]
+                  if len(nv) == 6:
+                      nv = ["alle"]
+                  if schule:
+                      nv = ["Schule"] + nv
+                  if kinder:
+                      nv = (["Kids"] + nv) if not schule else (nv + ["Kids"])
+                  if not nv:
+                      nv = ["alle"]
+
+              # ── Thema ──
+              th = meta(roh, "daf-thema").split()
+              emoji_thema = "✨"
+              if not th:
+                  treffer = [(k, e) for k, pat, e in THEMEN if re.search(pat, kopf1)]  # Titel zählt zuerst
+                  treffer += [(k, e) for k, pat, e in THEMEN if re.search(pat, kopf) and (k, e) not in treffer]
+                  if not treffer:
+                      zaehl = [(len(re.findall(pat, rumpf)), k, e) for k, pat, e in THEMEN]
+                      zaehl = [z for z in zaehl if z[0] >= 3]
+                      zaehl.sort(key=lambda z: -z[0])
+                      treffer = [(k, e) for _, k, e in zaehl[:2]]
+                  if not treffer:
+                      treffer = [("gemischt", "📝")]
+                  treffer = treffer[:3]
+                  th = [k for k, _ in treffer]
+                  emoji_thema = treffer[0][1]
+              else:
+                  emoji_thema = next((e for k, _, e in THEMEN if k == th[0]), "✨")
+
+              # ── Schlagwörter ──
+              tg = meta(roh, "daf-tags") or meta(roh, "keywords")
+              if not tg:
+                  woerter = [w for w in SCHLAGWOERTER if w.lower() in kopf]
+                  if len(woerter) < 3:
+                      woerter += [w for w in SCHLAGWOERTER if w.lower() in rumpf and w not in woerter]
+                  tg = ", ".join(woerter[:4])
+
+              # ── Emoji ──
+              em = meta(roh, "daf-emoji")
+              if not em:
+                  e = re.search(r"[\U0001F300-\U0001FAFF☀-➿]️?", titel + " " + h1)
+                  em = e.group(0) if e else emoji_thema
+              titel = re.sub(r"^[\U0001F300-\U0001FAFF☀-➿️\s]+", "", titel).strip() or titel
+
+              sp = meta(roh, "daf-sprache")
+              return {"nv": " ".join(nv), "th": " ".join(th), "tg": tg, "sp": sp, "em": em,
+                      "t": titel, "d": datum(datei), "desc": beschreibung}
+
+          def js(s):
+              return json.dumps(s, ensure_ascii=False)
+
+          index = INDEX.read_text(encoding="utf-8")
+          verlinkt = {urllib.parse.unquote(x).lower()
+                      for x in re.findall(r"interdaf/([^\"'#?<>\s]+\.html?)", index, flags=re.I)}
+          anfang = index.find("const EX = [")
+          ende = index.find("\n];", anfang)
+          if anfang < 0 or ende < 0:
+              raise SystemExit("Die Liste 'const EX = [' wurde in daf/index.html nicht gefunden – nichts geändert.")
+
+          neu = 0
+          for datei in sorted(ORDNER.glob("*.htm*"), key=lambda p: p.name.lower()):
+              if datei.name in AUSLASSEN or datei.name.lower() in verlinkt:
+                  continue
+              e = beschreiben(datei)
+              if e is None:
+                  continue
+              ende = index.find("\n];", anfang)
+              liste = index[anfang:ende]
+              # Abschnitt suchen
+              erster = e["nv"].split()[0]
+              marke = "// ── " + ABSCHNITT.get(erster, "Für alle Niveaus") + " ──"
+              start = liste.find(marke)
+              if start < 0:
+                  start, stop = 0, len(liste)
+              else:
+                  naechste = liste.find("\n// ── ", start + len(marke))
+                  stop = naechste if naechste >= 0 else len(liste)
+              nummern = [int(x) for x in re.findall(r"\bo:(\d+)", liste[start:stop])]
+              o = (max(nummern) + 1) if nummern else 9000
+              sp = (",sp:" + js(e["sp"])) if e["sp"] else ""
+              eintrag = ("{nv:" + js(e["nv"]) + ",th:" + js(e["th"]) + ",tg:" + js(e["tg"]) + sp +
+                         ",href:" + js("interdaf/" + urllib.parse.quote(datei.name)) + ",em:" + js(e["em"]) +
+                         ",t:" + js(e["t"]) + ",d:" + js(e["d"]) + ",o:" + str(o) + ",\n desc:" + js(e["desc"]) + "},")
+              stelle = anfang + len(liste[:stop].rstrip())
+              index = index[:stelle] + "\n" + eintrag + index[stelle:]
+              verlinkt.add(datei.name.lower())
+              neu += 1
+              print("eingetragen:", datei.name, "→", e["nv"], "|", e["th"], "|", e["t"])
+
+          if neu:
+              INDEX.write_text(index, encoding="utf-8")
+          print(f"Fertig – {neu} neue Übung(en) in die Übungsliste eingetragen.")
+          PY
+
       - name: Änderungen speichern
         run: |
           if [ -n "$(git status --porcelain)" ]; then
-            git config user.name "Passwortschutz"
+            git config user.name "Übungspflege"
             git config user.email "actions@users.noreply.github.com"
-            git add -A daf/interdaf
-            git commit -m "Passwortschutz für neue Übungen ergänzt"
+            git add -A daf
+            git commit -m "Neue Übungen geschützt und in die Übungsliste eingetragen"
+            git pull --rebase
             git push
           else
-            echo "Alle Übungen sind bereits geschützt."
+            echo "Alles ist bereits geschützt und eingetragen."
           fi
