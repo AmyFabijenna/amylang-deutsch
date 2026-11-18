@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Präzise schreiben auf C1 – genau, stimmig, überzeugend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F5F1EA;--card:#FFFDF9;--ink:#141414;--soft:#4A4A4A;--blue:#2B4667;--petrol:#256A73;--lila:#66557F;--ocker:#B9853A;--line:#E2DACD;--ok:#256A73;--okbg:#E3F0F1;--no:#A9503A;--nobg:#F7E6E0;--fs:18px}
+body.gross{--fs:21px}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:'Lexend',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:var(--fs);line-height:1.65;color:var(--ink);background:var(--bg);font-weight:400}
+.bubbles{position:fixed;inset:0;overflow:hidden;z-index:0;pointer-events:none}
+.bubbles i{position:absolute;border-radius:50%;opacity:.13;animation:float 26s ease-in-out infinite}
+.bubbles i:nth-child(1){width:260px;height:260px;background:var(--blue);left:-70px;top:12%}
+.bubbles i:nth-child(2){width:180px;height:180px;background:var(--lila);right:-40px;top:38%;animation-delay:-8s}
+.bubbles i:nth-child(3){width:320px;height:320px;background:var(--petrol);left:55%;bottom:-140px;animation-delay:-15s}
+.bubbles i:nth-child(4){width:120px;height:120px;background:var(--ocker);left:12%;bottom:8%;animation-delay:-4s}
+@keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(18px,-28px)}}
+@media (prefers-reduced-motion:reduce){.bubbles i{animation:none}}
+.wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:22px 16px 90px}
+header.top{background:linear-gradient(135deg,#E6E0F0,#DCE8EC);border-radius:28px;padding:30px 26px;border:1px solid var(--line)}
+header.top h1{margin:0 0 8px;font-size:1.75em;line-height:1.2;color:var(--blue);font-weight:700}
+header.top p{margin:0;color:var(--ink);max-width:60ch}
+.tools{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+button{font-family:inherit;font-size:1em;cursor:pointer}
+.pill{border:1.5px solid var(--blue);background:var(--card);color:var(--ink);padding:9px 16px;border-radius:999px;font-weight:500}
+.pill:hover{background:#EEF2F7}
+.total{margin:20px 2px 6px;font-weight:500}
+.bar{height:12px;background:#E4DCCF;border-radius:999px;overflow:hidden}
+.bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--petrol),var(--blue));border-radius:999px;transition:width .4s}
+nav{display:flex;gap:10px;overflow-x:auto;padding:16px 2px 10px;position:sticky;top:0;background:linear-gradient(var(--bg) 80%,transparent);z-index:5}
+nav button{flex:0 0 auto;border:1.5px solid var(--line);background:var(--card);color:var(--ink);padding:10px 16px;border-radius:16px;font-weight:500;white-space:nowrap}
+nav button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+nav button small{display:block;font-weight:400;font-size:.72em;opacity:.85}
+section h2{font-size:1.4em;color:var(--blue);margin:22px 2px 6px;line-height:1.25}
+section>p.intro{margin:0 2px 14px;color:var(--ink)}
+.rule{background:#EDE7F3;border-left:6px solid var(--lila);border-radius:18px;padding:16px 18px;margin:0 0 18px}
+.rule b{color:#3E2F5C}
+.rule ul{margin:8px 0 0;padding-left:20px}
+.rule li{margin:4px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px 20px 16px;margin:0 0 16px;box-shadow:0 3px 14px rgba(43,70,103,.06)}
+.card .n{display:inline-block;font-size:.78em;font-weight:600;color:var(--petrol);letter-spacing:.04em;margin-bottom:4px}
+.card .q{font-weight:500;margin:0 0 12px}
+.card .q em{font-style:normal;background:#F3EAD9;border-radius:8px;padding:1px 7px}
+.opts{display:grid;gap:10px}
+.opt{text-align:left;border:1.5px solid var(--line);background:#fff;color:var(--ink);border-radius:16px;padding:13px 16px;line-height:1.5;transition:border-color .15s,background .15s}
+.opt:hover:not(:disabled){border-color:var(--blue);background:#F2F5F9}
+.opt:disabled{cursor:default;color:var(--ink)}
+.opt.right{border-color:var(--ok);background:var(--okbg);font-weight:500}
+.opt.wrong{border-color:var(--no);background:var(--nobg)}
+.fb{margin-top:12px;border-radius:16px;padding:13px 16px;background:#F3EFE7;border:1px solid var(--line)}
+.fb strong{display:block;margin-bottom:2px}
+.fb.good strong{color:var(--ok)}
+.fb.bad strong{color:var(--no)}
+textarea{width:100%;min-height:86px;font-family:inherit;font-size:1em;line-height:1.5;border:1.5px solid var(--line);border-radius:16px;padding:12px 14px;background:#fff;color:var(--ink);resize:vertical}
+textarea:focus{outline:2px solid var(--blue);border-color:var(--blue)}
+.salopp{background:#F7E6E0;border-radius:14px;padding:10px 14px;margin:0 0 12px;font-weight:500}
+.muster{background:var(--okbg);border-radius:14px;padding:10px 14px;margin:0 0 8px;font-weight:500}
+.act{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.btn{border:none;background:var(--blue);color:#fff;border-radius:14px;padding:11px 18px;font-weight:500}
+.btn.alt{background:var(--card);color:var(--ink);border:1.5px solid var(--blue)}
+.btn.chosen{background:var(--lila);color:#fff;border-color:var(--lila)}
+.done{background:linear-gradient(135deg,#DCE6EF,#E3F0F1);border-radius:22px;padding:20px;margin:6px 0 20px;border:1px solid var(--line);font-weight:500}
+footer{margin-top:30px;color:var(--soft);font-size:.85em;text-align:center}
+@media (max-width:520px){header.top h1{font-size:1.45em}.card{padding:17px 15px 14px}}
+</style>
+</head>
+<body>
+<div class="bubbles"><i></i><i></i><i></i><i></i></div>
+<div class="wrap">
+<header class="top">
+<h1>Präzise schreiben auf C1</h1>
+<p>Notizen exakt umsetzen, Zahlen genau wiedergeben, das passende Wort wählen und die Endungen sicher treffen: Hier trainierst du die Genauigkeit, die einen guten Text zu einem C1-Text macht. Nach jeder Antwort bekommst du eine Erklärung, damit du das Muster dahinter verstehst.</p>
+<div class="tools">
+<button class="pill" id="bGross">Größere Schrift</button>
+<button class="pill" id="bReset">Alles zurücksetzen</button>
+</div>
+</header>
+<div class="total" id="totalTxt"></div>
+<div class="bar"><span id="totalBar"></span></div>
+<nav id="nav"></nav>
+<main id="main"></main>
+<footer>Präzise schreiben auf C1 · Übungsreihe für Deutsch als Fremdsprache</footer>
+</div>
+<script>
+// Aufbau jeder Aufgabe: q = Frage, o = Antworten (die ERSTE ist richtig, wird beim Anzeigen gemischt), e = Erklärung
+var S=[
+{id:'a',t:'Notizen genau umsetzen',s:'Was sagt die Notiz wirklich?',intro:'In der Prüfung schreibst du aus Stichwörtern einen Brief. Punkte gibt es nur, wenn jede Notiz genau das sagt, was gemeint war. In jeder Aufgabe ist nur eine Formulierung inhaltlich exakt und zugleich formell.',
+rule:'<b>So gehst du vor:</b><ul><li>Lies jede Notiz und sag sie dir in einem eigenen Satz: <b>Was genau</b> steht da?</li><li>Behandle jede Notiz <b>einzeln</b>. Wer zwei Notizen in einen Satz presst, verschiebt leicht den Sinn.</li><li>Gib nichts zu, was die Notiz bestreitet, und füge keine Behauptung hinzu, die nicht dasteht.</li><li>Eine Notiz wie „So viel?!“ wird zu einem sachlichen Einwand mit Begründung.</li></ul>',
+items:[
+{q:'Die Hausverwaltung schreibt: „Sie haben die Reinigung der Waschküche dreimal versäumt.“ Deine Notiz: <em>Nur einmal!</em>',o:['Ich habe die Reinigung nur ein einziges Mal versäumt, nicht dreimal.','Nur eine der drei Beschwerden halte ich für berechtigt.','Ich habe die Waschküche bisher nur einmal gereinigt.'],e:'Die Notiz bestreitet die Zahl: Es war einmal. Der zweite Satz räumt dagegen drei Beschwerden ein und hält nur zwei davon für unberechtigt. Der dritte Satz sagt etwas ganz anderes, nämlich wie oft du geputzt hast.'},
+{q:'Ein Online-Shop schreibt: „Wir haben Ihnen bereits zwei Zahlungserinnerungen geschickt.“ Deine Notiz: <em>Keine bekommen!</em>',o:['Leider habe ich keine dieser Erinnerungen erhalten.','Leider habe ich nur eine der beiden Erinnerungen erhalten.','Leider habe ich auf Ihre Erinnerungen nicht rechtzeitig reagiert.'],e:'„Keine“ heißt: null. Der zweite Satz gibt eine Erinnerung zu, der dritte setzt voraus, dass du sie bekommen und ignoriert hast. Beides schwächt deine Position.'},
+{q:'Die Sprachschule schreibt: „Sie sind für den Kurs am Montag angemeldet.“ Deine Notiz: <em>Falsch, Mittwoch!</em>',o:['Hier muss ein Irrtum vorliegen: Ich habe mich für den Kurs am Mittwoch angemeldet.','Ich würde gern vom Montagskurs in den Mittwochskurs wechseln.','Leider kann ich am Montag nicht am Kurs teilnehmen.'],e:'Die Notiz sagt: Die Schule hat einen Fehler gemacht. Mit „Ich würde gern wechseln“ machst du aus dem Fehler der Schule einen eigenen Wunsch, und mit „Ich kann am Montag nicht“ nennst du gar nicht, dass du für Mittwoch angemeldet bist.'},
+{q:'Deine Bank schreibt: „Ab sofort berechnen wir für die Kontoführung 12 Euro monatlich.“ Deine Notiz: <em>Laut Vertrag kostenlos!</em>',o:['Laut meinem Vertrag ist die Kontoführung jedoch kostenlos.','Zwölf Euro im Monat erscheinen mir für die Kontoführung recht viel.','Könnten Sie mir die Gebühr wenigstens für die ersten Monate erlassen?'],e:'Dein Argument ist der Vertrag, nicht der Preis. Wer über die Höhe verhandelt oder um einen Nachlass bittet, akzeptiert stillschweigend, dass die Gebühr überhaupt erlaubt ist.'},
+{q:'Der Vermieter schreibt: „Die Reparatur des Fensterrahmens müssen Sie selbst bezahlen.“ Deine Notiz: <em>Schaden schon beim Einzug, steht im Protokoll!</em>',o:['Dieser Schaden war bereits bei meinem Einzug vorhanden und ist im Übergabeprotokoll vermerkt.','Ich bin mir nicht sicher, ob der Schaden schon bei meinem Einzug vorhanden war.','Der Schaden ist kurz nach meinem Einzug entstanden, wie im Protokoll vermerkt.'],e:'Die Notiz enthält zwei feste Tatsachen: Der Schaden war schon da, und das ist dokumentiert. Der zweite Satz macht daraus eine Unsicherheit, der dritte verlegt den Schaden in deine Mietzeit.'},
+{q:'Die Versicherung schreibt: „Sie haben uns den Wasserschaden erst nach vier Wochen gemeldet.“ Deine Notiz: <em>Gleich am nächsten Tag angerufen!</em>',o:['Ich habe Ihnen den Schaden bereits am Tag danach telefonisch gemeldet.','Ich habe den Schaden innerhalb der Frist von vier Wochen gemeldet.','Ich hatte vor, Ihnen den Schaden am nächsten Tag telefonisch zu melden.'],e:'Die Notiz sagt: Du hast am nächsten Tag angerufen. „Innerhalb von vier Wochen“ ist viel ungenauer und bestätigt fast die Darstellung der Versicherung. „Ich hatte vor“ bedeutet, dass du es eben nicht getan hast.'},
+{q:'Ein Fitnessstudio berechnet für die Bearbeitung deiner Kündigung 45 Euro. Deine Notiz: <em>Viel zu viel!</em>',o:['Eine Bearbeitungsgebühr von 45 Euro erscheint mir unverhältnismäßig hoch.','Eine Bearbeitungsgebühr von 45 Euro ist höher als bei allen anderen Studios.','Eine Bearbeitungsgebühr von 45 Euro werde ich auf keinen Fall bezahlen.'],e:'Der erste Satz drückt die Empörung der Notiz sachlich aus. Der zweite fügt eine Behauptung hinzu, die du nicht belegen kannst, und der dritte verschärft den Ton so, dass ein Gespräch kaum noch möglich ist.'},
+{q:'Die Bibliothek schreibt: „Bis zur Rückgabe der Bücher sind Sie für weitere Ausleihen gesperrt.“ Deine Notiz: <em>Brauche nächste Woche dringend Bücher, Prüfung!</em> Welche Version gibt die Notiz vollständig wieder?',o:['Da ich mich auf eine Prüfung vorbereite, benötige ich bereits nächste Woche dringend Fachliteratur. Ich bitte Sie daher, die Sperre möglichst bald aufzuheben.','Da ich nächste Woche eine Prüfung habe, werde ich die Bücher so bald wie möglich zurückbringen.','Ich bitte Sie, die Sperre für weitere Ausleihen aufzuheben.'],e:'Die Notiz enthält drei Bausteine: dringend, nächste Woche, wegen einer Prüfung. Nur die erste Version nennt alle drei und macht daraus eine begründete Bitte. Die zweite verändert das Anliegen, die dritte lässt Grund und Dringlichkeit weg.'},
+{q:'Der Stromanbieter schreibt: „Wir konnten Sie unter Ihrer Anschrift nicht erreichen.“ Deine Notiz: <em>Mein Fehler, Umzug nicht gemeldet.</em>',o:['Ich bedaure sehr, dass ich Ihnen meine neue Anschrift nicht rechtzeitig mitgeteilt habe.','Leider hat mich niemand darauf hingewiesen, dass ich meinen Umzug melden muss.','Soweit ich weiß, habe ich Ihnen meine neue Anschrift bereits mitgeteilt.'],e:'Die Notiz gibt den Fehler zu, also tust du das auch, ruhig und knapp. Der zweite Satz schiebt die Verantwortung weiter, der dritte widerspricht der Notiz. Ein offen zugegebener Fehler macht deine übrigen Einwände glaubwürdiger.'},
+{q:'Eine Firma schreibt: „Sie haben zweimal verspätet bezahlt. Die Belege haben wir Ihnen zugesandt.“ Deine Notizen: <em>Nur einmal!</em> und <em>Belege: falscher Betrag!</em> Welche Version trennt die beiden Notizen richtig?',o:['Ich habe nur ein einziges Mal verspätet bezahlt. Zudem ist in den Belegen, die Sie mir zugesandt haben, ein falscher Betrag angegeben.','Nur eine der beiden Zahlungen war verspätet; bei der zweiten war im Beleg ein falscher Betrag angegeben.','In beiden Belegen, die Sie mir zugesandt haben, ist ein falscher Betrag angegeben.'],e:'Zwei Notizen, zwei Aussagen. Die zweite Version verschmilzt beides und räumt dabei zwei verspätete Zahlungen ein, obwohl die Notiz genau das bestreitet. Die dritte lässt die erste Notiz ganz weg.'}
+]},
+{id:'b',t:'Subjekt und Verb',s:'Was passt zusammen?',intro:'Bei langen Sätzen verliert man leicht das Subjekt aus den Augen, und dann passt das Verb nicht mehr. Wähle die Verbform, die zum Subjekt passt.',
+rule:'<b>Erst das Subjekt suchen, dann das Verb anpassen:</b><ul><li>Frag: <b>Wer oder was</b> tut etwas? Nur dieses Wort bestimmt die Verbform.</li><li>Ein langes Subjekt mit Infinitivgruppe bleibt Singular: <b>Die Möglichkeit</b>, zu reisen und …, <b>gibt</b> …</li><li>Ein ganzer Nebensatz als Subjekt zählt wie <b>es</b>: <b>Dass</b> Lesen weit hinten liegt, <b>kann</b> …</li><li>Steht das Subjekt hinter dem Verb, gilt dieselbe Regel: Oder <b>sind</b> es <b>die kleinen Dinge</b>?</li></ul>',
+items:[
+{q:'„Die Möglichkeit, neue Kulturen kennenzulernen und den eigenen Horizont zu erweitern, ___ vielen Menschen neue Energie.“',o:['gibt','geben','gebe'],e:'Subjekt ist „die Möglichkeit“ (Singular). „Kulturen“ und „Horizont“ gehören zur Infinitivgruppe und zählen für das Verb nicht.'},
+{q:'„Dass Lesen und Fernsehen weit hinten liegen, ___ daran liegen, dass gemeinsame Erlebnisse wichtiger sind.“',o:['kann','können','könne'],e:'Der ganze dass-Satz ist das Subjekt. Ein Satz als Subjekt verlangt die 3. Person Singular, auch wenn in ihm zwei Dinge genannt werden.'},
+{q:'„Ist es der berufliche Erfolg, oder ___ es die kleinen Freuden des Alltags?“',o:['sind','ist','seien'],e:'Hier ist „es“ nur ein Platzhalter. Das eigentliche Subjekt ist „die kleinen Freuden“ (Plural), deshalb „sind es“, so wie „Es sind viele Leute gekommen.“'},
+{q:'„Gerade die gemeinsamen Mahlzeiten mit der Familie ___ für viele einen festen Platz im Alltag.“',o:['haben','hat','habe'],e:'Subjekt ist „die Mahlzeiten“ (Plural). „Mit der Familie“ ist eine Ergänzung im Dativ und bestimmt das Verb nicht.'},
+{q:'„Jeder der befragten Studierenden ___ mindestens ein Hobby.“',o:['nennt','nennen','genannt'],e:'Subjekt ist „jeder“ (Singular). „Der befragten Studierenden“ ist ein Genitiv, der nur sagt, aus welcher Gruppe dieser eine stammt.'},
+{q:'„Zu den häufigsten Antworten ___ Spaziergänge in der Natur.“',o:['gehören','gehört','gehöre'],e:'Der Satz beginnt mit einer Ergänzung, das Subjekt folgt erst am Ende: „Spaziergänge“ (Plural).'},
+{q:'„Was viele überrascht, ___ der geringe Stellenwert des Geldes.“',o:['ist','sind','seien'],e:'Subjekt ist „der geringe Stellenwert“ (Singular). „Des Geldes“ ist Genitiv und „viele“ gehört in den Nebensatz.'},
+{q:'„Die Ergebnisse der Umfrage ___ deutlich, wie wichtig soziale Kontakte sind.“',o:['zeigen','zeigt','zeige'],e:'Subjekt ist „die Ergebnisse“ (Plural). „Der Umfrage“ ist ein Genitiv-Attribut und zählt nicht.'},
+{q:'„Vor allem in ländlichen Regionen ___ das Vereinsleben eine wichtige Rolle.“',o:['spielt','spielen','spiele'],e:'„In ländlichen Regionen“ steht auf Position eins, ist aber kein Subjekt. Subjekt ist „das Vereinsleben“ (Singular).'},
+{q:'„Die Zahl der Menschen, die regelmäßig Bücher lesen, ___ seit Jahren.“',o:['sinkt','sinken','sanken'],e:'Subjekt ist „die Zahl“. Die „Menschen“ stehen im Genitiv und im Relativsatz. Die Zeitangabe „seit Jahren“ verlangt außerdem das Präsens, deshalb passt auch „sanken“ nicht.'},
+{q:'„Der Anteil derjenigen, die Musikhören nennen, ___ bei 57 Prozent.“',o:['liegt','liegen','lägen'],e:'Subjekt ist „der Anteil“ (Singular). Ein Anteil liegt bei einem Wert.'},
+{q:'„Jeder dritte Befragte ___ an, sich beim Fernsehen am besten zu entspannen.“',o:['gibt','geben','gebe'],e:'„Jeder dritte Befragte“ ist grammatisch Singular, auch wenn insgesamt viele Menschen gemeint sind.'}
+]},
+{id:'c',t:'Dativ und n-Deklination',s:'Die kleinen Endungen',intro:'Ein fehlendes -n fällt Prüferinnen und Prüfern sofort auf. Wähle die richtige Form.',
+rule:'<b>Zum Merken:</b><ul><li><b>mit, nach, bei, seit, von, zu, aus</b> + Dativ.</li><li><b>Dativ Plural</b>: Das Nomen bekommt ein <b>-n</b>: mit Freunde<b>n</b>, vielen Mensche<b>n</b>, den Kinder<b>n</b>.</li><li>Jemandem etwas <b>geben, mitteilen, danken</b>: Die Person steht im Dativ.</li><li><b>n-Deklination</b>: der Mensch, der Herr, der Kollege, der Präsident bekommen außer im Nominativ Singular ein <b>-(e)n</b>: den Mensch<b>en</b>, Herr<b>n</b> Hofer.</li></ul>',
+items:[
+{q:'„Am Wochenende verbringe ich gern Zeit mit ___.“',o:['meinen Freunden','meine Freunde','meinen Freunde'],e:'„Mit“ verlangt den Dativ. Im Dativ Plural braucht der Artikel die Endung -en und das Nomen ein zusätzliches -n: meinen Freunden.'},
+{q:'„Familie und Freunde geben ___ Sicherheit und Halt.“',o:['vielen Menschen','viele Menschen','vielen Mensch'],e:'Jemandem etwas geben: Die Person steht im Dativ, also „vielen Menschen“. „Mensch“ gehört zusätzlich zur n-Deklination.'},
+{q:'„Glück hat nicht für ___ die gleiche Bedeutung.“',o:['jeden Menschen','jedem Menschen','jeden Mensch'],e:'„Für“ verlangt den Akkusativ: jeden. „Mensch“ hat als n-Nomen im Akkusativ die Endung -en.'},
+{q:'„Könnten Sie mich bitte mit ___ Hofer verbinden?“',o:['Herrn','Herr','Herren'],e:'„Herr“ gehört zur n-Deklination und lautet im Dativ und Akkusativ Singular „Herrn“. „Herren“ ist der Plural.'},
+{q:'„Wir haben gestern mit ___ über die neuen Gebühren gesprochen.“',o:['dem Präsidenten','dem Präsident','den Präsident'],e:'Auch „der Präsident“ ist ein n-Nomen: dem Präsidenten. So funktionieren viele Wörter auf -ent und -ant (der Student, der Lieferant).'},
+{q:'„Die Reise gibt ___ das Gefühl, wirklich frei zu sein.“',o:['den Teilnehmern','die Teilnehmer','den Teilnehmer'],e:'Jemandem ein Gefühl geben: Dativ. Im Dativ Plural heißt es „den Teilnehmern“, mit -n am Nomen.'},
+{q:'„Bitte teilen Sie ___ mit, ob die Sperre bereits aufgehoben wurde.“',o:['mir','mich','meiner'],e:'Jemandem etwas mitteilen: Die Person steht im Dativ, also „mir“.'},
+{q:'„Die Umfrage wurde unter Menschen aus ___ Bundesländern durchgeführt.“',o:['allen','alle','aller'],e:'„Aus“ verlangt immer den Dativ. Im Dativ Plural endet „alle“ auf -en, und auch „Bundesländern“ hat das Dativ-n.'},
+{q:'„Viele treffen sich am Abend mit ___ Nachbarn.“',o:['ihren','ihre','ihrer'],e:'„Mit“ + Dativ Plural: ihren Nachbarn. „Ihrer“ wäre Dativ Singular feminin (mit ihrer Nachbarin).'},
+{q:'„Das Ergebnis widerspricht ___ Erwartungen vieler Fachleute.“',o:['den','die','der'],e:'„Widersprechen“ verlangt den Dativ: einer Sache widersprechen. Dativ Plural: den Erwartungen.'},
+{q:'„Der Autor stimmt ___ Meinung ausdrücklich zu.“',o:['dieser','diese','diesen'],e:'„Zustimmen“ verlangt den Dativ, und „Meinung“ ist feminin: dieser Meinung.'},
+{q:'„Die Firma hat ___ Kundin bereits zwei Mahnungen geschickt.“',o:['der','die','den'],e:'Jemandem etwas schicken: Die Empfängerin steht im Dativ. Dativ Singular feminin: der Kundin.'},
+{q:'„Mit ___ Schreiben vom 3. Mai haben Sie mich über die Änderung informiert.“',o:['Ihrem','Ihren','Ihr'],e:'„Mit“ verlangt den Dativ, „das Schreiben“ ist Neutrum: mit Ihrem Schreiben.'}
+]},
+{id:'d',t:'Das genaue Wort',s:'Wortverbindungen auf C1',intro:'Auf C1 zählt nicht nur, ob man dich versteht, sondern ob das Wort genau sitzt. Viele Fehler entstehen, weil zwei ähnliche Wörter verwechselt werden. Wähle das passende.',
+rule:'<b>Lerne Wörter als Paare:</b><ul><li>Zeit und Ort sind falsch <b>angegeben</b> · die <b>Angaben</b></li><li><b>nach Erhalt</b> der Unterlagen</li><li>den Horizont <b>erweitern</b> · eine Sperre <b>aufheben</b> · einen Betrag <b>begleichen</b></li><li>jemandem <b>Halt</b> geben · eine Rolle <b>spielen</b> · Kontakt <b>aufnehmen</b></li><li>„zu hoch“ ist zu viel; „höher“ braucht einen Vergleich (höher als …)</li></ul>',
+items:[
+{q:'„In den Unterlagen waren Uhrzeit und Ort falsch ___.“',o:['angegeben','aufgegeben','vergeben'],e:'Informationen werden „angegeben“. „Aufgeben“ bedeutet etwas beenden oder einen Brief zur Post bringen, „vergeben“ bedeutet verzeihen oder verteilen.'},
+{q:'„Laut Ihren ___ fand der Vorfall am Hauptplatz statt.“',o:['Angaben','Aufgaben','Abgaben'],e:'„Die Angabe“ ist eine Information. „Die Aufgabe“ ist etwas, das zu erledigen ist, „die Abgabe“ eine Steuer oder das Einreichen von etwas.'},
+{q:'„Unmittelbar nach ___ der Rechnung habe ich mich bei Ihnen gemeldet.“',o:['Erhalt','Erhaltung','Behalt'],e:'Das Nomen zu „erhalten“ im Sinn von bekommen ist „der Erhalt“. „Die Erhaltung“ gehört zu „erhalten“ im Sinn von bewahren, etwa die Erhaltung eines Gebäudes.'},
+{q:'„Reisen hilft vielen Menschen, den eigenen Horizont zu ___.“',o:['erweitern','verbreiten','verlängern'],e:'Die feste Verbindung lautet „den Horizont erweitern“. „Verbreiten“ sagt man von Nachrichten oder Gerüchten, „verlängern“ von Fristen oder Verträgen.'},
+{q:'Du findest eine Gebühr übertrieben: „Diesen Betrag halte ich für deutlich ___.“',o:['zu hoch','höher','am höchsten'],e:'Gemeint ist ein Übermaß, also „zu hoch“. Der Komparativ „höher“ verlangt einen Vergleich (höher als üblich), und der Superlativ passt hier gar nicht.'},
+{q:'„Den offenen Betrag werde ich umgehend ___.“',o:['begleichen','vergleichen','ergänzen'],e:'„Einen Betrag begleichen“ ist die formelle Wendung für bezahlen. „Vergleichen“ bedeutet gegenüberstellen, „ergänzen“ bedeutet vervollständigen.'},
+{q:'„Ich bitte Sie, die Sperre meines Kundenkontos ___.“',o:['aufzuheben','abzuheben','aufzuhalten'],e:'Eine Sperre, ein Verbot oder eine Regel wird „aufgehoben“. Geld „hebt“ man vom Konto „ab“, und „aufhalten“ bedeutet jemanden stoppen.'},
+{q:'„Familie und Freunde geben vielen Menschen Sicherheit und ___.“',o:['Halt','Haltung','Anhalt'],e:'„Jemandem Halt geben“ bedeutet: jemanden innerlich stützen. „Haltung“ ist die Körperhaltung oder eine Einstellung, „Anhalt“ ist ein Hinweis (einen Anhaltspunkt haben).'},
+{q:'„Gesundheit und Freundschaften sind für mich besonders ___.“',o:['wertvoll','nachvollziehend','nachvollziehbar'],e:'Gemeint ist der Wert. „Nachvollziehbar“ heißt verständlich (eine nachvollziehbare Entscheidung), „nachvollziehend“ ist ein Partizip, das als Eigenschaft hier keinen Sinn ergibt.'},
+{q:'„Kommunikation ist ein ___ Bestandteil unserer Entwicklung.“',o:['grundlegender','sehr fundamentaler','fundamentalerer'],e:'„Fundamental“ ist schon das Höchste und lässt sich weder mit „sehr“ verstärken noch steigern. Dasselbe gilt für grundlegend, einzigartig oder perfekt.'},
+{q:'„Viele junge Menschen möchten die Welt ___.“',o:['erkunden','erkundigen','verkünden'],e:'„Etwas erkunden“ heißt erforschen. „Sich erkundigen“ ist reflexiv und bedeutet nachfragen (sich nach etwas erkundigen), „verkünden“ heißt öffentlich bekannt geben.'},
+{q:'„Bei der Durchsicht der Rechnung ist mir ein Fehler ___.“',o:['aufgefallen','ausgefallen','eingefallen'],e:'Wenn man etwas bemerkt, ist es einem „aufgefallen“. „Ausfallen“ heißt nicht stattfinden, „einfallen“ heißt in den Sinn kommen.'},
+{q:'„Ich würde gern mit der zuständigen Abteilung Kontakt ___.“',o:['aufnehmen','einnehmen','annehmen'],e:'Die feste Verbindung ist „Kontakt aufnehmen“. „Einnehmen“ sagt man von Medikamenten oder Geld, „annehmen“ von Angeboten oder Vermutungen.'},
+{q:'„Ich muss Sie leider auf ein Missverständnis ___.“',o:['hinweisen','aufweisen','nachweisen'],e:'„Jemanden auf etwas hinweisen“ ist die höfliche Art, einen Fehler der anderen Seite anzusprechen. „Aufweisen“ bedeutet zeigen (Mängel aufweisen), „nachweisen“ bedeutet beweisen.'}
+]},
+{id:'e',t:'Zahlen genau wiedergeben',s:'Statistik präzise',intro:'Grundlage dieses Teils ist eine erfundene Umfrage: „Was Beschäftigte an ihrem Arbeitsplatz zufrieden macht“ (Mehrfachnennungen möglich). Die Werte stehen im Kasten. Wähle jeweils die Aussage, die genau zu den Zahlen passt.',
+rule:'<b>Die Umfrage:</b> gutes Betriebsklima <b>74 %</b> · flexible Arbeitszeiten <b>71 %</b> · sicherer Arbeitsplatz <b>69 %</b> · faires Gehalt <b>66 %</b> · Weiterbildung <b>48 %</b> · kurzer Arbeitsweg <b>45 %</b> · Homeoffice <b>39 %</b><ul><li>Kleiner Abstand: <b>fast genauso</b>, <b>knapp dahinter</b>. Großer Abstand: <b>deutlich seltener</b>.</li><li>Bleib beim Wortlaut der Frage: Wer etwas <b>nennt</b>, sagt nicht automatisch, dass er es <b>möchte</b> oder <b>hat</b>.</li><li>Brüche: 74 % sind <b>fast drei Viertel</b>, 48 % <b>knapp die Hälfte</b>, 39 % <b>knapp zwei Fünftel</b>.</li></ul>',
+items:[
+{q:'Betriebsklima 74 %, flexible Arbeitszeiten 71 %. „Flexible Arbeitszeiten sind ___ wichtig wie ein gutes Betriebsklima.“',o:['fast genauso','genauso','bei Weitem nicht so'],e:'Drei Prozentpunkte Abstand: Die Werte sind nah beieinander, aber nicht gleich. „Fast genauso“ trifft das exakt.'},
+{q:'Welcher Satz gibt die 71 % für flexible Arbeitszeiten korrekt wieder?',o:['71 % der Befragten nennen flexible Arbeitszeiten als Grund für ihre Zufriedenheit.','71 % der Befragten wünschen sich flexible Arbeitszeiten.','71 % der Befragten haben flexible Arbeitszeiten.'],e:'Die Umfrage fragt, was zufrieden macht. Ob sich jemand etwas wünscht oder ob er es schon hat, lässt sich aus den Zahlen nicht ablesen.'},
+{q:'„Weiterbildung, ein kurzer Arbeitsweg und Homeoffice werden im Vergleich zu den ersten vier Faktoren ___ genannt.“',o:['deutlich seltener','etwas seltener','ähnlich oft'],e:'Zwischen 66 % (Platz vier) und 48 % (Platz fünf) liegen 18 Prozentpunkte. Das ist ein deutlicher Sprung.'},
+{q:'Die Werte ergeben zusammen weit mehr als 100 %. Was folgt daraus?',o:['Die Befragten konnten offenbar mehrere Antworten wählen.','Die Umfrage enthält offenbar einen Rechenfehler.','Es wurden offenbar mehr Personen befragt als angegeben.'],e:'Wenn die Summe über 100 % liegt, waren Mehrfachnennungen möglich. Das ist bei solchen Umfragen üblich und ein guter Satz für deine Beschreibung.'},
+{q:'„An dritter Stelle steht mit 69 % ___.“',o:['ein sicherer Arbeitsplatz','ein faires Gehalt','die Möglichkeit zur Weiterbildung'],e:'Die Rangfolge: Betriebsklima, Arbeitszeiten, sicherer Arbeitsplatz. Und als Subjekt steht der Faktor im Nominativ.'},
+{q:'Betriebsklima 74 %, faires Gehalt 66 %. „Der Abstand beträgt acht ___.“',o:['Prozentpunkte','Prozent','Prozentsätze'],e:'Den Abstand zwischen zwei Prozentwerten misst man in Prozentpunkten. „Acht Prozent weniger als 74 %“ wären rechnerisch etwa 68 %.'},
+{q:'„Ein kurzer Arbeitsweg wird von ___ der Befragten genannt.“ (45 %)',o:['knapp der Hälfte','gut der Hälfte','der Mehrheit'],e:'45 % liegen unter 50 %, also „knapp die Hälfte“. „Gut die Hälfte“ wäre etwas über 50 %, und eine Mehrheit sind mehr als 50 %.'},
+{q:'„Ein gutes Betriebsklima nennen ___ der Befragten.“ (74 %)',o:['fast drei Viertel','mehr als drei Viertel','genau drei Viertel'],e:'Drei Viertel sind 75 %. 74 % liegen knapp darunter: fast drei Viertel.'},
+{q:'„Homeoffice nennen ___ der Befragten.“ (39 %)',o:['knapp zwei Fünftel','gut die Hälfte','etwa ein Viertel'],e:'Zwei Fünftel sind 40 %. 39 % liegen knapp darunter.'},
+{q:'„Das Schlusslicht bildet ___.“',o:['das Homeoffice mit 39 %','der kurze Arbeitsweg mit 45 %','die Weiterbildung mit 48 %'],e:'Das Schlusslicht ist der niedrigste Wert. Achte darauf, ob die Grafik vollständig sortiert ist, bevor du den letzten Platz nennst.'}
+]},
+{id:'f',t:'Deuten und Stellung nehmen',s:'Redemittel für die Ausarbeitung',intro:'Nach der Beschreibung kommen Deutung, Vergleich und Meinung. Wähle die Formulierung, die korrekt ist und in eine schriftliche Ausarbeitung passt.',
+rule:'<b>Bausteine für den zweiten Teil:</b><ul><li>Deuten: <b>Eine mögliche Erklärung liegt darin, dass …</b> · <b>Dass …, kann daran liegen, dass …</b></li><li>Vermuten (ohne eigene Zahlen): <b>Konjunktiv II</b>: In meinem Heimatland <b>würde</b> eine solche Umfrage ähnlich <b>ausfallen</b>.</li><li>Vergleichen: <b>im Gegensatz zu</b> · <b>verglichen mit</b></li><li>Schriftlich heißt: kein Publikum ansprechen, keine Hinweise auf Folien.</li></ul>',
+items:[
+{q:'„___ das Fernsehen weit hinten liegt, kann daran liegen, dass viele Menschen lieber aktiv sind.“',o:['Dass','Das','Was'],e:'Der Satzteil ist ein ganzer Nebensatz mit Verb am Ende, also die Konjunktion „dass“ mit Doppel-s.'},
+{q:'„Eine mögliche Erklärung ___ darin, dass sichere Arbeitsplätze seltener geworden sind.“',o:['liegt','ist','steht'],e:'Die feste Wendung heißt „Die Erklärung liegt darin, dass …“. Ebenso: Der Grund liegt darin, dass …'},
+{q:'Für dein Heimatland gibt es keine Zahlen. Welcher Satz drückt die Vermutung richtig aus?',o:['In meinem Heimatland würde eine solche Umfrage meiner Einschätzung nach ähnlich ausfallen.','In meinem Heimatland ist die Statistik meiner Einschätzung nach ähnlich.','In meinem Heimatland wäre die Statistik meiner Einschätzung nach ähnlich ausgefallen.'],e:'Eine Vermutung über etwas, das es so nicht gibt, steht im Konjunktiv II der Gegenwart. Der Indikativ tut so, als gäbe es die Statistik, und der Konjunktiv der Vergangenheit verlegt alles in eine abgeschlossene Situation.'},
+{q:'„Im Gegensatz ___ Österreich spielt in meinem Heimatland der Urlaub eine geringere Rolle.“',o:['zu','von','mit'],e:'Die Wendung lautet „im Gegensatz zu“ + Dativ.'},
+{q:'„Verglichen ___ den österreichischen Ergebnissen fallen die Werte bei uns niedriger aus.“',o:['mit','zu','an'],e:'„Verglichen mit“ + Dativ. Auch: im Vergleich zu.'},
+{q:'„___ Geld eine gewisse Rolle spielt, steht es bei den Befragten nicht im Vordergrund.“',o:['Obwohl','Weil','Damit'],e:'Zwischen den beiden Teilen besteht ein Gegensatz: Geld ist wichtig, aber nicht das Wichtigste. Das drückt „obwohl“ aus.'},
+{q:'Welcher Satz passt in eine schriftliche Ausarbeitung?',o:['Im Folgenden werden die wichtigsten Ergebnisse der Umfrage zusammengefasst.','Liebe Kolleginnen und Kollegen, ich stelle Ihnen jetzt die Ergebnisse vor.','Wie Sie hier auf der Folie sehen, steht das Betriebsklima an erster Stelle.'],e:'Die schriftliche Ausarbeitung ist ein Text zum Lesen. Anreden und Hinweise auf Folien gehören zum mündlichen Vortrag.'},
+{q:'„Die Zahlen zeigen, ___ wichtig ein gutes Miteinander am Arbeitsplatz ist.“',o:['wie','was','dass'],e:'Hier folgt eine indirekte Frage nach dem Grad (Wie wichtig ist es?). „Dass“ passt nicht, weil „wichtig“ dann ohne Bezugswort dastünde.'},
+{q:'„Zusammenfassend lässt sich ___, dass Zufriedenheit vor allem vom Miteinander abhängt.“',o:['sagen','gesagt','sprechen'],e:'„Lässt sich“ verbindet sich mit dem Infinitiv: Es lässt sich sagen. „Sprechen“ bräuchte ein „von“ oder „über“ und passt nicht zum dass-Satz.'}
+]},
+{id:'g',t:'Feinschliff',s:'Zeichen und Schreibung',intro:'Diese Kleinigkeiten kosten unnötig Punkte, und sie lassen sich in fünf Minuten Korrekturlesen fast alle finden. Welche Version ist richtig?',
+rule:'<b>Checkliste für den letzten Durchgang:</b><ul><li>Daten mit der Vorlage vergleichen.</li><li>Nomen groß: <b>in Höhe von</b>, <b>das Musikhören</b>.</li><li>Kein Ausrufezeichen in formellen Texten, kein Komma nach der Grußformel.</li><li>Komma bei Infinitivgruppen, die mit <b>es</b> angekündigt werden oder von einem Nomen abhängen, und am Ende der Gruppe wieder schließen.</li></ul>',
+items:[
+{q:'Welche Version ist richtig geschrieben?',o:['eine Gebühr in Höhe von 80 Euro','eine Gebühr in höhe von 80 Euro','eine Gebühr In Höhe von 80 Euro'],e:'„Höhe“ ist ein Nomen und wird großgeschrieben. Die Präposition „in“ bleibt klein.'},
+{q:'Welche Zeichensetzung ist richtig?',o:['Es war für Sie nicht möglich, mich zu erreichen.','Es war für Sie nicht möglich mich zu erreichen.','Es war für Sie nicht möglich mich, zu erreichen.'],e:'Wenn „es“ die Infinitivgruppe ankündigt, muss ein Komma stehen, und zwar vor der ganzen Gruppe.'},
+{q:'Welche Zeichensetzung ist richtig?',o:['Die Möglichkeit, neue Kulturen kennenzulernen und Hobbys auszuüben, gibt vielen Menschen Energie.','Die Möglichkeit, neue Kulturen kennenzulernen und Hobbys auszuüben gibt vielen Menschen Energie.','Die Möglichkeit neue Kulturen kennenzulernen, und Hobbys auszuüben, gibt vielen Menschen Energie.'],e:'Die Infinitivgruppe hängt vom Nomen „Möglichkeit“ ab, deshalb steht sie zwischen zwei Kommas. Das zweite Komma vergisst man leicht, es schließt die Gruppe vor dem Verb.'},
+{q:'Welcher Schluss passt in eine formelle E-Mail?',o:['Für eine rasche Lösung wäre ich Ihnen sehr dankbar.','Für eine rasche Lösung wäre ich Ihnen sehr dankbar!','Für eine rasche Lösung wäre ich Ihnen sehr dankbar …'],e:'Ein formeller Satz endet mit einem Punkt. Das Ausrufezeichen wirkt drängend, die Auslassungspunkte unentschlossen.'},
+{q:'Welche Grußformel ist richtig gesetzt?',o:['Mit freundlichen Grüßen<br>Ana Petrova','Mit freundlichen Grüßen,<br>Ana Petrova','Mit freundlichen Grüßen.<br>Ana Petrova'],e:'Nach der Grußformel steht im Deutschen kein Satzzeichen. Der Name folgt einfach in der nächsten Zeile.'},
+{q:'Welche Frage ist richtig zu Ende gesetzt?',o:['Hat Glück für jeden Menschen die gleiche Bedeutung?','Hat Glück für jeden Menschen die gleiche Bedeutung.?','Hat Glück für jeden Menschen die gleiche Bedeutung.'],e:'Eine Frage endet mit genau einem Fragezeichen. Punkt und Fragezeichen werden nicht kombiniert.'},
+{q:'Welche Schreibung ist richtig?',o:['soziale Kontakte','soziele Kontakte','sozialle Kontakte'],e:'Das Adjektiv heißt „sozial“, mit a und einfachem l.'},
+{q:'Welche Schreibung ist richtig?',o:['beispielsweise','beispielweise','beispielsweiße'],e:'„Beispiel“ + Fugen-s + „weise“. Das Wort „weise“ (Art und Weise) schreibt man mit s.'},
+{q:'Welche Schreibung ist richtig?',o:['Zusammenfassend','Zusammenfasend','Zusammengefassend'],e:'Das Partizip kommt von „zusammenfassen“, mit Doppel-s, und hat kein „ge“.'},
+{q:'„Das ___ entspannt viele Menschen am Abend.“',o:['Musikhören','Musik hören','musikhören'],e:'Mit Artikel wird die Wendung zum Nomen und deshalb zusammen- und großgeschrieben: das Musikhören, das Radfahren, das Zeitunglesen.'},
+{q:'„Viele Befragte verbringen ___ Freizeit am liebsten mit der Familie.“',o:['ihre','Ihre','ihrer'],e:'Gemeint ist die Freizeit der Befragten, also kleines „ihre“. Großes „Ihre“ gehört nur zur höflichen Anrede. „Verbringen“ verlangt den Akkusativ: ihre Freizeit.'}
+]},
+{id:'h',t:'Vom Stichwort zum Satz',s:'Selbst formulieren',open:true,intro:'Jetzt schreibst du selbst. Ein Fitnessstudio hat dir eine Mahnung geschickt, und du hast dir auf dem Ausdruck Notizen gemacht. Mach aus jeder Notiz einen formellen Satz und vergleiche dann mit dem Muster. Dein Satz darf anders klingen, solange er genau dasselbe sagt.',
+rule:'<b>Drei Prüffragen für jeden Satz:</b><ul><li>Sagt mein Satz <b>genau</b> das, was die Notiz sagt, nicht mehr und nicht weniger?</li><li>Ist der Ton <b>sachlich und höflich</b>, auch wenn die Notiz empört klingt?</li><li>Passt das <b>Verb zum Subjekt</b>, und stimmen die <b>Endungen</b>?</li></ul>',
+items:[
+{q:'Stimmt nicht! Hab im März per Einschreiben gekündigt!',m:'Ich möchte Sie darauf hinweisen, dass ich meinen Vertrag bereits im März per Einschreiben gekündigt habe.',e:'„Darauf hinweisen, dass …“ widerspricht, ohne laut zu werden. Das „bereits“ betont, dass du rechtzeitig gehandelt hast.'},
+{q:'Welche Rechnung? Nie bekommen!',m:'Die erwähnte Rechnung habe ich leider nie erhalten. Könnten Sie sie mir bitte noch einmal zusenden?',e:'Erst die Tatsache, dann eine kleine Bitte. So zeigst du, dass du die Sache klären willst.'},
+{q:'30 € Mahngebühr? Frechheit!',m:'Eine Mahngebühr von 30 Euro halte ich für unverhältnismäßig hoch und bitte Sie, sie zu erlassen.',e:'Die Empörung der Notiz wird zu einer sachlichen Bewertung („unverhältnismäßig hoch“) und einer Bitte. „Eine Gebühr erlassen“ heißt: auf sie verzichten.'},
+{q:'Mein Fehler: neue Bankverbindung nicht gemeldet.',m:'Ich bedaure, dass ich Ihnen meine neue Bankverbindung nicht rechtzeitig mitgeteilt habe. Das war ein Versäumnis meinerseits.',e:'Ein eigener Fehler wird kurz und ruhig zugegeben. Das macht deine übrigen Einwände glaubwürdiger.'},
+{q:'Nur 1 Monat offen, nicht 3!',m:'Nach meinen Unterlagen ist lediglich ein Monatsbeitrag offen, nicht drei.',e:'Die Zahl der Notiz bleibt exakt erhalten. „Lediglich“ ist das formelle Wort für „nur“.'},
+{q:'Brauche ab nächster Woche wieder Zugang, Wettkampf!',m:'Da ich mich auf einen Wettkampf vorbereite, wäre ich Ihnen sehr dankbar, wenn ich bereits ab nächster Woche wieder trainieren könnte.',e:'Grund, Dringlichkeit und Bitte stecken in einem Satz. Der Konjunktiv II („wäre“, „könnte“) macht aus dem Wunsch eine höfliche Bitte.'},
+{q:'Zahle sofort, wenn Gebühr weg.',m:'Sobald die Mahngebühr erlassen ist, überweise ich den offenen Beitrag umgehend.',e:'Ein klares Angebot mit Bedingung. „Sobald“ verbindet beides, das Verb steht im Nebensatz am Ende.'},
+{q:'Datum im Brief falsch!',m:'In Ihrem Schreiben ist das Datum der Kündigung leider falsch angegeben.',e:'„Falsch angegeben“ ist die feste Verbindung. „Leider“ nimmt dem Hinweis die Schärfe.'}
+]}
+];
+var KEY='praezise_c1_v1',st={};
+try{st=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){st={}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+var perm={},cur=st._cur||'a';
+function shuf(n){var a=[],i,j,t;for(i=0;i<n;i++)a.push(i);for(i=n-1;i>0;i--){j=Math.floor(Math.random()*(i+1));t=a[i];a[i]=a[j];a[j]=t}return a}
+function el(tag,cls,html){var x=document.createElement(tag);if(cls)x.className=cls;if(html!=null)x.innerHTML=html;return x}
+function count(sec){var d=0,r=0;sec.items.forEach(function(it,i){var v=st[sec.id+i];if(v!=null&&v!==''){d++;if(!sec.open&&v===0)r++}});return{d:d,r:r,n:sec.items.length}}
+function totals(){var d=0,n=0;S.forEach(function(s){var c=count(s);d+=c.d;n+=c.n});document.getElementById('totalTxt').textContent='Dein Fortschritt: '+d+' von '+n+' Aufgaben';document.getElementById('totalBar').style.width=(n?d/n*100:0)+'%'}
+function nav(){var n=document.getElementById('nav');n.innerHTML='';S.forEach(function(s){var c=count(s);var b=el('button',s.id===cur?'on':'',s.t+'<small>'+c.d+' / '+c.n+'</small>');b.onclick=function(){cur=s.id;st._cur=cur;save();render();window.scrollTo({top:document.getElementById('nav').offsetTop-4,behavior:'smooth'})};n.appendChild(b)})}
+function render(){nav();totals();var sec=S.filter(function(s){return s.id===cur})[0],m=document.getElementById('main');m.innerHTML='';var box=el('section');box.appendChild(el('h2',null,sec.t+' · '+sec.s));box.appendChild(el('p','intro',sec.intro));box.appendChild(el('div','rule',sec.rule));
+sec.items.forEach(function(it,i){box.appendChild(sec.open?openCard(sec,it,i):mcCard(sec,it,i))});
+var c=count(sec);if(c.d===c.n){var txt=sec.open?'Du hast alle Sätze dieses Teils bearbeitet. Lies die Muster ruhig noch einmal laut und achte darauf, ob dein Satz wirklich genau dasselbe sagt.':'Geschafft: '+c.r+' von '+c.n+' auf Anhieb richtig. '+(c.r===c.n?'Dieser Teil sitzt.':'Lies die Erklärungen zu den anderen Aufgaben noch einmal in Ruhe durch und wiederhole den Teil in ein paar Tagen.');var dn=el('div','done',txt);var rb=el('button','btn alt','Diesen Teil neu starten');rb.style.marginTop='12px';rb.style.display='block';rb.onclick=function(){sec.items.forEach(function(_,i){delete st[sec.id+i];delete st[sec.id+i+'t'];delete perm[sec.id+i]});save();render()};dn.appendChild(rb);box.appendChild(dn)}
+m.appendChild(box)}
+function mcCard(sec,it,i){var id=sec.id+i,card=el('div','card');card.appendChild(el('span','n','Aufgabe '+(i+1)));card.appendChild(el('p','q',it.q));var wrap=el('div','opts');if(!perm[id])perm[id]=shuf(it.o.length);var ans=st[id];
+perm[id].forEach(function(k){var b=el('button','opt',it.o[k]);if(ans!=null){b.disabled=true;if(k===0)b.className='opt right';else if(k===ans)b.className='opt wrong'}else b.onclick=function(){st[id]=k;save();render()};wrap.appendChild(b)});card.appendChild(wrap);
+if(ans!=null){card.appendChild(el('div','fb '+(ans===0?'good':'bad'),'<strong>'+(ans===0?'Richtig.':'Noch nicht ganz. Die passende Lösung ist markiert.')+'</strong>'+it.e))}return card}
+function openCard(sec,it,i){var id=sec.id+i,card=el('div','card');card.appendChild(el('span','n','Satz '+(i+1)));card.appendChild(el('div','salopp','„'+it.q+'“'));var ta=el('textarea');ta.placeholder='Deine formelle Version …';ta.value=st[id+'t']||'';ta.oninput=function(){st[id+'t']=ta.value;save()};card.appendChild(ta);
+if(st[id]==null||st[id]===''){var a=el('div','act'),b=el('button','btn','Mit dem Muster vergleichen');b.onclick=function(){st[id]='x';save();render()};a.appendChild(b);card.appendChild(a)}else{var f=el('div','fb');f.appendChild(el('div','muster',it.m));f.appendChild(el('div',null,it.e));var a2=el('div','act');[['s','Hatte ich ähnlich'],['u','Übe ich noch einmal']].forEach(function(p){var b=el('button','btn alt'+(st[id]===p[0]?' chosen':''),p[1]);b.onclick=function(){st[id]=p[0];save();render()};a2.appendChild(b)});f.appendChild(a2);card.appendChild(f)}return card}
+document.getElementById('bGross').onclick=function(){document.body.classList.toggle('gross');st._g=document.body.classList.contains('gross');save();this.textContent=st._g?'Normale Schrift':'Größere Schrift'};
+if(st._g){document.body.classList.add('gross');document.getElementById('bGross').textContent='Normale Schrift'}
+var armed=false;document.getElementById('bReset').onclick=function(){if(!armed){armed=true;this.textContent='Wirklich alles löschen? Noch einmal tippen';var t=this;setTimeout(function(){armed=false;t.textContent='Alles zurücksetzen'},4000);return}st={};perm={};cur='a';save();armed=false;this.textContent='Alles zurücksetzen';document.body.classList.remove('gross');document.getElementById('bGross').textContent='Größere Schrift';render()};
+render();
+</script>
+</body>
+</html>
