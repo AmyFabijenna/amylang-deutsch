@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<script src="/daf/interdaf/passwort.js"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Märchen – Schularbeitstraining</title>
@@ -188,11 +187,18 @@ function weight(type, it){
   return 1;
 }
 
+const POSBAG = {};
+function nextPos(n){ if (!POSBAG[n] || !POSBAG[n].length) POSBAG[n] = shuffle([...Array(n).keys()]); return POSBAG[n].pop(); }
 function rMC(it, done, fixed){
   const box = h('div',{class:'item'});
   box.append(h('div',{class:'q',html:it.q}));
   let opts = it.o.map((t,i)=>({t, ok: fixed ? i===it.a : i===0}));
-  if (!fixed) opts = shuffle(opts);
+  if (!fixed){
+    /* Die richtige Antwort landet gleichmäßig verteilt auf allen Positionen */
+    const pos = nextPos(opts.length);
+    const wrong = shuffle(opts.filter(o=>!o.ok)), right = opts.find(o=>o.ok);
+    opts = wrong; opts.splice(pos, 0, right);
+  }
   const wrap = h('div',{class:'opts'+((fixed && it.o.length>3) || opts.every(o=>o.t.length<34) ? ' cols':'')});
   let locked = false;
   opts.forEach((o,k)=>{
@@ -631,6 +637,39 @@ const BAUKASTEN = {
 const MODEL_M = `<b>Der Glasvogel</b><br><br>Es war einmal eine arme Witwe, die mit ihrer Tochter Lene am Rand eines großen Waldes lebte. Lene war fleißig und gutherzig, doch die beiden besaßen kaum genug, um satt zu werden. Eines Winters wurde die Mutter krank, und kein Kraut konnte ihr helfen.<br><br>Da erzählte eine alte Frau, dass hinter den sieben Bergen ein Vogel aus Glas lebe, dessen Lied jede Krankheit heile. Lene nahm ein Stück Brot und machte sich auf den Weg.<br><br>Am ersten Tag kam sie an einen Bach, in dem ein Fisch im Eis gefangen war. „Hilf mir!“, bat der Fisch. Lene zerschlug das Eis mit einem Stein, und der Fisch sprach: „Wenn du mich brauchst, ruf dreimal meinen Namen: Silberflosse.“ Am zweiten Tag teilte sie ihr letztes Brot mit einer hungrigen Krähe, die ihr zum Dank eine schwarze Feder schenkte. Am dritten Tag erreichte sie das Schloss des Nebelkönigs, der den Glasvogel in einem goldenen Käfig gefangen hielt.<br><br>„Drei Aufgaben musst du lösen“, sprach der Nebelkönig mit eisiger Stimme, „sonst bleibst du für immer meine Magd.“ Zuerst sollte sie einen Ring aus dem tiefen Schlossteich holen. Lene rief dreimal „Silberflosse!“, und alsbald brachte ihr der Fisch den Ring. Dann sollte sie in einer Nacht hundert verstreute Perlen einsammeln. Sie warf die schwarze Feder in die Luft, und hundert Krähen pickten die Perlen auf. Zuletzt aber verlangte der König: „Sag mir, was stärker ist als mein Nebel.“ Lene dachte lange nach. Dann antwortete sie: „Die Sonne – und ein Herz, das hilft, ohne etwas dafür zu verlangen.“<br><br>Da riss der Nebel auf, die Sonne brach hervor, und der Nebelkönig zerfloss zu einer grauen Pfütze. Der Käfig sprang auf, und der Glasvogel setzte sich auf Lenes Schulter. Zu Hause sang er drei Tage und drei Nächte, und am Morgen des vierten Tages stand die Mutter gesund auf. Der Vogel blieb bei ihnen, und fortan brachte sein Lied Glück ins ganze Tal. Und wenn sie nicht gestorben sind, dann leben sie noch heute.<br><br><span class="note">Achte auf: Anfangs- und Schlussformel · unbestimmter Ort · Gut gegen Böse · Helfer, die für eine gute Tat danken · drei Prüfungen mit Steigerung (die letzte ist am schwersten und braucht Klugheit statt Zauber) · Zahlen 3, 7, 100 · wörtliche Rede · Präteritum · Er-/Sie-Form.</span>`;
 
 /* =========================================================
+   AUSGEWOGENE ANTWORTLÄNGEN (erste Option = richtige Antwort)
+   ========================================================= */
+const OVR_M = {
+ MERKMC:{
+  0:{o:['Er-/Sie-Form im Präteritum','Ich-Form im Präteritum, wie ein Tagebuch','Er-/Sie-Form im Präsens','Ich-Form im Perfekt']},
+  1:{o:['Damit die Geschichte zeitlos wirkt und überall spielen könnte.','Weil die Verfasser den genauen Ort und die Zeit vergessen haben.','Weil Märchen immer in Deutschland spielen und das jeder weiß.','Damit man die Geschichte als wahren Bericht erkennt.']},
+  2:{o:['Sie nehmen es als selbstverständlich hin.','Sie fallen vor Schreck in Ohnmacht und laufen davon.','Sie rufen sofort Hilfe herbei.','Sie halten alles für einen Traum.']},
+  3:{o:['eindeutig gut oder böse, ohne viele Zwischentöne','mit vielen widersprüchlichen, sich ändernden Eigenschaften','alle gleich freundlich und hilfsbereit','alle gleich böse']},
+  6:{o:['Im Märchen geschehen Wunder, und es wird in der Er-Form erzählt; die Erlebniserzählung erzählt in der Ich-Form ein mögliches eigenes Erlebnis.','Das Märchen steht im Präsens, die Erlebniserzählung im Präteritum, sonst gibt es keinen Unterschied zwischen den beiden Textsorten.','Das Märchen hat keinen Höhepunkt, weil von Anfang an klar ist, dass das Gute siegt und die Heldin glücklich wird.','Im Märchen gibt es keine wörtliche Rede, denn die Figuren sprechen nicht miteinander, sondern es wird nur über sie berichtet.']},
+  7:{o:['ein Märchen, das lange mündlich weitererzählt wurde und dessen Verfasser unbekannt ist','ein Märchen, das ein bekannter Dichter selbst erfunden und aufgeschrieben hat','ein Märchen über das Leben eines bestimmten Volkes in einem bestimmten Land','ein Märchen, das nur für Erwachsene geschrieben wurde']},
+  8:{o:['ein Märchen, das ein bestimmter, bekannter Autor erfunden hat – etwa Hans Christian Andersen','ein Märchen über Maler und Bildhauer, die mit ihrer Kunst einen Zauber brechen','ein Märchen, das aus vielen Bildern besteht','ein Volksmärchen, das von Schauspielern besonders kunstvoll vorgelesen wird']},
+  9:{o:['die Brüder Jacob und Wilhelm Grimm','der Däne Hans Christian Andersen','Wolfgang Amadeus Mozart','die Schriftsteller Wilhelm Hauff und Erich Kästner']},
+  10:{o:['Kinder- und Hausmärchen','Tausendundeine Nacht','Märchen aus aller Welt','Deutsche Sagen und Legenden']},
+  11:{o:['das jüngste, oft unterschätzte Geschwister','das älteste, weil es am stärksten und erfahrensten ist','das mittlere, weil es am klügsten ist','alle drei gemeinsam']}
+ },
+ ALT:{0:{o:['bald darauf, kurz danach','vor sehr langer Zeit','ganz langsam und vorsichtig','niemals']}},
+ ZAHLMC:{
+  0:{o:['Die Aufgaben werden immer schwerer, sodass die Spannung bis zur dritten steigt.','Weil drei die kleinste Zahl ist, die man in einem Märchen überhaupt verwenden darf.','Damit das Märchen möglichst kurz bleibt.','Weil alle drei Aufgaben genau gleich schwer sind und sich nur wiederholen.']},
+  1:{o:['hinter den sieben Bergen bei den sieben Zwergen','etwa 4,5 Kilometer hinter dem Ortsende von Mödling','in der dritten Straße links','neben dem Supermarkt an der Ecke']},
+  2:{o:['Sie steigert die Spannung und macht den Erfolg des Jüngsten umso eindrucksvoller.','Sie macht das Märchen langweilig und sollte deshalb beim Schreiben unbedingt vermieden werden.','Sie zeigt, dass alle drei Brüder gleich tüchtig sind.','Sie dient nur dazu, die Geschichte zu verlängern.']}
+ },
+ BAUSTEIN:{
+  0:{o:['Vor langer Zeit lebte in einem kleinen Dorf am Rand eines finsteren Waldes ein armer Schusterjunge.','Am 12. Mai fuhr Tim nach der Schule mit der U-Bahn zu seinem Freund in die Leopoldstadt.','Ich wachte heute Morgen auf und hatte schrecklichen Hunger.','Es war einmal ein Schusterjunge, der mit seinem Handy in einer kleinen Wohnung in Graz lebte.']},
+  1:{o:['Er drehte den Ring an seinem Finger und schlich unsichtbar an den Wachen vorbei.','Plötzlich landete ein Hubschrauber im Schlosshof und flog ihn über die hohe Mauer.','Er rief die Polizei, die die Wachen festnahm.','Er wartete einfach so lange, bis die Wachen müde wurden und nach Hause gingen.']},
+  2:{o:['Die böse Königin wurde aus dem Land gejagt, und die Müllerstochter regierte fortan gerecht und weise. Und wenn sie nicht gestorben sind, dann leben sie noch heute.','Der Drache besiegte alle Ritter, die gegen ihn kämpften, und das ganze Land blieb für immer in Finsternis und Angst. Niemand konnte die Königstochter je befreien.','Und dann wachte ich auf – alles war nur ein Traum.','Die Lehre aus dieser Geschichte lautet: Wer andern eine Grube gräbt, fällt selbst hinein. Deshalb sollen wir alle immer ehrlich zu unseren Mitmenschen sein.']},
+  3:{o:['Weil er ihnen vorher selbst geholfen hat – Güte wird belohnt.','Weil Tiere im Märchen jedem helfen, der zufällig vorbeikommt.','Weil der Held sie dafür bezahlt.','Weil die Tiere den Gegenspieler nicht kennen und ihn nicht fürchten.']},
+  4:{o:['„Wer mir die goldene Kugel aus dem Brunnen holt, dem will ich reichen Lohn geben“, sprach die Königstochter.','„Hey, kann mir mal wer die Kugel aus dem Brunnen holen? Wäre echt nett“, sagte die Königstochter.','„Wer holt mir die goldene Kugel?“, fragt die Königstochter.','„Wer mir die goldene Kugel aus dem Brunnen holt, bekommt fünfhundert Euro“, sprach die Königstochter.']},
+  5:{o:['eine Königstochter, so schön, dass selbst die Sonne staunte, wenn sie ihr ins Gesicht schien','eine Königstochter mit hellblauem Hoodie, weißen Sneakers und einer Kappe','eine Königstochter, die 1,52 Meter groß ist und 41 Kilo wiegt','eine Königstochter, die manchmal nett und manchmal gemein ist, je nach Laune und Wetter']}
+ }
+};
+for (const [arr,m] of Object.entries(OVR_M)){ const A = eval(arr); for (const [i,v] of Object.entries(m)){ if (v.o) A[i].o = v.o; } }
+
+/* =========================================================
    SCHREIBWERKSTATT MÄRCHEN
    ========================================================= */
 function renderWrite(){
@@ -800,6 +839,7 @@ function buildSection(sec, el){
     if (b.k === 'theory'){ el.append(h('div',{class:'card theory',html:b.html})); return; }
     if (b.k === 'scene'){ el.append(h('div',{class:'card scene',html:b.html})); return; }
     if (b.k === 'write'){ el.append(renderWrite()); return; }
+    if (b.k === 'custom'){ el.append(b.fn()); return; }
     if (b.k === 'rally'){ el.append(renderRally()); return; }
     if (b.k === 'test'){ el.append(renderTestShell()); return; }
     const card = h('div',{class:'card'});

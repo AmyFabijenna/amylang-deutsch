@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<script src="/daf/interdaf/passwort.js"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Krimi-Sprache &amp; Beistriche – Schularbeitstraining</title>
@@ -533,6 +532,22 @@ const RALLY = [
  {l:'Beistrich bei Anrede oder Ausruf', need:[/,/], forbid:[], ex:'Frau Inspektorin, wir haben etwas gefunden!'}
 ];
 
+/* Ausgewogene Antwortlängen (erste Option = richtige Antwort) */
+const OVR_K = {
+ FACHMC:{
+  2:{o:['ein bestätigtes Alibi','ein nachvollziehbares Motiv für die Tat','ein Geständnis','einen Haftbefehl des Gerichts']},
+  3:{o:['Eifersucht auf den neuen Partner der Nachbarin','ein Fingerabdruck auf der Türklinke der Wohnung','die Aussage einer Zeugin','ein Brecheisen im Kofferraum des Verdächtigen']},
+  8:{o:['die gezielte Suche nach einer Person oder einem Gegenstand','die offizielle Befragung einer Zeugin durch die Polizei','das Sichern von Spuren am Tatort','das Urteil eines Gerichts']},
+  9:{o:['Sie ist für die Aufklärung schwerer Straftaten wie Raub oder Mord zuständig.','Sie regelt vor allem den Straßenverkehr und kontrolliert Autofahrer.','Sie ist ein privates Detektivbüro, das man für Aufträge bezahlt.','Sie spricht vor Gericht die Urteile.']}
+ },
+ TATMC:{
+  1:{o:['Das Zahlenschloss des Tresors zeigt keinerlei Kratzer oder Bohrspuren.','Das Bild über dem Sofa, hinter dem der Tresor versteckt ist, hängt schief.','Alle Schubladen der Kommode sind herausgezogen.','Die Nachbarin hörte gegen 23 Uhr Schritte, aber keinen Lärm von Werkzeug.']},
+  4:{o:['Darauf können sich Fingerabdrücke oder Speichelspuren der Person befinden.','Es zeigt, dass die Person großen Durst hatte und lange in der Wohnung blieb.','Es beweist, dass die Person eine Frau ist.','Es ist unwichtig, weil Frau Kral es vor der Reise übersehen haben könnte.']},
+  5:{o:['in der Nacht auf Dienstag gegen 23 Uhr','am Mittwoch um 8 Uhr früh, kurz vor der Rückkehr','am Tag vor Frau Krals Abreise','am Mittwochabend']}
+ }
+};
+for (const [arr,m] of Object.entries(OVR_K)){ const A = eval(arr); for (const [i,v] of Object.entries(m)){ if (v.o) A[i].o = v.o; } }
+
 /* =========================================================
    AUFBEREITUNG
    ========================================================= */
@@ -594,11 +609,18 @@ function weight(type, it){
   return 1;
 }
 
+const POSBAG = {};
+function nextPos(n){ if (!POSBAG[n] || !POSBAG[n].length) POSBAG[n] = shuffle([...Array(n).keys()]); return POSBAG[n].pop(); }
 function rMC(it, done, fixed){
   const box = h('div',{class:'item'});
   box.append(h('div',{class:'q',html:it.q}));
   let opts = it.o.map((t,i)=>({t, ok: fixed ? i===it.a : i===0}));
-  if (!fixed) opts = shuffle(opts);
+  if (!fixed){
+    /* Die richtige Antwort landet gleichmäßig verteilt auf allen Positionen */
+    const pos = nextPos(opts.length);
+    const wrong = shuffle(opts.filter(o=>!o.ok)), right = opts.find(o=>o.ok);
+    opts = wrong; opts.splice(pos, 0, right);
+  }
   const wrap = h('div',{class:'opts'+((fixed && it.o.length>3) || opts.every(o=>o.t.length<34) ? ' cols':'')});
   let locked = false;
   opts.forEach((o,k)=>{
@@ -895,6 +917,7 @@ function buildSection(sec, el){
     if (b.k === 'theory'){ el.append(h('div',{class:'card theory',html:b.html})); return; }
     if (b.k === 'scene'){ el.append(h('div',{class:'card scene',html:b.html})); return; }
     if (b.k === 'write'){ el.append(renderWrite()); return; }
+    if (b.k === 'custom'){ el.append(b.fn()); return; }
     if (b.k === 'rally'){ el.append(renderRally()); return; }
     if (b.k === 'test'){ el.append(renderTestShell()); return; }
     const card = h('div',{class:'card'});
