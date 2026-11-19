@@ -1,0 +1,1082 @@
+<!doctype html>
+<html lang="de">
+<head>
+<script src="/daf/interdaf/passwort.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fällezauber – Akkusativ und Dativ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#edf0f6; --card:#fbfcfe; --soft:#e3e8f2; --line:#d6dceb;
+  --ink:#151a2b; --muted:#5d6479; --navy:#22345c; --navy-deep:#16233f;
+  --akk:#a12d6b; --akk-deep:#74204d; --akk-soft:#f6e3ed;
+  --dat:#2d5c9c; --dat-deep:#1f416f; --dat-soft:#e1eaf6;
+  --nom:#b48a35; --nom-deep:#86651f; --nom-soft:#f5ebd2;
+  --gold:#b48a35; --gold-soft:#f5ebd2;
+  --shadow:0 6px 22px rgba(22,35,63,.10);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:'Lexend',system-ui,sans-serif;font-size:20px;line-height:1.55;min-height:100vh}
+button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px 6px;max-width:900px;margin:0 auto}
+.brand{font-weight:700;color:var(--navy);letter-spacing:.3px;font-size:1.1rem}
+.brand .a{color:var(--akk)} .brand .d{color:var(--dat)}
+.iconbtn{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:6px 14px;font-size:.9rem;color:var(--navy)}
+.stars{background:var(--navy-deep);color:#f3dfa6;border-radius:14px;padding:6px 14px;font-size:.9rem;font-weight:500}
+.tabs{display:flex;gap:8px;max-width:900px;margin:6px auto 0;padding:0 16px;overflow-x:auto}
+.tab{flex:1 0 auto;background:transparent;border:1.5px solid var(--line);border-radius:16px;padding:8px 14px;font-size:.88rem;font-weight:500;color:var(--muted);display:flex;align-items:center;gap:8px;white-space:nowrap}
+.tab .dot{width:12px;height:12px;border-radius:50%}
+.tab.on{background:var(--card);color:var(--ink);border-color:var(--navy);box-shadow:var(--shadow)}
+main{max-width:900px;margin:0 auto;padding:14px 16px 60px}
+.card{background:var(--card);border-radius:28px;box-shadow:var(--shadow);border:1px solid var(--line);padding:30px 28px}
+h1{font-size:2rem;margin:.2em 0 .3em;color:var(--navy);font-weight:700;line-height:1.2}
+h2{font-size:1.45rem;margin:.1em 0 .5em;color:var(--navy);font-weight:600;line-height:1.25}
+p{margin:.5em 0}
+.center{text-align:center}
+.muted{color:var(--muted)}
+.illu{display:block;margin:0 auto;max-width:100%;height:auto}
+.btn{background:var(--navy);color:#fff;border:none;border-radius:18px;padding:14px 28px;font-weight:500;box-shadow:0 4px 0 var(--navy-deep);transition:transform .1s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--navy-deep)}
+.btn:disabled{opacity:.55;cursor:default}
+.btn.gold{background:var(--gold);box-shadow:0 4px 0 var(--nom-deep)}
+.btn.akk{background:var(--akk);box-shadow:0 4px 0 var(--akk-deep)}
+.btn.dat{background:var(--dat);box-shadow:0 4px 0 var(--dat-deep)}
+.btn.ghost{background:var(--card);color:var(--navy);border:1.5px solid var(--line);box-shadow:none}
+.row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:20px}
+.A{color:var(--akk);font-weight:600} .D{color:var(--dat);font-weight:600} .N{color:var(--nom-deep);font-weight:600}
+
+/* Modus-Karten & Level */
+.modes{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:18px}
+.mode{text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:22px;padding:18px;box-shadow:var(--shadow);transition:transform .15s,border-color .2s;border-top:7px solid var(--c)}
+.mode:hover{transform:translateY(-2px);border-color:var(--c)}
+.mode b{display:block;font-size:1.08rem;color:var(--ink)}
+.mode small{display:block;color:var(--muted);font-size:.84rem;line-height:1.4;margin-top:4px}
+.mode .ic{font-size:1.8rem}
+.levels{display:grid;gap:14px;margin-top:18px}
+.level{display:flex;align-items:center;gap:16px;text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:22px;padding:16px 18px;box-shadow:var(--shadow);transition:border-color .2s,transform .15s}
+.level:hover{border-color:var(--c,var(--navy));transform:translateY(-2px)}
+.level .num{flex:0 0 52px;height:52px;border-radius:50%;background:var(--soft);display:grid;place-items:center;font-size:1.5rem}
+.level b{display:block;color:var(--ink);font-weight:600}
+.level small{color:var(--muted);font-size:.85rem;line-height:1.35;display:block}
+.level .best{margin-left:auto;color:var(--gold);font-size:1.1rem;white-space:nowrap}
+
+/* Regel */
+.rulebox{background:var(--gold-soft);border-radius:20px;padding:16px 20px;margin:16px 0;border:1.5px solid #e6d5a8}
+.rulebox.akk{background:var(--akk-soft);border-color:#e7c3d6}
+.rulebox.dat{background:var(--dat-soft);border-color:#c3d3ea}
+.cases{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0}
+.case{border-radius:18px;padding:12px 8px;text-align:center;border:2px solid var(--line);background:var(--card);font-size:.9rem;line-height:1.35}
+.case b{display:block;font-size:1rem}
+.case.dim{opacity:.45}
+.case.c1{border-color:var(--nom)} .case.c3{border-color:var(--dat)} .case.c4{border-color:var(--akk)}
+.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+.ncard{background:var(--card);border:2px solid var(--line);border-radius:22px;padding:14px 8px;text-align:center;transition:all .35s}
+.ncard .emo{font-size:2.6rem;line-height:1.2}
+.ncard .art{font-weight:600;font-size:1.2rem;transition:all .35s}
+.ncard .noun{font-size:1rem}
+.ncard .tag{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+.ncard.magicA{border-color:var(--akk);background:var(--akk-soft);box-shadow:0 0 0 4px rgba(161,45,107,.15)}
+.ncard.magicA .art{color:var(--akk)}
+.ncard.magicD{border-color:var(--dat);background:var(--dat-soft);box-shadow:0 0 0 4px rgba(45,92,156,.15)}
+.ncard.magicD .art{color:var(--dat)}
+.ncard.same .art{color:var(--muted)}
+button.ncard:hover:not(:disabled){border-color:var(--navy)}
+.ncard.wrongpick{outline:3px dashed var(--muted);outline-offset:3px}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.16) rotate(-3deg)}100%{transform:scale(1)}}
+.pop{animation:pop .5s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.shake{animation:shake .4s ease}
+
+/* Aufgabe */
+.progress{height:12px;background:var(--soft);border-radius:10px;overflow:hidden;margin:6px 0 18px}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--akk),var(--dat));border-radius:10px;transition:width .4s}
+.meta{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-bottom:4px}
+.verbtag{display:inline-block;background:var(--navy-deep);color:#f3dfa6;border-radius:12px;padding:4px 14px;font-size:.9rem;font-weight:500}
+.qtag{display:inline-block;border-radius:12px;padding:4px 12px;font-size:.85rem;font-weight:500;margin-left:6px}
+.pic{width:112px;height:112px;border-radius:50%;margin:14px auto 8px;display:grid;place-items:center;font-size:3.5rem;background:radial-gradient(circle at 35% 30%,#fff,var(--soft));border:3px solid var(--line);position:relative}
+.pic::after{content:"✦";position:absolute;right:4px;top:6px;color:var(--gold);font-size:1.2rem}
+.chip{display:inline-block;background:var(--soft);border:1.5px dashed var(--navy);border-radius:14px;padding:3px 14px;font-size:.95rem;color:var(--navy);margin:2px}
+.chip small{color:var(--muted)}
+.sentence{font-size:1.55rem;font-weight:500;text-align:center;margin:18px 0 22px;line-height:1.7}
+.gap{display:inline-block;min-width:92px;border-bottom:3px solid var(--navy);margin:0 6px;font-weight:700;text-align:center}
+.gap.active{border-bottom-color:var(--gold);background:var(--gold-soft);border-radius:8px 8px 0 0}
+.gap.filled{animation:pop .5s ease}
+.gap.fA{color:var(--akk);border-bottom-color:var(--akk)} .gap.fD{color:var(--dat);border-bottom-color:var(--dat)}
+.opts{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;max-width:520px;margin:0 auto}
+.opts.two{max-width:420px}
+.opt{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:16px;font-size:1.35rem;font-weight:600;color:var(--ink);transition:all .2s}
+.opt:hover:not(:disabled){border-color:var(--navy);background:var(--soft);transform:translateY(-2px)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--gold-soft);border-color:var(--gold);color:var(--nom-deep)}
+.opt.wrong{background:#f1f1f4;border-color:var(--muted);color:var(--muted);text-decoration:line-through;text-decoration-thickness:2px}
+.feedback{margin-top:22px;border-radius:22px;padding:18px 22px;font-size:1.02rem;line-height:1.6}
+.feedback.good{background:var(--gold-soft);border:1.5px solid #e4d09e}
+.feedback.bad{background:#eef1f7;border:1.5px solid var(--line)}
+.feedback h3{margin:0 0 6px;font-size:1.2rem;color:var(--navy)}
+.feedback .full{display:block;margin-top:8px;font-weight:600}
+.feedback .again{display:block;margin-top:6px;font-size:.88rem;color:var(--muted)}
+.feedback .row{margin-top:14px;justify-content:flex-end}
+
+/* Satzteile */
+.parts{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:18px 0}
+.part{border:2px solid var(--line);background:var(--card);border-radius:16px;padding:10px 16px;font-size:1.25rem;font-weight:500;transition:all .25s}
+button.part:hover:not(:disabled){border-color:var(--navy);transform:translateY(-2px)}
+.part.nom{border-color:var(--nom);background:var(--nom-soft)}
+.part.dat{border-color:var(--dat);background:var(--dat-soft)}
+.part.akk{border-color:var(--akk);background:var(--akk-soft)}
+.part.verb{border-color:var(--navy);background:var(--soft)}
+.part .lbl{display:block;font-size:.7rem;font-weight:600;letter-spacing:.6px;text-transform:uppercase;margin-top:2px}
+.part.nom .lbl{color:var(--nom-deep)} .part.dat .lbl{color:var(--dat)} .part.akk .lbl{color:var(--akk)} .part.verb .lbl{color:var(--navy)}
+span.part:not(.nom):not(.dat):not(.akk):not(.verb){border-style:dashed;color:var(--muted);background:transparent}
+.part.hidden{opacity:0;transform:translateY(8px)}
+.build{min-height:74px;border:2px dashed var(--line);border-radius:20px;padding:10px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center;margin:12px 0}
+.formula{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;font-size:1.15rem;margin:14px 0}
+.formula span{border-radius:14px;padding:6px 14px;font-weight:600}
+.formula .fn{background:var(--nom-soft);color:var(--nom-deep)} .formula .fv{background:var(--soft);color:var(--navy)}
+.formula .fd{background:var(--dat-soft);color:var(--dat)} .formula .fa{background:var(--akk-soft);color:var(--akk)}
+
+/* Verben-Ernte */
+.tree{position:relative;margin:6px auto 0;max-width:640px}
+.crown{background:radial-gradient(ellipse at 50% 40%,#f6ecd2,#ecdcb4);border-radius:46% 54% 50% 50%/58% 58% 42% 42%;padding:34px 26px 40px;display:flex;flex-wrap:wrap;gap:12px;justify-content:center;min-height:190px;border:2px solid #e2cd9c}
+.trunk{width:56px;height:46px;margin:-6px auto 0;background:linear-gradient(90deg,#7a5634,#9a7048,#7a5634);border-radius:0 0 10px 10px}
+.fruit{position:relative;border:2px solid rgba(21,26,43,.55);border-radius:50% 50% 46% 46%;padding:14px 16px 12px;font-size:1.02rem;font-weight:600;min-width:118px;transition:transform .2s,box-shadow .2s}
+.fruit::before{content:"";position:absolute;top:-9px;left:50%;width:3px;height:11px;background:#5b4330;border-radius:2px;transform:translateX(-50%) rotate(8deg)}
+.fruit::after{content:"";position:absolute;top:-11px;left:calc(50% + 3px);width:16px;height:9px;background:#9aa678;border-radius:0 80% 0 80%;border:1px solid #5d6648}
+.fruit:hover:not(:disabled){transform:translateY(-3px) rotate(-2deg)}
+.fruit.sel{box-shadow:0 0 0 4px var(--gold),0 8px 18px rgba(0,0,0,.15);transform:translateY(-4px) scale(1.05)}
+.fruit.gone{visibility:hidden}
+.f0{background:#f6c98e} .f1{background:#f3dd8a} .f2{background:#f2b49b} .f3{background:#e8d2a2}
+.baskets{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+.basket{background:var(--card);border:2px solid var(--line);border-radius:24px;padding:12px 10px 14px;text-align:center;transition:all .2s}
+.basket.ready{border-color:var(--c);box-shadow:0 0 0 4px var(--cs)}
+.basket.ready:hover{transform:translateY(-3px)}
+.basket .name{font-weight:700;font-size:1.15rem;color:var(--c)}
+.basket .q{font-size:.9rem;color:var(--ink)}
+.basket .pile{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;min-height:26px;margin-top:6px}
+.basket .pile span{font-size:.72rem;border-radius:10px;padding:1px 8px;background:var(--cs);color:var(--c);font-weight:600}
+.basket .pile span.miss{outline:1.5px dashed var(--muted)}
+.basket.hop{animation:pop .5s ease} .basket.shake{animation:shake .4s ease}
+.hl{border-radius:8px;padding:0 4px;font-weight:600}
+.hl.A{background:var(--akk-soft)} .hl.D{background:var(--dat-soft)}
+@media (max-width:600px){
+  body{font-size:18px}
+  .card{padding:22px 16px;border-radius:22px}
+  h1{font-size:1.6rem}
+  .sentence{font-size:1.25rem}
+  .ncard .emo{font-size:2rem}
+  .trio{gap:8px}
+  .modes{grid-template-columns:1fr}
+  .cases{grid-template-columns:repeat(2,1fr)}
+  .fruit{min-width:100px;font-size:.92rem}
+  .part{font-size:1.05rem;padding:8px 12px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <button class="iconbtn" id="homeBtn" aria-label="Zur Startseite">☰ Start</button>
+  <div class="brand"><span class="a">Fälle</span><span class="d">zauber</span></div>
+  <div class="stars" id="starsTotal">★ 0</div>
+</header>
+<nav class="tabs" id="tabs">
+  <button class="tab" data-m="akk"><span class="dot" style="background:var(--akk)"></span>1 · Akkusativ</button>
+  <button class="tab" data-m="dat"><span class="dot" style="background:var(--dat)"></span>2 · Dativ</button>
+  <button class="tab" data-m="ernte"><span class="dot" style="background:linear-gradient(90deg,var(--akk) 50%,var(--dat) 50%)"></span>3 · Verben-Ernte</button>
+  <button class="tab" data-m="combo"><span class="dot" style="background:var(--gold)"></span>4 · Alle zusammen</button>
+</nav>
+<main id="app"></main>
+
+<script>
+/* =========================================================
+   Illustrationen
+   ========================================================= */
+const SVG_BOOK = `
+<svg class="illu" width="300" viewBox="0 0 300 200" role="img" aria-label="Zauberbuch">
+  <ellipse cx="150" cy="186" rx="118" ry="10" fill="#d6dceb"/>
+  <path d="M30 70 Q90 52 150 74 L150 176 Q90 156 30 172 Z" fill="#22345c"/>
+  <path d="M270 70 Q210 52 150 74 L150 176 Q210 156 270 172 Z" fill="#16233f"/>
+  <path d="M40 68 Q92 52 146 70 L146 166 Q92 148 40 162 Z" fill="#fbfcfe"/>
+  <path d="M260 68 Q208 52 154 70 L154 166 Q208 148 260 162 Z" fill="#f5ebd2"/>
+  <g stroke="#d6dceb" stroke-width="3" stroke-linecap="round"><path d="M58 88 Q92 80 128 90"/><path d="M58 104 Q92 96 128 106"/><path d="M58 120 Q92 112 128 122"/></g>
+  <g stroke="#e6d5a8" stroke-width="3" stroke-linecap="round"><path d="M172 90 Q208 80 242 88"/><path d="M172 106 Q208 96 242 104"/><path d="M172 122 Q208 112 242 120"/></g>
+  <circle cx="98" cy="42" r="20" fill="#a12d6b"/><circle cx="91" cy="35" r="6" fill="#fff" opacity=".35"/>
+  <text x="98" y="49" text-anchor="middle" font-family="Lexend" font-weight="700" font-size="18" fill="#fff">4</text>
+  <circle cx="202" cy="42" r="20" fill="#2d5c9c"/><circle cx="195" cy="35" r="6" fill="#fff" opacity=".35"/>
+  <text x="202" y="49" text-anchor="middle" font-family="Lexend" font-weight="700" font-size="18" fill="#fff">3</text>
+  <path d="M120 44 Q150 10 180 44" stroke="#b48a35" stroke-width="3" fill="none" stroke-dasharray="5 6"/>
+  <g fill="#d9b25b"><path d="M150 14 l4 9 l9 4 l-9 4 l-4 9 l-4 -9 l-9 -4 l9 -4 z"/><path d="M40 40 l3 6 l6 3 l-6 3 l-3 6 l-3 -6 l-6 -3 l6 -3 z"/><path d="M262 34 l3 6 l6 3 l-6 3 l-3 6 l-3 -6 l-6 -3 l6 -3 z"/></g>
+</svg>`;
+const SVG_WAND = `
+<svg class="illu" width="200" viewBox="0 0 200 90" role="img" aria-label="Zauberstab">
+  <rect x="34" y="52" width="120" height="12" rx="6" transform="rotate(-18 94 58)" fill="#16233f"/>
+  <rect x="124" y="30" width="30" height="12" rx="6" transform="rotate(-18 139 36)" fill="#b48a35"/>
+  <g fill="#d9b25b"><path d="M168 14 l5 11 l11 5 l-11 5 l-5 11 l-5 -11 l-11 -5 l11 -5 z"/><circle cx="186" cy="56" r="3"/><circle cx="150" cy="10" r="2.5"/></g>
+</svg>`;
+const SVG_TROPHY = `
+<svg class="illu" width="170" viewBox="0 0 170 150" role="img" aria-label="Pokal">
+  <ellipse cx="85" cy="140" rx="60" ry="7" fill="#d6dceb"/>
+  <rect x="52" y="116" width="66" height="18" rx="5" fill="#16233f"/>
+  <rect x="74" y="92" width="22" height="26" fill="#b48a35"/>
+  <path d="M40 20 H130 V44 Q130 96 85 98 Q40 96 40 44 Z" fill="#d9b25b"/>
+  <path d="M40 30 Q14 30 18 52 Q22 70 46 70" stroke="#b48a35" stroke-width="8" fill="none"/>
+  <path d="M130 30 Q156 30 152 52 Q148 70 124 70" stroke="#b48a35" stroke-width="8" fill="none"/>
+  <path d="M60 30 V52 Q62 76 80 82" stroke="#fff" stroke-width="5" fill="none" opacity=".45" stroke-linecap="round"/>
+  <circle cx="72" cy="56" r="9" fill="#a12d6b"/><circle cx="98" cy="56" r="9" fill="#2d5c9c"/>
+</svg>`;
+const SVG_GIFT = `
+<svg class="illu" width="330" viewBox="0 0 330 120" role="img" aria-label="Übergabe">
+  <circle cx="44" cy="40" r="20" fill="#b48a35"/><rect x="22" y="64" width="44" height="46" rx="14" fill="#b48a35"/>
+  <text x="44" y="47" text-anchor="middle" font-family="Lexend" font-size="18" font-weight="700" fill="#fff">1</text>
+  <circle cx="286" cy="40" r="20" fill="#2d5c9c"/><rect x="264" y="64" width="44" height="46" rx="14" fill="#2d5c9c"/>
+  <text x="286" y="47" text-anchor="middle" font-family="Lexend" font-size="18" font-weight="700" fill="#fff">3</text>
+  <rect x="140" y="58" width="50" height="40" rx="6" fill="#a12d6b"/><rect x="134" y="50" width="62" height="12" rx="4" fill="#74204d"/>
+  <rect x="160" y="50" width="10" height="48" fill="#d9b25b"/>
+  <path d="M165 50 q-14 -16 -22 -6 q4 8 22 6 q14 -16 22 -6 q-4 8 -22 6" fill="#d9b25b"/>
+  <text x="151" y="86" text-anchor="middle" font-family="Lexend" font-size="15" font-weight="700" fill="#fff">4</text>
+  <path d="M76 80 Q104 70 128 76" stroke="#86651f" stroke-width="3" fill="none" stroke-dasharray="5 5"/>
+  <path d="M202 76 Q228 70 254 80" stroke="#86651f" stroke-width="3" fill="none" stroke-dasharray="5 5"/>
+  <path d="M248 72 l8 8 l-10 4" stroke="#86651f" stroke-width="3" fill="none" stroke-linecap="round"/>
+</svg>`;
+
+/* =========================================================
+   Grammatik
+   ========================================================= */
+const GW  = {m:'männlich', f:'weiblich', n:'sächlich', p:'Mehrzahl'};
+const DEF = {m:'der', f:'die', n:'das', p:'die'};
+const IND = {m:'ein', f:'eine', n:'ein'};
+const AKK_D = {m:'den', f:'die', n:'das', p:'die'};
+const AKK_I = {m:'einen', f:'eine', n:'ein'};
+const DAT_D = {m:'dem', f:'der', n:'dem', p:'den'};
+const DAT_I = {m:'einem', f:'einer', n:'einem'};
+const POOL_D = ['der','die','das','den','dem'];
+const POOL_I = ['ein','eine','einen','einem','einer'];
+const cap = s => s.charAt(0).toUpperCase()+s.slice(1);
+const shuffle = a => { a=[...a]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+function formOf(c,t,g){
+  if(c==='akk') return t==='d'?AKK_D[g]:AKK_I[g];
+  if(c==='dat') return t==='d'?DAT_D[g]:DAT_I[g];
+  return t==='d'?DEF[g]:IND[g];
+}
+const baseOf = it => it.t==='d' ? DEF[it.g] : IND[it.g];
+const answerOf = it => formOf(it.c, it.t, it.g);
+function optionsFor(it){
+  const ans=answerOf(it), base=baseOf(it), pool=it.t==='d'?POOL_D:POOL_I;
+  const other = formOf(it.c==='akk'?'dat':'akk', it.t, it.g);
+  const set=[ans];
+  [base, other].forEach(o=>{ if(o && !set.includes(o)) set.push(o); });
+  for(const o of shuffle(pool)){ if(set.length>=4) break; if(!set.includes(o)) set.push(o); }
+  return shuffle(set.slice(0,4));
+}
+function fullSentence(it){
+  const p=it.s.split('___'); let a=answerOf(it); if(p[0]==='') a=cap(a);
+  return p[0]+a+p[1];
+}
+function chipHTML(it){
+  if(it.g==='p') return `die ${it.n} <small>(Mehrzahl)</small>`;
+  if(it.t==='d') return `${DEF[it.g]} ${it.n}`;
+  return `${IND[it.g]} ${it.n} <small>(${DEF[it.g]} ${it.n})</small>`;
+}
+const Q = {akk:'Wen oder was?', dat:'Wem?', nom:'Wer oder was?'};
+const CASENAME = {akk:'Akkusativ (4. Fall)', dat:'Dativ (3. Fall)', nom:'Nominativ (1. Fall)'};
+
+/* =========================================================
+   Aufgaben – Modus 1: Akkusativ
+   ========================================================= */
+const AKK_TRANSFORM = [
+ {verb:'sehen',      t:'d', cards:[['Dino','m','🦖'],['Rakete','f','🚀'],['Schiff','n','🚢']]},
+ {verb:'finden',     t:'d', cards:[['Schlüssel','m','🔑'],['Karte','f','🗺️'],['Handy','n','📱']]},
+ {verb:'haben',      t:'i', cards:[['Roboter','m','🤖'],['Taschenlampe','f','🔦'],['Skateboard','n','🛹']]},
+ {verb:'suchen',     t:'i', cards:[['Ball','m','⚽'],['Münze','f','🪙'],['Fahrrad','n','🚲']]},
+ {verb:'tragen',     t:'d', cards:[['Rucksack','m','🎒'],['Kiste','f','📦'],['Schwert','n','🗡️']]},
+ {verb:'reparieren', t:'i', cards:[['Computer','m','💻'],['Lampe','f','💡'],['Auto','n','🚗']]},
+ {verb:'brauchen',   t:'d', cards:[['Plan','m','📋'],['Lupe','f','🔍'],['Seil','n','🪢']]},
+ {verb:'gewinnen',   t:'i', cards:[['Pokal','m','🏆'],['Medaille','f','🥇'],['Spiel','n','🎮']]}
+];
+const AKK_DEN = [
+ {v:'sehen',      s:'Ich sehe ___ Dino im Museum.', n:'Dino', g:'m', e:'🦖'},
+ {v:'schießen',   s:'Der Stürmer schießt ___ Ball ins Tor.', n:'Ball', g:'m', e:'⚽'},
+ {v:'finden',     s:'Wir finden ___ Schatz auf der Insel.', n:'Schatz', g:'m', e:'💰'},
+ {v:'reparieren', s:'Papa repariert ___ Roller.', n:'Roller', g:'m', e:'🛴'},
+ {v:'öffnen',     s:'Der Detektiv öffnet ___ Tresor.', n:'Tresor', g:'m', e:'🔐'},
+ {v:'essen',      s:'Ich esse ___ Burger ganz allein.', n:'Burger', g:'m', e:'🍔'},
+ {v:'gewinnen',   s:'Unsere Mannschaft gewinnt ___ Pokal.', n:'Pokal', g:'m', e:'🏆'},
+ {v:'suchen',     s:'Der Hund sucht ___ Knochen.', n:'Knochen', g:'m', e:'🦴'},
+ {v:'fangen',     s:'Der Torwart fängt ___ Ball.', n:'Ball', g:'m', e:'🧤'},
+ {v:'besuchen',   s:'Am Sonntag besuchen wir ___ Zoo.', n:'Zoo', g:'m', e:'🦒'},
+ {v:'vergessen',  s:'Oh nein, ich vergesse ___ Schlüssel!', n:'Schlüssel', g:'m', e:'🔑'},
+ {v:'anrufen',    s:'Ich rufe ___ Trainer an.', n:'Trainer', g:'m', e:'📞'},
+ {v:'abholen',    s:'Mama holt ___ Opa vom Bahnhof ab.', n:'Opa', g:'m', e:'🚉'},
+ {v:'tragen',     s:'Ich trage ___ Rucksack zur Schule.', n:'Rucksack', g:'m', e:'🎒'}
+].map(x=>({...x,t:'d',c:'akk'}));
+const AKK_EINEN = [
+ {v:'haben',     s:'Ich habe ___ Roboter.', n:'Roboter', g:'m', e:'🤖'},
+ {v:'bauen',     s:'Wir bauen ___ Turm aus Steinen.', n:'Turm', g:'m', e:'🧱'},
+ {v:'brauchen',  s:'Der Astronaut braucht ___ Helm.', n:'Helm', g:'m', e:'🧑‍🚀'},
+ {v:'bekommen',  s:'Ich bekomme ___ Hund zum Geburtstag!', n:'Hund', g:'m', e:'🐶'},
+ {v:'malen',     s:'Ich male ___ Vulkan.', n:'Vulkan', g:'m', e:'🌋'},
+ {v:'kaufen',    s:'Wir kaufen ___ Fußball.', n:'Fußball', g:'m', e:'⚽'},
+ {v:'es gibt',   s:'Im Park gibt es ___ Spielplatz.', n:'Spielplatz', g:'m', e:'🛝'},
+ {v:'treffen',   s:'Im Wald treffen wir ___ Fuchs.', n:'Fuchs', g:'m', e:'🦊'},
+ {v:'zeichnen',  s:'Er zeichnet ___ Hai.', n:'Hai', g:'m', e:'🦈'},
+ {v:'packen',    s:'Ich packe ___ Koffer für die Ferien.', n:'Koffer', g:'m', e:'🧳'},
+ {v:'mitnehmen', s:'Ich nehme ___ Regenschirm mit.', n:'Regenschirm', g:'m', e:'☂️'},
+ {v:'werfen',    s:'Er wirft ___ Schneeball.', n:'Schneeball', g:'m', e:'❄️'},
+ {v:'gewinnen',  s:'Ich gewinne ___ Preis!', n:'Preis', g:'m', e:'🏅'}
+].map(x=>({...x,t:'i',c:'akk'}));
+const AKK_PROBE = [
+ {v:'sehen',      s:'Ich sehe ___ Rakete.', n:'Rakete', g:'f', t:'d', e:'🚀'},
+ {v:'bauen',      s:'Wir bauen ___ Baumhaus.', n:'Baumhaus', g:'n', t:'i', e:'🌳'},
+ {v:'finden',     s:'Der Hund findet ___ Ball.', n:'Ball', g:'m', t:'d', e:'🐕'},
+ {v:'haben',      s:'Ich habe ___ Taschenlampe.', n:'Taschenlampe', g:'f', t:'i', e:'🔦'},
+ {v:'reparieren', s:'Er repariert ___ Fahrrad.', n:'Fahrrad', g:'n', t:'d', e:'🚲'},
+ {v:'brauchen',   s:'Wir brauchen ___ Plan.', n:'Plan', g:'m', t:'i', e:'📋'},
+ {v:'mögen',      s:'Ich mag ___ Comics.', n:'Comics', g:'p', t:'d', e:'📚'},
+ {v:'öffnen',     s:'Sie öffnet ___ Schatzkiste.', n:'Schatzkiste', g:'f', t:'d', e:'🧰'},
+ {v:'trinken',    s:'Ich trinke ___ Kakao.', n:'Kakao', g:'m', t:'d', e:'☕'},
+ {v:'besuchen',   s:'Wir besuchen ___ Freibad.', n:'Freibad', g:'n', t:'d', e:'🏊'},
+ {v:'bekommen',   s:'Er bekommt ___ Medaille.', n:'Medaille', g:'f', t:'i', e:'🥇'},
+ {v:'kennen',     s:'Ich kenne ___ Zaubertrick.', n:'Zaubertrick', g:'m', t:'i', e:'🎩'},
+ {v:'sammeln',    s:'Wir sammeln ___ Kastanien.', n:'Kastanien', g:'p', t:'d', e:'🌰'},
+ {v:'nehmen',     s:'Ich nehme ___ Skateboard.', n:'Skateboard', g:'n', t:'d', e:'🛹'},
+ {v:'lesen',      s:'Ich lese ___ Krimi.', n:'Krimi', g:'m', t:'i', e:'🕵️'},
+ {v:'gewinnen',   s:'Wir gewinnen ___ Spiel!', n:'Spiel', g:'n', t:'d', e:'🎮'}
+].map(x=>({...x,c:'akk'}));
+
+/* =========================================================
+   Modus 2: Dativ
+   ========================================================= */
+const DAT_DEMDER = [
+ ['Trainer','m','🏃'],['Lehrerin','f','👩‍🏫'],['Kind','n','🧒'],['Torwart','m','🧤'],
+ ['Oma','f','👵'],['Team','n','👕'],['Hund','m','🐶'],['Schiedsrichterin','f','🟨'],
+ ['Pferd','n','🐴'],['Mannschaft','f','⚽'],['Opa','m','👴'],['Baby','n','👶']
+];
+const DAT_D_ITEMS = [
+ {v:'helfen',      s:'Ich helfe ___ Trainer mit den Bällen.', n:'Trainer', g:'m', e:'🏃'},
+ {v:'danken',      s:'Wir danken ___ Busfahrerin.', n:'Busfahrerin', g:'f', e:'🚌'},
+ {v:'gehören',     s:'Das Skateboard gehört ___ Kind dort.', n:'Kind', g:'n', e:'🛹'},
+ {v:'schmecken',   s:'Die Pizza schmeckt ___ Ritter.', n:'Ritter', g:'m', e:'🍕'},
+ {v:'gefallen',    s:'Das Spiel gefällt ___ Mannschaft.', n:'Mannschaft', g:'f', e:'⚽'},
+ {v:'antworten',   s:'Ich antworte ___ Lehrerin.', n:'Lehrerin', g:'f', e:'🙋'},
+ {v:'gratulieren', s:'Wir gratulieren ___ Sieger.', n:'Sieger', g:'m', e:'🏆'},
+ {v:'zuhören',     s:'Alle hören ___ Kapitän zu.', n:'Kapitän', g:'m', e:'🧭'},
+ {v:'zuschauen',   s:'Wir schauen ___ Zauberer zu.', n:'Zauberer', g:'m', e:'🪄'},
+ {v:'zuwinken',    s:'Ich winke ___ Feuerwehrauto zu.', n:'Feuerwehrauto', g:'n', e:'🚒'},
+ {v:'folgen',      s:'Der Hund folgt ___ Spur.', n:'Spur', g:'f', e:'🐾'},
+ {v:'passen',      s:'Der Helm passt ___ Rennfahrer.', n:'Rennfahrer', g:'m', e:'🏎️'},
+ {v:'zujubeln',    s:'Die Fans jubeln ___ Torwart zu.', n:'Torwart', g:'m', e:'🧤'},
+ {v:'vertrauen',   s:'Das Pferd vertraut ___ Reiterin.', n:'Reiterin', g:'f', e:'🐴'},
+ {v:'gehorchen',   s:'Der Hund gehorcht ___ Polizistin.', n:'Polizistin', g:'f', e:'🐕'},
+ {v:'ausweichen',  s:'Das Auto weicht ___ Reh aus.', n:'Reh', g:'n', e:'🦌'}
+].map(x=>({...x,t:'d',c:'dat'}));
+const DAT_I_ITEMS = [
+ {v:'helfen',      s:'Ich helfe ___ Mann mit dem Koffer.', n:'Mann', g:'m', e:'🧳'},
+ {v:'begegnen',    s:'Im Wald begegnen wir ___ Fuchs.', n:'Fuchs', g:'m', e:'🦊'},
+ {v:'gehören',     s:'Das Fahrrad gehört ___ Mädchen aus meiner Klasse.', n:'Mädchen', g:'n', e:'🚲'},
+ {v:'danken',      s:'Ich danke ___ Ärztin.', n:'Ärztin', g:'f', e:'🩺'},
+ {v:'gehören',     s:'Der Ball gehört ___ Spieler aus Team Blau.', n:'Spieler', g:'m', e:'⚽'},
+ {v:'zuschauen',   s:'Wir schauen ___ Feuerwehrfrau zu.', n:'Feuerwehrfrau', g:'f', e:'🧑‍🚒'},
+ {v:'nachlaufen',  s:'Der Hund läuft ___ Katze nach.', n:'Katze', g:'f', e:'🐈'},
+ {v:'gefallen',    s:'Das Geschenk gefällt ___ Kind.', n:'Kind', g:'n', e:'🎁'},
+ {v:'vertrauen',   s:'Ich vertraue ___ Freund.', n:'Freund', g:'m', e:'🤝'},
+ {v:'zuwinken',    s:'Wir winken ___ Schiff zu.', n:'Schiff', g:'n', e:'🚢'},
+ {v:'gratulieren', s:'Wir gratulieren ___ Siegerin.', n:'Siegerin', g:'f', e:'🥇'},
+ {v:'schmecken',   s:'Der Kuchen schmeckt ___ Gast.', n:'Gast', g:'m', e:'🍰'}
+].map(x=>({...x,t:'i',c:'dat'}));
+const DAT_PROBE = [
+ {v:'sehen',      c:'akk', s:'Ich sehe ___ Torwart.', n:'Torwart', g:'m', t:'d', e:'🧤'},
+ {v:'helfen',     c:'dat', s:'Ich helfe ___ Torwart.', n:'Torwart', g:'m', t:'d', e:'🧤'},
+ {v:'finden',     c:'akk', s:'Wir finden ___ Katze.', n:'Katze', g:'f', t:'d', e:'🐱'},
+ {v:'folgen',     c:'dat', s:'Wir folgen ___ Katze.', n:'Katze', g:'f', t:'d', e:'🐈'},
+ {v:'besuchen',   c:'akk', s:'Ich besuche ___ Opa.', n:'Opa', g:'m', t:'d', e:'👴'},
+ {v:'danken',     c:'dat', s:'Ich danke ___ Opa.', n:'Opa', g:'m', t:'d', e:'👴'},
+ {v:'haben',      c:'akk', s:'Ich habe ___ Pferd.', n:'Pferd', g:'n', t:'i', e:'🐴'},
+ {v:'vertrauen',  c:'dat', s:'Ich vertraue ___ Pferd.', n:'Pferd', g:'n', t:'i', e:'🐎'},
+ {v:'anrufen',    c:'akk', s:'Ich rufe ___ Freund an.', n:'Freund', g:'m', t:'i', e:'📞'},
+ {v:'antworten',  c:'dat', s:'Ich antworte ___ Freund.', n:'Freund', g:'m', t:'i', e:'💬'},
+ {v:'suchen',     c:'akk', s:'Wir suchen ___ Lehrerin.', n:'Lehrerin', g:'f', t:'d', e:'🔎'},
+ {v:'gefallen',   c:'dat', s:'Der Film gefällt ___ Lehrerin.', n:'Lehrerin', g:'f', t:'d', e:'🎬'},
+ {v:'sehen',      c:'akk', s:'Ich sehe ___ Kinder im Hof.', n:'Kinder', g:'p', t:'d', e:'🧒'},
+ {v:'helfen',     c:'dat', s:'Wir helfen ___ Kindern.', n:'Kinder', g:'p', t:'d', e:'🤲'},
+ {v:'schmecken',  c:'dat', s:'Die Pizza schmeckt ___ Freunden.', n:'Freunde', g:'p', t:'d', e:'🍕'},
+ {v:'einladen',   c:'akk', s:'Ich lade ___ Freunde ein.', n:'Freunde', g:'p', t:'d', e:'🎉'}
+];
+
+/* =========================================================
+   Modus 3: Verben-Ernte  [Verb, Korb, Satz mit {Objekt}]
+   ========================================================= */
+const ERNTE = [
+ ['sehen','akk','Ich sehe {den Ball}.'],['finden','akk','Wir finden {den Schatz}.'],
+ ['essen','akk','Ich esse {eine Pizza}.'],['bauen','akk','Wir bauen {ein Baumhaus}.'],
+ ['suchen','akk','Der Hund sucht {den Knochen}.'],['haben','akk','Ich habe {einen Roboter}.'],
+ ['besuchen','akk','Wir besuchen {den Zoo}.'],['fragen','akk','Ich frage {die Lehrerin}.','Achtung: Man fragt <b>wen?</b> – darum Akkusativ, auch wenn es um eine Person geht.'],
+ ['anrufen','akk','Ich rufe {den Trainer} an.','Achtung: Man ruft <b>wen?</b> an – Akkusativ, auch bei Personen.'],['tragen','akk','Ich trage {den Rucksack}.'],
+ ['öffnen','akk','Er öffnet {die Tür}.'],['gewinnen','akk','Wir gewinnen {das Spiel}.'],
+ ['reparieren','akk','Papa repariert {das Fahrrad}.'],['vergessen','akk','Ich vergesse {den Schlüssel}.'],
+ ['einladen','akk','Ich lade {die ganze Klasse} ein.'],['werfen','akk','Er wirft {den Ball}.'],
+ ['helfen','dat','Ich helfe {dem Trainer}.'],['danken','dat','Wir danken {der Ärztin}.'],
+ ['gehören','dat','Der Ball gehört {dem Kind}.'],['gefallen','dat','Das Spiel gefällt {der Klasse}.'],
+ ['schmecken','dat','Die Pizza schmeckt {dem Opa}.'],['antworten','dat','Ich antworte {der Lehrerin}.'],
+ ['gratulieren','dat','Wir gratulieren {dem Sieger}.'],['zuhören','dat','Ich höre {dem Kapitän} zu.'],
+ ['zuschauen','dat','Wir schauen {dem Zauberer} zu.'],['zuwinken','dat','Ich winke {dem Schiff} zu.'],
+ ['folgen','dat','Der Hund folgt {der Spur}.'],['vertrauen','dat','Ich vertraue {dem Freund}.'],
+ ['passen','dat','Der Helm passt {dem Fahrer}.'],['zujubeln','dat','Die Fans jubeln {der Mannschaft} zu.'],
+ ['ausweichen','dat','Das Auto weicht {dem Reh} aus.'],['gehorchen','dat','Der Hund gehorcht {der Polizistin}.']
+];
+
+/* =========================================================
+   Modus 4: Alle zusammen
+   ========================================================= */
+// Satzteile: [Text, Rolle] – Rollen: nom, v, dat, akk, x (Rest)
+const DETEKTIV = [
+ {p:[['Der Pirat','nom'],['zeigt','v'],['dem Kapitän','dat'],['eine Karte','akk']], ask:'akk'},
+ {p:[['Die Oma','nom'],['schenkt','v'],['dem Enkel','dat'],['ein Fahrrad','akk']], ask:'dat'},
+ {p:[['Ich','nom'],['leihe','v'],['dem Freund','dat'],['mein Skateboard','akk']], ask:'akk'},
+ {p:[['Der Kellner','nom'],['bringt','v'],['der Familie','dat'],['eine Pizza','akk']], ask:'dat'},
+ {p:[['Die Lehrerin','nom'],['erklärt','v'],['der Klasse','dat'],['das Spiel','akk']], ask:'nom'},
+ {p:[['Der Stürmer','nom'],['spielt','v'],['dem Kapitän','dat'],['den Ball','akk'],['zu','x']], ask:'akk'},
+ {p:[['Papa','nom'],['liest','v'],['dem Baby','dat'],['ein Buch','akk'],['vor','x']], ask:'dat'},
+ {p:[['Der Zauberer','nom'],['zeigt','v'],['dem König','dat'],['einen Trick','akk']], ask:'nom'},
+ {p:[['Wir','nom'],['schicken','v'],['der Tante','dat'],['eine Postkarte','akk']], ask:'akk'},
+ {p:[['Der Roboter','nom'],['bringt','v'],['dem Erfinder','dat'],['einen Schraubenzieher','akk']], ask:'dat'},
+ {p:[['Mein Bruder','nom'],['erzählt','v'],['der Schwester','dat'],['einen Witz','akk']], ask:'akk'},
+ {p:[['Die Trainerin','nom'],['wirft','v'],['dem Torwart','dat'],['den Ball','akk'],['zu','x']], ask:'dat'}
+];
+// Doppel-Lücke: erste Lücke Dativ, zweite Lücke Akkusativ
+const DOPPEL = [
+ {v:'geben',     s:'Der Trainer gibt ___ Spieler ___ Ball.', a:{n:'Spieler',g:'m',t:'d'}, b:{n:'Ball',g:'m',t:'i'}, e:'⚽'},
+ {v:'schenken',  s:'Die Oma schenkt ___ Enkelin ___ Fahrrad.', a:{n:'Enkelin',g:'f',t:'d'}, b:{n:'Fahrrad',g:'n',t:'i'}, e:'🚲'},
+ {v:'zeigen',    s:'Ich zeige ___ Freund ___ Zaubertrick.', a:{n:'Freund',g:'m',t:'d'}, b:{n:'Zaubertrick',g:'m',t:'i'}, e:'🎩'},
+ {v:'bringen',   s:'Der Kellner bringt ___ Gast ___ Pizza.', a:{n:'Gast',g:'m',t:'d'}, b:{n:'Pizza',g:'f',t:'i'}, e:'🍕'},
+ {v:'schicken',  s:'Wir schicken ___ Opa ___ Foto.', a:{n:'Opa',g:'m',t:'d'}, b:{n:'Foto',g:'n',t:'i'}, e:'📸'},
+ {v:'erklären',  s:'Die Lehrerin erklärt ___ Klasse ___ Aufgabe.', a:{n:'Klasse',g:'f',t:'d'}, b:{n:'Aufgabe',g:'f',t:'d'}, e:'📝'},
+ {v:'leihen',    s:'Ich leihe ___ Freundin ___ Roller.', a:{n:'Freundin',g:'f',t:'d'}, b:{n:'Roller',g:'m',t:'d'}, e:'🛴'},
+ {v:'zeigen',    s:'Der Pirat zeigt ___ Kapitän ___ Schatzkarte.', a:{n:'Kapitän',g:'m',t:'d'}, b:{n:'Schatzkarte',g:'f',t:'d'}, e:'🗺️'},
+ {v:'vorlesen',  s:'Papa liest ___ Kind ___ Geschichte vor.', a:{n:'Kind',g:'n',t:'d'}, b:{n:'Geschichte',g:'f',t:'i'}, e:'📖'},
+ {v:'zuwerfen',  s:'Der Torwart wirft ___ Mitspieler ___ Ball zu.', a:{n:'Mitspieler',g:'m',t:'d'}, b:{n:'Ball',g:'m',t:'d'}, e:'🧤'},
+ {v:'kaufen',    s:'Mama kauft ___ Baby ___ Teddy.', a:{n:'Baby',g:'n',t:'d'}, b:{n:'Teddy',g:'m',t:'i'}, e:'🧸'},
+ {v:'erzählen',  s:'Ich erzähle ___ Schwester ___ Witz.', a:{n:'Schwester',g:'f',t:'d'}, b:{n:'Witz',g:'m',t:'i'}, e:'😄'},
+ {v:'bringen',   s:'Der Roboter bringt ___ Erfinder ___ Werkzeugkasten.', a:{n:'Erfinder',g:'m',t:'d'}, b:{n:'Werkzeugkasten',g:'m',t:'i'}, e:'🧰'}
+];
+const BAUER = [
+ [['Der Trainer','nom'],['gibt','v'],['dem Spieler','dat'],['einen Ball','akk']],
+ [['Die Oma','nom'],['schenkt','v'],['dem Enkel','dat'],['ein Fahrrad','akk']],
+ [['Der Kellner','nom'],['bringt','v'],['der Familie','dat'],['eine Pizza','akk']],
+ [['Ich','nom'],['zeige','v'],['der Freundin','dat'],['meinen Trick','akk']],
+ [['Wir','nom'],['schicken','v'],['dem Opa','dat'],['eine Karte','akk']],
+ [['Der Zauberer','nom'],['leiht','v'],['dem Ritter','dat'],['einen Zauberstab','akk']],
+ [['Die Lehrerin','nom'],['erklärt','v'],['der Klasse','dat'],['das Spiel','akk']],
+ [['Papa','nom'],['kauft','v'],['dem Hund','dat'],['einen Knochen','akk']]
+];
+
+/* =========================================================
+   Zustand
+   ========================================================= */
+const app = document.getElementById('app');
+const starsEl = document.getElementById('starsTotal');
+let best = {}, total = 0;
+try{ best = JSON.parse(localStorage.getItem('faelleZauberBest')||'{}')||{}; total = +(localStorage.getItem('faelleZauberStars')||0); }catch(e){}
+function saveBest(key,stars){
+  if(!best[key] || stars>best[key]) best[key]=stars;
+  try{ localStorage.setItem('faelleZauberBest', JSON.stringify(best)); }catch(e){}
+}
+function addStar(){ total++; starsEl.textContent='★ '+total; try{ localStorage.setItem('faelleZauberStars', total); }catch(e){} }
+starsEl.textContent='★ '+total;
+const PRAISE=['Volltreffer!','Stark!','Genau richtig!','Treffer!','Sauber gelöst!','Profi-Niveau!','Top!','Richtig gezaubert!'];
+const praise = () => PRAISE[Math.floor(Math.random()*PRAISE.length)];
+const scrollUp = () => window.scrollTo({top:0,behavior:'smooth'});
+const starsStr = k => best[k] ? '★'.repeat(best[k])+'☆'.repeat(3-best[k]) : '';
+function setTab(m){ document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on', t.dataset.m===m)); }
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>MENUS[t.dataset.m]());
+document.getElementById('homeBtn').onclick = showStart;
+
+/* =========================================================
+   Start
+   ========================================================= */
+function showStart(){
+  setTab(null);
+  app.innerHTML = `
+  <div class="card center">
+    ${SVG_BOOK}
+    <h1>Der Fällezauber</h1>
+    <p>Im Deutschen gibt es <b>vier Fälle</b>. Jeder Fall hat seine eigene Frage. Zwei davon knacken wir jetzt: den <span class="A">4. Fall</span> und den <span class="D">3. Fall</span>.</p>
+    <div class="cases" style="text-align:center">
+      <div class="case c1"><b>1. Fall</b>Nominativ<br><span class="N">Wer oder was?</span></div>
+      <div class="case dim"><b>2. Fall</b>Genitiv<br>Wessen?</div>
+      <div class="case c3"><b>3. Fall</b>Dativ<br><span class="D">Wem?</span></div>
+      <div class="case c4"><b>4. Fall</b>Akkusativ<br><span class="A">Wen oder was?</span></div>
+    </div>
+    <p class="muted">Wähle einen Modus. Am besten spielst du sie der Reihe nach.</p>
+    <div class="modes">
+      <button class="mode" style="--c:var(--akk)" data-m="akk"><span class="ic">🪄</span><b>1 · Akkusativ-Zauber</b><small>Wen oder was? – Welches Wort verwandelt sich?</small></button>
+      <button class="mode" style="--c:var(--dat)" data-m="dat"><span class="ic">🎁</span><b>2 · Dativ-Zauber</b><small>Wem? – Der Zauber, der alle Artikel verwandelt.</small></button>
+      <button class="mode" style="--c:var(--gold)" data-m="ernte"><span class="ic">🧺</span><b>3 · Verben-Ernte</b><small>Pflücke die Verben und sortiere sie in die zwei Körbe.</small></button>
+      <button class="mode" style="--c:var(--navy)" data-m="combo"><span class="ic">🏆</span><b>4 · Alle zusammen</b><small>Der Nominativ gibt dem Dativ einen Akkusativ.</small></button>
+    </div>
+  </div>`;
+  app.querySelectorAll('.mode').forEach(b=>b.onclick=()=>MENUS[b.dataset.m]());
+  scrollUp();
+}
+
+/* =========================================================
+   Menüs der Modi
+   ========================================================= */
+function levelMenu(mode, color, title, intro, list){
+  setTab(mode);
+  app.innerHTML = `
+  <div class="card">
+    <h2>${title}</h2>
+    <p class="muted">${intro}</p>
+    <div class="levels">${list.map((l,i)=>`
+      <button class="level" style="--c:${color}" data-i="${i}"><span class="num">${l[0]}</span><span><b>${l[1]}</b><small>${l[2]}</small></span><span class="best">${l[3]?starsStr(l[3]):''}</span></button>`).join('')}
+    </div>
+  </div>`;
+  app.querySelectorAll('.level').forEach(b=>b.onclick=()=>list[+b.dataset.i][4]());
+  scrollUp();
+}
+const MENUS = {
+  akk: ()=>levelMenu('akk','var(--akk)','Modus 1 · Der Akkusativ-Zauber','Der 4. Fall. Die Frage lautet: <span class="A">Wen oder was?</span>',[
+    ['🪄','1 · Die Zauberregel','Schau zu, welches Wort sich verwandelt.','',akkRule],
+    ['🔍','2 · Wer verwandelt sich?','Tippe auf das Wort, das sich verwandelt.','akkTr',akkTransform],
+    ['👑','3 · Der den-Zauber','der wird zu den – mit vielen Verben.','akkDen',()=>playGap('akkDen','Der den-Zauber',AKK_DEN)],
+    ['💎','4 · Der einen-Zauber','ein wird zu einen – bei männlichen Wörtern.','akkEinen',()=>playGap('akkEinen','Der einen-Zauber',AKK_EINEN)],
+    ['🌟','5 · Die Akkusativ-Probe','Gemischt: verwandelt es sich – oder bleibt es gleich?','akkProbe',()=>playGap('akkProbe','Die Akkusativ-Probe',AKK_PROBE)]
+  ]),
+  dat: ()=>levelMenu('dat','var(--dat)','Modus 2 · Der Dativ-Zauber','Der 3. Fall. Die Frage lautet: <span class="D">Wem?</span>',[
+    ['🎁','1 · Die Wem-Regel','Hier verwandeln sich alle Artikel – schau zu!','',datRule],
+    ['⚖️','2 · dem oder der?','Nur zwei Knöpfe: Wer bekommt dem, wer der?','datDD',datDemDer],
+    ['🛡️','3 · Dativ-Training','dem, der, dem – mit vielen Dativ-Verben.','datD',()=>playGap('datD','Dativ-Training',DAT_D_ITEMS)],
+    ['💠','4 · einem oder einer?','Der Dativ mit ein und eine.','datI',()=>playGap('datI','einem oder einer?',DAT_I_ITEMS)],
+    ['🌟','5 · Die große Probe','Akkusativ oder Dativ? Frag „Wen?“ oder „Wem?“','datProbe',()=>playGap('datProbe','Die große Probe',DAT_PROBE)]
+  ]),
+  ernte: ()=>{ setTab('ernte'); ernteIntro(); },
+  combo: ()=>levelMenu('combo','var(--gold)','Modus 4 · Alle zusammen','Der Nominativ gibt dem Dativ einen Akkusativ.',[
+    ['🎁','1 · Das Schema','Der Nominativ gibt dem Dativ einen Akkusativ.','',comboRule],
+    ['🕵️','2 · Fälle-Detektiv','Finde den Nominativ, den Dativ oder den Akkusativ.','comboDet',comboDetektiv],
+    ['✍️','3 · Doppel-Zauber','Zwei Lücken: zuerst Wem?, dann Was?','comboDop',comboDoppel],
+    ['🧩','4 · Satz-Baumeister','Baue den Satz nach dem Schema.','comboBau',comboBauer]
+  ])
+};
+
+/* =========================================================
+   Gemeinsame Bausteine
+   ========================================================= */
+function trioHTML(set,t){
+  return `<div class="trio">${set.map(([n,g,e])=>`
+    <div class="ncard" data-g="${g}"><div class="emo">${e}</div><div class="art">${t==='d'?DEF[g]:IND[g]}</div><div class="noun">${n}</div><div class="tag">${GW[g]}</div></div>`).join('')}</div>`;
+}
+function magicTrio(box,t,c){
+  box.querySelectorAll('.ncard').forEach(card=>{
+    const g=card.dataset.g, art=card.querySelector('.art'), nf=formOf(c,t,g);
+    if(nf!==(t==='d'?DEF[g]:IND[g])){ art.textContent=nf; card.classList.add(c==='akk'?'magicA':'magicD','pop'); }
+    else card.classList.add('same');
+  });
+}
+function finish(key,title,score,tot,again,next,menu){
+  const r=score/tot, stars=r>=0.9?3:r>=0.7?2:1;
+  saveBest(key,stars);
+  const msg = stars===3?'Stark! Das sitzt wie ein Profi-Schuss.':stars===2?'Sehr gut! Mit ein bisschen Übung holst du alle drei Sterne.':'Gut, dass du bis zum Ende durchgezogen hast! Spiel das Level ruhig noch einmal.';
+  app.innerHTML = `
+  <div class="card center">
+    ${SVG_TROPHY}
+    <h1>${title} geschafft!</h1>
+    <p style="font-size:2rem;color:var(--gold);margin:.2em 0">${'★'.repeat(stars)}${'☆'.repeat(3-stars)}</p>
+    <p>Beim ersten Versuch richtig: <b>${score} von ${tot}</b></p>
+    <p class="muted">${msg}</p>
+    <div class="row">
+      <button class="btn ghost" id="again">Nochmal spielen</button>
+      <button class="btn ghost" id="menu">Zum Menü</button>
+      ${next?'<button class="btn" id="next">Weiter →</button>':''}
+    </div>
+  </div>`;
+  document.getElementById('again').onclick=again;
+  document.getElementById('menu').onclick=menu;
+  if(next) document.getElementById('next').onclick=next;
+  scrollUp();
+}
+
+/* =========================================================
+   Erklärungen
+   ========================================================= */
+function whoIs(word){
+  // welche Fälle/Geschlechter passen zu einer Form?
+  const res=[];
+  for(const c of ['nom','akk','dat']) for(const g of ['m','f','n','p']) for(const t of ['d','i']){
+    if(t==='i' && g==='p') continue;
+    if(formOf(c,t,g)===word) res.push({c,g,t});
+  }
+  return res;
+}
+function explain(it, chosen){
+  const n=it.n, g=it.g, c=it.c, ans=answerOf(it);
+  const ask = it.v==='es gibt' ? 'Nach „es gibt“ kommt immer der Akkusativ.' : `Nach „${it.v}“ fragst du: <b>${Q[c]}</b> → ${CASENAME[c]}.`;
+  let pre='';
+  if(chosen!==ans){
+    const hits=whoIs(chosen).filter(h=>h.g===g && h.t===it.t);
+    if(hits.some(h=>h.c==='nom')) pre=`„${chosen}“ ist die Grundform (1. Fall: Wer oder was?). So steht das Wort im Wörterbuch – nach diesem Verb verwandelt es sich aber. `;
+    else if(hits.some(h=>h.c!==c)) pre=`„${chosen}“ wäre der ${c==='akk'?'Dativ (Frage: Wem?)':'Akkusativ (Frage: Wen oder was?)'}. Hier passt aber die andere Frage. `;
+    else if(g==='p') pre=`„${chosen}“ passt nicht zur Mehrzahl. `;
+    else pre=`„${chosen}“ passt nicht zu „${n}“. `;
+  }
+  let core;
+  if(g==='p'){
+    core = c==='akk'
+      ? `„${n}“ ist Mehrzahl. ${ask} In der Mehrzahl bleibt es beim Akkusativ einfach <b>die</b>.`
+      : `„${n}“ ist Mehrzahl. ${ask} Im Dativ wird die Mehrzahl zu <b>den</b> – und das Nomen bekommt ein <b>-n</b> dazu (wenn es noch keins hat).`;
+  } else if(c==='akk'){
+    core = `„${n}“ ist ${GW[g]}: ${DEF[g]} ${n}. ${ask} ` + (g==='m'
+      ? `Bei männlichen Wörtern wird <b>${it.t==='d'?'der zu den':'ein zu einen'}</b>.`
+      : `${cap(GW[g])}e Wörter verwandeln sich im Akkusativ nicht – <b>${baseOf(it)} bleibt ${baseOf(it)}</b>.`);
+  } else {
+    core = `„${n}“ ist ${GW[g]}: ${DEF[g]} ${n}. ${ask} ` + (g==='f'
+      ? `Weibliche Wörter bekommen im Dativ <b>${it.t==='d'?'der':'einer'}</b>.`
+      : `Männliche und sächliche Wörter bekommen im Dativ <b>${it.t==='d'?'dem':'einem'}</b>.`);
+  }
+  return pre + core + `<span class="full">→ ${fullSentence(it)}</span>`;
+}
+
+/* =========================================================
+   Lückensatz-Level (Modus 1 + 2)
+   ========================================================= */
+function playGap(key,title,items){
+  const menu = key.startsWith('akk')?MENUS.akk:MENUS.dat;
+  const order = key.startsWith('akk')?['akkDen','akkEinen','akkProbe']:['datD','datI','datProbe'];
+  const lv = {akkDen:[AKK_DEN,'Der den-Zauber'],akkEinen:[AKK_EINEN,'Der einen-Zauber'],akkProbe:[AKK_PROBE,'Die Akkusativ-Probe'],
+              datD:[DAT_D_ITEMS,'Dativ-Training'],datI:[DAT_I_ITEMS,'einem oder einer?'],datProbe:[DAT_PROBE,'Die große Probe']};
+  const nk = order[order.indexOf(key)+1];
+  let queue=shuffle(items).map(x=>({...x})), done=0, first=0; const tot=items.length;
+  function render(){
+    const it=queue[0], opts=optionsFor(it), [before,after]=it.s.split('___');
+    const showQ = key==='datProbe' ? '' : `<span class="qtag" style="background:${it.c==='akk'?'var(--akk-soft)':'var(--dat-soft)'};color:${it.c==='akk'?'var(--akk)':'var(--dat)'}">${Q[it.c]}</span>`;
+    app.innerHTML = `
+    <div class="card">
+      <div class="meta"><span>${title}</span><span>${Math.min(done+1,tot)} / ${tot}</span></div>
+      <div class="progress"><i style="width:${done/tot*100}%"></i></div>
+      <p class="center"><span class="verbtag">${it.v}</span>${showQ}</p>
+      <div class="pic">${it.e}</div>
+      <p class="center"><span class="chip">${chipHTML(it)}</span></p>
+      <div class="sentence">${before}<span class="gap" id="gap">&nbsp;</span>${after}</div>
+      <div class="opts">${opts.map(o=>`<button class="opt" data-o="${o}">${o}</button>`).join('')}</div>
+      <div id="fb"></div>
+    </div>`;
+    const btns=[...app.querySelectorAll('.opt')];
+    btns.forEach(b=>b.onclick=()=>{
+      const chosen=b.dataset.o, ans=answerOf(it), ok=chosen===ans;
+      btns.forEach(x=>{x.disabled=true; if(x.dataset.o===ans) x.classList.add('right');});
+      if(!ok) b.classList.add('wrong');
+      const gap=document.getElementById('gap'); gap.textContent=before===''?cap(ans):ans; gap.classList.add('filled',it.c==='akk'?'fA':'fD');
+      if(ok && !it.retry){ first++; addStar(); }
+      let again='';
+      if(!ok && !it.retry){ queue.push({...it,retry:true}); again='<span class="again">Diese Aufgabe kommt später noch einmal.</span>'; }
+      document.getElementById('fb').innerHTML = `
+        <div class="feedback ${ok?'good':'bad'}"><h3>${ok?praise()+' ✨':'Knapp daneben – schau mal:'}</h3>${explain(it,chosen)}${again}
+        <div class="row"><button class="btn" id="nx">Weiter →</button></div></div>`;
+      const nx=document.getElementById('nx'); nx.focus();
+      nx.onclick=()=>{ if(!it.retry) done++; queue.shift();
+        if(queue.length) render();
+        else finish(key,title,first,tot,()=>playGap(key,title,items), nk?()=>playGap(nk,lv[nk][1],lv[nk][0]):(key==='akkProbe'?MENUS.dat:MENUS.ernte), menu); };
+    });
+    scrollUp();
+  }
+  render();
+}
+
+/* =========================================================
+   Modus 1: Akkusativ – Regel & Verwandlung
+   ========================================================= */
+function akkRule(){
+  setTab('akk');
+  const set=[['Ball','m','⚽'],['Rakete','f','🚀'],['Skateboard','n','🛹']];
+  app.innerHTML = `
+  <div class="card">
+    <h2>Die Akkusativ-Regel</h2>
+    ${SVG_WAND}
+    <p>Wenn ein Ding einfach nur <b>da ist</b>, steht es im <span class="N">1. Fall</span>: <i>Der Ball liegt im Gras.</i> – <span class="N">Wer oder was</span> liegt im Gras? <b>Der Ball.</b></p>
+    <p>Aber wenn jemand etwas <b>mit dem Ball macht</b> – ihn sieht, sucht, schießt –, dann fragst du: <span class="A">Wen oder was?</span> Ich schieße … <i>wen oder was?</i> Das ist der <span class="A">4. Fall, der Akkusativ</span>.</p>
+    <p>Tippe auf den Zauberstab und beobachte die Artikel genau:</p>
+    <div id="d1">${trioHTML(set,'d')}</div>
+    <div class="row"><button class="btn akk" id="w1">🪄 Ich sehe …</button></div>
+    <div id="a1"></div>
+  </div>`;
+  document.getElementById('w1').onclick=()=>{
+    magicTrio(document.getElementById('d1'),'d','akk'); document.getElementById('w1').disabled=true;
+    document.getElementById('a1').innerHTML = `
+      <div class="rulebox akk"><strong>Hast du es bemerkt?</strong> Nur <b>der Ball</b> hat sich verwandelt: <b>der → den</b>. „Ball“ ist ein <b>männliches</b> Wort. <b>die Rakete</b> und <b>das Skateboard</b> bleiben genau so.</div>
+      <p>Jetzt mit <b>ein</b> und <b>eine</b>. Vorsicht: Ball und Skateboard haben beide <b>ein</b>!</p>
+      <div id="d2">${trioHTML(set,'i')}</div>
+      <div class="row"><button class="btn akk" id="w2">🪄 Ich habe …</button></div>
+      <div id="a2"></div>`;
+    document.getElementById('w2').onclick=()=>{
+      magicTrio(document.getElementById('d2'),'i','akk'); document.getElementById('w2').disabled=true;
+      document.getElementById('a2').innerHTML = `
+        <div class="rulebox akk"><strong>Die Akkusativ-Regel:</strong><br>
+        Frage: <b>Wen oder was?</b> Dann verwandeln sich <b>nur männliche Wörter</b>:<br>
+        <b>der → den</b> &nbsp;und&nbsp; <b>ein → einen</b>.<br>
+        Alles andere bleibt: <b>die</b> bleibt <b>die</b>, <b>das</b> bleibt <b>das</b>, <b>eine</b> bleibt <b>eine</b>. Und <b>ein Skateboard</b> bleibt <b>ein Skateboard</b>, denn es heißt <b>das</b> Skateboard.</div>
+        <div class="row"><button class="btn" id="nx">Jetzt bist du dran →</button></div>`;
+      document.getElementById('nx').onclick=akkTransform;
+    };
+  };
+  scrollUp();
+}
+function akkTransform(){
+  setTab('akk');
+  const rounds=shuffle(AKK_TRANSFORM); let i=0, first=0;
+  function render(){
+    const r=rounds[i], cards=shuffle(r.cards);
+    app.innerHTML = `
+    <div class="card">
+      <div class="meta"><span>Wer verwandelt sich?</span><span>${i+1} / ${rounds.length}</span></div>
+      <div class="progress"><i style="width:${i/rounds.length*100}%"></i></div>
+      <p class="center"><span class="verbtag">${r.verb}</span><span class="qtag" style="background:var(--akk-soft);color:var(--akk)">Wen oder was?</span></p>
+      <h2 class="center">Welches Wort verwandelt sich nach diesem Verb?</h2>
+      <div class="trio">${cards.map(([n,g,e],k)=>`
+        <button class="ncard" data-k="${k}"><div class="emo">${e}</div><div class="art">${r.t==='d'?DEF[g]:IND[g]}</div><div class="noun">${n}</div><div class="tag">${r.t==='i'?'('+DEF[g]+')':'&nbsp;'}</div></button>`).join('')}</div>
+      <div id="fb"></div>
+    </div>`;
+    const btns=[...app.querySelectorAll('button.ncard')];
+    btns.forEach(b=>b.onclick=()=>{
+      const [n,g]=cards[+b.dataset.k], masc=cards.find(c=>c[1]==='m');
+      btns.forEach((x,k)=>{ x.disabled=true; const c=cards[k];
+        if(c[1]==='m'){ x.querySelector('.art').textContent=r.t==='d'?'den':'einen'; x.classList.add('magicA','pop'); } else x.classList.add('same'); });
+      const ok=g==='m'; if(ok){first++;addStar();} else b.classList.add('wrongpick');
+      const mA = r.t==='d'?`der ${masc[0]} → den ${masc[0]}`:`ein ${masc[0]} → einen ${masc[0]}`;
+      let txt;
+      if(ok){ txt=`„${n}“ ist männlich (der ${n}). Nur männliche Wörter verwandeln sich: <b>${mA}</b>.`;
+        if(r.t==='i'){ const ne=cards.find(c=>c[1]==='n'); txt+=` Achtung: <b>ein ${ne[0]}</b> bleibt <b>ein ${ne[0]}</b>, denn es heißt <b>das</b> ${ne[0]}.`; } }
+      else { txt=`„${n}“ ist ${GW[g]} (${DEF[g]} ${n}) – darum bleibt <b>${r.t==='d'?DEF[g]:IND[g]} ${n}</b> gleich. Verwandeln tut sich nur das männliche Wort: <b>${mA}</b>.`;
+        if(r.t==='i' && g==='n') txt+=` „ein“ allein verrät es nicht – prüfe, ob es <b>der</b> oder <b>das</b> heißt.`; }
+      document.getElementById('fb').innerHTML = `<div class="feedback ${ok?'good':'bad'}"><h3>${ok?praise()+' ✨':'Knapp daneben – schau mal:'}</h3>${txt}
+        <div class="row"><button class="btn" id="nx">${i<rounds.length-1?'Weiter →':'Fertig ✨'}</button></div></div>`;
+      document.getElementById('nx').onclick=()=>{ i++; if(i<rounds.length) render();
+        else finish('akkTr','Wer verwandelt sich?',first,rounds.length,akkTransform,()=>playGap('akkDen','Der den-Zauber',AKK_DEN),MENUS.akk); };
+    });
+    scrollUp();
+  }
+  render();
+}
+
+/* =========================================================
+   Modus 2: Dativ – Regel & dem/der
+   ========================================================= */
+function datRule(){
+  setTab('dat');
+  const set=[['Trainer','m','🏃'],['Lehrerin','f','👩‍🏫'],['Kind','n','🧒']];
+  app.innerHTML = `
+  <div class="card">
+    <h2>Die Wem-Regel</h2>
+    ${SVG_WAND}
+    <p>Manche Verben fragen nicht „Wen?“, sondern <span class="D">Wem?</span> – zum Beispiel <i>helfen, danken, gehören, gratulieren, zuschauen</i>. Ich helfe … <i>wem?</i> Das ist der <span class="D">3. Fall, der Dativ</span>.</p>
+    <p>Der Dativ-Zauber ist <b>stärker</b> als der Akkusativ-Zauber. Tippe und schau, wie viele Wörter sich jetzt verwandeln:</p>
+    <div id="d1">${trioHTML(set,'d')}</div>
+    <div class="row"><button class="btn dat" id="w1">🪄 Ich helfe …</button></div>
+    <div id="a1"></div>
+  </div>`;
+  document.getElementById('w1').onclick=()=>{
+    magicTrio(document.getElementById('d1'),'d','dat'); document.getElementById('w1').disabled=true;
+    document.getElementById('a1').innerHTML = `
+      <div class="rulebox dat"><strong>Wow – alle drei!</strong> <b>der → dem</b>, <b>die → der</b>, <b>das → dem</b>.<br>Trick: Bei <b>der</b> und <b>das</b> kommt ein <b>m</b> ans Ende (dem). Bei <b>die</b> ein <b>r</b> (der).</div>
+      <p>Und mit <b>ein</b> und <b>eine</b>?</p>
+      <div id="d2">${trioHTML(set,'i')}</div>
+      <div class="row"><button class="btn dat" id="w2">🪄 Ich danke …</button></div>
+      <div id="a2"></div>`;
+    document.getElementById('w2').onclick=()=>{
+      magicTrio(document.getElementById('d2'),'i','dat'); document.getElementById('w2').disabled=true;
+      document.getElementById('a2').innerHTML = `
+        <div class="rulebox dat"><strong>Die Wem-Regel:</strong><br>
+        Frage: <b>Wem?</b> Dann verwandeln sich <b>alle</b>:<br>
+        männlich: <b>der → dem</b>, <b>ein → einem</b><br>
+        weiblich: <b>die → der</b>, <b>eine → einer</b><br>
+        sächlich: <b>das → dem</b>, <b>ein → einem</b><br>
+        Mehrzahl: <b>die → den</b>, und das Nomen bekommt ein <b>-n</b>: die Kinder → <b>den Kindern</b>.</div>
+        <div class="rulebox"><strong>Achtung, Falle:</strong> „der“ gibt es zweimal! <b>der Trainer</b> ist die Grundform (1. Fall). Im Dativ heißt es <b>dem</b> Trainer. Und <b>der</b> Lehrerin ist der Dativ von <b>die</b> Lehrerin.</div>
+        <div class="row"><button class="btn" id="nx">Jetzt bist du dran →</button></div>`;
+      document.getElementById('nx').onclick=datDemDer;
+    };
+  };
+  scrollUp();
+}
+function datDemDer(){
+  setTab('dat');
+  const rounds=shuffle(DAT_DEMDER); let i=0, first=0;
+  function render(){
+    const [n,g,e]=rounds[i], ans=g==='f'?'der':'dem';
+    app.innerHTML = `
+    <div class="card">
+      <div class="meta"><span>dem oder der?</span><span>${i+1} / ${rounds.length}</span></div>
+      <div class="progress"><i style="width:${i/rounds.length*100}%"></i></div>
+      <p class="center"><span class="verbtag">helfen</span><span class="qtag" style="background:var(--dat-soft);color:var(--dat)">Wem?</span></p>
+      <div class="pic">${e}</div>
+      <p class="center"><span class="chip">${DEF[g]} ${n}</span></p>
+      <div class="sentence">Ich helfe <span class="gap" id="gap">&nbsp;</span> ${n}.</div>
+      <div class="opts two">${['dem','der'].map(o=>`<button class="opt" data-o="${o}">${o}</button>`).join('')}</div>
+      <div id="fb"></div>
+    </div>`;
+    const btns=[...app.querySelectorAll('.opt')];
+    btns.forEach(b=>b.onclick=()=>{
+      const ok=b.dataset.o===ans;
+      btns.forEach(x=>{x.disabled=true; if(x.dataset.o===ans) x.classList.add('right');}); if(!ok) b.classList.add('wrong');
+      const gap=document.getElementById('gap'); gap.textContent=ans; gap.classList.add('filled','fD');
+      if(ok){first++;addStar();}
+      let txt = g==='f' ? `„${n}“ ist weiblich: die ${n}. Im Dativ wird <b>die → der</b>.` : `„${n}“ ist ${GW[g]}: ${DEF[g]} ${n}. Im Dativ wird <b>${DEF[g]} → dem</b>.`;
+      if(!ok && g==='m') txt = `„der“ ist hier die Grundform (der ${n}) – im Dativ verwandelt sie sich aber. ` + txt;
+      document.getElementById('fb').innerHTML = `<div class="feedback ${ok?'good':'bad'}"><h3>${ok?praise()+' ✨':'Knapp daneben – schau mal:'}</h3>${txt}<span class="full">→ Ich helfe ${ans} ${n}.</span>
+        <div class="row"><button class="btn" id="nx">${i<rounds.length-1?'Weiter →':'Fertig ✨'}</button></div></div>`;
+      document.getElementById('nx').onclick=()=>{ i++; if(i<rounds.length) render();
+        else finish('datDD','dem oder der?',first,rounds.length,datDemDer,()=>playGap('datD','Dativ-Training',DAT_D_ITEMS),MENUS.dat); };
+    });
+    scrollUp();
+  }
+  render();
+}
+
+/* =========================================================
+   Modus 3: Verben-Ernte
+   ========================================================= */
+function ernteIntro(){
+  app.innerHTML = `
+  <div class="card center">
+    <h1>Die Verben-Ernte</h1>
+    <p>Am Baum hängen Verb-Früchte. Jede gehört in einen der zwei Körbe:</p>
+    <div class="baskets" style="max-width:520px;margin:14px auto">
+      <div class="basket" style="--c:var(--akk);--cs:var(--akk-soft)"><div class="name">Akkusativ</div><div class="q">Wen oder was?</div></div>
+      <div class="basket" style="--c:var(--dat);--cs:var(--dat-soft)"><div class="name">Dativ</div><div class="q">Wem?</div></div>
+    </div>
+    <p>Tippe auf eine Frucht – und dann auf den richtigen Korb.<br><span class="muted">Trick: Bau im Kopf einen kleinen Satz. „Ich helfe …“ – <i>wem?</i> „Ich sehe …“ – <i>wen oder was?</i></span></p>
+    <p class="muted">4 Bäume · 32 Verben ${best.ernte?'· Bestes Ergebnis: '+starsStr('ernte'):''}</p>
+    <div class="row"><button class="btn gold" id="go">Ernte starten 🧺</button></div>
+  </div>`;
+  document.getElementById('go').onclick=ernteGame;
+  scrollUp();
+}
+function ernteGame(){
+  setTab('ernte');
+  const akk=shuffle(ERNTE.filter(x=>x[1]==='akk')), dat=shuffle(ERNTE.filter(x=>x[1]==='dat'));
+  const trees=[0,1,2,3].map(k=>shuffle([...akk.slice(k*4,k*4+4),...dat.slice(k*4,k*4+4)]));
+  let tIdx=0, okAll=0, sel=null; const tot=ERNTE.length;
+  const piles={akk:[],dat:[]};
+  function render(){
+    const tree=trees[tIdx];
+    app.innerHTML = `
+    <div class="card">
+      <div class="meta"><span>Baum ${tIdx+1} von 4</span><span>${okAll} richtig</span></div>
+      <div class="progress"><i style="width:${tIdx/4*100}%"></i></div>
+      <div class="tree"><div class="crown" id="crown">${tree.map((v,k)=>`<button class="fruit f${k%4}" data-k="${k}">${v[0]}</button>`).join('')}</div><div class="trunk"></div></div>
+      <div class="baskets">
+        <button class="basket" data-c="akk" style="--c:var(--akk);--cs:var(--akk-soft)"><div class="name">🧺 Akkusativ</div><div class="q">Wen oder was?</div><div class="pile" id="p-akk"></div></button>
+        <button class="basket" data-c="dat" style="--c:var(--dat);--cs:var(--dat-soft)"><div class="name">🧺 Dativ</div><div class="q">Wem?</div><div class="pile" id="p-dat"></div></button>
+      </div>
+      <div id="fb"><div class="feedback bad" style="text-align:center">Tippe auf eine Frucht am Baum.</div></div>
+    </div>`;
+    drawPiles();
+    const fruits=[...app.querySelectorAll('.fruit')], baskets=[...app.querySelectorAll('.basket')];
+    let left=tree.length;
+    fruits.forEach(f=>f.onclick=()=>{
+      fruits.forEach(x=>x.classList.remove('sel')); f.classList.add('sel'); sel=+f.dataset.k;
+      baskets.forEach(b=>b.classList.add('ready'));
+      document.getElementById('fb').innerHTML=`<div class="feedback bad" style="text-align:center">Du hast <b>${tree[sel][0]}</b> gepflückt. In welchen Korb gehört es?</div>`;
+    });
+    baskets.forEach(b=>b.onclick=()=>{
+      if(sel===null) { b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); return; }
+      const v=tree[sel], chosen=b.dataset.c, ok=chosen===v[1];
+      const fEl=fruits[sel]; fEl.classList.add('gone'); fEl.disabled=true;
+      piles[v[1]].push([v[0],ok]); drawPiles();
+      const target=app.querySelector(`.basket[data-c="${v[1]}"]`); target.classList.remove('hop','shake'); void target.offsetWidth; target.classList.add(ok?'hop':'shake');
+      if(ok){ okAll++; addStar(); }
+      const cls=v[1]==='akk'?'A':'D';
+      const sent=v[2].replace(/\{(.+?)\}/,`<span class="hl ${cls}">$1</span>`);
+      const q=v[1]==='akk'?'Wen oder was?':'Wem?';
+      const name=v[1]==='akk'?'<span class="A">Akkusativ</span>':'<span class="D">Dativ</span>';
+      let txt = ok ? `<b>${v[0]}</b> gehört in den Korb ${name}. Du fragst: <b>${q}</b>`
+                   : `<b>${v[0]}</b> gehört in den Korb ${name}, nicht zum ${chosen==='akk'?'Akkusativ':'Dativ'}. Du fragst nämlich: <b>${q}</b>`;
+      txt += `<span class="full">→ ${sent}</span>`;
+      if(v[3]) txt += `<span class="again">${v[3]}</span>`;
+      sel=null; baskets.forEach(x=>x.classList.remove('ready')); left--;
+      document.getElementById('fb').innerHTML=`<div class="feedback ${ok?'good':'bad'}"><h3>${ok?praise()+' ✨':'Fast! Diese Frucht gehört in den anderen Korb.'}</h3>${txt}
+        ${left===0?`<div class="row"><button class="btn" id="nx">${tIdx<3?'Nächster Baum →':'Ernte beenden ✨'}</button></div>`:''}</div>`;
+      if(left===0) document.getElementById('nx').onclick=()=>{ tIdx++; if(tIdx<4) render(); else finish('ernte','Die Verben-Ernte',okAll,tot,ernteGame,MENUS.combo,ernteIntro); };
+    });
+    scrollUp();
+  }
+  function drawPiles(){
+    for(const c of ['akk','dat']){ const el=document.getElementById('p-'+c); if(el) el.innerHTML=piles[c].map(([w,ok])=>`<span class="${ok?'':'miss'}">${w}</span>`).join(''); }
+  }
+  render();
+}
+
+/* =========================================================
+   Modus 4: Alle zusammen
+   ========================================================= */
+const ROLE = {nom:['nom','Nominativ · Wer?'], v:['verb','Verb'], dat:['dat','Dativ · Wem?'], akk:['akk','Akkusativ · Was?'], x:['verb','']};
+function partHTML([txt,r],show,btn,k){
+  const [cls,lbl]=ROLE[r];
+  const tag=btn?'button':'span';
+  return `<${tag} class="part ${show?cls:''}" ${btn?`data-k="${k}"`:''}>${txt}${show&&lbl?`<span class="lbl">${lbl}</span>`:''}</${tag}>`;
+}
+function comboRule(){
+  setTab('combo');
+  const s1=[['Der Trainer','nom'],['gibt','v'],['dem Spieler','dat'],['einen Ball','akk']];
+  const s2=[['Die Oma','nom'],['schenkt','v'],['der Enkelin','dat'],['ein Fahrrad','akk']];
+  app.innerHTML = `
+  <div class="card">
+    <h2>Der Nominativ gibt dem Dativ einen Akkusativ</h2>
+    ${SVG_GIFT}
+    <p>Klingt lustig – ist aber der beste Trick für Sätze mit <b>zwei</b> Ergänzungen. Bei Verben wie <i>geben, schenken, zeigen, bringen, leihen, schicken, erklären</i> braucht man drei Mitspieler:</p>
+    <div class="formula"><span class="fn">Nominativ</span><span class="fv">gibt</span><span class="fd">dem Dativ</span><span class="fa">einen Akkusativ</span></div>
+    <p>Tippe auf „Weiter“ und bau den Satz Stück für Stück auf:</p>
+    <div class="parts" id="sp">${s1.map(p=>partHTML(p,true,false)).join('')}</div>
+    <div class="row"><button class="btn gold" id="st">Weiter ▶</button></div>
+    <div id="ex"></div>
+  </div>`;
+  const parts=[...document.querySelectorAll('#sp .part')]; parts.forEach(p=>p.classList.add('hidden'));
+  const notes=[
+    `<span class="N">Der Trainer</span> – <b>Wer</b> gibt? Das ist der <span class="N">Nominativ</span>, der Chef im Satz. Er macht etwas.`,
+    `<b>gibt</b> – das Verb. Es braucht zwei Dinge: <b>wem?</b> und <b>was?</b>`,
+    `<span class="D">dem Spieler</span> – <b>Wem</b> gibt er etwas? Das ist der <span class="D">Dativ</span>. Meistens ist das eine <b>Person</b> (oder ein Tier), die etwas bekommt.`,
+    `<span class="A">einen Ball</span> – <b>Was</b> gibt er? Das ist der <span class="A">Akkusativ</span>. Meistens ist das die <b>Sache</b>, die wandert.`
+  ];
+  let k=0;
+  document.getElementById('st').onclick=()=>{
+    if(k<4){ parts[k].classList.remove('hidden'); parts[k].classList.add('pop');
+      document.getElementById('ex').innerHTML=`<div class="rulebox">${notes[k]}</div>`; k++;
+      if(k===4){ document.getElementById('st').textContent='Noch ein Beispiel ▶'; } return; }
+    document.getElementById('st').style.display='none';
+    document.getElementById('ex').innerHTML=`
+      <div class="parts">${s2.map(p=>partHTML(p,true,false)).join('')}</div>
+      <div class="rulebox"><strong>So merkst du es dir:</strong><br>
+      <span class="N">Nominativ</span> = <b>Wer?</b> – wer gibt<br>
+      <span class="D">Dativ</span> = <b>Wem?</b> – wer bekommt (meist eine Person)<br>
+      <span class="A">Akkusativ</span> = <b>Was?</b> – die Sache, die wandert<br>
+      Die Reihenfolge im Satz: <b>Nominativ – Verb – Dativ – Akkusativ</b>.</div>
+      <div class="rulebox"><strong>Die Artikel kennst du schon:</strong> Im <span class="D">Dativ</span> heißt es dem / der / dem, im <span class="A">Akkusativ</span> den / die / das. Ein Satz – zwei Zauber!</div>
+      <div class="row"><button class="btn" id="nx">Werde Fälle-Detektiv →</button></div>`;
+    document.getElementById('nx').onclick=comboDetektiv;
+  };
+  scrollUp();
+}
+function comboDetektiv(){
+  setTab('combo');
+  const rounds=shuffle(DETEKTIV); let i=0, first=0;
+  const askTxt={nom:['den <span class="N">Nominativ</span>','Wer?'],dat:['den <span class="D">Dativ</span>','Wem?'],akk:['den <span class="A">Akkusativ</span>','Was?']};
+  function render(){
+    const r=rounds[i];
+    const opts=r.p.map((p,k)=>[p,k]).filter(([p])=>['nom','dat','akk'].includes(p[1]));
+    app.innerHTML = `
+    <div class="card">
+      <div class="meta"><span>Fälle-Detektiv</span><span>${i+1} / ${rounds.length}</span></div>
+      <div class="progress"><i style="width:${i/rounds.length*100}%"></i></div>
+      <h2 class="center">Tippe auf ${askTxt[r.ask][0]}<br><span class="muted" style="font-size:1rem">Frage: ${askTxt[r.ask][1]}</span></h2>
+      <div class="parts" id="pp">${r.p.map((p,k)=>['nom','dat','akk'].includes(p[1])?partHTML(p,false,true,k):partHTML(p,false,false)).join('')}<span style="font-size:1.25rem">.</span></div>
+      <div id="fb"></div>
+    </div>`;
+    const btns=[...app.querySelectorAll('#pp button.part')];
+    btns.forEach(b=>b.onclick=()=>{
+      const k=+b.dataset.k, ok=r.p[k][1]===r.ask;
+      app.querySelector('#pp').innerHTML = r.p.map(p=>partHTML(p,true,false)).join('')+'<span style="font-size:1.25rem">.</span>';
+      const right=r.p.find(p=>p[1]===r.ask)[0], verb=r.p.find(p=>p[1]==='v')[0];
+      const nom=r.p.find(p=>p[1]==='nom')[0], dat=r.p.find(p=>p[1]==='dat')[0], akk=r.p.find(p=>p[1]==='akk')[0];
+      if(ok){first++;addStar();}
+      let txt = r.ask==='nom' ? `<b>Wer</b> ${verb}? → <span class="N">${nom}</span>. Das ist der Nominativ – er macht etwas.`
+              : r.ask==='dat' ? `<b>Wem</b>? → <span class="D">${dat}</span> bekommt etwas. Das ist der Dativ.`
+              : `<b>Was</b>? → <span class="A">${akk}</span> ist die Sache, die wandert. Das ist der Akkusativ.`;
+      if(!ok) txt = `„${r.p[k][0]}“ ist der ${r.p[k][1]==='nom'?'<span class="N">Nominativ</span>':r.p[k][1]==='dat'?'<span class="D">Dativ</span>':'<span class="A">Akkusativ</span>'}. Gesucht war aber „${right}“. ` + txt;
+      document.getElementById('fb').innerHTML=`<div class="feedback ${ok?'good':'bad'}"><h3>${ok?praise()+' 🕵️':'Knapp daneben – schau mal:'}</h3>${txt}
+        <div class="row"><button class="btn" id="nx">${i<rounds.length-1?'Weiter →':'Fertig ✨'}</button></div></div>`;
+      document.getElementById('nx').onclick=()=>{ i++; if(i<rounds.length) render(); else finish('comboDet','Fälle-Detektiv',first,rounds.length,comboDetektiv,comboDoppel,MENUS.combo); };
+    });
+    scrollUp();
+  }
+  render();
+}
+function comboDoppel(){
+  setTab('combo');
+  let queue=shuffle(DOPPEL).map(x=>({...x})), done=0, first=0; const tot=DOPPEL.length;
+  function render(){
+    const it=queue[0], [s0,s1,s2]=it.s.split('___');
+    const A={...it.a,c:'dat',v:it.v,s:''}, B={...it.b,c:'akk',v:it.v,s:''};
+    let step=0, mistakes=0;
+    app.innerHTML = `
+    <div class="card">
+      <div class="meta"><span>Doppel-Zauber</span><span>${Math.min(done+1,tot)} / ${tot}</span></div>
+      <div class="progress"><i style="width:${done/tot*100}%"></i></div>
+      <p class="center"><span class="verbtag">${it.v}</span></p>
+      <div class="pic">${it.e}</div>
+      <p class="center"><span class="chip" style="border-color:var(--dat)">${chipHTML(A)}</span> <span class="chip" style="border-color:var(--akk)">${chipHTML(B)}</span></p>
+      <div class="sentence">${s0}<span class="gap active" id="g0">&nbsp;</span>${s1}<span class="gap" id="g1">&nbsp;</span>${s2}</div>
+      <p class="center" id="hint"><span class="qtag" style="background:var(--dat-soft);color:var(--dat)">Lücke 1 · Wem?</span></p>
+      <div class="opts" id="opts"></div>
+      <div id="fb"></div>
+    </div>`;
+    function showOpts(){
+      const cur=step===0?A:B, opts=optionsFor(cur);
+      document.getElementById('opts').innerHTML=opts.map(o=>`<button class="opt" data-o="${o}">${o}</button>`).join('');
+      const btns=[...app.querySelectorAll('#opts .opt')];
+      btns.forEach(b=>b.onclick=()=>{
+        const ans=answerOf(cur), ok=b.dataset.o===ans;
+        if(!ok){ mistakes++; b.classList.add('wrong'); b.disabled=true;
+          const e=explain(cur,b.dataset.o).split('<span class="full">')[0];
+          document.getElementById('fb').innerHTML=`<div class="feedback bad"><h3>Noch nicht – probier es noch einmal:</h3>${e}</div>`; return; }
+        const g=document.getElementById('g'+step); g.textContent=ans; g.classList.remove('active'); g.classList.add('filled',step===0?'fD':'fA');
+        document.getElementById('fb').innerHTML='';
+        if(step===0){ step=1; document.getElementById('g1').classList.add('active');
+          document.getElementById('hint').innerHTML='<span class="qtag" style="background:var(--akk-soft);color:var(--akk)">Lücke 2 · Was?</span>'; showOpts(); return; }
+        document.getElementById('opts').innerHTML='';
+        const ok2=mistakes===0; if(ok2 && !it.retry){first++;addStar();}
+        let again=''; if(!ok2 && !it.retry){ queue.push({...it,retry:true}); again='<span class="again">Dieser Satz kommt später noch einmal.</span>'; }
+        const full=s0+formOf('dat',A.t,A.g)+s1+formOf('akk',B.t,B.g)+s2;
+        document.getElementById('hint').innerHTML='';
+        document.getElementById('fb').innerHTML=`<div class="feedback ${ok2?'good':'bad'}"><h3>${ok2?praise()+' ✨':'Geschafft!'}</h3>
+          <span class="D">${formOf('dat',A.t,A.g)} ${A.n}</span>: <b>Wem?</b> – ${A.n} ist ${GW[A.g]}, Dativ → ${formOf('dat',A.t,A.g)}.<br>
+          <span class="A">${formOf('akk',B.t,B.g)} ${B.n}</span>: <b>Was?</b> – ${B.n} ist ${GW[B.g]}, Akkusativ → ${formOf('akk',B.t,B.g)}.
+          <span class="full">→ ${full}</span>${again}
+          <div class="row"><button class="btn" id="nx">Weiter →</button></div></div>`;
+        document.getElementById('nx').onclick=()=>{ if(!it.retry) done++; queue.shift();
+          if(queue.length) render(); else finish('comboDop','Doppel-Zauber',first,tot,comboDoppel,comboBauer,MENUS.combo); };
+      });
+    }
+    showOpts(); scrollUp();
+  }
+  render();
+}
+function comboBauer(){
+  setTab('combo');
+  const rounds=shuffle(BAUER); let i=0, first=0;
+  const need=['nom','v','dat','akk'];
+  const tip={nom:'Zuerst kommt der <span class="N">Nominativ</span>: <b>Wer</b> macht etwas?',v:'Jetzt kommt das <b>Verb</b>.',dat:'Jetzt kommt der <span class="D">Dativ</span>: <b>Wem?</b>',akk:'Zum Schluss der <span class="A">Akkusativ</span>: <b>Was?</b>'};
+  function render(){
+    const r=rounds[i], pool=shuffle(r.map((p,k)=>[p,k]));
+    let pos=0, err=0;
+    app.innerHTML = `
+    <div class="card">
+      <div class="meta"><span>Satz-Baumeister</span><span>${i+1} / ${rounds.length}</span></div>
+      <div class="progress"><i style="width:${i/rounds.length*100}%"></i></div>
+      <h2 class="center">Baue den Satz nach dem Schema</h2>
+      <div class="formula"><span class="fn">Nominativ</span><span class="fv">Verb</span><span class="fd">Dativ</span><span class="fa">Akkusativ</span></div>
+      <div class="build" id="bd"></div>
+      <div class="parts" id="pool">${pool.map(([p,k])=>`<button class="part" data-k="${k}">${p[0]}</button>`).join('')}</div>
+      <div id="fb"><div class="feedback bad" style="text-align:center">${tip.nom}</div></div>
+    </div>`;
+    app.querySelectorAll('#pool .part').forEach(b=>b.onclick=()=>{
+      const p=r[+b.dataset.k];
+      if(p[1]!==need[pos]){ err++; b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake');
+        document.getElementById('fb').innerHTML=`<div class="feedback bad" style="text-align:center">Noch nicht. ${tip[need[pos]]}</div>`; return; }
+      b.remove(); document.getElementById('bd').insertAdjacentHTML('beforeend',partHTML(p,true,false)); pos++;
+      if(pos<4){ document.getElementById('fb').innerHTML=`<div class="feedback bad" style="text-align:center">${tip[need[pos]]}</div>`; return; }
+      document.getElementById('bd').insertAdjacentHTML('beforeend','<span style="font-size:1.3rem">.</span>');
+      const ok=err===0; if(ok){first++;addStar();}
+      document.getElementById('fb').innerHTML=`<div class="feedback ${ok?'good':'bad'}"><h3>${ok?praise()+' 🧩':'Geschafft!'}</h3>
+        <span class="N">${r[0][0]}</span> ${r[1][0]} <span class="D">${r[2][0]}</span> <span class="A">${r[3][0]}</span>: Wer? – Wem? – Was? Genau nach dem Schema.
+        <div class="row"><button class="btn" id="nx">${i<rounds.length-1?'Weiter →':'Fertig ✨'}</button></div></div>`;
+      document.getElementById('nx').onclick=()=>{ i++; if(i<rounds.length) render(); else finish('comboBau','Satz-Baumeister',first,rounds.length,comboBauer,null,MENUS.combo); };
+    });
+    scrollUp();
+  }
+  render();
+}
+
+showStart();
+</script>
+</body>
+</html>
