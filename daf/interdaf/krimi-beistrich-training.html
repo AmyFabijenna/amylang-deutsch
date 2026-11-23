@@ -126,6 +126,18 @@ textarea{min-height:12rem;resize:vertical;line-height:1.6}
 .rally:first-of-type{border-top:none}
 .rally .lbl{font-weight:500;color:var(--blue);margin-bottom:.35rem}
 .formcheck{font-size:.9rem;margin-top:.35rem}
+.tapbox{font-size:1.08rem;line-height:2.1;background:#fbf9f5;border-radius:13px;padding:.7rem 1rem;border:1px solid #eee6da}
+.tw{cursor:pointer;border-radius:6px;padding:.05em .12em;transition:background .15s}
+.tw:hover{background:var(--blue-soft)}
+.tw.on{background:var(--lilac-soft);box-shadow:inset 0 -2px 0 var(--lilac)}
+.tw.good{background:var(--petrol-soft);box-shadow:inset 0 -2px 0 var(--petrol)}
+.tw.miss{background:var(--rose-soft);outline:1.5px dashed var(--rose)}
+.tw.extra{background:var(--rose-soft);text-decoration:line-through}
+.planbox{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:.7rem;margin:.6rem 0}
+.planbox label{font-size:.9rem;color:var(--blue);font-weight:500}
+.planbox textarea{min-height:4.2rem}
+select.wide{font:inherit;font-size:1rem;border:1.5px solid #d3cabc;border-radius:12px;padding:.5rem .7rem;background:#fff;color:var(--ink);max-width:100%}
+.gpstart{display:flex;flex-wrap:wrap;gap:.6rem}
 footer{max-width:960px;margin:0 auto;padding:0 1rem 2.5rem;color:var(--muted);font-size:.85rem}
 @media (max-width:600px){
   body{font-size:17px}
@@ -137,15 +149,15 @@ footer{max-width:960px;margin:0 auto;padding:0 1rem 2.5rem;color:var(--muted);fo
 <body>
 <header>
   <div class="wrap">
-    <span class="kicker">Deutsch · 5. Schulstufe · Schularbeitstraining</span>
-    <h1>Krimi-Sprache, Ermittlungsberichte &amp; Beistriche</h1>
-    <p>Fachbegriffe der Kriminalistik, spannend und abwechslungsreich erzählen, einen Tatort genau lesen und jeden Beistrich sicher setzen. Die Aufgaben sind absichtlich anspruchsvoll: Lies genau, denk mit und lies nach jeder Antwort auch die Erklärung.</p>
+    <span class="kicker">Deutsch · Schularbeitstraining Kriminalgeschichte</span>
+    <h1>Kriminalgeschichten: Wortschatz, Erzählzeiten, Aufbau &amp; Beistriche</h1>
+    <p>Fachbegriffe und Redewendungen der Kriminalistik, Präteritum und Plusquamperfekt, Aufbau, Einstieg und Wende einer Kriminalgeschichte, genaues Lesen und jeder Beistrich. Am Ende schreibst du deine eigene Geschichte. Die Aufgaben sind absichtlich anspruchsvoll: Lies genau, denk mit und lies nach jeder Antwort auch die Erklärung.</p>
     <div class="total"><span id="totalPts">Gesamtpunkte: 0 / 0</span><span id="totalPct">0 % erledigt</span></div>
   </div>
 </header>
 <nav><div class="wrap" id="tabs"></div></nav>
 <main id="main"></main>
-<footer>Alle Übungstexte, Fälle, Figuren und Beispielsätze dieser Seite wurden eigens für dieses Training verfasst. Die erwähnte Buchkritik bezieht sich auf ein erfundenes Buch.</footer>
+<footer>Alle Übungstexte, Fälle, Figuren und Beispielsätze dieser Seite wurden eigens für dieses Training verfasst. Die erwähnte Buchkritik bezieht sich auf ein erfundenes Buch. Es werden keine Texte aus Schulbüchern oder Jugendbüchern wiedergegeben.</footer>
 
 <script>
 /* =========================================================
@@ -561,6 +573,422 @@ const IB_FX = fixedItems(IB, IB_OPTS, quote);
 const AUFBAU_FX = fixedItems(AUFBAU, AUFBAU_OPTS, s => 'Zu welchem Teil der Buchkritik gehört dieser Satz? '+quote(s));
 
 /* =========================================================
+   DATEN · KAPITEL 6: KRIMI-WORTSCHATZ & REDEWENDUNGEN
+   ========================================================= */
+const THEORY_WORT = `
+<h3>Wissensbox: Der Wortschatz einer Kriminalgeschichte</h3>
+<p class="intro">Ein guter Krimi lebt von treffenden Wörtern. Ordne neue Wörter immer einer Gruppe zu – so merkst du sie dir viel leichter.</p>
+<div class="rules">
+ <div class="rule"><b>Personenbezeichnungen</b><br>die Kommissarin, der Privatdetektiv, der Ganove, die Geisel, der Spitzel, der Komplize …</div>
+ <div class="rule"><b>Straftaten</b><br>der Diebstahl, der Raubüberfall, die Erpressung, die Entführung, der Betrug, die Hehlerei …</div>
+ <div class="rule"><b>Krimi-Verben</b><br>ermitteln, aufklären, verhören, vernehmen, beschatten, entlarven, überführen, festnehmen …</div>
+ <div class="rule"><b>Krimi-Adjektive</b><br>verdächtig, misstrauisch, geheimnisvoll, berüchtigt, rücksichtslos, kaltblütig, gerissen …</div>
+ <div class="rule"><b>Spezialbegriffe</b><br>das Lösegeld, das Protokoll, die Tatwaffe, das Phantombild, die DNA-Spur, das Beweismittel …</div>
+ <div class="rule"><b>Redewendungen</b><br>eine heiße Spur verfolgen · auf frischer Tat ertappen · die Flucht ergreifen · hinter Schloss und Riegel bringen …</div>
+</div>`;
+
+const CATS = ['Personenbezeichnung','Straftat','Krimi-Verb','Krimi-Adjektiv','Spezialbegriff'];
+const SORT = [
+ ['der Privatdetektiv',0,'Eine Person, die gegen Bezahlung ermittelt – also eine Personenbezeichnung.'],
+ ['der Ganove',0,'Umgangssprachlich für einen Verbrecher oder Gauner – eine Person.'],
+ ['die Geisel',0,'Eine Person, die gefangen gehalten wird, um etwas zu erzwingen.'],
+ ['der Spitzel',0,'Eine Person, die heimlich andere beobachtet und Informationen weitergibt.'],
+ ['die Hehlerin',0,'Eine Person, die gestohlene Waren kauft und weiterverkauft.'],
+ ['der Erpresser',0,'Eine Person, die jemanden mit Drohungen zu etwas zwingt.'],
+ ['die Erpressung',1,'Die Straftat selbst. Achtung: der Erpresser ist die Person, die Erpressung ist die Tat.'],
+ ['der Raubüberfall',1,'Ein Diebstahl mit Gewalt oder Drohung – eine Straftat.'],
+ ['die Entführung',1,'Jemanden gegen seinen Willen verschleppen – eine Straftat.'],
+ ['der Betrug',1,'Jemanden absichtlich täuschen, um sich einen Vorteil zu verschaffen – eine Straftat.'],
+ ['die Hehlerei',1,'Das Kaufen und Verkaufen von Diebesgut ist selbst eine Straftat.'],
+ ['die Brandstiftung',1,'Absichtlich ein Feuer legen – eine Straftat.'],
+ ['entlarven',2,'Ein Verb: jemandes wahres Gesicht aufdecken.'],
+ ['verhören',2,'Ein Verb: jemanden offiziell und eindringlich befragen.'],
+ ['überführen',2,'Ein Verb: jemandem eine Tat eindeutig nachweisen.'],
+ ['beschatten',2,'Ein Verb: jemanden heimlich verfolgen und beobachten.'],
+ ['aufklären',2,'Ein Verb: einen Fall lösen.'],
+ ['festnehmen',2,'Ein Verb: eine Person in Gewahrsam nehmen.'],
+ ['berüchtigt',3,'Ein Adjektiv: für schlechte Taten bekannt. Adjektive schreibt man klein.'],
+ ['misstrauisch',3,'Ein Adjektiv: wer misstrauisch ist, glaubt anderen nicht so leicht.'],
+ ['kaltblütig',3,'Ein Adjektiv: ohne Mitgefühl und ohne Aufregung handeln.'],
+ ['gerissen',3,'Ein Adjektiv: besonders schlau und durchtrieben.'],
+ ['rücksichtslos',3,'Ein Adjektiv: ohne Rücksicht auf andere.'],
+ ['geheimnisvoll',3,'Ein Adjektiv: rätselhaft, voller Geheimnisse.'],
+ ['das Lösegeld',4,'Ein Fachbegriff: Geld, das für die Freilassung einer entführten Person verlangt wird.'],
+ ['das Phantombild',4,'Ein Fachbegriff: ein Bild des Täters, das nach den Angaben von Zeugen angefertigt wird.'],
+ ['das Protokoll',4,'Ein Fachbegriff: die schriftliche Aufzeichnung, z. B. einer Vernehmung.'],
+ ['die Handschellen',4,'Ein Gegenstand aus der Polizeiarbeit – ein Spezialbegriff.'],
+ ['das Beweismittel',4,'Ein Fachbegriff: ein Gegenstand oder eine Aussage, die eine Tat nachweisen soll.'],
+ ['die DNA-Spur',4,'Ein Fachbegriff aus der Spurensicherung.']
+];
+
+const BEGRIFFE = [
+ {q:'Was ist eine <b>DNA-Spur</b>?', o:['winzige Reste von Haut, Haaren oder Speichel, aus denen man das Erbgut eines Menschen bestimmen kann','ein Schuhabdruck, mit dem man die Schuhgröße eines Menschen genau bestimmen kann','ein Foto vom Tatort, das die Spurensicherung gleich nach der Tat aufnimmt','eine schriftliche Aussage, die eine Zeugin unterschreiben muss'], ex:'DNA ist das Erbgut. Schon ein einziges Haar kann genügen, um eine Person zu bestimmen.'},
+ {q:'Was ist ein <b>Beweismittel</b>?', o:['ein Gegenstand oder eine Aussage, mit der man vor Gericht eine Tat nachweist','ein Pulver, mit dem die Spurensicherung Fingerabdrücke sichtbar macht','die Belohnung, die man für einen wichtigen Hinweis bekommt','das Geld, das die Polizei für ihre Ermittlungen ausgeben darf'], ex:'Ein Beweismittel kann eine Tatwaffe sein, ein Video oder eine Zeugenaussage. Das Pulver ist nur ein Hilfsmittel, um Spuren zu finden.'},
+ {q:'Was heißt es, jemanden zu <b>überführen</b>?', o:['jemandem eine Tat eindeutig nachweisen','jemanden in ein anderes Gefängnis bringen','jemanden über die Grenze ins Ausland abschieben','jemanden nach der Vernehmung freilassen'], ex:'„Der Täter wurde durch seine DNA überführt.“ = Die DNA bewies eindeutig, dass er es war.'},
+ {q:'Was ist der <b>Tathergang</b>?', o:['der genaue Ablauf einer Tat, Schritt für Schritt','der Weg, auf dem der Täter vom Tatort geflohen ist','der Gang im Gericht, durch den die Angeklagten geführt werden','die Reihenfolge, in der die Zeugen befragt werden'], ex:'Wer den Tathergang rekonstruiert, will wissen: Was ist wann, wie und in welcher Reihenfolge passiert?'},
+ {q:'Was bedeutet: Die Detektivin <b>beschattet</b> den Verdächtigen?', o:['Sie folgt ihm heimlich und beobachtet ihn.','Sie verhört ihn stundenlang auf der Wache.','Sie verhaftet ihn vor seinem Haus.','Sie macht ihm mit Drohungen Angst.'], ex:'Beim Beschatten bleibt man unbemerkt „wie ein Schatten“ hinter der Person.'},
+ {q:'Was bedeutet: Die Polizei <b>stellt dem Dieb eine Falle</b>?', o:['Sie schafft eine Situation, in der sich der Dieb verrät oder gefasst werden kann.','Sie baut am Tatort ein Gitter auf, damit niemand hineinkommt.','Sie stellt dem Dieb eine besonders schwierige Frage bei der Vernehmung.','Sie lässt den Dieb absichtlich laufen, damit er ins Ausland flieht.'], ex:'Zum Beispiel: Ein Lockvogel bietet dem Dieb wertvolle Ware an, und die Polizei wartet schon versteckt.'},
+ {q:'„Früher oder später <b>gehen sie mir alle ins Netz</b>.“ – Was meint die Ermittlerin?', o:['Früher oder später fasst sie alle Täter.','Früher oder später findet sie alle Täter im Internet.','Früher oder später schreiben ihr alle Täter eine Nachricht.','Früher oder später gesteht sie selbst einen Fehler.'], ex:'Die Redewendung kommt vom Fischen: Wer ins Netz geht, ist gefangen.'},
+ {q:'Was bedeutet: Sie muss sich <b>in den Täter hineinversetzen</b>?', o:['Sie muss sich vorstellen, wie der Täter denkt und warum er so handelt.','Sie muss sich so verkleiden, dass sie aussieht wie der Täter.','Sie muss den Täter in eine Zelle sperren lassen.','Sie muss dem Täter zeigen, dass sie Mitleid mit ihm hat.'], ex:'Wer sich in jemanden hineinversetzt, sieht die Situation mit dessen Augen – so kann man Motiv und Tathergang besser verstehen.'},
+ {q:'Was ist ein <b>Phantombild</b>?', o:['ein Bild des Täters, das nach den Beschreibungen von Zeugen angefertigt wird','ein Foto, das die Überwachungskamera in der Nacht aufnimmt','ein Gemälde, das bei einem Einbruch gestohlen wurde','ein unscharfes Bild, auf dem man niemanden erkennt'], ex:'Zeuginnen und Zeugen beschreiben Gesicht, Haare, Nase usw. – daraus entsteht das Phantombild für die Fahndung.'},
+ {q:'Was macht ein <b>Hehler</b>?', o:['Er kauft gestohlene Waren und verkauft sie weiter.','Er bricht in Häuser ein und stiehlt Schmuck.','Er bewacht nachts Geschäfte und Banken.','Er verrät der Polizei die Namen von Verbrechern.'], ex:'Hehlerei ist eine eigene Straftat. Wer der Polizei heimlich Namen verrät, ist ein Spitzel bzw. Informant.'},
+ {q:'Ein <b>berüchtigter</b> Bankräuber ist …', o:['ein Bankräuber, der für seine schlimmen Taten bekannt ist','ein Bankräuber, der wegen guter Taten berühmt geworden ist','ein Bankräuber, den noch niemand kennt','ein Bankräuber, der nur in Gerüchten vorkommt'], ex:'„berüchtigt“ = bekannt für etwas Schlechtes. „berühmt“ = bekannt für etwas Gutes oder Besonderes.'},
+ {q:'Was bedeutet <b>entlarven</b>?', o:['jemandes wahre Absicht oder Identität aufdecken','jemanden mit einer Maske tarnen','jemanden aus dem Gefängnis befreien','jemanden zu Unrecht beschuldigen'], ex:'Eine Larve ist (altes Wort) eine Maske. Ent-larven heißt also: die Maske herunterreißen.'},
+ {q:'Was ist <b>Lösegeld</b>?', o:['Geld, das Entführer für die Freilassung einer Person verlangen','Geld, das man bekommt, wenn man einen Fall löst','Geld, das man für einen gestohlenen Gegenstand zurückbekommt','Geld, mit dem man ein Gerichtsverfahren bezahlt'], ex:'Bei einer Entführung fordern die Täter Lösegeld: Erst wenn bezahlt wird, „lösen“ sie die Geisel aus der Gefangenschaft.'},
+ {q:'Wer ist <b>misstrauisch</b>?', o:['jemand, der anderen nicht so leicht glaubt','jemand, der anderen absichtlich etwas vortäuscht','jemand, der sehr schnell Angst bekommt','jemand, der die Wahrheit immer sofort erkennt'], ex:'Gute Ermittlerinnen sind misstrauisch: Sie prüfen jede Aussage, bevor sie ihr glauben.'},
+ {q:'Was bedeutet <b>kaltblütig</b>?', o:['ohne Mitgefühl und ohne Aufregung','sehr schnell und überstürzt','aus Versehen und ohne Absicht','mit großer Angst vor Entdeckung'], ex:'Ein kaltblütiger Täter bleibt bei seiner Tat völlig ruhig und hat kein Mitleid.'},
+ {q:'Welches Verb bedeutet im Krimi fast dasselbe wie <b>vernehmen</b>?', o:['verhören','verhaften','verfolgen','verurteilen'], ex:'Vernehmen und verhören heißt: eine Person offiziell befragen. „Verhören“ klingt strenger.'}
+];
+
+const SYN = [
+ {q:'„Der <b>Inhaber</b> des Juweliergeschäfts rief sofort die Polizei.“ – Welches Wort hat eine sehr ähnliche Bedeutung?', o:['der Besitzer','der Angestellte','der Kunde','der Lieferant'], ex:'Der Inhaber ist die Person, der das Geschäft gehört – also der Besitzer.'},
+ {q:'„Der Dieb wollte die Uhren schnell <b>veräußern</b>.“', o:['verkaufen','verstecken','verschenken','zerstören'], ex:'veräußern = verkaufen, etwas gegen Geld abgeben.'},
+ {q:'„Jemand hatte aus der Kassa 200 Euro <b>entwendet</b>.“', o:['gestohlen','gezählt','eingezahlt','gewechselt'], ex:'entwenden ist ein gehobenes Wort für stehlen.'},
+ {q:'„Der Täter <b>flüchtete</b> über den Hinterhof.“', o:['floh','schlich','rief','stürzte'], ex:'flüchten = fliehen. „schleichen“ heißt nur: leise gehen – das muss keine Flucht sein.'},
+ {q:'„Die Polizei fand die gesamte <b>Beute</b> im Kofferraum.“', o:['das Diebesgut','die Tatwaffe','das Werkzeug','das Lösegeld'], ex:'Beute = das, was gestohlen oder geraubt wurde = das Diebesgut.'},
+ {q:'„Der Bewohner wurde <b>stutzig</b>, als er das offene Fenster sah.“', o:['misstrauisch','müde','fröhlich','wütend'], ex:'stutzig werden = plötzlich misstrauisch werden, weil etwas merkwürdig ist.'},
+ {q:'„Bei der Vernehmung <b>verplapperte</b> sich der Verdächtige.“', o:['Er verriet unabsichtlich etwas.','Er sprach absichtlich sehr leise.','Er schwieg die ganze Zeit.','Er sagte ausschließlich die Wahrheit.'], ex:'Wer sich verplappert, sagt unabsichtlich etwas, das er eigentlich verheimlichen wollte.'},
+ {q:'„Kein Nachbar hatte etwas vom Einbruch <b>mitbekommen</b>.“', o:['bemerkt','verursacht','erzählt','gestohlen'], ex:'mitbekommen (umgangssprachlich) = bemerken, wahrnehmen.'},
+ {q:'„Der Mann <b>beteuerte</b> immer wieder seine Unschuld.“', o:['versicherte','verschwieg','bezweifelte','vergaß'], ex:'beteuern = nachdrücklich versichern, dass etwas wahr ist.'},
+ {q:'„Die Polizei konnte den Mann noch in derselben Nacht <b>festnehmen</b>.“', o:['verhaften','verhören','verfolgen','verteidigen'], ex:'festnehmen = verhaften. Verhören passiert erst danach, auf der Wache.'},
+ {q:'„Der Hund hatte das Versteck sofort <b>aufgespürt</b>.“', o:['gefunden','bewacht','verlassen','zerstört'], ex:'aufspüren = durch Suchen finden – besonders mit der Nase oder durch genaue Nachforschung.'},
+ {q:'„Der Dieb verließ das Haus völlig <b>unbemerkt</b>.“', o:['ohne gesehen zu werden','ohne Beute','ohne Schlüssel','ohne Eile'], ex:'unbemerkt = ohne dass es jemand bemerkt.'}
+];
+
+const IDIOM = [
+ {t:'Nach dem anonymen Anruf glaubte die Detektivin endlich, eine heiße Spur zu [[verfolgen]].', ex:'eine heiße Spur verfolgen = einem sehr vielversprechenden Hinweis nachgehen.'},
+ {t:'Die Polizei konnte den Taschendieb in der U-Bahn auf frischer Tat [[ertappen]].', ex:'auf frischer Tat ertappen = genau in dem Moment erwischen, in dem jemand die Tat begeht.'},
+ {t:'Als der Einbrecher das Blaulicht sah, [[ergriff]] er sofort die Flucht.', ex:'die Flucht ergreifen = fliehen. Präteritum: ergriff (unregelmäßig).'},
+ {t:'Zwei Streifenwagen [[nahmen]] sofort die Verfolgung [[auf]].', ex:'die Verfolgung aufnehmen = beginnen, jemanden zu verfolgen. Trennbar: nahmen … auf.'},
+ {t:'Der Kommissar wollte den nervösen Zeugen ab jetzt genau im Auge [[behalten]].', ex:'im Auge behalten = aufmerksam beobachten.'},
+ {t:'Die Spurensicherung [[nahm]] jedes Haar am Tatort genau unter die Lupe.', ex:'unter die Lupe nehmen = sehr genau untersuchen.'},
+ {t:'Nach monatelangen Ermittlungen konnten sie die Bande endlich hinter Schloss und Riegel [[bringen]].', ex:'hinter Schloss und Riegel bringen = ins Gefängnis bringen.'},
+ {t:'Der Juwelier [[setzte]] eine hohe Belohnung für Hinweise auf die Täter [[aus]].', ex:'eine Belohnung aussetzen = öffentlich eine Belohnung versprechen. Trennbar: setzte … aus.'},
+ {t:'Der Einbrecher hatte alle Spuren sorgfältig [[verwischt]].', ex:'Spuren verwischen = Spuren beseitigen, damit man nichts mehr findet.'},
+ {t:'Mit einem klugen Trick kam die Inspektorin dem Betrüger schließlich auf die [[Schliche]].', ex:'jemandem auf die Schliche kommen = jemandes heimliche Tricks durchschauen.'},
+ {t:'Bevor jemand etwas merkte, [[machte]] sich der Gauner aus dem Staub.', ex:'sich aus dem Staub machen = heimlich und schnell verschwinden.'},
+ {t:'Mit jeder neuen Frage [[trieben]] die Ermittler den Verdächtigen weiter in die Enge.', ex:'jemanden in die Enge treiben = jemanden so bedrängen, dass er keinen Ausweg mehr hat. treiben – trieb – getrieben.'},
+ {t:'Der Dieb [[roch]] Lunte und verschwand durch den Hinterausgang.', ex:'Lunte riechen = eine Gefahr ahnen. riechen – roch – gerochen.'},
+ {t:'Am Ende gingen alle drei Ganoven der Polizei ins [[Netz]].', ex:'jemandem ins Netz gehen = gefasst werden.'}
+];
+
+const IDIOM_MC = [
+ {q:'Was bedeutet <b>Lunte riechen</b>?', o:['eine Gefahr oder eine Falle ahnen','einen verdächtigen Brandgeruch melden','einen Hinweis absichtlich übersehen','jemanden durch Schnüffeln aufspüren'], ex:'Eine Lunte war früher eine Zündschnur. Wer sie roch, wusste: Gleich knallt es – Gefahr!'},
+ {q:'Was bedeutet <b>sich aus dem Staub machen</b>?', o:['heimlich und schnell verschwinden','sich nach einer Tat gründlich waschen','alle Spuren am Tatort beseitigen','sich auf dem Dachboden verstecken'], ex:'Wer sich aus dem Staub macht, ist plötzlich weg – meistens, um einer unangenehmen Lage zu entkommen.'},
+ {q:'Was bedeutet <b>jemandem auf die Schliche kommen</b>?', o:['jemandes heimliche Tricks durchschauen','jemandem heimlich bis nach Hause folgen','jemandem den Fluchtweg abschneiden','jemandem einen Hinweis zuspielen'], ex:'„Schliche“ sind Tricks und heimliche Wege.'},
+ {q:'Was bedeutet <b>jemanden auf frischer Tat ertappen</b>?', o:['jemanden genau bei der Tat erwischen','jemanden kurz nach der Tat befragen','jemanden mit frischen Spuren verwechseln','jemanden mit einem Lockvogel anlocken'], ex:'„auf frischer Tat“ = während die Tat gerade passiert.'},
+ {q:'Was bedeutet <b>jemanden in die Enge treiben</b>?', o:['jemanden so bedrängen, dass er keinen Ausweg mehr hat','jemanden in eine kleine Zelle sperren','jemanden durch eine schmale Gasse verfolgen','jemanden bei der Vernehmung anschreien'], ex:'Meist im übertragenen Sinn: Mit klugen Fragen wird ein Verdächtiger in die Enge getrieben, bis er sich verrät.'},
+ {q:'Was bedeutet <b>eine Belohnung aussetzen</b>?', o:['öffentlich eine Belohnung versprechen','eine Belohnung absichtlich nicht bezahlen','eine Belohnung an jemanden auszahlen','eine Belohnung für später aufheben'], ex:'Die Belohnung wird angekündigt – wer den entscheidenden Hinweis liefert, bekommt sie.'}
+];
+
+/* =========================================================
+   DATEN · KAPITEL 7: PRÄTERITUM & PLUSQUAMPERFEKT
+   ========================================================= */
+const THEORY_ZEIT = `
+<h3>Wissensbox: Die Zeiten in der Kriminalgeschichte</h3>
+<div class="rules">
+ <div class="rule"><b>Präteritum = Erzählzeit</b><br>Schriftliche Geschichten stehen im Präteritum: <em>Sie öffnete die Tür. Er floh.</em><br>Auch Modalverben: <em>wollte, konnte, musste, durfte, sollte, mochte</em>.</div>
+ <div class="rule"><b>Plusquamperfekt = Vorvergangenheit</b><br>Was <em>noch früher</em> geschah: <em>hatte/war + Partizip II</em><br><em>Der Dieb hatte das Fenster aufgebrochen.</em> · <em>Er war geflohen.</em></div>
+ <div class="rule"><b>nachdem → Plusquamperfekt</b><br>Im nachdem-Satz steht das Plusquamperfekt, im Hauptsatz das Präteritum:<br><em>Nachdem sie den Tatort untersucht hatte, befragte sie die Zeugen.</em></div>
+ <div class="rule"><b>haben oder sein?</b><br><em>sein</em> bei Bewegung und Veränderung (gehen, fliehen, einsteigen, verschwinden, einschlafen) und bei <em>sein, bleiben, passieren</em>. Sonst meistens <em>haben</em>.</div>
+ <div class="rule"><b>Perfekt = mündliches Erzählen</b><br>Beim Reden sagen wir: <em>Es hat geläutet, ich bin hingegangen.</em> In einer geschriebenen Geschichte wird daraus: <em>Es läutete, ich ging hin.</em></div>
+ <div class="rule"><b>Wörtliche Rede</b><br>In der wörtlichen Rede steht die Zeit, in der die Figur spricht: <em>„Ich habe nichts gesehen“, sagte der Zeuge.</em> – hier ist das Perfekt richtig!</div>
+ <div class="rule no"><b>Kein Zeitenwechsel</b><br>Wechsle in deiner Erzählung nicht plötzlich ins Präsens: <em>Sie öffnete die Tür und <s>sieht</s> sah den Einbrecher.</em></div>
+ <div class="rule"><b>Präsens · Futur</b><br>Präsens: <em>Er sucht den Schlüssel.</em><br>Futur I: <em>Er wird den Schlüssel finden.</em></div>
+</div>`;
+
+const ZOPTS = ['Präsens','Präteritum','Perfekt','Plusquamperfekt','Futur I'];
+const ZEITFORM = [
+ ['Die Inspektorin <u>wollte</u> gerade nach Hause gehen.',1,'„wollte“ ist das Präteritum des Modalverbs „wollen“. Der Infinitiv „gehen“ gehört dazu, verändert die Zeit aber nicht.'],
+ ['Sie fand den Täter nicht, obwohl sie lange <u>suchen musste</u>.',1,'Modalverb im Präteritum (musste) + Infinitiv. Das bleibt Präteritum.'],
+ ['Ein erfahrener Einbrecher <u>meidet</u> helles Licht.',0,'„meidet“ – Präsens. Es ist eine allgemeine Aussage, die immer gilt.'],
+ ['Gestern <u>hat</u> jemand dreimal an unsere Tür <u>geklopft</u>.',2,'hat + Partizip II (geklopft) = Perfekt. So erzählt man mündlich.'],
+ ['Als die Streife ankam, <u>war</u> der Dieb längst <u>verschwunden</u>.',3,'war + Partizip II = Plusquamperfekt: Das Verschwinden geschah noch vor dem Ankommen der Streife.'],
+ ['Morgen <u>wird</u> die Polizei den Verdächtigen <u>vernehmen</u>.',4,'werden + Infinitiv = Futur I.'],
+ ['Der Zeuge <u>erinnerte</u> sich an ein rotes Auto.',1,'erinnerte – Präteritum eines regelmäßigen Verbs (-te).'],
+ ['Wir <u>sind</u> sofort zur Polizei <u>gelaufen</u>.',2,'sind + Partizip II = Perfekt (mit „sein“, weil es eine Bewegung ist).'],
+ ['Sie <u>hatte</u> den Ersatzschlüssel unter der Fußmatte <u>versteckt</u>.',3,'hatte + Partizip II = Plusquamperfekt.'],
+ ['Der Kommissar <u>ist</u> heute sehr misstrauisch.',0,'„ist“ allein, ohne Partizip – das ist das Präsens von „sein“.'],
+ ['Der Kommissar <u>war</u> an diesem Abend sehr misstrauisch.',1,'„war“ allein, ohne Partizip – das ist das Präteritum von „sein“. Erst mit Partizip II (war … gewesen / war … gegangen) wäre es Plusquamperfekt.'],
+ ['Plötzlich <u>riss</u> jemand die Kellertür <u>auf</u>.',1,'aufreißen – riss … auf: Präteritum eines trennbaren, unregelmäßigen Verbs.'],
+ ['Die Zeugin <u>durfte</u> den Raum nicht verlassen.',1,'„durfte“ ist das Präteritum von „dürfen“.'],
+ ['Ich <u>werde</u> diesen Fall <u>lösen</u>!',4,'werde + Infinitiv = Futur I.'],
+ ['Jemand <u>war</u> durch das Kellerfenster <u>gestiegen</u>.',3,'war + Partizip II = Plusquamperfekt.'],
+ ['Er <u>hat</u> sich den Fremden genau <u>angesehen</u>.',2,'hat + Partizip II = Perfekt.'],
+ ['Die Polizei <u>sucht</u> seit drei Tagen nach dem Ring.',0,'„sucht“ – Präsens. „seit drei Tagen“ zeigt: Die Suche dauert jetzt noch an.'],
+ ['Nachdem der Wachmann <u>eingeschlafen war</u>, schlich sich der Dieb hinein.',3,'war + eingeschlafen = Plusquamperfekt, typisch nach „nachdem“.'],
+ ['Der Hund <u>bellte</u> die ganze Nacht.',1,'bellte – Präteritum.'],
+ ['„Ich <u>habe</u> den Mann noch nie <u>gesehen</u>“, behauptete die Kellnerin.',2,'In der wörtlichen Rede: habe + Partizip II = Perfekt. Die Figur spricht, also ist das Perfekt hier richtig.']
+];
+
+const NACHDEM = [
+ {q:'Stichworte: <i>nachdem · Inspektor Brandt · den Tatort absperren · die Spurensicherung rufen</i>', o:['Nachdem Inspektor Brandt den Tatort abgesperrt hatte, rief er die Spurensicherung.','Nachdem Inspektor Brandt den Tatort absperrte, rief er die Spurensicherung.','Nachdem Inspektor Brandt den Tatort abgesperrt hatte, er rief die Spurensicherung.','Nachdem Inspektor Brandt hatte den Tatort abgesperrt, rief er die Spurensicherung.'], ex:'Nach „nachdem“ steht das Plusquamperfekt (abgesperrt hatte), und das gebeugte Verb steht am Ende des Nebensatzes. Danach folgt sofort das Verb des Hauptsatzes: rief er.'},
+ {q:'Stichworte: <i>sie · feststellen, dass · jemand · ein Fenster einschlagen · außerdem · Glassplitter im Garten liegen</i>', o:['Sie stellte fest, dass jemand ein Fenster eingeschlagen hatte. Außerdem lagen Glassplitter im Garten.','Sie feststellte, dass jemand ein Fenster eingeschlagen hatte. Außerdem lagen Glassplitter im Garten.','Sie stellte fest, dass jemand ein Fenster eingeschlagen hat. Außerdem liegen Glassplitter im Garten.','Sie stellte fest, dass jemand hatte ein Fenster eingeschlagen. Außerdem lagen Glassplitter im Garten.'], ex:'feststellen wird getrennt (stellte … fest). Das Einschlagen geschah vorher: Plusquamperfekt, im dass-Satz mit dem Verb am Ende. Kein Wechsel ins Präsens.'},
+ {q:'Stichworte: <i>als · die Inspektorin · die Nachbarn befragen · erfahren, dass · ein Mann · nachts · im Garten herumschleichen</i>', o:['Als die Inspektorin die Nachbarn befragte, erfuhr sie, dass ein Mann nachts im Garten herumgeschlichen war.','Wenn die Inspektorin die Nachbarn befragte, erfuhr sie, dass ein Mann nachts im Garten herumgeschlichen war.','Als die Inspektorin die Nachbarn befragte, erfuhr sie, dass ein Mann nachts im Garten herumgeschlichen hatte.','Als die Inspektorin die Nachbarn befragte, sie erfuhr, dass ein Mann nachts im Garten herumgeschlichen war.'], ex:'„als“ für ein einmaliges Ereignis in der Vergangenheit („wenn“ nur für Wiederholungen). „schleichen“ ist eine Bewegung → war herumgeschlichen. Nach dem Nebensatz kommt sofort das Verb: erfuhr sie.'},
+ {q:'Stichworte: <i>der Täter · bei der Flucht · einen Handschuh verlieren · deshalb · die Polizei · seine DNA finden</i>', o:['Der Täter hatte bei der Flucht einen Handschuh verloren. Deshalb fand die Polizei seine DNA.','Der Täter hatte bei der Flucht einen Handschuh verloren. Deshalb die Polizei fand seine DNA.','Der Täter war bei der Flucht einen Handschuh verloren. Deshalb fand die Polizei seine DNA.','Der Täter hatte bei der Flucht einen Handschuh verliert. Deshalb fand die Polizei seine DNA.'], ex:'verlieren bildet das Plusquamperfekt mit „haben“: hatte verloren (Partizip II: verloren). Nach „deshalb“ steht sofort das Verb: Deshalb fand …'},
+ {q:'Stichworte: <i>bei näherem Hinsehen · auffallen · ihr · dass · die Kratzer · ganz frisch sein</i>', o:['Bei näherem Hinsehen fiel ihr auf, dass die Kratzer ganz frisch waren.','Bei näherem Hinsehen auffiel ihr, dass die Kratzer ganz frisch waren.','Bei näherem Hinsehen fiel ihr auf, dass die Kratzer waren ganz frisch.','Bei näherem Hinsehen fiel sie auf, dass die Kratzer ganz frisch waren.'], ex:'auffallen ist trennbar (fiel … auf) und verlangt den Dativ: Es fiel <b>ihr</b> auf. Im dass-Satz steht das Verb am Ende.'},
+ {q:'Stichworte: <i>nachdem · der Hausmeister · den Alarm hören · die Polizei verständigen</i>', o:['Nachdem der Hausmeister den Alarm gehört hatte, verständigte er die Polizei.','Nachdem der Hausmeister den Alarm gehört hat, verständigte er die Polizei.','Nachdem der Hausmeister den Alarm hörte, verständigt er die Polizei.','Nachdem der Hausmeister den Alarm gehört war, verständigte er die Polizei.'], ex:'Plusquamperfekt mit „haben“ (gehört hatte) im nachdem-Satz, Präteritum im Hauptsatz (verständigte). „hören“ ist keine Bewegung → nicht mit „sein“.'},
+ {q:'Stichworte: <i>obwohl · der Verdächtige · ein Alibi haben · die Inspektorin · ihm · nicht glauben</i>', o:['Obwohl der Verdächtige ein Alibi hatte, glaubte die Inspektorin ihm nicht.','Obwohl der Verdächtige ein Alibi hatte, die Inspektorin glaubte ihm nicht.','Obwohl der Verdächtige hatte ein Alibi, glaubte die Inspektorin ihm nicht.','Obwohl der Verdächtige ein Alibi hatte, glaubte die Inspektorin ihn nicht.'], ex:'Im obwohl-Satz steht das Verb am Ende, danach folgt sofort das Verb des Hauptsatzes. „glauben“ verlangt bei Personen den Dativ: ihm.'},
+ {q:'Stichworte: <i>bevor · die Polizei · eintreffen · der Dieb · über den Zaun klettern</i>', o:['Bevor die Polizei eintraf, kletterte der Dieb über den Zaun.','Bevor die Polizei eintraf, der Dieb kletterte über den Zaun.','Bevor die Polizei traf ein, kletterte der Dieb über den Zaun.','Bevor die Polizei eintraf, klettert der Dieb über den Zaun.'], ex:'Im Nebensatz bleibt das trennbare Verb zusammen und steht am Ende (eintraf). Danach Verb an erster Stelle des Hauptsatzes – und keine Zeitenmischung.'},
+ {q:'Stichworte: <i>nachdem · die Diebe · die Alarmanlage ausschalten · in aller Ruhe · die Bilder abhängen</i>', o:['Nachdem die Diebe die Alarmanlage ausgeschaltet hatten, hängten sie in aller Ruhe die Bilder ab.','Nachdem die Diebe die Alarmanlage ausgeschaltet hatte, hängten sie in aller Ruhe die Bilder ab.','Nachdem die Diebe die Alarmanlage ausgeschaltet hatten, hängten sie in aller Ruhe die Bilder an.','Nachdem die Diebe die Alarmanlage ausschalteten, hängten sie in aller Ruhe die Bilder ab.'], ex:'„die Diebe“ ist Mehrzahl → hatten. Bilder werden von der Wand <b>ab</b>gehängt (Präteritum: hängten … ab). Im nachdem-Satz steht das Plusquamperfekt.'}
+];
+
+const PQPGAP = [
+ {t:'Nachdem der Dieb das Fenster [[aufgebrochen hatte]], kletterte er hinein. <span class="note">(aufbrechen)</span>', ex:'aufbrechen → hatte aufgebrochen. Im nachdem-Satz steht das gebeugte Verb ganz am Ende.'},
+ {t:'Als die Polizei eintraf, [[war]] der Täter schon [[geflohen]]. <span class="note">(fliehen)</span>', ex:'fliehen ist eine Bewegung → war geflohen.'},
+ {t:'Erst nachdem der Wachmann [[eingeschlafen war]], schlich sich der Einbrecher ins Lager. <span class="note">(einschlafen)</span>', ex:'einschlafen ist eine Veränderung des Zustands → war eingeschlafen.'},
+ {t:'Die Besitzerin bemerkte, dass sie das Tor nicht [[abgeschlossen hatte]]. <span class="note">(abschließen)</span>', ex:'abschließen → hatte abgeschlossen (mit ss).'},
+ {t:'Niemand wusste, was in der Nacht [[passiert war]]. <span class="note">(passieren)</span>', ex:'passieren bildet die zusammengesetzten Zeiten mit „sein“: war passiert.'},
+ {t:'Der Verdächtige [[hatte]] bei der ersten Vernehmung [[gelogen]]. <span class="note">(lügen)</span>', ex:'lügen – log – gelogen → hatte gelogen.'},
+ {t:'Nachdem die Zeugin den Mann genau [[beschrieben hatte]], fertigte die Polizei ein Phantombild an. <span class="note">(beschreiben)</span>', ex:'beschreiben – beschrieb – beschrieben → hatte beschrieben.'},
+ {t:'Die Kette [[war]] spurlos [[verschwunden]]. <span class="note">(verschwinden)</span>', ex:'verschwinden → war verschwunden.'},
+ {t:'Der Täter [[hatte]] die Tatwaffe in den Fluss [[geworfen]]. <span class="note">(werfen)</span>', ex:'werfen – warf – geworfen → hatte geworfen.'},
+ {t:'Nachdem die Gäste [[gegangen waren]], schloss der Wirt die Tür ab. <span class="note">(gehen)</span>', ex:'gehen → waren gegangen (Mehrzahl: die Gäste).'},
+ {t:'Obwohl der Alarm laut [[geheult hatte]], war niemand aufgewacht. <span class="note">(heulen)</span>', ex:'heulen → hatte geheult.'},
+ {t:'Der Zeuge [[war]] die ganze Nacht zu Hause [[geblieben]]. <span class="note">(bleiben)</span>', ex:'bleiben bildet die zusammengesetzten Zeiten mit „sein“: war geblieben.'},
+ {t:'Sie konnte nicht glauben, dass ausgerechnet ihr Bruder das Geld [[genommen hatte]]. <span class="note">(nehmen)</span>', ex:'nehmen – nahm – genommen → hatte genommen.'},
+ {t:'Bevor die Kommissarin kam, [[hatten]] die Kollegen bereits alle Zeugen [[befragt]]. <span class="note">(befragen)</span>', ex:'befragen → hatten befragt (Mehrzahl, kein ge- doppelt: be-fragt).'}
+];
+
+const MUENDLICH = [
+ {t:'Ich bin mit meiner Schwester losgegangen. → Ich [[ging]] mit meiner Schwester [[los]].', ex:'losgehen → ging … los'},
+ {t:'Es hat an der Tür geklingelt. → Es [[klingelte]] an der Tür.', ex:'klingeln → klingelte'},
+ {t:'Mein Freund hat sich an mir vorbeigedrängt. → Mein Freund [[drängte]] sich an mir [[vorbei]].', ex:'vorbeidrängen → drängte … vorbei'},
+ {t:'Wir haben sofort die Polizei angerufen. → Wir [[riefen]] sofort die Polizei [[an]].', ex:'anrufen → riefen … an (unregelmäßig)'},
+ {t:'Ich habe gleich gewusst, dass etwas nicht stimmt. → Ich [[wusste]] gleich, dass etwas nicht [[stimmte]].', ex:'wissen → wusste; auch im dass-Satz ins Präteritum: stimmte.'},
+ {t:'Der Mann ist plötzlich stehen geblieben. → Der Mann [[blieb]] plötzlich [[stehen]].', ex:'stehen bleiben → blieb … stehen'},
+ {t:'Wir haben uns hinter der Hecke versteckt. → Wir [[versteckten]] uns hinter der Hecke.', ex:'verstecken → versteckten'},
+ {t:'Der Alarm ist nicht losgegangen. → Der Alarm [[ging]] nicht [[los]].', ex:'losgehen → ging … los'},
+ {t:'Ich habe den Fremden angestarrt. → Ich [[starrte]] den Fremden [[an]].', ex:'anstarren → starrte … an'},
+ {t:'Wir sind ihm bis zum Bahnhof nachgeschlichen. → Wir [[schlichen]] ihm bis zum Bahnhof [[nach]].', ex:'nachschleichen → schlichen … nach (schleichen – schlich – geschlichen)'},
+ {t:'Das hat mich ziemlich gewundert. → Das [[wunderte]] mich ziemlich.', ex:'wundern → wunderte'},
+ {t:'Er hat die ganze Zeit geschwiegen. → Er [[schwieg]] die ganze Zeit.', ex:'schweigen – schwieg – geschwiegen'},
+ {t:'Sie hat den Brief zerrissen. → Sie [[zerriss]] den Brief.', ex:'zerreißen – zerriss – zerrissen'},
+ {t:'Der Hund ist an mir hochgesprungen. → Der Hund [[sprang]] an mir [[hoch]].', ex:'hochspringen → sprang … hoch'}
+];
+
+const ZEIT_MC = [
+ {q:'Ein Jugendkrimi ist durchgehend im <b>Perfekt</b> erzählt: „Ich hab die Tür aufgemacht und bin raus.“ Was bewirkt das?', o:['Es klingt, als würde der Ich-Erzähler uns die Geschichte mündlich erzählen.','Es zeigt, dass die Geschichte in der Zukunft spielt.','Es macht den Text besonders feierlich und altmodisch.','Es zeigt, dass der Autor die Regeln nicht kennt.'], ex:'Das Perfekt ist die Zeit der gesprochenen Sprache. Ein Autor setzt es bewusst ein, damit der Text lebendig und nah wirkt. In deiner Schularbeit erzählst du aber im Präteritum!'},
+ {q:'In welcher Zeit schreibst du deine Kriminalgeschichte in der Schularbeit?', o:['im Präteritum, für Vorzeitiges im Plusquamperfekt','im Perfekt, weil es lebendiger klingt','im Präsens, damit es spannender ist','abwechselnd im Präsens und Perfekt'], ex:'Schriftliches Erzählen = Präteritum. Was davor geschah, steht im Plusquamperfekt. Nur die wörtliche Rede darf andere Zeiten haben.'},
+ {q:'Welcher Satz ist in einer Erzählung <b>richtig</b>?', o:['„Wo waren Sie gestern?“, fragte die Kommissarin.','„Wo waren Sie gestern?“, fragt die Kommissarin.','„Wo waren Sie gestern?“, hat die Kommissarin gefragt.','„Wo waren Sie gestern?“, hatte die Kommissarin fragte.'], ex:'Der Begleitsatz gehört zur Erzählung und steht deshalb im Präteritum: fragte.'},
+ {q:'Welcher Satz verwendet die Zeiten <b>logisch richtig</b>?', o:['Als die Inspektorin kam, hatte der Täter das Geld schon versteckt.','Als die Inspektorin kam, versteckt der Täter das Geld schon.','Als die Inspektorin gekommen war, versteckte der Täter das Geld schon.','Als die Inspektorin kommt, hatte der Täter das Geld schon versteckt.'], ex:'Zuerst wurde das Geld versteckt (Plusquamperfekt), danach kam die Inspektorin (Präteritum). „schon“ zeigt die Vorzeitigkeit an.'},
+ {q:'Welche Form ist das Plusquamperfekt von <b>„sie kommt an“</b>?', o:['sie war angekommen','sie hatte angekommen','sie ist angekommen','sie kam an'], ex:'ankommen ist eine Bewegung → sein: war angekommen. „ist angekommen“ wäre Perfekt, „kam an“ Präteritum.'},
+ {q:'Welche Form ist das Plusquamperfekt von <b>„er beobachtet“</b>?', o:['er hatte beobachtet','er hatte gebeobachtet','er war beobachtet','er hat beobachtet'], ex:'Verben mit untrennbarer Vorsilbe (be-, ver-, ent-, er-, zer-) bekommen kein ge-: beobachtet. „hat beobachtet“ ist Perfekt.'}
+];
+
+/* =========================================================
+   DATEN · KAPITEL 8: LESEN & VERSTEHEN – DER FALL HARMONIE
+   ========================================================= */
+/* {{…}} = Teil einer Plusquamperfekt-Form, **…** = fett gedrucktes Wort */
+const STORY = [
+ '„Bitte finden Sie die Geige, bevor sie für immer verschwindet!“, **flehte** Albin Rauscher, der Inhaber des Musikhauses Harmonie. Als er am Montag um acht Uhr sein Geschäft aufsperrte, war die Vitrine im Schaufenster leer. Bis zum Vorabend {{hatte}} darin eine über zweihundert Jahre alte Geige {{gelegen}}, ein **kostbares** Einzelstück aus Italien. Die 600 Euro in der Kassa {{hatte}} der Dieb dagegen nicht {{angerührt}}.',
+ 'Inspektorin Falk sah sich zuerst die Eingangstür an. Das Schloss war unbeschädigt, doch im Hinterhof entdeckte sie ein aufgebrochenes Kellerfenster. Der Täter {{war}} offenbar durch den Keller {{eingestiegen}}. Auf den Stufen zum Verkaufsraum fand die Spurensicherung Abdrücke von Gummistiefeln. Außerdem lag unter der Vitrine ein Stück Kolophonium, also jenes Harz, mit dem Geigerinnen und Geiger die Haare ihres Bogens einreiben. Herr Rauscher war sich sicher: Am Samstag {{hatte}} er den Boden noch gründlich {{gewischt}}.',
+ 'Kein Nachbar {{hatte}} in der Nacht etwas {{bemerkt}}. Nur die Bäckerin von gegenüber erinnerte sich an einen jungen Mann, der am Sonntagnachmittag die Geige im Schaufenster mehrmals {{fotografiert}} {{hatte}}. Die **gewiefte** Inspektorin zog daraus einen ersten Schluss: Eine so berühmte Geige fiel überall auf. Wer sie behalten oder verkaufen wollte, musste sie entweder heimlich im Internet anbieten oder sie zuerst unkenntlich machen lassen.',
+ 'Deshalb bat sie ihren Kollegen Brandt, zwei Tage lang alle Online-Marktplätze nach alten Geigen zu durchsuchen. Sie selbst befragte die Geigenbauer der Stadt. Schon am nächsten Tag meldete sich einer von ihnen: Ein junger Mann {{hatte}} ihm am Vormittag eine alte Geige {{gebracht}} und {{gefragt}}, ob man den Zettel mit dem Namen des Geigenbauers aus ihrem Inneren entfernen könne. „Er trug Gummistiefel, obwohl es seit Tagen nicht {{geregnet}} {{hatte}}“, erzählte der Geigenbauer **verdutzt**.',
+ 'Die Spur führte zu Florian K., einem Musikstudenten, der nebenbei in einer Gärtnerei arbeitete. Bei der Hausdurchsuchung stellte die Polizei die Geige sicher. Zuerst **beteuerte** der junge Mann, er habe das Instrument auf einem Flohmarkt gekauft. Doch an seinen Gummistiefeln klebte Kellerstaub aus dem Musikhaus, und in seiner Jackentasche steckte Kolophonium derselben Marke. Schließlich gestand er: Er {{hatte}} sich schon immer eine solche Geige {{gewünscht}}, um selbst darauf zu spielen, konnte sie sich aber niemals leisten. Noch am selben Abend lag das **Diebesgut** wieder in der Vitrine.'
+];
+const storyHTML = STORY.map(p => '<p>'+p.replace(/\{\{|\}\}/g,'').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')+'</p>').join('');
+const SCENE2 = `
+<h3>Der Fall Harmonie</h3>
+<p class="intro">Lies den Text sehr genau. Du darfst während der Aufgaben jederzeit wieder nachlesen.</p>
+${storyHTML}`;
+
+const RF_OPTS = ['richtig','falsch'];
+const RF = [
+ ['Aus der Kassa des Musikhauses wurde kein Geld gestohlen.',0,'Im Text steht: Die 600 Euro in der Kassa hatte der Dieb nicht angerührt.'],
+ ['Der Täter kam durch die Eingangstür, weil er einen Schlüssel besaß.',1,'Das Schloss der Eingangstür war unbeschädigt, aber der Täter war durch ein aufgebrochenes Kellerfenster eingestiegen. Von einem Schlüssel ist keine Rede.'],
+ ['Das Kolophonium kann erst nach dem Wischen am Samstag unter die Vitrine gefallen sein.',0,'Herr Rauscher hatte den Boden am Samstag gründlich gewischt. Was danach dort lag, kam also später dazu – vermutlich in der Tatnacht.'],
+ ['Die Bäckerin beobachtete den Täter in der Nacht beim Einsteigen.',1,'Die Bäckerin sah nur am Sonntagnachmittag einen jungen Mann, der die Geige fotografierte. In der Nacht hatte niemand etwas bemerkt.'],
+ ['Der Geigenbauer wurde misstrauisch, weil der junge Mann den Namenszettel aus der Geige entfernen lassen wollte und trotz trockenem Wetter Gummistiefel trug.',0,'Beides wird im Text genannt. Wer den Namenszettel entfernen lässt, will die Herkunft der Geige verschleiern.'],
+ ['Der entscheidende Hinweis kam von einem Geigenbauer.',0,'Am nächsten Tag meldete sich ein Geigenbauer – damit begann die heiße Spur. Von Ergebnissen der Internetsuche erzählt der Text nichts.'],
+ ['Florian K. gab bei der Hausdurchsuchung sofort zu, die Geige gestohlen zu haben.',1,'Zuerst beteuerte er, die Geige auf einem Flohmarkt gekauft zu haben. Gestanden hat er erst, als die Beweise gegen ihn sprachen.'],
+ ['Florian K. stahl die Geige, weil er dringend Geld brauchte.',1,'Von Geldnot steht nichts im Text. Sein Motiv: Er hatte sich schon immer eine solche Geige gewünscht, um selbst darauf zu spielen.'],
+ ['Die Gummistiefel passen zu Florians Nebenjob.',0,'Florian arbeitete nebenbei in einer Gärtnerei – dort trägt man Gummistiefel.']
+];
+
+const SYN2 = [
+ {q:'„… <b>flehte</b> Albin Rauscher …“ – Was bedeutet das Wort im Text?', o:['bat inständig','schimpfte laut','fragte neugierig','flüsterte ängstlich'], ex:'flehen = sehr eindringlich, fast verzweifelt bitten.'},
+ {q:'„… ein <b>kostbares</b> Einzelstück …“', o:['wertvolles','zerbrechliches','berühmtes','gestohlenes'], ex:'kostbar = sehr wertvoll.'},
+ {q:'„Die <b>gewiefte</b> Inspektorin …“', o:['erfahrene und schlaue','strenge und ungeduldige','junge und unerfahrene','freundliche und hilfsbereite'], ex:'gewieft = erfahren, schlau, man kann ihr nichts vormachen.'},
+ {q:'„… erzählte der Geigenbauer <b>verdutzt</b>.“', o:['überrascht','verärgert','gelangweilt','erleichtert'], ex:'verdutzt = verwundert, überrascht.'},
+ {q:'„Zuerst <b>beteuerte</b> der junge Mann …“', o:['versicherte nachdrücklich','gab kleinlaut zu','verschwieg absichtlich','vermutete vorsichtig'], ex:'beteuern = eindringlich versichern, dass etwas wahr ist – auch wenn es gar nicht stimmt.'},
+ {q:'„… lag das <b>Diebesgut</b> wieder in der Vitrine.“', o:['das gestohlene Gut','das Werkzeug des Diebes','das Beweismittel gegen den Dieb','das Eigentum des Diebes'], ex:'Diebesgut = das, was gestohlen wurde – hier die Geige. Achtung: Es gehört nicht dem Dieb!'}
+];
+
+const STORYORDER = {q:'Bring die Ereignisse in die Reihenfolge, in der sie <b>tatsächlich geschehen</b> sind – nicht in der Reihenfolge, in der sie erzählt werden!', items:[
+ 'Herr Rauscher wischt den Boden des Geschäfts.',
+ 'Ein junger Mann fotografiert die Geige im Schaufenster.',
+ 'Der Täter steigt durch das Kellerfenster ein.',
+ 'Herr Rauscher entdeckt die leere Vitrine.',
+ 'Ein junger Mann bringt einem Geigenbauer eine alte Geige.',
+ 'Die Polizei stellt bei der Hausdurchsuchung die Geige sicher.'
+], ex:'Krimis erzählen oft nicht der Reihe nach: Was früher geschah, erfährt man später – erkennbar am Plusquamperfekt (hatte gewischt, hatte fotografiert, war eingestiegen).'};
+
+const TAPSTORY = {q:'Tippe alle Wörter an, die zu einer Verbform im <b>Plusquamperfekt</b> gehören – immer beide Teile (z. B. <i>hatte</i> und <i>gelegen</i>). Vorsicht: Nicht jedes „war“ oder „hatte“ gehört dazu!', t: STORY.map(p=>p.replace(/\*\*/g,'')).join(' '),
+ ex:'Zur Kontrolle: hatte gelegen · hatte angerührt · war eingestiegen · hatte gewischt · hatte bemerkt · fotografiert hatte · hatte gebracht (und gefragt) · geregnet hatte · hatte gewünscht. Fallen: „war leer“, „war unbeschädigt“, „war sich sicher“ sind Präteritum (ohne Partizip), „er habe gekauft“ ist Konjunktiv.'};
+
+/* =========================================================
+   DATEN · KAPITEL 9: AUFBAU · EINSTIEG · WENDE · SCHLUSS
+   ========================================================= */
+const THEORY_AUFBAU = `
+<h3>Wissensbox: So ist eine Kriminalgeschichte gebaut</h3>
+<div class="rules">
+ <div class="rule"><b>Einleitung</b><br>Die Straftat geschieht oder wird entdeckt. Die Ermittlerin, der Kommissar oder die Hobbydetektivin beginnt zu ermitteln. Figuren, Ort und Fall werden vorgestellt.</div>
+ <div class="rule"><b>Hauptteil</b><br>Spuren werden gesucht, Zeugen befragt, Verdächtige überprüft. Hinweise sammeln sich, falsche Fährten führen in die Irre, die Spannung steigt bis zum <em>Höhepunkt</em>.</div>
+ <div class="rule"><b>Wende (Pointe)</b><br>Eine überraschende Entwicklung: ein entscheidender Hinweis, ein Versprecher, eine unerwartete Täterin. Danach ist der Fall plötzlich klar.</div>
+ <div class="rule"><b>Schluss</b><br>Auflösung: Die Täterin oder der Täter wird überführt und verhaftet. Oft folgt ein <em>Geständnis</em>, in dem das <em>Motiv</em> erklärt wird.</div>
+ <div class="rule"><b>Detektivgeschichte</b><br>Eine Form der Kriminalgeschichte, in der eine bestimmte Ermittlerfigur die Hauptrolle spielt.</div>
+ <div class="rule"><b>Direkter Einstieg</b><br>Statt einleitender Sätze steigst du mitten in die Handlung ein – zum Beispiel mit wörtlicher Rede oder einem rätselhaften Detail.</div>
+ <div class="rule"><b>Spannungsmittel</b><br>Andeutungen, Zeitdruck, Geräusche und Gerüche, kurze Sätze, Fragen, Gefühle der Figuren, falsche Fährten.</div>
+ <div class="rule no"><b>Spannungskiller</b><br>Die Lösung am Anfang verraten · lange Alltagsbeschreibungen · „dann … dann … dann“ · Zeitenwechsel.</div>
+</div>`;
+
+const ORDER_A = {q:'<b>Fall 1 – Die leere Klassenkassa.</b> Bring die Notizen in die richtige Reihenfolge.', items:[
+ 'Am Montag ist die Klassenkassa leer; Klassensprecherin Jana nimmt die Ermittlungen auf.',
+ 'Jana befragt die Klasse: Nur Paul hatte am Freitag den Schlüssel zum Kasten.',
+ 'Paul beteuert, den Schlüssel sofort dem Klassenvorstand zurückgegeben zu haben – der Klassenvorstand bestätigt das.',
+ 'Jana entdeckt auf der Kassa einen Fleck aus blauer Acrylfarbe – am Freitag hat nur Tim im Werkraum blau gemalt.',
+ 'Tim gesteht: Er hatte sich einen Nachschlüssel gefeilt, weil er ein Geburtstagsgeschenk für seine Mutter kaufen wollte.'
+], ex:'Einleitung (Straftat + Ermittlerin) → Hauptteil (Befragung, falscher Verdacht) → Wende (der Farbfleck) → Schluss (Geständnis mit Motiv).'};
+const ORDER_B = {q:'<b>Fall 2 – Die Bronzestatue im Rathaus.</b> Bring die Notizen in die richtige Reihenfolge.', items:[
+ 'Beim Neujahrsempfang verschwindet eine kleine Bronzestatue; Kommissar Huber beginnt zu ermitteln.',
+ 'Alle Gäste werden befragt, doch niemand will etwas bemerkt haben.',
+ 'Nach den Befragungen verdächtigt der Kommissar einen Kellner, dessen Tasche auffällig schwer ist – darin sind aber nur Weinflaschen.',
+ 'Auf dem Handyfoto eines Gastes sieht man im Hintergrund die Statue – in der Hand der Festrednerin.',
+ 'Die Festrednerin legt ein Geständnis ab: Sie wollte die Statue verkaufen, um ihre Schulden zu bezahlen.'
+], ex:'Der verdächtige Kellner ist eine falsche Fährte – sie hält die Spannung hoch. Das Handyfoto ist die Wende.'};
+
+const TEILE = ['Einleitung','Hauptteil','Wende','Schluss'];
+const TEIL = [
+ ['Als Frau Berger am Sonntagmorgen in ihr Blumengeschäft kam, war die Kassa aufgebrochen.',0,'Die Straftat wird entdeckt – so beginnt eine Kriminalgeschichte.'],
+ ['Detektiv Moser ließ sich die Liste aller Angestellten geben und begann noch am selben Vormittag mit den Befragungen.',1,'Die Ermittlungen laufen: Befragungen gehören in den Hauptteil.'],
+ ['Der Lieferant hatte für die Tatnacht ein Alibi, und die Aushilfe konnte beweisen, dass sie im Urlaub war.',1,'Verdächtige werden überprüft und scheiden aus – typisch für den Hauptteil.'],
+ ['Plötzlich fiel Moser auf, dass auf der Quittung vom Samstag die Handschrift des Neffen stand – obwohl dieser behauptet hatte, nie im Geschäft gewesen zu sein.',2,'„Plötzlich“, ein entscheidender Hinweis, eine Lüge fliegt auf: Das ist die Wende.'],
+ ['„Ich wollte das Geld zurücklegen, bevor es jemand merkt“, gestand der Neffe mit gesenktem Kopf.',3,'Geständnis mit Motiv – damit endet der Fall.'],
+ ['Noch am selben Abend wurde der Neffe festgenommen, und Frau Berger bekam ihr Geld zurück.',3,'Die Auflösung: Der Täter wird verhaftet, der Schaden ist behoben.'],
+ ['Kommissarin Rieger hatte gerade ihren Kaffee getrunken, als das Telefon klingelte: Im Stadtmuseum war eingebrochen worden.',0,'Die Ermittlerin wird vorgestellt, und der Fall beginnt.'],
+ ['Erst als der Hund des Hausmeisters die Wachsfigur anbellte, begriff die Kommissarin, wo sich der Dieb die ganze Zeit versteckt hatte.',2,'Ein überraschender Moment, der den Fall plötzlich löst: die Wende.']
+];
+
+const EINSTIEG_HTML = `
+<h3>Drei Einstiege für denselben Fall</h3>
+<p class="intro">Lies die drei Anfänge. Alle gehören zur Geschichte „Das verschwundene Rad“.</p>
+<div class="suspects">
+ <div><b>Einstieg A</b><br>Es war ein ganz normaler Dienstag. Felix stand wie jeden Tag um sieben Uhr auf, frühstückte sein Müsli und putzte sich die Zähne. Danach fuhr er mit dem Rad zur Schule, wo er sechs Stunden Unterricht hatte. Am Nachmittag wollte er wieder nach Hause fahren.</div>
+ <div><b>Einstieg B</b><br>„Das gibt’s doch nicht!“ Felix starrte auf den leeren Fahrradständer. Nur das durchtrennte Schloss lag noch im nassen Gras – und daneben ein Knopf, den er noch nie gesehen hatte.</div>
+ <div><b>Einstieg C</b><br>In dieser Geschichte erzähle ich, wie mein Nachbar Herr Brunner mein Fahrrad gestohlen hat und wie ich ihn am Ende überführt habe. Alles begann an einem Dienstag.</div>
+</div>`;
+const EINSTIEG = [
+ {q:'Welcher Einstieg ist ein <b>direkter Einstieg</b>?', o:['Einstieg B','Einstieg A','Einstieg C','keiner der drei'], ex:'B beginnt mitten in der Handlung mit wörtlicher Rede – ohne einleitende Sätze.'},
+ {q:'Welcher Einstieg <b>verrät die Lösung</b> und nimmt damit die ganze Spannung?', o:['Einstieg C','Einstieg A','Einstieg B','alle drei gleich'], ex:'C nennt den Täter schon im ersten Satz. Wozu sollte man dann noch weiterlesen?'},
+ {q:'Welcher Einstieg hält die Leserinnen und Leser mit <b>unwichtigen Alltagsdetails</b> auf?', o:['Einstieg A','Einstieg B','Einstieg C','keiner der drei'], ex:'Frühstück und Zähneputzen haben mit dem Fall nichts zu tun. Außerdem fehlt jede Spannung.'},
+ {q:'Warum ist Einstieg B besonders spannend?', o:['Er beginnt mitten im Geschehen und enthält ein rätselhaftes Detail, das Fragen aufwirft.','Er erklärt genau, wer der Täter ist und warum er das Rad gestohlen hat.','Er beschreibt ausführlich, wie Felix den ganzen Tag verbracht hat.','Er verwendet besonders viele lange Sätze mit vielen Beistrichen.'], ex:'Der fremde Knopf ist ein Hinweis: Die Leser wollen sofort wissen, wem er gehört.'}
+];
+
+const SPANNUNG = [
+ {q:'Welche Fassung erzeugt Spannung <b>und</b> ist sprachlich fehlerfrei?', o:['Vorsichtig drückte Mira die Kellertür auf. Sie knarrte. Irgendwo tropfte Wasser. Plötzlich hörte sie hinter sich ein leises Rascheln.','Mira ging in den Keller. Dann machte sie das Licht an. Dann sah sie sich um. Dann hörte sie etwas.','Vorsichtig drückte Mira die Kellertür auf. Sie knarrt. Irgendwo tropft Wasser. Plötzlich hörte sie hinter sich ein leises Rascheln.','Vorsichtig drückte Mira die Kellertür auf, doch das Rascheln hinter ihr kam zum Glück nur von der Katze.'], ex:'Fassung 2: eintönige „dann“-Kette. Fassung 3: Zeitenwechsel ins Präsens. Fassung 4: Die Auflösung wird sofort verraten – die Spannung ist weg.'},
+ {q:'Welche Fassung erzeugt Spannung <b>und</b> ist sprachlich fehlerfrei?', o:['Noch zehn Minuten, dann würde der Zug mit der Beute abfahren. Die Kommissarin rannte, so schnell sie konnte.','Der Zug fuhr in zehn Minuten ab. Die Kommissarin ging zum Bahnhof. Sie kam rechtzeitig an und verhaftete den Dieb.','Noch zehn Minuten, dann würde der Zug mit der Beute abfahren. Die Kommissarin rennt, so schnell sie kann.','Noch zehn Minuten, dann würde der Zug mit der Beute abfahren. Die Kommissarin rannte, so schnell sie konnte, und dann sie erreichte den Bahnsteig.'], ex:'Zeitdruck erzeugt Spannung. Fassung 2 verrät alles sofort, Fassung 3 wechselt ins Präsens, Fassung 4 hat einen Wortstellungsfehler (… und dann erreichte sie …).'},
+ {q:'Welches Spannungsmittel wird hier vor allem eingesetzt? <i>„Hätte Jana an diesem Morgen gewusst, was sie im Keller erwartete, wäre sie niemals hinuntergegangen.“</i>', o:['eine Vorausdeutung (Andeutung auf Kommendes)','eine Frage an die Leserinnen und Leser','eine wörtliche Rede','eine Aufzählung von Geräuschen'], ex:'Die Erzählung deutet an, dass etwas Schlimmes passieren wird – ohne zu verraten, was.'},
+ {q:'Welches Spannungsmittel wird hier vor allem eingesetzt? <i>„Wer hatte den Schlüssel gehabt? Und warum brannte im Lager plötzlich Licht?“</i>', o:['Fragen, die sich die Leserinnen und Leser mitstellen','Zeitdruck','eine Vorausdeutung','eine falsche Fährte'], ex:'Offene Fragen lassen die Leser mitraten – genau das wollen Krimis.'},
+ {q:'Welches Spannungsmittel wird hier vor allem eingesetzt? <i>„Schritte. Ein Knarren. Dann Stille.“</i>', o:['sehr kurze, abgehackte Sätze','eine Vorausdeutung','eine Frage an die Leser','ein Zeitsprung in die Zukunft'], ex:'Kurze Sätze bremsen das Lesen und erzeugen Atemlosigkeit. Sparsam verwenden!'},
+ {q:'Was ist eine <b>falsche Fährte</b>?', o:['ein Hinweis, der den Verdacht absichtlich auf eine unschuldige Person lenkt','ein Rechtschreibfehler in der Geschichte','ein Hinweis, den die Ermittlerin übersieht und der nie wieder vorkommt','eine Fußspur, die zu einem Tier gehört'], ex:'Eine falsche Fährte hält die Spannung hoch: Die Leser glauben, den Täter zu kennen – und werden überrascht.'}
+];
+
+const WENDE_HTML = `
+<h3>Der Fall der verschwundenen Halskette – Notizen der Detektivin</h3>
+<div class="stichw"><ul>
+ <li>Hotel Seeblick, Zimmer 312 (3. Stock): Halskette von Frau Lindner verschwunden</li>
+ <li>Zimmertür abgesperrt, nur Frau Lindner und das Zimmermädchen haben einen Schlüssel</li>
+ <li>Zimmermädchen: war zur Tatzeit nachweislich in der Wäscherei im Keller</li>
+ <li>Balkontür gekippt, kein Balkon in der Nähe, keine Kletterspuren an der Fassade</li>
+ <li>auf dem Balkongeländer: zwei schwarz-weiße Federn</li>
+ <li>Gärtner: „Auf dem Dach nistet seit Wochen eine Elster.“</li>
+ <li>Feuerwehrleiter, Nest auf dem Dachvorsprung: Kette, Ohrring, Kronkorken</li>
+</ul></div>`;
+const WENDE_FX_OPTS = ['entscheidender Hinweis','kein entscheidender Hinweis'];
+const WENDE_FX = [
+ ['Auf dem Balkongeländer liegen schwarz-weiße Federn.',0,'Die Federn passen zu einer Elster – ein entscheidender Hinweis.'],
+ ['Die Balkontür ist gekippt.',0,'Nur so konnte ein Vogel ins Zimmer gelangen.'],
+ ['Das Zimmer liegt im 3. Stock.',1,'Das erklärt nur, warum kein Mensch hereinklettern konnte – es löst den Fall aber nicht.'],
+ ['Der Gärtner erzählt von der Elster auf dem Dach.',0,'Dieser Hinweis verbindet die Federn mit einem bestimmten Tier.'],
+ ['Das Zimmermädchen war zur Tatzeit in der Wäscherei.',1,'Das ist ein Alibi – es schließt eine Verdächtige aus, führt aber nicht zur Lösung.'],
+ ['Die Zimmertür war abgesperrt.',1,'Es macht den Fall rätselhaft, ist aber noch nicht die Lösung.']
+];
+const WENDE_MC = [
+ {q:'Was ist die <b>Wende</b> (Pointe) in diesem Fall?', o:['Die „Diebin“ ist kein Mensch, sondern eine Elster, die glitzernde Dinge sammelt.','Das Zimmermädchen hat die Kette gestohlen und auf das Dach geworfen.','Frau Lindner hat die Kette nur verlegt und findet sie im Koffer.','Ein Kletterer ist über die Fassade in das Zimmer eingestiegen.'], ex:'Die Federn, die gekippte Balkontür und die Aussage des Gärtners führen zur überraschenden Lösung – die Kette liegt im Elsternest.'}
+];
+
+const GESTAENDNIS = [
+ {q:'Fall 1 (leere Klassenkassa): Welches Geständnis passt zu den Notizen, erklärt <b>Tathergang und Motiv</b> und ist sprachlich richtig?', o:['„Ich habe mir im Werkraum einen Nachschlüssel gefeilt und am Freitag nach der letzten Stunde die Kassa geöffnet. Meine Mutter hatte Geburtstag, und ich wollte ihr unbedingt etwas Schönes schenken.“','„Ich habe Paul am Freitag den Schlüssel aus der Tasche genommen und damit die Kassa geöffnet. Meine Mutter hatte Geburtstag, und ich wollte ihr unbedingt etwas Schönes schenken.“','„Ich habe mir im Werkraum einen Nachschlüssel gefeilt und am Freitag nach der letzten Stunde die Kassa geöffnet. Warum, weiß ich selbst nicht mehr.“','„Ich habe mir im Werkraum einen Nachschlüssel gefeilt und am Freitag nach der letzten Stunde die Kassa geöffnet gehabt. Meine Mutter hatte Geburtstag, und ich wollte ihr etwas schenken.“'], ex:'Fassung 2 widerspricht den Notizen (Paul hatte den Schlüssel zurückgegeben). Fassung 3 nennt kein Motiv. Fassung 4 hat eine falsche Verbform („geöffnet gehabt“). Übrigens: In der wörtlichen Rede ist das Perfekt richtig – Tim spricht ja.'},
+ {q:'Was gehört in den <b>Schluss</b> einer Kriminalgeschichte?', o:['die Auflösung: Täterin oder Täter wird überführt, oft mit Geständnis und Motiv','eine ausführliche Beschreibung des Tatorts','die ersten Befragungen der Zeuginnen und Zeugen','die Vorstellung der Ermittlerin und ihres Assistenten'], ex:'Tatort, Befragungen und Figuren gehören an den Anfang bzw. in den Hauptteil.'},
+ {q:'Was ist ein <b>Motiv</b>?', o:['der Grund, warum jemand eine Tat begangen hat','das Werkzeug, mit dem die Tat begangen wurde','der Ort, an dem die Tat begangen wurde','die Person, die die Tat beobachtet hat'], ex:'Typische Motive: Geldnot, Neid, Eifersucht, Rache, Habgier – oder der Wunsch, etwas Bestimmtes zu besitzen.'}
+];
+
+const ERZ_MC = [
+ {q:'Ein Jugendkrimi wird abwechselnd aus der Sicht von zwei Figuren in der Ich-Form erzählt. Wie nennt man das?', o:['Wechsel der Erzählperspektive','Zeitenwechsel','Rückblende','direkter Einstieg'], ex:'Die Erzählperspektive ist die Sicht, aus der erzählt wird. Wechselt die erzählende Figur, wechselt die Perspektive.'},
+ {q:'Woran erkennst du eine <b>Ich-Erzählerin</b> bzw. einen <b>Ich-Erzähler</b>?', o:['Eine Figur der Geschichte erzählt selbst, was sie erlebt: „Ich rannte los.“','Die Geschichte enthält besonders viel wörtliche Rede.','Die Geschichte steht im Präsens.','Die Erzählerin weiß alles, was alle Figuren denken.'], ex:'Bei der Ich-Form erfährt man nur, was diese eine Figur sieht, denkt und fühlt – das macht es spannend.'},
+ {q:'Was ist eine <b>Rückblende</b>?', o:['Die Erzählung springt zu etwas, das früher geschehen ist – meist im Plusquamperfekt.','Die Erzählung springt in die Zukunft.','Eine Figur blickt in einen Spiegel.','Die Geschichte wird am Ende noch einmal kurz zusammengefasst.'], ex:'„Drei Tage zuvor hatte sie den Fremden zum ersten Mal gesehen …“ – so beginnt eine Rückblende.'}
+];
+
+const CHECK_OPTS = ['stimmt','stimmt nicht'];
+const CHECK = [
+ ['Eine Kriminalgeschichte schreibt man im Präteritum.',0,'Richtig – für das, was davor geschah, nimmt man das Plusquamperfekt.'],
+ ['Damit es spannender wird, wechselt man am Höhepunkt ins Präsens.',1,'Ein Zeitenwechsel ist in der Schularbeit ein Fehler.'],
+ ['Die Geschichte braucht einen passenden Titel, der aber die Lösung nicht verrät.',0,'„Der Gärtner war’s“ wäre ein schlechter Titel.'],
+ ['Am besten verrät man gleich im ersten Absatz, wer der Täter ist.',1,'Dann ist die Spannung weg. Die Lösung kommt erst am Schluss.'],
+ ['Ein neuer Abschnitt der Handlung beginnt mit einem neuen Absatz.',0,'Absätze gliedern die Geschichte: Einleitung, Ermittlungen, Wende, Schluss.'],
+ ['Gute Satzanfänge sind: Zuerst, Anschließend, Kurz darauf, Plötzlich, Schließlich.',0,'Abwechslungsreiche Satzanfänge statt „dann … dann … dann“.'],
+ ['In der wörtlichen Rede darf das Perfekt stehen.',0,'Ja – die Figuren sprechen, und beim Sprechen verwendet man das Perfekt.'],
+ ['Eine Wende ist nur nötig, wenn die Geschichte sehr lang ist.',1,'Die überraschende Wende ist das Herzstück jeder Kriminalgeschichte.'],
+ ['Krimi-Wortschatz und Redewendungen machen die Geschichte lebendiger.',0,'Zum Beispiel: eine heiße Spur verfolgen, auf frischer Tat ertappen.'],
+ ['Wenn die Geschichte zu kurz ist, schreibt man möglichst viele Alltagsdetails dazu.',1,'Alltagsdetails ohne Bezug zum Fall bremsen die Spannung. Lieber Hinweise, Gefühle und Spannungsmittel ausbauen.'],
+ ['Das Motiv des Täters sollte am Schluss klar werden.',0,'Leserinnen und Leser wollen wissen, warum es passiert ist.'],
+ ['Die vereinbarte Wortanzahl ist egal, solange die Geschichte spannend ist.',1,'Die Wortanzahl ist Teil der Aufgabe und wird bewertet.']
+];
+
+/* =========================================================
+   DATEN · KAPITEL 10: SCHREIBWERKSTATT KRIMINALGESCHICHTE
+   ========================================================= */
+const KW_LISTS = [
+ {name:'Spuk im Heimatmuseum', stich:[
+   'Nachts heult im Heimatmuseum der Alarm – doch die Wächterin findet alles an seinem Platz',
+   'Kommissar Bauer und seine Assistentin Sophie nehmen die Ermittlungen auf',
+   'Auffällig: frischer Geruch nach Lösungsmittel im Gemäldesaal',
+   'Restaurator Herr Weiss hat am Vortag das Ölbild „Abend am See“ gereinigt',
+   'Der Hausmeister war in der Nacht als Erster vor Ort und wirkt nervös – er hat aber ein Alibi',
+   'Wende: Sophie entdeckt, dass die Farbe auf dem Bild noch feucht ist – das Bild ist eine Fälschung',
+   'Geständnis des Restaurators: Er hat das Original gegen eine Kopie ausgetauscht, weil ein Sammler viel Geld geboten hat'
+  ],
+  model:`<b>Die feuchte Farbe</b><br><br>„Hier stimmt etwas nicht“, murmelte Kommissar Bauer und schnupperte. Es war kurz nach zwei Uhr nachts, und im Gemäldesaal des Heimatmuseums roch es scharf nach Lösungsmittel. Die Wächterin, eine kleine Frau mit zitternden Händen, hatte den Alarm vor einer halben Stunde gehört. Doch so oft sie auch nachzählte: Kein einziges Bild fehlte.<br><br>Gemeinsam mit seiner Assistentin Sophie nahm der Kommissar die Ermittlungen auf. Zuerst untersuchten sie die Fenster und Türen, aber nirgends fanden sie Einbruchsspuren. Anschließend befragten sie den Hausmeister, der als Erster vor Ort gewesen war. Er schwitzte und wich jedem Blick aus. War er der Täter? Ein Anruf genügte jedoch, um sein Alibi zu bestätigen: Er hatte den Abend bei seiner Schwester verbracht. Sophie blätterte inzwischen im Besucherbuch. Am Vortag hatte Restaurator Weiss das Ölbild „Abend am See“ gereinigt – ein Gemälde, das als wertvollstes Stück des Museums galt.<br><br>Nachdenklich blieb Sophie vor dem Bild stehen. Die Wellen glänzten im Licht der Taschenlampe. Zu sehr. Vorsichtig berührte sie mit dem Handschuh eine Ecke – und erstarrte. „Chef! Die Farbe ist noch feucht!“ Ein über hundert Jahre altes Bild konnte keine feuchte Farbe haben. Vor ihnen hing eine Fälschung.<br><br>Noch am selben Morgen nahmen sie den Restaurator in seiner Werkstatt fest. Hinter einem Vorhang stand, sorgfältig verpackt, das Original. „Ein Sammler hat mir eine riesige Summe geboten“, gestand Weiss mit leiser Stimme. „Ich dachte, niemand würde den Unterschied je bemerken.“ Doch er hatte nicht mit einer Assistentin gerechnet, die ganz genau hinsah.`},
+ {name:'Die Tageslosung im Eissalon', stich:[
+   'Eissalonbesitzerin Frau Gruber meldet: Die Tageslosung ist über Nacht aus der Kassa verschwunden',
+   'Detektivin Lea Winter nimmt die Ermittlungen auf – die Kassa ist unbeschädigt',
+   'Einen Schlüssel haben nur Frau Gruber und die Aushilfe Ben',
+   'Ben beteuert seine Unschuld: Er war am Abend beim Fußballtraining (der Trainer bestätigt das)',
+   'Lea bemerkt frische Kratzer am Kellerfenster und weißen Mehlstaub auf den Stufen',
+   'Wende: Der Keller des Eissalons ist mit dem Keller der Bäckerei nebenan verbunden',
+   'Der Bäckerlehrling gesteht: Er hatte Schulden bei einem Freund und wollte sie schnell zurückzahlen'
+  ]},
+ {name:'Meine eigene Idee', stich:[
+   'Straftat und Ort: Was ist passiert, wo und wann?',
+   'Ermittlerin oder Ermittler: Wer löst den Fall? Gibt es eine Assistentin oder einen Assistenten?',
+   'Spuren und Zeugen: Welche Hinweise gibt es?',
+   'Verdächtige: Wer kommt in Frage? Wer hat ein Alibi, wer ein Motiv?',
+   'Falsche Fährte: Wer wird zu Unrecht verdächtigt?',
+   'Wende: Welcher Hinweis löst den Fall überraschend?',
+   'Schluss: Geständnis und Motiv'
+  ]}
+];
+const KRIMI_WORDS = ['ermitt','spur','tatort','zeug','verdächt','alibi','motiv','beweis','indiz','geständ','gestand','festgenommen','verhaft','überführ','täter','tatzeit','tatwaffe','dieb','polizei','kommissar','inspektor','detektiv','verhör','vernehm','beschatt','flucht','floh','beute','diebstahl','einbruch','fährte'];
+
+const SORT_FX = fixedItems(SORT, CATS, s => 'Zu welchem Ast der Mindmap gehört das Wort? '+quote(s));
+const ZEIT_FX = fixedItems(ZEITFORM, ZOPTS, s => 'In welcher Zeitform steht das unterstrichene Prädikat? '+quote(s));
+const RF_FX = fixedItems(RF, RF_OPTS, quote);
+const TEIL_FX = fixedItems(TEIL, TEILE, s => 'Wohin gehört dieser Satz? '+quote(s));
+const WENDE_FIX = fixedItems(WENDE_FX, WENDE_FX_OPTS, quote);
+const CHECK_FX = fixedItems(CHECK, CHECK_OPTS, quote);
+
+/* =========================================================
    KAPITEL
    ========================================================= */
 const SECTIONS = [
@@ -598,7 +1026,45 @@ const SECTIONS = [
    {k:'items', type:'code', title:'Rätsel für Profis', intro:'Entschlüssle den Satz mit der Zahlentabelle. Schreib ihn dann mit richtiger Groß- und Kleinschreibung und dem richtigen Beistrich auf.', items:CODES, keep:true},
    {k:'rally'}
  ]},
- {id:'s6', title:'Generalprobe', blocks:[{k:'test'}]}
+ {id:'s6', title:'Krimi-Wortschatz', blocks:[
+   {k:'theory', html:THEORY_WORT},
+   {k:'items', type:'fixed', title:'Die Krimi-Mindmap', intro:'Ordne jedes Wort dem richtigen Ast zu. Achte bei Nomen darauf, ob eine Person oder eine Tat gemeint ist.', items:SORT_FX},
+   {k:'items', type:'mc', title:'Was bedeutet das genau?', intro:'Ermittlungsbegriffe sicher erklären können – das ist die Grundlage für jede Kriminalgeschichte.', items:BEGRIFFE},
+   {k:'items', type:'mc', title:'Wörter mit sehr ähnlicher Bedeutung', intro:'Wähle das Wort oder die Erklärung, die im Satz dieselbe Bedeutung hat.', items:SYN},
+   {k:'items', type:'gap', title:'Redewendungen aus der Welt der Ermittler', intro:'Setze das fehlende Wort ein – im Präteritum, wenn der Satz es verlangt. Trennbare Verben brauchen zwei Lücken.', items:IDIOM},
+   {k:'items', type:'mc', title:'Was meint die Redewendung?', items:IDIOM_MC}
+ ]},
+ {id:'s7', title:'Präteritum & Plusquamperfekt', blocks:[
+   {k:'theory', html:THEORY_ZEIT},
+   {k:'items', type:'fixed', title:'Zeitform bestimmen', intro:'Bestimme die Zeitform des unterstrichenen Prädikats. Schau genau: Gibt es ein Partizip II? Ein Modalverb?', items:ZEIT_FX},
+   {k:'items', type:'gap', title:'Plusquamperfekt bilden: haben oder sein?', intro:'Setze das Verb in Klammern im Plusquamperfekt ein. Im Nebensatz schreibst du die ganze Form in eine Lücke (z. B. <i>gesehen hatte</i>).', items:PQPGAP},
+   {k:'items', type:'mc', title:'Aus Stichworten werden Sätze', intro:'Nur ein Satz ist vollständig richtig. In den anderen steckt jeweils ein echter Fehler: Zeitenfolge, Wortstellung, haben/sein oder Fall.', items:NACHDEM},
+   {k:'items', type:'gap', title:'Vom mündlichen zum schriftlichen Erzählen', intro:'Jemand erzählt mündlich im Perfekt. Schreib den Satz für eine Erzählung im Präteritum.', items:MUENDLICH},
+   {k:'items', type:'mc', title:'Zeiten clever einsetzen', items:ZEIT_MC}
+ ]},
+ {id:'s8', title:'Lesen: Der Fall Harmonie', blocks:[
+   {k:'scene', html:SCENE2},
+   {k:'items', type:'fixed', title:'Richtig oder falsch?', intro:'Prüfe jede Aussage genau am Text.', items:RF_FX},
+   {k:'items', type:'mc', title:'Die fett gedruckten Wörter', intro:'Welche Bedeutung hat das Wort im Text?', items:SYN2, keep:true},
+   {k:'items', type:'order', title:'Was geschah wirklich zuerst?', items:[STORYORDER], keep:true},
+   {k:'items', type:'tap', title:'Plusquamperfekt-Detektiv', intro:'Jede richtig markierte Wortform bringt einen Punkt, jede falsche kostet einen.', items:[TAPSTORY], keep:true}
+ ]},
+ {id:'s9', title:'Aufbau, Einstieg & Wende', blocks:[
+   {k:'theory', html:THEORY_AUFBAU},
+   {k:'items', type:'order', title:'Notizen ordnen', intro:'Tippe die Notizen in der richtigen Reihenfolge an.', items:[ORDER_A, ORDER_B], keep:true},
+   {k:'items', type:'fixed', title:'Einleitung, Hauptteil, Wende oder Schluss?', items:TEIL_FX},
+   {k:'scene', html:EINSTIEG_HTML},
+   {k:'items', type:'mc', title:'Der Einstieg', items:EINSTIEG, keep:true},
+   {k:'items', type:'mc', title:'Spannung erzeugen', intro:'Bei den ersten beiden Aufgaben ist nur eine Fassung spannend <u>und</u> fehlerfrei.', items:SPANNUNG, keep:true},
+   {k:'scene', html:WENDE_HTML},
+   {k:'items', type:'fixed', title:'Welche Hinweise führen zur Wende?', items:WENDE_FIX},
+   {k:'items', type:'mc', title:'Die Pointe', items:WENDE_MC},
+   {k:'items', type:'mc', title:'Der Schluss: Auflösung, Geständnis, Motiv', items:GESTAENDNIS, keep:true},
+   {k:'items', type:'mc', title:'Wer erzählt – und wie?', items:ERZ_MC},
+   {k:'items', type:'fixed', title:'Checkliste: Stimmt das?', intro:'Diese Regeln musst du für die Schularbeit sicher kennen.', items:CHECK_FX}
+ ]},
+ {id:'s10', title:'Deine Kriminalgeschichte', blocks:[{k:'custom', fn:()=>renderKrimiWrite()}], noscore:true},
+ {id:'gp', title:'Generalprobe', blocks:[{k:'test'}], noscore:true}
 ];
 
 /* =========================================================
@@ -607,6 +1073,7 @@ const SECTIONS = [
 function weight(type, it){
   if (type === 'gap' && it.each) return (it.t.match(/\[\[/g)||[]).length;
   if (type === 'comma' && it.partial) return (it.s.match(/,/g)||[]).length;
+  if (type === 'tap') return (it.t.match(/\{\{/g)||[]).length;
   return 1;
 }
 
@@ -809,7 +1276,140 @@ function renderItem(type, it, done){
     case 'comma': return rComma(it, done);
     case 'order': return rOrder(it, done);
     case 'code': return rCode(it, done);
+    case 'tap': return rTap(it, done);
   }
+}
+
+/* Wörter antippen (Plusquamperfekt-Detektiv) */
+function rTap(it, done){
+  const box = h('div',{class:'item'});
+  if (it.q) box.append(h('div',{class:'q',html:it.q}));
+  const area = h('div',{class:'tapbox'});
+  const words = [];
+  it.t.trim().split(/\s+/).forEach(tok=>{
+    let target = false;
+    if (/\{\{.+?\}\}/.test(tok)){ target = true; tok = tok.replace(/\{\{|\}\}/g,''); }
+    const m = tok.match(/^([„“"(]*)(.*?)([.,!?;:“”")–]*)$/);
+    const pre = m ? m[1] : '', core = m ? m[2] : tok, post = m ? m[3] : '';
+    if (pre) area.append(pre);
+    if (core){
+      const w = h('span',{class:'tw'},core);
+      w._t = target;
+      w.onclick = () => { if (!locked) w.classList.toggle('on'); };
+      words.push(w); area.append(w);
+    }
+    area.append(post + ' ');
+  });
+  box.append(area);
+  const need = words.filter(w=>w._t).length;
+  const btn = h('button',{class:'btn small',type:'button'},'Prüfen');
+  const msg = h('span',{class:'note'},`Gesucht sind ${need} Wörter.`);
+  box.append(h('div',{class:'row'},btn,msg));
+  let locked = false;
+  btn.onclick = () => {
+    if (locked) return; locked = true; btn.disabled = true;
+    let good=0, miss=0, extra=0;
+    words.forEach(w=>{
+      const on = w.classList.contains('on'); w.classList.remove('on');
+      if (on && w._t){ good++; w.classList.add('good'); }
+      else if (on && !w._t){ extra++; w.classList.add('extra'); }
+      else if (!on && w._t){ miss++; w.classList.add('miss'); }
+    });
+    const ok = !miss && !extra;
+    let txt = `${good} von ${need} Wörtern gefunden${extra ? ', '+extra+' falsch markiert' : ''}. `;
+    if (!ok) txt += '<br><span class="note">Rot gestrichelt = übersehen · rot durchgestrichen = gehört nicht dazu.</span><br>';
+    box.append(fb(ok, txt + (it.ex||'')));
+    done(Math.max(0, good-extra));
+  };
+  return box;
+}
+
+/* Schreibwerkstatt: eigene Kriminalgeschichte */
+const store = {
+  get(k){ try { return localStorage.getItem('krimi_'+k) || ''; } catch(e){ return ''; } },
+  set(k,v){ try { localStorage.setItem('krimi_'+k, v); } catch(e){} }
+};
+function renderKrimiWrite(){
+  const wrap = h('div');
+  const intro = h('div',{class:'card theory'});
+  intro.innerHTML = '<h3>So gehst du vor</h3><div class="rules">'+
+   '<div class="rule"><b>1 · Stichwortliste wählen</b><br>Zwei Fälle sind vorgegeben, oder du erfindest deinen eigenen. Namen, Orte und Details darfst du frei ergänzen.</div>'+
+   '<div class="rule"><b>2 · Schreibplan ausfüllen</b><br>Titel, Einstieg, Hinweise, falsche Fährte, Wende und Schluss – in Stichworten.</div>'+
+   '<div class="rule"><b>3 · Geschichte schreiben</b><br>Präteritum, Absätze, wörtliche Rede, abwechslungsreiche Satzanfänge, Krimi-Wortschatz. Die Zähler unter dem Textfeld helfen dir.</div>'+
+   '<div class="rule"><b>4 · Überarbeiten</b><br>Geh die Checkliste Punkt für Punkt durch. Lies dir den Text dabei halblaut vor.</div></div>'+
+   '<p class="note" style="margin-top:.7rem">Dein Text wird auf diesem Gerät im Browser gespeichert, solange du die Seite nicht im privaten Modus öffnest.</p>';
+  wrap.append(intro);
+
+  const card = h('div',{class:'card'});
+  card.append(h('h3',null,'Wähle deinen Fall'));
+  const sel = h('select',{class:'wide'});
+  KW_LISTS.forEach((l,i)=>sel.append(h('option',{value:String(i)},l.name)));
+  card.append(sel);
+  const host = h('div');
+  card.append(host);
+  wrap.append(card);
+
+  function build(){
+    const L = KW_LISTS[+sel.value], key = 'L'+sel.value;
+    host.innerHTML = '';
+    const ul = h('ul',{class:'stichw'}); L.stich.forEach(s=>ul.append(h('li',null,s)));
+    host.append(h('div',{class:'note',style:'margin-top:.8rem'},'Stichworte zur Handlung:'), ul);
+
+    host.append(h('h3',{style:'margin-top:1.2rem'},'Schreibplan'));
+    const plan = h('div',{class:'planbox'});
+    [['titel','Titel (verrät die Lösung nicht!)'],['einstieg','Einstieg: Womit beginnst du? (z. B. wörtliche Rede)'],['hinweise','Hinweise und Spuren'],['faehrte','Falsche Fährte: Wer wird zu Unrecht verdächtigt?'],['wende','Wende: Welcher Hinweis löst den Fall?'],['schluss','Schluss: Geständnis und Motiv']].forEach(([k,l])=>{
+      const ta = h('textarea',{spellcheck:'true'}); ta.value = store.get(key+'_'+k);
+      ta.addEventListener('input',()=>store.set(key+'_'+k, ta.value));
+      plan.append(h('div',null,h('label',null,l),ta));
+    });
+    host.append(plan);
+
+    host.append(h('h3',{style:'margin-top:1.2rem'},'Deine Kriminalgeschichte'));
+    host.append(h('p',{class:'intro',html:'Hausübung: Schreib deine Geschichte im <b>Präteritum</b> (ca. 300–400 Wörter oder die Wortanzahl, die deine Lehrperson vorgibt). Trenne die Teile durch eine Leerzeile.'}));
+    const ta = h('textarea',{spellcheck:'true',style:'min-height:20rem'});
+    ta.value = store.get(key+'_text');
+    const stats = h('div',{class:'stats'});
+    const warn = h('div');
+    const upd = () => {
+      store.set(key+'_text', ta.value);
+      const t = ta.value;
+      const words = t.trim().split(/\s+/).filter(Boolean).length;
+      const paras = t.split(/\n\s*\n/).filter(x=>x.trim()).length;
+      const sents = t.split(/[.!?]+/).map(s=>s.replace(/[„“"]/g,'').trim()).filter(Boolean);
+      const starts = {}; sents.forEach(s=>{ const f=(s.split(/\s+/)[0]||'').toLowerCase(); if (f) starts[f]=(starts[f]||0)+1; });
+      const rep = Object.entries(starts).filter(([w,n])=>n>2 && !['die','der','das','sie','er'].includes(w));
+      const dann = (t.match(/\bdann\b/gi)||[]).length;
+      const reden = (t.match(/„/g)||[]).length;
+      const low = t.toLowerCase();
+      const kw = KRIMI_WORDS.filter(f=>low.includes(f)).length;
+      const outside = t.replace(/„[^“]*“?/g,' ');
+      const pres = [...new Set((outside.match(/\b(ist|sind|hat|haben|geht|kommt|sieht|sagt|steht|liegt|gibt|findet|weiß|will|kann|muss|läuft|nimmt|macht|fragt|ruft|rennt|öffnet|bemerkt|entdeckt)\b/gi)||[]).map(x=>x.toLowerCase()))];
+      stats.innerHTML = '';
+      stats.append(h('span',null,'Wörter: '+words), h('span',{class: words && paras<4 ? 'warn':''},'Absätze: '+paras), h('span',null,'Sätze: '+sents.length), h('span',{class: words>80 && !reden ? 'warn':''},'Wörtliche Reden: '+reden), h('span',null,'Krimi-Wörter: '+kw), h('span',{class: dann>1 ? 'warn' : ''}, '„dann“: '+dann+'×'));
+      if (rep.length) stats.append(h('span',{class:'warn'}, 'Häufiger Satzanfang: '+rep.map(([w,n])=>'„'+w+'“ '+n+'×').join(', ')));
+      warn.innerHTML = '';
+      if (pres.length) warn.append(fb(false,'Prüfe diese Wörter außerhalb der wörtlichen Rede: <b>'+pres.join(', ')+'</b>. Sie können auf Präsens oder Perfekt hindeuten. In der Erzählung brauchst du das Präteritum (war, hatte, ging, kam, sah, sagte …) – oder das Plusquamperfekt für Vorzeitiges (hatte gesehen, war gegangen).','info'));
+    };
+    ta.addEventListener('input', upd); upd();
+    host.append(ta, stats, warn);
+
+    const cl = h('div',{class:'check-list'});
+    ['Mein Titel passt und verrät die Lösung nicht.','Mein Einstieg macht neugierig (z. B. direkter Einstieg mit wörtlicher Rede).','In der Einleitung sind Ermittlerfigur, Ort und Fall vorgestellt.','Im Hauptteil steigt die Spannung: Spuren, Befragungen, Verdächtige, eine falsche Fährte.','Es gibt eine überraschende Wende.','Am Schluss wird der Täter überführt, und das Motiv wird klar.','Ich erzähle durchgehend im Präteritum, Vorzeitiges im Plusquamperfekt.','Trennbare Verben sind richtig getrennt (stellte … fest, nahm … auf).','Meine Satzanfänge sind abwechslungsreich, „dann“ verwende ich höchstens einmal.','Ich verwende Krimi-Wortschatz und mindestens zwei Redewendungen.','Wörtliche Rede ist richtig gesetzt: „…?“, fragte sie.','Der Text ist in Absätze gegliedert und hat die vereinbarte Länge.','Ich habe alle Beistriche geprüft (Nebensätze, Infinitivgruppen, Aufzählungen).','Ich habe Rechtschreibung und Groß- und Kleinschreibung kontrolliert.'].forEach((t,i)=>{
+      const c = h('input',{type:'checkbox'}); c.checked = store.get(key+'_c'+i)==='1';
+      c.onchange = () => store.set(key+'_c'+i, c.checked ? '1':'');
+      cl.append(h('label',null,c,h('span',null,t)));
+    });
+    host.append(h('h3',{style:'margin-top:1.2rem'},'Checkliste zum Überarbeiten'), cl);
+
+    if (L.model){
+      const mb = h('button',{class:'btn small berry',type:'button'},'Mustergeschichte anzeigen');
+      const model = h('div',{class:'model',style:'display:none',html:'<span class="note">Eine von vielen guten Lösungen – lies sie erst, nachdem du selbst geschrieben hast.</span><br><br>'+L.model});
+      mb.onclick = () => { const v = model.style.display==='none'; model.style.display = v ? 'block' : 'none'; mb.textContent = v ? 'Mustergeschichte verbergen' : 'Mustergeschichte anzeigen'; };
+      host.append(h('div',{class:'row',style:'margin-top:1rem'},mb), model);
+    }
+  }
+  sel.onchange = build; build();
+  return wrap;
 }
 
 /* Schreibwerkstatt */
@@ -889,7 +1489,7 @@ const STATE = {};
 
 function updateTotals(){
   let p=0, m=0, a=0, n=0;
-  SECTIONS.forEach(s=>{ const st=STATE[s.id]; if (s.id==='s6' || !st || st.max==null) return; p+=st.p; m+=st.max; a+=st.answered; n+=st.count; });
+  SECTIONS.forEach(s=>{ const st=STATE[s.id]; if (s.noscore || !st || st.max==null) return; p+=st.p; m+=st.max; a+=st.answered; n+=st.count; });
   document.getElementById('totalPts').textContent = `Gesamtpunkte: ${p} / ${m}`;
   document.getElementById('totalPct').textContent = `${n ? Math.round(a/n*100) : 0} % erledigt`;
 }
@@ -897,7 +1497,7 @@ function updateSec(sec){
   const st = STATE[sec.id];
   if (st.pill) st.pill.textContent = `Punkte: ${st.p} / ${st.max}`;
   if (st.bar) st.bar.style.width = (st.count ? st.answered/st.count*100 : 0) + '%';
-  if (st.tab) st.tab.querySelector('small').textContent = sec.id==='s6' ? 'Schularbeit-Test' : `${st.p} / ${st.max} Punkte`;
+  if (st.tab) st.tab.querySelector('small').textContent = sec.id==='gp' ? 'Schularbeit-Test' : sec.noscore ? 'Schreibwerkstatt' : `${st.p} / ${st.max} Punkte`;
   updateTotals();
 }
 
@@ -906,14 +1506,14 @@ function buildSection(sec, el){
   const st = STATE[sec.id] = Object.assign(STATE[sec.id]||{}, {p:0,max:0,answered:0,count:0});
   const head = h('div',{class:'sechead'});
   head.append(h('h2',null,sec.title));
-  if (sec.id !== 's6'){
+  if (!sec.noscore){
     st.pill = h('span',{class:'pill'});
     const reset = h('button',{class:'btn small ghost',type:'button'},'Kapitel neu mischen');
     reset.onclick = () => { buildSection(sec, el); window.scrollTo({top:el.offsetTop-70,behavior:'smooth'}); };
     head.append(h('div',{class:'scorebox'},st.pill,reset));
   }
   el.append(head);
-  if (sec.id !== 's6'){ const bar = h('div',{class:'bar'}); st.bar = h('i'); bar.append(st.bar); el.append(bar); }
+  if (!sec.noscore){ const bar = h('div',{class:'bar'}); st.bar = h('i'); bar.append(st.bar); el.append(bar); }
   sec.blocks.forEach(b=>{
     if (b.k === 'theory'){ el.append(h('div',{class:'card theory',html:b.html})); return; }
     if (b.k === 'scene'){ el.append(h('div',{class:'card scene',html:b.html})); return; }
@@ -944,17 +1544,29 @@ function buildSection(sec, el){
 function renderTestShell(){
   const wrap = h('div');
   const intro = h('div',{class:'card theory'});
-  intro.innerHTML = '<h3>Generalprobe für die Schularbeit</h3><p>26 zufällig ausgewählte Aufgaben aus allen Kapiteln – jedes Mal neu gemischt. Arbeite ohne Regelkompass und ohne Tipps. Am Ende bekommst du eine Note nach dem Schularbeitsschlüssel.</p><p class="note">Notenschlüssel: ab 90 % Sehr gut · ab 80 % Gut · ab 65 % Befriedigend · ab 50 % Genügend · darunter Nicht genügend</p>';
-  const start = h('button',{class:'btn berry',type:'button'},'Generalprobe starten');
-  intro.append(h('div',{class:'row'},start));
+  intro.innerHTML = '<h3>Generalprobe für die Schularbeit</h3><p>Zufällig ausgewählte Aufgaben – jedes Mal neu gemischt. Arbeite ohne Wissensboxen und ohne Tipps. Am Ende bekommst du eine Note nach dem Schularbeitsschlüssel.</p><p class="note"><b>Kriminalgeschichte:</b> Wortschatz, Redewendungen, Zeiten, Aufbau, Einstieg, Wende (28 Aufgaben).<br><b>Krimi-Sprache &amp; Beistriche:</b> Fachsprache, Ermitteln, Tatort und Beistriche (26 Aufgaben).<br><b>Gesamt:</b> aus allen zehn Kapiteln (34 Aufgaben).</p>';
   const host = h('div');
-  start.onclick = () => { start.textContent = 'Neue Generalprobe starten'; buildTest(host); host.scrollIntoView({behavior:'smooth'}); };
+  const mk = (label, mode) => { const b = h('button',{class:'btn berry',type:'button'},label); b.onclick = () => { buildTest(host, mode); host.scrollIntoView({behavior:'smooth'}); }; return b; };
+  intro.append(h('div',{class:'row gpstart'}, mk('Kriminalgeschichte','krimi'), mk('Krimi-Sprache & Beistriche','alt'), mk('Gesamt','all')));
   wrap.append(intro, host);
   return wrap;
 }
-function buildTest(host){
+function buildTest(host, mode){
   host.innerHTML = '';
-  const plan = [
+  const KRIMI = () => [
+    ...pick(SORT_FX,3).map(x=>['fixed',x]),
+    ...pick(BEGRIFFE,3).map(x=>['mc',x]),
+    ...pick(SYN,2).map(x=>['mc',x]),
+    ...pick(IDIOM,3).map(x=>['gap',x]),
+    ...pick(ZEIT_FX,3).map(x=>['fixed',x]),
+    ...pick(PQPGAP,3).map(x=>['gap',x]),
+    ...pick(NACHDEM,3).map(x=>['mc',x]),
+    ...pick(MUENDLICH,2).map(x=>['gap',x]),
+    ...pick(TEIL_FX,2).map(x=>['fixed',x]),
+    ...pick(SPANNUNG.slice(0,2).concat(EINSTIEG.slice(3), GESTAENDNIS.slice(1)),2).map(x=>['mc',x]),
+    ...pick(CHECK_FX,2).map(x=>['fixed',x])
+  ];
+  const ALT = () => [
     ...pick(FACH,4).map(x=>['gap',x]),
     ...pick(FACHMC,3).map(x=>['mc',x]),
     ...pick(PRAET,3).map(x=>['gap',x]),
@@ -964,10 +1576,11 @@ function buildTest(host){
     ...pick(JUDGE_FX,3).map(x=>['fixed',x]),
     ...pick(COMMA,5).map(x=>['comma',x])
   ];
+  const plan = mode==='krimi' ? KRIMI() : mode==='alt' ? ALT() : pick(KRIMI(),18).concat(pick(ALT(),16));
   const st = {p:0,max:0,n:0,total:plan.length};
   const card = h('div',{class:'card'});
   const pill = h('span',{class:'pill'});
-  card.append(h('div',{class:'sechead'},h('h3',null,'Deine Generalprobe'),pill));
+  card.append(h('div',{class:'sechead'},h('h3',null,mode==='krimi' ? 'Generalprobe: Kriminalgeschichte' : mode==='alt' ? 'Generalprobe: Krimi-Sprache & Beistriche' : 'Generalprobe: Gesamt'),pill));
   const result = h('div');
   const upd = () => { pill.textContent = `${st.n} / ${st.total} beantwortet · ${st.p} / ${st.max} Punkte`; };
   plan.forEach(([type,it],i)=>{
@@ -987,8 +1600,8 @@ function buildTest(host){
     const [g,txt] = pct>=90 ? ['Sehr gut','Hervorragend – du beherrschst den Stoff sicher. Mach zur Sicherheit noch eine zweite Generalprobe.']
       : pct>=80 ? ['Gut','Sehr solide! Schau dir die rot markierten Aufgaben an und wiederhole die passenden Kapitel.']
       : pct>=65 ? ['Befriedigend','Die Grundlagen sitzen. Arbeite die Kapitel mit den meisten Fehlern noch einmal vollständig durch.']
-      : pct>=50 ? ['Genügend','Da ist noch Luft nach oben. Lies den Regelkompass gründlich und übe Kapitel für Kapitel.']
-      : ['Nicht genügend','Kein Grund zur Sorge – jetzt weißt du genau, wo du ansetzen kannst. Beginne mit dem Regelkompass und den Fachbegriffen.'];
+      : pct>=50 ? ['Genügend','Da ist noch Luft nach oben. Lies die Wissensboxen gründlich und übe Kapitel für Kapitel.']
+      : ['Nicht genügend','Jetzt weißt du genau, wo du ansetzen kannst. Beginne mit den Wissensboxen und arbeite die Kapitel der Reihe nach durch.'];
     const r = h('div',{class:'card result'});
     r.innerHTML = `<div class="note">Ergebnis der Generalprobe</div><div class="grade">${g}</div><div class="pct">${st.p} von ${st.max} Punkten · ${pct} %</div><p>${txt}</p>`;
     result.append(r);
