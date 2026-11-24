@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bildergeschichte – Spannung aufbauen: die leise Spur</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f2ea; --card:#fffdf9; --ink:#1d1b1a; --muted:#5d5752;
+  --blue:#3d5a80; --petrol:#2f6f73; --lilac:#6d5a86; --terra:#b8694a;
+  --gold:#c9a227; --line:#e3dccf;
+  --ok:#2f6f73; --okbg:#e6f0f0; --bad:#a24b4b; --badbg:#f6e7e4;
+}
+*{box-sizing:border-box}
+html{font-size:18px}
+body{margin:0;font-family:'Lexend',system-ui,sans-serif;font-weight:300;color:var(--ink);background:var(--bg);line-height:1.6;overflow-x:hidden}
+.bubbles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bubbles span{position:absolute;bottom:-120px;border-radius:50%;opacity:.13;animation:rise linear infinite}
+@keyframes rise{to{transform:translateY(-120vh)}}
+main,header,nav{position:relative;z-index:1}
+header{padding:2.2rem 1rem 1.2rem;text-align:center}
+header .kicker{color:var(--petrol);font-weight:500;letter-spacing:.04em;font-size:.85rem;text-transform:uppercase}
+header h1{font-weight:600;font-size:2rem;margin:.3rem 0 .4rem;color:var(--blue)}
+header p{max-width:760px;margin:0 auto;color:var(--muted)}
+.topbtn{display:inline-flex;border-radius:999px;overflow:hidden;margin-top:1rem;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.topbtn a{padding:.5rem 1.1rem;text-decoration:none;font-weight:500;font-size:.9rem}
+.topbtn a:first-child{background:var(--gold);color:#1d1b1a}
+.topbtn a:last-child{background:#1d1b1a;color:var(--gold)}
+nav{max-width:980px;margin:0 auto;padding:0 1rem;display:flex;flex-wrap:wrap;gap:.45rem;justify-content:center}
+nav button{font-family:inherit;font-size:.92rem;border:1px solid var(--line);background:var(--card);color:var(--blue);padding:.5rem .95rem;border-radius:999px;cursor:pointer;font-weight:400}
+nav button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+main{max-width:980px;margin:0 auto;padding:1.2rem 1rem 4rem}
+section{display:none}
+section.on{display:block}
+.card{background:var(--card);border-radius:20px;padding:1.3rem 1.4rem;margin:1rem 0;border:1px solid var(--line);box-shadow:0 2px 10px rgba(60,50,40,.05)}
+h2{font-weight:600;color:var(--blue);font-size:1.45rem;margin:.2rem 0 .6rem}
+h3{font-weight:500;color:var(--petrol);font-size:1.1rem;margin:1rem 0 .4rem}
+.rule{border-left:5px solid var(--petrol);background:#eef4f4;padding:.8rem 1rem;border-radius:12px;margin:.6rem 0}
+.rule.lilac{border-color:var(--lilac);background:#f1eef5}
+.rule.terra{border-color:var(--terra);background:#f8eee9}
+.rule b{font-weight:600}
+.strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:.7rem;margin:.7rem 0}
+.pn{margin:0;background:#fff;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+.pn svg{display:block;width:100%;height:auto}
+.pn figcaption{text-align:center;font-size:.85rem;color:var(--muted);padding:.3rem;font-weight:500}
+.q{margin:1.1rem 0;padding-top:.6rem;border-top:1px dashed var(--line)}
+.q:first-of-type{border-top:none}
+.qt{font-weight:500;margin-bottom:.5rem}
+.opts{display:grid;gap:.45rem}
+.opt{font-family:inherit;font-size:.95rem;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:.6rem .85rem;cursor:pointer;color:var(--ink);font-weight:300;line-height:1.45}
+.opt:hover{border-color:var(--blue)}
+.opt.right{background:var(--okbg);border-color:var(--ok)}
+.opt.wrong{background:var(--badbg);border-color:var(--bad)}
+.opt:disabled{cursor:default}
+.fb{display:none;margin-top:.55rem;padding:.65rem .9rem;border-radius:12px;font-size:.93rem}
+.fb.show{display:block}
+.fb.ok{background:var(--okbg)}
+.fb.no{background:var(--badbg)}
+.fb b{font-weight:600}
+.sent{background:#fff;border:1px solid var(--line);border-radius:14px;padding:.8rem 1rem;margin:.7rem 0}
+.sent .txt{font-style:italic;margin-bottom:.5rem}
+.cats{display:flex;flex-wrap:wrap;gap:.4rem}
+.cat{font-family:inherit;font-size:.88rem;border-radius:999px;border:1.5px solid var(--line);background:var(--card);padding:.4rem .8rem;cursor:pointer;color:var(--ink)}
+.cat.right{background:var(--okbg);border-color:var(--ok)}
+.cat.wrong{background:var(--badbg);border-color:var(--bad)}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.6rem;margin:.6rem 0}
+.legend div{border-radius:12px;padding:.6rem .8rem;font-size:.92rem}
+.order-item{display:flex;gap:.7rem;align-items:flex-start;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:.65rem .85rem;margin:.45rem 0;cursor:pointer}
+.order-item .num{flex:0 0 2rem;height:2rem;border-radius:50%;background:#ece6db;display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--blue)}
+.order-item.picked .num{background:var(--blue);color:#fff}
+.order-item.right{border-color:var(--ok);background:var(--okbg)}
+.order-item.wrong{border-color:var(--bad);background:var(--badbg)}
+.btn{font-family:inherit;font-size:.95rem;background:var(--petrol);color:#fff;border:none;border-radius:999px;padding:.55rem 1.2rem;cursor:pointer;margin:.3rem .3rem .3rem 0;font-weight:400}
+.btn.ghost{background:transparent;color:var(--petrol);border:1.5px solid var(--petrol)}
+.btn.lilac{background:var(--lilac)}
+.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:.7rem}
+.tool{background:#fff;border:1px solid var(--line);border-radius:14px;padding:.8rem 1rem}
+.tool b{color:var(--lilac);font-weight:600}
+.tool i{display:block;margin-top:.3rem;color:#2b2826}
+.tool.no b{color:var(--bad)}
+textarea{width:100%;min-height:5.2rem;font-family:inherit;font-size:1rem;border:1.5px solid var(--line);border-radius:12px;padding:.7rem;background:#fff;color:var(--ink);resize:vertical}
+textarea:focus{outline:none;border-color:var(--blue)}
+.model{display:none;margin-top:.5rem;padding:.7rem .9rem;border-radius:12px;background:#f1eef5;border-left:4px solid var(--lilac);font-size:.95rem}
+.model.show{display:block}
+.score{position:fixed;right:1rem;bottom:1rem;background:var(--blue);color:#fff;border-radius:999px;padding:.45rem 1rem;font-size:.9rem;z-index:5;box-shadow:0 3px 10px rgba(0,0,0,.18)}
+.versions{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:.7rem}
+.version{background:#fff;border:1px solid var(--line);border-radius:14px;padding:.85rem 1rem;font-size:.95rem}
+.version h4{margin:0 0 .3rem;font-weight:600;color:var(--blue)}
+.version mark{background:#efe3c2;padding:0 .15rem;border-radius:4px}
+ul.check{list-style:none;padding:0;margin:.4rem 0}
+ul.check li{margin:.35rem 0}
+ul.check label{cursor:pointer}
+footer{text-align:center;color:var(--muted);font-size:.8rem;padding:1rem}
+@media(max-width:600px){html{font-size:16.5px}header h1{font-size:1.6rem}}
+</style>
+</head>
+<body>
+<div class="bubbles" id="bubbles"></div>
+
+<header>
+  <div class="kicker">Deutsch · Unterstufe · Schularbeitstraining Bildergeschichte</div>
+  <h1>Spannung aufbauen: die leise Spur</h1>
+  <p>Am Ende einer Bildergeschichte wartet oft eine Überraschung. Damit sie wirkt, braucht der Leser vorher eine kleine Spur, die ihn neugierig macht, ohne zu verraten, was passieren wird.</p>
+  <div class="topbtn"><a href="../index.html">Übungsliste</a><a href="../../index.html">Hauptseite</a></div>
+</header>
+
+<nav id="tabs">
+  <button data-s="s0" class="on">1 · Die Spur-Regel</button>
+  <button data-s="s1">2 · Spur finden</button>
+  <button data-s="s2">3 · Lesertest</button>
+  <button data-s="s3">4 · Spur oder Spoiler?</button>
+  <button data-s="s4">5 · Spur steigern</button>
+  <button data-s="s5">6 · Spur-Baukasten</button>
+  <button data-s="s6">7 · Schreibwerkstatt</button>
+</nav>
+
+<main>
+
+<!-- ============ 1 REGEL ============ -->
+<section id="s0" class="on">
+ <div class="card">
+  <h2>Warum der Leser eine Spur braucht</h2>
+  <div class="rule terra"><b>Der Leser sieht die Bilder nicht.</b><br>Du siehst auf jedem Bild, wer da ist, und weißt deshalb genau, woher die Katze, der Hund oder die Tiere am Ende kommen. Der Leser hat nur deinen Text. Wenn etwas erst beim Höhepunkt zum ersten Mal vorkommt, fragt er sich: „Wer ist das? Woher kommt das plötzlich?“ Dann wirkt die Überraschung unlogisch und gar nicht spannend.</div>
+  <div class="rule lilac"><b>Verrätst du aber zu viel, ist die Überraschung weg.</b><br>Ein Satz wie „Sie ahnten nicht, dass die Katze gleich den Kuchen stehlen würde“ nimmt dem Leser die ganze Spannung. Er weiß dann schon alles und muss nicht mehr weiterlesen.</div>
+  <h3>Die Spur-Regel in fünf Schritten</h3>
+  <div class="rule"><b>1 · Pointe finden:</b> Was ist die Überraschung am Ende der Geschichte?</div>
+  <div class="rule"><b>2 · Erstes Auftauchen finden:</b> Auf welchem Bild ist das, was am Ende überrascht, zum ersten Mal zu sehen – oft ganz klein, am Rand oder im Hintergrund?</div>
+  <div class="rule"><b>3 · Leise Spur legen:</b> Erzähle genau bei diesem Bild nur einen Teil (ein Schwanz, zwei Ohren, zwei Augen), ein Geräusch oder eine Bewegung. Nenne nie, was später passieren wird.</div>
+  <div class="rule"><b>4 · Spur steigern:</b> Nimm die Spur bis zum Höhepunkt noch ein- oder zweimal auf, jedes Mal ein bisschen deutlicher. So steigt die Spannung.</div>
+  <div class="rule"><b>5 · Auflösen:</b> Beim Höhepunkt zeigt sich, was hinter der Spur steckt. Der Leser denkt: „Ach, das war es also!“ – und versteht sofort, weil er vorbereitet war.</div>
+ </div>
+</section>
+
+<!-- ============ 2 SPUR FINDEN ============ -->
+<section id="s1">
+ <div class="card">
+  <h2>Geschichte 1: Der Geburtstagskuchen</h2>
+  <p>Schau dir alle sechs Bilder genau an – auch die Ränder und den Hintergrund.</p>
+  <div class="strip" id="strip1"></div>
+ </div>
+ <div class="card" id="q-find"></div>
+</section>
+
+<!-- ============ 3 LESERTEST ============ -->
+<section id="s2">
+ <div class="card">
+  <h2>Lesertest: drei Versionen derselben Geschichte</h2>
+  <p>Lies die drei kurzen Fassungen von Bild 2 bis Bild 5. Stell dir vor, du kennst die Bilder nicht.</p>
+  <div class="versions">
+   <div class="version"><h4>Version A</h4>Sophie stellte den Kuchen zum Abkühlen auf das Fensterbrett. Dann lief sie ins Wohnzimmer und hängte bunte Girlanden auf. Kurz darauf läutete es, und Opa stand vor der Tür. Als Sophie den Kuchen holen wollte, war das Fensterbrett leer. Unter dem Fliederbusch saß die Katze und leckte sich die Schnauze.</div>
+   <div class="version"><h4>Version B</h4>Sophie stellte den Kuchen zum Abkühlen auf das Fensterbrett. <mark>Draußen auf der Gartenmauer zuckte hinter dem Blumentopf etwas Graues hin und her, doch Sophie war schon unterwegs ins Wohnzimmer.</mark> Dort hängte sie bunte Girlanden auf. <mark>Einmal glaubte sie, am Küchenfenster zwei spitze Ohren zu sehen, aber als sie genauer hinsah, war da nichts.</mark> Kurz darauf läutete es, und Opa stand vor der Tür. Als Sophie den Kuchen holen wollte, war das Fensterbrett leer – nur ein paar Krümel und kleine, runde Pfotenabdrücke waren noch da.</div>
+   <div class="version"><h4>Version C</h4>Sophie stellte den Kuchen zum Abkühlen auf das Fensterbrett. <mark>Sie ahnte nicht, dass die graue Nachbarskatze schon auf der Mauer lauerte, um ihn zu stehlen.</mark> Dann lief sie ins Wohnzimmer und hängte bunte Girlanden auf. Kurz darauf läutete es, und Opa stand vor der Tür. Als Sophie den Kuchen holen wollte, war das Fensterbrett leer.</div>
+  </div>
+ </div>
+ <div class="card" id="q-test"></div>
+</section>
+
+<!-- ============ 4 SPUR ODER SPOILER ============ -->
+<section id="s3">
+ <div class="card">
+  <h2>Spur oder Spoiler?</h2>
+  <p>Alle Sätze gehören zu <b>Bild 2</b> der Geschichte vom Geburtstagskuchen. Entscheide bei jedem Satz, wohin er gehört.</p>
+  <div class="legend">
+   <div style="background:#f8eee9"><b>sagt zu wenig</b><br>Die Katze kommt gar nicht vor. Am Ende weiß der Leser nicht, woher sie kommt.</div>
+   <div style="background:#f1eef5"><b>verrät zu viel</b><br>Der Satz nennt schon, was die Katze vorhat oder was passieren wird.</div>
+   <div style="background:#e6f0f0"><b>leise Spur – genau richtig</b><br>Der Leser bemerkt etwas und wird neugierig, weiß aber noch nicht, was kommt.</div>
+  </div>
+  <div id="sort"></div>
+ </div>
+</section>
+
+<!-- ============ 5 SPUR STEIGERN ============ -->
+<section id="s4">
+ <div class="card">
+  <h2>Die Spur wird immer deutlicher</h2>
+  <p>Diese vier Sätze stammen aus der Geschichte vom Geburtstagskuchen. Klicke sie in die richtige Reihenfolge – von der leisesten Spur bis zur Auflösung. Ein zweiter Klick nimmt die Auswahl zurück.</p>
+  <div id="order"></div>
+  <button class="btn" id="ordCheck">Reihenfolge prüfen</button>
+  <button class="btn ghost" id="ordReset">Neu beginnen</button>
+  <div class="fb" id="ordFb"></div>
+ </div>
+ <div class="card" id="q-steig"></div>
+</section>
+
+<!-- ============ 6 BAUKASTEN ============ -->
+<section id="s5">
+ <div class="card">
+  <h2>Der Spur-Baukasten</h2>
+  <p>Mit diesen Mitteln legst du eine Spur, ohne etwas zu verraten. Die Beispiele stammen aus ganz anderen Geschichten, damit du sie auf jede Bildergeschichte übertragen kannst.</p>
+  <div class="tools">
+   <div class="tool"><b>Ein Teil statt des Ganzen</b> Zeig nur einen Schwanz, Ohren, Augen, eine Pfote, einen Schatten.<i>„Hinter dem Vorhang lugte eine Schuhspitze hervor.“</i></div>
+   <div class="tool"><b>Ein Geräusch</b> Etwas raschelt, knackt, kratzt, tapst, schnuppert.<i>„Irgendwo über ihnen knarrte eine Diele.“</i></div>
+   <div class="tool"><b>Eine Bewegung am Rand</b> Etwas huscht, zuckt, wackelt im Augenwinkel.<i>„Im Augenwinkel huschte etwas Dunkles am Zaun entlang.“</i></div>
+   <div class="tool"><b>Die Figur bemerkt es nicht</b> Der Leser erfährt ein kleines Detail, die Figur ist abgelenkt.<i>„Paul war so in sein Buch vertieft, dass er das Kratzen an der Tür überhörte.“</i></div>
+   <div class="tool"><b>Kurz bemerkt – gleich vergessen</b> Die Figur stutzt, findet aber nichts.<i>„Hatte sich da nicht etwas bewegt? Lea zuckte mit den Schultern und lief weiter.“</i></div>
+   <div class="tool"><b>Eine Frage im Kopf der Figur</b> Die Figur wundert sich über eine Kleinigkeit.<i>„Seit wann standen hier im Schnee so viele kleine Abdrücke?“</i></div>
+   <div class="tool no"><b>Verboten: die Zukunft verraten</b> Sätze mit „Sie ahnten nicht, dass …“, „Gleich würde …“ oder „Das war das letzte Mal, dass …“ nehmen dem Leser die Überraschung, sobald sie verraten, was passiert.<i>„Er ahnte nicht, dass der Hund gleich die Wurst stehlen würde.“</i></div>
+   <div class="tool no"><b>Verboten: Absicht verraten</b> Wenn du schreibst, was das Tier vorhat, ist die Pointe weg.<i>„Hinter dem Zaun wartete der Fuchs darauf, die Eier zu holen.“</i></div>
+  </div>
+ </div>
+ <div class="card" id="q-bau"></div>
+</section>
+
+<!-- ============ 7 SCHREIBWERKSTATT ============ -->
+<section id="s6">
+ <div class="card">
+  <h2>Geschichte 2: Der Schneemann</h2>
+  <p>Jetzt bist du dran. Schau dir die Bilder genau an, auch die Ränder und den Hintergrund.</p>
+  <div class="strip" id="strip2"></div>
+ </div>
+ <div class="card" id="q-schnee"></div>
+ <div class="card">
+  <h2>Deine Spur-Sätze</h2>
+  <p>Schreib zu jedem Schritt ein bis zwei Sätze im Präteritum. Erst danach kannst du dir einen Mustervorschlag ansehen und mit deinem vergleichen. Die ganze Geschichte schreibst du als Hausübung.</p>
+
+  <h3>Schritt 1 · Bild 2: die erste leise Spur</h3>
+  <p>Erzähle, wie die Kinder dem Schneemann die Nase geben – und leg dabei eine Spur zum Rand des Bildes, ohne zu sagen, was dort ist oder was passieren wird.</p>
+  <textarea id="w1" placeholder="Lukas steckte …"></textarea>
+  <button class="btn lilac" data-m="m1">Mustervorschlag zeigen</button>
+  <div class="model" id="m1">Zum Schluss steckte Lukas dem Schneemann eine dicke, orange Karotte als Nase ins Gesicht. „Perfekt!“, rief Mia. Hinter der verschneiten Hecke ragten zwei lange, graue Spitzen hervor und zuckten kurz – doch die beiden bewunderten gerade ihren Schneemann und bemerkten nichts.</div>
+
+  <h3>Schritt 2 · Bild 3 und 4: die Spur deutlicher machen</h3>
+  <p>Die Kinder trinken drinnen Kakao, dann wird es Nacht. Mach die Spur ein Stück deutlicher, verrate aber immer noch nicht, wer da kommt.</p>
+  <textarea id="w2" placeholder="Drinnen …"></textarea>
+  <button class="btn lilac" data-m="m2">Mustervorschlag zeigen</button>
+  <div class="model" id="m2">Drinnen wärmten sich die beiden mit heißem Kakao die Hände. Als Mia aus dem Fenster schaute, stutzte sie: Von der Hecke bis zum Schneemann führte eine Reihe kleiner Abdrücke durch den Schnee. „Waren die vorhin schon da?“, fragte sie, aber Lukas zuckte nur mit den Schultern. In der Nacht schien der Mond hell auf den Garten. Neben dem Schneemann bewegte sich ein kleiner Schatten mit langen Ohren.</div>
+
+  <h3>Schritt 3 · Bild 5: der Höhepunkt</h3>
+  <p>Am nächsten Morgen laufen die Kinder in den Garten. Jetzt darf der Leser staunen. Weil er die Spur kennt, ahnt er sofort, wer es war.</p>
+  <textarea id="w3" placeholder="Am nächsten Morgen …"></textarea>
+  <button class="btn lilac" data-m="m3">Mustervorschlag zeigen</button>
+  <div class="model" id="m3">Am nächsten Morgen stürmten die beiden noch im Schlafanzug in den Garten. Plötzlich blieb Lukas wie angewurzelt stehen. „Mia! Seine Nase ist weg!“ Wo gestern noch die Karotte gesteckt hatte, war nur noch ein kleines Loch. Im Schnee rundherum waren lauter kleine Abdrücke – und sie führten geradewegs zurück zur Hecke.</div>
+
+  <h3>Selbstcheck</h3>
+  <ul class="check">
+   <li><label><input type="checkbox"> Der Hase (oder eine Spur von ihm) kommt schon bei Bild 2 vor.</label></li>
+   <li><label><input type="checkbox"> Ich habe nirgends verraten, dass der Hase die Karotte fressen wird.</label></li>
+   <li><label><input type="checkbox"> Die Spur wird von Bild zu Bild etwas deutlicher.</label></li>
+   <li><label><input type="checkbox"> Ein Leser ohne Bilder versteht am Ende sofort, wer die Nase geholt hat.</label></li>
+   <li><label><input type="checkbox"> Alles steht im Präteritum, und ich habe nie „Auf dem Bild sieht man …“ geschrieben.</label></li>
+  </ul>
+ </div>
+</section>
+
+</main>
+<div class="score" id="score">Punkte: 0 / 0</div>
+<footer>Alle Illustrationen und Geschichten wurden eigens für diese Seite gezeichnet und geschrieben.</footer>
+
+<script>
+/* ---------- Hintergrund-Bubbles ---------- */
+(function(){const c=['#3d5a80','#2f6f73','#6d5a86','#c9a227'],b=document.getElementById('bubbles');
+for(let i=0;i<14;i++){const s=document.createElement('span'),d=30+Math.random()*90;
+s.style.cssText=`width:${d}px;height:${d}px;left:${Math.random()*100}%;background:${c[i%4]};animation-duration:${28+Math.random()*30}s;animation-delay:-${Math.random()*40}s`;b.appendChild(s);}})();
+
+/* ---------- Tabs ---------- */
+document.querySelectorAll('#tabs button').forEach(bt=>bt.onclick=()=>{
+ document.querySelectorAll('#tabs button').forEach(x=>x.classList.remove('on'));
+ document.querySelectorAll('section').forEach(x=>x.classList.remove('on'));
+ bt.classList.add('on');document.getElementById(bt.dataset.s).classList.add('on');window.scrollTo({top:0,behavior:'smooth'});});
+
+/* ---------- Punkte ---------- */
+let pts=0,tot=0;const score=()=>document.getElementById('score').textContent=`Punkte: ${pts} / ${tot}`;
+
+/* =========================================================
+   ZEICHNUNGEN (eigene SVG-Illustrationen)
+   ========================================================= */
+const L='#4a3f3a',SKIN='#f0cfb3';
+function face(cx,cy,r,mood){
+ const e=cy-r*.12,m=cy+r*.35;let s='';
+ const eyes=`<circle cx="${cx-r*.38}" cy="${e}" r="${r*.11}" fill="${L}"/><circle cx="${cx+r*.38}" cy="${e}" r="${r*.11}" fill="${L}"/>`;
+ const closed=`<path d="M${cx-r*.55},${e} q${r*.17},-${r*.22} ${r*.34},0 M${cx+r*.21},${e} q${r*.17},-${r*.22} ${r*.34},0" stroke="${L}" stroke-width="1.6" fill="none"/>`;
+ if(mood==='happy') s=eyes+`<path d="M${cx-r*.4},${m-2} Q${cx},${m+r*.35} ${cx+r*.4},${m-2}" stroke="${L}" stroke-width="1.7" fill="none" stroke-linecap="round"/>`;
+ else if(mood==='laugh') s=closed+`<path d="M${cx-r*.45},${m-3} Q${cx},${m+r*.6} ${cx+r*.45},${m-3} Z" fill="#7a3040"/>`;
+ else if(mood==='shock') s=eyes+`<path d="M${cx-r*.55},${e-r*.32} l${r*.3},-${r*.12} M${cx+r*.55},${e-r*.32} l-${r*.3},-${r*.12}" stroke="${L}" stroke-width="1.5"/><ellipse cx="${cx}" cy="${m+1}" rx="${r*.16}" ry="${r*.22}" fill="#7a3040"/>`;
+ else if(mood==='focus') s=eyes+`<path d="M${cx-r*.25},${m} L${cx+r*.25},${m}" stroke="${L}" stroke-width="1.6" stroke-linecap="round"/>`;
+ return s+`<circle cx="${cx-r*.62}" cy="${m-r*.15}" r="${r*.16}" fill="#e8a0a0" opacity=".45"/><circle cx="${cx+r*.62}" cy="${m-r*.15}" r="${r*.16}" fill="#e8a0a0" opacity=".45"/>`;
+}
+/* Person: x = Mitte, y = Füße, h = Größe */
+function person(o){
+ const {x,y,h=100,shirt='#3d5a80',pants='#4a4560',hair='#6b4a32',style='short',mood='happy',arms='down',coat=false,beard=false}=o;
+ const r=h*.13,hy=y-h+r,bt=hy+r,bb=y-h*.36,bw=h*.30;
+ let s='';
+ // Beine
+ s+=`<path d="M${x-bw*.25},${bb} L${x-bw*.28},${y} M${x+bw*.25},${bb} L${x+bw*.28},${y}" stroke="${pants}" stroke-width="${h*.085}" stroke-linecap="round"/>`;
+ // Arme
+ const sh=bt+h*.06,aw=h*.06;
+ let A='';
+ if(arms==='down') A=`M${x-bw*.5},${sh} L${x-bw*.72},${bb+h*.02} M${x+bw*.5},${sh} L${x+bw*.72},${bb+h*.02}`;
+ if(arms==='up') A=`M${x-bw*.5},${sh} L${x-bw*.85},${hy-r*1.2} M${x+bw*.5},${sh} L${x+bw*.85},${hy-r*1.2}`;
+ if(arms==='fwdR') A=`M${x-bw*.5},${sh} L${x-bw*.72},${bb+h*.02} M${x+bw*.5},${sh} L${x+bw*1.45},${sh+h*.05}`;
+ if(arms==='fwdL') A=`M${x+bw*.5},${sh} L${x+bw*.72},${bb+h*.02} M${x-bw*.5},${sh} L${x-bw*1.45},${sh+h*.05}`;
+ if(arms==='both') A=`M${x-bw*.5},${sh} L${x-bw*1.2},${sh+h*.12} M${x+bw*.5},${sh} L${x+bw*1.2},${sh+h*.12}`;
+ if(arms==='cheer') A=`M${x-bw*.5},${sh} L${x-bw*1.1},${hy-r*.2} M${x+bw*.5},${sh} L${x+bw*1.1},${hy-r*.2}`;
+ s+=`<path d="${A}" stroke="${shirt}" stroke-width="${aw*1.4}" stroke-linecap="round"/>`;
+ // Körper
+ s+=`<rect x="${x-bw/2}" y="${bt}" width="${bw}" height="${bb-bt+h*.03}" rx="${bw*.35}" fill="${shirt}"/>`;
+ if(coat) s+=`<path d="M${x},${bt+2} L${x},${bb}" stroke="#ffffff55" stroke-width="2"/>`;
+ // Kopf
+ if(style==='long') s+=`<rect x="${x-r*1.12}" y="${hy-r*.2}" width="${r*.55}" height="${r*1.75}" rx="${r*.27}" fill="${hair}"/><rect x="${x+r*.57}" y="${hy-r*.2}" width="${r*.55}" height="${r*1.75}" rx="${r*.27}" fill="${hair}"/>`;
+ s+=`<circle cx="${x}" cy="${hy}" r="${r}" fill="${SKIN}"/>`;
+ if(style==='short'||style==='long') s+=`<path d="M${x-r},${hy-r*.05} Q${x-r*.9},${hy-r*1.25} ${x},${hy-r*1.1} Q${x+r*.9},${hy-r*1.25} ${x+r},${hy-r*.05} Q${x+r*.4},${hy-r*.65} ${x-r},${hy-r*.05} Z" fill="${hair}"/>`;
+ if(style==='bald') s+=`<path d="M${x-r*.98},${hy+r*.1} Q${x-r*1.1},${hy-r*.5} ${x-r*.75},${hy-r*.55} M${x+r*.98},${hy+r*.1} Q${x+r*1.1},${hy-r*.5} ${x+r*.75},${hy-r*.55}" stroke="#d9d4cc" stroke-width="${r*.35}" fill="none" stroke-linecap="round"/>`;
+ if(style==='beanie') s+=`<path d="M${x-r*1.02},${hy-r*.1} Q${x},${hy-r*1.9} ${x+r*1.02},${hy-r*.1} Z" fill="${hair}"/><circle cx="${x}" cy="${hy-r*1.15}" r="${r*.25}" fill="#fff"/><rect x="${x-r*1.05}" y="${hy-r*.35}" width="${r*2.1}" height="${r*.35}" rx="${r*.15}" fill="#fff" opacity=".7"/>`;
+ if(beard) s+=`<path d="M${x-r*.75},${hy+r*.2} Q${x},${hy+r*1.55} ${x+r*.75},${hy+r*.2} Q${x},${hy+r*.85} ${x-r*.75},${hy+r*.2} Z" fill="#e3ded6"/>`;
+ s+=face(x,hy,r,mood);
+ return s;
+}
+/* Katze sitzend, Blick nach links */
+function cat(x,y,s=1,col='#8b8a8f',cream=false){
+ return `<g transform="translate(${x},${y}) scale(${s})">
+ <path d="M12,-4 Q30,-6 26,-26 Q24,-34 30,-38" stroke="${col}" stroke-width="5" fill="none" stroke-linecap="round"/>
+ <ellipse cx="0" cy="-14" rx="14" ry="15" fill="${col}"/>
+ <circle cx="-9" cy="-33" r="10" fill="${col}"/>
+ <path d="M-17,-38 L-17,-50 L-9,-42 Z M-3,-41 L1,-51 L4,-38 Z" fill="${col}"/>
+ <circle cx="-13" cy="-34" r="1.8" fill="#e2b838"/><circle cx="-5" cy="-34" r="1.8" fill="#e2b838"/>
+ <path d="M-11,-29 l2,1.5 l2,-1.5" stroke="${L}" stroke-width="1" fill="none"/>
+ <path d="M-20,-29 l-7,-1 M-20,-27 l-7,2" stroke="${L}" stroke-width=".7"/>
+ ${cream?'<ellipse cx="-11" cy="-26" rx="5" ry="2.6" fill="#fff"/>':''}
+ <ellipse cx="-6" cy="0" rx="5" ry="2.5" fill="${col}"/><ellipse cx="5" cy="0" rx="5" ry="2.5" fill="${col}"/></g>`;}
+const catTail=(x,y,col='#8b8a8f')=>`<path d="M${x},${y} Q${x+10},${y-14} ${x+3},${y-26} Q${x-2},${y-33} ${x+6},${y-36}" stroke="${col}" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+const catEars=(x,y,col='#8b8a8f')=>`<path d="M${x-9},${y} Q${x},${y-14} ${x+9},${y} Z" fill="${col}"/><path d="M${x-8},${y-6} L${x-8},${y-15} L${x-3},${y-9} Z M${x+3},${y-9} L${x+8},${y-15} L${x+8},${y-6} Z" fill="${col}"/><circle cx="${x-3.5}" cy="${y-4}" r="1.4" fill="#e2b838"/><circle cx="${x+3.5}" cy="${y-4}" r="1.4" fill="#e2b838"/>`;
+function cake(x,y,w=46,bitten=false){const h=w*.38;
+ return `<rect x="${x-w/2-4}" y="${y-2}" width="${w+8}" height="4" rx="2" fill="#d9d2c6"/>
+ <rect x="${x-w/2}" y="${y-h}" width="${w}" height="${h}" rx="4" fill="#b8694a"/>
+ <rect x="${x-w/2}" y="${y-h*.55}" width="${w}" height="${h*.14}" fill="#f3e3c4"/>
+ <path d="M${x-w/2},${y-h} q${w/8},-6 ${w/4},0 q${w/8},-6 ${w/4},0 q${w/8},-6 ${w/4},0 q${w/8},-6 ${w/4},0 v4 h-${w} Z" fill="#fff"/>
+ ${bitten?`<path d="M${x+w/2-10},${y-h-3} q6,6 10,10 v-13 Z" fill="#fff8"/><circle cx="${x+w/2-4}" cy="${y-h+2}" r="6" fill="#fff"/>`:`<circle cx="${x-w/4}" cy="${y-h-3}" r="2.6" fill="#9c2f3c"/><circle cx="${x+w/4}" cy="${y-h-3}" r="2.6" fill="#9c2f3c"/>`}`;}
+const sky=(c='#dfe8f0')=>`<rect width="300" height="210" fill="${c}"/>`;
+const wall=(c='#efe7da')=>`<rect width="300" height="210" fill="${c}"/>`;
+const floor=(c='#d9c7ad')=>`<rect y="180" width="300" height="30" fill="${c}"/>`;
+const brickWall=(x,y,w,h)=>{let s=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#b9b2a9"/>`;for(let r=0;r<h/10;r++)for(let c=0;c<w/22+1;c++){const bx=x+c*22-(r%2?11:0);if(bx<x+w&&bx+20>x)s+=`<rect x="${Math.max(bx,x)}" y="${y+r*10}" width="${Math.min(20,x+w-Math.max(bx,x))}" height="8" fill="#c9c2b8"/>`;}return s;};
+const pot=(x,y)=>`<path d="M${x-12},${y-22} L${x+12},${y-22} L${x+9},${y} L${x-9},${y} Z" fill="#b8694a"/><circle cx="${x-7}" cy="${y-28}" r="7" fill="#9b84b8"/><circle cx="${x+5}" cy="${y-31}" r="8" fill="#8670a6"/><circle cx="${x+1}" cy="${y-24}" r="6" fill="#a993c4"/>`;
+const lilacBush=(x,y,s=1)=>`<g transform="translate(${x},${y}) scale(${s})"><ellipse cx="0" cy="-22" rx="38" ry="26" fill="#5f6f7c"/><circle cx="-18" cy="-34" r="9" fill="#9b84b8"/><circle cx="6" cy="-42" r="10" fill="#8670a6"/><circle cx="22" cy="-28" r="8" fill="#a993c4"/><circle cx="-4" cy="-24" r="7" fill="#9b84b8"/></g>`;
+function windowFrame(x,y,w,h,inside){return `<rect x="${x-6}" y="${y-6}" width="${w+12}" height="${h+12}" rx="4" fill="#f9f6f0" stroke="#c9bfb0" stroke-width="2"/>
+ <svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${inside}</svg>
+ <rect x="${x+w/2-2}" y="${y}" width="4" height="${h}" fill="#f9f6f0"/>
+ <rect x="${x-14}" y="${y+h}" width="${w+28}" height="9" rx="3" fill="#e8e0d3" stroke="#c9bfb0"/>`;}
+const garland=()=>{let s='<path d="M10,22 Q150,62 290,22" stroke="#7a6a58" stroke-width="1.2" fill="none"/>';const c=['#3d5a80','#c9a227','#6d5a86','#b8694a','#2f6f73'];for(let i=1;i<10;i++){const t=i/10,x=10+280*t,y=22+40*4*t*(1-t)*1;s+=`<path d="M${x-7},${y} L${x+7},${y} L${x},${y+14} Z" fill="${c[i%5]}"/>`;}return s;};
+const table=(x,y,w)=>`<rect x="${x}" y="${y}" width="${w}" height="8" rx="3" fill="#a8825f"/><rect x="${x+6}" y="${y+8}" width="6" height="${180-y-8}" fill="#8f6c4d"/><rect x="${x+w-12}" y="${y+8}" width="6" height="${180-y-8}" fill="#8f6c4d"/>`;
+const paw=(x,y,s=1)=>`<g transform="translate(${x},${y}) scale(${s})" fill="#8b7b6c"><ellipse cx="0" cy="0" rx="3.2" ry="2.6"/><circle cx="-3.4" cy="-3.6" r="1.2"/><circle cx="0" cy="-4.7" r="1.2"/><circle cx="3.4" cy="-3.6" r="1.2"/></g>`;
+/* Winter */
+const snowGround=()=>`<path d="M0,165 Q75,155 150,163 T300,160 V210 H0 Z" fill="#fbfcfd"/><path d="M0,190 Q90,182 170,190 T300,188" stroke="#d6dfe8" stroke-width="3" fill="none"/>`;
+const snowman=(x,y,nose=true,s=1)=>`<g transform="translate(${x},${y}) scale(${s})"><circle cx="0" cy="-22" r="24" fill="#fff" stroke="#cfd8e2" stroke-width="2"/><circle cx="0" cy="-60" r="18" fill="#fff" stroke="#cfd8e2" stroke-width="2"/><circle cx="0" cy="-90" r="13" fill="#fff" stroke="#cfd8e2" stroke-width="2"/><circle cx="-4.5" cy="-93" r="1.8" fill="${L}"/><circle cx="4.5" cy="-93" r="1.8" fill="${L}"/>${nose?`<path d="M0,-89 L-18,-86 L0,-85 Z" fill="#d9783a"/>`:`<circle cx="-1" cy="-87" r="2" fill="#cfd8e2"/>`}<path d="M-5,-82 q5,4 10,0" stroke="${L}" stroke-width="1.4" fill="none"/><circle cx="0" cy="-64" r="2" fill="${L}"/><circle cx="0" cy="-55" r="2" fill="${L}"/><rect x="-14" y="-108" width="28" height="5" rx="2" fill="#3d5a80"/><rect x="-9" y="-124" width="18" height="17" rx="3" fill="#3d5a80"/><path d="M-16,-76 q16,8 32,0 l-2,6 q-14,6 -28,0 Z" fill="#6d5a86"/></g>`;
+const hedge=(x,y,s=1)=>`<g transform="translate(${x},${y}) scale(${s})"><ellipse cx="0" cy="-24" rx="42" ry="28" fill="#4f5f6e"/><path d="M-40,-30 Q-20,-58 0,-50 Q22,-60 40,-30 Q20,-44 0,-40 Q-20,-46 -40,-30 Z" fill="#fff"/></g>`;
+const rabbitEars=(x,y,col='#9a8f86')=>`<ellipse cx="${x-5}" cy="${y-12}" rx="4" ry="13" fill="${col}" transform="rotate(-10 ${x-5} ${y-12})"/><ellipse cx="${x+5}" cy="${y-12}" rx="4" ry="13" fill="${col}" transform="rotate(10 ${x+5} ${y-12})"/><ellipse cx="${x-5}" cy="${y-12}" rx="1.6" ry="9" fill="#e8c4c4" transform="rotate(-10 ${x-5} ${y-12})"/><ellipse cx="${x+5}" cy="${y-12}" rx="1.6" ry="9" fill="#e8c4c4" transform="rotate(10 ${x+5} ${y-12})"/>`;
+const rabbit=(x,y,carrot=false)=>`<g transform="translate(${x},${y})"><ellipse cx="0" cy="-12" rx="14" ry="12" fill="#9a8f86"/><circle cx="14" cy="-1" r="5" fill="#fff"/><circle cx="-12" cy="-24" r="9" fill="#9a8f86"/>${rabbitEars(-12,-30)}<circle cx="-15" cy="-25" r="1.6" fill="${L}"/><circle cx="-20" cy="-22" r="1.5" fill="#d68a8a"/>${carrot?`<path d="M-21,-20 L-40,-16 L-22,-15 Z" fill="#d9783a"/><path d="M-40,-16 l-5,-4 M-40,-16 l-6,1" stroke="#7d8a5a" stroke-width="1.6"/>`:''}</g>`;
+const tracks=(pts)=>pts.map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="2.4" ry="3.4" fill="#c8d3de"/><ellipse cx="${x+5}" cy="${y+1}" rx="2" ry="2.8" fill="#c8d3de"/>`).join('');
+const house=(x,y,inside)=>`<rect x="${x}" y="${y}" width="140" height="${180-y}" fill="#e6d6c2"/><path d="M${x-8},${y} L${x+70},${y-34} L${x+148},${y} Z" fill="#8e5a4a"/><path d="M${x-6},${y-2} L${x+70},${y-34} L${x+146},${y-2}" stroke="#fff" stroke-width="5" fill="none"/>${windowFrame(x+22,y+20,96,64,inside)}`;
+const svg=(c)=>`<svg viewBox="0 0 300 210" xmlns="http://www.w3.org/2000/svg" role="img">${c}</svg>`;
+
+const SOPHIE={shirt:'#2f6f73',hair:'#7a4a2a',style:'long',h:78,pants:'#3d5a80'};
+const MAMA={shirt:'#6d5a86',hair:'#5a3b26',style:'long',h:108,pants:'#4a4560'};
+const OPA={shirt:'#3d5a80',hair:'#d9d4cc',style:'bald',h:106,pants:'#5d5752',beard:true};
+
+const STORY1=[
+ ['Sophie und ihre Mutter backen',svg(wall()+floor()+`<rect x="212" y="98" width="70" height="82" rx="5" fill="#cfc6b8"/><rect x="220" y="112" width="54" height="38" rx="4" fill="#3b3836"/><rect x="216" y="102" width="62" height="6" rx="2" fill="#a59c90"/>`+table(60,128,130)+cake(125,128,50)+`<path d="M115,96 q-4,-8 0,-14 M125,94 q-4,-8 0,-14 M135,96 q-4,-8 0,-14" stroke="#c9bfb0" stroke-width="2" fill="none"/>`+person({...MAMA,x:50,y:180,arms:'fwdR',mood:'happy'})+person({...SOPHIE,x:200,y:180,arms:'fwdL',mood:'laugh'}))],
+ ['Der Kuchen kühlt am Fenster ab',svg(wall()+floor()+windowFrame(110,40,150,104,sky('#dde7ef')+brickWall(0,64,150,40)+pot(118,64)+catTail(128,58))+cake(205,144,46)+person({...SOPHIE,x:150,y:180,arms:'fwdR',mood:'happy'}))],
+ ['Sophie schmückt das Wohnzimmer',svg(wall('#f1eadf')+floor()+garland()+windowFrame(222,80,58,52,sky('#dde7ef')+brickWall(0,36,58,16)+catEars(40,36))+table(30,138,150)+`<ellipse cx="70" cy="136" rx="14" ry="3.5" fill="#fff" stroke="#d9d2c6"/><ellipse cx="140" cy="136" rx="14" ry="3.5" fill="#fff" stroke="#d9d2c6"/><rect x="100" y="118" width="10" height="18" rx="2" fill="#c9a227"/>`+person({...SOPHIE,x:190,y:180,arms:'up',mood:'happy'}))],
+ ['Opa kommt zu Besuch',svg(wall()+floor()+`<rect x="185" y="52" width="80" height="128" rx="4" fill="#8f6c4d"/><rect x="190" y="57" width="70" height="123" fill="#f9f3e6"/><rect x="250" y="52" width="15" height="128" fill="#a8825f"/>`+person({...OPA,x:222,y:180,arms:'fwdL',mood:'laugh'})+`<rect x="178" y="122" width="22" height="18" rx="2" fill="#6d5a86"/><path d="M189,122 v18 M178,131 h22" stroke="#c9a227" stroke-width="2.5"/>`+person({...SOPHIE,x:140,y:180,arms:'cheer',mood:'laugh'})+person({...MAMA,x:80,y:180,arms:'down',mood:'happy'}))],
+ ['Das Fensterbrett ist leer',svg(wall()+floor()+windowFrame(110,40,150,104,sky('#dde7ef')+brickWall(0,64,150,40)+pot(118,64))+`<circle cx="168" cy="148" r="1.6" fill="#b8694a"/><circle cx="176" cy="147" r="1.2" fill="#b8694a"/><circle cx="190" cy="148" r="1.8" fill="#b8694a"/><circle cx="201" cy="147" r="1.1" fill="#b8694a"/>`+paw(212,148,.9)+paw(226,147,.9)+paw(240,148,.9)+person({...SOPHIE,x:75,y:180,arms:'cheer',mood:'shock'}))],
+ ['Im Garten',svg(sky('#dde7ef')+`<rect y="150" width="300" height="60" fill="#d8cdb9"/>`+brickWall(0,100,300,50)+lilacBush(90,160,1.1)+cake(118,170,40,true)+cat(160,172,1,'#8b8a8f',true)+person({...OPA,x:215,y:192,arms:'both',mood:'laugh'})+person({...SOPHIE,x:265,y:194,arms:'cheer',mood:'laugh'}))]
+];
+
+const LUKAS={shirt:'#3d5a80',hair:'#b8694a',style:'beanie',h:80,pants:'#4a4560'};
+const MIA={shirt:'#6d5a86',hair:'#2f6f73',style:'beanie',h:72,pants:'#3d5a80'};
+const STORY2=[
+ ['Mia und Lukas rollen Schnee',svg(sky()+snowGround()+`<circle cx="120" cy="158" r="26" fill="#fff" stroke="#cfd8e2" stroke-width="2"/><circle cx="210" cy="166" r="17" fill="#fff" stroke="#cfd8e2" stroke-width="2"/>`+person({...LUKAS,x:78,y:184,arms:'fwdR',mood:'happy'})+person({...MIA,x:250,y:186,arms:'fwdL',mood:'laugh'}))],
+ ['Der Schneemann bekommt eine Nase',svg(sky()+snowGround()+hedge(262,170,.85)+rabbitEars(268,130)+snowman(140,176)+person({...LUKAS,x:92,y:186,arms:'fwdR',mood:'happy'})+person({...MIA,x:196,y:188,arms:'cheer',mood:'laugh'}))],
+ ['Kakao am Fenster',svg(sky()+snowGround()+hedge(278,172,.7)+house(10,80,`<rect width="96" height="64" fill="#f3dcae"/>`+person({...MIA,x:30,y:90,h:60,arms:'both',mood:'happy',style:'long'})+person({...LUKAS,x:68,y:90,h:64,arms:'both',mood:'focus',style:'short'})+`<rect x="18" y="52" width="10" height="9" rx="2" fill="#fff"/><rect x="74" y="52" width="10" height="9" rx="2" fill="#fff"/>`)+snowman(205,176,true,.75)+tracks([[262,170],[248,174],[234,170],[222,176]]))],
+ ['In der Nacht',svg(`<rect width="300" height="210" fill="#2f3f5c"/><circle cx="245" cy="42" r="18" fill="#f4ecd2"/><circle cx="60" cy="30" r="1.6" fill="#fff"/><circle cx="120" cy="50" r="1.3" fill="#fff"/><circle cx="180" cy="22" r="1.5" fill="#fff"/><circle cx="30" cy="80" r="1.2" fill="#fff"/>`+`<path d="M0,165 Q75,155 150,163 T300,160 V210 H0 Z" fill="#dfe6ef"/>`+snowman(140,176)+`<ellipse cx="200" cy="181" rx="22" ry="5" fill="#9aa6b8"/>`+`<g opacity=".55">${rabbitEars(186,170,'#5b6578')}<ellipse cx="188" cy="176" rx="8" ry="6" fill="#5b6578"/></g>`)],
+ ['Am nächsten Morgen',svg(sky('#e6edf3')+snowGround()+snowman(150,176,false)+tracks([[190,182],[206,178],[222,182],[238,177],[254,181]])+person({...LUKAS,x:70,y:186,arms:'cheer',mood:'shock'})+person({...MIA,x:30,y:188,arms:'both',mood:'shock'}))],
+ ['Hinter der Hecke',svg(sky('#e6edf3')+snowGround()+hedge(150,170,1)+rabbit(118,182,true)+person({...LUKAS,x:238,y:188,arms:'fwdL',mood:'laugh'})+`<path d="M203,138 L188,142 L203,145 Z" fill="#d9783a"/>`+person({...MIA,x:280,y:190,arms:'cheer',mood:'laugh'}))]
+];
+function strip(id,arr){document.getElementById(id).innerHTML=arr.map((p,i)=>`<figure class="pn">${p[1]}<figcaption>Bild ${i+1} · ${p[0]}</figcaption></figure>`).join('');}
+strip('strip1',STORY1);strip('strip2',STORY2);
+
+/* =========================================================
+   MULTIPLE CHOICE
+   ========================================================= */
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const PRAISE=['Genau.','Richtig erkannt.','Stimmt.','Gut beobachtet.','So ist es.'];
+const TRY=['Noch nicht ganz.','Schau noch einmal genau hin.','Fast – lies die Erklärung.','Nicht ganz.'];
+function mc(container,title,items){
+ const box=document.getElementById(container);
+ box.innerHTML=`<h2>${title}</h2>`;
+ items.forEach((it,k)=>{
+  tot++;
+  const q=document.createElement('div');q.className='q';
+  q.innerHTML=`<div class="qt">${k+1}. ${it.q}</div><div class="opts"></div><div class="fb"></div>`;
+  const opts=q.querySelector('.opts'),fb=q.querySelector('.fb');
+  shuffle(it.o.map((t,i)=>({t,ok:i===0}))).forEach(o=>{
+   const b=document.createElement('button');b.className='opt';b.textContent=o.t;
+   b.onclick=()=>{
+    opts.querySelectorAll('.opt').forEach(x=>x.disabled=true);
+    if(o.ok){b.classList.add('right');pts++;fb.className='fb show ok';fb.innerHTML=`<b>${PRAISE[k%5]}</b> ${it.ex}`;}
+    else{b.classList.add('wrong');[...opts.children].find(x=>x.textContent===it.o[0]).classList.add('right');fb.className='fb show no';fb.innerHTML=`<b>${TRY[k%4]}</b> ${it.ex}`;}
+    score();};
+   opts.appendChild(b);});
+  box.appendChild(q);});
+ score();
+}
+
+mc('q-find','Detektivarbeit: Wo beginnt die Spur?',[
+ {q:'Was ist die Überraschung (Pointe) am Ende dieser Geschichte?',
+  o:['Die Nachbarskatze hat den Kuchen vom Fensterbrett geholt.','Opa hat den Kuchen heimlich in den Garten getragen.','Der Kuchen ist vom Fensterbrett in den Garten gefallen.','Sophies Mutter hat den Kuchen draußen versteckt, um Opa zu überraschen.'],
+  ex:'Auf Bild 5 sieht man Pfotenabdrücke auf dem Fensterbrett, auf Bild 6 sitzt die Katze mit Sahne an der Schnauze neben dem angeknabberten Kuchen. Die Pfotenabdrücke passen weder zu Opa noch zur Mutter, und ein heruntergefallener Kuchen wäre nicht angeknabbert.'},
+ {q:'Auf welchem Bild ist die Katze zum allerersten Mal zu sehen?',
+  o:['auf Bild 2 – hinter dem Blumentopf auf der Mauer ragt ein grauer Schwanz hervor','auf Bild 3 – am Wohnzimmerfenster sieht man zwei Ohren','auf Bild 5 – auf dem Fensterbrett sind Pfotenabdrücke','auf Bild 6 – die Katze sitzt im Garten neben dem Kuchen'],
+  ex:'Ganz klein und am Rand taucht die Katze schon auf Bild 2 auf: Man sieht nur ihren Schwanz. Auf Bild 3 kommen die Ohren dazu, auf Bild 5 die Pfotenabdrücke, und erst auf Bild 6 sieht man die ganze Katze. Genau bei Bild 2 legst du deshalb die erste Spur.'},
+ {q:'Was zeigt Bild 2 von der Katze – und was nicht?',
+  o:['nur ihren Schwanz; man sieht nicht, ob sie den Kuchen bemerkt hat','die ganze Katze, die gerade auf das Fensterbrett springt','ihre Pfotenabdrücke neben dem Kuchen','die Katze, wie sie Sophie beim Backen zuschaut'],
+  ex:'Das Bild zeigt nur einen kleinen Teil. Genau so darfst du auch erzählen: etwas Graues, das zuckt – ohne zu sagen, was die Katze vorhat.'},
+ {q:'Welches Bild ist der Höhepunkt, also der spannendste Moment?',
+  o:['Bild 5 – Sophie findet das leere Fensterbrett','Bild 4 – Opa steht vor der Tür','Bild 6 – alle lachen im Garten','Bild 3 – Sophie hängt die Girlanden auf'],
+  ex:'Auf Bild 5 ändert sich die Lage plötzlich: Der Kuchen ist weg und Sophie erschrickt. Bild 6 ist der Schluss, der das Rätsel auflöst.'},
+ {q:'Was macht ein geschickter Erzähler auf Bild 3 mit der Katze?',
+  o:['Er nimmt die Spur wieder auf und macht sie ein bisschen deutlicher – etwa mit den zwei spitzen Ohren am Fenster.','Er lässt die Katze weg, weil Bild 3 im Wohnzimmer spielt.','Er erzählt hier schon, dass die Katze gleich den Kuchen holt.','Er beschreibt die Katze genau mit Farbe, Größe und Namen.'],
+  ex:'Die Spur wird von Bild zu Bild etwas deutlicher: erst ein Schwanz, dann zwei Ohren, dann Pfotenabdrücke. So steigt die Spannung, und der Leser bleibt dran.'}
+]);
+
+mc('q-test','Was denkt sich der Leser?',[
+ {q:'Version A: Was fragt sich ein Leser beim letzten Satz?',
+  o:['„Welche Katze? Woher kommt die denn plötzlich?“','„Ach, die graue Katze von der Mauer war es also!“','„Das habe ich mir schon seit dem ersten Satz gedacht.“','„Jetzt verstehe ich, warum Sophie die Ohren am Fenster gesehen hat.“'],
+  ex:'In Version A kommt die Katze vorher nie vor. Der Leser hat keine Chance, sie einzuordnen. Die Überraschung wirkt deshalb nicht spannend, sondern unlogisch – genau wie Tiere, die beim Höhepunkt plötzlich „da“ sind, obwohl sie vorher nie erwähnt wurden.'},
+ {q:'Version C: Was ist hier das Problem?',
+  o:['Der Leser weiß schon nach dem zweiten Satz, was passieren wird – die Überraschung ist weg.','Die Katze kommt viel zu spät in der Geschichte vor.','Die Geschichte steht nicht im Präteritum.','Der Text ist zu kurz, um spannend zu sein.'],
+  ex:'„Sie ahnte nicht, dass die Katze … stehlen wollte“ verrät die Pointe. Warum sollte der Leser noch gespannt sein, wenn er schon alles weiß?'},
+ {q:'Warum ist Version B die beste?',
+  o:['Die Katze wird leise angedeutet, die Spur wird deutlicher, und erst beim Höhepunkt wird klar, was passiert ist.','Sie ist die längste Version und hat deshalb die meisten Punkte.','Sie nennt die Katze schon am Anfang mit Namen, damit der Leser sie kennt.','Sie erklärt dem Leser genau, was die Katze vorhat.'],
+  ex:'Version B legt eine Spur (etwas Graues auf der Mauer), steigert sie (zwei spitze Ohren) und löst beim Höhepunkt auf (Pfotenabdrücke). Der Leser ist neugierig und versteht am Ende sofort.'},
+ {q:'In Version B steht: „… doch Sophie war schon unterwegs ins Wohnzimmer.“ Warum ist dieser Satzteil geschickt?',
+  o:['Der Leser bemerkt etwas, das Sophie nicht bemerkt – dadurch wird er neugierig und ein bisschen unruhig.','Er zeigt, dass Sophie sehr schnell laufen kann.','Er erklärt, wie das Haus eingerichtet ist.','Er macht klar, dass Sophie die Katze absichtlich übersieht.'],
+  ex:'Wenn der Leser ein bisschen mehr weiß als die Figur, aber noch nicht alles, entsteht Spannung: Er möchte wissen, was das Graue auf der Mauer zu bedeuten hat.'}
+]);
+
+/* =========================================================
+   SPUR ODER SPOILER – Zuordnen
+   ========================================================= */
+const CATS=['sagt zu wenig','verrät zu viel','leise Spur – genau richtig'];
+const SORT=[
+ ['Sophie stellte den Kuchen aufs Fensterbrett und ging ins Wohnzimmer.',0,'Hier fehlt jede Spur zur Katze. Beim Höhepunkt taucht sie dann plötzlich aus dem Nichts auf.'],
+ ['Sophie stellte den Kuchen aufs Fensterbrett. Sie ahnte nicht, dass die Nachbarskatze ihn gleich stehlen würde.',1,'„Sie ahnte nicht, dass …“ verrät, was passieren wird. Die Überraschung ist damit schon weg.'],
+ ['Auf der Gartenmauer zuckte hinter dem Blumentopf etwas Graues hin und her. Sophie bemerkte es nicht.',2,'Ein Teil statt des Ganzen, und die Figur bemerkt es nicht: Der Leser wird neugierig, weiß aber noch nicht, was es ist.'],
+ ['Hinter dem Blumentopf lauerte die Katze schon darauf, sich den Kuchen zu schnappen.',1,'Der Satz verrät die Absicht der Katze. Der Leser kennt die Pointe, bevor sie passiert.'],
+ ['Draußen schien die Sonne, und die Vögel zwitscherten.',0,'Ein schöner Satz für die Stimmung, aber er legt keine Spur zur Katze.'],
+ ['Von der Mauer kam ein leises Rascheln, doch Sophie war viel zu beschäftigt, um sich umzudrehen.',2,'Ein Geräusch und eine abgelenkte Figur: Der Leser horcht auf, und die Spannung beginnt.'],
+ ['Das war das letzte Mal, dass Sophie den Kuchen ganz sah, denn die Katze war schneller.',1,'Dieser Satz verrät gleich zwei Dinge: dass der Kuchen verschwindet und wer ihn holt.'],
+ ['Zwischen den Fliederblüten im Blumentopf blitzten für einen Moment zwei gelbe Punkte auf.',2,'Der Leser ahnt: Da ist ein Tier. Was es vorhat, bleibt offen.'],
+ ['Sophie freute sich schon sehr auf Opas Gesicht, wenn er den Kuchen sehen würde.',0,'Der Satz macht neugierig auf Opa, aber nicht auf die Katze. Für die Pointe fehlt die Spur.']
+];
+(function(){const box=document.getElementById('sort');
+ shuffle(SORT).forEach(([t,c,ex])=>{tot++;
+  const d=document.createElement('div');d.className='sent';
+  d.innerHTML=`<div class="txt">„${t}“</div><div class="cats"></div><div class="fb"></div>`;
+  const cs=d.querySelector('.cats'),fb=d.querySelector('.fb');
+  CATS.forEach((n,i)=>{const b=document.createElement('button');b.className='cat';b.textContent=n;
+   b.onclick=()=>{cs.querySelectorAll('.cat').forEach(x=>x.disabled=true);
+    if(i===c){b.classList.add('right');pts++;fb.className='fb show ok';fb.innerHTML=`<b>Richtig.</b> ${ex}`;}
+    else{b.classList.add('wrong');cs.children[c].classList.add('right');fb.className='fb show no';fb.innerHTML=`<b>Richtig wäre: ${CATS[c]}.</b> ${ex}`;}
+    score();};cs.appendChild(b);});
+  box.appendChild(d);});score();})();
+
+/* =========================================================
+   SPUR STEIGERN – Reihenfolge
+   ========================================================= */
+const ORD=[
+ ['Auf der Gartenmauer zuckte hinter dem Blumentopf etwas Graues hin und her.','Bild 2: nur eine Bewegung, ganz am Rand – die leiseste Spur.'],
+ ['Als Sophie die Girlande aufhängte, glaubte sie, am Fenster zwei spitze Ohren zu sehen. Doch als sie genauer hinsah, war da nichts.','Bild 3: Jetzt sind es schon Ohren, und Sophie stutzt kurz. Die Spur wird deutlicher.'],
+ ['Auf dem Fensterbrett lagen nur noch ein paar Krümel – und daneben kleine, runde Pfotenabdrücke.','Bild 5: der Höhepunkt. Der Leser zählt eins und eins zusammen.'],
+ ['Unter dem Fliederbusch saß die graue Nachbarskatze und hatte Sahne an der Schnauze.','Bild 6: die Auflösung. Jetzt erst sieht man das Tier ganz.']
+];
+let pick=[];tot++;let ordDone=false,ordScored=false;
+function drawOrder(){const box=document.getElementById('order');box.innerHTML='';
+ (window._ordMix=window._ordMix||shuffle(ORD.map((x,i)=>i))).forEach(i=>{
+  const d=document.createElement('div');d.className='order-item'+(pick.includes(i)?' picked':'');
+  d.innerHTML=`<div class="num">${pick.includes(i)?pick.indexOf(i)+1:''}</div><div>${ORD[i][0]}</div>`;
+  d.onclick=()=>{if(ordDone)return;pick.includes(i)?pick=pick.filter(x=>x!==i):pick.push(i);drawOrder();};
+  box.appendChild(d);});}
+drawOrder();
+document.getElementById('ordCheck').onclick=()=>{const fb=document.getElementById('ordFb');
+ if(pick.length<4){fb.className='fb show no';fb.innerHTML='<b>Noch nicht fertig.</b> Klicke alle vier Sätze in eine Reihenfolge.';return;}
+ const ok=pick.every((v,i)=>v===i);
+ document.querySelectorAll('.order-item').forEach((el,k)=>{const i=window._ordMix[k];el.classList.add(pick.indexOf(i)===i?'right':'wrong');});
+ ordDone=true;if(!ordScored){ordScored=true;if(ok)pts++;score();}
+ fb.className='fb show '+(ok?'ok':'no');
+ fb.innerHTML=(ok?'<b>Perfekt – die Spur wird Schritt für Schritt deutlicher.</b>':'<b>Die richtige Reihenfolge:</b>')+'<ol>'+ORD.map(x=>`<li>${x[1]}</li>`).join('')+'</ol>';};
+document.getElementById('ordReset').onclick=()=>{pick=[];ordDone=false;window._ordMix=null;document.getElementById('ordFb').className='fb';drawOrder();};
+
+mc('q-steig','Warum steigern?',[
+ {q:'Warum wird die Spur von Bild zu Bild deutlicher – und nicht gleich am Anfang ganz deutlich?',
+  o:['Weil die Spannung so langsam steigt und der Leser bis zum Höhepunkt neugierig bleibt.','Weil man am Anfang einer Geschichte keine Tiere erwähnen darf.','Weil der Leser die Katze sonst für die Hauptfigur halten würde.','Weil eine Bildergeschichte immer genau drei Spuren haben muss.'],
+  ex:'Spannung entsteht, wenn der Leser Stück für Stück mehr erfährt. Eine ganz deutliche Spur gleich zu Beginn wäre fast schon ein Spoiler.'},
+ {q:'Wie oft solltest du die Spur in einer Bildergeschichte mit sechs Bildern ungefähr aufnehmen, bevor der Höhepunkt kommt?',
+  o:['ein- bis zweimal, dort, wo sie auf den Bildern zu sehen ist','in jedem einzelnen Satz, damit der Leser sie nicht vergisst','gar nicht – eine einzige Erwähnung beim Höhepunkt reicht','nur im Titel der Geschichte'],
+  ex:'Ein bis zwei Spuren genügen. Halte dich an die Bilder: Wo das Tier oder der Gegenstand auftaucht, darfst du es andeuten.'}
+]);
+
+mc('q-bau','Welches Werkzeug passt?',[
+ {q:'„Unter dem Tisch raschelte es leise.“ Welches Werkzeug steckt in diesem Satz?',
+  o:['ein Geräusch','ein Teil statt des Ganzen','eine Frage im Kopf der Figur','die Zukunft verraten'],
+  ex:'„Raschelte“ beschreibt ein Geräusch. Man weiß nicht, wer oder was raschelt – deshalb wird man neugierig.'},
+ {q:'„Hinter dem Sofa ragte eine buschige, rote Schwanzspitze hervor.“ Welches Werkzeug ist das?',
+  o:['ein Teil statt des Ganzen','ein Geräusch','die Figur bemerkt es kurz und vergisst es','Absicht verraten'],
+  ex:'Man sieht nur die Schwanzspitze, nicht das ganze Tier. Der Leser beginnt zu raten.'},
+ {q:'„Er ahnte nicht, dass der Hund gleich seine Wurstsemmel stehlen würde.“ Was ist das Problem?',
+  o:['Der Satz verrät die Zukunft – die Überraschung ist weg.','Der Satz legt gar keine Spur zum Hund.','Der Satz steht im falschen Tempus.','Der Satz ist zu kurz für eine Spur.'],
+  ex:'„Er ahnte nicht, dass … gleich … würde“ verrät, was passiert. Besser: „Unter dem Nachbartisch klopfte ein Schwanz auf den Boden.“'},
+ {q:'„Hatte da nicht gerade etwas geschnuppert? Lea schüttelte den Kopf und packte weiter ihren Rucksack.“ Welches Werkzeug ist das?',
+  o:['Die Figur bemerkt es kurz – und vergisst es gleich wieder.','Die Figur bemerkt es gar nicht.','ein Teil statt des Ganzen','Absicht verraten'],
+  ex:'Lea stutzt, findet aber nichts und macht weiter. Der Leser bleibt mit der Frage zurück – und will wissen, was da geschnuppert hat.'}
+]);
+
+mc('q-schnee','Detektivarbeit: Geschichte 2',[
+ {q:'Was ist die Pointe dieser Geschichte?',
+  o:['Ein Hase hat in der Nacht die Karottennase gefressen.','Mia hat die Karotte versteckt, um Lukas zu ärgern.','Der Wind hat die Nase in der Nacht weggeweht.','Ein Vogel hat die Karotte am Morgen geholt.'],
+  ex:'Auf Bild 6 sitzt der Hase hinter der Hecke und knabbert an der Karotte. Die kleinen Abdrücke im Schnee führen von der Hecke zum Schneemann und zurück.'},
+ {q:'Auf welchem Bild taucht der Hase zum allerersten Mal auf?',
+  o:['auf Bild 2 – hinter der Hecke ragen zwei lange Ohren hervor','auf Bild 3 – im Schnee sind kleine Abdrücke zu sehen','auf Bild 4 – neben dem Schneemann ist ein Schatten mit langen Ohren','auf Bild 6 – der Hase sitzt hinter der Hecke'],
+  ex:'Schon auf Bild 2 sind die zwei langen Ohren hinter der Hecke zu sehen. Bild 3 (Abdrücke) und Bild 4 (Schatten) machen die Spur deutlicher, Bild 6 löst auf.'},
+ {q:'Welcher Satz passt als erste, leise Spur zu Bild 2?',
+  o:['Hinter der verschneiten Hecke zuckten zwei lange, graue Spitzen, doch die Kinder bewunderten gerade ihren Schneemann.','Hinter der Hecke wartete schon ein hungriger Hase auf die Karotte.','Lukas und Mia waren mit ihrem Schneemann sehr zufrieden.','Die Kinder ahnten nicht, dass ihr Schneemann am nächsten Morgen keine Nase mehr haben würde.'],
+  ex:'Nur der erste Satz legt eine leise Spur. Satz zwei verrät die Absicht des Hasen, Satz drei sagt nichts über ihn, und Satz vier verrät, was passieren wird.'},
+ {q:'Welches Bild ist der Höhepunkt?',
+  o:['Bild 5 – die Kinder entdecken, dass die Nase fehlt','Bild 4 – die Nacht mit dem Mond','Bild 6 – der Hase hinter der Hecke','Bild 2 – der Schneemann bekommt seine Nase'],
+  ex:'Auf Bild 5 ändert sich die Lage plötzlich: Die Nase ist weg, die Kinder erschrecken. Bild 6 ist die Auflösung und der Schluss.'}
+]);
+
+/* Mustervorschläge erst nach eigenem Versuch */
+document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{
+ const m=document.getElementById(b.dataset.m),ta=document.getElementById('w'+b.dataset.m.slice(1));
+ if(ta.value.trim().length<25){ta.focus();ta.placeholder='Schreib zuerst deinen eigenen Satz – dann kannst du vergleichen.';return;}
+ m.classList.toggle('show');b.textContent=m.classList.contains('show')?'Mustervorschlag ausblenden':'Mustervorschlag zeigen';});
+</script>
+</body>
+</html>
