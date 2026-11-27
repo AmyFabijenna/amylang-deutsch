@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="/daf/interdaf/passwort.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Konnektoren-Atelier C1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1c1d22;--muted:#4c5260;--bg:#f4f1ea;--card:#fffdf8;--line:#e2dccf;
+  --blue:#34507c;--blue-s:#e5ebf4;--pet:#1d6670;--pet-s:#ddedee;--lil:#5b4679;--lil-s:#ebe5f2;
+  --gold:#b7892e;--gold-s:#f6eedb;--rust:#a1453a;--rust-s:#f6e3df;--r:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Lexend',system-ui,-apple-system,sans-serif;font-size:18px;line-height:1.6;color:var(--ink);background:var(--bg);min-height:100vh;overflow-x:hidden}
+button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
+.bubbles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bubble{position:absolute;border-radius:50%;opacity:.16;animation:float linear infinite}
+@keyframes float{0%{transform:translateY(0) translateX(0)}50%{transform:translateY(-40px) translateX(18px)}100%{transform:translateY(0) translateX(0)}}
+.wrap{position:relative;z-index:1;max-width:1040px;margin:0 auto;padding:22px 20px 60px}
+header{text-align:center;padding:18px 0 8px}
+h1{font-weight:600;font-size:2.35rem;letter-spacing:-.01em;color:var(--blue)}
+h1 span{color:var(--lil)}
+.sub{color:var(--muted);font-size:1.02rem;margin-top:4px}
+.topbtn{display:inline-flex;border-radius:999px;overflow:hidden;margin-top:14px;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.topbtn a{padding:.5rem 1.15rem;text-decoration:none;font-weight:500;font-size:.9rem}
+.topbtn a:first-child{background:var(--gold);color:#1d1b1a}
+.topbtn a:last-child{background:#1d1b1a;color:var(--gold)}
+/* stats */
+.stats{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:20px 0 22px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 16px;font-size:.92rem;color:var(--muted);display:flex;gap:8px;align-items:baseline}
+.stat b{color:var(--ink);font-weight:600;font-size:1.05rem}
+.stat.rank b{color:var(--lil)}
+/* screens */
+.screen{display:none;animation:fade .35s ease}
+.screen.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:26px 28px;box-shadow:0 4px 22px rgba(52,80,124,.07);margin-bottom:18px}
+/* home grid */
+.sect-title{font-weight:600;font-size:1.05rem;color:var(--muted);margin:26px 4px 12px;letter-spacing:.02em}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.mode{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 18px 16px;text-align:left;position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s}
+.mode:hover{transform:translateY(-3px);box-shadow:0 8px 26px rgba(52,80,124,.13)}
+.mode::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--acc,var(--blue))}
+.mode .ic{font-size:1.5rem}
+.mode h3{font-weight:600;font-size:1.08rem;margin:4px 0 4px}
+.mode p{font-size:.88rem;color:var(--muted);line-height:1.45}
+.mode .tag{display:inline-block;margin-top:9px;font-size:.74rem;font-weight:500;padding:2px 9px;border-radius:999px;background:var(--accs,var(--blue-s));color:var(--acc,var(--blue))}
+.fam-blue{--acc:var(--blue);--accs:var(--blue-s)}
+.fam-pet{--acc:var(--pet);--accs:var(--pet-s)}
+.fam-lil{--acc:var(--lil);--accs:var(--lil-s)}
+.fam-gold{--acc:#94701f;--accs:var(--gold-s)}
+.marathon{grid-column:1/-1;display:flex;gap:16px;align-items:center;background:linear-gradient(120deg,var(--blue),var(--lil));color:#fff;border:none}
+.marathon::before{display:none}
+.marathon p{color:#eef0f7}
+.marathon .ic{font-size:2.1rem}
+/* quiz */
+.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.back{background:none;border:1px solid var(--line);border-radius:999px;padding:6px 16px;font-size:.9rem;color:var(--muted);background:var(--card)}
+.back:hover{border-color:var(--blue);color:var(--blue)}
+.mtitle{font-weight:600;font-size:1.25rem;color:var(--blue)}
+.counter{font-size:.9rem;color:var(--muted)}
+.instr{font-size:.95rem;color:var(--lil);font-weight:500;margin-bottom:12px}
+.kicker{display:inline-block;font-size:.76rem;font-weight:500;padding:2px 10px;border-radius:999px;background:var(--blue-s);color:var(--blue);margin-bottom:10px}
+.stem{font-size:1.28rem;line-height:1.75;margin-bottom:20px}
+.stem .src{display:block;background:var(--blue-s);border-radius:12px;padding:12px 16px;font-size:1.12rem;margin-bottom:6px}
+.gap{display:inline-block;min-width:110px;border-bottom:2.5px solid var(--lil);text-align:center;color:var(--lil);font-weight:600;padding:0 6px}
+.gap.filled{border-color:var(--pet);color:var(--pet);background:var(--pet-s);border-radius:6px 6px 0 0}
+.mk{background:var(--gold-s);border-bottom:2px solid var(--gold);padding:0 4px;border-radius:4px;font-weight:500}
+.opts{display:grid;gap:10px}
+.opts.two{grid-template-columns:1fr 1fr}
+@media(max-width:640px){.opts.two{grid-template-columns:1fr}}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px 16px;font-size:1.05rem;line-height:1.5;transition:border-color .12s,background .12s}
+.opt:hover:not([disabled]){border-color:var(--blue);background:var(--blue-s)}
+.opt .lt{flex:none;width:28px;height:28px;border-radius:50%;background:var(--blue-s);color:var(--blue);font-weight:600;font-size:.85rem;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.opt.right{border-color:var(--pet);background:var(--pet-s)}
+.opt.right .lt{background:var(--pet);color:#fff}
+.opt.wrong{border-color:var(--rust);background:var(--rust-s)}
+.opt.wrong .lt{background:var(--rust);color:#fff}
+.opt[disabled]{cursor:default}
+.fb{margin-top:18px;border-radius:14px;padding:16px 18px;font-size:.98rem;line-height:1.6;display:none}
+.fb.show{display:block;animation:fade .3s}
+.fb.ok{background:var(--pet-s);border-left:5px solid var(--pet)}
+.fb.no{background:var(--rust-s);border-left:5px solid var(--rust)}
+.fb .verdict{font-weight:600;margin-bottom:6px}
+.fb.ok .verdict{color:var(--pet)}
+.fb.no .verdict{color:var(--rust)}
+.fb p{margin-top:6px}
+.fb .why{background:rgba(255,255,255,.65);border-radius:10px;padding:8px 12px;margin-top:8px}
+.sol{margin-top:10px;background:#fff;border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:flex-start;font-weight:500}
+.spk{flex:none;background:var(--blue-s);border:none;border-radius:50%;width:32px;height:32px;font-size:.95rem}
+.spk:hover{background:var(--blue);color:#fff}
+.qnav{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
+.btn{border:none;border-radius:999px;padding:10px 22px;font-weight:500;background:var(--blue);color:#fff;font-size:.98rem}
+.btn:hover{filter:brightness(1.1)}
+.btn.ghost{background:var(--card);color:var(--blue);border:1.5px solid var(--blue)}
+.btn.lil{background:var(--lil)}
+.btn.pet{background:var(--pet)}
+.btn[hidden]{display:none}
+.hint{font-size:.85rem;color:var(--muted);margin-top:10px}
+/* bau */
+.zone{min-height:66px;border:2px dashed var(--line);border-radius:14px;padding:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:#fff;margin-bottom:12px}
+.zone.target{border-color:var(--lil);background:var(--lil-s)}
+.zone.target.done{border-style:solid;border-color:var(--pet);background:var(--pet-s)}
+.tile{background:var(--card);border:1.5px solid var(--blue);color:var(--blue);border-radius:10px;padding:6px 13px;font-size:1.02rem;font-weight:500;transition:transform .1s}
+.tile:hover{transform:translateY(-2px)}
+.tile.p{border-color:var(--muted);color:var(--muted);min-width:34px}
+.tile.k{border-color:var(--lil);color:var(--lil);background:var(--lil-s)}
+.zone.target .tile{background:#fff}
+.placeholder{color:var(--muted);font-size:.9rem;padding:0 6px}
+.built{font-size:1.15rem;margin:4px 0 12px;min-height:1.6em;color:var(--ink)}
+/* text mode */
+.txtsel{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:5px 14px;font-size:.88rem;color:var(--muted)}
+.chip.on,.chip:hover{background:var(--lil);border-color:var(--lil);color:#fff}
+.ttext{font-size:1.14rem;line-height:2.05}
+.ttext select{font-family:inherit;font-size:1rem;padding:2px 6px;border-radius:8px;border:1.5px solid var(--lil);background:var(--lil-s);color:var(--ink);margin:0 2px}
+.ttext select.r{border-color:var(--pet);background:var(--pet-s)}
+.ttext select.w{border-color:var(--rust);background:var(--rust-s)}
+.ttext .num{font-size:.7rem;vertical-align:super;color:var(--lil);font-weight:600}
+.exlist{margin-top:16px;display:grid;gap:8px}
+.exitem{border-radius:12px;padding:10px 14px;font-size:.95rem}
+.exitem.r{background:var(--pet-s)}
+.exitem.w{background:var(--rust-s)}
+.exitem b{font-weight:600}
+/* sorter */
+.sortword{text-align:center;font-size:2.3rem;font-weight:600;color:var(--lil);margin:16px 0 8px;min-height:3.2rem}
+.timer{height:8px;border-radius:999px;background:var(--line);overflow:hidden;margin:6px 0 16px}
+.timer i{display:block;height:100%;background:linear-gradient(90deg,var(--pet),var(--blue));width:100%;transition:width 1s linear}
+.sortbtns{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.sbtn{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px 10px;font-size:.95rem;font-weight:500;line-height:1.35}
+.sbtn small{display:block;font-weight:400;color:var(--muted);font-size:.8rem}
+.sbtn:hover{border-color:var(--lil);background:var(--lil-s)}
+.sbtn.flashR{background:var(--pet-s);border-color:var(--pet)}
+.sbtn.flashW{background:var(--rust-s);border-color:var(--rust)}
+.sortfb{text-align:center;min-height:1.6em;font-size:.95rem;margin-top:12px;color:var(--muted)}
+.big{font-size:2rem;font-weight:600;color:var(--blue)}
+/* duett */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.dbtn{width:100%;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:1.05rem;font-weight:500}
+.dbtn.sel{border-color:var(--lil);background:var(--lil-s)}
+.dbtn.done{border-color:var(--pet);background:var(--pet-s);color:var(--pet);cursor:default}
+.dbtn.bad{border-color:var(--rust);background:var(--rust-s)}
+.pairinfo{font-size:.92rem;background:var(--pet-s);border-radius:12px;padding:10px 14px;margin-top:10px}
+/* rad */
+.topic{font-size:1.4rem;font-weight:600;color:var(--blue);text-align:center;margin:8px 0 6px;line-height:1.4}
+.role{text-align:center;color:var(--lil);font-weight:500;margin-bottom:16px}
+.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.kc{background:var(--lil-s);border-radius:14px;padding:14px 16px;cursor:pointer;border:1.5px solid transparent}
+.kc.used{background:var(--pet-s);border-color:var(--pet)}
+.kc b{font-size:1.2rem;color:var(--lil);display:block}
+.kc.used b{color:var(--pet)}
+.kc span{font-size:.85rem;color:var(--muted);display:block;margin-top:3px}
+.kc .fr{font-size:.92rem;color:var(--ink);margin-top:6px;font-style:italic}
+.level{display:flex;gap:8px;justify-content:center;margin-bottom:12px;flex-wrap:wrap}
+/* lexikon */
+.search{width:100%;padding:12px 16px;font-family:inherit;font-size:1.05rem;border:1.5px solid var(--line);border-radius:14px;background:#fff;margin-bottom:12px}
+.search:focus{outline:none;border-color:var(--blue)}
+.lexcard{background:#fff;border:1px solid var(--line);border-radius:14px;margin-bottom:8px;overflow:hidden}
+.lexhead{padding:11px 16px;cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.lexhead:hover{background:var(--blue-s)}
+.lexw{font-weight:600;color:var(--blue);font-size:1.12rem}
+.lexb{font-size:.75rem;padding:2px 9px;border-radius:999px;background:var(--lil-s);color:var(--lil);margin-left:6px;white-space:nowrap}
+.lexbody{display:none;padding:4px 16px 14px;font-size:.95rem;border-top:1px solid var(--line)}
+.lexcard.open .lexbody{display:block}
+.lexbody .lbl{font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:9px}
+.lexbody .tip{background:var(--gold-s);border-radius:10px;padding:8px 12px;margin-top:9px}
+.pop{position:fixed;top:18%;left:50%;transform:translateX(-50%);font-size:1.6rem;font-weight:600;color:var(--pet);pointer-events:none;z-index:50;animation:popup 1s ease forwards}
+@keyframes popup{from{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,-50px)}}
+.resultbig{text-align:center;padding:10px 0}
+.resultbig .big{font-size:3rem}
+footer{text-align:center;font-size:.8rem;color:var(--muted);margin-top:30px}
+.yt{font-size:.85rem;color:var(--muted);margin-top:8px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.85rem;color:var(--muted);margin-top:10px}
+kbd{font-family:inherit;font-size:.78rem;background:var(--blue-s);border-radius:5px;padding:1px 6px;color:var(--blue)}
+</style>
+</head>
+<body>
+<div class="bubbles" id="bubbles"></div>
+<div class="wrap">
+<header>
+  <h1>Konnektoren-<span>Atelier</span> C1</h1>
+  <p class="sub">Sätze verbinden wie ein Profi – mit Logik, Stil und präziser Wortstellung</p>
+  <div class="topbtn"><a href="../index.html">Übungsliste</a><a href="../../index.html">Hauptseite</a></div>
+</header>
+
+<div class="stats">
+  <div class="stat">Punkte <b id="sPts">0</b></div>
+  <div class="stat rank">Rang <b id="sRank">–</b></div>
+  <div class="stat">Serie <b id="sStreak">0</b></div>
+  <div class="stat">Beste Serie <b id="sBest">0</b></div>
+  <div class="stat">Treffsicherheit <b id="sAcc">–</b></div>
+</div>
+
+<!-- HOME -->
+<section id="home" class="screen active">
+  <div class="grid">
+    <button class="mode marathon" onclick="startMode('marathon')">
+      <div class="ic">🏁</div>
+      <div><h3>Konnektor-Marathon</h3><p>20 gemischte Aufgaben aus allen Werkstätten – Sinn, Wortstellung, Nominalstil, Fehlerjagd und Satzbau im Wechsel. Am Ende gibt es deine Bilanz.</p></div>
+    </button>
+  </div>
+
+  <div class="sect-title">✦ Endlos-Werkstätten – jede Runde neu zusammengesetzt</div>
+  <div class="grid">
+    <button class="mode fam-blue" onclick="startMode('sinn')"><div class="ic">🧭</div><h3>Sinn &amp; Satzbau</h3><p>Nur ein Konnektor passt inhaltlich UND grammatisch. Die anderen scheitern an der Logik, an der Wortstellung – oder an beidem.</p><span class="tag">Doppelte Prüfung</span></button>
+    <button class="mode fam-blue" onclick="startMode('wort')"><div class="ic">🔬</div><h3>Wortstellungs-Labor</h3><p>Vier Versionen desselben Gedankens. Finde die einzig korrekte – oder den einen Satz, der aus der Reihe tanzt.</p><span class="tag">Verbposition</span></button>
+    <button class="mode fam-blue" onclick="startMode('bau')"><div class="ic">🧱</div><h3>Satzbaukasten</h3><p>Baue aus Bausteinen einen korrekten Satz. Oft gibt es mehrere richtige Lösungen – du entscheidest, wie du es sagst.</p><span class="tag">Selbst konstruieren</span></button>
+  </div>
+
+  <div class="sect-title">✦ Präzisions-Werkstätten</div>
+  <div class="grid">
+    <button class="mode fam-lil" onclick="startMode('prae')"><div class="ic">🎯</div><h3>Präzisionstraining</h3><p>48 anspruchsvolle C1-Sätze: sofern, es sei denn, zu … als dass, kaum … als, als ob, ohne dass und viele mehr.</p><span class="tag">Feinheiten</span></button>
+    <button class="mode fam-lil" onclick="startMode('nomi')"><div class="ic">🔁</div><h3>Nominalstil-Wandler</h3><p>obwohl ↔ trotz, indem ↔ durch, nachdem ↔ nach: Wechsle zwischen Verbal- und Nominalstil – wie in Fachtexten.</p><span class="tag">Stilebene C1</span></button>
+    <button class="mode fam-lil" onclick="startMode('syn')"><div class="ic">⚖️</div><h3>Synonym oder Falle?</h3><p>Ersetze einen Konnektor so, dass Bedeutung und Satzbau exakt gleich bleiben. Gleicher Sinn heißt nicht gleiche Grammatik!</p><span class="tag">Bedeutung + Syntax</span></button>
+    <button class="mode fam-lil" onclick="startMode('fehler')"><div class="ic">🔍</div><h3>Fehlerjagd</h3><p>Drei Sätze sind korrekt, einer enthält einen typischen Konnektor-Fehler. Spür ihn auf.</p><span class="tag">Fehler erkennen</span></button>
+  </div>
+
+  <div class="sect-title">✦ Spiel, Text &amp; Gespräch</div>
+  <div class="grid">
+    <button class="mode fam-pet" onclick="openText()"><div class="ic">📜</div><h3>Textkohärenz</h3><p>Sieben C1-Texte – Erörterung, Kommentar, Bewerbung, Bericht. Fülle alle Lücken und mach den Text schlüssig.</p><span class="tag">Zusammenhang</span></button>
+    <button class="mode fam-pet" onclick="openSort()"><div class="ic">⚡</div><h3>Blitz-Sortierer</h3><p>60 Sekunden: Welche Wortstellung verlangt der Konnektor? Sortiere so viele wie möglich.</p><span class="tag">Tempo &amp; Highscore</span></button>
+    <button class="mode fam-pet" onclick="openDuett()"><div class="ic">🔗</div><h3>Doppel-Duett</h3><p>Finde die Partner der Doppelkonnektoren und setze sie danach in echte Sätze ein.</p><span class="tag">je … desto &amp; Co.</span></button>
+    <button class="mode fam-gold" onclick="openRad()"><div class="ic">🎙️</div><h3>Argumentationsrad</h3><p>Thema, Rolle, drei Konnektoren: Sprich frei im Unterricht – mit Satzrahmen als Stütze.</p><span class="tag">Mündlich</span></button>
+    <button class="mode fam-gold" onclick="openLex()"><div class="ic">📖</div><h3>Lexikon</h3><p>Alle 146 Konnektoren zum Nachschlagen: Bedeutung, Wortstellung, Beispiele, Tipps.</p><span class="tag">Nachschlagen</span></button>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz" class="screen">
+  <div class="bar"><button class="back" onclick="goHome()">← Übersicht</button><div class="mtitle" id="qTitle"></div><div class="counter" id="qCount"></div></div>
+  <div class="card" id="qCard"></div>
+</section>
+
+<!-- RESULT -->
+<section id="result" class="screen">
+  <div class="card resultbig" id="resBox"></div>
+</section>
+
+<!-- TEXT -->
+<section id="text" class="screen">
+  <div class="bar"><button class="back" onclick="goHome()">← Übersicht</button><div class="mtitle">📜 Textkohärenz</div><div class="counter" id="tCount"></div></div>
+  <div class="card">
+    <div class="txtsel" id="txtSel"></div>
+    <div class="kicker" id="tKind"></div>
+    <h2 id="tTitle" style="font-weight:600;font-size:1.35rem;margin-bottom:12px;color:var(--blue)"></h2>
+    <div class="ttext" id="tBody"></div>
+    <div class="qnav"><button class="btn ghost" onclick="renderText()">Neu mischen</button><button class="btn" id="tCheck" onclick="checkText()">Text prüfen</button></div>
+    <div class="exlist" id="tEx"></div>
+  </div>
+</section>
+
+<!-- SORT -->
+<section id="sort" class="screen">
+  <div class="bar"><button class="back" onclick="stopSort();goHome()">← Übersicht</button><div class="mtitle">⚡ Blitz-Sortierer</div><div class="counter" id="soHi"></div></div>
+  <div class="card" id="sortCard"></div>
+</section>
+
+<!-- DUETT -->
+<section id="duett" class="screen">
+  <div class="bar"><button class="back" onclick="goHome()">← Übersicht</button><div class="mtitle">🔗 Doppel-Duett</div><div class="counter" id="duCount"></div></div>
+  <div class="card" id="duCard"></div>
+</section>
+
+<!-- RAD -->
+<section id="rad" class="screen">
+  <div class="bar"><button class="back" onclick="goHome()">← Übersicht</button><div class="mtitle">🎙️ Argumentationsrad</div><div class="counter" id="radCount"></div></div>
+  <div class="card" id="radCard"></div>
+</section>
+
+<!-- LEX -->
+<section id="lex" class="screen">
+  <div class="bar"><button class="back" onclick="goHome()">← Übersicht</button><div class="mtitle">📖 Lexikon</div><div class="counter" id="lexMeta"></div></div>
+  <div class="card">
+    <input class="search" id="lexQ" placeholder="Konnektor oder Bedeutung suchen … (z. B. obwohl, Folge, formal)" oninput="renderLex()">
+    <div class="txtsel" id="lexChips"></div>
+    <div id="lexList"></div>
+  </div>
+</section>
+
+<footer>Konnektoren-Atelier C1 · Tastatur: <kbd>1</kbd>–<kbd>4</kbd> zum Antworten, <kbd>Enter</kbd> für die nächste Aufgabe</footer>
+</div>
+
+<script>
+// ═══════════════ LEXIKON-DATENBANK (Grundlage: Konnektor Champion) ═══════════════
+const DB = [
+  // ── ADDITIV ─────────────────────────────────────────────────────────
+  {w:"und",kat:"additiv",funk:["Konjunktion (Pos.0)"],bed:"Aufzählung / Verbindung",ws:"Position 0 — kein Einfluss auf Wortstellung",bsp:["Sie lernt Deutsch und er lernt Englisch."],tip:"Kein Komma bei einfacher Verbindung zweier HS!"},
+  {w:"auch",kat:"additiv",funk:["Satzverbindendes Adverb"],bed:"Hinzufügung",ws:"Position 1 oder 3",bsp:["Er lernt viel. Auch sie arbeitet fleißig.","Sie arbeitet auch fleißig."]},
+  {w:"außerdem",kat:"additiv",funk:["Satzverbindendes Adverb"],bed:"Hinzufügung / dazu kommt noch",ws:"Position 1 oder 3",bsp:["Sie ist klug. Außerdem ist sie sehr fleißig."]},
+  {w:"zudem",kat:"additiv",funk:["Satzverbindendes Adverb"],bed:"Hinzufügung (formal)",ws:"Position 1",bsp:["Das Projekt ist teuer. Zudem dauert es lange."],tip:"Formeller als 'außerdem', typisch in Fach- und Wissenschaftstexten."},
+  {w:"darüber hinaus",kat:"additiv",funk:["Satzverbindendes Adverb"],bed:"Zusätzlich / noch mehr (betont)",ws:"Position 1",bsp:["Sie spricht Englisch. Darüber hinaus beherrscht sie Spanisch."]},
+  {w:"überdies",kat:"additiv",funk:["Satzverbindendes Adverb"],bed:"Hinzufügung (gehoben/literarisch)",ws:"Position 1",bsp:["Er ist talentiert. Überdies arbeitet er sehr hart."],tip:"Sehr formell / literarisch."},
+  {w:"des Weiteren",kat:"additiv",funk:["Satzverbindendes Adverb"],bed:"Hinzufügung (schriftlich/formal)",ws:"Position 1",bsp:["Das Konzept ist innovativ. Des Weiteren ist es kostengünstig."]},
+  {w:"ferner",kat:"additiv",funk:["Satzverbindendes Adverb"],bed:"Hinzufügung (schriftlich/formal)",ws:"Position 1",bsp:["Wir bitten um Ihre Unterlagen. Ferner benötigen wir Ihre Zeugnisse."]},
+  {w:"dazu",kat:"additiv",funk:["Satzverbindendes Adverb","Finales Adverb"],bed:"Hinzufügung ODER Zweck (je nach Kontext)",ws:"Position 1 oder 3",bsp:["Er lernt täglich. Dazu macht er Vokabelkarten."],tip:"Kann additiv ('außerdem') oder final ('zu diesem Zweck') bedeuten — Kontext entscheidet!"},
+  {w:"dafür",kat:"additiv",funk:["Satzverbindendes Adverb","Finales Adverb"],bed:"dafür / dazu (Zweck oder Kompensation)",ws:"Position 1 oder 3",bsp:["Er verdient wenig. Dafür hat er viel Freizeit.","Sie will Erfolg. Dafür arbeitet sie hart."]},
+  {w:"nicht nur … sondern auch",kat:"additiv",funk:["Doppelkonnektor"],bed:"Steigerung: A, und besonders auch B",ws:"nicht nur (Pos.3 / Verbpos.) + sondern auch (Pos.0 + Verb-Zweit)",bsp:["Er ist nicht nur intelligent, sondern auch fleißig.","Nicht nur die Kinder, sondern auch die Erwachsenen lachten."],tip:"'Sondern auch' leitet Hauptsatz ein → Verb-Zweit! Kein Verb ans Ende."},
+  {w:"sowohl … als auch",kat:"additiv",funk:["Doppelkonnektor"],bed:"Beides trifft zu (kumulativ)",ws:"Kein Einfluss auf Wortstellung; Verb richtet sich nach Gesamtsubjekt",bsp:["Sowohl Maria als auch Peter kommen zur Party.","Er ist sowohl sportlich als auch musikalisch."],tip:"Kein Komma zwischen sowohl … als auch! Verb oft im Plural (Gesamtsubjekt)."},
+  {w:"einerseits … andererseits",kat:"additiv",funk:["Doppelkonnektor"],bed:"Zwei Seiten / Aspekte einer Sache gegenüberstellen",ws:"Pos.1 im 1. HS + Pos.1 im 2. HS; jeweils Verb-Zweit",bsp:["Einerseits ist das Angebot günstig, andererseits ist die Qualität schlecht.","Das Studium ist einerseits interessant, andererseits sehr zeitaufwendig."],tip:"Beide Teile nötig! Zweiter Teil kann auch 'zum anderen' sein. Jeweils Position 1."},
+  {w:"teils … teils",kat:"additiv",funk:["Doppelkonnektor"],bed:"Teils das eine, teils das andere (gemischt)",ws:"Pos.1 im 1. HS + Pos.1 im 2. HS",bsp:["Die Reaktionen waren teils positiv, teils negativ.","Teils bin ich froh, teils bin ich traurig darüber."],tip:"Drückt aus, dass beide Aspekte gleichzeitig und gemischt zutreffen."},
+  {w:"zum einen … zum anderen",kat:"additiv",funk:["Doppelkonnektor"],bed:"Erstens … zweitens (Aufzählung von Aspekten)",ws:"Pos.1 im 1. HS + Pos.1 im 2. HS",bsp:["Zum einen ist es teuer, zum anderen fehlt die Zeit."],tip:"Stilistisch elegante Alternative zu 'einerseits … andererseits'."},
+  // ── ADVERSATIV ───────────────────────────────────────────────────────
+  {w:"aber",kat:"adversativ",funk:["Konjunktion (Pos.0)"],bed:"Gegensatz / Einschränkung",ws:"Position 0 — Wortstellung bleibt unverändert!",bsp:["Er ist fleißig, aber er ist nicht erfolgreich.","Das ist teuer, aber es lohnt sich."],tip:"'Aber' steht auf Pos.0 — es beeinflusst die Wortstellung NICHT!"},
+  {w:"jedoch",kat:"adversativ",funk:["Konjunktion (Pos.0)","Satzverbindendes Adverb (Pos.1/3)"],bed:"Gegensatz / Einschränkung (formal)",ws:"Pos.0 (kein Einfl.) ODER Pos.1/3 (Verb-Zweit)",bsp:["Er lernte viel, jedoch bestand er nicht.","Er lernte viel. Jedoch bestand er nicht."],tip:"Flexibel: wie 'aber' (Pos.0) ODER wie Adverb (Pos.1). Formeller als 'aber'."},
+  {w:"doch",kat:"adversativ",funk:["Konjunktion (Pos.0)"],bed:"Gegensatz (umgangssprachlich / expressiv)",ws:"Position 0",bsp:["Sie wollte kommen, doch sie wurde krank."]},
+  {w:"sondern",kat:"adversativ",funk:["Konjunktion (Pos.0)"],bed:"Richtigstellung nach Verneinung",ws:"Position 0",bsp:["Das ist kein Fehler, sondern eine Absicht.","Nicht er, sondern sie hat das gemacht."],tip:"NUR nach Verneinung (nicht / kein)! Nicht mit 'aber' verwechseln!"},
+  {w:"dagegen",kat:"adversativ",funk:["Satzverbindendes Adverb"],bed:"Gegensatz / Kontrast",ws:"Position 1 oder 3",bsp:["Er mag Kaffee. Sie dagegen trinkt nur Tee."]},
+  {w:"hingegen",kat:"adversativ",funk:["Satzverbindendes Adverb"],bed:"Gegensatz (etwas formeller als 'dagegen')",ws:"Position 1 oder 3",bsp:["Deutschland ist kalt. Spanien hingegen ist warm."]},
+  {w:"demgegenüber",kat:"adversativ",funk:["Satzverbindendes Adverb"],bed:"Gegenüberstellung (formal/schriftlich)",ws:"Position 1",bsp:["Die Preise steigen. Demgegenüber sinken die Löhne."]},
+  {w:"wohingegen",kat:"adversativ",funk:["Nebensatzkonnektor"],bed:"Gegensatz (= während adversativ)",ws:"Verb ans Ende",bsp:["Er ist sportlich, wohingegen sein Bruder lieber liest."]},
+  {w:"während",kat:"adversativ",funk:["Nebensatzkonnektor"],bed:"Gegensatz ODER Gleichzeitigkeit (temporal!)",ws:"Verb ans Ende",bsp:["Er ist ruhig, während sie sehr lebhaft ist.","Während ich koche, hört er Musik."],tip:"ACHTUNG: 'während' = temporal (gleichzeitig) ODER adversativ (Gegensatz). Kontext entscheidet!"},
+  {w:"wo(hin)gegen",kat:"adversativ",funk:["Nebensatzkonnektor"],bed:"Gegensatz (= wohingegen, formal)",ws:"Verb ans Ende",bsp:["Er lacht, wogegen sie ernst bleibt."]},
+  {w:"weder … noch",kat:"adversativ",funk:["Doppelkonnektor"],bed:"Keines von beidem trifft zu",ws:"Kein Komma; Verb-Zweit im zweiten Teil",bsp:["Er mag weder Kaffee noch Tee.","Weder sie noch er hat die Wahrheit gesagt."],tip:"Kein Komma zwischen weder … noch! Nach 'noch': Hauptsatz-Wortstellung."},
+  {w:"entweder … oder",kat:"adversativ",funk:["Doppelkonnektor"],bed:"Das eine ODER das andere (nicht beides)",ws:"Kein Komma; Verb-Zweit im zweiten Teil",bsp:["Entweder kommst du mit, oder du bleibst hier.","Das machen wir entweder heute oder morgen."],tip:"Nach 'oder' im HS: Verb-Zweit-Stellung! Kein Komma."},
+  {w:"zwar … aber",kat:"adversativ",funk:["Doppelkonnektor"],bed:"Einräumung + Einschränkung: zugegeben … trotzdem",ws:"'zwar' Pos.1 oder 3; 'aber' Pos.0 + Verb-Zweit",bsp:["Das ist zwar teuer, aber es lohnt sich.","Er ist zwar müde, aber er arbeitet weiter."],tip:"'Zwar' räumt ein, 'aber' schränkt ein. 'Aber' leitet Hauptsatz auf Pos.0 ein."},
+  // ── KAUSAL ───────────────────────────────────────────────────────────
+  {w:"weil",kat:"kausal",funk:["Nebensatzkonnektor"],bed:"Grund (neue / unbekannte Information)",ws:"Verb ans Ende",bsp:["Ich lerne Deutsch, weil ich in Deutschland arbeiten möchte.","Weil es regnet, bleiben wir zu Hause."],tip:"'Weil' = aktuelle, unbekannte Begründung. Verb IMMER ans Ende!"},
+  {w:"da",kat:"kausal",funk:["Nebensatzkonnektor"],bed:"Grund (bekannte / geteilte Information)",ws:"Verb ans Ende; steht meist voran",bsp:["Da es regnet, nehmen wir den Schirm mit.","Da sie krank ist, kommt sie nicht."],tip:"'Da' = bekannte Information; steht meist am Satzanfang. Formeller als 'weil'."},
+  {w:"denn",kat:"kausal",funk:["Konjunktion (Pos.0)"],bed:"Begründung im Hauptsatz",ws:"Position 0 — KEIN Einfluss auf Wortstellung!",bsp:["Ich nehme den Schirm, denn es regnet.","Wir bleiben zu Hause, denn das Wetter ist schlecht."],tip:"'Denn' verändert die Wortstellung NICHT — leitet normalen Hauptsatz ein!"},
+  {w:"nämlich",kat:"kausal",funk:["Satzverbindendes Adverb"],bed:"Nachgestellte Begründung / Erklärung",ws:"NIEMALS Pos.1! Immer Pos.3 (nach Subj.+Verb)",bsp:["Er kommt nicht. Er ist nämlich krank.","Sie lernt viel. Sie will nämlich die Prüfung bestehen."],tip:"KRITISCH: 'nämlich' steht NIEMALS auf Position 1! Immer nach Subjekt und Verb!"},
+  {w:"deshalb",kat:"kausal",funk:["Satzverbindendes Adverb"],bed:"Folge / Konsequenz",ws:"Position 1 oder 3",bsp:["Es regnet. Deshalb bleiben wir zu Hause.","Es regnet. Wir bleiben deshalb zu Hause."]},
+  {w:"deswegen",kat:"kausal",funk:["Satzverbindendes Adverb"],bed:"Folge / Konsequenz (= deshalb)",ws:"Position 1 oder 3",bsp:["Sie ist krank. Deswegen kommt sie nicht."]},
+  {w:"daher",kat:"kausal",funk:["Satzverbindendes Adverb"],bed:"Folge / Konsequenz (= deshalb)",ws:"Position 1 oder 3",bsp:["Er hat viel geübt. Daher ist er so gut."]},
+  {w:"darum",kat:"kausal",funk:["Satzverbindendes Adverb"],bed:"Folge / Konsequenz (= deshalb)",ws:"Position 1 oder 3",bsp:["Ich mag Musik. Darum höre ich jeden Tag Radio."]},
+  {w:"folglich",kat:"kausal",funk:["Satzverbindendes Adverb"],bed:"Konsequenz / Schlussfolgerung (formal)",ws:"Position 1",bsp:["Er hat nicht gelernt. Folglich hat er die Prüfung nicht bestanden."]},
+  {w:"somit",kat:"kausal",funk:["Satzverbindendes Adverb"],bed:"Konsequenz (formal)",ws:"Position 1",bsp:["Die Kosten sind gestiegen. Somit müssen wir sparen."]},
+  {w:"demnach",kat:"kausal",funk:["Satzverbindendes Adverb"],bed:"Schlussfolgerung / laut dem",ws:"Position 1",bsp:["Der Bericht zeigt Probleme. Demnach müssen wir handeln."]},
+  {w:"infolgedessen",kat:"kausal",funk:["Satzverbindendes Adverb"],bed:"Als Folge davon (sehr formal)",ws:"Position 1",bsp:["Es gab einen Unfall. Infolgedessen kam es zu Staus."]},
+  {w:"also",kat:"kausal",funk:["Satzverbindendes Adverb"],bed:"Schlussfolgerung / Konsequenz",ws:"Position 1 oder 3",bsp:["Sie ist müde. Also geht sie früh schlafen."]},
+  {w:"aus diesem Grund",kat:"kausal",funk:["Satzverbindendes Adverb"],bed:"Wegen diesem Grund / deshalb",ws:"Position 1",bsp:["Er hat Angst. Aus diesem Grund traut er sich nicht."]},
+  {w:"sodass",kat:"kausal",funk:["Nebensatzkonnektor"],bed:"Folge / Konsequenz",ws:"Verb ans Ende",bsp:["Er arbeitet viel, sodass er wenig Zeit hat."],tip:"'So … dass' mit Intensivierung: 'Er war so müde, dass er sofort schlief.'"},
+  {w:"weshalb",kat:"kausal",funk:["Nebensatzkonnektor"],bed:"Folge (= sodass)",ws:"Verb ans Ende",bsp:["Er kam zu spät, weshalb wir ohne ihn anfingen."]},
+  {w:"weswegen",kat:"kausal",funk:["Nebensatzkonnektor"],bed:"Folge (= sodass, formal)",ws:"Verb ans Ende",bsp:["Sie hatte Fieber, weswegen sie zuhause blieb."]},
+  {w:"so … dass",kat:"kausal",funk:["Nebensatzkonnektor (graduell)"],bed:"Graduelle Folge: Intensität → Konsequenz",ws:"Verb ans Ende",bsp:["Er war so müde, dass er sofort einschlief.","Es war so kalt, dass wir frosteten."]},
+  // ── KONZESSIV ────────────────────────────────────────────────────────
+  {w:"obwohl",kat:"konzessiv",funk:["Nebensatzkonnektor"],bed:"Gegenargument (trotzdem)",ws:"Verb ans Ende",bsp:["Obwohl es regnet, gehen wir spazieren.","Er kam pünktlich, obwohl er weit weg wohnt."]},
+  {w:"obgleich",kat:"konzessiv",funk:["Nebensatzkonnektor"],bed:"Gegenargument (formal = obwohl)",ws:"Verb ans Ende",bsp:["Obgleich er müde war, arbeitete er weiter."]},
+  {w:"obschon",kat:"konzessiv",funk:["Nebensatzkonnektor"],bed:"Gegenargument (gehoben / veraltet)",ws:"Verb ans Ende",bsp:["Obschon er reich war, lebte er bescheiden."],tip:"Literarisch/veraltet. Gleiche Bedeutung wie 'obwohl'."},
+  {w:"wenngleich",kat:"konzessiv",funk:["Nebensatzkonnektor"],bed:"Gegenargument (formal)",ws:"Verb ans Ende",bsp:["Wenngleich das Projekt teuer ist, lohnt es sich."]},
+  {w:"auch wenn",kat:"konzessiv",funk:["Nebensatzkonnektor"],bed:"Konzessive Bedingung",ws:"Verb ans Ende",bsp:["Auch wenn er schreit, höre ich nicht hin."]},
+  {w:"selbst wenn",kat:"konzessiv",funk:["Nebensatzkonnektor"],bed:"Konzessive Bedingung (besonders betont)",ws:"Verb ans Ende + Konjunktiv II möglich",bsp:["Selbst wenn er käme, würde es nichts ändern."]},
+  {w:"trotzdem",kat:"konzessiv",funk:["Satzverbindendes Adverb"],bed:"trotzdem / dennoch",ws:"Position 1 oder 3",bsp:["Es regnet. Trotzdem gehen wir spazieren."]},
+  {w:"dennoch",kat:"konzessiv",funk:["Satzverbindendes Adverb"],bed:"trotzdem (etwas formeller)",ws:"Position 1 oder 3",bsp:["Sie war müde. Dennoch arbeitete sie bis Mitternacht."]},
+  {w:"gleichwohl",kat:"konzessiv",funk:["Satzverbindendes Adverb"],bed:"dennoch (gehoben/formal)",ws:"Position 1",bsp:["Das Vorhaben ist riskant. Gleichwohl unterstütze ich es."]},
+  {w:"allerdings",kat:"konzessiv",funk:["Satzverbindendes Adverb"],bed:"Einschränkung (weicher als 'trotzdem')",ws:"Position 1 oder 3",bsp:["Das Konzept ist gut. Allerdings braucht es mehr Zeit."],tip:"Schwächer als 'trotzdem' — signalisiert Einschränkung, keinen direkten Widerspruch."},
+  {w:"zwar … aber",kat:"konzessiv",funk:["Doppelkonnektor"],bed:"Einräumung + Einschränkung",ws:"'zwar' Pos.1/3; 'aber' Pos.0",bsp:["Er ist zwar müde, aber er arbeitet weiter."]},
+  {w:"wenn … auch (so)",kat:"konzessiv",funk:["Doppelkonnektor"],bed:"Egal ob/wie … trotzdem",ws:"wenn + Verb-Ende; auch (so) + Verb-Zweit",bsp:["Wenn er auch viel arbeitet, so verdient er wenig."]},
+  // ── TEMPORAL ─────────────────────────────────────────────────────────
+  {w:"als",kat:"temporal",funk:["Nebensatzkonnektor"],bed:"Einmaliges Ereignis in der Vergangenheit",ws:"Verb ans Ende",bsp:["Als ich Kind war, liebte ich Eis.","Als er ankam, war sie schon weg."],tip:"NUR für EINMALIGES in der VERGANGENHEIT! Für Routinen: 'wenn'. Für Vergleich: 'als' nach Komparativ."},
+  {w:"wenn",kat:"temporal",funk:["Nebensatzkonnektor"],bed:"Routine / Wiederholung (alle Zeiten) + Bedingung",ws:"Verb ans Ende",bsp:["Wenn ich nach Hause komme, esse ich.","Wenn es regnet, nehme ich den Schirm."],tip:"TEMPORAL: Routinen. KONDITIONAL: Bedingung. Kontext entscheidet!"},
+  {w:"während",kat:"temporal",funk:["Nebensatzkonnektor","Präposition (+ Gen.)"],bed:"Gleichzeitigkeit ODER Gegensatz",ws:"Verb ans Ende",bsp:["Während ich koche, hört er Musik.","Während des Essens hörte er Radio."],tip:"Temporal = gleichzeitig. Adversativ = Gegensatz. Kontext entscheidet!"},
+  {w:"nachdem",kat:"temporal",funk:["Nebensatzkonnektor"],bed:"Reihenfolge: erst A, dann B",ws:"Verb ans Ende; ZEITVERSCHIEBUNG zwingend!",bsp:["Nachdem er gegessen hatte, schlief er ein.","Nachdem sie die Prüfung bestanden hat, feiert sie."],tip:"ZEITVERSCHIEBUNG! Plusquamperf.→Prät. oder Perf.→Präsens. 'Nachdem er aß' ist FALSCH!"},
+  {w:"bevor",kat:"temporal",funk:["Nebensatzkonnektor"],bed:"Reihenfolge: erst B, dann A (Aktion 2 → Aktion 1)",ws:"Verb ans Ende",bsp:["Bevor ich schlafe, lese ich noch.","Ich lerne, bevor ich die Prüfung schreibe."]},
+  {w:"bis",kat:"temporal",funk:["Nebensatzkonnektor","Präposition"],bed:"Ende einer Phase / Aktion",ws:"Verb ans Ende",bsp:["Ich lerne, bis ich alles verstehe.","Bis zum Abend bin ich fertig."]},
+  {w:"seit / seitdem",kat:"temporal",funk:["Nebensatzkonnektor","Präposition (+ Dat.)","Satzverbindendes Adverb"],bed:"Beginn in der Vergangenheit — noch jetzt andauernd",ws:"Verb ans Ende (NS); Position 1 (Adverb)",bsp:["Seitdem er in Berlin wohnt, ist er glücklicher.","Er ist umgezogen. Seitdem ist er glücklich.","Seit dem Umzug fühlt er sich wohl."]},
+  {w:"sobald",kat:"temporal",funk:["Nebensatzkonnektor"],bed:"Unmittelbar danach / sofort wenn",ws:"Verb ans Ende",bsp:["Sobald er anruft, fahre ich los.","Ruf mich an, sobald du da bist."]},
+  {w:"solange",kat:"temporal",funk:["Nebensatzkonnektor"],bed:"Für die gesamte Dauer",ws:"Verb ans Ende",bsp:["Solange ich hier bin, bin ich glücklich.","Solange du schläfst, bin ich ruhig."]},
+  {w:"ehe",kat:"temporal",funk:["Nebensatzkonnektor"],bed:"Bevor (literarisch / formell)",ws:"Verb ans Ende",bsp:["Ehe du gehst, sag mir Bescheid."],tip:"Formeller/literarischer als 'bevor'. Gleiche Bedeutung."},
+  {w:"kaum dass",kat:"temporal",funk:["Nebensatzkonnektor"],bed:"Unmittelbar danach (literarisch)",ws:"Verb ans Ende",bsp:["Kaum hatte er den Raum betreten, begann es zu regnen."],tip:"Literarisch/formal: 'Kaum hatte er …' (Verb-Erst-Stellung im kaum-Satz!)."},
+  {w:"sobald",kat:"temporal",funk:["Nebensatzkonnektor"],bed:"Unmittelbar nach einem Ereignis",ws:"Verb ans Ende",bsp:["Sobald sie da ist, fangen wir an."]},
+  {w:"danach",kat:"temporal",funk:["Satzverbindendes Adverb"],bed:"Danach / reihenfolge",ws:"Position 1",bsp:["Ich esse. Danach schlafe ich."]},
+  {w:"vorher",kat:"temporal",funk:["Satzverbindendes Adverb"],bed:"Reihenfolge: davor",ws:"Position 1 oder 3",bsp:["Ich schlafe. Vorher esse ich noch kurz."]},
+  {w:"davor",kat:"temporal",funk:["Satzverbindendes Adverb"],bed:"Davor / zeitlich vorher",ws:"Position 1",bsp:["Er zog nach Berlin. Davor wohnte er in München."]},
+  {w:"zuvor",kat:"temporal",funk:["Satzverbindendes Adverb"],bed:"Davor / vorher (formal)",ws:"Position 1",bsp:["Er lernte. Zuvor hatte er lange gezögert."]},
+  {w:"anschließend",kat:"temporal",funk:["Satzverbindendes Adverb"],bed:"Danach / im Anschluss",ws:"Position 1",bsp:["Sie bestand die Prüfung. Anschließend feierten alle."]},
+  {w:"währenddessen",kat:"temporal",funk:["Satzverbindendes Adverb"],bed:"In der Zwischenzeit / gleichzeitig",ws:"Position 1",bsp:["Sie arbeitet. Währenddessen spielt er Gitarre."]},
+  {w:"gleichzeitig",kat:"temporal",funk:["Satzverbindendes Adverb"],bed:"Zur gleichen Zeit",ws:"Position 1 oder 3",bsp:["Er kocht. Gleichzeitig höre ich Musik."]},
+  {w:"dabei",kat:"temporal",funk:["Satzverbindendes Adverb"],bed:"Gleichzeitig / währenddessen (bei einer Handlung)",ws:"Position 1 oder 3",bsp:["Er liest. Dabei hört er Musik.","Beim Tanzen bin ich glücklich. Ich singe dabei."]},
+  {w:"jedesmal",kat:"temporal",funk:["Satzverbindendes Adverb"],bed:"Bei jeder Wiederholung",ws:"Position 1",bsp:["Er kommt zu spät. Jedesmal entschuldigt er sich."]},
+  // ── KONDITIONAL ──────────────────────────────────────────────────────
+  {w:"wenn",kat:"konditional",funk:["Nebensatzkonnektor"],bed:"Bedingung (real oder irreal mit Konj.II)",ws:"Verb ans Ende",bsp:["Wenn du lernst, wirst du Erfolg haben.","Wenn ich Zeit hätte, würde ich kommen."],tip:"Real: Indikativ. Irreal: Konjunktiv II. Für Routinen auch temporal!"},
+  {w:"falls",kat:"konditional",funk:["Nebensatzkonnektor"],bed:"Bedingung (eher unwahrscheinlicher Fall)",ws:"Verb ans Ende",bsp:["Falls er kommt, sag mir Bescheid.","Falls du Hilfe brauchst, ruf mich an."]},
+  {w:"sofern",kat:"konditional",funk:["Nebensatzkonnektor"],bed:"Einschränkende Bedingung",ws:"Verb ans Ende",bsp:["Ich komme, sofern ich Zeit habe.","Sofern keine Einwände bestehen, beginnen wir."]},
+  {w:"soweit",kat:"konditional",funk:["Nebensatzkonnektor"],bed:"Einschränkend / soweit bekannt",ws:"Verb ans Ende",bsp:["Soweit ich weiß, kommt er heute.","Das ist korrekt, soweit ich das beurteilen kann."]},
+  {w:"vorausgesetzt",kat:"konditional",funk:["Konnektor mit Hauptsatz (Pos.0)"],bed:"Bedingung (= wenn, formal)",ws:"Position 0; Verb-Zweit im Folgesatz",bsp:["Vorausgesetzt, du lernst fleißig, wirst du Erfolg haben.","Wir kommen, vorausgesetzt das Wetter ist gut."]},
+  {w:"es sei denn",kat:"konditional",funk:["Konnektor mit Hauptsatz (Pos.0)"],bed:"Ausnahme / außer wenn (negative Bedingung)",ws:"Position 0; leitet HS ein",bsp:["Wir gehen spazieren, es sei denn, es regnet.","Ich helfe dir, es sei denn, du willst es nicht."],tip:"'Es sei denn' = 'außer wenn'. Leitet Hauptsatz ein!"},
+  {w:"sonst",kat:"konditional",funk:["Satzverbindendes Adverb"],bed:"Negative Bedingung / andernfalls",ws:"Position 1",bsp:["Lern fleißig, sonst fällst du durch!","Beeil dich! Sonst kommen wir zu spät."]},
+  {w:"andernfalls",kat:"konditional",funk:["Satzverbindendes Adverb"],bed:"Negative Bedingung (formal = sonst)",ws:"Position 1",bsp:["Zahlen Sie die Rechnung. Andernfalls schalten wir einen Anwalt ein."]},
+  {w:"ansonsten",kat:"konditional",funk:["Satzverbindendes Adverb"],bed:"Negative Bedingung (= sonst)",ws:"Position 1",bsp:["Mach das Licht aus. Ansonsten ist es zu hell."]},
+  // ── FINAL ────────────────────────────────────────────────────────────
+  {w:"damit",kat:"final",funk:["Nebensatzkonnektor"],bed:"Zweck / Ziel (verschiedene Subjekte!)",ws:"Verb ans Ende",bsp:["Sie spricht laut, damit alle sie hören.","Ich erkläre es nochmal, damit du es verstehst."],tip:"'Damit' = verschiedene Subjekte! Bei gleichem Subjekt → 'um … zu'!"},
+  {w:"um … zu",kat:"final",funk:["Infinitivkonstruktion"],bed:"Zweck / Ziel (GLEICHES Subjekt!)",ws:"'um' + Infinitiv mit 'zu' am Satzende",bsp:["Er lernt viel, um die Prüfung zu bestehen.","Ich fahre in die Stadt, um einzukaufen."],tip:"NUR bei GLEICHEM Subjekt! Verschiedene Subjekte → zwingend 'damit'!"},
+  {w:"dazu",kat:"final",funk:["Satzverbindendes Adverb"],bed:"Zu diesem Zweck",ws:"Position 1 oder 3",bsp:["Sie will abnehmen. Dazu treibt sie täglich Sport."]},
+  {w:"dafür",kat:"final",funk:["Satzverbindendes Adverb"],bed:"Dafür / zu diesem Ziel",ws:"Position 1 oder 3",bsp:["Er will Erfolg. Dafür arbeitet er hart."]},
+  {w:"zwecks",kat:"final",funk:["Präposition (+ Gen.)"],bed:"Zu dem Zweck (formal / bürokratisch)",ws:"Vor Nomen",bsp:["Zwecks Verbesserung der Qualität wurden Tests eingeführt."],tip:"Sehr formell, typisch in Geschäftsbriefen und Behördensprache."},
+  {w:"zu (+ Dat.)",kat:"final",funk:["Präposition (+ Dat.)"],bed:"Zu dem Zweck (nur von Verben abgeleitete Nomen)",ws:"Vor Verbalnomen",bsp:["Zum Abnehmen treibt sie Sport. → Sie treibt Sport, um abzunehmen.","Zur Entspannung hört er Musik."],tip:"Nur mit Verbalnomen (das Tanzen, das Lesen). → Umformung in 'um … zu' möglich!"},
+  {w:"damit … nicht / um … nicht zu",kat:"final",funk:["Nebensatzkonnektor","Infinitivkonstruktion"],bed:"Zweck der Vermeidung",ws:"Verb ans Ende (damit); Infinitiv (um … nicht zu)",bsp:["Sie kam leise, um niemanden zu stören.","Sie kam leise, damit sie niemanden störte."],tip:"'Um … nicht zu' bei gleichem Subjekt; 'damit … nicht' bei verschiedenen Subjekten."},
+  // ── MODAL ────────────────────────────────────────────────────────────
+  {w:"indem",kat:"modal",funk:["Nebensatzkonnektor"],bed:"Methode / Art und Weise (Wie?)",ws:"Verb ans Ende",bsp:["Er bereitet sich vor, indem er viele Bücher liest.","Man kann abnehmen, indem man Sport treibt."],tip:"ACHTUNG: 'indem' ≠ 'in dem' (Artikel)! Immer zusammengeschrieben."},
+  {w:"dadurch dass",kat:"modal",funk:["Nebensatzkonnektor"],bed:"Methode / Mittel",ws:"Verb ans Ende",bsp:["Dadurch dass er täglich übte, wurde er besser.","Er verbesserte sich, dadurch dass er viel las."]},
+  {w:"dadurch",kat:"modal",funk:["Satzverbindendes Adverb"],bed:"Durch diese Methode / auf diese Weise",ws:"Position 1 oder 3",bsp:["Er übte täglich. Dadurch wurde er besser.","Sie lernte viel. Dadurch bestand sie."]},
+  {w:"damit",kat:"modal",funk:["Satzverbindendes Adverb"],bed:"Auf diese Weise / dadurch (modal)",ws:"Position 1 oder 3",bsp:["Er übt täglich. Damit verbessert er sich."],tip:"Als Adverb: 'auf diese Art und Weise'. Nicht verwechseln mit finalem 'damit' (Nebensatz)!"},
+  {w:"so",kat:"modal",funk:["Satzverbindendes Adverb"],bed:"Auf diese Weise / dadurch",ws:"Position 1",bsp:["Er übte täglich. So wurde er besser.","Sie lernte Vokabeln. So bestand sie die Prüfung."]},
+  {w:"auf diese Weise",kat:"modal",funk:["Satzverbindendes Adverb"],bed:"Durch diese Methode",ws:"Position 1",bsp:["Er lernte täglich. Auf diese Weise verbesserte er sich schnell."]},
+  {w:"mit (+ Dat.)",kat:"modal",funk:["Präposition (+ Dat.)"],bed:"Art und Weise / Mittel",ws:"Vor Nomen",bsp:["Mit Fleiß hat sie die Prüfung bestanden.","Mit einem Bleistift schreibt man leichter.","→ Indem sie fleißig war, bestand sie die Prüfung."]},
+  {w:"mittels (+ Gen.)",kat:"modal",funk:["Präposition (+ Gen.)"],bed:"Mittel / Instrument (formal)",ws:"Vor Nomen",bsp:["Mittels moderner Technik wurde das Problem gelöst.","→ Indem man moderne Technik einsetzte, wurde das Problem gelöst."],tip:"Formal/schriftlich. Synonym zu 'mit', aber mit Genitiv."},
+  {w:"mithilfe (+ Gen.)",kat:"modal",funk:["Präposition (+ Gen.)"],bed:"Mit der Hilfe von / durch",ws:"Vor Nomen",bsp:["Mithilfe eines Wörterbuches verstand sie den Text.","→ Indem sie ein Wörterbuch benutzte, verstand sie den Text."]},
+  {w:"durch (+ Akk.)",kat:"modal",funk:["Präposition (+ Akk.)"],bed:"Mittel / Instrument",ws:"Vor Nomen",bsp:["Durch regelmäßiges Üben verbesserte er sich.","→ Dadurch dass er regelmäßig übte, verbesserte er sich.","→ Indem er regelmäßig übte, verbesserte er sich."]},
+  {w:"per (+ Akk./Dat.)",kat:"modal",funk:["Präposition (+ Akk./Dat.)"],bed:"Durch / via (Medium / Transportmittel)",ws:"Vor Nomen (meist ohne Artikel)",bsp:["Per E-Mail wurde er benachrichtigt.","Sie zahlen per Überweisung.","→ Er wurde benachrichtigt, indem man ihm eine E-Mail schickte."]},
+  {w:"ohne … zu",kat:"modal",funk:["Infinitivkonstruktion"],bed:"Fehlende Handlung (GLEICHES Subjekt!)",ws:"Infinitiv + 'zu' am Ende",bsp:["Er verließ das Zimmer, ohne ein Wort zu sagen.","Sie arbeitete weiter, ohne zu klagen."],tip:"NUR bei GLEICHEM Subjekt! Verschiedene Subjekte → 'ohne dass'."},
+  {w:"ohne dass",kat:"modal",funk:["Nebensatzkonnektor"],bed:"Fehlende Handlung (VERSCHIEDENE Subjekte!)",ws:"Verb ans Ende",bsp:["Er verließ das Zimmer, ohne dass jemand es bemerkte."],tip:"Bei verschiedenen Subjekten! Gleiches Subjekt → 'ohne … zu'."},
+  {w:"anstatt … zu",kat:"modal",funk:["Infinitivkonstruktion"],bed:"Alternative / Ersatz (GLEICHES Subjekt!)",ws:"Infinitiv + 'zu' am Ende",bsp:["Anstatt zu schlafen, lernte er die ganze Nacht.","Statt ein Taxi zu nehmen, fuhr er mit dem Bus."],tip:"Auch 'statt … zu'. NUR bei gleichem Subjekt!"},
+  {w:"(an)statt dass",kat:"modal",funk:["Nebensatzkonnektor"],bed:"Alternative / Ersatz (VERSCHIEDENE Subjekte!)",ws:"Verb ans Ende",bsp:["Anstatt dass er selbst kommt, schickt er sie."],tip:"Bei verschiedenen Subjekten! Gleiches Subjekt → 'anstatt … zu'."},
+  {w:"stattdessen",kat:"modal",funk:["Satzverbindendes Adverb"],bed:"Alternative / Ersatz",ws:"Position 1",bsp:["Er kaufte kein Auto. Stattdessen kaufte er ein Fahrrad."]},
+  {w:"als ob",kat:"modal",funk:["Nebensatzkonnektor"],bed:"Irrealer Vergleich",ws:"Verb ans Ende + Konjunktiv II!",bsp:["Er tut so, als ob er alles wüsste.","Sie sieht aus, als ob sie weinen würde."],tip:"Nach 'als ob' immer Konjunktiv II! 'Als ob er weiß' ist FALSCH!"},
+  {w:"als",kat:"modal",funk:["Nebensatzkonnektor (irr. Vergleich)"],bed:"Irrealer Vergleich (Kurzform von 'als ob')",ws:"Verb-Zweit-Stellung + Konjunktiv II!",bsp:["Er tut so, als wäre er der Chef.","Sie sieht aus, als würde sie weinen."],tip:"Nach 'als' (Kurzform): Verb kommt sofort nach 'als', Konjunktiv II!"},
+  {w:"wie",kat:"modal",funk:["Nebensatzkonnektor","Vergleichspartikel"],bed:"Vergleich / Art und Weise",ws:"Verb ans Ende (NS) oder wie Hauptsatz",bsp:["Er läuft, wie er immer gelaufen ist.","Mach es so, wie ich es erklärt habe.","Sie ist so groß wie ihre Mutter."]},
+  {w:"genauso wie",kat:"modal",funk:["Vergleichspartikel"],bed:"Genau so wie (Vergleich = Gleichheit)",ws:"Vergleichspartikel; kein Einfluss auf WS",bsp:["Er denkt genauso wie ich.","Sie kocht genauso gut wie ihre Mutter.","→ Sie kocht so gut, wie ihre Mutter kocht."]},
+  {w:"(genau)so … wie",kat:"modal",funk:["Vergleichskonstruktion"],bed:"Gleichheitsvergleich",ws:"(genau)so + Adj. + wie + Vergleichsgröße",bsp:["Er ist genauso groß wie sein Vater.","Das Ergebnis ist so gut wie erwartet."],tip:"Positiv (Gleichheit): genauso … wie. Ungleichheit: nicht so … wie."},
+  {w:"nach (+ Dat.)",kat:"modal",funk:["Präposition (+ Dat.)"],bed:"Gemäß / laut / entsprechend",ws:"Vor Nomen",bsp:["Nach Plan wurde gebaut.","Nach seiner Meinung ist das falsch.","→ Wie es der Plan vorsah, wurde gebaut."]},
+  {w:"gemäß (+ Dat.)",kat:"modal",funk:["Präposition (+ Dat.)"],bed:"Entsprechend / laut (formal)",ws:"Vor Nomen",bsp:["Gemäß den Vorschriften ist das verboten.","→ Wie es die Vorschriften vorsehen, ist das verboten."]},
+  {w:"entsprechend (+ Dat.)",kat:"modal",funk:["Präposition (+ Dat.)"],bed:"Entsprechend / gemäß",ws:"Vor Nomen",bsp:["Entsprechend seiner Leistung wurde er belohnt.","→ Wie es seiner Leistung entsprach, wurde er belohnt."]},
+  {w:"laut (+ Dat./Gen.)",kat:"modal",funk:["Präposition (+ Dat./Gen.)"],bed:"Laut / gemäß (Quellenangabe, indirekte Rede)",ws:"Vor Nomen",bsp:["Laut Bericht sei er krank.","Laut dem Chef ist das kein Problem.","→ Wie der Bericht berichtet, ist er krank."]},
+  {w:"im Gegensatz zu",kat:"modal",funk:["Präpositionalausdruck (+ Dat.)"],bed:"Im Gegensatz zu / anders als",ws:"Vor Nomen",bsp:["Im Gegensatz zu ihr mag er Kaffee.","→ Während sie keinen Kaffee mag, trinkt er ihn."]},
+  {w:"anstelle von",kat:"modal",funk:["Präposition (+ Gen./Dat.)"],bed:"Anstelle von / statt",ws:"Vor Nomen",bsp:["Anstelle von Zucker nimmt sie Honig.","→ Anstatt Zucker zu nehmen, nimmt sie Honig."]},
+  {w:"wodurch",kat:"modal",funk:["Nebensatzkonnektor","Relativadverb"],bed:"Durch was / durch welches Mittel (Folge)",ws:"Verb ans Ende",bsp:["Er übte täglich, wodurch er besser wurde."]},
+  // ── KONSEKUTIV ───────────────────────────────────────────────────────
+  {w:"zu … als dass",kat:"konsekutiv",funk:["Nebensatzkonnektor"],bed:"Zu [Eigenschaft] für eine Handlung",ws:"Verb ans Ende + Konjunktiv II!",bsp:["Er ist zu stolz, als dass er um Hilfe bitten würde.","Das Problem ist zu komplex, als dass man es einfach lösen könnte."],tip:"Immer mit Konjunktiv II! = 'Er ist so stolz, dass er nicht um Hilfe bittet.'"},
+  {w:"je … desto",kat:"konsekutiv",funk:["Doppelkonnektor"],bed:"Proportionale Steigerung",ws:"je + Komparativ + Verb-Ende; desto + Komparativ + Verb-Zweit",bsp:["Je mehr er lernt, desto besser wird er.","Je früher, desto besser."],tip:"BEIDE Teile müssen Komparativ haben! Verb im je-Satz ans Ende!"},
+  {w:"je … umso",kat:"konsekutiv",funk:["Doppelkonnektor"],bed:"Proportionale Steigerung (= je … desto)",ws:"Wie je … desto",bsp:["Je mehr man übt, umso leichter fällt es."],tip:"'Je … umso' und 'je … desto' sind bedeutungsgleich und vollständig austauschbar!"},
+  // ── GRADUELL / DOPPEL ────────────────────────────────────────────────
+  {w:"ob … oder",kat:"graduell",funk:["Doppelkonnektor"],bed:"Egal ob … oder (= es spielt keine Rolle)",ws:"ob leitet NS ein (Verb-Ende); oder leitet zweiten NS ein (Verb-Ende)",bsp:["Ob es regnet oder schneit, ich gehe spazieren.","Ob er kommt oder nicht, wir fangen an."],tip:"Beide Teile leiten Nebensätze ein (Verb ans Ende)!"},
+  {w:"teils … teils",kat:"graduell",funk:["Doppelkonnektor"],bed:"Zum Teil … zum Teil (gemischte Eigenschaften)",ws:"Pos.1 im 1. HS + Pos.1 im 2. HS",bsp:["Die Reaktionen waren teils positiv, teils negativ.","Teils freute er sich, teils war er traurig."]},
+  {w:"zum einen … zum anderen",kat:"graduell",funk:["Doppelkonnektor"],bed:"Erstens … zweitens (zwei Aspekte)",ws:"Pos.1 im jeweiligen HS",bsp:["Zum einen ist es teuer, zum anderen fehlt die Zeit.","Das ist zum einen schön, zum anderen auch praktisch."]},
+  {w:"einerseits … andererseits",kat:"graduell",funk:["Doppelkonnektor"],bed:"Auf der einen Seite … auf der anderen",ws:"Pos.1 im 1. HS + Pos.1 im 2. HS",bsp:["Einerseits ist das Angebot günstig, andererseits ist die Qualität schlecht."]},
+  {w:"sowohl … als auch",kat:"graduell",funk:["Doppelkonnektor"],bed:"Beides trifft zu",ws:"Kein Komma; Verb nach Gesamtsubjekt",bsp:["Sowohl Maria als auch Peter sind eingeladen."]},
+  {w:"nicht nur … sondern auch",kat:"graduell",funk:["Doppelkonnektor"],bed:"Erstes und besonders auch das Zweite",ws:"nicht nur (Pos.3); sondern auch (Pos.0 + Verb-Zweit)",bsp:["Er ist nicht nur klug, sondern auch freundlich."]},
+  {w:"weder … noch",kat:"graduell",funk:["Doppelkonnektor"],bed:"Keines von beidem",ws:"Kein Komma; Verb-Zweit im 2. Teil",bsp:["Er hat weder Zeit noch Geld."]},
+  {w:"entweder … oder",kat:"graduell",funk:["Doppelkonnektor"],bed:"Das eine oder das andere (nicht beides)",ws:"Kein Komma; Verb-Zweit im 2. Teil",bsp:["Entweder lernst du, oder du fällst durch."]},
+  {w:"zwar … aber",kat:"graduell",funk:["Doppelkonnektor"],bed:"Einräumung + Einschränkung",ws:"'zwar' Pos.1/3; 'aber' Pos.0",bsp:["Das ist zwar schwer, aber machbar."]},
+  // ── INDIREKTE REDE ───────────────────────────────────────────────────
+  {w:"dass",kat:"indirekt",funk:["Nebensatzkonnektor"],bed:"Einleitung indirekter Rede / Objektsatz",ws:"Verb ans Ende (Konjunktiv I in indir. Rede!)",bsp:["Er sagt, dass er krank sei.","Ich weiß, dass sie kommt.","Sie behauptet, dass er gelogen habe."],tip:"Konjunktiv I (er sei, sie habe). Bei unklarer Form → Konj.II."},
+  {w:"ob",kat:"indirekt",funk:["Nebensatzkonnektor (Entscheidungsfrage)"],bed:"Indirekte Ja/Nein-Frage",ws:"Verb ans Ende",bsp:["Ich weiß nicht, ob er kommt.","Sie fragt, ob du Zeit hast.","Er fragte mich, ob ich mitfahren möchte."],tip:"'Ob'-Satz = indirekte Entscheidungsfrage (Ja/Nein). W-Fragen: W-Wort als Konnektor!"},
+  {w:"wer / wen / wem / wessen",kat:"indirekt",funk:["Fragewort als Konnektor (W-Frage, Person)"],bed:"Indirekte W-Frage (Person)",ws:"Verb ans Ende",bsp:["Ich weiß nicht, wer das gemacht hat.","Er fragt, wen du eingeladen hast.","Sie weiß nicht, wem er das Buch gegeben hat.","Ich frage mich, wessen Auto das ist."],tip:"W-Wörter leiten indirekte Fragesätze ein → Verb ans Ende!"},
+  {w:"was",kat:"indirekt",funk:["Fragewort als Konnektor (W-Frage, Sache)"],bed:"Indirekte W-Frage (Sache) / Relativpronomen",ws:"Verb ans Ende",bsp:["Ich weiß nicht, was er gemeint hat.","Er fragt, was du gemacht hast.","Was er sagt, stimmt nicht."]},
+  {w:"wo / wohin / woher",kat:"indirekt",funk:["Fragewort als Konnektor (W-Frage, Ort)"],bed:"Indirekte Frage nach Ort / Richtung / Herkunft",ws:"Verb ans Ende",bsp:["Ich weiß nicht, wo er wohnt.","Sie fragt, wohin er gefahren ist.","Er weiß nicht, woher sie kommt."]},
+  {w:"wie",kat:"indirekt",funk:["Fragewort als Konnektor (W-Frage, Art/Weise)"],bed:"Indirekte Frage nach Art und Weise / Menge",ws:"Verb ans Ende",bsp:["Ich weiß nicht, wie er das gemacht hat.","Sie fragt, wie viel es kostet.","Er fragt, wie lange das dauert."]},
+  {w:"warum / weshalb / weswegen",kat:"indirekt",funk:["Fragewort als Konnektor (W-Frage, Grund)"],bed:"Indirekte Frage nach dem Grund",ws:"Verb ans Ende",bsp:["Ich verstehe nicht, warum er so reagiert hat.","Sie fragt, weshalb er nicht gekommen ist.","Er erklärt, weswegen er zu spät war."]},
+  {w:"wann / wie lange / wie oft",kat:"indirekt",funk:["Fragewort als Konnektor (W-Frage, Zeit)"],bed:"Indirekte Frage nach Zeit / Dauer / Häufigkeit",ws:"Verb ans Ende",bsp:["Ich frage mich, wann er zurückkommt.","Sie weiß nicht, wie lange es noch dauert.","Er fragt, wie oft du das machst."]},
+  {w:"welcher / welche / welches",kat:"indirekt",funk:["Fragewort als Konnektor (W-Frage, Auswahl)"],bed:"Indirekte Frage nach einer Auswahl",ws:"Verb ans Ende",bsp:["Ich weiß nicht, welchen Film du meinst.","Er fragt, welche Farbe sie bevorzugt.","Sie fragt, welches Buch ich empfehle."]},
+  {w:"laut (+ Dat./Gen.)",kat:"indirekt",funk:["Präposition"],bed:"Laut / gemäß (Quellenangabe in ind. Rede)",ws:"Vor Nomen",bsp:["Laut Bericht sei er krank.","→ Der Bericht sagt, dass er krank sei."]},
+  {w:"angeblich / anscheinend",kat:"indirekt",funk:["Satzverbindendes Adverb"],bed:"Distanz zum Gesagten (= laut Anderen)",ws:"Position 1 oder 3",bsp:["Er ist angeblich krank.","Sie hat anscheinend gewonnen.","→ Es wird gesagt, dass er krank ist."]},
+];
+const KL = {additiv:"Additiv",adversativ:"Adversativ",kausal:"Kausal/Konsekutiv",konzessiv:"Konzessiv",temporal:"Temporal",konditional:"Konditional",final:"Final",modal:"Modal",konsekutiv:"Konsekutiv",graduell:"Doppelkonnektoren",indirekt:"Indirekte Rede / Fragewörter"};
+
+// ═══════════════ SATZPAARE FÜR DIE GENERATOREN ═══════════════
+// Satzglied-Format: [Subjekt, konjugiertes Verb, Mittelfeld, Verbende]
+// KAUSAL: c = Ursache, e = Wirkung
+const P_KAUSAL = [
+ {c:["der Server","war","in der Nacht","ausgefallen"], e:["die Bestellungen","konnten","stundenlang nicht","bearbeitet werden"]},
+ {c:["die Mieten","waren","im Zentrum drastisch","gestiegen"], e:["viele junge Familien","zogen","an den Stadtrand",""]},
+ {c:["die Studie","hatte","gravierende methodische Mängel",""], e:["die Fachzeitschrift","verweigerte","die Veröffentlichung",""]},
+ {c:["die Verhandlungen","waren","kurz vor Mitternacht","gescheitert"], e:["die Gewerkschaft","organisierte","für den nächsten Morgen einen Warnstreik",""]},
+ {c:["die Lieferkette","war","durch den Hafenstreik","unterbrochen"], e:["das Werk","musste","die Produktion für zwei Wochen","stoppen"]},
+ {c:["der Gutachter","hatte","Risse im Fundament","entdeckt"], e:["die Stadt","sperrte","die Brücke für den gesamten Verkehr",""]},
+ {c:["die Bewerbungsunterlagen","waren","außergewöhnlich überzeugend","gewesen"], e:["die Kandidatin","erhielt","umgehend eine Einladung zum Gespräch",""]},
+ {c:["die Fördergelder","waren","ersatzlos","gestrichen worden"], e:["das Forschungsprojekt","musste","vorzeitig","beendet werden"]},
+ {c:["der Zug","hatte","über eine Stunde Verspätung",""], e:["die Reisende","verpasste","den Anschlussflug nach Lissabon",""]},
+ {c:["das Gericht","hatte","die Beweise für unzulässig","erklärt"], e:["der Angeklagte","wurde","aus Mangel an Beweisen","freigesprochen"]},
+ {c:["die Regierung","hatte","die Mehrwertsteuer auf Lebensmittel","gesenkt"], e:["die Preise im Supermarkt","fielen","spürbar",""]},
+ {c:["die Dissertation","enthielt","zahlreiche Passagen ohne Quellenangabe",""], e:["die Universität","entzog","dem Autor den Doktortitel",""]},
+ {c:["die Nachfrage nach Elektroautos","war","unerwartet stark","eingebrochen"], e:["der Hersteller","musste","Kurzarbeit","anmelden"]},
+ {c:["der Pilot","hatte","starke Turbulenzen","gemeldet"], e:["die Crew","unterbrach","den Bordservice vorübergehend",""]},
+ {c:["das Museum","hatte","seine Öffnungszeiten deutlich","verlängert"], e:["die Besucherzahlen","stiegen","innerhalb eines Jahres um fast die Hälfte",""]},
+ {c:["die Moderatorin","hatte","ihre Stimme","verloren"], e:["die Sendung","wurde","kurzfristig von einem Kollegen","übernommen"]},
+ {c:["der Vermieter","hatte","die defekte Heizung monatelang nicht","repariert"], e:["die Mieter","minderten","die Miete um zwanzig Prozent",""]},
+ {c:["die Wahlbeteiligung","war","außergewöhnlich niedrig","gewesen"], e:["das Ergebnis","galt","als wenig repräsentativ",""]},
+ {c:["das Orchester","hatte","monatelang intensiv","geprobt"], e:["die Premiere","wurde","zu einem triumphalen Erfolg",""]},
+ {c:["die Zentralbank","hatte","die Leitzinsen erneut","angehoben"], e:["viele Haushalte","verschoben","den geplanten Wohnungskauf",""]},
+ {c:["ein Hackerangriff","hatte","das Buchungssystem","lahmgelegt"], e:["die Fluggesellschaft","musste","Hunderte Flüge","streichen"]},
+ {c:["die Übersetzung","enthielt","zahlreiche sinnentstellende Fehler",""], e:["der Verlag","ließ","den Roman neu","übersetzen"]},
+ {c:["der Gletscher","war","in den letzten Jahren dramatisch","geschrumpft"], e:["die Behörden","sperrten","den beliebten Höhenweg",""]},
+ {c:["die Zeugin","hatte","mehrfach widersprüchliche Angaben","gemacht"], e:["das Gericht","zweifelte","an der Glaubwürdigkeit der Aussage",""]},
+ {c:["die Gemeinde","hatte","das Kulturbudget","halbiert"], e:["das traditionelle Stadtfest","musste","in diesem Jahr","ausfallen"]},
+ {c:["die Software","war","nicht ausreichend","getestet worden"], e:["die Nutzer","meldeten","schon am ersten Tag massive Fehler",""]},
+ {c:["das Restaurant","hatte","wiederholt gegen Hygienevorschriften","verstoßen"], e:["das Amt","ließ","den Betrieb","schließen"]},
+ {c:["die Expedition","war","in einen Schneesturm","geraten"], e:["das Team","musste","den Aufstieg kurz vor dem Gipfel","abbrechen"]},
+ {c:["der Dolmetscher","war","kurzfristig","erkrankt"], e:["die Konferenz","begann","mit einer Stunde Verspätung",""]},
+ {c:["die Weizenernte","war","fast vollständig","ausgefallen"], e:["der Brotpreis","stieg","auf ein Rekordniveau",""]},
+ {c:["die Sanierung","hatte","doppelt so viel wie geplant","gekostet"], e:["der Bürgermeister","geriet","massiv unter Druck",""]},
+ {c:["die Werbung in den Videos","war","nicht","gekennzeichnet gewesen"], e:["die Influencerin","musste","eine hohe Geldstrafe","zahlen"]},
+ {c:["der Rohstoffpreis","war","innerhalb eines Monats um das Dreifache","gestiegen"], e:["die Firma","erhöhte","die Preise für alle Produkte",""]},
+ {c:["die Bibliothek","hatte","ihr Angebot vollständig","digitalisiert"], e:["die Zahl der E-Book-Ausleihen","stieg","deutlich",""]},
+ {c:["die Gutachterin","hatte","Schimmel in den Klassenzimmern","festgestellt"], e:["die Schule","blieb","eine Woche lang","geschlossen"]},
+ {c:["der Auftritt in der Fernsehdebatte","hatte","viele Unentschlossene","überzeugt"], e:["der Kandidat","gewann","in den Umfragen deutlich an Zustimmung",""]}
+];
+// KONZESSIV: c = Gegengrund, e = trotzdem eingetretenes Ergebnis
+const P_KONZ = [
+ {c:["das Wetter","war","den ganzen Tag stürmisch","gewesen"], e:["Tausende Menschen","kamen","zum Konzert im Park",""]},
+ {c:["der Konzern","hatte","Rekordgewinne","erzielt"], e:["die Geschäftsleitung","entließ","fast ein Drittel der Belegschaft",""]},
+ {c:["der Autor","hatte","nie eine Schreibschule","besucht"], e:["das Erstlingswerk","wurde","mit dem Buchpreis","ausgezeichnet"]},
+ {c:["die Bürgerinitiative","hatte","Tausende Unterschriften","gesammelt"], e:["der Gemeinderat","genehmigte","den Bau des Einkaufszentrums",""]},
+ {c:["ein Reifen","war","in der vorletzten Runde","geplatzt"], e:["die Rennfahrerin","erreichte","als Dritte das Ziel",""]},
+ {c:["die Experten","hatten","ausdrücklich vor dem Risiko","gewarnt"], e:["der Vorstand","investierte","Millionen in das Projekt",""]},
+ {c:["das Haus","lag","direkt an einer lauten Hauptstraße",""], e:["die Wohnung","war","innerhalb eines Tages","vermietet"]},
+ {c:["das Werbebudget","war","äußerst gering","gewesen"], e:["der Film","lockte","Millionen Zuschauer in die Kinos",""]},
+ {c:["die Reisegruppe","sprach","kein Wort Japanisch",""], e:["die Verständigung im Hotel","klappte","reibungslos",""]},
+ {c:["die Prognosen","waren","äußerst düster","gewesen"], e:["die Wirtschaft","wuchs","im dritten Quartal kräftig",""]},
+ {c:["das Ministerium","hatte","jede Verantwortung","bestritten"], e:["der Minister","musste","wenige Tage später","zurücktreten"]},
+ {c:["der Vortrag","hatte","fast drei Stunden","gedauert"], e:["kaum jemand","verließ","vorzeitig den Saal",""]},
+ {c:["die Villa","stand","seit Jahrzehnten unter Denkmalschutz",""], e:["der Investor","ließ","das Gebäude","abreißen"]},
+ {c:["das Thema","war","äußerst fachspezifisch","gewesen"], e:["das Publikum","folgte","der Referentin mit großer Aufmerksamkeit",""]},
+ {c:["die Kosten","waren","massiv","gestiegen"], e:["der Verein","erhöhte","die Mitgliedsbeiträge nicht",""]},
+ {c:["die Ausstellung","war","in der Presse scharf","kritisiert worden"], e:["das Museum","verzeichnete","einen Besucherrekord",""]},
+ {c:["das Navigationsgerät","hatte","eine Umleitung","angezeigt"], e:["der Fahrer","blieb","auf der gesperrten Strecke",""]},
+ {c:["die Verhandlungspartner","hatten","eine grundsätzliche Einigung","erzielt"], e:["der Vertrag","wurde","nie","unterzeichnet"]},
+ {c:["der Lebenslauf","enthielt","mehrere unerklärte Lücken",""], e:["die Kandidatin","wurde","zum Vorstellungsgespräch","eingeladen"]},
+ {c:["die Forscherin","hatte","das Experiment dutzende Male","wiederholt"], e:["das ursprüngliche Ergebnis","konnte","nicht","reproduziert werden"]},
+ {c:["der Zug","war","pünktlich","abgefahren"], e:["wir","erreichten","Salzburg mit großer Verspätung",""]},
+ {c:["die Partei","hatte","die Wahl klar","gewonnen"], e:["die Regierungsbildung","scheiterte","am Ende",""]},
+ {c:["das Hotel","hatte","hervorragende Bewertungen",""], e:["unser Aufenthalt","war","eine einzige Enttäuschung",""]},
+ {c:["die Gemeinde","hatte","neue Radwege","gebaut"], e:["die meisten Pendler","fuhren","weiterhin mit dem Auto",""]},
+ {c:["der Pianist","hatte","kaum","geprobt"], e:["der Auftritt","war","technisch makellos",""]},
+ {c:["das Paket","war","als Express","verschickt worden"], e:["die Zustellung","dauerte","zehn Tage",""]},
+ {c:["die Regierung","hatte","umfassende Reformen","versprochen"], e:["das Bildungssystem","blieb","weitgehend unverändert",""]}
+];
+// ADVERSATIV: a und b werden einander gegenübergestellt
+const P_ADV = [
+ {a:["die Großstädte","wuchsen","rasant",""], b:["viele Dörfer","verloren","jedes Jahr Einwohner",""]},
+ {a:["die ältere Generation","las","morgens die gedruckte Zeitung",""], b:["die Jüngeren","nutzten","fast ausschließlich soziale Medien",""]},
+ {a:["der Erstgutachter","bewertete","die Masterarbeit als hervorragend",""], b:["der Zweitgutachter","hielt","die Arbeit für durchschnittlich",""]},
+ {a:["die Exporte","stiegen","deutlich",""], b:["die Binnennachfrage","stagnierte","seit Monaten",""]},
+ {a:["die Stadt","investierte","massiv in Radwege",""], b:["das Umland","setzte","weiterhin auf neue Straßen",""]},
+ {a:["die Mieten","stiegen","nur moderat",""], b:["die Preise für Eigentumswohnungen","explodierten","regelrecht",""]},
+ {a:["die Kritiker","feierten","den Film als Meisterwerk",""], b:["das breite Publikum","zeigte","kaum Interesse",""]},
+ {a:["meine Schwester","plante","jeden Urlaub bis ins Detail",""], b:["ich","reiste","am liebsten ohne festes Ziel",""]},
+ {a:["die Opposition","forderte","sofortige Neuwahlen",""], b:["die Regierungsparteien","wollten","bis zum regulären Termin","weiterregieren"]},
+ {a:["die Theorie","klang","überzeugend",""], b:["die Praxis","zeigte","ein völlig anderes Bild",""]},
+ {a:["das Management","sprach","von einer Erfolgsgeschichte",""], b:["die Belegschaft","erlebte","eine Phase großer Unsicherheit",""]},
+ {a:["frühere Generationen","blieben","oft ein Leben lang beim selben Arbeitgeber",""], b:["heutige Berufseinsteiger","wechseln","im Schnitt alle drei Jahre die Stelle",""]}
+];
+
+// ═══════════════ PRÄZISIONSTRAINING (o[0] = richtig, w = Begründungen für o[1..3]) ═══════════════
+const PRAE = [
+ {s:"Die Ergebnisse der Umfrage sind kaum aussagekräftig, ___ nur vierzig Personen daran teilgenommen haben.",o:["da","denn","deshalb","sodass"],ex:"„da“ leitet einen kausalen Nebensatz ein – das Verb „haben“ steht am Ende. Der Nebensatz nennt den Grund, warum die Ergebnisse wenig aussagekräftig sind.",w:["„denn“ passt inhaltlich, verlangt aber einen Hauptsatz mit dem Verb an zweiter Stelle („denn nur vierzig Personen haben …“).","„deshalb“ leitet eine Folge ein und verlangt das Verb direkt danach – hier geht es aber um den Grund.","„sodass“ dreht die Logik um: Die wenig aussagekräftigen Ergebnisse wären dann der Grund für die geringe Teilnahme."]},
+ {s:"Er nahm die Stelle an, ___ ihm das Gehalt eigentlich zu niedrig erschien.",o:["obwohl","weil","trotzdem","sodass"],ex:"Konzessiv: Das zu niedrige Gehalt spricht eigentlich gegen die Zusage – er nimmt die Stelle dennoch an. „obwohl“ + Verb am Ende („erschien“). Das Wort „eigentlich“ ist ein typisches Signal für einen Gegengrund.",w:["„weil“ ist unlogisch: Ein zu niedriges Gehalt ist kein Grund, eine Stelle anzunehmen.","„trotzdem“ trifft den Sinn, ist aber ein Adverb: Danach müsste direkt das Verb folgen – hier steht das Verb jedoch am Ende.","„sodass“ würde das niedrige Gehalt zur Folge der Zusage machen – das ergibt keinen Sinn."]},
+ {s:"Der Vertrag verlängert sich automatisch um ein Jahr, ___ Sie ihn nicht bis zum 30. Juni schriftlich kündigen.",o:["sofern","es sei denn","obwohl","sodass"],ex:"„sofern … nicht“ bedeutet „unter der Bedingung, dass … nicht“. Nebensatz, das Verb „kündigen“ steht am Ende.",w:["„es sei denn“ enthält die Verneinung bereits und verlangt danach einen Hauptsatz: „…, es sei denn, Sie kündigen ihn …“.","„obwohl“ ist unlogisch: Die fehlende Kündigung spricht nicht gegen die Verlängerung, sie ist ihre Bedingung.","„sodass“ macht die fehlende Kündigung zur Folge der Verlängerung – verdrehte Logik."]},
+ {s:"Der Vertrag verlängert sich automatisch um ein Jahr, ___, Sie kündigen ihn bis zum 30. Juni schriftlich.",o:["es sei denn","sofern","falls","damit"],ex:"„es sei denn“ = „außer wenn“. Danach folgt nach einem Komma ein Hauptsatz mit dem Verb an zweiter Stelle („Sie kündigen …“) – genau diese Struktur steht hier.",w:["„sofern“ leitet einen Nebensatz ein: kein Komma danach, das Verb müsste am Ende stehen – und der Sinn wäre umgekehrt.","„falls“ verlangt ebenfalls einen Nebensatz mit Verb am Ende; außerdem würde sich der Sinn umkehren.","„damit“ nennt einen Zweck und verlangt das Verb am Ende; inhaltlich passt es nicht."]},
+ {s:"___ die Ministerin das Podium betreten hatte, wurde es im Saal still.",o:["Nachdem","Bevor","Seitdem","Während"],ex:"Die Zeitverschiebung – Plusquamperfekt („betreten hatte“) im Nebensatz, Präteritum („wurde“) im Hauptsatz – zeigt die Reihenfolge: erst die eine Handlung, dann die andere. Das ist das Markenzeichen von „nachdem“.",w:["„bevor“ verlangt die umgekehrte Reihenfolge und kein Plusquamperfekt im Nebensatz.","„seitdem“ beschreibt einen andauernden Zustand ab einem Zeitpunkt – „wurde still“ ist aber ein punktuelles Ereignis.","„während“ drückt Gleichzeitigkeit aus und verlangt in beiden Sätzen dieselbe Zeitstufe."]},
+ {s:"___ ich die Unterlagen nicht vollständig gelesen habe, gebe ich keine Stellungnahme ab.",o:["Solange","Sobald","Nachdem","Seit"],ex:"„solange“ bezeichnet die gesamte Dauer, in der etwas (nicht) der Fall ist: Für die ganze Zeit, in der das Lesen nicht abgeschlossen ist, gibt es keine Stellungnahme.",w:["„sobald“ bedeutet „unmittelbar nachdem“ – zusammen mit „nicht gelesen“ ergibt das keinen Sinn.","„nachdem“ verlangt eine abgeschlossene Handlung; „nachdem ich nicht gelesen habe“ ist unlogisch.","„seit“ markiert einen Anfangspunkt – eine Handlung, die nicht stattgefunden hat, hat keinen solchen Anfangspunkt."]},
+ {s:"Die Kommission prüft den Antrag erst, ___ alle Unterlagen vollständig vorliegen.",o:["wenn","als","ob","wann"],ex:"„erst, wenn“ = nicht früher als in dem Moment, in dem … Für Gegenwart und Zukunft steht „wenn“.",w:["„als“ steht nur für einmalige Ereignisse in der Vergangenheit.","„ob“ leitet eine indirekte Ja/Nein-Frage ein und passt nicht zu „erst“.","„wann“ ist ein Fragewort und leitet indirekte Fragen ein, keinen Zeitpunkt-Nebensatz."]},
+ {s:"Das Gebäude ist zu marode, ___ sich eine Sanierung noch lohnen würde.",o:["als dass","sodass","dass","damit"],ex:"„zu + Adjektiv, als dass + Konjunktiv II“: Die Eigenschaft ist so ausgeprägt, dass die Folge nicht eintreten kann – eine Sanierung lohnt sich nicht mehr.",w:["„sodass“ verlangt eine tatsächlich eintretende Folge im Indikativ und passt nicht zu „zu marode“.","Nach „zu + Adjektiv“ steht nicht „dass“, sondern „als dass“.","„damit“ nennt einen Zweck – inhaltlich passt das nicht."]},
+ {s:"Die Messdaten waren ___ widersprüchlich, dass das Team die gesamte Messreihe wiederholen musste.",o:["so","zu","je","als"],ex:"„so + Adjektiv, dass …“: Intensität mit tatsächlicher Folge (Indikativ „musste“).",w:["„zu“ verlangt „als dass“ und eine Folge, die nicht eintritt – hier tritt sie aber ein.","„je“ braucht einen Komparativ und den Partner „desto“ oder „umso“.","„als … dass“ ist keine Konstruktion des Deutschen."]},
+ {s:"Je länger die Verhandlungen dauerten, ___ geringer wurde die Bereitschaft zum Kompromiss.",o:["desto","als","wie","denn"],ex:"„je + Komparativ …, desto + Komparativ …“: proportionale Steigerung. Nach „desto geringer“ folgt sofort das Verb.",w:["„als“ steht nach einem Komparativ für Vergleiche („geringer als …“), nicht als Partner von „je“.","„wie“ steht bei Gleichheitsvergleichen („so groß wie …“).","Der Partner von „je“ ist „desto“ oder „umso“ – „denn“ ist hier ungrammatisch."]},
+ {s:"Sie bestand die Prüfung mit Auszeichnung, ___ sie sich wochenlang mit Probeklausuren unter Zeitdruck vorbereitete.",o:["indem","damit","sodass","obwohl"],ex:"„indem“ beantwortet die Frage „Wie? Auf welche Weise?“ – die Vorbereitung mit Probeklausuren ist das Mittel zum Erfolg.",w:["„damit“ würde die Vorbereitung zum Ziel der bestandenen Prüfung machen – sie ist aber das Mittel.","„sodass“ macht die Vorbereitung zur Folge der Prüfung – zeitlich und logisch verdreht.","„obwohl“ ist unlogisch: Gute Vorbereitung spricht nicht gegen den Erfolg."]},
+ {s:"Er verließ die Sitzung, ___ sich zu verabschieden.",o:["ohne","ohne dass","damit","anstatt dass"],ex:"„ohne … zu + Infinitiv“ bei gleichem Subjekt: Er verlässt die Sitzung – er verabschiedet sich nicht.",w:["„ohne dass“ verlangt einen Nebensatz mit konjugiertem Verb am Ende („ohne dass er sich verabschiedete“).","„damit“ kann keinen Infinitiv mit „zu“ einleiten.","„anstatt dass“ verlangt einen konjugierten Nebensatz – und der Sinn wäre ein anderer."]},
+ {s:"Die Änderung wurde beschlossen, ___ die Betroffenen vorher angehört worden wären.",o:["ohne dass","ohne","um","anstatt"],ex:"„ohne dass“ + Nebensatz bei verschiedenen Subjekten (die Änderung – die Betroffenen). Der Konjunktiv II („worden wären“) ist hier typisch; der Indikativ wäre ebenfalls möglich.",w:["„ohne“ allein steht als Präposition oder mit „zu + Infinitiv“, nicht mit einem konjugierten Nebensatz.","„um“ verlangt „zu + Infinitiv“ und nennt einen Zweck.","„anstatt“ allein leitet keinen konjugierten Nebensatz ein – dafür bräuchte man „anstatt dass“."]},
+ {s:"___ selbst Verantwortung zu übernehmen, schob der Geschäftsführer die Schuld auf sein Team.",o:["Anstatt","Obwohl","Um","Damit"],ex:"„anstatt … zu“: An die Stelle der erwarteten Handlung (Verantwortung übernehmen) tritt eine andere.",w:["„obwohl“ leitet einen konjugierten Nebensatz ein, keinen Infinitiv mit „zu“.","„um … zu“ wäre grammatisch möglich, ergibt aber keinen Sinn: Schuld abzuschieben dient nicht dazu, Verantwortung zu übernehmen.","„damit“ kann keinen Infinitiv mit „zu“ einleiten."]},
+ {s:"Er spricht über das Projekt, ___ er es ganz allein geleitet hätte – dabei war er nur zwei Monate beteiligt.",o:["als ob","wie","obwohl","sodass"],ex:"„als ob“ + Konjunktiv II = irrealer Vergleich: Es ist nicht so, aber er stellt es so dar.",w:["„wie“ leitet einen realen Vergleich ein und passt nicht zum Konjunktiv II „hätte“.","„obwohl“ verlangt den Indikativ und ergibt hier keinen Sinn.","„sodass“ leitet eine reale Folge im Indikativ ein."]},
+ {s:"Sie tat so, ___ hätte sie die E-Mail nie erhalten.",o:["als","als ob","wie","ob"],ex:"Kurzform des irrealen Vergleichs: „als“ + konjugiertes Verb direkt danach („hätte“) + Konjunktiv II.",w:["„als ob“ verlangt das Verb am Ende: „als ob sie die E-Mail nie erhalten hätte“.","„wie“ leitet keinen irrealen Vergleich mit dem Verb an erster Stelle ein.","„ob“ leitet eine indirekte Frage ein – „so tun, ob“ gibt es nicht."]},
+ {s:"Die Studie ist methodisch solide. ___ bleibt offen, ob sich die Ergebnisse auf andere Altersgruppen übertragen lassen.",o:["Allerdings","Deshalb","Obwohl","Denn"],ex:"„allerdings“ schränkt eine positive Aussage ein. Position 1, das Verb „bleibt“ folgt direkt.",w:["„deshalb“ ist unlogisch: Die solide Methode ist kein Grund dafür, dass eine Frage offen bleibt.","„obwohl“ leitet einen Nebensatz ein und verlangt das Verb am Ende.","„denn“ steht auf Position 0 und verlangt danach Subjekt + Verb; außerdem nennt es einen Grund."]},
+ {s:"Die Werbeausgaben wurden verdoppelt. Der Umsatz ___ blieb nahezu unverändert.",o:["hingegen","deshalb","nämlich","also"],ex:"„hingegen“ stellt zwei Sachverhalte einander gegenüber und darf direkt nach dem Subjekt stehen („Der Umsatz hingegen blieb …“).",w:["„deshalb“ ergibt keinen Sinn – und zwischen Subjekt und Verb kann es nicht stehen.","„nämlich“ liefert einen Grund nach; zwischen Subjekt und Verb steht es außerdem nicht.","„also“ zieht eine Schlussfolgerung – inhaltlich falsch, und zwischen Subjekt und Verb ungrammatisch."]},
+ {s:"Die Firma verlegt ihren Sitz nach Linz. Dort sind die Gewerbeflächen ___ deutlich günstiger.",o:["nämlich","denn","deshalb","trotzdem"],ex:"„nämlich“ liefert im zweiten Satz den Grund nach und steht im Mittelfeld, direkt nach dem konjugierten Verb.",w:["„denn“ steht auf Position 0, nie im Mittelfeld.","„deshalb“ würde bedeuten: Weil die Firma umzieht, sind die Flächen günstiger – die Logik ist umgekehrt.","„trotzdem“ drückt einen Widerspruch aus, den es hier nicht gibt."]},
+ {s:"Bitte bestätigen Sie Ihre Teilnahme bis Freitag, ___ wir die Räume entsprechend planen können.",o:["damit","um","denn","indem"],ex:"„damit“ nennt einen Zweck bei verschiedenen Subjekten (Sie – wir); das Verb „können“ steht am Ende.",w:["„um … zu“ verlangt einen Infinitiv mit „zu“ und dasselbe Subjekt.","„denn“ verlangt das Verb an zweiter Stelle und nennt einen Grund, keinen Zweck.","„indem“ nennt das Mittel, nicht den Zweck."]},
+ {s:"Sie belegte einen Rhetorikkurs, ___ bei Präsentationen souveräner aufzutreten.",o:["um","damit","sodass","indem"],ex:"„um … zu“: Zweck bei gleichem Subjekt – sie belegt den Kurs, sie will souveräner auftreten.",w:["„damit“ verlangt einen konjugierten Nebensatz, keinen zu-Infinitiv.","„sodass“ verlangt einen konjugierten Nebensatz und drückt eine Folge aus.","„indem“ verlangt einen konjugierten Nebensatz und nennt ein Mittel."]},
+ {s:"Wir nehmen das Angebot nur an, ___ die Lieferung bis Ende März erfolgt.",o:["sofern","es sei denn","obwohl","damit"],ex:"„nur …, sofern …“ = ausschließlich unter dieser Bedingung. Nebensatz, Verb am Ende.",w:["„es sei denn“ verlangt einen Hauptsatz und bedeutet das Gegenteil („außer wenn“).","„obwohl“ ist unlogisch: Die pünktliche Lieferung spricht nicht gegen die Annahme.","„damit“ behauptet einen Zweck: Man nimmt das Angebot nicht an, um die Lieferung zu bewirken."]},
+ {s:"___, die Finanzierung ist gesichert, kann das Projekt im Herbst starten.",o:["Vorausgesetzt","Sofern","Es sei denn","Falls"],ex:"„Vorausgesetzt, …“ wird mit Komma abgetrennt; danach folgt ein Satz mit dem Verb an zweiter Stelle („die Finanzierung ist gesichert“).",w:["„sofern“ leitet einen Nebensatz ein: kein Komma danach, Verb am Ende.","„es sei denn“ bedeutet „außer wenn“ und kann nicht am Satzanfang stehen.","„falls“ leitet einen Nebensatz ein: kein Komma danach, Verb am Ende."]},
+ {s:"Der Bericht wurde mehrmals überarbeitet. ___ enthält er noch zahlreiche Fehler.",o:["Dennoch","Folglich","Obwohl","Somit"],ex:"„dennoch“ = trotzdem: Die Überarbeitung spricht eigentlich gegen Fehler. Position 1, das Verb folgt direkt.",w:["„folglich“ stellt die Fehler als logische Folge der Überarbeitung dar.","„obwohl“ leitet einen Nebensatz ein – das Verb müsste am Ende stehen.","„somit“ zieht ebenfalls eine Konsequenz – inhaltlich falsch."]},
+ {s:"Das neue Verfahren spart Zeit. ___ senkt es die Fehlerquote erheblich.",o:["Darüber hinaus","Dagegen","Trotzdem","Stattdessen"],ex:"„darüber hinaus“ fügt einen weiteren Vorteil hinzu (additiv), Position 1.",w:["„dagegen“ markiert einen Gegensatz – beide Aussagen sind aber positiv.","„trotzdem“ behauptet einen Widerspruch, den es nicht gibt.","„stattdessen“ würde bedeuten: Das Verfahren spart keine Zeit, sondern senkt die Fehlerquote."]},
+ {s:"Sie las den Vertrag nicht nur einmal, ___ ließ ihn zusätzlich von einer Anwältin prüfen.",o:["sondern","aber","denn","doch"],ex:"„nicht nur …, sondern (auch) …“: Steigerung. „sondern“ steht auf Position 0.",w:["„aber“ ist nicht der Partner von „nicht nur“.","„denn“ nennt einen Grund – inhaltlich falsch.","„doch“ markiert einen Gegensatz und ist kein Partner von „nicht nur“."]},
+ {s:"Die Weiterbildung richtet sich sowohl an Studierende ___ an Berufstätige.",o:["als auch","noch","oder","sondern auch"],ex:"Feste Verbindung: „sowohl … als auch“ = beides trifft zu.",w:["„noch“ gehört zu „weder“.","„oder“ gehört zu „entweder“.","„sondern auch“ gehört zu „nicht nur“."]},
+ {s:"Weder die Geschäftsführung ___ der Betriebsrat wurde vorab informiert.",o:["noch","oder","und","als auch"],ex:"„weder … noch“ = keines von beiden. Die Verneinung steckt bereits im Konnektor.",w:["„oder“ gehört zu „entweder“.","„und“ ist kein Partner von „weder“.","„als auch“ gehört zu „sowohl“."]},
+ {s:"Entweder wir reichen den Antrag bis Montag ein, ___ wir verlieren den Anspruch auf Förderung.",o:["oder","sonst","noch","und"],ex:"„entweder …, oder …“: „oder“ steht auf Position 0, danach normale Wortstellung („wir verlieren“).",w:["„sonst“ passt inhaltlich, verlangt aber Inversion („sonst verlieren wir …“) und ist nicht der Partner von „entweder“.","„noch“ gehört zu „weder“.","„und“ ist nicht der Partner von „entweder“."]},
+ {s:"Zum einen fehlt es an qualifiziertem Personal, ___ ist die technische Ausstattung veraltet.",o:["zum anderen","andererseits","teils","oder"],ex:"Feste Paare: „zum einen … zum anderen“ zählt zwei Aspekte auf.",w:["„andererseits“ gehört zu „einerseits“ und stellt zwei Seiten gegenüber.","„teils … teils“ ist ein eigenes Paar und gehört nicht zu „zum einen“.","„oder“ ist nicht der Partner von „zum einen“ und würde keine Inversion verlangen."]},
+ {s:"Die Kritik ist ___ nachvollziehbar, aber sie trifft nicht den Kern des Problems.",o:["zwar","sowohl","weder","entweder"],ex:"„zwar … aber“: Man räumt etwas ein und schränkt es danach ein.",w:["„sowohl“ verlangt „als auch“.","„weder“ verlangt „noch“.","„entweder“ verlangt „oder“."]},
+ {s:"Er hatte kaum das Büro betreten, ___ das Telefon klingelte.",o:["als","wenn","nachdem","sobald"],ex:"Feste Konstruktion: „kaum …, als …“ = unmittelbar danach (einmalig, Vergangenheit).",w:["„wenn“ steht für Wiederholungen oder für Gegenwart und Zukunft.","„nachdem“ passt nicht zu „kaum“ – die Konstruktion verlangt „als“.","„sobald“ passt nicht in die Konstruktion „kaum …, als …“."]},
+ {s:"___ er von seiner Weltreise zurückgekehrt ist, wirkt er wie ausgewechselt.",o:["Seitdem","Bevor","Während","Bis"],ex:"„seitdem“: Beginn in der Vergangenheit, Wirkung bis heute (Perfekt im Nebensatz, Präsens im Hauptsatz).",w:["„bevor“ ergibt mit der abgeschlossenen Rückkehr und dem andauernden Zustand keinen Sinn.","„während“ verlangt Gleichzeitigkeit – die Rückkehr ist aber abgeschlossen.","„bis“ markiert ein Ende – hier beginnt aber etwas."]},
+ {s:"Er arbeitete an seiner Dissertation, ___ er nebenbei als Übersetzer jobbte.",o:["während","indem","sodass","damit"],ex:"Temporales „während“: Beide Tätigkeiten laufen gleichzeitig ab.",w:["„indem“ nennt ein Mittel – das Jobben ist nicht die Methode, eine Dissertation zu schreiben.","„sodass“ würde das Jobben zur Folge der Dissertation machen.","„damit“ nennt einen Zweck – inhaltlich passt das nicht."]},
+ {s:"Der eine Bruder wanderte nach Kanada aus, ___ der andere sein Leben lang im Heimatdorf blieb.",o:["wohingegen","sodass","weshalb","als ob"],ex:"„wohingegen“ stellt zwei Personen oder Sachverhalte einander gegenüber; Nebensatz, Verb am Ende.",w:["„sodass“ macht das Bleiben zur Folge der Auswanderung – das ist nicht gemeint.","„weshalb“ leitet ebenfalls eine Folge ein.","„als ob“ verlangt einen irrealen Vergleich im Konjunktiv II."]},
+ {s:"Das Unternehmen erhöhte die Gehälter, ___ die Fluktuation spürbar zurückging.",o:["sodass","obwohl","als dass","indem"],ex:"„sodass“: Die Gehaltserhöhung hat eine Folge – weniger Kündigungen.",w:["„obwohl“ ist unlogisch: Höhere Gehälter sprechen nicht gegen eine sinkende Fluktuation.","„als dass“ braucht „zu + Adjektiv“ im Hauptsatz und den Konjunktiv II.","„indem“ würde den Rückgang zum Mittel der Gehaltserhöhung machen."]},
+ {s:"Die Reform wurde von beiden Seiten kritisiert: von den einen, weil sie zu weit ging, von den anderen, ___ sie nicht weit genug ging.",o:["weil","denn","obwohl","deshalb"],ex:"Parallelismus: Beide Begründungen sind Nebensätze mit dem Verb am Ende („ging“).",w:["„denn“ verlangt das Verb an zweiter Stelle.","„obwohl“ ist inhaltlich falsch – es geht um die Gründe der Kritik.","„deshalb“ leitet eine Folge ein und verlangt das Verb direkt danach."]},
+ {s:"Teilen Sie uns bitte bis Freitag mit, ___ Sie an der Exkursion teilnehmen oder nicht.",o:["ob","dass","wenn","falls"],ex:"„ob … oder nicht“: indirekte Ja/Nein-Frage – die Antwort ist noch offen.",w:["„dass“ setzt eine Tatsache voraus und passt nicht zu „oder nicht“.","„wenn“ leitet eine Bedingung ein, keine indirekte Frage.","„falls“ leitet eine Bedingung ein, keine indirekte Frage."]},
+ {s:"Die Ministerin ließ offen, ___ genau die Reform in Kraft treten soll – fest steht nur, dass sie kommt.",o:["wann","ob","dass","als"],ex:"Offen ist der Zeitpunkt: indirekte W-Frage mit „wann“. Da feststeht, dass die Reform kommt, ist keine Ja/Nein-Frage offen.",w:["„ob“ würde bedeuten, dass offen ist, ob die Reform überhaupt kommt – das widerspricht dem zweiten Satzteil.","„offen lassen, dass …“ ist unlogisch: „dass“ leitet keine offene Frage ein.","„als“ bezieht sich auf einmalige Ereignisse in der Vergangenheit."]},
+ {s:"Er überzeugte den Vorstand, ___ er die Zahlen anschaulich visualisierte.",o:["indem","obwohl","damit","als ob"],ex:"„indem“ nennt Mittel und Methode: Wie hat er überzeugt? Durch die Visualisierung.",w:["„obwohl“ ist unlogisch: Anschauliche Zahlen sprechen nicht gegen die Überzeugungskraft.","„damit“ würde die Visualisierung zum Ziel machen.","„als ob“ verlangt einen irrealen Vergleich im Konjunktiv II."]},
+ {s:"Das Wetter schlug um; ___ fiel die geplante Gipfeltour ins Wasser.",o:["folglich","obwohl","denn","trotzdem"],ex:"„folglich“ leitet die Konsequenz ein; Position 1, das Verb folgt direkt.",w:["„obwohl“ verlangt einen Nebensatz mit Verb am Ende.","„denn“ verlangt Subjekt + Verb und nennt einen Grund, keine Folge.","„trotzdem“ ist unlogisch: Schlechtes Wetter spricht nicht für die Tour."]},
+ {s:"Der Antrag ist unvollständig. ___ kann er derzeit nicht bearbeitet werden.",o:["Infolgedessen","Hingegen","Indem","Obgleich"],ex:"„infolgedessen“ = als Folge davon (formell); Position 1, das Verb folgt direkt.",w:["„hingegen“ stellt einen Gegensatz her – inhaltlich falsch.","„indem“ leitet einen Nebensatz ein und nennt ein Mittel.","„obgleich“ leitet einen konzessiven Nebensatz ein – Verb am Ende."]},
+ {s:"Ich helfe dir gern beim Umzug, ___ du mir rechtzeitig Bescheid gibst.",o:["sofern","es sei denn","obwohl","sonst"],ex:"„sofern“ = unter der Bedingung, dass …; Nebensatz, Verb am Ende.",w:["„es sei denn“ bedeutet das Gegenteil („außer wenn“) und verlangt einen Hauptsatz.","„obwohl“ ist unlogisch: Rechtzeitiger Bescheid spricht nicht gegen die Hilfe.","„sonst“ ist ein Adverb und verlangt Inversion – auch inhaltlich falsch."]},
+ {s:"Mach dir während des Vortrags Notizen, ___ vergisst du die Hälfte.",o:["sonst","denn","falls","obwohl"],ex:"„sonst“ = andernfalls (negative Bedingung); Position 1, das Verb folgt direkt.",w:["„denn“ steht auf Position 0 und verlangt Subjekt + Verb.","„falls“ verlangt einen Nebensatz mit Verb am Ende.","„obwohl“ verlangt einen Nebensatz mit Verb am Ende und passt inhaltlich nicht."]},
+ {s:"Die Wohnung ist hell und ruhig, ___ liegt sie verkehrsgünstig.",o:["außerdem","sondern","obwohl","deshalb"],ex:"„außerdem“ fügt einen weiteren Vorzug hinzu; als Adverb verlangt es das Verb direkt danach.",w:["„sondern“ verlangt eine vorausgehende Verneinung und normale Wortstellung.","„obwohl“ leitet einen Nebensatz ein – Verb am Ende.","„deshalb“ ist unlogisch: Helligkeit ist kein Grund für eine gute Verkehrslage."]},
+ {s:"Die Produktion wurde nach Osteuropa verlagert, ___ die Lohnkosten zu senken.",o:["um","damit","sodass","weil"],ex:"„um … zu“: Zweck. Gemeint ist in beiden Teilen dasselbe handelnde Unternehmen.",w:["„damit“ verlangt einen konjugierten Nebensatz.","„sodass“ verlangt einen konjugierten Nebensatz und drückt eine Folge aus.","„weil“ verlangt einen konjugierten Nebensatz."]},
+ {s:"Die Mieten in der Innenstadt steigen seit Jahren, ___ die Einkommen stagnieren.",o:["während","sodass","indem","damit"],ex:"Adversatives „während“: zwei gegenläufige Entwicklungen werden einander gegenübergestellt.",w:["„sodass“ macht die stagnierenden Einkommen zur Folge der Mieten.","„indem“ nennt ein Mittel – unlogisch.","„damit“ nennt einen Zweck – unlogisch."]},
+ {s:"Wir sollten die Entscheidung vertagen, ___ uns die vollständigen Zahlen vorliegen.",o:["bis","als","seit","nachdem"],ex:"„bis“ markiert das Ende eines Zeitraums: vertagen – und zwar bis zu dem Moment, in dem die Zahlen da sind.",w:["„als“ bezieht sich auf die Vergangenheit.","„seit“ markiert einen Anfangspunkt in der Vergangenheit.","„nachdem“ ergibt mit „vertagen“ keinen Sinn: Vertagt wird ja, solange die Zahlen fehlen."]}
+];
+
+// ═══════════════ NOMINALSTIL-WANDLER ═══════════════
+const NOMI = [
+ {q:"Obwohl die Kosten gestiegen waren, hielt die Stadt an dem Projekt fest.",d:"n",o:["Trotz der gestiegenen Kosten hielt die Stadt an dem Projekt fest.","Wegen der gestiegenen Kosten hielt die Stadt an dem Projekt fest.","Trotz die gestiegenen Kosten hielt die Stadt an dem Projekt fest.","Trotz der gestiegene Kosten hielt die Stadt an dem Projekt fest."],ex:"obwohl → trotz + Genitiv. „der gestiegenen Kosten“ ist Genitiv Plural.",w:["„wegen“ ist kausal – die Bedeutung kippt ins Gegenteil.","„trotz“ verlangt den Genitiv, nicht den Akkusativ.","Die Adjektivendung stimmt nicht: Genitiv Plural mit Artikel → „-en“."]},
+ {q:"Weil der Zug Verspätung hatte, verpasste sie den Termin.",d:"n",o:["Wegen der Verspätung des Zuges verpasste sie den Termin.","Trotz der Verspätung des Zuges verpasste sie den Termin.","Wegen der Verspätung der Zug verpasste sie den Termin.","Wegen die Verspätung des Zuges verpasste sie den Termin."],ex:"weil → wegen + Genitiv; das Subjekt des Nebensatzes wird zum Genitivattribut („des Zuges“).",w:["„trotz“ ist konzessiv – die Bedeutung stimmt nicht.","Das Genitivattribut muss „des Zuges“ heißen.","„wegen“ verlangt in der Standardsprache den Genitiv."]},
+ {q:"Nachdem die Sitzung beendet worden war, gab der Vorsitzende eine Erklärung ab.",d:"n",o:["Nach Beendigung der Sitzung gab der Vorsitzende eine Erklärung ab.","Vor Beendigung der Sitzung gab der Vorsitzende eine Erklärung ab.","Nach der Beendigung die Sitzung gab der Vorsitzende eine Erklärung ab.","Seit Beendigung der Sitzung gab der Vorsitzende eine Erklärung ab."],ex:"nachdem → nach + Dativ; das Verb wird zum Nomen („beenden“ → „Beendigung“), das Objekt zum Genitivattribut.",w:["„vor“ dreht die zeitliche Reihenfolge um.","Das Genitivattribut muss „der Sitzung“ lauten.","„seit“ beschreibt einen andauernden Zustand – „gab eine Erklärung ab“ ist punktuell."]},
+ {q:"Bevor das Gesetz in Kraft tritt, wird es noch einmal geprüft.",d:"n",o:["Vor dem Inkrafttreten des Gesetzes wird es noch einmal geprüft.","Nach dem Inkrafttreten des Gesetzes wird es noch einmal geprüft.","Vor das Inkrafttreten des Gesetzes wird es noch einmal geprüft.","Vor dem Inkrafttreten dem Gesetz wird es noch einmal geprüft."],ex:"bevor → vor + Dativ. „in Kraft treten“ wird zu „das Inkrafttreten“.",w:["„nach“ dreht die Reihenfolge um.","Temporales „vor“ verlangt den Dativ.","Das Attribut muss im Genitiv stehen: „des Gesetzes“."]},
+ {q:"Während das Gebäude renoviert wird, bleibt das Museum geschlossen.",d:"n",o:["Während der Renovierung des Gebäudes bleibt das Museum geschlossen.","Während die Renovierung des Gebäudes bleibt das Museum geschlossen.","Nach der Renovierung des Gebäudes bleibt das Museum geschlossen.","Während der Renovierung das Gebäude bleibt das Museum geschlossen."],ex:"Konnektor „während“ → Präposition „während“ + Genitiv.",w:["Die Präposition „während“ verlangt den Genitiv.","„nach“ verändert die Zeitlogik: Nach der Renovierung wäre das Museum eher offen.","Das Attribut muss im Genitiv stehen: „des Gebäudes“."]},
+ {q:"Wenn es zu einem Stromausfall kommt, schaltet sich das Notaggregat automatisch ein.",d:"n",o:["Bei einem Stromausfall schaltet sich das Notaggregat automatisch ein.","Trotz eines Stromausfalls schaltet sich das Notaggregat automatisch ein.","Bei einen Stromausfall schaltet sich das Notaggregat automatisch ein.","Nach einem Stromausfall schaltet sich das Notaggregat nie ein."],ex:"wenn/falls (Bedingung) → bei + Dativ.",w:["„trotz“ ist konzessiv – die Bedingung geht verloren.","„bei“ verlangt den Dativ: „bei einem Stromausfall“.","Die Aussage hat sich inhaltlich völlig verändert."]},
+ {q:"Indem man die Abläufe digitalisiert, lassen sich Kosten sparen.",d:"n",o:["Durch die Digitalisierung der Abläufe lassen sich Kosten sparen.","Durch der Digitalisierung der Abläufe lassen sich Kosten sparen.","Trotz der Digitalisierung der Abläufe lassen sich Kosten sparen.","Durch die Digitalisierung die Abläufe lassen sich Kosten sparen."],ex:"indem → durch + Akkusativ; das Objekt wird zum Genitivattribut („der Abläufe“).",w:["„durch“ verlangt den Akkusativ.","„trotz“ ist konzessiv – das Mittel wird zum Gegengrund.","Das Attribut muss im Genitiv stehen: „der Abläufe“."]},
+ {q:"Damit die Sicherheit verbessert wird, wurden neue Kameras installiert.",d:"n",o:["Zur Verbesserung der Sicherheit wurden neue Kameras installiert.","Wegen der Verbesserung der Sicherheit wurden neue Kameras installiert.","Zum Verbesserung der Sicherheit wurden neue Kameras installiert.","Zur Verbesserung die Sicherheit wurden neue Kameras installiert."],ex:"damit / um … zu (Zweck) → zu + Dativ: „zur“ = zu der (die Verbesserung ist feminin).",w:["„wegen“ ist kausal: Die Verbesserung wäre der Grund, nicht das Ziel.","„Verbesserung“ ist feminin: „zur“, nicht „zum“.","Das Attribut muss im Genitiv stehen: „der Sicherheit“."]},
+ {q:"Seit die Grenze geöffnet wurde, hat der Handel stark zugenommen.",d:"n",o:["Seit der Öffnung der Grenze hat der Handel stark zugenommen.","Seit die Öffnung der Grenze hat der Handel stark zugenommen.","Bis zur Öffnung der Grenze hat der Handel stark zugenommen.","Seit der Öffnung die Grenze hat der Handel stark zugenommen."],ex:"seit (Konnektor) → seit (Präposition) + Dativ.",w:["Die Präposition „seit“ verlangt den Dativ.","„bis“ verschiebt den Zeitraum vor die Öffnung.","Das Attribut muss im Genitiv stehen: „der Grenze“."]},
+ {q:"Falls Sie Fragen haben, wenden Sie sich bitte an das Sekretariat.",d:"n",o:["Bei Fragen wenden Sie sich bitte an das Sekretariat.","Trotz Fragen wenden Sie sich bitte an das Sekretariat.","Nach Fragen wenden Sie sich bitte an das Sekretariat.","Ohne Fragen wenden Sie sich bitte an das Sekretariat."],ex:"falls → bei + Dativ: eine der häufigsten Formeln in Behörden- und Geschäftstexten.",w:["„trotz“ ist konzessiv – unlogisch.","„nach Fragen“ ist hier keine Bedingung.","„ohne“ kehrt die Bedingung ins Gegenteil."]},
+ {q:"Trotz intensiver Bemühungen konnte der Vermisste nicht gefunden werden.",d:"v",o:["Obwohl man sich intensiv bemüht hatte, konnte der Vermisste nicht gefunden werden.","Weil man sich intensiv bemüht hatte, konnte der Vermisste nicht gefunden werden.","Obwohl man hatte sich intensiv bemüht, konnte der Vermisste nicht gefunden werden.","Obwohl man sich intensiv bemüht hatte, der Vermisste konnte nicht gefunden werden."],ex:"trotz → obwohl + Nebensatz; danach folgt im Hauptsatz sofort das Verb („konnte“).",w:["„weil“ ist kausal – die Bedeutung kippt.","Im Nebensatz gehört das konjugierte Verb ans Ende.","Nach dem vorangestellten Nebensatz muss im Hauptsatz das Verb direkt folgen."]},
+ {q:"Aufgrund des starken Schneefalls wurde der Flughafen gesperrt.",d:"v",o:["Weil es stark geschneit hatte, wurde der Flughafen gesperrt.","Obwohl es stark geschneit hatte, wurde der Flughafen gesperrt.","Weil es hatte stark geschneit, wurde der Flughafen gesperrt.","Weil es stark geschneit hatte, der Flughafen wurde gesperrt."],ex:"aufgrund → weil + Nebensatz; das Nomen „Schneefall“ wird zum Verb „schneien“.",w:["„obwohl“ ist konzessiv – die Bedeutung stimmt nicht.","Im Nebensatz gehört das konjugierte Verb ans Ende.","Nach dem vorangestellten Nebensatz muss im Hauptsatz das Verb direkt folgen."]},
+ {q:"Bei rechtzeitiger Anmeldung erhalten Sie zehn Prozent Rabatt.",d:"v",o:["Wenn Sie sich rechtzeitig anmelden, erhalten Sie zehn Prozent Rabatt.","Obwohl Sie sich rechtzeitig anmelden, erhalten Sie zehn Prozent Rabatt.","Wenn Sie anmelden sich rechtzeitig, erhalten Sie zehn Prozent Rabatt.","Wenn Sie sich rechtzeitig anmelden, Sie erhalten zehn Prozent Rabatt."],ex:"bei (Bedingung) → wenn/falls + Nebensatz.",w:["„obwohl“ macht aus der Bedingung einen Gegengrund.","Im Nebensatz steht das trennbare Verb zusammengeschrieben am Ende: „anmelden“.","Nach dem vorangestellten Nebensatz muss das Verb direkt folgen: „erhalten Sie“."]},
+ {q:"Nach Abschluss des Studiums ging sie für zwei Jahre nach Kanada.",d:"v",o:["Nachdem sie das Studium abgeschlossen hatte, ging sie für zwei Jahre nach Kanada.","Nachdem sie das Studium abschloss, ging sie für zwei Jahre nach Kanada.","Bevor sie das Studium abgeschlossen hatte, ging sie für zwei Jahre nach Kanada.","Nachdem sie hatte das Studium abgeschlossen, ging sie für zwei Jahre nach Kanada."],ex:"nach → nachdem + Zeitverschiebung: Plusquamperfekt im Nebensatz, Präteritum im Hauptsatz.",w:["Standardsprachlich fehlt die Zeitverschiebung: nach „nachdem“ steht eine Zeitstufe „früher“ (Plusquamperfekt).","„bevor“ dreht die Reihenfolge um.","Im Nebensatz gehört das konjugierte Verb „hatte“ ans Ende."]},
+ {q:"Zur Vermeidung von Missverständnissen bitten wir um schriftliche Bestätigung.",d:"v",o:["Um Missverständnisse zu vermeiden, bitten wir um schriftliche Bestätigung.","Damit Missverständnisse zu vermeiden, bitten wir um schriftliche Bestätigung.","Um Missverständnisse vermeiden, bitten wir um schriftliche Bestätigung.","Um Missverständnisse zu vermeiden, wir bitten um schriftliche Bestätigung."],ex:"zur + Verbalnomen (Zweck) → um … zu + Infinitiv (gleiches Subjekt: wir).",w:["„damit“ kann keinen zu-Infinitiv einleiten.","Bei „um“ fehlt das „zu“ vor dem Infinitiv.","Die um-zu-Gruppe besetzt Position 1: Danach muss sofort das Verb folgen."]},
+ {q:"Durch regelmäßiges Training verbesserte er seine Ausdauer deutlich.",d:"v",o:["Indem er regelmäßig trainierte, verbesserte er seine Ausdauer deutlich.","Damit er regelmäßig trainierte, verbesserte er seine Ausdauer deutlich.","Indem er trainierte regelmäßig, verbesserte er seine Ausdauer deutlich.","Indem er regelmäßig trainierte, er verbesserte seine Ausdauer deutlich."],ex:"durch (Mittel) → indem + Nebensatz.",w:["„damit“ würde das Training zum Ziel machen.","Im Nebensatz gehört das konjugierte Verb ans Ende.","Nach dem vorangestellten Nebensatz muss das Verb direkt folgen."]},
+ {q:"Während seines Aufenthalts in Rom lernte er Italienisch.",d:"v",o:["Während er sich in Rom aufhielt, lernte er Italienisch.","Bevor er sich in Rom aufhielt, lernte er Italienisch.","Während er hielt sich in Rom auf, lernte er Italienisch.","Während er sich in Rom aufhielt, er lernte Italienisch."],ex:"Präposition „während“ → Konnektor „während“ + Nebensatz; „der Aufenthalt“ → „sich aufhalten“.",w:["„bevor“ verändert den Zeitbezug.","Im Nebensatz steht das trennbare Verb zusammengeschrieben am Ende: „aufhielt“.","Nach dem vorangestellten Nebensatz muss das Verb direkt folgen."]},
+ {q:"Ohne Zustimmung des Betriebsrats darf die Regelung nicht eingeführt werden.",d:"v",o:["Ohne dass der Betriebsrat zustimmt, darf die Regelung nicht eingeführt werden.","Ohne der Betriebsrat zuzustimmen, darf die Regelung nicht eingeführt werden.","Ohne dass der Betriebsrat stimmt zu, darf die Regelung nicht eingeführt werden.","Anstatt dass der Betriebsrat zustimmt, darf die Regelung nicht eingeführt werden."],ex:"ohne + Nomen → ohne dass + Nebensatz (verschiedene Subjekte: Betriebsrat ≠ Regelung).",w:["„ohne … zu“ funktioniert nur bei gleichem Subjekt – und ein eigenes Subjekt ist dort gar nicht möglich.","Im Nebensatz steht das trennbare Verb zusammengeschrieben am Ende: „zustimmt“.","„anstatt dass“ bedeutet etwas anderes (Ersatz statt fehlende Handlung)."]}
+];
+
+// ═══════════════ FEHLERJAGD (o[0] = der fehlerhafte Satz) ═══════════════
+const FEHLER = [
+ {o:["Er kommt heute nicht. Nämlich ist er krank.","Sie bleibt zu Hause, denn sie ist erkältet.","Weil der Kurs ausfiel, gingen wir ins Museum.","Das Projekt ist teuer. Es lohnt sich trotzdem."],fix:"Er kommt heute nicht. Er ist nämlich krank.",ex:"„nämlich“ kann nie auf Position 1 stehen – es steht im Mittelfeld nach dem konjugierten Verb."},
+ {o:["Das ist kein Zufall, aber eine bewusste Entscheidung.","Er sprach nicht laut, sondern flüsterte.","Sie ist zwar jung, aber sehr erfahren.","Nicht der Preis, sondern die Qualität entscheidet."],fix:"Das ist kein Zufall, sondern eine bewusste Entscheidung.",ex:"Nach einer Verneinung („kein“, „nicht“) wird mit „sondern“ korrigiert, nicht mit „aber“."},
+ {o:["Wenn ich 2019 in Lissabon war, habe ich zum ersten Mal Fado gehört.","Immer wenn sie in Wien war, besuchte sie das Burgtheater.","Als die Mauer fiel, war ich zehn Jahre alt.","Wenn du morgen Zeit hast, ruf mich bitte an."],fix:"Als ich 2019 in Lissabon war, habe ich zum ersten Mal Fado gehört.",ex:"Ein einmaliges Ereignis in der Vergangenheit verlangt „als“. „wenn“ steht für Wiederholungen oder für Gegenwart und Zukunft."},
+ {o:["Ich spreche langsam, um alle mich verstehen.","Sie spart, um sich eine Weltreise leisten zu können.","Ich erkläre es noch einmal, damit alle es verstehen.","Er stellte den Wecker, um den Zug nicht zu verpassen."],fix:"Ich spreche langsam, damit mich alle verstehen.",ex:"„um … zu“ braucht einen Infinitiv mit „zu“ und dasselbe Subjekt. Bei verschiedenen Subjekten (ich – alle) steht „damit“ mit konjugiertem Verb am Ende."},
+ {o:["Je mehr sie über das Thema las, desto sie wurde neugieriger.","Je länger der Film dauerte, desto unruhiger wurde das Publikum.","Je früher wir buchen, umso günstiger ist der Flug.","Je öfter ich die Strecke fahre, desto entspannter bin ich."],fix:"Je mehr sie über das Thema las, desto neugieriger wurde sie.",ex:"Nach „desto“ folgt sofort der Komparativ, danach direkt das Verb: „desto neugieriger wurde sie“."},
+ {o:["Er tut so, als er die Antwort wüsste.","Sie sah mich an, als hätte sie einen Geist gesehen.","Es klingt, als ob jemand an der Tür wäre.","Er benahm sich, als wäre nichts geschehen."],fix:"Er tut so, als wüsste er die Antwort. (oder: … als ob er die Antwort wüsste.)",ex:"Beim kurzen irrealen Vergleich mit „als“ steht das konjugierte Verb direkt nach „als“. Mit „als ob“ steht es am Ende."},
+ {o:["Weder mein Bruder noch meine Schwester haben nicht angerufen.","Weder der Vertrag noch die Rechnung lag dem Brief bei.","Er spricht weder Französisch noch Spanisch.","Entweder du rufst an, oder du schreibst eine Nachricht."],fix:"Weder mein Bruder noch meine Schwester haben angerufen.",ex:"„weder … noch“ enthält die Verneinung bereits – ein zusätzliches „nicht“ ist falsch."},
+ {o:["Obwohl es regnete, trotzdem gingen wir spazieren.","Es regnete. Trotzdem gingen wir spazieren.","Obwohl es regnete, gingen wir trotzdem spazieren.","Wir gingen spazieren, obwohl es regnete."],fix:"Obwohl es regnete, gingen wir (trotzdem) spazieren.",ex:"Der obwohl-Satz besetzt bereits Position 1. Danach muss das Verb folgen – „trotzdem“ kann nicht zusätzlich davor stehen. Im Mittelfeld („gingen wir trotzdem“) ist es dagegen möglich."},
+ {o:["Nachdem er den Bericht las, schickte er ihn an die Chefin.","Nachdem sie gegessen hat, macht sie einen Spaziergang.","Nachdem wir angekommen waren, begann es zu regnen.","Bevor er den Bericht abschickte, las er ihn noch einmal."],fix:"Nachdem er den Bericht gelesen hatte, schickte er ihn an die Chefin.",ex:"Nach „nachdem“ gilt die Zeitverschiebung: Plusquamperfekt → Präteritum bzw. Perfekt → Präsens."},
+ {o:["Er ist zwar müde, sondern er arbeitet weiter.","Zwar ist die Wohnung klein, aber sie liegt zentral.","Die Lösung ist zwar elegant, doch sie kostet zu viel.","Einerseits möchte sie reisen, andererseits fehlt ihr das Geld."],fix:"Er ist zwar müde, aber er arbeitet weiter.",ex:"Der Partner von „zwar“ ist „aber“ (oder „doch“, „jedoch“). „sondern“ verlangt eine vorausgehende Verneinung."},
+ {o:["Die Straße war gesperrt, deshalb wir mussten einen Umweg fahren.","Der Akku war leer, daher konnte ich nicht anrufen.","Es war schon spät, also nahmen wir ein Taxi.","Der Antrag kam zu spät; folglich wurde er abgelehnt."],fix:"Die Straße war gesperrt, deshalb mussten wir einen Umweg fahren.",ex:"„deshalb“ besetzt Position 1 – das konjugierte Verb muss direkt folgen."},
+ {o:["Sie fuhr nach Hause, ohne dass sie sich zu verabschieden.","Er ging, ohne sich umzudrehen.","Die Tür ging auf, ohne dass jemand geklopft hatte.","Anstatt zu warten, rief sie sofort an."],fix:"Sie fuhr nach Hause, ohne sich zu verabschieden.",ex:"Zwei Konstruktionen sind vermischt: Entweder „ohne … zu + Infinitiv“ (gleiches Subjekt) oder „ohne dass“ + konjugiertes Verb am Ende."},
+ {o:["Ich weiß nicht, dass er morgen kommt oder nicht.","Sie fragte, wann der Zug abfährt.","Ich frage mich, ob das wirklich stimmt.","Weißt du, wer das Fenster offen gelassen hat?"],fix:"Ich weiß nicht, ob er morgen kommt oder nicht.",ex:"Eine offene Ja/Nein-Frage wird mit „ob“ eingeleitet. „dass“ setzt eine Tatsache voraus."},
+ {o:["Das Problem ist zu komplex, dass man es schnell lösen könnte.","Er war so erschöpft, dass er sofort einschlief.","Der Text ist zu lang, als dass ich ihn heute noch lesen könnte.","Es war so laut, dass wir uns kaum verstanden."],fix:"Das Problem ist zu komplex, als dass man es schnell lösen könnte.",ex:"Nach „zu + Adjektiv“ steht „als dass“ (meist mit Konjunktiv II). „so … dass“ beschreibt eine tatsächliche Folge."},
+ {o:["Er hatte kaum das Haus verlassen, wenn es zu regnen begann.","Kaum hatte sie sich gesetzt, klingelte das Telefon.","Kaum dass er angekommen war, wollte er wieder weg.","Sobald die Ergebnisse vorliegen, informieren wir Sie."],fix:"Er hatte kaum das Haus verlassen, als es zu regnen begann.",ex:"Die feste Konstruktion lautet „kaum …, als …“ (einmaliges Ereignis in der Vergangenheit)."},
+ {o:["Sie bestand die Prüfung, in dem sie täglich übte.","Das Haus, in dem ich aufgewachsen bin, steht noch.","Er lernt Vokabeln, indem er sie laut wiederholt.","Man spart Energie, indem man die Heizung drosselt."],fix:"Sie bestand die Prüfung, indem sie täglich übte.",ex:"Der modale Konnektor „indem“ (= auf welche Weise?) wird zusammengeschrieben. „in dem“ ist Präposition + Relativpronomen."},
+ {o:["Während die Mieten steigen, wohingegen die Löhne stagnieren.","Die Mieten steigen, während die Löhne stagnieren.","Die Mieten steigen, wohingegen die Löhne stagnieren.","Die Mieten steigen. Die Löhne dagegen stagnieren."],fix:"Die Mieten steigen, während (wohingegen) die Löhne stagnieren.",ex:"Hier stehen zwei Nebensätze nebeneinander – es fehlt der Hauptsatz. Ein Gegensatz braucht nur einen Konnektor."},
+ {o:["Es sei denn, das Wetter wird schlecht, fahren wir morgen ans Meer.","Wir fahren morgen ans Meer, es sei denn, das Wetter wird schlecht.","Wir fahren morgen ans Meer, sofern das Wetter gut bleibt.","Falls das Wetter schlecht wird, bleiben wir zu Hause."],fix:"Wir fahren morgen ans Meer, es sei denn, das Wetter wird schlecht.",ex:"„es sei denn“ steht immer nach dem Hauptsatz und kann nicht vorangestellt werden."},
+ {o:["Denn die Bahn streikte, kamen wir zu spät.","Wir kamen zu spät, denn die Bahn streikte.","Da die Bahn streikte, kamen wir zu spät.","Wir kamen zu spät. Die Bahn streikte nämlich."],fix:"Wir kamen zu spät, denn die Bahn streikte. (oder: Da die Bahn streikte, kamen wir zu spät.)",ex:"Ein denn-Satz kann nicht vor dem Hauptsatz stehen: „denn“ liefert die Begründung immer nachträglich. Für einen vorangestellten Grund: „da“ oder „weil“."},
+ {o:["Sie arbeitet gern im Team, aber hat sie auch kein Problem mit Einzelarbeit.","Sie arbeitet gern im Team, aber sie kann auch gut allein arbeiten.","Die Idee ist gut, doch die Umsetzung ist schwierig.","Er wollte anrufen, aber er hatte keine Zeit."],fix:"Sie arbeitet gern im Team, aber sie hat auch kein Problem mit Einzelarbeit.",ex:"„aber“ steht auf Position 0 und verändert die Wortstellung nicht: Danach folgt Subjekt + Verb."}
+];
+
+// ═══════════════ SYNONYM ODER FALLE ═══════════════
+const SYN = [
+ {s:"[Obwohl] die Kritik berechtigt war, ignorierte sie der Vorstand.",o:["Obgleich","Trotzdem","Weil","Zwar"],ex:"„obgleich“ ist ein konzessiver Nebensatz-Konnektor wie „obwohl“ – gleiche Bedeutung, gleiche Wortstellung (Verb am Ende), nur etwas formeller.",w:["„trotzdem“ hat die gleiche Bedeutung, ist aber ein Adverb: Danach müsste direkt das Verb folgen.","„weil“ hat dieselbe Wortstellung, aber eine andere Bedeutung (kausal statt konzessiv).","„zwar“ braucht „aber“ als Partner und keinen Nebensatz."]},
+ {s:"Das Projekt ist riskant. [Trotzdem] unterstützen wir es.",o:["Dennoch","Obwohl","Deshalb","Aber"],ex:"„dennoch“ = „trotzdem“: konzessives Adverb auf Position 1, das Verb folgt direkt.",w:["„obwohl“ hat die gleiche Bedeutung, leitet aber einen Nebensatz ein.","„deshalb“ hat dieselbe Wortstellung, aber eine kausale Bedeutung.","„aber“ steht auf Position 0 – danach müsste „wir unterstützen“ folgen."]},
+ {s:"Er kam zu spät, [weil] der Bus ausgefallen war.",o:["da","denn","deshalb","obwohl"],ex:"„da“ ist ein kausaler Nebensatz-Konnektor wie „weil“ – das Verb bleibt am Ende.",w:["„denn“ hat die gleiche Bedeutung, verlangt aber das Verb an zweiter Stelle.","„deshalb“ leitet eine Folge ein und verlangt Inversion.","„obwohl“ hat die Wortstellung, aber nicht die Bedeutung."]},
+ {s:"Wir kommen gern, [falls] es nicht regnet.",o:["sofern","es sei denn","sonst","obwohl"],ex:"„sofern“ ist wie „falls“ ein konditionaler Nebensatz-Konnektor: gleicher Sinn, Verb am Ende.",w:["„es sei denn“ enthält die Verneinung bereits und verlangt einen Hauptsatz.","„sonst“ ist ein Adverb mit Inversion und verändert den Sinn.","„obwohl“ ist konzessiv – die Bedingung geht verloren."]},
+ {s:"Die Mieten steigen, [während] die Löhne stagnieren.",o:["wohingegen","solange","dagegen","sodass"],ex:"„wohingegen“ entspricht dem adversativen „während“ – Nebensatz, Verb am Ende.",w:["„solange“ ist temporal und verändert die Aussage.","„dagegen“ hat die gleiche Bedeutung, ist aber ein Adverb – es kann keinen Nebensatz einleiten.","„sodass“ leitet eine Folge ein."]},
+ {s:"Es regnete stark. [Deshalb] wurde das Spiel abgesagt.",o:["Folglich","Denn","Sodass","Trotzdem"],ex:"„folglich“ leitet wie „deshalb“ eine Folge ein und besetzt Position 1 mit dem Verb direkt danach.",w:["„denn“ nennt einen Grund und steht auf Position 0.","„sodass“ leitet einen Nebensatz ein und kann nicht nach einem Punkt stehen.","„trotzdem“ hat dieselbe Wortstellung, aber die gegenteilige Logik."]},
+ {s:"Sie ist klug. [Außerdem] ist sie sehr hilfsbereit.",o:["Zudem","Und","Dagegen","Stattdessen"],ex:"„zudem“ ist wie „außerdem“ ein additives Adverb auf Position 1.",w:["„und“ steht auf Position 0 – danach müsste „sie ist“ folgen.","„dagegen“ ist adversativ.","„stattdessen“ bedeutet Ersatz, nicht Ergänzung."]},
+ {s:"[Bevor] du unterschreibst, lies den Vertrag genau.",o:["Ehe","Nachdem","Vorher","Bis"],ex:"„ehe“ ist ein gehobenes Synonym von „bevor“ – Nebensatz, Verb am Ende.",w:["„nachdem“ kehrt die Reihenfolge um.","„vorher“ hat ähnliche Bedeutung, ist aber ein Adverb und kann keinen Nebensatz einleiten.","„bis“ markiert ein Ende und verändert den Sinn."]},
+ {s:"Ich lerne Vokabeln, [indem] ich sie laut wiederhole.",o:["dadurch dass","dadurch","damit","sodass"],ex:"„dadurch dass“ ist wie „indem“ ein modaler Nebensatz-Konnektor (Mittel, Methode).",w:["„dadurch“ allein ist ein Adverb und verlangt Inversion.","„damit“ nennt einen Zweck.","„sodass“ leitet eine Folge ein."]},
+ {s:"Je mehr wir wissen, [desto] mehr Fragen stellen sich.",o:["umso","als","wie","sodass"],ex:"„je … umso“ ist vollständig gleichbedeutend mit „je … desto“.",w:["„als“ steht nach Komparativen bei Vergleichen.","„wie“ steht bei Gleichheitsvergleichen.","„sodass“ leitet eine Folge ein und ist kein Partner von „je“."]},
+ {s:"Die Methode ist zwar aufwendig, [aber] sie liefert präzise Ergebnisse.",o:["doch","sondern","denn","trotzdem"],ex:"„doch“ kann nach „zwar“ für „aber“ stehen – Position 0, normale Wortstellung.",w:["„sondern“ verlangt eine Verneinung.","„denn“ nennt einen Grund.","„trotzdem“ verlangt Inversion („trotzdem liefert sie …“)."]},
+ {s:"Wir müssen jetzt los, [sonst] verpassen wir den Zug.",o:["andernfalls","damit","deshalb","falls"],ex:"„andernfalls“ ist ein formelleres Synonym von „sonst“ – Adverb auf Position 1.",w:["„damit“ nennt einen Zweck – der Sinn wäre absurd.","„deshalb“ hat dieselbe Wortstellung, kehrt aber die Logik um.","„falls“ leitet einen Nebensatz ein."]},
+ {s:"[Kaum dass] der Vorhang gefallen war, brach tosender Jubel aus.",o:["Sobald","Bevor","Solange","Obwohl"],ex:"„sobald“ beschreibt wie „kaum dass“ ein unmittelbares Nacheinander – Nebensatz, Verb am Ende.",w:["„bevor“ kehrt die Reihenfolge um.","„solange“ beschreibt eine Dauer.","„obwohl“ ist konzessiv."]},
+ {s:"Die Kosten sind hoch. [Zudem] fehlt qualifiziertes Personal.",o:["Darüber hinaus","Hingegen","Somit","Obgleich"],ex:"„darüber hinaus“ ist wie „zudem“ additiv und besetzt Position 1.",w:["„hingegen“ ist adversativ.","„somit“ leitet eine Folge ein.","„obgleich“ leitet einen konzessiven Nebensatz ein."]},
+ {s:"Die Kritiker lobten den Roman. Die Leser [hingegen] reagierten zurückhaltend.",o:["dagegen","deshalb","nämlich","also"],ex:"„dagegen“ entspricht „hingegen“ und kann ebenfalls direkt nach dem Subjekt stehen.",w:["„deshalb“ ist kausal und kann nicht zwischen Subjekt und Verb stehen.","„nämlich“ liefert einen Grund nach und steht nicht zwischen Subjekt und Verb.","„also“ zieht eine Schlussfolgerung."]},
+ {s:"Ich rufe dich an, [sobald] ich gelandet bin.",o:["wenn","bevor","solange","obwohl"],ex:"„wenn“ kann hier wie „sobald“ den Zeitpunkt in der Zukunft markieren – Nebensatz, Verb am Ende. „sobald“ betont nur stärker das „sofort danach“.",w:["„bevor“ kehrt die Reihenfolge um.","„solange“ beschreibt eine Dauer, keinen Zeitpunkt.","„obwohl“ ist konzessiv."]}
+];
+
+// ═══════════════ TEXTKOHÄRENZ ═══════════════
+// Lücke: {richtig|falsch|falsch|falsch#Erklärung}
+const TEXTE = [
+ {t:"Homeoffice – Freiheit mit Nebenwirkungen", k:"Erörterung",
+  x:"Seit einigen Jahren arbeiten viele Angestellte zumindest teilweise von zu Hause aus. {Einerseits|Obwohl|Sowohl|Weder#„Einerseits“ kündigt das spätere „andererseits“ an; Position 1, das Verb „sparen“ folgt direkt.} sparen sie dadurch täglich wertvolle Pendelzeit, andererseits verschwimmen die Grenzen zwischen Beruf und Privatleben. Viele Beschäftigte berichten, dass sie abends noch E-Mails beantworten, {obwohl|weil|sodass|denn#Konzessiv: Der offiziell beendete Arbeitstag spricht eigentlich gegen das Beantworten von E-Mails. Verb am Ende („ist“).} ihr Arbeitstag offiziell längst vorbei ist. {Deshalb|Denn|Obwohl|Trotzdem#Folge: Aus der Überlastung ergibt sich die Forderung. „Deshalb“ auf Position 1, Verb direkt danach.} fordern Arbeitspsychologen klare Regeln für die Erreichbarkeit nach Feierabend. Auch die Unternehmen profitieren: Sie können Büroflächen reduzieren und {somit|obwohl|weil|denn#„somit“ steht hier im Mittelfeld und leitet die Konsequenz ein. Nebensatz-Konnektoren wie „obwohl/weil“ würden das Verb ans Ende verlangen.} erhebliche Kosten einsparen. {Allerdings|Folglich|Denn|Weil#„Allerdings“ schränkt die positive Bilanz ein; Position 1, Verb „zeigen“ folgt direkt.} zeigen Studien, dass der informelle Austausch im Team leidet, {wenn|als|ob|wann#„wenn“ = immer dann, wenn (Gegenwart). „als“ gilt nur für einmalige Ereignisse in der Vergangenheit.} kaum noch jemand ins Büro kommt."},
+ {t:"Lebenslanges Lernen", k:"Sachtext",
+  x:"Wer heute ins Berufsleben einsteigt, wird kaum vierzig Jahre lang dieselben Tätigkeiten ausüben. Technologische Entwicklungen verändern Berufsbilder rasant, {sodass|obwohl|damit|denn#Folge: Der rasante Wandel führt dazu, dass Weiterbildung unverzichtbar ist. Verb am Ende („geworden ist“).} regelmäßige Weiterbildung unverzichtbar geworden ist. {Je|Desto|Als|Wie#„Je + Komparativ …, desto + Komparativ …“ – der Partner „desto“ folgt im zweiten Teil.} schneller sich ein Arbeitsfeld wandelt, desto wichtiger wird die Bereitschaft, Neues zu lernen. Viele Erwachsene zögern jedoch, sich weiterzubilden, {da|denn|deshalb|trotzdem#Grund mit Verb am Ende („bringen“) → Nebensatz-Konnektor „da“. „denn“ würde das Verb an zweiter Stelle verlangen.} sie Beruf und Familie ohnehin kaum unter einen Hut bringen. Arbeitgeber können hier gegensteuern, {indem|damit|sodass|als ob#Mittel/Methode: Wie können Arbeitgeber gegensteuern? Indem sie Lernzeiten integrieren.} sie Lernzeiten in die reguläre Arbeitszeit integrieren. Manche Firmen gehen noch weiter: Sie finanzieren {nicht nur|weder|sowohl|zwar#Der Partner „sondern … auch“ verlangt „nicht nur“.} Kurse, sondern stellen ihre Beschäftigten auch für längere Lernphasen frei. {Ohne|Statt|Um|Damit#Präposition „ohne“ + Akkusativ: Fehlen solche Angebote, droht ein Mangel.} solche Angebote droht vielen Betrieben ein empfindlicher Mangel an Fachkräften."},
+ {t:"Gärten zwischen Beton", k:"Kommentar",
+  x:"Auf brachliegenden Flächen mitten in der Stadt entstehen immer häufiger Gemeinschaftsgärten. Kritiker halten sie für eine romantische Spielerei, {da|denn|deshalb|sodass#Grund mit Verb am Ende („falle“) → „da“. Der Konjunktiv I zeigt: Das ist die Meinung der Kritiker.} ihr Ertrag kaum ins Gewicht falle. Diese Sicht greift {allerdings|folglich|deshalb|denn#„allerdings“ widerspricht der Kritik und steht im Mittelfeld nach dem Verb. „denn“ kann nie im Mittelfeld stehen.} zu kurz. Die Gärten verbessern {nicht nur|weder|entweder|sowohl#„nicht nur …, sondern auch …“ – „sondern“ im Folgesatz verlangt „nicht nur“.} das Mikroklima, sondern bringen auch Menschen zusammen, die sich sonst nie begegnen würden. {Während|Indem|Damit|Sodass#„Während“ stellt die gleichzeitigen Tätigkeiten der einen und der anderen nebeneinander.} die einen Tomaten ziehen, tauschen die anderen Rezepte und Erfahrungen aus. Stadtverwaltungen sollten solche Projekte daher fördern, {anstatt|damit|obwohl|sodass#„anstatt … zu + Infinitiv“: die Alternative, die man nicht wählen sollte. „damit“ kann keinen zu-Infinitiv einleiten.} die Flächen an Investoren zu verkaufen. Nur {wenn|als|ob|obwohl#„nur wenn“ = ausschließlich unter dieser Bedingung (Gegenwart).} die Pachtverträge langfristig gesichert sind, lohnt sich das Engagement der vielen Freiwilligen."},
+ {t:"Ein holpriger Start", k:"Bericht",
+  x:"{Als|Wenn|Nachdem|Seit#Einmaliges Ereignis in der Vergangenheit → „als“. „nachdem“ verlangt eine Zeitverschiebung (Plusquamperfekt).} die beiden Gründerinnen 2021 ihr erstes Café eröffneten, ahnten sie nicht, wie schwierig das erste Jahr werden würde. {Kaum|Sobald|Bevor|Als#„Kaum hatten sie …“ – „kaum“ mit dem Verb direkt danach. Nebensatz-Konnektoren würden das Verb ans Ende verlangen.} hatten sie die Türen geöffnet, fiel die Kaffeemaschine aus. Sie bedienten die ersten Gäste mit Filterkaffee, {während|nachdem|als ob|sodass#Gleichzeitigkeit: Bedienen und Reparieren laufen parallel.} ein Techniker die Maschine reparierte. {Nachdem|Während|Bevor|Solange#Plusquamperfekt („behoben worden war“) → Präteritum („lief“): klassische Zeitverschiebung nach „nachdem“.} der Fehler behoben worden war, lief der Betrieb wochenlang reibungslos. Doch {als|wenn|ob|nachdem#Ein einmaliges Ereignis im ersten Jahr → „als“. „wenn“ würde eine Wiederholung bedeuten.} der Winter kam, blieben die Gäste plötzlich aus. Die beiden dachten ernsthaft ans Aufgeben. {Stattdessen|Deshalb|Folglich|Sonst#„Stattdessen“: An die Stelle des Aufgebens tritt eine neue Idee.} entwickelten sie ein Mittagsangebot, das schließlich zum Erfolg wurde."},
+ {t:"Übersetzen im Zeitalter der Maschinen", k:"Erörterung",
+  x:"Maschinelle Übersetzungsprogramme liefern heute in Sekunden brauchbare Rohfassungen. {Folglich|Obwohl|Denn|Sondern#Konsequenz: Aus der Leistungsfähigkeit der Programme ergibt sich die Frage. Position 1, Verb folgt direkt.} fragen sich viele, ob der Beruf des Übersetzers noch Zukunft hat. Fachleute geben {jedoch|sondern|obwohl|denn#„jedoch“ widerspricht der Sorge und steht hier im Mittelfeld nach dem Verb. „sondern“ verlangt eine Verneinung, „denn“ kann nie im Mittelfeld stehen, „obwohl“ leitet einen Nebensatz ein.} Entwarnung. Maschinen erkennen {zwar|weder|sowohl|entweder#„zwar … aber“: Einräumung, dann Einschränkung.} Muster in riesigen Textmengen, aber sie verstehen keine Ironie. Ein Werbeslogan muss oft völlig neu gedichtet werden, {damit|um|indem|obwohl#Zweck mit konjugiertem Verb am Ende („entfaltet“) → „damit“. „um“ würde einen zu-Infinitiv verlangen.} er in der Zielsprache dieselbe Wirkung entfaltet. Übersetzer werden {daher|denn|obwohl|sondern#„daher“ steht im Mittelfeld und leitet die Folgerung ein.} künftig weniger tippen und mehr prüfen, gestalten und beraten. {Je|Desto|Wie|Als#„Je …, umso …“ – „umso“ ist der Partner von „je“.} anspruchsvoller ein Text ist, umso unverzichtbarer bleibt der Mensch."},
+ {t:"Bewerbung als Projektkoordinatorin", k:"Formeller Brief",
+  x:"Sehr geehrte Damen und Herren, ich bewerbe mich um die ausgeschriebene Stelle als Projektkoordinatorin, {da|denn|deshalb|obwohl#Grund mit Verb am Ende („möchte“) → „da“.} ich meine Erfahrung im internationalen Projektmanagement gern in Ihr Team einbringen möchte. In meiner bisherigen Position habe ich {sowohl|weder|entweder|zwar#„sowohl … als auch“ – der Partner „als auch“ folgt später im Satz.} Budgets verwaltet als auch interkulturelle Teams geleitet. {Darüber hinaus|Dagegen|Trotzdem|Stattdessen#Additiv: eine weitere Qualifikation kommt hinzu.} verfüge ich über sehr gute Kenntnisse in Englisch und Französisch. {Ferner|Sondern|Obwohl|Denn#„Ferner“ = außerdem (schriftlich, formell); Position 1, Verb direkt danach.} lege ich Ihnen meine Arbeitszeugnisse bei. Meine Kündigungsfrist beträgt drei Monate; {sofern|obwohl|damit|indem#Bedingung: „sofern“ = unter der Voraussetzung, dass …} Sie einen früheren Eintritt wünschen, ist dies nach Absprache möglich. Ich freue mich auf ein persönliches Gespräch, {in dem|indem|dem|als ob#Achtung, Falle: Hier ist „in dem“ Präposition + Relativpronomen (das Gespräch, in dem …). Der modale Konnektor „indem“ würde „auf welche Weise?“ bedeuten.} ich Sie von meiner Motivation überzeugen kann. Mit freundlichen Grüßen"},
+ {t:"Der wahre Preis der Mode", k:"Kommentar",
+  x:"Kleidung war noch nie so billig wie heute. {Doch|Sondern|Weil|Deshalb#„Doch“ auf Position 0 leitet die Kehrseite ein; danach normale Wortstellung. „Deshalb“ würde Inversion verlangen.} der niedrige Preis hat seine Kehrseite. Viele Kleidungsstücke werden nur wenige Male getragen, {bevor|nachdem|während|seit#Reihenfolge: erst getragen, dann im Müll → „bevor“.} sie im Müll landen. Die Textilindustrie verursacht {zudem|sondern|obwohl|denn#„zudem“ fügt ein weiteres Problem hinzu und steht im Mittelfeld.} einen erheblichen Teil der weltweiten Treibhausgasemissionen. Nachhaltige Mode ist {zwar|weder|sowohl|je#„zwar … aber“ – Einräumung (teurer), dann Gegenargument (hält länger).} teurer, aber sie hält oft deutlich länger. Statt ständig Neues zu kaufen, könnte man Kleidung tauschen, reparieren {oder|sondern|denn|noch#Alternative in einer Aufzählung → „oder“. „noch“ braucht „weder“.} gebraucht erwerben. {Solange|Sobald|Nachdem|Bevor#„Solange“ = für die gesamte Dauer, in der Verbraucher vor allem auf den Preis achten.} Konsumentinnen und Konsumenten vor allem auf den Preis achten, wird sich jedoch wenig ändern."}
+];
+
+// ═══════════════ SATZBAUKASTEN (handgemacht) ═══════════════
+// a = akzeptierte Lösungen; Bausteine durch | getrennt; a[0] liefert die Bausteine
+const BAU_H = [
+ {k:"je … desto",a:["je länger|man|wartet|,|desto teurer|wird|die Reparatur|.","die Reparatur|wird|desto teurer|,|je länger|man|wartet|."],ex:"„je + Komparativ“ leitet einen Nebensatz ein (Verb am Ende), „desto + Komparativ“ steht im Hauptsatz – das Verb folgt sofort."},
+ {k:"es sei denn",a:["wir|fahren|morgen|ans Meer|,|es sei denn|,|es|regnet|.","morgen|fahren|wir|ans Meer|,|es sei denn|,|es|regnet|."],ex:"„es sei denn“ steht nach dem Hauptsatz, wird durch Kommas abgetrennt und von einem Hauptsatz mit Verb an zweiter Stelle gefolgt."},
+ {k:"kaum … (Verb-Erst)",a:["kaum|hatte|sie|das Büro|betreten|,|klingelte|das Telefon|."],ex:"Nach vorangestelltem „kaum“ folgt sofort das konjugierte Verb; der zweite Satz beginnt ebenfalls mit dem Verb."},
+ {k:"zu … als dass",a:["der Text|ist|zu komplex|,|als dass|man|ihn|schnell|übersetzen könnte|."],ex:"„zu + Adjektiv, als dass … + Konjunktiv II“: Die Folge kann nicht eintreten. Das konjugierte Verb „könnte“ steht am Ende."},
+ {k:"ohne … zu",a:["er|verließ|den Raum|,|ohne|ein Wort|zu sagen|.","ohne|ein Wort|zu sagen|,|verließ|er|den Raum|."],ex:"„ohne … zu + Infinitiv“ bei gleichem Subjekt. Steht die Infinitivgruppe vorne, folgt sofort das Verb."},
+ {k:"ohne dass",a:["die Tür|ging|auf|,|ohne dass|jemand|geklopft|hatte|.","ohne dass|jemand|geklopft|hatte|,|ging|die Tür|auf|."],ex:"„ohne dass“ bei verschiedenen Subjekten (die Tür – jemand); das konjugierte Verb steht am Ende."},
+ {k:"anstatt … zu",a:["anstatt|selbst|zu kommen|,|schickte|er|seine Assistentin|.","er|schickte|seine Assistentin|,|anstatt|selbst|zu kommen|."],ex:"„anstatt … zu + Infinitiv“: Die erwartete Handlung wird durch eine andere ersetzt."},
+ {k:"als (irrealer Vergleich)",a:["sie|tat|so|,|als|hätte|sie|nichts|gehört|."],ex:"Kurzform des irrealen Vergleichs: „als“ + konjugiertes Verb im Konjunktiv II direkt danach."},
+ {k:"indem",a:["man|spart|Energie|,|indem|man|die Raumtemperatur um ein Grad|senkt|.","indem|man|die Raumtemperatur um ein Grad|senkt|,|spart|man|Energie|."],ex:"„indem“ nennt das Mittel: Nebensatz, Verb am Ende."},
+ {k:"sofern",a:["sofern|keine Einwände|bestehen|,|beginnen|wir|mit der Abstimmung|.","wir|beginnen|mit der Abstimmung|,|sofern|keine Einwände|bestehen|."],ex:"„sofern“ = unter der Bedingung, dass …; Nebensatz mit Verb am Ende."},
+ {k:"nicht nur … sondern auch",a:["er|ist|nicht nur|ein brillanter Analytiker|,|sondern auch|ein geduldiger Lehrer|.","nicht nur|ist|er|ein brillanter Analytiker|,|sondern auch|ein geduldiger Lehrer|."],ex:"„nicht nur … sondern auch“ verbindet hier zwei Satzglieder; „sondern auch“ steht auf Position 0."},
+ {k:"weder … noch",a:["weder|der Vertrag|noch|die Rechnung|lag|dem Schreiben|bei|.","dem Schreiben|lag|weder|der Vertrag|noch|die Rechnung|bei|."],ex:"„weder … noch“ verneint beide Teile – ein zusätzliches „nicht“ ist überflüssig."},
+ {k:"nämlich",a:["er|kommt|heute|nicht|.|er|ist|nämlich|krank|.","heute|kommt|er|nicht|.|er|ist|nämlich|krank|."],ex:"„nämlich“ liefert den Grund nach – im Mittelfeld nach dem Verb, nie auf Position 1."},
+ {k:"sobald",a:["ich|rufe|dich|an|,|sobald|ich|in Wien|angekommen bin|.","sobald|ich|in Wien|angekommen bin|,|rufe|ich|dich|an|."],ex:"„sobald“ = unmittelbar nachdem; Nebensatz, das konjugierte Verb „bin“ steht ganz am Ende."},
+ {k:"zwar … aber",a:["zwar|ist|die Methode|aufwendig|,|aber|sie|liefert|präzise Ergebnisse|.","die Methode|ist|zwar|aufwendig|,|aber|sie|liefert|präzise Ergebnisse|."],ex:"„zwar“ auf Position 1 (Verb direkt danach) oder im Mittelfeld; „aber“ steht auf Position 0."},
+ {k:"entweder … oder",a:["entweder|du|entschuldigst|dich|,|oder|ich|rede|nicht mehr|mit dir|.","entweder|entschuldigst|du|dich|,|oder|ich|rede|nicht mehr|mit dir|.","entweder|du|entschuldigst|dich|,|oder|ich|rede|mit dir|nicht mehr|.","entweder|entschuldigst|du|dich|,|oder|ich|rede|mit dir|nicht mehr|."],ex:"Nach „entweder“ sind beide Wortstellungen möglich (Verb direkt danach oder Subjekt zuerst); „oder“ steht auf Position 0."},
+ {k:"sodass",a:["die Firma|erhöhte|die Gehälter|,|sodass|die Fluktuation|deutlich zurückging|."],ex:"Der sodass-Satz nennt die Folge und steht immer hinter dem Hauptsatz; Verb am Ende."},
+ {k:"selbst wenn",a:["selbst wenn|er|sich|entschuldigen würde|,|würde|ich|ihm nicht verzeihen|.","ich|würde|ihm nicht verzeihen|,|selbst wenn|er|sich|entschuldigen würde|."],ex:"„selbst wenn“ + Konjunktiv II: Auch unter dieser (unwahrscheinlichen) Bedingung ändert sich nichts."},
+ {k:"wohingegen",a:["der ältere Sohn|studierte|Medizin|,|wohingegen|der jüngere|eine Tischlerlehre|begann|."],ex:"„wohingegen“ stellt zwei Sachverhalte gegenüber; der Nebensatz folgt dem Hauptsatz, Verb am Ende."},
+ {k:"damit",a:["damit|alle|die Präsentation|verfolgen können|,|spricht|die Referentin|ins Mikrofon|.","die Referentin|spricht|ins Mikrofon|,|damit|alle|die Präsentation|verfolgen können|."],ex:"„damit“ bei verschiedenen Subjekten (die Referentin – alle); das konjugierte Verb „können“ steht am Ende."}
+];
+
+// ═══════════════ DOPPEL-DUETT ═══════════════
+const DUO = [
+ {l:"je",r:"desto",m:"proportionale Steigerung",s:"Je gründlicher man recherchiert, ___ überzeugender wird die Argumentation.",o:["desto","als","wie","noch"]},
+ {l:"sowohl",r:"als auch",m:"beides trifft zu",s:"Das Programm richtet sich sowohl an Einsteiger ___ an erfahrene Fachkräfte.",o:["als auch","noch","oder","sondern auch"]},
+ {l:"weder",r:"noch",m:"keines von beiden",s:"Der Vorschlag ist weder neu ___ besonders originell.",o:["noch","oder","als auch","sondern auch"]},
+ {l:"entweder",r:"oder",m:"das eine oder das andere",s:"Entweder wir verschieben den Termin, ___ wir sagen die Veranstaltung ganz ab.",o:["oder","noch","sondern","als auch"]},
+ {l:"zwar",r:"aber",m:"Einräumung + Einschränkung",s:"Die Wohnung ist zwar klein, ___ sie hat einen herrlichen Ausblick.",o:["aber","sondern","noch","als auch"]},
+ {l:"nicht nur",r:"sondern auch",m:"Steigerung: A und sogar B",s:"Sie spricht nicht nur fließend Spanisch, ___ Katalanisch.",o:["sondern auch","als auch","noch","oder"]},
+ {l:"einerseits",r:"andererseits",m:"zwei Seiten einer Sache",s:"Einerseits möchte er Karriere machen, ___ wünscht er sich mehr Zeit für die Familie.",o:["andererseits","zum anderen","teils","noch"]},
+ {l:"zum einen",r:"zum anderen",m:"Aufzählung zweier Aspekte",s:"Zum einen fehlt das Geld, ___ fehlt die politische Unterstützung.",o:["zum anderen","andererseits","teils","noch"]},
+ {l:"teils",r:"teils",m:"gemischt: zum Teil so, zum Teil anders",s:"Die Rückmeldungen waren teils begeistert, ___ ausgesprochen kritisch.",o:["teils","andererseits","noch","als auch"]},
+ {l:"so",r:"dass",m:"Intensität mit tatsächlicher Folge",s:"Die Nachfrage war so groß, ___ die Tickets innerhalb einer Stunde vergriffen waren.",o:["dass","als dass","desto","noch"]},
+ {l:"zu",r:"als dass",m:"Intensität, die eine Folge verhindert",s:"Die Zeit ist zu knapp, ___ wir alle Punkte besprechen könnten.",o:["als dass","dass","desto","sondern auch"]},
+ {l:"wenn … auch",r:"so … doch",m:"Einräumung (gehoben)",s:"Wenn die Reform auch umstritten ist, ___ ist sie doch notwendig.",o:["so","desto","dass","noch"]}
+];
+
+// ═══════════════ BLITZ-SORTIERER ═══════════════
+const SORT_CAT = {
+ p0:{n:"Position 0",d:"Subjekt + Verb folgen normal",e:"steht auf Position 0 – danach folgt ein ganz normaler Hauptsatz (Subjekt, Verb)."},
+ p1:{n:"Position 1",d:"Verb folgt direkt",e:"ist ein Adverb: Es besetzt Position 1, das konjugierte Verb folgt direkt."},
+ ns:{n:"Nebensatz",d:"Verb ans Ende",e:"leitet einen Nebensatz ein – das konjugierte Verb steht am Ende."},
+ inf:{n:"Infinitiv mit zu",d:"kein konjugiertes Verb",e:"verlangt einen Infinitiv mit „zu“ (gleiches Subjekt)."},
+ dop:{n:"Doppelkonnektor",d:"zweiteilig",e:"besteht aus zwei festen Teilen."}
+};
+const SORT_LIST = [
+ ["und","p0"],["aber","p0"],["oder","p0"],["denn","p0"],["sondern","p0"],
+ ["deshalb","p1"],["deswegen","p1"],["daher","p1"],["darum","p1"],["folglich","p1"],["somit","p1"],["infolgedessen","p1"],["demnach","p1"],["trotzdem","p1"],["dennoch","p1"],["gleichwohl","p1"],["allerdings","p1"],["außerdem","p1"],["zudem","p1"],["darüber hinaus","p1"],["überdies","p1"],["ferner","p1"],["des Weiteren","p1"],["hingegen","p1"],["demgegenüber","p1"],["sonst","p1"],["andernfalls","p1"],["ansonsten","p1"],["anschließend","p1"],["zuvor","p1"],["währenddessen","p1"],["stattdessen","p1"],["dadurch","p1"],["aus diesem Grund","p1"],["auf diese Weise","p1"],
+ ["weil","ns"],["da","ns"],["obwohl","ns"],["obgleich","ns"],["obschon","ns"],["wenngleich","ns"],["nachdem","ns"],["bevor","ns"],["ehe","ns"],["sobald","ns"],["solange","ns"],["falls","ns"],["sofern","ns"],["indem","ns"],["sodass","ns"],["wohingegen","ns"],["als ob","ns"],["ohne dass","ns"],["anstatt dass","ns"],["dadurch dass","ns"],["auch wenn","ns"],["selbst wenn","ns"],["weshalb","ns"],["wodurch","ns"],["ob","ns"],["dass","ns"],["soweit","ns"],["kaum dass","ns"],
+ ["um … zu","inf"],["ohne … zu","inf"],["anstatt … zu","inf"],
+ ["je … desto","dop"],["je … umso","dop"],["sowohl … als auch","dop"],["weder … noch","dop"],["entweder … oder","dop"],["zwar … aber","dop"],["nicht nur … sondern auch","dop"],["einerseits … andererseits","dop"],["zum einen … zum anderen","dop"],["teils … teils","dop"],["so … dass","dop"],["zu … als dass","dop"]
+];
+
+// ═══════════════ ARGUMENTATIONSRAD ═══════════════
+const TOPICS = [
+ "Ist Homeoffice die Zukunft der Arbeit?","Brauchen wir in zehn Jahren noch Bargeld?","Sollten Smartphones an Schulen verboten werden?","Macht der Massentourismus unsere schönsten Städte kaputt?","Lohnt sich ein Studium heute noch?","Sollten Museen grundsätzlich kostenlos sein?","Kann man echte Freundschaften online pflegen?","Ist Perfektionismus eine Stärke oder eine Schwäche?","Sollte man im Urlaub beruflich erreichbar sein?","Machen soziale Medien einsam?","Leben auf dem Land oder in der Stadt – was ist lebenswerter?","Sollten Supermärkte unverkaufte Lebensmittel spenden müssen?","Ist ein Sabbatical Luxus oder Notwendigkeit?","Wie viel Ehrgeiz ist gesund?","Sollten Hausaufgaben abgeschafft werden?","Ist Reisen die beste Bildung?","Werden gedruckte Bücher irgendwann verschwinden?","Sollte Programmieren ein Pflichtfach werden?","Gehört die Innenstadt den Fußgängern und Radfahrern?","Kann Kunst die Gesellschaft verändern?","Sollten Haustiere im Büro erlaubt sein?","Ist Ehrlichkeit wichtiger als Höflichkeit?","Wie verändert künstliche Intelligenz unseren Alltag?","Sollte Kochen ein Schulfach sein?","Ist die Wohngemeinschaft im Alter ein Modell für die Zukunft?","Kann man Online-Bewertungen vertrauen?","Brauchen Kinder mehr Langeweile?","Muss man eine Fremdsprache akzentfrei sprechen?","Macht Minimalismus zufriedener?","Ist die Vier-Tage-Woche realistisch?","Sollte man seinen Beruf nach Leidenschaft oder nach Sicherheit wählen?","Ist es sinnvoll, mehrere Sprachen gleichzeitig zu lernen?"
+];
+const ROLES = ["Vertritt die Pro-Seite.","Vertritt die Contra-Seite.","Wäge beide Seiten ab und komm zu einem eigenen Urteil.","Überzeuge eine skeptische Gesprächspartnerin.","Beginne mit einem persönlichen Erlebnis und leite daraus deine Position ab.","Formuliere einen Kompromissvorschlag."];
+const RAD = {
+ ns:[["weil","…, weil [Subjekt] … [Verb]."],["da","Da [Subjekt] … [Verb], [Verb] [Subjekt] …"],["obwohl","…, obwohl [Subjekt] … [Verb]."],["wenngleich","…, wenngleich [Subjekt] … [Verb]."],["sofern","…, sofern [Subjekt] … [Verb]."],["falls","Falls [Subjekt] … [Verb], [Verb] [Subjekt] …"],["indem","…, indem [Subjekt] … [Verb]."],["sodass","…, sodass [Subjekt] … [Verb]."],["während","…, während [Subjekt] … [Verb]."],["wohingegen","…, wohingegen [Subjekt] … [Verb]."],["nachdem","Nachdem [Subjekt] … [Partizip] [hatte/war], …"],["solange","Solange [Subjekt] … [Verb], …"],["damit","…, damit [anderes Subjekt] … [Verb]."],["ohne dass","…, ohne dass [anderes Subjekt] … [Verb]."],["als ob","…, als ob [Subjekt] … [Verb im Konjunktiv II]."],["auch wenn","Auch wenn [Subjekt] … [Verb], [Verb] [Subjekt] …"],["selbst wenn","Selbst wenn [Subjekt] … [würde/hätte], …"]],
+ p1:[["deshalb","… . Deshalb [Verb] [Subjekt] …"],["folglich","… . Folglich [Verb] [Subjekt] …"],["trotzdem","… . Trotzdem [Verb] [Subjekt] …"],["dennoch","… . Dennoch [Verb] [Subjekt] …"],["allerdings","… . Allerdings [Verb] [Subjekt] …"],["außerdem","… . Außerdem [Verb] [Subjekt] …"],["darüber hinaus","… . Darüber hinaus [Verb] [Subjekt] …"],["hingegen","… . [Subjekt] hingegen [Verb] …"],["sonst","…, sonst [Verb] [Subjekt] …"],["stattdessen","… . Stattdessen [Verb] [Subjekt] …"],["infolgedessen","… . Infolgedessen [Verb] [Subjekt] …"],["zudem","… . Zudem [Verb] [Subjekt] …"]],
+ dop:[["zwar … aber","Zwar [Verb] [Subjekt] …, aber [Subjekt] [Verb] …"],["einerseits … andererseits","Einerseits [Verb] [Subjekt] …, andererseits [Verb] [Subjekt] …"],["nicht nur … sondern auch","[Subjekt] [Verb] nicht nur …, sondern auch …"],["je … desto","Je [Komparativ] [Subjekt] … [Verb], desto [Komparativ] [Verb] [Subjekt] …"],["sowohl … als auch","… sowohl [X] als auch [Y] …"],["weder … noch","… weder [X] noch [Y] …"],["entweder … oder","Entweder [Verb] [Subjekt] …, oder [Subjekt] [Verb] …"],["zum einen … zum anderen","Zum einen [Verb] [Subjekt] …, zum anderen [Verb] [Subjekt] …"]],
+ pro:[["es sei denn","…, es sei denn, [Subjekt] [Verb] …"],["nämlich","[Subjekt] [Verb] nämlich …"],["zu … als dass","… zu [Adjektiv], als dass [Subjekt] … [Verb im Konjunktiv II]."],["um … zu","…, um … zu [Infinitiv]."],["anstatt … zu","Anstatt … zu [Infinitiv], [Verb] [Subjekt] …"],["sondern","… nicht …, sondern …"],["denn","…, denn [Subjekt] [Verb] …"],["kaum … als","[Subjekt] hatte kaum …, als …"]]
+};
+
+// ═══════════════ HILFSFUNKTIONEN ═══════════════
+const $ = s => document.querySelector(s);
+const shuffle = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function J(...p){ return p.filter(x => x !== '' && x != null).join(' ').replace(/\s+([,.;:!?])/g,'$1').replace(/\s+/g,' ').trim(); }
+function SV(s){ s = cap(s.trim()); return s.replace(/([.!?;]) +([a-zäöü])/g,(m,p,l)=>p+' '+l.toUpperCase()); }
+// Satzglieder: [Subjekt, finites Verb, Mittelfeld, Verbende]
+const N  = c => [c[0],c[1],c[2],c[3]].filter(Boolean);       // Hauptsatz normal
+const I  = c => [c[1],c[0],c[2],c[3]].filter(Boolean);       // Inversion
+const S  = c => [c[0],c[2],c[3],c[1]].filter(Boolean);       // Nebensatz (Verb am Ende)
+const SP = c => [c[0],c[2],c[1],c[3]].filter(Boolean);       // Fehler: Verb vor dem Partizip
+const M  = (c,k) => [c[0],c[1],k,c[2],c[3]].filter(Boolean); // Adverb im Mittelfeld
+const toStr = a => SV(J(...a));
+
+function speak(t){ try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang='de-DE'; u.rate=.92; const v = speechSynthesis.getVoices().find(v=>v.lang && v.lang.startsWith('de')); if(v) u.voice=v; speechSynthesis.speak(u);}catch(e){} }
+function solBox(t){ return `<div class="sol"><button class="spk" title="Vorlesen" onclick='speak(${JSON.stringify(t)})'>🔊</button><span>${esc(t)}</span></div>`; }
+
+// ═══════════════ PUNKTE & RANG ═══════════════
+const ST = {pts:0,ans:0,ok:0,best:0,sortHi:0};
+let streak = 0;
+try { Object.assign(ST, JSON.parse(localStorage.getItem('konnektorenAtelierC1') || '{}')); } catch(e){}
+function save(){ try{ localStorage.setItem('konnektorenAtelierC1', JSON.stringify(ST)); }catch(e){} }
+const RANKS = [[0,"Verknüpfungstalent"],[300,"Satzarchitekt:in"],[800,"Stilsicher"],[1600,"Rhetorik-Profi"],[3000,"Konnektor-Champion"],[5000,"Meister:in der Kohärenz"]];
+function rank(){ let r = RANKS[0][1]; RANKS.forEach(([p,n]) => { if (ST.pts >= p) r = n; }); return r; }
+function renderStats(){
+  $('#sPts').textContent = ST.pts; $('#sRank').textContent = rank(); $('#sStreak').textContent = streak; $('#sBest').textContent = ST.best;
+  $('#sAcc').textContent = ST.ans ? Math.round(ST.ok / ST.ans * 100) + ' %' : '–';
+}
+function popup(t){ const p = document.createElement('div'); p.className='pop'; p.textContent=t; document.body.appendChild(p); setTimeout(()=>p.remove(),1000); }
+function award(ok, base = 10, silent = false){
+  ST.ans++;
+  if (ok){ ST.ok++; streak++; const p = base + Math.min(streak - 1, 5) * 2; ST.pts += p; ST.best = Math.max(ST.best, streak); if (!silent) popup('+' + p); }
+  else streak = 0;
+  save(); renderStats();
+}
+
+// ═══════════════ KONNEKTOR-EIGENSCHAFTEN (für Generatoren) ═══════════════
+const KON = {
+ weil:{t:'ns',r:'grund'}, da:{t:'ns',r:'grund'}, obwohl:{t:'ns',r:'konz'}, obgleich:{t:'ns',r:'konz'}, wenngleich:{t:'ns',r:'konz'},
+ sodass:{t:'ns',r:'folge'}, weshalb:{t:'ns',r:'folge'}, damit:{t:'ns',r:'zweck'},
+ deshalb:{t:'p1',r:'folge'}, daher:{t:'p1',r:'folge'}, deswegen:{t:'p1',r:'folge'}, folglich:{t:'p1',r:'folge'}, infolgedessen:{t:'p1',r:'folge'},
+ trotzdem:{t:'p1',r:'konz'}, dennoch:{t:'p1',r:'konz'}, gleichwohl:{t:'p1',r:'konz'},
+ denn:{t:'p0',r:'grund'}, aber:{t:'p0',r:'gegen'}, doch:{t:'p0',r:'gegen'},
+ 'nämlich':{t:'mf',r:'grund'}, zwar:{t:'zwar',r:'konz'}, entweder:{t:'dop',r:'alt'}
+};
+const R_TXT = {grund:"nennt einen Grund (kausal)",folge:"leitet eine Folge ein (konsekutiv)",konz:"nennt einen Gegengrund – etwas, das eigentlich dagegen spricht (konzessiv)",zweck:"nennt einen Zweck (final)",gegen:"drückt einen Gegensatz oder eine Einschränkung aus (adversativ)",alt:"eröffnet eine Alternative"};
+const T_TXT = {ns:"leitet einen Nebensatz ein – das konjugierte Verb steht am Ende",p1:"ist ein Adverb: Auf Position 1 folgt direkt das konjugierte Verb; es kann auch im Mittelfeld stehen",p0:"steht auf Position 0 – danach folgt ein normaler Hauptsatz (Subjekt, dann Verb)",mf:"steht nie auf Position 1, sondern im Mittelfeld nach dem konjugierten Verb",zwar:"steht auf Position 1 oder im Mittelfeld und kündigt ein „aber“ an",dop:"ist der erste Teil eines Doppelkonnektors"};
+const NEED_TXT = {grund:"einen Grund nennt",folge:"eine Folge einleitet",konz:"einen Gegengrund ausdrückt",gegen:"einen Gegensatz ausdrückt"};
+const SLOT_TXT = {
+ ns:"Hier steht das konjugierte Verb aber am Ende – das verlangt einen Nebensatz-Konnektor.",
+ nsf:"Hier steht das konjugierte Verb aber am Ende des ersten Satzteils – das verlangt einen Nebensatz-Konnektor.",
+ inv:"Hier folgt nach der Lücke aber direkt das konjugierte Verb – Position 1 muss ein Adverb besetzen.",
+ norm:"Hier folgt nach der Lücke aber zuerst das Subjekt, dann das Verb – das verlangt einen Konnektor auf Position 0.",
+ mf:"Hier liegt die Lücke aber im Mittelfeld nach dem Verb – dort kann nur ein Adverb stehen.",
+ zwar:"Hier folgt direkt das Verb, und später kommt „aber“ – das verlangt „zwar“."
+};
+const ACC = {ns:['ns'],nsf:['ns'],inv:['p1'],norm:['p0'],mf:['p1','mf'],zwar:['zwar','dop']};
+function whyOpt(k, slot, need){
+  const K = KON[k], syn = ACC[slot].includes(K.t), sem = need.includes(K.r);
+  if (k === 'entweder') return "„entweder“ braucht als Partner „oder“ – hier folgt aber „aber“. Zu „aber“ gehört „zwar“.";
+  if (syn && sem) return `„${k}“ passt grammatisch und inhaltlich: Es ${R_TXT[K.r]} und ${T_TXT[K.t]}.`;
+  if (syn) return `„${k}“ ist grammatisch möglich, passt aber inhaltlich nicht: Es ${R_TXT[K.r]}. Gesucht ist ein Konnektor, der ${NEED_TXT[need[0]]}.`;
+  if (sem) return `„${k}“ passt inhaltlich, aber nicht grammatisch: Es ${T_TXT[K.t]}. ${SLOT_TXT[slot]}`;
+  return `„${k}“ passt weder inhaltlich noch grammatisch: Es ${R_TXT[K.r]} und ${T_TXT[K.t]}.`;
+}
+
+// ═══════════════ GENERATOR 1: SINN & SATZBAU ═══════════════
+// § = Lücke
+const TPL = {
+ kausal:[
+  {slot:'ns',need:['grund'],cor:['weil','da'],dis:[['obwohl','obgleich'],['denn'],['deshalb','daher']],b:p=>J(...N(p.e))+', § '+J(...S(p.c))+'.'},
+  {slot:'inv',need:['folge'],cor:['deshalb','daher','folglich','infolgedessen','deswegen'],dis:[['trotzdem','dennoch'],['weil','da'],['denn']],b:p=>J(...N(p.c))+'. § '+J(...I(p.e))+'.'},
+  {slot:'norm',need:['grund'],cor:['denn'],dis:[['doch'],['deshalb','daher'],['obwohl']],b:p=>J(...N(p.e))+', § '+J(...N(p.c))+'.'},
+  {slot:'nsf',need:['grund'],cor:['weil','da'],dis:[['obwohl'],['deshalb'],['denn']],b:p=>'§ '+J(...S(p.c))+', '+J(...I(p.e))+'.'},
+  {slot:'ns',need:['folge'],cor:['sodass','weshalb'],dis:[['obwohl'],['deshalb','daher'],['damit']],b:p=>J(...N(p.c))+', § '+J(...S(p.e))+'.'},
+  {slot:'mf',need:['grund'],cor:['nämlich'],dis:[['deshalb','daher'],['trotzdem'],['denn']],b:p=>J(...N(p.e))+'. '+J(p.c[0],p.c[1])+' § '+J(p.c[2],p.c[3])+'.'}
+ ],
+ konz:[
+  {slot:'ns',need:['konz'],cor:['obwohl','obgleich','wenngleich'],dis:[['weil','da'],['trotzdem','dennoch'],['deshalb']],b:p=>J(...N(p.e))+', § '+J(...S(p.c))+'.'},
+  {slot:'inv',need:['konz'],cor:['trotzdem','dennoch','gleichwohl'],dis:[['deshalb','folglich'],['obwohl'],['denn']],b:p=>J(...N(p.c))+'. § '+J(...I(p.e))+'.'},
+  {slot:'nsf',need:['konz'],cor:['obwohl','obgleich'],dis:[['weil','da'],['trotzdem'],['deshalb']],b:p=>'§ '+J(...S(p.c))+', '+J(...I(p.e))+'.'},
+  {slot:'zwar',need:['konz'],cor:['zwar'],dis:[['obwohl'],['weil'],['entweder']],b:p=>'§ '+J(...I(p.c))+', aber '+J(...N(p.e))+'.'},
+  {slot:'mf',need:['konz'],cor:['trotzdem','dennoch'],dis:[['deshalb','folglich'],['obwohl'],['denn']],b:p=>J(...N(p.c))+'. '+J(p.e[0],p.e[1])+' § '+J(p.e[2],p.e[3])+'.'},
+  {slot:'norm',need:['konz','gegen'],cor:['aber','doch'],dis:[['denn'],['trotzdem'],['obwohl']],b:p=>J(...N(p.c))+', § '+J(...N(p.e))+'.'}
+ ]
+};
+function genSinn(){
+  const rel = Math.random() < .55 ? 'kausal' : 'konz';
+  const p = pick(rel === 'kausal' ? P_KAUSAL : P_KONZ);
+  const T = pick(TPL[rel]);
+  const raw = SV(T.b(p));                       // ganzer Satz mit §
+  const [pre, post] = raw.split('§');
+  const atStart = pre.trim() === '' || /[.!?]\s*$/.test(pre);
+  const fmt = k => atStart ? cap(k) : k;
+  const cor = pick(T.cor);
+  const opts = [{k:cor, ok:true}];
+  T.dis.forEach(g => { const k = pick(g); if (!opts.find(o=>o.k===k)) opts.push({k, ok:false}); });
+  const full = (pre + fmt(cor) + post).replace(/\s+/g,' ').trim();
+  const others = T.cor.filter(k => k !== cor);
+  return {
+    kind:'mc', kicker:'Sinn & Satzbau',
+    instr:"Welcher Konnektor passt inhaltlich UND grammatisch? Nur eine Lösung ist richtig.",
+    stem: esc(pre) + '<span class="gap">…</span>' + esc(post),
+    gapFill: fmt(cor),
+    opts: shuffle(opts).map(o => ({h: esc(fmt(o.k)), ok:o.ok, why: whyOpt(o.k, T.slot, T.need)})),
+    ex: (others.length ? `Ebenso korrekt wäre hier: ${others.map(k=>'„'+fmt(k)+'“').join(', ')}.` : ''),
+    sol: full
+  };
+}
+
+// ═══════════════ GENERATOR 2: WORTSTELLUNGS-LABOR ═══════════════
+const W = {
+ v2: k => `Nach „${k}“ steht das konjugierte Verb nicht an zweiter Stelle, sondern am Ende: „${k}“ leitet einen Nebensatz ein.` + (k==='weil'||k==='obwohl' ? " (In der gesprochenen Umgangssprache hört man das manchmal – standardsprachlich ist es falsch.)" : ""),
+ inv: k => `Nach „${k}“ folgt nicht sofort das Verb: Im Nebensatz kommt zuerst das Subjekt, das konjugierte Verb steht ganz am Ende.`,
+ split: f => `Das konjugierte Verb „${f}“ muss im Nebensatz ganz ans Ende – hinter das Partizip bzw. den Infinitiv.`,
+ noInv: k => `Der ${k}-Satz steht vorne und besetzt damit Position 1. Im folgenden Hauptsatz muss deshalb sofort das konjugierte Verb stehen.`,
+ p1Norm: k => `„${k}“ besetzt Position 1 – deshalb muss das konjugierte Verb direkt danach stehen, erst dann das Subjekt.`,
+ p1Ns: k => `„${k}“ ist ein Adverb, kein Nebensatz-Konnektor: Das Verb gehört nicht ans Ende, sondern direkt hinter „${k}“ (oder „${k}“ steht im Mittelfeld nach dem Verb).`,
+ p0Inv: k => `„${k}“ steht auf Position 0 und zählt nicht mit: Danach kommt ein normaler Hauptsatz – zuerst das Subjekt, dann das Verb.`,
+ p0Ns: k => `„${k}“ leitet keinen Nebensatz ein: Das Verb bleibt an zweiter Stelle, es wandert nicht ans Ende.`,
+ dennFront: "Ein denn-Satz kann nicht vor dem Hauptsatz stehen: „denn“ liefert die Begründung immer nachträglich. Für einen vorangestellten Grund braucht man „da“ oder „weil“.",
+ naemP1: "„nämlich“ kann nie auf Position 1 stehen. Es steht im Mittelfeld – direkt nach dem konjugierten Verb.",
+ naemNs: "„nämlich“ leitet keinen Nebensatz ein. Richtig ist ein eigener Hauptsatz, in dem „nämlich“ nach dem Verb steht.",
+ zwarNorm: "„zwar“ besetzt hier Position 1 – das konjugierte Verb muss direkt folgen.",
+ aberInv: "„aber“ steht auf Position 0: Danach folgt normale Wortstellung – erst das Subjekt, dann das Verb.",
+ zwarNs: "„zwar“ ist kein Nebensatz-Konnektor – das Verb steht nicht am Ende.",
+ hingNs: "„hingegen“ ist ein Adverb und kann keinen Nebensatz einleiten. Für einen Nebensatz bräuchte man „wohingegen“ oder „während“.",
+ hingSubj: "Auch wenn „hingegen“ direkt nach dem Subjekt steht, bleibt es ein Hauptsatz: Das konjugierte Verb folgt unmittelbar danach."
+};
+const RU = {
+ weil:"„weil“ leitet einen Nebensatz ein: Das konjugierte Verb steht am Ende. Steht der weil-Satz vorne, besetzt er Position 1 – im Hauptsatz folgt sofort das Verb.",
+ da:"„da“ leitet einen kausalen Nebensatz ein (Verb am Ende) und nennt oft einen bekannten Grund; der da-Satz steht gern am Anfang. Danach folgt im Hauptsatz sofort das Verb.",
+ denn:"„denn“ steht auf Position 0 und zählt nicht mit: Danach folgt ein normaler Hauptsatz (Subjekt – Verb – …). Der denn-Satz steht immer hinter dem Satz, den er begründet.",
+ deshalb:"„deshalb“ ist ein Adverb: Auf Position 1 folgt direkt das konjugierte Verb. Es kann auch im Mittelfeld nach dem Verb stehen.",
+ folglich:"„folglich“ ist ein Adverb (formell): Auf Position 1 folgt direkt das konjugierte Verb.",
+ naemlich:"„nämlich“ liefert einen Grund nach – aber nie auf Position 1. Es steht im Mittelfeld, direkt nach dem konjugierten Verb.",
+ sodass:"„sodass“ leitet einen Nebensatz mit einer Folge ein (Verb am Ende); der sodass-Satz steht immer hinter dem Hauptsatz.",
+ obwohl:"„obwohl“ leitet einen konzessiven Nebensatz ein: Verb am Ende. Steht er vorne, folgt im Hauptsatz sofort das Verb.",
+ trotzdem:"„trotzdem“ ist ein Adverb: auf Position 1 mit dem Verb direkt danach – oder im Mittelfeld nach dem Verb.",
+ dennoch:"„dennoch“ ist ein Adverb wie „trotzdem“: Auf Position 1 folgt direkt das konjugierte Verb.",
+ zwar:"„zwar … aber“: „zwar“ steht auf Position 1 (dann folgt das Verb direkt) oder im Mittelfeld; „aber“ steht auf Position 0 – danach normale Wortstellung.",
+ waehrend:"Adversatives „während“ leitet einen Nebensatz ein: Verb am Ende.",
+ wohingegen:"„wohingegen“ leitet einen Nebensatz ein (Verb am Ende) und folgt dem Hauptsatz.",
+ hingegen:"„hingegen“ ist ein Adverb: Es steht oft direkt nach dem Subjekt („Die Jüngeren hingegen nutzten …“), auf Position 1 mit Inversion oder im Mittelfeld. Einen Nebensatz leitet es nie ein.",
+ aber:"„aber“ steht auf Position 0 und verändert die Wortstellung nicht: Danach folgt Subjekt + Verb."
+};
+function nsWr(pre, k, c, post, fix){
+  const r = [[[...pre,k,...N(c),...post], W.v2(k), fix], [[...pre,k,...I(c),...post], W.inv(k), fix]];
+  if (c[3]) r.push([[...pre,k,...SP(c),...post], W.split(c[1]), fix]);
+  return r;
+}
+const FORMS = {
+ kausal:{
+  weil:p=>{const A=[...N(p.e),',','weil',...S(p.c),'.'],B=['weil',...S(p.c),',',...I(p.e),'.'];
+    return {k:'weil',rule:RU.weil,ok:[A,B],wr:[...nsWr([...N(p.e),','],'weil',p.c,['.'],A),[['weil',...S(p.c),',',...N(p.e),'.'],W.noInv('weil'),B],[['weil',...N(p.c),',',...I(p.e),'.'],W.v2('weil'),B]]};},
+  da:p=>{const A=['da',...S(p.c),',',...I(p.e),'.'],B=[...N(p.e),',','da',...S(p.c),'.'];
+    return {k:'da',rule:RU.da,ok:[A,B],wr:[[['da',...S(p.c),',',...N(p.e),'.'],W.noInv('da'),A],[['da',...N(p.c),',',...I(p.e),'.'],W.v2('da'),A],[['da',...I(p.c),',',...I(p.e),'.'],W.inv('da'),A]]};},
+  denn:p=>{const A=[...N(p.e),',','denn',...N(p.c),'.'];
+    return {k:'denn',rule:RU.denn,ok:[A],wr:[[[...N(p.e),',','denn',...I(p.c),'.'],W.p0Inv('denn'),A],[[...N(p.e),',','denn',...S(p.c),'.'],W.p0Ns('denn'),A],[['denn',...N(p.c),',',...N(p.e),'.'],W.dennFront,A]]};},
+  deshalb:p=>{const A=[...N(p.c),'.','deshalb',...I(p.e),'.'],B=[...N(p.c),'.',...M(p.e,'deshalb'),'.'];
+    return {k:'deshalb',rule:RU.deshalb,ok:[A,B],wr:[[[...N(p.c),'.','deshalb',...N(p.e),'.'],W.p1Norm('deshalb'),A],[[...N(p.c),'.','deshalb',...S(p.e),'.'],W.p1Ns('deshalb'),A],[[...N(p.c),',','deshalb',...S(p.e),'.'],W.p1Ns('deshalb'),A]]};},
+  folglich:p=>{const A=[...N(p.c),'.','folglich',...I(p.e),'.'];
+    return {k:'folglich',rule:RU.folglich,ok:[A],wr:[[[...N(p.c),'.','folglich',...N(p.e),'.'],W.p1Norm('folglich'),A],[[...N(p.c),'.','folglich',...S(p.e),'.'],W.p1Ns('folglich'),A],[[...N(p.c),',','folglich',...S(p.e),'.'],W.p1Ns('folglich'),A]]};},
+  naemlich:p=>{const A=[...N(p.e),'.',...M(p.c,'nämlich'),'.'];
+    return {k:'nämlich',rule:RU.naemlich,ok:[A],wr:[[[...N(p.e),'.','nämlich',...I(p.c),'.'],W.naemP1,A],[[...N(p.e),'.','nämlich',...N(p.c),'.'],W.naemP1,A],[[...N(p.e),',','nämlich',...S(p.c),'.'],W.naemNs,A]]};},
+  sodass:p=>{const A=[...N(p.c),',','sodass',...S(p.e),'.'];
+    return {k:'sodass',rule:RU.sodass,ok:[A],wr:nsWr([...N(p.c),','],'sodass',p.e,['.'],A)};}
+ },
+ konz:{
+  obwohl:p=>{const A=[...N(p.e),',','obwohl',...S(p.c),'.'],B=['obwohl',...S(p.c),',',...I(p.e),'.'];
+    return {k:'obwohl',rule:RU.obwohl,ok:[A,B],wr:[...nsWr([...N(p.e),','],'obwohl',p.c,['.'],A),[['obwohl',...S(p.c),',',...N(p.e),'.'],W.noInv('obwohl'),B],[['obwohl',...N(p.c),',',...I(p.e),'.'],W.v2('obwohl'),B]]};},
+  trotzdem:p=>{const A=[...N(p.c),'.','trotzdem',...I(p.e),'.'],B=[...N(p.c),'.',...M(p.e,'trotzdem'),'.'];
+    return {k:'trotzdem',rule:RU.trotzdem,ok:[A,B],wr:[[[...N(p.c),'.','trotzdem',...N(p.e),'.'],W.p1Norm('trotzdem'),A],[[...N(p.c),'.','trotzdem',...S(p.e),'.'],W.p1Ns('trotzdem'),A],[[...N(p.c),',','trotzdem',...S(p.e),'.'],W.p1Ns('trotzdem'),A]]};},
+  dennoch:p=>{const A=[...N(p.c),'.','dennoch',...I(p.e),'.'];
+    return {k:'dennoch',rule:RU.dennoch,ok:[A],wr:[[[...N(p.c),'.','dennoch',...N(p.e),'.'],W.p1Norm('dennoch'),A],[[...N(p.c),'.','dennoch',...S(p.e),'.'],W.p1Ns('dennoch'),A],[[...N(p.c),',','dennoch',...S(p.e),'.'],W.p1Ns('dennoch'),A]]};},
+  zwar:p=>{const A=['zwar',...I(p.c),',','aber',...N(p.e),'.'],B=[...M(p.c,'zwar'),',','aber',...N(p.e),'.'];
+    return {k:'zwar … aber',rule:RU.zwar,ok:[A,B],wr:[[['zwar',...N(p.c),',','aber',...N(p.e),'.'],W.zwarNorm,A],[['zwar',...I(p.c),',','aber',...I(p.e),'.'],W.aberInv,A],[['zwar',...S(p.c),',','aber',...N(p.e),'.'],W.zwarNs,A]]};}
+ },
+ advers:{
+  waehrend:p=>{const A=[...N(p.a),',','während',...S(p.b),'.'],B=['während',...S(p.b),',',...I(p.a),'.'];
+    return {k:'während',rule:RU.waehrend,ok:[A,B],wr:[...nsWr([...N(p.a),','],'während',p.b,['.'],A),[['während',...S(p.b),',',...N(p.a),'.'],W.noInv('während'),B]]};},
+  wohingegen:p=>{const A=[...N(p.a),',','wohingegen',...S(p.b),'.'];
+    return {k:'wohingegen',rule:RU.wohingegen,ok:[A],wr:nsWr([...N(p.a),','],'wohingegen',p.b,['.'],A)};},
+  hingegen:p=>{const rest=[p.b[1],p.b[2],p.b[3]].filter(Boolean);
+    const A=[...N(p.a),'.',p.b[0],'hingegen',...rest,'.'],B=[...N(p.a),'.','hingegen',...I(p.b),'.'],C=[...N(p.a),'.',...M(p.b,'hingegen'),'.'];
+    return {k:'hingegen',rule:RU.hingegen,ok:[A,B,C],wr:[[[...N(p.a),'.','hingegen',...N(p.b),'.'],W.p1Norm('hingegen'),B],[[...N(p.a),',','hingegen',...S(p.b),'.'],W.hingNs,A],[[...N(p.a),'.',p.b[0],'hingegen',p.b[2],p.b[3],p.b[1],'.'].filter(Boolean),W.hingSubj,A]]};},
+  aber:p=>{const A=[...N(p.a),',','aber',...N(p.b),'.'];
+    const wr=[[[...N(p.a),',','aber',...I(p.b),'.'],W.p0Inv('aber'),A],[[...N(p.a),',','aber',...S(p.b),'.'],W.p0Ns('aber'),A]];
+    return {k:'aber',rule:RU.aber,ok:[A],wr};}
+ }
+};
+const POOL_OF = {kausal:P_KAUSAL, konz:P_KONZ, advers:P_ADV};
+function randRel(){ const r = Math.random(); return r < .45 ? 'kausal' : r < .8 ? 'konz' : 'advers'; }
+function uniqStr(arr){ const seen = new Set(); return arr.filter(x => { if (seen.has(x.s)) return false; seen.add(x.s); return true; }); }
+function genWort(){
+  const rel = randRel(), p = pick(POOL_OF[rel]);
+  if (Math.random() < .7){
+    const F = pick(Object.values(FORMS[rel]))(p);
+    const okArr = pick(F.ok), okS = toStr(okArr);
+    let wr = uniqStr(F.wr.map(w => ({s:toStr(w[0]), why:w[1]}))).filter(w => w.s !== okS && !F.ok.map(toStr).includes(w.s));
+    wr = shuffle(wr).slice(0,3);
+    const opts = shuffle([{h:esc(okS), ok:true, why:"Genau so ist der Satz korrekt."}, ...wr.map(w => ({h:esc(w.s), ok:false, why:w.why}))]);
+    return {kind:'mc', kicker:'Wortstellung · ' + F.k, instr:"Welcher Satz ist standardsprachlich korrekt? Nur einer ist es.", stem:'', opts, two:false, ex:F.rule, sol:okS};
+  }
+  // Variante: Finde den falschen Satz
+  const forms = Object.values(FORMS[rel]).map(f => f(p));
+  let oks = []; forms.forEach(F => F.ok.forEach(a => oks.push({s:toStr(a), k:F.k})));
+  oks = shuffle(uniqStr(oks)).slice(0,3);
+  const okSet = new Set(forms.flatMap(F => F.ok.map(toStr)));
+  const F = pick(forms); const w = pick(F.wr.filter(w => !okSet.has(toStr(w[0]))));
+  const wrongS = toStr(w[0]), fixS = toStr(w[2]);
+  const opts = shuffle([{h:esc(wrongS), ok:true, why:"Richtig erkannt – dieser Satz enthält den Fehler."}, ...oks.map(o => ({h:esc(o.s), ok:false, why:`Dieser Satz ist korrekt („${o.k}“). Der Fehler steckt in einem anderen Satz.`}))]);
+  return {kind:'mc', kicker:'Wortstellung · Fehlersuche', instr:"Drei Sätze sind korrekt. Welcher enthält einen Wortstellungsfehler?", stem:'', opts, ex:`<b>Der Fehler:</b> ${w[1]}<br>${F.rule}`, sol:fixS, solLabel:'So ist er richtig:'};
+}
+
+// ═══════════════ GENERATOR 3: SATZBAUKASTEN ═══════════════
+function genBau(){
+  if (Math.random() < .4){
+    const h = pick(BAU_H);
+    const acc = h.a.map(x => x.split('|'));
+    return {kind:'bau', kicker:'Satzbau · ' + h.k, instr:`Baue einen korrekten Satz mit „${h.k}“. Klicke die Bausteine in der richtigen Reihenfolge an.`, tiles:shuffle(acc[0]), acc, ex:h.ex, k:h.k.split(' (')[0]};
+  }
+  const rel = randRel(), p = pick(POOL_OF[rel]);
+  const F = pick(Object.values(FORMS[rel]))(p);
+  return {kind:'bau', kicker:'Satzbau · ' + F.k, instr:`Verbinde die beiden Aussagen mit „${F.k}“. Klicke die Bausteine in der richtigen Reihenfolge an.`, tiles:shuffle(F.ok[0]), acc:F.ok, ex:F.rule, k:F.k};
+}
+
+// ═══════════════ HANDGEMACHTE POOLS ═══════════════
+const POOLS = {};
+function fromPool(name, arr){ if (!POOLS[name] || !POOLS[name].length) POOLS[name] = shuffle(arr.map((_,i)=>i)); return arr[POOLS[name].pop()]; }
+function gapStem(s){ return esc(s).replace('___','<span class="gap">…</span>'); }
+function genPrae(){
+  const it = fromPool('prae', PRAE);
+  const opts = it.o.map((o,i) => ({h:esc(o), ok:i===0, why:i===0 ? it.ex : it.w[i-1]}));
+  return {kind:'mc', kicker:'Präzision', instr:"Welcher Konnektor ist korrekt? Nur eine Lösung passt.", stem:gapStem(it.s), gapFill:it.o[0], opts:shuffle(opts), ex:it.ex, sol:it.s.replace('___', it.o[0])};
+}
+function genNomi(){
+  const it = fromPool('nomi', NOMI);
+  const opts = it.o.map((o,i) => ({h:esc(o), ok:i===0, why:i===0 ? it.ex : it.w[i-1]}));
+  const ins = it.d === 'n' ? "Forme in den Nominalstil um (Präposition statt Konnektor). Welche Version ist korrekt?" : "Forme in den Verbalstil um (Konnektor + Nebensatz statt Präposition). Welche Version ist korrekt?";
+  return {kind:'mc', kicker: it.d === 'n' ? 'Verbal → Nominal' : 'Nominal → Verbal', instr:ins, stem:`<span class="src">${esc(it.q)}</span>`, opts:shuffle(opts), ex:it.ex, sol:it.o[0]};
+}
+function genFehler(){
+  const it = fromPool('fehler', FEHLER);
+  const opts = it.o.map((o,i) => ({h:esc(o), ok:i===0, why:i===0 ? "Richtig erkannt – hier steckt der Fehler." : "Dieser Satz ist korrekt. Der Fehler steckt in einem anderen Satz."}));
+  return {kind:'mc', kicker:'Fehlerjagd', instr:"Nur ein Satz enthält einen Fehler. Welcher?", stem:'', opts:shuffle(opts), ex:it.ex, sol:it.fix, solLabel:'So ist er richtig:'};
+}
+function genSyn(){
+  const it = fromPool('syn', SYN);
+  const m = it.s.match(/\[(.+?)\]/);
+  const stem = esc(it.s).replace(/\[(.+?)\]/, '<span class="mk">$1</span>');
+  const opts = it.o.map((o,i) => ({h:esc(o), ok:i===0, why:i===0 ? it.ex : it.w[i-1]}));
+  return {kind:'mc', kicker:'Synonym oder Falle?', instr:`Ersetze „${m[1]}“ so, dass Bedeutung UND Satzbau exakt gleich bleiben.`, stem, opts:shuffle(opts), ex:it.ex, sol:it.s.replace(/\[(.+?)\]/, it.o[0])};
+}
+const MIX = [genSinn, genSinn, genWort, genWort, genBau, genPrae, genPrae, genNomi, genFehler, genSyn];
+const MODES = {
+ sinn:{t:"🧭 Sinn & Satzbau", g:genSinn}, wort:{t:"🔬 Wortstellungs-Labor", g:genWort}, bau:{t:"🧱 Satzbaukasten", g:genBau},
+ prae:{t:"🎯 Präzisionstraining", g:genPrae, n:PRAE.length}, nomi:{t:"🔁 Nominalstil-Wandler", g:genNomi, n:NOMI.length},
+ fehler:{t:"🔍 Fehlerjagd", g:genFehler, n:FEHLER.length}, syn:{t:"⚖️ Synonym oder Falle?", g:genSyn, n:SYN.length},
+ marathon:{t:"🏁 Konnektor-Marathon", g:()=>pick(MIX)(), lim:20}
+};
+
+// ═══════════════ NAVIGATION ═══════════════
+function show(id){ document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id)); window.scrollTo({top:0}); }
+function goHome(){ show('home'); }
+
+// ═══════════════ QUIZ-ENGINE ═══════════════
+let Q = {};
+function startMode(m){ Q = {mode:m, n:0, ok:0, cur:null, done:false}; $('#qTitle').textContent = MODES[m].t; show('quiz'); nextQ(); }
+function updCount(){
+  const M = MODES[Q.mode];
+  $('#qCount').textContent = M.lim ? `Aufgabe ${Math.min(Q.n+1, M.lim)} / ${M.lim} · ${Q.ok} richtig` : `${Q.n} gelöst · ${Q.ok} richtig` + (M.n ? ` · ${M.n} Aufgaben im Pool` : ' · endlos');
+}
+function nextQ(){
+  const M = MODES[Q.mode];
+  if (M.lim && Q.n >= M.lim) return endMarathon();
+  Q.cur = M.g(); Q.done = false; Q.tries = 0;
+  updCount();
+  if (Q.cur.kind === 'mc') renderMC(Q.cur); else renderBau(Q.cur);
+}
+function renderMC(q){
+  const L = ['A','B','C','D'];
+  $('#qCard').innerHTML = `<span class="kicker">${q.kicker}</span><div class="instr">${q.instr}</div>${q.stem ? `<div class="stem" id="qStem">${q.stem}</div>` : ''}
+   <div class="opts">${q.opts.map((o,i) => `<button class="opt" data-i="${i}" onclick="answer(${i})"><span class="lt">${L[i]}</span><span>${o.h}</span></button>`).join('')}</div>
+   <div class="fb" id="qFb"></div><div class="qnav"><button class="btn" id="qNext" hidden onclick="nextQ()">Weiter →</button></div>`;
+}
+function answer(i){
+  if (Q.done || !Q.cur || Q.cur.kind !== 'mc') return;
+  Q.done = true; const q = Q.cur, o = q.opts[i];
+  document.querySelectorAll('.opt').forEach((b,j) => { b.disabled = true; if (q.opts[j].ok) b.classList.add('right'); });
+  if (!o.ok) document.querySelector(`.opt[data-i="${i}"]`).classList.add('wrong');
+  const g = document.querySelector('#qStem .gap'); if (g && q.gapFill){ g.textContent = q.gapFill; g.classList.add('filled'); }
+  Q.n++; if (o.ok) Q.ok++; award(o.ok); updCount();
+  const right = q.opts.find(x => x.ok);
+  let h = `<div class="verdict">${o.ok ? '✓ Richtig!' : '✗ Nicht ganz.'}</div>`;
+  if (!o.ok) h += `<div class="why"><b>Deine Wahl:</b> ${o.why}</div>`;
+  if (right.why && right.why !== q.ex && !/^Genau so|^Richtig erkannt/.test(right.why)) h += `<p><b>Richtig:</b> ${right.why}</p>`;
+  if (q.ex) h += `<p>${q.ex}</p>`;
+  if (q.sol) h += `<p style="margin-top:8px"><b>${q.solLabel || 'Lösung:'}</b></p>` + solBox(q.sol);
+  const fb = $('#qFb'); fb.className = 'fb show ' + (o.ok ? 'ok' : 'no'); fb.innerHTML = h;
+  $('#qNext').hidden = false; $('#qNext').focus({preventScroll:true});
+}
+// Satzbau
+function renderBau(q){
+  q.built = [];
+  $('#qCard').innerHTML = `<span class="kicker">${q.kicker}</span><div class="instr">${q.instr}</div>
+   <div class="zone target" id="bTarget"><span class="placeholder">Hier entsteht dein Satz …</span></div>
+   <div class="built" id="bBuilt"></div>
+   <div class="zone" id="bPool"></div>
+   <div class="hint">Tipp: Ein Klick auf einen eingesetzten Baustein legt ihn zurück. Satzzeichen sind eigene Bausteine; Großschreibung am Satzanfang ergänzt sich von selbst.</div>
+   <div class="fb" id="qFb"></div>
+   <div class="qnav"><button class="btn ghost" onclick="bauReset()">Zurücksetzen</button><button class="btn ghost" id="bShow" onclick="bauShow()">Lösung zeigen</button><button class="btn" id="bCheck" onclick="bauCheck()">Prüfen</button><button class="btn" id="qNext" hidden onclick="nextQ()">Weiter →</button></div>`;
+  bauDraw();
+}
+function tileClass(t, k){
+  if (/^[.,]$/.test(t)) return 'tile p';
+  const parts = (k || '').split(/\s*…\s*/).map(x => x.trim()).filter(Boolean);
+  if (parts.includes(t) || (parts.includes('zwar') && t === 'aber') || (k === 'es sei denn' && t === 'es sei denn') || (k === 'je … desto' && /^(je|desto) /.test(t))) return 'tile k';
+  return 'tile';
+}
+function bauDraw(){
+  const q = Q.cur; const used = q.built;
+  const pool = q.tiles.map((t,i) => ({t,i})).filter(x => !used.includes(x.i));
+  $('#bPool').innerHTML = pool.length ? pool.map(x => `<button class="${tileClass(x.t,q.k)}" onclick="bauAdd(${x.i})">${esc(x.t)}</button>`).join('') : '<span class="placeholder">Alle Bausteine verwendet.</span>';
+  $('#bTarget').innerHTML = used.length ? used.map((i,pos) => `<button class="${tileClass(q.tiles[i],q.k)}" onclick="bauRemove(${pos})">${esc(q.tiles[i])}</button>`).join('') : '<span class="placeholder">Hier entsteht dein Satz …</span>';
+  $('#bBuilt').textContent = used.length ? toStr(used.map(i => q.tiles[i])) : '';
+}
+function bauAdd(i){ if (Q.done) return; Q.cur.built.push(i); bauDraw(); }
+function bauRemove(pos){ if (Q.done) return; Q.cur.built.splice(pos,1); bauDraw(); }
+function bauReset(){ if (Q.done) return; Q.cur.built = []; bauDraw(); $('#qFb').className = 'fb'; }
+function bauCheck(){
+  const q = Q.cur; if (Q.done) return;
+  const fb = $('#qFb');
+  if (q.built.length < q.tiles.length){ fb.className = 'fb show no'; fb.innerHTML = `<div class="verdict">Noch nicht fertig</div>Es fehlen noch ${q.tiles.length - q.built.length} Baustein(e).`; return; }
+  const mine = q.built.map(i => q.tiles[i]);
+  const s = toStr(mine), accS = q.acc.map(toStr);
+  Q.tries++;
+  if (accS.includes(s)){
+    Q.done = true; Q.n++; Q.ok++; award(true, Q.tries === 1 ? 12 : 6); updCount();
+    $('#bTarget').classList.add('done');
+    const alts = accS.filter(x => x !== s);
+    fb.className = 'fb show ok';
+    fb.innerHTML = `<div class="verdict">✓ Ausgezeichnet gebaut!</div>${solBox(s)}<p>${q.ex}</p>` + (alts.length ? `<p><b>Ebenso richtig:</b></p>${alts.map(solBox).join('')}` : '');
+    bauEnd(); return;
+  }
+  let best = 0; q.acc.forEach(a => { let n = 0; while (n < a.length && a[n] === mine[n]) n++; best = Math.max(best, n); });
+  if (Q.tries >= 3){ bauShow(); return; }
+  fb.className = 'fb show no';
+  fb.innerHTML = `<div class="verdict">Noch nicht ganz – versuch es noch einmal.</div>` + (best > 0 ? `Die ersten <b>${best}</b> Baustein(e) stimmen; ab dem ${best+1}. Baustein solltest du umbauen.` : `Schon der Satzanfang passt noch nicht.`) + `<p class="hint">${Q.tries === 1 ? 'Tipp: Wo steht nach diesem Konnektor das konjugierte Verb?' : 'Letzter Versuch – danach erscheint die Lösung.'}</p>`;
+}
+function bauShow(){
+  const q = Q.cur; if (Q.done) return;
+  Q.done = true; Q.n++; award(false); updCount();
+  const accS = q.acc.map(toStr);
+  $('#qFb').className = 'fb show no';
+  $('#qFb').innerHTML = `<div class="verdict">Die Lösung</div>${accS.map(solBox).join('')}<p>${q.ex}</p>`;
+  bauEnd();
+}
+function bauEnd(){ $('#bCheck').hidden = true; $('#bShow').hidden = true; $('#qNext').hidden = false; $('#qNext').focus({preventScroll:true}); }
+function endMarathon(){
+  const pct = Math.round(Q.ok / Q.n * 100);
+  const msg = pct >= 90 ? "Herausragend – du verknüpfst Gedanken auf höchstem Niveau." : pct >= 75 ? "Sehr stark – Logik und Wortstellung sitzen fast immer." : pct >= 55 ? "Solide Basis – die Feinheiten kommen mit jeder Runde." : "Guter Anfang – jede Runde schärft dein Gespür für Sinn und Satzbau.";
+  $('#resBox').innerHTML = `<div style="font-size:2.4rem">🏁</div><div class="mtitle" style="margin:6px 0 10px">Marathon beendet</div><div class="big">${Q.ok} / ${Q.n}</div><p style="margin:10px 0 4px">${pct} % richtig</p><p style="color:var(--muted)">${msg}</p><div class="qnav" style="justify-content:center;margin-top:20px"><button class="btn ghost" onclick="goHome()">Zur Übersicht</button><button class="btn" onclick="startMode('marathon')">Neuer Marathon</button></div>`;
+  show('result');
+}
+document.addEventListener('keydown', e => {
+  if (!$('#quiz').classList.contains('active') || !Q.cur) return;
+  if (e.target.tagName === 'INPUT') return;
+  if (e.target.tagName === 'BUTTON' && e.key === 'Enter') return;
+  if (Q.cur.kind === 'mc' && !Q.done){ const i = {'1':0,'2':1,'3':2,'4':3,'a':0,'b':1,'c':2,'d':3}[e.key.toLowerCase()]; if (i !== undefined && i < Q.cur.opts.length){ answer(i); e.preventDefault(); } }
+  else if (Q.done && e.key === 'Enter'){ e.preventDefault(); nextQ(); }
+});
+
+// ═══════════════ TEXTKOHÄRENZ ═══════════════
+let TX = {i:0, gaps:[], checked:false};
+function parseText(x){
+  const parts = []; const re = /\{([^}]+)\}/g; let last = 0, m;
+  while ((m = re.exec(x))){ parts.push(x.slice(last, m.index)); const [o, ex] = m[1].split('#'); parts.push({o:o.split('|'), ex}); last = re.lastIndex; }
+  parts.push(x.slice(last)); return parts;
+}
+function openText(){ show('text'); $('#txtSel').innerHTML = TEXTE.map((t,i) => `<button class="chip${i===TX.i?' on':''}" onclick="TX.i=${i};renderText()">${i+1}. ${esc(t.t)}</button>`).join(''); renderText(); }
+function renderText(){
+  document.querySelectorAll('#txtSel .chip').forEach((c,i) => c.classList.toggle('on', i === TX.i));
+  const T = TEXTE[TX.i]; const parts = parseText(T.x); TX.gaps = []; TX.checked = false;
+  $('#tKind').textContent = T.k; $('#tTitle').textContent = T.t; $('#tEx').innerHTML = ''; $('#tCheck').disabled = false;
+  let n = 0;
+  $('#tBody').innerHTML = parts.map(p => {
+    if (typeof p === 'string') return esc(p);
+    const id = n++; TX.gaps.push(p);
+    return `<span class="num">${id+1}</span><select id="g${id}"><option value="">…</option>${shuffle(p.o).map(o => `<option>${esc(o)}</option>`).join('')}</select>`;
+  }).join('');
+  $('#tCount').textContent = `Text ${TX.i+1} von ${TEXTE.length} · ${TX.gaps.length} Lücken`;
+}
+function checkText(){
+  if (TX.checked) return;
+  let ok = 0; const items = [];
+  TX.gaps.forEach((g,i) => {
+    const sel = $('#g'+i), v = sel.value, r = v === g.o[0];
+    sel.classList.add(r ? 'r' : 'w'); sel.disabled = true; if (r) ok++;
+    items.push(`<div class="exitem ${r?'r':'w'}"><b>${i+1}. ${esc(g.o[0])}</b>${r ? ' ✓' : ` – deine Wahl: ${v ? '„'+esc(v)+'“' : 'keine'}`}<br>${g.ex}</div>`);
+    award(r, 8, true);
+  });
+  if (ok) popup('+' + ok * 8);
+  TX.checked = true; $('#tCheck').disabled = true;
+  $('#tEx').innerHTML = `<div class="fb show ${ok===TX.gaps.length?'ok':'no'}"><div class="verdict">${ok} von ${TX.gaps.length} Lücken richtig</div>${ok===TX.gaps.length ? 'Ein durch und durch kohärenter Text!' : 'Lies den Text mit den Lösungen noch einmal laut – so verankert sich der Zusammenhang.'}</div>` + items.join('') +
+    `<div class="qnav"><button class="btn" onclick="TX.i=(TX.i+1)%TEXTE.length;openText()">Nächster Text →</button></div>`;
+}
+
+// ═══════════════ BLITZ-SORTIERER ═══════════════
+let SO = {};
+function openSort(){ show('sort'); SO = {run:false}; sortIntro(); }
+function sortIntro(){
+  $('#soHi').textContent = `Highscore: ${ST.sortHi}`;
+  $('#sortCard').innerHTML = `<div class="instr">Ein Konnektor erscheint – du entscheidest in Sekunden, welche Wortstellung er verlangt. 60 Sekunden, so viele richtige Zuordnungen wie möglich.</div>
+   <div class="legend">${Object.values(SORT_CAT).map(c => `<span><b>${c.n}</b> – ${c.d}</span>`).join('')}</div>
+   <div class="qnav" style="justify-content:center;margin-top:22px"><button class="btn lil" onclick="sortStart()">Start ⚡</button></div>
+   <p class="hint" style="text-align:center">Tastatur: <kbd>1</kbd> Position 0 · <kbd>2</kbd> Position 1 · <kbd>3</kbd> Nebensatz · <kbd>4</kbd> Infinitiv · <kbd>5</kbd> Doppel</p>`;
+}
+function sortStart(){
+  SO = {run:true, t:60, score:0, wrong:[], deck:shuffle(SORT_LIST), cur:null};
+  $('#sortCard').innerHTML = `<div class="bar"><div class="counter">Punkte: <b id="soScore">0</b></div><div class="counter" id="soTime">60 s</div></div>
+   <div class="timer"><i id="soBar"></i></div><div class="sortword" id="soWord"></div>
+   <div class="sortbtns">${Object.entries(SORT_CAT).map(([k,c],i) => `<button class="sbtn" id="sb_${k}" onclick="sortPick('${k}')">${i+1} · ${c.n}<small>${c.d}</small></button>`).join('')}</div>
+   <div class="sortfb" id="soFb"></div>`;
+  sortNext();
+  SO.iv = setInterval(() => { SO.t--; $('#soTime').textContent = SO.t + ' s'; $('#soBar').style.width = (SO.t/60*100) + '%'; if (SO.t <= 0) sortEnd(); }, 1000);
+}
+function sortNext(){ if (!SO.deck.length) SO.deck = shuffle(SORT_LIST); SO.cur = SO.deck.pop(); $('#soWord').textContent = SO.cur[0]; }
+function sortPick(k){
+  if (!SO.run) return;
+  const [w, c] = SO.cur, ok = k === c, b = $('#sb_'+k);
+  b.classList.add(ok ? 'flashR' : 'flashW'); setTimeout(() => b.classList.remove('flashR','flashW'), 260);
+  if (ok){ SO.score++; $('#soScore').textContent = SO.score; $('#soFb').textContent = `✓ „${w}“ ${SORT_CAT[c].e}`; }
+  else { SO.wrong.push(SO.cur); $('#soFb').textContent = `✗ „${w}“ ${SORT_CAT[c].e}`; }
+  award(ok, 3, true); sortNext();
+}
+function stopSort(){ if (SO.iv) clearInterval(SO.iv); SO.run = false; }
+function sortEnd(){
+  stopSort(); const neu = SO.score > ST.sortHi; if (neu){ ST.sortHi = SO.score; save(); }
+  const wr = [...new Map(SO.wrong.map(x => [x[0], x])).values()];
+  $('#sortCard').innerHTML = `<div class="resultbig"><div class="big">${SO.score}</div><p>richtige Zuordnungen in 60 Sekunden${neu ? ' – <b>neuer Highscore!</b>' : ''}</p></div>` +
+   (wr.length ? `<div class="sect-title">Das solltest du dir merken:</div><div class="exlist">${wr.map(([w,c]) => `<div class="exitem w"><b>${esc(w)}</b> → ${SORT_CAT[c].n}: „${esc(w)}“ ${SORT_CAT[c].e}</div>`).join('')}</div>` : '<p style="text-align:center">Keine einzige Fehlzuordnung – beeindruckend!</p>') +
+   `<div class="qnav" style="justify-content:center"><button class="btn lil" onclick="sortStart()">Noch eine Runde ⚡</button></div>`;
+  $('#soHi').textContent = `Highscore: ${ST.sortHi}`;
+}
+document.addEventListener('keydown', e => { if (!$('#sort').classList.contains('active') || !SO.run) return; const k = ['p0','p1','ns','inf','dop'][parseInt(e.key)-1]; if (k){ sortPick(k); e.preventDefault(); } });
+
+// ═══════════════ DOPPEL-DUETT ═══════════════
+let DU = {rounds:0};
+function openDuett(){ show('duett'); duRound(); }
+function duRound(){
+  DU.set = shuffle(DUO).slice(0,6); DU.sel = null; DU.done = new Set(); DU.err = 0; DU.phase = 1;
+  DU.L = shuffle(DU.set.map((p,i) => i)); DU.R = shuffle(DU.set.map((p,i) => i));
+  $('#duCount').textContent = `Runde ${DU.rounds+1}`;
+  duDraw();
+}
+function duDraw(){
+  $('#duCard').innerHTML = `<div class="instr">Phase 1: Welche Teile gehören zusammen? Klicke links einen ersten Teil und rechts seinen Partner an.</div>
+   <div class="cols"><div>${DU.L.map(i => `<button class="dbtn${DU.done.has(i)?' done':''}${DU.sel===i?' sel':''}" id="dl${i}" onclick="duL(${i})">${esc(DU.set[i].l)} …</button>`).join('')}</div>
+   <div>${DU.R.map(i => `<button class="dbtn${DU.done.has(i)?' done':''}" id="dr${i}" onclick="duR(${i})">… ${esc(DU.set[i].r)}</button>`).join('')}</div></div>
+   <div id="duInfo"></div>`;
+}
+function duL(i){ if (DU.done.has(i)) return; DU.sel = i; document.querySelectorAll('.cols .dbtn').forEach(b => b.classList.remove('sel')); $('#dl'+i).classList.add('sel'); }
+function duR(j){
+  if (DU.sel === null || DU.done.has(j)) return;
+  const i = DU.sel, a = DU.set[i], b = DU.set[j];
+  if (i === j || a.r === b.r){
+    DU.done.add(i); if (i !== j) DU.done.add(j); award(true, 5);
+    $('#dl'+i).className = 'dbtn done'; $('#dr'+j).className = 'dbtn done'; DU.sel = null;
+    $('#duInfo').innerHTML = `<div class="pairinfo"><b>${esc(a.l)} … ${esc(a.r)}</b> – ${a.m}</div>`;
+    if (DU.done.size >= DU.set.length) setTimeout(duPhase2, 700);
+  } else {
+    DU.err++; award(false); const el = $('#dr'+j); el.classList.add('bad'); setTimeout(() => el.classList.remove('bad'), 450);
+    $('#duInfo').innerHTML = `<div class="pairinfo" style="background:var(--rust-s)">„${esc(a.l)}“ und „${esc(b.r)}“ bilden kein festes Paar.</div>`;
+  }
+}
+function duPhase2(){ DU.phase = 2; DU.q = shuffle(DU.set).slice(0,4); DU.qi = 0; DU.qok = 0; duQ(); }
+function duQ(){
+  if (DU.qi >= DU.q.length){
+    DU.rounds++;
+    $('#duCard').innerHTML = `<div class="resultbig"><div class="big">${DU.qok} / ${DU.q.length}</div><p>Sätze richtig ergänzt · ${DU.err} Fehlversuch(e) beim Zuordnen</p></div><div class="qnav" style="justify-content:center"><button class="btn pet" onclick="duRound()">Neue Runde 🔗</button></div>`;
+    return;
+  }
+  const d = DU.q[DU.qi]; const L = ['A','B','C','D'];
+  DU.opts = shuffle(d.o.map((o,i) => ({o, ok:i===0}))); DU.ans = false;
+  $('#duCard').innerHTML = `<span class="kicker">Phase 2 · Satz ${DU.qi+1} von ${DU.q.length}</span><div class="instr">Ergänze den passenden zweiten Teil.</div>
+   <div class="stem" id="duStem">${gapStem(d.s)}</div>
+   <div class="opts two">${DU.opts.map((x,i) => `<button class="opt" data-i="${i}" onclick="duA(${i})"><span class="lt">${L[i]}</span><span>${esc(x.o)}</span></button>`).join('')}</div>
+   <div class="fb" id="duFb"></div><div class="qnav"><button class="btn" id="duNext" hidden onclick="DU.qi++;duQ()">Weiter →</button></div>`;
+}
+function duA(i){
+  if (DU.ans) return; DU.ans = true; const d = DU.q[DU.qi], x = DU.opts[i];
+  document.querySelectorAll('#duCard .opt').forEach((b,j) => { b.disabled = true; if (DU.opts[j].ok) b.classList.add('right'); });
+  if (!x.ok) document.querySelector(`#duCard .opt[data-i="${i}"]`).classList.add('wrong');
+  const g = document.querySelector('#duStem .gap'); g.textContent = d.o[0]; g.classList.add('filled');
+  if (x.ok) DU.qok++; award(x.ok);
+  const full = d.s.replace('___', d.o[0]);
+  $('#duFb').className = 'fb show ' + (x.ok ? 'ok' : 'no');
+  $('#duFb').innerHTML = `<div class="verdict">${x.ok ? '✓ Richtig!' : '✗ Nicht ganz.'}</div>Das feste Paar lautet <b>${esc(d.l)} … ${esc(d.r)}</b> (${d.m}).${x.ok ? '' : ` „${esc(x.o)}“ gehört zu einem anderen Doppelkonnektor.`}${solBox(full)}`;
+  $('#duNext').hidden = false;
+}
+
+// ═══════════════ ARGUMENTATIONSRAD ═══════════════
+let RD = {lvl:3, done:0};
+function openRad(){ show('rad'); radSpin(); }
+function radSpin(){
+  const ks = [pick(RAD.ns), pick(RAD.p1), pick(RAD.dop)];
+  if (RD.lvl >= 4) ks.push(pick(RAD.pro));
+  if (RD.lvl >= 5){ let x; do { x = pick(RAD.ns); } while (ks.includes(x)); ks.push(x); }
+  RD.ks = ks; RD.used = new Set(); RD.topic = pick(TOPICS); RD.role = pick(ROLES);
+  radDraw();
+}
+function radDraw(){
+  $('#radCount').textContent = `${RD.done} Statements gemeistert`;
+  $('#radCard').innerHTML = `<div class="level">${[3,4,5].map(n => `<button class="chip${RD.lvl===n?' on':''}" onclick="RD.lvl=${n};radSpin()">${n} Konnektoren</button>`).join('')}</div>
+   <div class="kicker" style="display:table;margin:0 auto 6px">Dein Thema</div>
+   <div class="topic">${esc(RD.topic)}</div><div class="role">${esc(RD.role)}</div>
+   <div class="instr" style="text-align:center">Baue alle Konnektoren in dein mündliches Statement ein (ca. 1–2 Minuten). Tippe eine Karte an, sobald du ihn verwendet hast.</div>
+   <div class="kgrid">${RD.ks.map(([k,f],i) => `<div class="kc${RD.used.has(i)?' used':''}" onclick="radUse(${i})"><b>${esc(k)}</b><span>${esc(kInfo(k))}</span><div class="fr">${esc(f)}</div></div>`).join('')}</div>
+   <div class="qnav" style="justify-content:center;margin-top:20px"><button class="btn ghost" onclick="radSpin()">🎲 Neu drehen</button><button class="btn" onclick="RD.topic=pick(TOPICS);radDraw()">Nur Thema wechseln</button><button class="btn pet" onclick="radDone()">✓ Statement gelungen</button></div>`;
+}
+function kInfo(k){ const d = DB.find(x => x.w === k || x.w.replace(/\s/g,'') === k.replace(/\s/g,'')); return d ? d.bed : ''; }
+function radUse(i){ RD.used.has(i) ? RD.used.delete(i) : RD.used.add(i); radDraw(); }
+function radDone(){ const all = RD.used.size === RD.ks.length; RD.done++; award(true, all ? 10 + RD.ks.length * 3 : 8); radSpin(); }
+
+// ═══════════════ LEXIKON ═══════════════
+let LX = {kat:null, open:new Set()};
+function openLex(){ show('lex'); const kats = [...new Set(DB.map(k => k.kat))];
+  $('#lexChips').innerHTML = `<button class="chip on" onclick="LX.kat=null;lexChip(this)">Alle</button>` + kats.map(k => `<button class="chip" onclick="LX.kat='${k}';lexChip(this)">${KL[k]||k}</button>`).join('');
+  renderLex(); }
+function lexChip(b){ document.querySelectorAll('#lexChips .chip').forEach(c => c.classList.remove('on')); b.classList.add('on'); renderLex(); }
+function renderLex(){
+  const q = $('#lexQ').value.trim().toLowerCase();
+  const res = DB.filter(k => (!LX.kat || k.kat === LX.kat) && (!q || (k.w + ' ' + k.bed + ' ' + (k.funk||[]).join(' ') + ' ' + (k.tip||'')).toLowerCase().includes(q)));
+  $('#lexMeta').textContent = `${res.length} von ${DB.length} Einträgen`;
+  $('#lexList').innerHTML = res.map((k,i) => { const id = k.w + '|' + k.kat;
+    return `<div class="lexcard${LX.open.has(id)?' open':''}" data-id="${esc(id)}"><div class="lexhead" onclick="lexTog(this)"><span class="lexw">${esc(k.w)}</span><span>${(k.funk||[]).map(f => `<span class="lexb">${esc(f)}</span>`).join('')}<span class="lexb" style="background:var(--blue-s);color:var(--blue)">${KL[k.kat]||k.kat}</span></span></div>
+     <div class="lexbody"><div class="lbl">Bedeutung</div>${esc(k.bed)}${k.ws?`<div class="lbl">Wortstellung</div>${esc(k.ws)}`:''}${(k.bsp||[]).length?`<div class="lbl">Beispiele</div>${k.bsp.map(b => `<div>• ${esc(b)}</div>`).join('')}`:''}${k.tip?`<div class="tip">💡 ${esc(k.tip)}</div>`:''}</div></div>`; }).join('');
+}
+function lexTog(h){ const c = h.parentElement, id = c.dataset.id; c.classList.toggle('open'); c.classList.contains('open') ? LX.open.add(id) : LX.open.delete(id); }
+
+// ═══════════════ START ═══════════════
+(function bubbles(){ const cols = ['#34507c','#1d6670','#5b4679','#b7892e']; const b = $('#bubbles');
+  for (let i = 0; i < 14; i++){ const d = document.createElement('div'); d.className = 'bubble'; const s = 40 + Math.random()*160;
+    d.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;top:${Math.random()*100}%;background:radial-gradient(circle at 30% 30%, ${pick(cols)}55, transparent 70%);animation-duration:${14+Math.random()*16}s;animation-delay:-${Math.random()*10}s`;
+    b.appendChild(d); } })();
+renderStats();
+
+</script>
+</body>
+</html>
