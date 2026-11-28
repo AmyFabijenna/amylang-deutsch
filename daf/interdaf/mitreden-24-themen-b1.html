@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<script src="/daf/interdaf/passwort.js"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mitreden auf Deutsch – 24 Gesprächsthemen (B1)</title>
@@ -165,6 +164,22 @@ main{padding:34px 0 90px}
   .steps{border-radius:18px}
   body{font-size:18px}
 }
+/* Weiter-Modus */
+.wmode{display:inline-flex;background:var(--accent-soft);border-radius:999px;padding:3px;gap:2px;align-items:center;vertical-align:middle}
+.wmode button{border:0;background:transparent;border-radius:999px;padding:5px 13px;font-size:.82rem;color:var(--accent);font-weight:400}
+.wmode button.on{background:var(--accent);color:#fff}
+header.top .wmode{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25)}
+header.top .wmode button{color:#fff}
+header.top .wmode button.on{background:#fff;color:#2f4c6e}
+.modeline{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin-bottom:16px}
+.modeline .score{margin:0}
+.fb.try{background:var(--plum-soft)}
+.fb .nextrow{display:flex;justify-content:flex-end;margin-top:10px;gap:12px;align-items:center}
+.fb .hold{border:0;background:none;color:var(--muted);text-decoration:underline;text-underline-offset:3px;font-size:.82rem;padding:0}
+.fb .cd{height:4px;border-radius:4px;background:rgba(0,0,0,.07);overflow:hidden;margin-top:10px}
+.fb .cd i{display:block;height:100%;width:100%;background:var(--ok);animation:cdrun linear forwards}
+@keyframes cdrun{from{width:100%}to{width:0}}
+.q.nextup,.gaprow.nextup{box-shadow:0 0 0 3px var(--accent-soft);border-radius:16px;transition:box-shadow .3s}
 </style>
 </head>
 <body>
@@ -172,7 +187,7 @@ main{padding:34px 0 90px}
   <div class="wrap">
     <h1>Mitreden auf Deutsch</h1>
     <p>24 Gesprächsthemen für Niveau B1. Zuerst sammelst du die Wörter, die du für das Thema brauchst. Dann sprichst du frei, mit deinem Spickzettel immer neben dir.</p>
-    <div class="legend"><span>1–7 Wortschatz aufbauen</span><span>8 Gespräch: 7 leichte + 7 komplexe Fragen</span><span>🔊 nur auf Klick</span></div>
+    <div class="legend"><span>1–7 Wortschatz aufbauen</span><span>8 Gespräch: 7 leichte + 7 komplexe Fragen</span><span>🔊 nur auf Klick</span><span class="wmode"><button data-m="auto">sofort weiter</button><button data-m="manual">erst Erklärung, dann Weiter</button></span></div>
   </div>
 </header>
 <main><div class="wrap" id="app"></div></main>
@@ -1711,10 +1726,39 @@ function say(t){
   speechSynthesis.speak(u);
 }
 function spkBtn(text){return `<button class="spk" title="Vorlesen" onclick="event.stopPropagation();say(${JSON.stringify(text).replace(/"/g,'&quot;')})">${SPK}</button>`}
+/* ---------- Weiter-Modus ---------- */
+let ADV="auto";try{ADV=localStorage.getItem("weiterModus")||"auto"}catch(e){}
+let advT=null;function clearAdv(){if(advT){clearTimeout(advT);advT=null}}
+const SEGM='<span class="wmode"><button data-m="auto">sofort weiter</button><button data-m="manual">erst Erklärung, dann Weiter</button></span>';
+function syncWM(){document.querySelectorAll(".wmode button").forEach(b=>{b.classList.toggle("on",b.dataset.m===ADV);b.onclick=()=>{ADV=b.dataset.m;try{localStorage.setItem("weiterModus",ADV)}catch(e){}syncWM()}})}
+/* zur nächsten offenen Aufgabe weiterrücken – nur so weit, dass sie ganz zu sehen ist, nie an den Seitenanfang */
+function bringNext(el){
+  if(!el)return;
+  el.classList.add("nextup");setTimeout(()=>el.classList.remove("nextup"),1600);
+  const r=el.getBoundingClientRect();
+  if(r.bottom>window.innerHeight-16){window.scrollBy({top:Math.min(r.top-16,r.bottom-window.innerHeight+30),behavior:"smooth"})}
+  else if(r.top<0){window.scrollBy({top:r.top-16,behavior:"smooth"})}
+  const f=el.querySelector(".opt:not(:disabled)");if(f)try{f.focus({preventScroll:true})}catch(e){}
+}
+/* nach richtiger Antwort: Countdown (sofort weiter) oder Weiter-Knopf */
+function afterRight(fb,nextEl,late,expl){
+  clearAdv();
+  if(!nextEl)return;
+  const go=()=>{clearAdv();const nr=fb.querySelector(".nextrow");if(nr)nr.remove();const c=fb.querySelector(".cd");if(c)c.remove();bringNext(nextEl)};
+  if(ADV==="auto"){
+    const L=plain(expl).length, ms=late?Math.min(9000,2800+L*40):Math.min(4500,1400+L*20);
+    fb.insertAdjacentHTML("beforeend",`<div class="cd"><i style="animation-duration:${ms}ms"></i></div><div class="nextrow"><button class="hold" type="button">Moment, ich lese noch</button></div>`);
+    fb.querySelector(".hold").onclick=()=>{clearAdv();fb.querySelector(".cd").remove();fb.querySelector(".nextrow").innerHTML='<button class="btn" type="button">Weiter →</button>';fb.querySelector(".nextrow .btn").onclick=go};
+    advT=setTimeout(go,ms);
+  }else{
+    fb.insertAdjacentHTML("beforeend",'<div class="nextrow"><button class="btn" type="button">Weiter →</button></div>');
+    fb.querySelector(".nextrow .btn").onclick=go;
+  }
+}
 function setAccent(i){const c=COLORS[i%COLORS.length];document.documentElement.style.setProperty("--accent",c[0]);document.documentElement.style.setProperty("--accent-soft",c[1]);}
 
 function home(){
-  cur=null;document.getElementById("fab").style.display="none";closeDrawer();
+  clearAdv();cur=null;document.getElementById("fab").style.display="none";closeDrawer();
   setAccent(0);
   app.innerHTML=`<div class="grid">${TOPICS.map((T,i)=>{
     const c=COLORS[i%COLORS.length][0];
@@ -1729,6 +1773,7 @@ function openTopic(i,s){cur=i;step=s;setAccent(i);render();window.scrollTo({top:
 function go(s){step=s;render();window.scrollTo({top:document.querySelector(".thead").offsetTop-10});}
 
 function render(){
+  clearAdv();
   const T=TOPICS[cur];
   document.getElementById("fab").style.display=step===7?"none":"block";
   fillDrawer();
@@ -1738,6 +1783,7 @@ function render(){
   <nav class="steps">${tabs}</nav><section id="stage"></section>`;
   const st=document.getElementById("stage");
   [karten,zuordnen,bedeutung,passt,luecke,reaktion,bau,gespraech][step](st,T);
+  syncWM();
 }
 function navBtns(){
   return `<div class="nav"><button class="btn ghost" ${step===0?'disabled':''} onclick="go(${step-1})">← Zurück</button>
@@ -1788,7 +1834,7 @@ function zuordnen(st,T){
 
 /* generisches Multiple Choice */
 function mcList(st,items,stepIdx,title,hint,isGap){
-  st.innerHTML=`<div class="panel"><h3>${title}</h3><p class="hint">${hint}</p><span class="score" id="sc">0 von ${items.length} richtig</span><div id="ql"></div>${navBtns()}</div>`;
+  st.innerHTML=`<div class="panel"><h3>${title}</h3><p class="hint">${hint}</p><div class="modeline"><span class="score" id="sc">0 von ${items.length} richtig</span>${SEGM}</div><div id="ql"></div>${navBtns()}</div>`;syncWM();
   const ql=st.querySelector("#ql");let answered=0,right=0;
   items.forEach((it,qi)=>{
     const [prompt,opts,expl]=it;
@@ -1798,16 +1844,20 @@ function mcList(st,items,stepIdx,title,hint,isGap){
     d.innerHTML=`<div class="prompt"><span class="qn">${qi+1}</span><span>${pr}</span></div>
       <div class="opts">${order.map(i=>`<button class="opt" data-i="${i}">${esc(opts[i])}</button>`).join("")}</div><div class="fb"></div>`;
     ql.appendChild(d);
+    let missed=false;
     d.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
-      const ok=b.dataset.i==="0";
-      d.querySelectorAll(".opt").forEach(x=>{x.disabled=true;if(x.dataset.i==="0")x.classList.add("right")});
-      if(!ok)b.classList.add("wrong");
-      const fb=d.querySelector(".fb");fb.className="fb show "+(ok?"ok":"no");
-      fb.innerHTML=`<b>${ok?"Richtig.":"Nicht ganz. Richtig ist: „"+esc(opts[0])+"“."}</b> ${expl}`;
+      const ok=b.dataset.i==="0";const fb=d.querySelector(".fb");
+      if(!ok){b.classList.add("wrong");b.disabled=true;missed=true;fb.className="fb show try";fb.innerHTML="<b>Nicht ganz – versuch es noch einmal.</b>";return}
+      d.querySelectorAll(".opt").forEach(x=>x.disabled=true);b.classList.add("right");
+      fb.className="fb show ok";
+      fb.innerHTML=`<b>${missed?"Jetzt stimmt’s.":"Richtig."}</b> ${expl}`;
       if(isGap){const bl=d.querySelector(".blank");bl.textContent=opts[0];bl.classList.add("filled")}
-      answered++;if(ok)right++;
+      answered++;if(!missed)right++;
       st.querySelector("#sc").textContent=right+" von "+items.length+" richtig";
       if(answered===items.length)mark(cur,stepIdx);
+      const open=[...ql.querySelectorAll(".q")].filter(x=>x.querySelector(".opt:not(:disabled)"));
+      const nx=open.find(x=>x.compareDocumentPosition(d)&Node.DOCUMENT_POSITION_PRECEDING)||open[0];
+      afterRight(fb,nx,missed,expl);
     });
   });
 }
@@ -1820,7 +1870,7 @@ function luecke(st,T){
   const parts=T.g.x.split("___");
   let html="";parts.forEach((p,i)=>{html+=esc(p);if(i<parts.length-1)html+=`<span class="blank" id="b${i}">${i+1}</span>`});
   st.innerHTML=`<div class="panel"><h3>Lückentext</h3><p class="hint">Lies zuerst den ganzen Text. Dann wähl für jede Lücke das passende Wort. Mit 🔊 hörst du den fertigen Text.</p>
-  <span class="score" id="sc">0 von ${T.g.o.length} richtig</span>
+  <div class="modeline"><span class="score" id="sc">0 von ${T.g.o.length} richtig</span>${SEGM}</div>
   <div class="gaptext" style="display:flex;gap:14px;align-items:flex-start"><div style="flex:1" id="gt">${html}</div><span id="gspk"></span></div>
   <div id="rows"></div>${navBtns()}</div>`;
   const full=parts.map((p,i)=>p+(i<T.g.o.length?T.g.o[i][0][0]:"")).join("");
@@ -1831,15 +1881,19 @@ function luecke(st,T){
     const r=document.createElement("div");r.className="gaprow";
     r.innerHTML=`<div class="lbl">Lücke ${gi+1}</div><div><div class="opts">${order.map(i=>`<button class="opt" data-i="${i}">${esc(opts[i])}</button>`).join("")}</div><div class="fb"></div></div>`;
     rows.appendChild(r);
+    let missed=false;
     r.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
-      const ok=b.dataset.i==="0";
-      r.querySelectorAll(".opt").forEach(x=>{x.disabled=true;if(x.dataset.i==="0")x.classList.add("right")});
-      if(!ok)b.classList.add("wrong");
-      const fb=r.querySelector(".fb");fb.className="fb show "+(ok?"ok":"no");
-      fb.innerHTML=`<b>${ok?"Richtig.":"Nicht ganz. Richtig ist: „"+esc(opts[0])+"“."}</b> ${expl}`;
+      const ok=b.dataset.i==="0";const fb=r.querySelector(".fb");
+      if(!ok){b.classList.add("wrong");b.disabled=true;missed=true;fb.className="fb show try";fb.innerHTML="<b>Nicht ganz – versuch es noch einmal.</b>";return}
+      r.querySelectorAll(".opt").forEach(x=>x.disabled=true);b.classList.add("right");
+      fb.className="fb show ok";
+      fb.innerHTML=`<b>${missed?"Jetzt stimmt’s.":"Richtig."}</b> ${expl}`;
       const bl=st.querySelector("#b"+gi);bl.textContent=opts[0];bl.classList.add("filled");
-      answered++;if(ok)right++;st.querySelector("#sc").textContent=right+" von "+T.g.o.length+" richtig";
+      answered++;if(!missed)right++;st.querySelector("#sc").textContent=right+" von "+T.g.o.length+" richtig";
       if(answered===T.g.o.length)mark(cur,4);
+      const open=[...rows.querySelectorAll(".gaprow")].filter(x=>x.querySelector(".opt:not(:disabled)"));
+      const nx=open.find(x=>x.compareDocumentPosition(r)&Node.DOCUMENT_POSITION_PRECEDING)||open[0];
+      afterRight(fb,nx,missed,expl);
     });
   });
 }
@@ -1901,6 +1955,7 @@ function closeDrawer(){document.getElementById("drawer").classList.remove("open"
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer()});
 if("speechSynthesis" in window){speechSynthesis.getVoices();}
 home();
+syncWM();
 </script>
 </body>
 </html>
