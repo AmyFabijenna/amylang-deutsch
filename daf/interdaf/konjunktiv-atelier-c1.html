@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script src="/daf/interdaf/passwort.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Konjunktiv-Atelier C1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1c1d22;--muted:#4c5260;--bg:#f4f1ea;--card:#fffdf8;--line:#e2dccf;
+  --blue:#34507c;--blue-s:#e5ebf4;--pet:#1d6670;--pet-s:#ddedee;--lil:#5b4679;--lil-s:#ebe5f2;
+  --gold:#b7892e;--gold-s:#f6eedb;--rust:#a1453a;--rust-s:#f6e3df;--r:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Lexend',system-ui,-apple-system,sans-serif;font-size:18px;line-height:1.6;color:var(--ink);background:var(--bg);min-height:100vh;overflow-x:hidden}
+button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
+.bubbles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bubble{position:absolute;border-radius:50%;opacity:.16;animation:float linear infinite}
+@keyframes float{0%{transform:translateY(0) translateX(0)}50%{transform:translateY(-40px) translateX(18px)}100%{transform:translateY(0) translateX(0)}}
+.wrap{position:relative;z-index:1;max-width:1040px;margin:0 auto;padding:22px 20px 60px}
+header{text-align:center;padding:18px 0 8px}
+h1{font-weight:600;font-size:2.35rem;letter-spacing:-.01em;color:var(--blue)}
+h1 span{color:var(--lil)}
+.sub{color:var(--muted);font-size:1.02rem;margin-top:4px}
+.topbtn{display:inline-flex;border-radius:999px;overflow:hidden;margin-top:14px;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.topbtn a{padding:.5rem 1.15rem;text-decoration:none;font-weight:500;font-size:.9rem}
+.topbtn a:first-child{background:var(--gold);color:#1d1b1a}
+.topbtn a:last-child{background:#1d1b1a;color:var(--gold)}
+/* stats */
+.stats{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:20px 0 22px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 16px;font-size:.92rem;color:var(--muted);display:flex;gap:8px;align-items:baseline}
+.stat b{color:var(--ink);font-weight:600;font-size:1.05rem}
+.stat.rank b{color:var(--lil)}
+/* screens */
+.screen{display:none;animation:fade .35s ease}
+.screen.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:26px 28px;box-shadow:0 4px 22px rgba(52,80,124,.07);margin-bottom:18px}
+/* home grid */
+.sect-title{font-weight:600;font-size:1.05rem;color:var(--muted);margin:26px 4px 12px;letter-spacing:.02em}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.mode{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 18px 16px;text-align:left;position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s}
+.mode:hover{transform:translateY(-3px);box-shadow:0 8px 26px rgba(52,80,124,.13)}
+.mode::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--acc,var(--blue))}
+.mode .ic{font-size:1.5rem}
+.mode h3{font-weight:600;font-size:1.08rem;margin:4px 0 4px}
+.mode p{font-size:.88rem;color:var(--muted);line-height:1.45}
+.mode .tag{display:inline-block;margin-top:9px;font-size:.74rem;font-weight:500;padding:2px 9px;border-radius:999px;background:var(--accs,var(--blue-s));color:var(--acc,var(--blue))}
+.fam-blue{--acc:var(--blue);--accs:var(--blue-s)}
+.fam-pet{--acc:var(--pet);--accs:var(--pet-s)}
+.fam-lil{--acc:var(--lil);--accs:var(--lil-s)}
+.fam-gold{--acc:#94701f;--accs:var(--gold-s)}
+.marathon{grid-column:1/-1;display:flex;gap:16px;align-items:center;background:linear-gradient(120deg,var(--blue),var(--lil));color:#fff;border:none}
+.marathon::before{display:none}
+.marathon p{color:#eef0f7}
+.marathon .ic{font-size:2.1rem}
+/* quiz */
+.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.back{background:none;border:1px solid var(--line);border-radius:999px;padding:6px 16px;font-size:.9rem;color:var(--muted);background:var(--card)}
+.back:hover{border-color:var(--blue);color:var(--blue)}
+.mtitle{font-weight:600;font-size:1.25rem;color:var(--blue)}
+.counter{font-size:.9rem;color:var(--muted)}
+.instr{font-size:.95rem;color:var(--lil);font-weight:500;margin-bottom:12px}
+.kicker{display:inline-block;font-size:.76rem;font-weight:500;padding:2px 10px;border-radius:999px;background:var(--blue-s);color:var(--blue);margin-bottom:10px}
+.stem{font-size:1.28rem;line-height:1.75;margin-bottom:20px}
+.stem .src{display:block;background:var(--blue-s);border-radius:12px;padding:12px 16px;font-size:1.12rem;margin-bottom:6px}
+.gap{display:inline-block;min-width:110px;border-bottom:2.5px solid var(--lil);text-align:center;color:var(--lil);font-weight:600;padding:0 6px}
+.gap.filled{border-color:var(--pet);color:var(--pet);background:var(--pet-s);border-radius:6px 6px 0 0}
+.mk{background:var(--gold-s);border-bottom:2px solid var(--gold);padding:0 4px;border-radius:4px;font-weight:500}
+.opts{display:grid;gap:10px}
+.opts.two{grid-template-columns:1fr 1fr}
+@media(max-width:640px){.opts.two{grid-template-columns:1fr}}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px 16px;font-size:1.05rem;line-height:1.5;transition:border-color .12s,background .12s}
+.opt:hover:not([disabled]){border-color:var(--blue);background:var(--blue-s)}
+.opt .lt{flex:none;width:28px;height:28px;border-radius:50%;background:var(--blue-s);color:var(--blue);font-weight:600;font-size:.85rem;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.opt.right{border-color:var(--pet);background:var(--pet-s)}
+.opt.right .lt{background:var(--pet);color:#fff}
+.opt.wrong{border-color:var(--rust);background:var(--rust-s)}
+.opt.wrong .lt{background:var(--rust);color:#fff}
+.opt[disabled]{cursor:default}
+.fb{margin-top:18px;border-radius:14px;padding:16px 18px;font-size:.98rem;line-height:1.6;display:none}
+.fb.show{display:block;animation:fade .3s}
+.fb.ok{background:var(--pet-s);border-left:5px solid var(--pet)}
+.fb.no{background:var(--rust-s);border-left:5px solid var(--rust)}
+.fb .verdict{font-weight:600;margin-bottom:6px}
+.fb.ok .verdict{color:var(--pet)}
+.fb.no .verdict{color:var(--rust)}
+.fb p{margin-top:6px}
+.fb .why{background:rgba(255,255,255,.65);border-radius:10px;padding:8px 12px;margin-top:8px}
+.sol{margin-top:10px;background:#fff;border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:flex-start;font-weight:500}
+.spk{flex:none;background:var(--blue-s);border:none;border-radius:50%;width:32px;height:32px;font-size:.95rem}
+.spk:hover{background:var(--blue);color:#fff}
+.qnav{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
+.btn{border:none;border-radius:999px;padding:10px 22px;font-weight:500;background:var(--blue);color:#fff;font-size:.98rem}
+.btn:hover{filter:brightness(1.1)}
+.btn.ghost{background:var(--card);color:var(--blue);border:1.5px solid var(--blue)}
+.btn.lil{background:var(--lil)}
+.btn.pet{background:var(--pet)}
+.btn[hidden]{display:none}
+.hint{font-size:.85rem;color:var(--muted);margin-top:10px}
+/* bau */
+.zone{min-height:66px;border:2px dashed var(--line);border-radius:14px;padding:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:#fff;margin-bottom:12px}
+.zone.target{border-color:var(--lil);background:var(--lil-s)}
+.zone.target.done{border-style:solid;border-color:var(--pet);background:var(--pet-s)}
+.tile{background:var(--card);border:1.5px solid var(--blue);color:var(--blue);border-radius:10px;padding:6px 13px;font-size:1.02rem;font-weight:500;transition:transform .1s}
+.tile:hover{transform:translateY(-2px)}
+.tile.p{border-color:var(--muted);color:var(--muted);min-width:34px}
+.tile.k{border-color:var(--lil);color:var(--lil);background:var(--lil-s)}
+.zone.target .tile{background:#fff}
+.placeholder{color:var(--muted);font-size:.9rem;padding:0 6px}
+.built{font-size:1.15rem;margin:4px 0 12px;min-height:1.6em;color:var(--ink)}
+/* text mode */
+.txtsel{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:5px 14px;font-size:.88rem;color:var(--muted)}
+.chip.on,.chip:hover{background:var(--lil);border-color:var(--lil);color:#fff}
+.ttext{font-size:1.14rem;line-height:2.05}
+.ttext select{font-family:inherit;font-size:1rem;padding:2px 6px;border-radius:8px;border:1.5px solid var(--lil);background:var(--lil-s);color:var(--ink);margin:0 2px}
+.ttext select.r{border-color:var(--pet);background:var(--pet-s)}
+.ttext select.w{border-color:var(--rust);background:var(--rust-s)}
+.ttext .num{font-size:.7rem;vertical-align:super;color:var(--lil);font-weight:600}
+.exlist{margin-top:16px;display:grid;gap:8px}
+.exitem{border-radius:12px;padding:10px 14px;font-size:.95rem}
+.exitem.r{background:var(--pet-s)}
+.exitem.w{background:var(--rust-s)}
+.exitem b{font-weight:600}
+/* sorter */
+.sortword{text-align:center;font-size:2.3rem;font-weight:600;color:var(--lil);margin:16px 0 8px;min-height:3.2rem}
+.timer{height:8px;border-radius:999px;background:var(--line);overflow:hidden;margin:6px 0 16px}
+.timer i{display:block;height:100%;background:linear-gradient(90deg,var(--pet),var(--blue));width:100%;transition:width 1s linear}
+.sortbtns{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.sbtn{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px 10px;font-size:.95rem;font-weight:500;line-height:1.35}
+.sbtn small{display:block;font-weight:400;color:var(--muted);font-size:.8rem}
+.sbtn:hover{border-color:var(--lil);background:var(--lil-s)}
+.sbtn.flashR{background:var(--pet-s);border-color:var(--pet)}
+.sbtn.flashW{background:var(--rust-s);border-color:var(--rust)}
+.sortfb{text-align:center;min-height:1.6em;font-size:.95rem;margin-top:12px;color:var(--muted)}
+.big{font-size:2rem;font-weight:600;color:var(--blue)}
+/* duett */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.dbtn{width:100%;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:1.05rem;font-weight:500}
+.dbtn.sel{border-color:var(--lil);background:var(--lil-s)}
+.dbtn.done{border-color:var(--pet);background:var(--pet-s);color:var(--pet);cursor:default}
+.dbtn.bad{border-color:var(--rust);background:var(--rust-s)}
+.pairinfo{font-size:.92rem;background:var(--pet-s);border-radius:12px;padding:10px 14px;margin-top:10px}
+/* rad */
+.topic{font-size:1.4rem;font-weight:600;color:var(--blue);text-align:center;margin:8px 0 6px;line-height:1.4}
+.role{text-align:center;color:var(--lil);font-weight:500;margin-bottom:16px}
+.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.kc{background:var(--lil-s);border-radius:14px;padding:14px 16px;cursor:pointer;border:1.5px solid transparent}
+.kc.used{background:var(--pet-s);border-color:var(--pet)}
+.kc b{font-size:1.2rem;color:var(--lil);display:block}
+.kc.used b{color:var(--pet)}
+.kc span{font-size:.85rem;color:var(--muted);display:block;margin-top:3px}
+.kc .fr{font-size:.92rem;color:var(--ink);margin-top:6px;font-style:italic}
+.level{display:flex;gap:8px;justify-content:center;margin-bottom:12px;flex-wrap:wrap}
+/* lexikon */
+.search{width:100%;padding:12px 16px;font-family:inherit;font-size:1.05rem;border:1.5px solid var(--line);border-radius:14px;background:#fff;margin-bottom:12px}
+.search:focus{outline:none;border-color:var(--blue)}
+.lexcard{background:#fff;border:1px solid var(--line);border-radius:14px;margin-bottom:8px;overflow:hidden}
+.lexhead{padding:11px 16px;cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.lexhead:hover{background:var(--blue-s)}
+.lexw{font-weight:600;color:var(--blue);font-size:1.12rem}
+.lexb{font-size:.75rem;padding:2px 9px;border-radius:999px;background:var(--lil-s);color:var(--lil);margin-left:6px;white-space:nowrap}
+.lexbody{display:none;padding:4px 16px 14px;font-size:.95rem;border-top:1px solid var(--line)}
+.lexcard.open .lexbody{display:block}
+.lexbody .lbl{font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:9px}
+.lexbody .tip{background:var(--gold-s);border-radius:10px;padding:8px 12px;margin-top:9px}
+.pop{position:fixed;top:18%;left:50%;transform:translateX(-50%);font-size:1.6rem;font-weight:600;color:var(--pet);pointer-events:none;z-index:50;animation:popup 1s ease forwards}
+@keyframes popup{from{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,-50px)}}
+.resultbig{text-align:center;padding:10px 0}
+.resultbig .big{font-size:3rem}
+footer{text-align:center;font-size:.8rem;color:var(--muted);margin-top:30px}
+.yt{font-size:.85rem;color:var(--muted);margin-top:8px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.85rem;color:var(--muted);margin-top:10px}
+kbd{font-family:inherit;font-size:.78rem;background:var(--blue-s);border-radius:5px;padding:1px 6px;color:var(--blue)}
+</style>
+<style>
+.quote{background:var(--blue-s);border-left:5px solid var(--blue);border-radius:12px;padding:14px 18px;font-size:1.13rem;line-height:1.7}
+.qintro{color:var(--muted)}
+.arrow{color:var(--lil);font-weight:600}
+.exbox{background:rgba(255,255,255,.7);border-radius:12px;padding:10px 14px;margin-top:8px;font-size:.95rem}
+.exh{font-size:.76rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--lil);margin:8px 0 3px}
+.exh:first-child{margin-top:0}
+.shift{margin:2px 0}
+.shift b{font-weight:600;color:var(--blue)}
+.shift .arr{color:var(--lil);font-weight:600;margin:0 4px}
+.shift .lbl{color:var(--muted);font-size:.88rem}
+.frame{font-size:1.18rem;line-height:2.3;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 16px}
+.gin{font-family:inherit;font-size:1.05rem;padding:3px 8px;border-radius:8px;border:1.5px solid var(--lil);background:var(--lil-s);color:var(--ink);text-align:center;margin:0 2px;max-width:100%}
+.gin:focus{outline:none;border-color:var(--blue);background:#fff}
+.gin.r{border-color:var(--pet);background:var(--pet-s)}
+.gin.w{border-color:var(--rust);background:var(--rust-s)}
+.gin.s{border-color:var(--gold);background:var(--gold-s)}
+.gin::placeholder{color:#8a8f9c;font-size:.85rem}
+.built{font-size:1.1rem;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:14px 0 10px}
+.built b{color:var(--lil);font-weight:500}
+.rulemini{background:var(--gold-s);border-radius:12px;padding:12px 16px;font-size:.95rem;margin-top:14px}
+.tquote{background:var(--blue-s);border-radius:12px;padding:12px 16px;font-size:1.02rem;margin-bottom:16px;font-style:italic}
+.tquote .exh{font-style:normal}
+.rules h3{font-weight:600;font-size:1.15rem;color:var(--blue);margin:22px 0 8px}
+.rules h3:first-child{margin-top:0}
+.rules p{margin:6px 0}
+.rules table{border-collapse:collapse;width:100%;font-size:.95rem;margin:8px 0;background:#fff;border-radius:12px;overflow:hidden}
+.rules th,.rules td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left}
+.rules th{background:var(--lil-s);color:var(--lil);font-weight:600}
+.rules td.k1{color:var(--pet);font-weight:600}
+.rules td.k2{color:var(--lil);font-weight:600}
+.rules td.w{color:var(--blue);font-weight:600}
+.rules .ex{background:var(--blue-s);border-radius:10px;padding:8px 12px;margin:6px 0;font-size:.95rem}
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:10px 0}
+.flow div{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;font-size:.92rem}
+.flow div b{display:block;color:var(--lil);margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="bubbles" id="bubbles"></div>
+<div class="wrap">
+<header>
+  <h1>Konjunktiv-<span>Atelier</span> C1</h1>
+  <p class="sub">Indirekte Rede wie im Qualitätsjournalismus – mit Perspektivwechsel, Ersatzformen und Konjunktiv II</p>
+  <div class="topbtn"><a href="../index.html">Übungsliste</a><a href="../../index.html">Hauptseite</a></div>
+</header>
+
+<div class="stats">
+  <div class="stat">Punkte <b id="sPts">0</b></div>
+  <div class="stat rank">Rang <b id="sRank">–</b></div>
+  <div class="stat">Serie <b id="sStreak">0</b></div>
+  <div class="stat">Beste Serie <b id="sBest">0</b></div>
+  <div class="stat">Treffsicherheit <b id="sAcc">–</b></div>
+</div>
+
+<section id="home" class="screen active">
+  <div class="grid">
+    <button class="mode marathon" onclick="startMode('marathon')">
+      <div class="ic">🏁</div>
+      <div><h3>Konjunktiv-Marathon</h3><p>20 gemischte Aufgaben: Perspektivwechsel, Formen, Satzbau, Spezialfälle, Konjunktiv II und Fehlerjagd im Wechsel. Am Ende gibt es deine Bilanz.</p></div>
+    </button>
+  </div>
+
+  <div class="sect-title">✦ Endlos-Werkstätten – jedes Zitat neu: andere Sprecher, andere Situationen</div>
+  <div class="grid">
+    <button class="mode fam-blue" onclick="startMode('persp')"><div class="ic">🔄</div><h3>Perspektivwechsel</h3><p>Wer spricht zu wem – und wer berichtet? „du“ wird mal zu „ich“, mal zu „er“; „unser“ bleibt manchmal „unser“. Vier Versionen, nur eine stimmt.</p><span class="tag">Person &amp; Bezug</span></button>
+    <button class="mode fam-blue" onclick="startMode('form')"><div class="ic">✍️</div><h3>Formen-Schmiede</h3><p>Tippe Pronomen, Possessivartikel und Verbform selbst ein – ohne Auswahl, ohne Hilfe. Die Königsdisziplin.</p><span class="tag">Selbst schreiben</span></button>
+    <button class="mode fam-blue" onclick="startMode('bau')"><div class="ic">🧱</div><h3>Satzbaukasten</h3><p>Baue die indirekte Rede aus Bausteinen – mit und ohne „dass“. Vorsicht: Unter den Bausteinen lauern Fallen.</p><span class="tag">Mit Fallen</span></button>
+  </div>
+
+  <div class="sect-title">✦ Präzisions-Werkstätten</div>
+  <div class="grid">
+    <button class="mode fam-lil" onclick="startMode('spez')"><div class="ic">🎯</div><h3>Spezialfälle</h3><p>„Sie“ wird zu „ich“, „wir“ zu „er“, Bitten werden zu „möge“, „morgen“ zu „am nächsten Tag“, „hier“ zu „dort“.</p><span class="tag">Feinheiten</span></button>
+    <button class="mode fam-lil" onclick="startMode('k2')"><div class="ic">💭</div><h3>Konjunktiv-II-Werkstatt</h3><p>Irreale Bedingungen, Wünsche, Vorwürfe, doppelter Infinitiv, „als“-Vergleiche – und wann der Konjunktiv II in der indirekten Rede bleibt.</p><span class="tag">Irreales</span></button>
+    <button class="mode fam-lil" onclick="startMode('fehler')"><div class="ic">🔍</div><h3>Fehlerjagd</h3><p>Drei Sätze sind druckreif, einer verstößt gegen die Regeln der indirekten Rede. Finde ihn.</p><span class="tag">Fehler erkennen</span></button>
+  </div>
+
+  <div class="sect-title">✦ Text, Tempo &amp; Gespräch</div>
+  <div class="grid">
+    <button class="mode fam-pet" onclick="openText()"><div class="ic">📰</div><h3>Zeitungs-Redaktion</h3><p>Fünf Originalzitate – Interview, Pressekonferenz, Mitarbeitergespräch. Mach daraus einen druckreifen Bericht.</p><span class="tag">Zusammenhang</span></button>
+    <button class="mode fam-pet" onclick="openBlitz()"><div class="ic">⚡</div><h3>Blitz: Konjunktiv I oder Ersatz?</h3><p>60 Sekunden: Person + Verb – Konjunktiv I, Konjunktiv II oder würde-Form? Trainiere die Ersatzregel bis zum Automatismus.</p><span class="tag">Tempo &amp; Highscore</span></button>
+    <button class="mode fam-gold" onclick="openRep()"><div class="ic">🎙️</div><h3>Reporter-Runde</h3><p>Ein Zitat erscheint – du berichtest es im Unterricht mündlich, mit und ohne „dass“. Dann deckst du die Lösung auf.</p><span class="tag">Mündlich</span></button>
+    <button class="mode fam-gold" onclick="show('rules')"><div class="ic">🧭</div><h3>Regelkompass</h3><p>Alles auf einen Blick: Bildung, Ersatzregel, Zeiten, Pronomen-Kompass, Fragen, Aufforderungen, Konjunktiv II.</p><span class="tag">Nachschlagen</span></button>
+  </div>
+</section>
+
+<section id="quiz" class="screen">
+  <div class="bar"><button class="back" onclick="goHome()">← Übersicht</button><div class="mtitle" id="qTitle"></div><div class="counter" id="qCount"></div></div>
+  <div class="card" id="qCard"></div>
+</section>
+
+<section id="result" class="screen"><div class="card resultbig" id="resBox"></div></section>
+
+<section id="text" class="screen">
+  <div class="bar"><button class="back" onclick="goHome()">← Übersicht</button><div class="mtitle">📰 Zeitungs-Redaktion</div><div class="counter" id="tCount"></div></div>
+  <div class="card">
+    <div class="txtsel" id="txtSel"></div>
+    <div class="kicker" id="tKind"></div>
+    <h2 id="tTitle" style="font-weight:600;font-size:1.35rem;margin-bottom:12px;color:var(--blue)"></h2>
+    <div class="tquote" id="tQuote"></div>
+    <div class="exh">Dein Bericht</div>
+    <div class="ttext" id="tBody"></div>
+    <div class="qnav"><button class="btn ghost" onclick="renderText()">Neu mischen</button><button class="btn" id="tCheck" onclick="checkText()">Bericht prüfen</button></div>
+    <div class="exlist" id="tEx"></div>
+  </div>
+</section>
+
+<section id="blitz" class="screen">
+  <div class="bar"><button class="back" onclick="stopBlitz();goHome()">← Übersicht</button><div class="mtitle">⚡ Konjunktiv I oder Ersatz?</div><div class="counter" id="bzHi"></div></div>
+  <div class="card" id="blitzCard"></div>
+</section>
+
+<section id="rep" class="screen">
+  <div class="bar"><button class="back" onclick="goHome()">← Übersicht</button><div class="mtitle">🎙️ Reporter-Runde</div><div class="counter" id="repCount"></div></div>
+  <div class="card" id="repCard"></div>
+</section>
+
+<section id="rules" class="screen">
+  <div class="bar"><button class="back" onclick="goHome()">← Übersicht</button><div class="mtitle">🧭 Regelkompass</div><div class="counter"></div></div>
+  <div class="card rules">
+    <h3>1 · Konjunktiv I bilden</h3>
+    <p>Infinitivstamm + Endung <b>-e, -est, -e, -en, -et, -en</b>. Einzige Ausnahme: <b>sein</b> (ich sei, er sei, wir seien, sie seien).</p>
+    <table><tr><th>Infinitiv</th><th>er/sie/es (Ind.)</th><th>er/sie/es (Konj. I)</th><th>ich (Konj. I)</th><th>wir/sie (Konj. I)</th></tr>
+      <tr><td>haben</td><td>hat</td><td class="k1">habe</td><td>habe = Ind.</td><td>haben = Ind.</td></tr>
+      <tr><td>sein</td><td>ist</td><td class="k1">sei</td><td class="k1">sei</td><td class="k1">seien</td></tr>
+      <tr><td>werden</td><td>wird</td><td class="k1">werde</td><td>werde = Ind.</td><td>werden = Ind.</td></tr>
+      <tr><td>können</td><td>kann</td><td class="k1">könne</td><td class="k1">könne</td><td>können = Ind.</td></tr>
+      <tr><td>wissen</td><td>weiß</td><td class="k1">wisse</td><td class="k1">wisse</td><td>wissen = Ind.</td></tr>
+      <tr><td>kommen</td><td>kommt</td><td class="k1">komme</td><td>komme = Ind.</td><td>kommen = Ind.</td></tr></table>
+    <p>Merke: In der 3. Person Singular ist der Konjunktiv I <b>immer</b> eindeutig. Bei „ich“, „wir“ und „sie“ (Plural) fast nie – außer bei „sein“ und den Modalverben im Singular.</p>
+
+    <h3>2 · Die Ersatzregel</h3>
+    <div class="flow"><div><b>① Konjunktiv I</b>wenn er sich vom Indikativ unterscheidet: <i>er habe, ich sei, ich könne</i></div><div><b>② Konjunktiv II</b>wenn Konj. I = Indikativ: <i>wir haben → wir hätten; ich komme → ich käme</i></div><div><b>③ würde + Infinitiv</b>wenn auch Konj. II = Präteritum (oder veraltet klingt): <i>sie arbeiten → sie würden arbeiten; ich rufe an → ich würde anrufen</i></div></div>
+    <p>Im neutralen Bericht (Zeitung, Protokoll, wissenschaftlicher Text) gilt: Wo der Konjunktiv I eindeutig ist, steht er. Der Konjunktiv II statt eines eindeutigen Konjunktiv I klingt umgangssprachlich oder signalisiert Zweifel.</p>
+
+    <h3>3 · Zeiten</h3>
+    <table><tr><th>Direkte Rede</th><th>Indirekte Rede</th></tr>
+      <tr><td>Gegenwart: „Ich bin müde.“</td><td>er <b>sei</b> müde</td></tr>
+      <tr><td>Vergangenheit (Präteritum, Perfekt, Plusquamperfekt): „Ich war / bin / war … gewesen.“</td><td>er <b>sei</b> müde <b>gewesen</b> · sie <b>habe</b> … <b>gelesen</b></td></tr>
+      <tr><td>Zukunft: „Ich werde kommen.“</td><td>er <b>werde</b> kommen · sie (Pl.) <b>würden</b> kommen</td></tr></table>
+
+    <h3>4 · Pronomen-Kompass</h3>
+    <p>Entscheidend ist immer: <b>Wer spricht, wer ist gemeint – und wer berichtet?</b></p>
+    <table><tr><th>Direkt</th><th>Gemeint ist …</th><th>Indirekt</th></tr>
+      <tr><td>ich · mein</td><td>der/die Sprechende</td><td>er/sie · sein/ihr</td></tr>
+      <tr><td>du / Sie · dein / Ihr</td><td>ich selbst (zu mir gesagt)</td><td>ich · mein</td></tr>
+      <tr><td>du / Sie · dein / Ihr</td><td>eine dritte Person</td><td>er/sie · sein/ihr</td></tr>
+      <tr><td>wir · unser</td><td>eine Gruppe ohne mich (Firma, Team)</td><td>sie / man · ihr</td></tr>
+      <tr><td>wir · unser</td><td>der/die Sprechende und ich</td><td>wir · unser (bleibt!)</td></tr>
+      <tr><td>ihr · euer</td><td>wir (zu uns gesagt)</td><td>wir · unser</td></tr></table>
+    <div class="ex">„Du hast meinen Bericht noch nicht gelesen“, sagte die Chefin zu mir. → Die Chefin sagte, <b>ich hätte ihren</b> Bericht noch nicht gelesen.</div>
+
+    <h3>5 · Fragen und Aufforderungen</h3>
+    <p><b>Ja/Nein-Frage → ob</b>, W-Frage → Fragewort; das Verb steht am Ende: <i>Sie fragte mich, ob ich Zeit hätte / wann ich käme.</i></p>
+    <p><b>Imperativ → sollen</b> (höfliche Bitte: <b>mögen</b>): „Ruf mich an!“ → er solle sie anrufen · „Bitte setzen Sie sich!“ → ich möge mich setzen.</p>
+
+    <h3>6 · Zeit und Ort aus der Sicht des Berichts</h3>
+    <p>heute → an jenem Tag · morgen → am nächsten Tag · gestern → am Vortag · hier → dort – sofern sich Zeit oder Ort des Berichts vom Originalzitat unterscheiden.</p>
+
+    <h3>7 · Konjunktiv II – eigene Aufgaben</h3>
+    <p><b>Irreales:</b> Wenn ich Zeit hätte, käme ich mit. · <b>Wünsche:</b> Hätte ich das nur gewusst! · <b>Höflichkeit:</b> Würden Sie mir helfen? · <b>Vergleich:</b> als wäre nichts geschehen · <b>Vergangenheit:</b> hätte/wäre + Partizip II · <b>Modalverb:</b> hätte kommen sollen (doppelter Infinitiv).</p>
+    <p>Steht in der direkten Rede bereits ein Konjunktiv II, <b>bleibt er</b> in der indirekten Rede erhalten: „Ich hätte das nie gedacht.“ → Er sagte, er hätte das nie gedacht.</p>
+  </div>
+</section>
+
+<footer>Konjunktiv-Atelier C1 · Tastatur: <kbd>1</kbd>–<kbd>4</kbd> zum Antworten, <kbd>Enter</kbd> zum Prüfen bzw. Weitergehen</footer>
+</div>
+
+<script>
+// ═══════════════ VERBEN ═══════════════
+// Personen-Index: 0 ich · 1 du · 2 er/sie/es · 3 wir · 4 ihr · 5 sie/Sie
+const VB = {
+ haben:{pr:"habe hast hat haben habt haben",pt:"hatte hattest hatte hatten hattet hatten",k2:"hätte hättest hätte hätten hättet hätten",pp:"gehabt",aux:"haben",imp:"hab"},
+ sein:{pr:"bin bist ist sind seid sind",pt:"war warst war waren wart waren",k2:"wäre wärst wäre wären wärt wären",k1:"sei seist sei seien seiet seien",pp:"gewesen",aux:"sein",imp:"sei",impS:"seien"},
+ werden:{pr:"werde wirst wird werden werdet werden",pt:"wurde wurdest wurde wurden wurdet wurden",k2:"würde würdest würde würden würdet würden",pp:"geworden",aux:"sein"},
+ können:{pr:"kann kannst kann können könnt können",pt:"konnte konntest konnte konnten konntet konnten",k2:"könnte könntest könnte könnten könntet könnten",pp:"gekonnt",aux:"haben",modal:1},
+ müssen:{pr:"muss musst muss müssen müsst müssen",pt:"musste musstest musste mussten musstet mussten",k2:"müsste müsstest müsste müssten müsstet müssten",pp:"gemusst",aux:"haben",modal:1},
+ dürfen:{pr:"darf darfst darf dürfen dürft dürfen",pt:"durfte durftest durfte durften durftet durften",k2:"dürfte dürftest dürfte dürften dürftet dürften",pp:"gedurft",aux:"haben",modal:1},
+ sollen:{pr:"soll sollst soll sollen sollt sollen",pt:"sollte solltest sollte sollten solltet sollten",k2:"sollte solltest sollte sollten solltet sollten",pp:"gesollt",aux:"haben",modal:1},
+ wollen:{pr:"will willst will wollen wollt wollen",pt:"wollte wolltest wollte wollten wolltet wollten",k2:"wollte wolltest wollte wollten wolltet wollten",pp:"gewollt",aux:"haben",modal:1},
+ wissen:{pr:"weiß weißt weiß wissen wisst wissen",pt:"wusste wusstest wusste wussten wusstet wussten",k2:"wüsste wüsstest wüsste wüssten wüsstet wüssten",pp:"gewusst",aux:"haben"},
+ kommen:{pr:"komme kommst kommt kommen kommt kommen",pt:"kam kamst kam kamen kamt kamen",k2:"käme kämest käme kämen kämet kämen",pp:"gekommen",aux:"sein",imp:"komm"},
+ geben:{pr:"gebe gibst gibt geben gebt geben",pt:"gab gabst gab gaben gabt gaben",k2:"gäbe gäbest gäbe gäben gäbet gäben",pp:"gegeben",aux:"haben",imp:"gib"},
+ finden:{pr:"finde findest findet finden findet finden",pt:"fand fandest fand fanden fandet fanden",k2:"fände fändest fände fänden fändet fänden",pp:"gefunden",aux:"haben"},
+ bleiben:{pr:"bleibe bleibst bleibt bleiben bleibt bleiben",pt:"blieb bliebst blieb blieben bliebt blieben",k2:"bliebe bliebest bliebe blieben bliebet blieben",pp:"geblieben",aux:"sein"},
+ gehen:{pr:"gehe gehst geht gehen geht gehen",pt:"ging gingst ging gingen gingt gingen",k2:"ginge gingest ginge gingen ginget gingen",pp:"gegangen",aux:"sein"},
+ lesen:{pr:"lese liest liest lesen lest lesen",pt:"las last las lasen last lasen",k2:"läse läsest läse läsen läset läsen",pp:"gelesen",aux:"haben",imp:"lies",old:1},
+ nehmen:{pr:"nehme nimmst nimmt nehmen nehmt nehmen",pt:"nahm nahmst nahm nahmen nahmt nahmen",k2:"nähme nähmest nähme nähmen nähmet nähmen",pp:"genommen",aux:"haben",imp:"nimm",old:1},
+ sprechen:{pr:"spreche sprichst spricht sprechen sprecht sprechen",pt:"sprach sprachst sprach sprachen spracht sprachen",k2:"spräche sprächest spräche sprächen sprächet sprächen",pp:"gesprochen",aux:"haben",old:1},
+ treffen:{pr:"treffe triffst trifft treffen trefft treffen",pt:"traf trafst traf trafen traft trafen",k2:"träfe träfest träfe träfen träfet träfen",pp:"getroffen",aux:"haben",old:1},
+ erhalten:{pr:"erhalte erhältst erhält erhalten erhaltet erhalten",pt:"erhielt erhieltest erhielt erhielten erhieltet erhielten",k2:"erhielte erhieltest erhielte erhielten erhieltet erhielten",pp:"erhalten",aux:"haben",old:1},
+ halten:{pr:"halte hältst hält halten haltet halten",pt:"hielt hieltest hielt hielten hieltet hielten",k2:"hielte hieltest hielte hielten hieltet hielten",pp:"gehalten",aux:"haben",old:1},
+ vergessen:{pr:"vergesse vergisst vergisst vergessen vergesst vergessen",pt:"vergaß vergaßt vergaß vergaßen vergaßt vergaßen",k2:"vergäße vergäßest vergäße vergäßen vergäßet vergäßen",pp:"vergessen",aux:"haben",imp:"vergiss",old:1},
+ verschieben:{pr:"verschiebe verschiebst verschiebt verschieben verschiebt verschieben",pt:"verschob verschobst verschob verschoben verschobt verschoben",k2:"verschöbe verschöbest verschöbe verschöben verschöbet verschöben",pp:"verschoben",aux:"haben",old:1},
+ unterschreiben:{pr:"unterschreibe unterschreibst unterschreibt unterschreiben unterschreibt unterschreiben",pt:"unterschrieb unterschriebst unterschrieb unterschrieben unterschriebt unterschrieben",k2:"unterschriebe unterschriebest unterschriebe unterschrieben unterschriebet unterschrieben",pp:"unterschrieben",aux:"haben",old:1},
+ rufen:{pr:"rufe rufst ruft rufen ruft rufen",pt:"rief riefst rief riefen rieft riefen",k2:"riefe riefest riefe riefen riefet riefen",pp:"gerufen",aux:"haben",imp:"ruf",old:1},
+ steigen:{pr:"steige steigst steigt steigen steigt steigen",pt:"stieg stiegst stieg stiegen stiegt stiegen",k2:"stiege stiegest stiege stiegen stieget stiegen",pp:"gestiegen",aux:"sein",old:1}
+};
+// regelmäßige Verben: [Stamm, Partizip II, Hilfsverb]
+const REG = {arbeiten:["arbeit","gearbeitet","haben"],planen:["plan","geplant","haben"],schicken:["schick","geschickt","haben"],investieren:["investier","investiert","haben"],informieren:["informier","informiert","haben"],freuen:["freu","gefreut","haben"],irren:["irr","geirrt","haben"],erreichen:["erreich","erreicht","haben"],warten:["wart","gewartet","haben"]};
+// trennbare Verben
+const SEP = {anrufen:{b:"rufen",sep:"an",pp:"angerufen"},einhalten:{b:"halten",sep:"ein",pp:"eingehalten"},vorgehen:{b:"gehen",sep:"vor",pp:"vorgegangen"}};
+
+// ═══════════════ SPRECHER & SITUATIONEN ═══════════════
+const SPK = [
+ {n:"die Ministerin",g:"f"},{n:"der Bürgermeister",g:"m"},{n:"die Abteilungsleiterin",g:"f"},{n:"der Projektleiter",g:"m"},
+ {n:"die Geschäftsführerin",g:"f"},{n:"der Chefredakteur",g:"m"},{n:"die Professorin",g:"f"},{n:"der Direktor",g:"m"},
+ {n:"meine Chefin",g:"f"},{n:"mein Kollege",g:"m"},{n:"die Personalchefin",g:"f"},{n:"der Vorsitzende",g:"m"}
+];
+const ADDR = {
+ f:[{n:"ihr Assistent",d:"ihrem Assistenten",a:"ihren Assistenten"},{n:"ihr Stellvertreter",d:"ihrem Stellvertreter",a:"ihren Stellvertreter"},{n:"ihr Kollege",d:"ihrem Kollegen",a:"ihren Kollegen"}],
+ m:[{n:"seine Assistentin",d:"seiner Assistentin",a:"seine Assistentin"},{n:"seine Stellvertreterin",d:"seiner Stellvertreterin",a:"seine Stellvertreterin"},{n:"seine Kollegin",d:"seiner Kollegin",a:"seine Kollegin"}]
+};
+const ORG = [{n:"die Sprecherin des Konzerns",g:"f"},{n:"der Sprecher der Stadtwerke",g:"m"},{n:"die Sprecherin der Verkehrsbetriebe",g:"f"},{n:"der Sprecher der Fluggesellschaft",g:"m"},{n:"die Pressesprecherin der Baufirma",g:"f"},{n:"der Sprecher der Brauerei",g:"m"}];
+const INTRO_V = ["sagte","erklärte","betonte","versicherte","behauptete"];
+
+// ═══════════════ ZITAT-BAUPLÄNE ═══════════════
+// Rollen: S = Sprecher (ich) · A = Angesprochener (du/Sie) · W = Firma (wir, ohne Berichtenden) · U = wir (Sprecher + Berichtender)
+// Token: {Rolle:n|a|d|ra|rd} Pronomen · {Rolle:p:Endung} Possessiv (nm nf nn np am af an ap dm df dn dp gp)
+const TPL = [
+ {s:"S",v:"lesen",t:"perf",r:"{A:p:am} Bericht noch nicht"},
+ {s:"A",v:"müssen",t:"pres",r:"die Präsentation bis Freitag",tail:"überarbeiten"},
+ {s:"S",v:"können",t:"pres",r:"{A:d} morgen leider nicht",tail:"helfen"},
+ {s:"S",v:"anrufen",t:"pres",r:"{A:a} gleich nach der Sitzung"},
+ {s:"A",v:"haben",t:"pres",r:"in diesem Punkt völlig recht"},
+ {s:"S",v:"sein",t:"pres",r:"mit {A:p:df} Entscheidung nicht einverstanden"},
+ {s:"S",v:"geben",t:"fut",r:"{A:d} {S:p:af} Antwort bis Montag"},
+ {s:"S",v:"finden",t:"perf",r:"{A:p:af} Idee von Anfang an überzeugend"},
+ {s:"A",v:"dürfen",t:"pres",r:"die vertraulichen Unterlagen nicht mit nach Hause",tail:"nehmen"},
+ {s:"S",v:"verschieben",t:"perf",r:"{U:p:am} Termin auf nächste Woche"},
+ {s:"U",v:"müssen",t:"pres",r:"das Problem gemeinsam",tail:"lösen"},
+ {s:"A",v:"kommen",t:"perf",r:"heute schon wieder zu spät"},
+ {s:"S",v:"bleiben",t:"fut",r:"bis zum Ende des Projekts in der Abteilung"},
+ {s:"S",v:"sprechen",t:"perf",r:"lange mit {A:p:dm} Vorgesetzten"},
+ {s:"A",v:"können",t:"pres",r:"jederzeit auf {S:p:af} Unterstützung",tail:"zählen"},
+ {s:"S",v:"erhalten",t:"perf",r:"{A:p:af} E-Mail erst heute Morgen"},
+ {s:"S",v:"treffen",t:"fut",r:"{A:p:af} Schwester auf der Messe"},
+ {s:"A",v:"sollen",t:"pres",r:"{S:d} die Zahlen bis morgen",tail:"schicken"},
+ {s:"S",v:"unterschreiben",t:"perf",r:"den Vertrag noch nicht"},
+ {s:"S",v:"sein",t:"perf",r:"noch nie so enttäuscht"},
+ {s:"S",v:"arbeiten",t:"pres",r:"seit Jahren an diesem Thema"},
+ {s:"A",v:"arbeiten",t:"pres",r:"eindeutig zu viel"},
+ {s:"S",v:"freuen",t:"pres",r:"{S:ra} sehr auf die Zusammenarbeit mit {A:d}"},
+ {s:"A",v:"irren",t:"pres",r:"{A:ra} in diesem Punkt gewaltig"},
+ {s:"A",v:"vergessen",t:"perf",r:"{S:p:am} Geburtstag"},
+ {s:{lit:"{A:p:nf} Präsentation",p:2},v:"sein",t:"perf",r:"hervorragend"},
+ {s:{lit:"{S:p:nm} Zug",p:2},v:"haben",t:"pres",r:"eine Stunde Verspätung"},
+ {s:"A",v:"wissen",t:"pres",r:"mehr über dieses Thema als alle anderen"},
+ {s:"U",v:"erreichen",t:"perf",r:"in diesem Jahr gemeinsam sehr viel"},
+ {s:"S",v:"wollen",t:"pres",r:"{A:a} nicht unter Druck",tail:"setzen"},
+ {s:"A",v:"gehen",t:"perf",r:"mit dieser Bemerkung zu weit"},
+ {s:"S",v:"haben",t:"pres",r:"keine Zeit für {A:p:ap} Ausreden"},
+ {s:"U",v:"haben",t:"pres",r:"noch eine Woche Zeit für die Planung"},
+ {s:"A",v:"sein",t:"pres",r:"für diese Aufgabe genau der richtige Mensch"},
+ // Firma (wir → sie)
+ {s:"W",v:"planen",t:"pres",r:"keine weiteren Preiserhöhungen"},
+ {s:"W",v:"einhalten",t:"perf",r:"alle Vorschriften"},
+ {s:"W",v:"können",t:"pres",r:"die Preise nicht länger stabil",tail:"halten"},
+ {s:"W",v:"sein",t:"pres",r:"zu Gesprächen jederzeit bereit"},
+ {s:"W",v:"wissen",t:"perf",r:"von den Mängeln nichts"},
+ {s:"W",v:"investieren",t:"fut",r:"in den nächsten Jahren massiv in die Digitalisierung"},
+ {s:"W",v:"vorgehen",t:"perf",r:"bei der Planung äußerst sorgfältig"},
+ {s:"W",v:"nehmen",t:"pres",r:"die Sorgen {W:p:gp} Kundinnen und Kunden sehr ernst"},
+ {s:{lit:"{W:p:nm} Umsatz",p:2},v:"steigen",t:"perf",r:"im letzten Quartal um zwölf Prozent"},
+ {s:{lit:"{W:p:np} Mitarbeiter",p:5},v:"haben",t:"pres",r:"ab sofort mehr Gestaltungsspielraum"},
+ {s:"W",v:"haben",t:"pres",r:"die Situation vollständig unter Kontrolle"},
+ {s:"W",v:"werden",t:"pres",r:"bis Ende des Jahres klimaneutral"},
+ // Fragen
+ {q:"ob",s:"A",v:"lesen",t:"perf",r:"{S:p:am} Bericht schon"},
+ {q:"ob",s:"A",v:"können",t:"pres",r:"{S:d} kurz",tail:"helfen"},
+ {q:"wann",s:"A",v:"kommen",t:"perf",r:"heute ins Büro"},
+ {q:"warum",s:"A",v:"informieren",t:"perf",r:"{S:a} nicht rechtzeitig"},
+ {q:"ob",s:"A",v:"haben",t:"pres",r:"morgen Zeit für ein kurzes Gespräch"},
+ {q:"wo",s:"A",v:"sein",t:"perf",r:"die ganze Zeit"},
+ {q:"was",s:"A",v:"halten",t:"pres",r:"von {S:p:dm} Vorschlag"},
+ {q:"ob",s:"A",v:"wissen",t:"pres",r:"etwas über die neuen Pläne"},
+ {q:"wie lange",s:"A",v:"arbeiten",t:"pres",r:"schon in dieser Abteilung"},
+ {q:"ob",s:"A",v:"sein",t:"pres",r:"mit {S:p:dm} Vorschlag einverstanden"},
+ // Aufforderungen
+ {imp:1,v:"schicken",r:"{S:d} die Zahlen bis Freitag"},
+ {imp:1,v:"anrufen",r:"{S:a} sofort"},
+ {imp:1,v:"vergessen",r:"den Termin mit der Kundin nicht"},
+ {imp:1,v:"sein",r:"morgen pünktlich"},
+ {imp:1,v:"lesen",r:"den Vertrag genau"},
+ {imp:1,v:"nehmen",r:"{A:rd} für diese Entscheidung genug Zeit"},
+ {imp:1,v:"geben",r:"{S:d} bis Freitag Bescheid"}
+];
+
+// ═══════════════ KONJUNKTIV II – WERKSTATT ═══════════════
+const K2 = [
+ {s:"Wenn ich mehr Zeit ___, würde ich öfter ins Theater gehen.",o:["hätte","habe","hatte","hätten"],ex:"Irreale Bedingung in der Gegenwart: Konjunktiv II von „haben“, 1. Person Singular → „hätte“.",w:["„habe“ ist Konjunktiv I (bzw. Indikativ) – eine irreale Bedingung verlangt den Konjunktiv II.","„hatte“ ist Indikativ Präteritum und würde eine reale Vergangenheit beschreiben.","„hätten“ passt nicht zum Subjekt „ich“."]},
+ {s:"___ ich doch nur auf meine innere Stimme gehört!",o:["Hätte","Habe","Hatte","Würde"],ex:"Irrealer Wunsch in der Vergangenheit: Konjunktiv II Plusquamperfekt – „hätte“ + Partizip II, Verb an erster Stelle.",w:["„Habe“ ist kein Konjunktiv II; ein irrealer Wunsch braucht „hätte“.","„Hatte“ ist Indikativ – damit wird es eine Frage oder Feststellung, kein Wunsch.","„würde“ + Partizip II („würde gehört“) ist keine korrekte Verbform."]},
+ {s:"Wenn der Zug pünktlich gewesen wäre, ___ wir den Anschluss erreicht.",o:["hätten","wären","würden","haben"],ex:"Irreale Vergangenheit: „erreichen“ bildet das Perfekt mit „haben“ → „hätten … erreicht“.",w:["„erreichen“ bildet das Perfekt mit „haben“, nicht mit „sein“.","„würden … erreicht“ ist keine korrekte Form der Vergangenheit.","„haben“ ist Indikativ – passt nicht zur irrealen Bedingung."]},
+ {s:"Du ___ den Bericht früher abgeben sollen.",o:["hättest","würdest","wärst","solltest"],ex:"Vorwurf in der Vergangenheit: „hätte“ + doppelter Infinitiv („abgeben sollen“).",w:["„würdest … abgeben sollen“ beschreibt keine Vergangenheit.","Modalverben bilden das Perfekt mit „haben“, nicht mit „sein“.","„solltest … sollen“ verdoppelt das Modalverb."]},
+ {s:"Ohne deine Hilfe ___ ich die Prüfung nie bestanden.",o:["hätte","wäre","würde","habe"],ex:"„Ohne deine Hilfe“ ersetzt hier einen irrealen Bedingungssatz („Wenn du mir nicht geholfen hättest …“). „bestehen“ bildet das Perfekt mit „haben“.",w:["„bestehen“ bildet das Perfekt mit „haben“.","„würde … bestanden“ ist keine korrekte Verbform.","„habe“ ist kein Konjunktiv II – die irreale Bedeutung ginge verloren."]},
+ {s:"An deiner Stelle ___ ich das Angebot sofort annehmen.",o:["würde","hätte","wäre","werde"],ex:"Ratschlag mit „an deiner Stelle“: irreal (ich bin nicht du) → „würde“ + Infinitiv.",w:["„hätte … annehmen“ ist keine korrekte Verbform.","„wäre … annehmen“ ist keine korrekte Verbform.","„werde“ ist Indikativ Futur und passt nicht zur irrealen Perspektive."]},
+ {s:"Wenn sie früher losgefahren ___, wäre sie jetzt schon da.",o:["wäre","hätte","würde","ist"],ex:"„losfahren“ bildet das Perfekt mit „sein“ → Konjunktiv II Plusquamperfekt: „wäre losgefahren“.",w:["„losfahren“ bildet das Perfekt mit „sein“, nicht mit „haben“.","„würde losgefahren“ ist keine korrekte Verbform.","„ist“ ist Indikativ – die Bedingung muss irreal sein."]},
+ {s:"Formuliere höflich im Konjunktiv II: „___ Sie mir bitte die Unterlagen bis morgen schicken?“",o:["Würden","Werden","Wurden","Wären"],ex:"Höfliche Bitte im Konjunktiv II: „Würden Sie …?“",w:["„Werden Sie …?“ ist Indikativ – grammatisch möglich, aber hier ist der Konjunktiv II verlangt.","„Wurden“ ist Indikativ Präteritum.","„Wären Sie … schicken?“ ist keine korrekte Verbform."]},
+ {s:"Wenn ich das gewusst ___, hätte ich anders entschieden.",o:["hätte","wäre","würde","habe"],ex:"„wissen“ bildet das Perfekt mit „haben“ → „hätte gewusst“.",w:["„wissen“ bildet das Perfekt mit „haben“.","„würde gewusst“ ist keine korrekte Verbform.","„habe“ ist kein Konjunktiv II."]},
+ {s:"Sie hätte die Stelle bekommen ___, wenn sie sich rechtzeitig beworben hätte.",o:["können","gekonnt","konnte","könnte"],ex:"Modalverb im Konjunktiv II der Vergangenheit: „hätte“ + Infinitiv + Modalverb im Infinitiv (doppelter Infinitiv).",w:["Bei Modalverben mit einem weiteren Infinitiv steht kein Partizip „gekonnt“, sondern der Infinitiv.","„konnte“ ist eine konjugierte Form – am Ende steht hier der Infinitiv.","„könnte“ ist eine konjugierte Form – am Ende steht hier der Infinitiv."]},
+ {s:"Wenn er nicht so stur ___, könnten wir längst eine Lösung haben.",o:["wäre","sei","war","ist"],ex:"Irreale Bedingung in der Gegenwart: „wäre“ (Konjunktiv II von „sein“).",w:["„sei“ ist Konjunktiv I – er gehört in die indirekte Rede, nicht in irreale Bedingungen.","„war“ ist Indikativ Präteritum.","„ist“ ist Indikativ und passt nicht zum irrealen Hauptsatz."]},
+ {s:"Ich wünschte, ich ___ fließend Japanisch.",o:["spräche","spreche","sprach","sprechen"],ex:"Irrealer Wunsch nach „ich wünschte“: Konjunktiv II („spräche“; ebenso möglich: „ich würde fließend Japanisch sprechen“).",w:["„spreche“ ist Indikativ bzw. Konjunktiv I – ein irrealer Wunsch braucht den Konjunktiv II.","„sprach“ ist Indikativ Präteritum.","„sprechen“ passt nicht zum Subjekt „ich“."]},
+ {s:"Wäre ich an deiner Stelle, ___ ich mir einen Anwalt nehmen.",o:["würde","hätte","wäre","werde"],ex:"Der vorangestellte Bedingungssatz ohne „wenn“ (Verb an erster Stelle) verlangt im Hauptsatz den Konjunktiv II: „würde … nehmen“.",w:["„hätte … nehmen“ ist keine korrekte Verbform.","„wäre … nehmen“ ist keine korrekte Verbform.","„werde“ ist Indikativ und passt nicht zur irrealen Bedingung."]},
+ {s:"Hättest du mich angerufen, ___ ich dich vom Bahnhof abgeholt.",o:["hätte","wäre","würde","habe"],ex:"Irreale Vergangenheit: „abholen“ bildet das Perfekt mit „haben“ → „hätte abgeholt“.",w:["„abholen“ bildet das Perfekt mit „haben“.","„würde … abgeholt“ ist keine korrekte Verbform.","„habe“ ist kein Konjunktiv II."]},
+ {s:"Das Konzert ___ ausverkauft gewesen, wenn die Werbung besser gewesen wäre.",o:["wäre","hätte","würde","ist"],ex:"„sein“ bildet das Perfekt mit „sein“ → „wäre ausverkauft gewesen“.",w:["„sein“ bildet das Perfekt mit „sein“, nicht mit „haben“.","„würde … gewesen“ ist keine korrekte Verbform.","„ist“ ist Indikativ."]},
+ {s:"Er hätte den Fehler früher bemerken ___.",o:["müssen","gemusst","musste","müsste"],ex:"Doppelter Infinitiv: „hätte … bemerken müssen“.",w:["Mit einem weiteren Infinitiv steht das Modalverb im Infinitiv, nicht im Partizip.","Am Satzende steht hier keine konjugierte Form.","Am Satzende steht hier keine konjugierte Form."]},
+ {s:"Sie spricht so gut Deutsch, als ___ sie in Wien aufgewachsen.",o:["wäre","hätte","würde","war"],ex:"Irrealer Vergleich mit „als“ + Verb direkt danach; „aufwachsen“ bildet das Perfekt mit „sein“.",w:["„aufwachsen“ bildet das Perfekt mit „sein“.","„würde … aufgewachsen“ ist keine korrekte Verbform.","Nach dem irrealen „als“ steht der Konjunktiv, nicht der Indikativ."]},
+ {s:"Wenn es morgen regnen ___, verschieben wir das Picknick.",o:["sollte","würde","hätte","wäre"],ex:"„sollte“ (Konjunktiv II) drückt hier eine unsichere, aber mögliche Bedingung aus: „falls es regnet“.",w:["„würde“ im Wenn-Satz ist hier stilistisch falsch; der Hauptsatz ist zudem real.","„hätte … regnen“ ist keine korrekte Verbform.","„wäre … regnen“ ist keine korrekte Verbform."]},
+ {s:"Wenn du gestern zur Feier gekommen ___, hättest du meine Familie kennengelernt.",o:["wärst","hättest","würdest","bist"],ex:"„kommen“ bildet das Perfekt mit „sein“ → „wärst gekommen“.",w:["„kommen“ bildet das Perfekt mit „sein“.","„würdest … gekommen“ ist keine korrekte Verbform.","„bist“ ist Indikativ."]},
+ {s:"Ohne Navigationsgerät ___ wir uns gestern bestimmt verfahren.",o:["hätten","wären","würden","haben"],ex:"Reflexive Verben bilden das Perfekt mit „haben“ → „hätten uns verfahren“.",w:["Reflexive Verben bilden das Perfekt mit „haben“.","„würden … verfahren“ beschreibt keine Vergangenheit.","„haben“ ist Indikativ."]},
+ {s:"Er hätte gestern kommen ___, aber er war krank.",o:["sollen","gesollt","sollte","soll"],ex:"Doppelter Infinitiv: „hätte … kommen sollen“.",w:["Mit einem weiteren Infinitiv steht das Modalverb im Infinitiv.","Am Satzende steht hier keine konjugierte Form.","Am Satzende steht hier keine konjugierte Form."]},
+ {s:"Wenn die Mieten nicht so hoch ___, würden mehr Familien in der Stadt bleiben.",o:["wären","seien","waren","sind"],ex:"Irreale Bedingung: Konjunktiv II von „sein“ im Plural → „wären“.",w:["„seien“ ist Konjunktiv I – er gehört in die indirekte Rede.","„waren“ ist Indikativ Präteritum.","„sind“ ist Indikativ."]},
+ {s:"Wir ___ längst fertig sein können, wenn alle mitgearbeitet hätten.",o:["hätten","wären","würden","haben"],ex:"Modalverb + „sein“ in der irrealen Vergangenheit: „hätten … sein können“ (Modalverben bilden das Perfekt mit „haben“).",w:["Modalverben bilden das Perfekt mit „haben“ – auch wenn „sein“ davorsteht.","„würden … sein können“ beschreibt keine Vergangenheit.","„haben“ ist Indikativ."]},
+ {s:"Wenn ich Bürgermeisterin ___, würde ich als Erstes die Bibliothek ausbauen.",o:["wäre","sei","würde","hätte"],ex:"Irreale Bedingung in der Gegenwart: „wäre“.",w:["„sei“ ist Konjunktiv I.","„würde“ allein ergibt hier keinen vollständigen Satz.","„hätte Bürgermeisterin“ ergibt keinen Sinn."]},
+ {s:"„Ich hätte das nie gedacht“, sagte er. → Er sagte, er ___ das nie gedacht.",o:["hätte","habe","hat","hätten"],ex:"Steht in der direkten Rede bereits ein Konjunktiv II, bleibt er in der indirekten Rede erhalten – sonst ginge die irreale Bedeutung verloren.",w:["„habe“ würde aus der irrealen Aussage eine reale machen.","„hat“ ist Indikativ.","„hätten“ passt nicht zum Subjekt „er“."]},
+ {s:"„Wenn ich Zeit hätte, käme ich mit“, sagte sie zu mir. → Sie sagte, wenn sie Zeit hätte, ___ sie mit.",o:["käme","komme","kommt","kämen"],ex:"Der Konjunktiv II der direkten Rede bleibt in der indirekten Rede unverändert.",w:["„komme“ (Konjunktiv I) würde die irreale Bedingung zerstören.","„kommt“ ist Indikativ.","„kämen“ passt nicht zum Subjekt „sie“ (Singular)."]}
+];
+
+// ═══════════════ SPEZIALFÄLLE INDIREKTE REDE ═══════════════
+const SPEZ = [
+ {s:"„Bitte bedienen Sie sich!“, sagte die Gastgeberin zu mir. → Die Gastgeberin sagte, ich ___ mich bedienen.",o:["möge","möchte","mag","müsse"],ex:"Höfliche Aufforderung („bitte“) gibt man mit „mögen“ im Konjunktiv I wieder: ich möge (Indikativ: ich mag). „Sie“ wird zu „ich“.",w:["„möchte“ bedeutet „wollen“ – aus der Aufforderung würde ein Wunsch des Gastes.","„mag“ ist Indikativ.","„müsse“ macht aus der höflichen Einladung eine Verpflichtung."]},
+ {s:"In der Durchsage hieß es, man ___ die Fenster während des Sturms geschlossen halten.",o:["solle","soll","sollen","sollst"],ex:"Aufforderung in indirekter Rede: „sollen“ im Konjunktiv I; „man“ verlangt die 3. Person Singular → „solle“.",w:["„soll“ ist Indikativ.","„sollen“ passt nicht zu „man“ (Singular).","„sollst“ ist die 2. Person."]},
+ {s:"„Kommst du mit?“, fragte sie mich. → Sie fragte mich, ___ ich mitkäme.",o:["ob","dass","wenn","wann"],ex:"Ja/Nein-Fragen werden mit „ob“ eingeleitet. Die Verbform „mitkäme“ ist die Ersatzform, weil „ich komme mit“ dem Indikativ gleicht.",w:["„dass“ leitet eine Aussage ein, keine Frage.","„wenn“ leitet eine Bedingung ein.","„wann“ fragt nach dem Zeitpunkt – die direkte Frage war aber eine Ja/Nein-Frage."]},
+ {s:"„Wo warst du gestern?“, fragte er mich. → Er wollte wissen, wo ich am Vortag ___.",o:["gewesen sei","war","wäre","sei"],ex:"Vergangenheit in indirekter Rede: Konjunktiv der Vergangenheit „gewesen sei“ (ich sei ≠ ich bin, also Konjunktiv I).",w:["„war“ ist Indikativ.","„wäre“ ist Gegenwart (Konjunktiv II) – die Frage bezieht sich auf die Vergangenheit.","„sei“ allein ist Gegenwart – die Frage bezieht sich auf die Vergangenheit."]},
+ {s:"„Wir kommen morgen“, schrieben die Gäste. → Die Gäste schrieben, sie ___ am nächsten Tag.",o:["kämen","kommen","komme","kamen"],ex:"„sie kommen“ (Konjunktiv I) gleicht dem Indikativ → Ersatzform Konjunktiv II „kämen“.",w:["„kommen“ ist nicht als Konjunktiv erkennbar.","„komme“ ist Singular – „sie“ meint hier die Gäste (Plural).","„kamen“ ist Indikativ Präteritum."]},
+ {s:"„Ich bin krank“, sagte er am Telefon. → Er sagte, er ___ krank.",o:["sei","ist","seie","sein"],ex:"Konjunktiv I von „sein“, 3. Person Singular: „sei“.",w:["„ist“ ist Indikativ.","„seie“ ist keine korrekte Form.","„sein“ ist der Infinitiv."]},
+ {s:"„Wir sind sehr zufrieden“, erklärten die Teilnehmenden. → Die Teilnehmenden erklärten, sie ___ sehr zufrieden.",o:["seien","sein","sind","sei"],ex:"Konjunktiv I Plural von „sein“: „seien“ – bei „sein“ ist der Konjunktiv I in allen Personen eindeutig.",w:["„sein“ ist der Infinitiv.","„sind“ ist Indikativ.","„sei“ ist Singular."]},
+ {s:"„Ihr habt gut gearbeitet!“, sagte die Chefin zu uns. → Die Chefin sagte, wir ___ gut gearbeitet.",o:["hätten","haben","habt","hättet"],ex:"„ihr“ (wir sind gemeint) → „wir“. Konjunktiv I „wir haben“ gleicht dem Indikativ → Ersatzform „hätten“.",w:["„wir haben“ ist nicht als Konjunktiv erkennbar.","„habt“ passt zu „ihr“, nicht zu „wir“.","„hättet“ passt zu „ihr“, nicht zu „wir“."]},
+ {s:"„Du hast mich enttäuscht“, sagte er zu ihr. → Er sagte zu ihr, sie ___ ihn enttäuscht.",o:["habe","hat","hast","haben"],ex:"„du“ (= sie) → „sie“; „mich“ (= er) → „ihn“. Konjunktiv I 3. Person Singular: „habe“.",w:["„hat“ ist Indikativ.","„hast“ gehört zu „du“ – die Person wurde nicht umgestellt.","„haben“ ist Plural."]},
+ {s:"„Ich werde dich nie vergessen“, sagte sie zu ihm. → Sie sagte zu ihm, sie ___ ihn nie vergessen.",o:["werde","wird","werden","wirst"],ex:"Zukunft in indirekter Rede: „werde“ + Infinitiv (Konjunktiv I, 3. Person Singular).",w:["„wird“ ist Indikativ.","„werden“ ist Plural.","„wirst“ ist die 2. Person."]},
+ {s:"„Ich will nicht länger warten“, sagte er. → Er sagte, er ___ nicht länger warten.",o:["wolle","will","wollen","wollt"],ex:"Konjunktiv I von „wollen“: „er wolle“ – eindeutig verschieden vom Indikativ „er will“.",w:["„will“ ist Indikativ.","„wollen“ ist Plural.","„wollt“ gehört zu „ihr“."]},
+ {s:"„Sie haben gewonnen!“, sagte der Moderator zu mir. → Der Moderator sagte, ich ___ gewonnen.",o:["hätte","habe","hätten","haben"],ex:"„Sie“ (Höflichkeitsform, gemeint bin ich) → „ich“. „ich habe“ gleicht dem Indikativ → Ersatzform „hätte“.",w:["„ich habe“ ist nicht als Konjunktiv erkennbar.","„hätten“ passt nicht zu „ich“ – die Höflichkeitsform „Sie“ wurde nicht umgestellt.","„haben“ passt nicht zu „ich“."]},
+ {s:"„Haben Sie morgen Zeit?“, fragte mich der Professor. → Der Professor fragte mich, ob ich am nächsten Tag Zeit ___.",o:["hätte","habe","hätten","haben"],ex:"„Sie“ → „ich“; „ich habe“ = Indikativ → Ersatzform „hätte“ – Verb am Ende der indirekten Frage.",w:["„ich habe“ ist nicht als Konjunktiv erkennbar.","„hätten“ gehört zu „Sie“ – die Person wurde nicht umgestellt.","„haben“ passt nicht zu „ich“."]},
+ {s:"„Wir sind gestern angekommen“, erzählten die Austauschschüler. → Die Austauschschüler erzählten, sie ___ am Vortag angekommen.",o:["seien","sind","sei","waren"],ex:"Konjunktiv der Vergangenheit: „seien“ + Partizip II. „gestern“ wird aus der Sicht des Berichts zu „am Vortag“.",w:["„sind“ ist Indikativ.","„sei“ ist Singular – „sie“ meint die Schüler (Plural).","„waren angekommen“ ist Indikativ Plusquamperfekt."]},
+ {s:"„Komm sofort nach Hause!“, sagte die Mutter zu ihrem Sohn. → Die Mutter sagte zu ihrem Sohn, er ___ sofort nach Hause kommen.",o:["solle","soll","sollen","sollst"],ex:"Imperativ in indirekter Rede: „sollen“ im Konjunktiv I – „er solle“.",w:["„soll“ ist Indikativ.","„sollen“ ist Plural.","„sollst“ gehört zu „du“ – die Person wurde nicht umgestellt."]},
+ {s:"„Ich komme morgen.“ (am Montag gesagt; du berichtest am Freitag) → Er sagte, er komme ___.",o:["am nächsten Tag","morgen","gestern","heute"],ex:"Zeitangaben werden aus der Perspektive des Berichts angepasst: „morgen“ (vom Montag aus) = „am nächsten Tag“ (also am Dienstag).",w:["„morgen“ wäre vom Freitag aus gesehen Samstag – das ist nicht gemeint.","„gestern“ wäre vom Freitag aus Donnerstag – falsch.","„heute“ wäre Freitag – falsch."]},
+ {s:"„Ich warte hier auf dich“, sagte sie am Bahnhof zu ihm. → Später erzählte er, sie habe gesagt, sie warte ___ auf ihn.",o:["dort","hier","hierher","dorthin"],ex:"Ortsangaben passen sich der Perspektive an: Der Bahnhof ist für den Erzählenden nicht mehr „hier“, sondern „dort“.",w:["„hier“ wäre der Ort des Erzählenden, nicht der Bahnhof.","„hierher“ bezeichnet eine Richtung („wohin?“), keinen Ort.","„dorthin“ bezeichnet eine Richtung („wohin?“), keinen Ort."]},
+ {s:"„Mein Bruder hat mir geholfen“, sagte sie. → Sie sagte, ihr Bruder habe ___ geholfen.",o:["ihr","mir","ihm","sich"],ex:"„mir“ meint die Sprecherin → „ihr“ (Dativ).",w:["„mir“ wurde nicht umgestellt – gemeint ist die Sprecherin.","„ihm“ würde den Bruder selbst oder einen Mann meinen.","„sich“ bezöge sich auf das Subjekt „ihr Bruder“."]},
+ {s:"„Wir haben unsere Ziele erreicht“, erklärte der Vorstand. → Der Vorstand erklärte, er habe ___ Ziele erreicht.",o:["seine","unsere","ihre","deren"],ex:"„wir“ steht hier für „der Vorstand“ – ein maskulines Nomen im Singular. Deshalb: er → seine Ziele.",w:["„unsere“ wurde nicht umgestellt.","„ihre“ würde auf eine Frau oder eine Gruppe im Plural verweisen – Subjekt ist aber „er“.","„deren“ verweist auf eine andere, zuvor genannte Person oder Gruppe."]},
+ {s:"„Ich habe euch etwas mitgebracht“, sagte die Großmutter zu uns. → Die Großmutter sagte zu uns, sie habe ___ etwas mitgebracht.",o:["uns","euch","ihnen","sich"],ex:"„euch“ meint uns selbst (die Berichtenden) → „uns“.",w:["„euch“ wurde nicht umgestellt.","„ihnen“ wäre richtig, wenn jemand anderes berichtete – hier berichten wir selbst.","„sich“ bezöge sich auf die Großmutter selbst."]},
+ {s:"„Wann beginnt der Kurs?“, fragte die Teilnehmerin. → Die Teilnehmerin fragte, wann der Kurs ___.",o:["beginne","beginnt","begänne","beginnen"],ex:"Indirekte W-Frage: Verb am Ende, Konjunktiv I der 3. Person Singular „beginne“ (eindeutig verschieden von „beginnt“).",w:["„beginnt“ ist Indikativ.","„begänne“ ist Konjunktiv II – nicht nötig, weil der Konjunktiv I eindeutig ist.","„beginnen“ ist Plural."]},
+ {s:"„Die Preise steigen weiter“, warnten die Experten. → Die Experten warnten, dass die Preise weiter ___.",o:["steigen würden","steigen","stiegen","steige"],ex:"Konjunktiv I „steigen“ = Indikativ; Konjunktiv II „stiegen“ = Präteritum. Beide sind nicht erkennbar → würde-Form.",w:["„steigen“ ist nicht als Konjunktiv erkennbar.","„stiegen“ gleicht dem Präteritum und würde als Vergangenheit verstanden.","„steige“ ist Singular – Subjekt sind die Preise."]}
+];
+
+// ═══════════════ FEHLERJAGD (o[0] = fehlerhaft) ═══════════════
+const FEHLER = [
+ {o:["Die Zeugen sagten, sie haben nichts gesehen.","Die Zeugin sagte, sie habe nichts gesehen.","Die Zeugen sagten, sie hätten nichts gesehen.","Der Zeuge erklärte, er sei zur Tatzeit zu Hause gewesen."],fix:"Die Zeugen sagten, sie hätten nichts gesehen.",ex:"„sie haben“ (Plural) gleicht dem Indikativ – der Konjunktiv I ist nicht erkennbar. Ersatzform: Konjunktiv II „hätten“."},
+ {o:["Er sagte zu mir, ich soll ihn morgen anrufen.","Sie bat mich, ich möge pünktlich sein.","Die Lehrerin sagte zu ihm, er solle leiser sprechen.","Der Arzt riet ihr, sie solle mehr schlafen."],fix:"Er sagte zu mir, ich solle ihn morgen anrufen.",ex:"„ich soll“ ist Indikativ. Der Konjunktiv I „ich solle“ unterscheidet sich davon – also muss er stehen."},
+ {o:["Er fragte mich, ob ich hätte Zeit.","Sie fragte mich, ob ich Zeit hätte.","Er wollte wissen, wann der Kurs beginne.","Sie fragte, warum ich so spät gekommen sei."],fix:"Er fragte mich, ob ich Zeit hätte.",ex:"In der indirekten Frage steht das konjugierte Verb am Ende."},
+ {o:["Der Autor erklärte, er sei das Buch in nur drei Monaten geschrieben.","Die Autorin erzählte, sie habe jahrelang recherchiert.","Der Regisseur sagte, er sei mit dem Film sehr zufrieden.","Die Läuferin berichtete, sie sei viel zu schnell gestartet."],fix:"Der Autor erklärte, er habe das Buch in nur drei Monaten geschrieben.",ex:"„schreiben“ bildet das Perfekt mit „haben“ – das gilt auch im Konjunktiv der Vergangenheit."},
+ {o:["Er behauptete, er wisst nichts davon.","Sie sagte, sie wisse nicht, wo der Schlüssel sei.","Die Kollegen meinten, sie wüssten von nichts.","Er sagte, er könne erst morgen kommen."],fix:"Er behauptete, er wisse nichts davon.",ex:"Konjunktiv I von „wissen“: „er wisse“ (Stamm „wiss-“ + Endung „-e“)."},
+ {o:["Die Sprecherin sagte, die Verhandlungen werden morgen fortgesetzt.","Der Sprecher sagte, die Verhandlungen würden morgen fortgesetzt.","Die Sprecherin sagte, das Gespräch werde morgen fortgesetzt.","Der Sprecher betonte, man werde eine Lösung finden."],fix:"Die Sprecherin sagte, die Verhandlungen würden morgen fortgesetzt.",ex:"„sie werden“ gleicht dem Indikativ → Ersatzform „würden“. Im Singular („werde“) ist der Konjunktiv I dagegen eindeutig."},
+ {o:["Er sagte, sie solle zu ihm kommen, damit er ihr etwas zeigen könnten.","Sie sagte, er solle sich beeilen, weil der Zug gleich abfahre.","Er meinte, sie solle ihn anrufen, sobald sie angekommen sei.","Sie sagte, er möge ihr verzeihen."],fix:"…, damit er ihr etwas zeigen könne.",ex:"„könnten“ ist Plural – das Subjekt „er“ verlangt den Singular: „er könne“."},
+ {o:["Laut Bericht seien die Ursachen noch unklar und werden derzeit untersucht.","Laut Bericht seien die Ursachen noch unklar und würden derzeit untersucht.","Die Polizei teilte mit, der Fahrer sei leicht verletzt worden.","Es hieß, die Straße bleibe bis Montag gesperrt."],fix:"…, die Ursachen seien noch unklar und würden derzeit untersucht.",ex:"Im zweiten Satzteil ist der Konjunktiv vergessen worden: „werden“ ist Indikativ; „sie werden“ gleicht dem Konjunktiv I → Ersatzform „würden“."},
+ {o:["Die Pressesprecherin erklärte, wir seien mit dem Ergebnis zufrieden.","Die Pressesprecherin erklärte, man sei mit dem Ergebnis zufrieden.","Die Pressesprecherin erklärte, das Unternehmen sei mit dem Ergebnis zufrieden.","Die Pressesprecherin erklärte, sie seien mit dem Ergebnis zufrieden."],fix:"Die Pressesprecherin erklärte, man sei (das Unternehmen sei / sie seien) mit dem Ergebnis zufrieden.",ex:"„wir“ meint das Unternehmen – der Berichtende gehört nicht dazu. Deshalb wird „wir“ zu „man“, „das Unternehmen“ oder „sie“."},
+ {o:["Sie sagte, sie habe gestern ihren Bruder getroffen und wäre mit ihm essen gegangen.","Sie sagte, sie habe ihren Bruder getroffen und sei mit ihm essen gegangen.","Er sagte, er sei müde und gehe früh schlafen.","Sie erzählte, ihr Mann habe den Termin vergessen."],fix:"…, sie habe ihren Bruder getroffen und sei mit ihm essen gegangen.",ex:"„sie sei“ unterscheidet sich vom Indikativ „sie ist“ – im Bericht steht deshalb der Konjunktiv I, nicht der Konjunktiv II. Zudem sollten beide Satzteile denselben Modus haben."},
+ {o:["Er fragte, ob sie morgen kommen würde und ob sie mitbringe ihre Unterlagen.","Er fragte, ob sie morgen komme und ihre Unterlagen mitbringe.","Sie fragte, wie lange die Sitzung dauere.","Er fragte, wer das Protokoll geschrieben habe."],fix:"Er fragte, ob sie morgen komme und ob sie ihre Unterlagen mitbringe.",ex:"Im zweiten Fragesatz steht das Verb nicht am Ende. Außerdem ist „sie komme“ eindeutig – die würde-Form ist im Bericht unnötig."},
+ {o:["Sie sagten, sie würden haben keine Zeit.","Sie sagten, sie hätten keine Zeit.","Er sagte, er habe keine Zeit.","Wir sagten, wir hätten keine Zeit."],fix:"Sie sagten, sie hätten keine Zeit.",ex:"Die würde-Form steht mit dem Infinitiv am Ende – und bei „haben“ nimmt man ohnehin „hätten“."}
+];
+
+// ═══════════════ ZEITUNGS-REDAKTION ═══════════════
+// Lücke: {richtig|falsch|falsch|falsch#Erklärung}
+const TEXTE = [
+ {t:"Interview mit einer Architektin", k:"Kulturteil",
+  q:"„Ich habe das Gebäude für die Menschen entworfen, nicht für die Fotos. Wir haben bewusst auf Glasfassaden verzichtet, weil sie sich im Sommer zu stark aufheizen. Mein Team arbeitet bereits an einem zweiten Projekt in Linz. Ich werde dort aber nicht selbst die Bauleitung übernehmen.“",
+  x:"Die Architektin erklärte, sie {habe|hat|hätte|haben#„sie habe“ – Konjunktiv I, eindeutig verschieden vom Indikativ „hat“.} das Gebäude für die Menschen entworfen, nicht für die Fotos. Sie und ihr Team {hätten|haben|habe|hättet#„sie und ihr Team“ = Plural; „sie haben“ gleicht dem Indikativ → Ersatzform „hätten“.} bewusst auf Glasfassaden verzichtet, weil diese sich im Sommer zu stark {aufheizen würden|aufheizen|aufheizten|aufheize#„aufheizen“ (Plural) = Indikativ, „aufheizten“ = Präteritum → würde-Form.}. {Ihr|Mein|Sein|Unser#„mein“ der Architektin → „ihr“.} Team {arbeite|arbeitet|arbeiten|würde arbeiten#„das Team“ = 3. Person Singular → „arbeite“ ist eindeutig.} bereits an einem zweiten Projekt in Linz. Sie {werde|wird|würde|werden#Zukunft: „sie werde“ ist eindeutig Konjunktiv I – keine Ersatzform nötig.} dort aber nicht selbst die Bauleitung übernehmen."},
+ {t:"Pressekonferenz im Rathaus", k:"Lokalteil",
+  q:"„Wir haben den Haushalt ohne neue Schulden ausgeglichen. Die Bürgerinnen und Bürger können sich auf stabile Gebühren verlassen. Ich weiß, dass viele über die Baustellen klagen. Aber die Arbeiten sind im Frühjahr abgeschlossen. Ich stehe für Fragen jederzeit zur Verfügung.“",
+  x:"Der Bürgermeister erklärte, die Stadt {habe|hat|hätte|haben#„die Stadt“ = Singular → „habe“ (Konjunktiv I, eindeutig).} den Haushalt ohne neue Schulden ausgeglichen. Die Bürgerinnen und Bürger {könnten|können|könne|konnten#Plural: „können“ gleicht dem Indikativ → Ersatzform „könnten“.} sich auf stabile Gebühren verlassen. Er {wisse|weiß|wüsste|wissen#„er wisse“ ist eindeutig Konjunktiv I.}, dass viele über die Baustellen {klagen würden|klagen|klagten|klage#„klagen“ = Indikativ, „klagten“ = Präteritum → würde-Form.}. Die Arbeiten {seien|sind|wären|sei#„seien“ – bei „sein“ ist der Konjunktiv I auch im Plural eindeutig.} jedoch im Frühjahr abgeschlossen. Er {stehe|steht|stünde|stehen#„er stehe“ ist eindeutig Konjunktiv I.} für Fragen jederzeit zur Verfügung."},
+ {t:"Abschied einer Austauschschülerin", k:"Reportage (ich berichte selbst)",
+  q:"Sie sagte zu mir: „Du hast mir am Anfang sehr geholfen. Ohne dich hätte ich mich in Wien nie so schnell zurechtgefunden. Meine Gastfamilie war wunderbar, aber ich vermisse mein Land.“",
+  x:"Sie sagte, ich {hätte|habe|hat|hätten#„du“ (= ich) → „ich“; „ich habe“ gleicht dem Indikativ → „hätte“.} {ihr|mir|dir|ihm#„mir“ (= sie) → „ihr“.} am Anfang sehr geholfen. Ohne {mich|dich|sie|uns#„dich“ (= ich) → „mich“.} {hätte|habe|hat|hättest#Hier stand schon in der direkten Rede ein Konjunktiv II – er bleibt erhalten.} sie sich in Wien nie so schnell zurechtgefunden. {Ihre|Meine|Seine|Deine#„meine“ (= ihre) → „ihre“.} Gastfamilie {sei|ist|wäre|war#Vergangenheit: „sei … gewesen“ (Konjunktiv I, eindeutig).} wunderbar gewesen, aber sie {vermisse|vermisst|vermissen|würde vermissen#„sie vermisse“ ist eindeutig Konjunktiv I.} ihr Land."},
+ {t:"Entdeckung in der Antarktis", k:"Wissenschaft",
+  q:"„Wir haben in der Antarktis eine bisher unbekannte Bakterienart entdeckt. Sie überlebt Temperaturen von minus 40 Grad. Unsere Ergebnisse müssen noch von anderen Labors bestätigt werden. Bis dahin werden wir keine weiteren Details veröffentlichen.“",
+  x:"Die Sprecherin des Forschungsteams erklärte, man {habe|hat|hätte|haben#„wir“ → „man“ (3. Person Singular) → „habe“.} in der Antarktis eine bisher unbekannte Bakterienart entdeckt. Diese {überlebe|überlebt|überleben|überlebte#„diese“ = die Bakterienart (Singular) → „überlebe“.} Temperaturen von minus 40 Grad. Die Ergebnisse des Teams {müssten|müssen|müsse|mussten#Plural: „müssen“ = Indikativ → Ersatzform „müssten“.} noch von anderen Labors bestätigt werden. Bis dahin {werde|wird|würde|werden#„man werde“ – Singular, eindeutig Konjunktiv I.} man keine weiteren Details veröffentlichen."},
+ {t:"Ein Mitarbeitergespräch", k:"Ich berichte über ein Gespräch",
+  q:"Meine Chefin sagte zu mir: „Sie haben in diesem Jahr hervorragende Arbeit geleistet. Ich schätze Ihre Zuverlässigkeit sehr. Wir wollen Ihnen deshalb die Leitung des neuen Teams anbieten. Überlegen Sie es sich in Ruhe und geben Sie mir bis Freitag Bescheid.“",
+  x:"Meine Chefin sagte, ich {hätte|habe|hat|hätten#„Sie“ (= ich) → „ich“; „ich habe“ = Indikativ → „hätte“.} in diesem Jahr hervorragende Arbeit geleistet. Sie {schätze|schätzt|schätzte|schätzen#„sie schätze“ ist eindeutig Konjunktiv I.} {meine|Ihre|ihre|seine#„Ihre“ (= meine) → „meine“.} Zuverlässigkeit sehr. Die Firma {wolle|will|wollte|wollen#„die Firma“ = Singular → „wolle“.} mir deshalb die Leitung des neuen Teams anbieten. Ich {solle|soll|sollte|sollen#Aufforderung → „sollen“; „ich solle“ ist eindeutig Konjunktiv I.} es mir in Ruhe überlegen und {ihr|mir|Ihnen|sich#„mir“ (= die Chefin) → „ihr“.} bis Freitag Bescheid geben."}
+];
+
+// ═══════════════ HILFSFUNKTIONEN ═══════════════
+const $ = s => document.querySelector(s);
+const shuffle = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function J(...p){ return p.filter(x => x !== '' && x != null).join(' ').replace(/\s+([,.;:!?])/g,'$1').replace(/\s+/g,' ').trim(); }
+function speak(t){ try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang='de-DE'; u.rate=.92; const v = speechSynthesis.getVoices().find(v=>v.lang && v.lang.startsWith('de')); if(v) u.voice=v; speechSynthesis.speak(u);}catch(e){} }
+function solBox(t){ return `<div class="sol"><button class="spk" title="Vorlesen" onclick='speak(${JSON.stringify(t)})'>🔊</button><span>${esc(t)}</span></div>`; }
+
+// ═══════════════ PUNKTE & RANG ═══════════════
+const ST = {pts:0,ans:0,ok:0,best:0,blitzHi:0};
+let streak = 0;
+try { Object.assign(ST, JSON.parse(localStorage.getItem('konjunktivAtelierC1') || '{}')); } catch(e){}
+function save(){ try{ localStorage.setItem('konjunktivAtelierC1', JSON.stringify(ST)); }catch(e){} }
+const RANKS = [[0,"Zuhörer:in"],[300,"Berichterstatter:in"],[800,"Korrespondent:in"],[1600,"Redakteur:in"],[3000,"Chefredakteur:in"],[5000,"Meister:in der Perspektive"]];
+function rank(){ let r = RANKS[0][1]; RANKS.forEach(([p,n]) => { if (ST.pts >= p) r = n; }); return r; }
+function renderStats(){
+  $('#sPts').textContent = ST.pts; $('#sRank').textContent = rank(); $('#sStreak').textContent = streak; $('#sBest').textContent = ST.best;
+  $('#sAcc').textContent = ST.ans ? Math.round(ST.ok / ST.ans * 100) + ' %' : '–';
+}
+function popup(t){ const p = document.createElement('div'); p.className='pop'; p.textContent=t; document.body.appendChild(p); setTimeout(()=>p.remove(),1000); }
+function award(ok, base = 10, silent = false){
+  ST.ans++;
+  if (ok){ ST.ok++; streak++; const p = base + Math.min(streak - 1, 5) * 2; ST.pts += p; ST.best = Math.max(ST.best, streak); if (!silent) popup('+' + p); }
+  else streak = 0;
+  save(); renderStats();
+}
+
+// ═══════════════ VERB-MASCHINE ═══════════════
+const WU = "würde würdest würde würden würdet würden".split(' ');
+const SPL = s => s.split(' ');
+function getV(key){
+  if (SEP[key]){ const s = SEP[key], b = getV(s.b); return {...b, key, sep:s.sep, pp:s.pp, infFull:s.sep + s.b}; }
+  if (REG[key]){ const [st,pp,aux] = REG[key]; const e = /[td]$/.test(st) ? 'e' : '';
+    const pr=[st+'e',st+e+'st',st+e+'t',st+'en',st+e+'t',st+'en'], pt=[st+e+'te',st+e+'test',st+e+'te',st+e+'ten',st+e+'tet',st+e+'ten'];
+    return {key, inf:key, infFull:key, pr, pt, k2:pt, k1:[st+'e',st+'est',st+'e',st+'en',st+'et',st+'en'], pp, aux, imp:st, impS:key, sep:''}; }
+  const v = VB[key], st = key.replace(/en$/,'');
+  return {key, inf:key, infFull:key, pr:SPL(v.pr), pt:SPL(v.pt), k2:SPL(v.k2), k1: v.k1 ? SPL(v.k1) : ['e','est','e','en','et','en'].map(x=>st+x), pp:v.pp, aux:v.aux, imp:v.imp, impS:v.impS||key, modal:v.modal, old:v.old, sep:''};
+}
+// Regel: Konjunktiv I, wenn eindeutig – sonst Konjunktiv II – ist auch der nicht erkennbar (oder veraltet): würde + Infinitiv
+function konj(v, p){
+  const r = {k1:v.k1[p], ind:v.pr[p], k2:v.k2[p], pt:v.pt[p]};
+  if (r.k1 !== r.ind) return {...r, f:r.k1, kind:'k1'};
+  if (r.k2 !== r.pt && !v.old) return {...r, f:r.k2, kind:'k2'};
+  return {...r, f:WU[p], kind:'w', old: r.k2 !== r.pt};
+}
+
+// ═══════════════ PERSPEKTIVE ═══════════════
+const PR = {
+ '0':{n:'ich',a:'mich',d:'mir',ra:'mich',rd:'mir',p:'mein'},
+ '1':{n:'du',a:'dich',d:'dir',ra:'dich',rd:'dir',p:'dein'},
+ '2m':{n:'er',a:'ihn',d:'ihm',ra:'sich',rd:'sich',p:'sein'},
+ '2f':{n:'sie',a:'sie',d:'ihr',ra:'sich',rd:'sich',p:'ihr'},
+ '3':{n:'wir',a:'uns',d:'uns',ra:'uns',rd:'uns',p:'unser'},
+ '5':{n:'sie',a:'sie',d:'ihnen',ra:'sich',rd:'sich',p:'ihr'},
+ '5f':{n:'Sie',a:'Sie',d:'Ihnen',ra:'sich',rd:'sich',p:'Ihr'}
+};
+const END = {nm:'',nf:'e',nn:'',np:'e',am:'en',af:'e',an:'',ap:'e',dm:'em',df:'er',dn:'em',dp:'en',gp:'er'};
+const pkey = d => d.p === 2 ? '2' + d.g : (d.p === 5 && d.f ? '5f' : String(d.p));
+const isMe = ctx => ctx.type === 'me' || ctx.type === 'meSie';
+function dirDesc(role, ctx){ if (role==='S') return {p:0}; if (role==='A') return ctx.type==='meSie' ? {p:5,f:1} : {p:1}; return {p:3}; }
+function indDesc(role, ctx, fl){
+  if (role==='S') return {p:2, g:ctx.spk.g};
+  if (role==='A') return isMe(ctx) ? {p:0} : {p:2, g:ctx.spk.g === 'f' ? 'm' : 'f'};
+  if (role==='W') return {p:5};
+  return fl.uShift ? {p:5} : {p:3};
+}
+function rolesOf(tpl){
+  const s = new Set(); if (typeof tpl.s === 'string') s.add(tpl.s); if (tpl.imp) s.add('A');
+  const txt = (tpl.r || '') + (tpl.s && tpl.s.lit ? tpl.s.lit : '');
+  (txt.match(/\{([SAWU]):/g) || []).forEach(m => s.add(m[1]));
+  return s;
+}
+function tokenRoles(tpl){ const s = new Set(); const txt = (tpl.r || '') + (tpl.s && tpl.s.lit ? tpl.s.lit : ''); (txt.match(/\{([SAWU]):/g) || []).forEach(m => s.add(m[1])); return s; }
+function makeCtx(tpl){
+  const roles = rolesOf(tpl);
+  if (roles.has('W')) return {type:'org', spk:pick(ORG), iv:pick(INTRO_V)};
+  const spk = pick(SPK);
+  if (roles.has('U')) return {type: Math.random() < .5 ? 'me' : 'meSie', spk};
+  if (roles.has('A') || tpl.q){ const r = Math.random(); return r < .35 ? {type:'me',spk} : r < .6 ? {type:'meSie',spk} : {type:'other',spk,addr:pick(ADDR[spk.g])}; }
+  return {type:'none', spk, iv:pick(INTRO_V)};
+}
+function fillTokens(str, ctx, mode, fl, gc){
+  return str.replace(/\{([SAWU]):([a-z]+)(?::([a-z]+))?\}/g, (m, role, c, end) => {
+    let r = role;
+    if (mode === 'ind' && fl.swap){ if (r === 'S') r = 'A'; else if (r === 'A') r = 'S'; }
+    const d = (mode === 'dir' || fl.noShift) ? dirDesc(r, ctx) : indDesc(r, ctx, fl);
+    const P = PR[pkey(d)], val = c === 'p' ? P.p + END[end] : P[c];
+    if (gc){ gc.push({a:val, ph:'…'}); return '§' + (gc.length - 1) + '§'; }
+    return val;
+  });
+}
+function verbPart(tpl, mode, fl, p){
+  const v = getV(tpl.v), tail = tpl.tail || '';
+  if (mode === 'dir'){
+    if (tpl.t === 'pres') return {fin:v.pr[p], nf:J(v.sep, tail)};
+    if (tpl.t === 'perf') return {fin:getV(v.aux).pr[p], nf:J(tail, v.pp)};
+    return {fin:getV('werden').pr[p], nf:J(tail, v.infFull)};
+  }
+  let pp = p; if (fl.num) pp = p === 2 ? 5 : (p === 5 ? 2 : p);
+  if (tpl.imp){
+    if (fl.plain){ const k = konj(v, pp); return k.kind === 'w' ? {fin:k.f, nf:v.infFull, k, vv:v} : {fin:k.f, nf:v.sep, k, vv:v}; }
+    const s = getV('sollen'), k = konj(s, pp);
+    return {fin: fl.ind ? s.pr[pp] : k.f, nf:v.infFull, k, vv:s};
+  }
+  let vv, nfK, nfW;
+  if (tpl.t === 'pres' || (tpl.t === 'perf' && fl.tense)){ vv = v; nfK = J(v.sep, tail); nfW = J(tail, v.infFull); }
+  else if (tpl.t === 'perf'){ vv = getV(v.aux); nfK = J(tail, v.pp); nfW = nfK; }
+  else { vv = getV('werden'); nfK = J(tail, v.infFull); nfW = nfK; }
+  const k = konj(vv, pp);
+  if (fl.ind) return {fin:vv.pr[pp], nf:nfK, k, vv};
+  if (fl.flip){
+    if (k.kind === 'k1'){ if (k.k2 !== k.pt && !vv.old) return {fin:k.k2, nf:nfK, k, vv, flipped:'k2'}; return null; }
+    return {fin:k.k1, nf:nfK, k, vv, flipped:'k1'};
+  }
+  return {fin:k.f, nf: k.kind === 'w' ? nfW : nfK, k, vv};
+}
+function build(tpl, ctx, mode, fl = {}, gc = null){
+  const rest = fillTokens(tpl.r || '', ctx, mode, fl, gc);
+  if (mode === 'dir'){
+    const v = getV(tpl.v);
+    if (tpl.imp){ const head = ctx.type === 'meSie' ? J(cap(v.impS), 'Sie') : cap(v.imp); return {text: J(head, rest, v.sep) + '!'}; }
+    let sj, p;
+    if (typeof tpl.s === 'string'){ const d = dirDesc(tpl.s, ctx); sj = PR[pkey(d)].n; p = d.p; }
+    else { sj = fillTokens(tpl.s.lit, ctx, 'dir', {}); p = tpl.s.p; }
+    const vp = verbPart(tpl, 'dir', {}, p);
+    if (tpl.q) return {text: cap(tpl.q === 'ob' ? J(vp.fin, sj, rest, vp.nf) : J(tpl.q, vp.fin, sj, rest, vp.nf)) + '?'};
+    return {text: cap(J(sj, vp.fin, rest, vp.nf)) + '.'};
+  }
+  let sj, p, sd = null;
+  const role = tpl.imp ? 'A' : tpl.s;
+  if (typeof role === 'string'){
+    sd = fl.noShift ? dirDesc(role, ctx) : indDesc(role, ctx, fl); p = sd.p; sj = PR[pkey(sd)].n;
+    if (gc){ gc.push({a:sj, ph:'Pronomen'}); sj = '§' + (gc.length - 1) + '§'; }
+  } else { sj = fillTokens(tpl.s.lit, ctx, 'ind', fl, gc); p = tpl.s.p; }
+  const vp = verbPart(tpl, 'ind', fl, p);
+  if (!vp) return null;
+  let fin = vp.fin;
+  if (gc){ gc.push({a:fin, ph:'(' + vp.vv.inf + ')'}); fin = '§' + (gc.length - 1) + '§'; }
+  let ch;
+  if (tpl.q) ch = fl.v2 ? [tpl.q, sj, fin, rest, vp.nf] : [tpl.q, sj, rest, vp.nf, fin];
+  else if (fl.dass) ch = ['dass', sj, rest, vp.nf, fin];
+  else ch = [sj, fin, rest, vp.nf];
+  ch = ch.filter(Boolean);
+  return {chunks:ch, text:J(...ch), vp, p, sd};
+}
+function intro(tpl, ctx){
+  const S = cap(ctx.spk.n);
+  if (tpl.q) return `${S} fragte ${isMe(ctx) ? 'mich' : ctx.addr.a}`;
+  if (isMe(ctx)) return `${S} sagte zu mir`;
+  if (ctx.type === 'other') return `${S} sagte zu ${ctx.addr.d}`;
+  return `${S} ${ctx.iv}`;
+}
+function roleLabel(r, ctx){
+  if (r === 'S') return ctx.spk.n;
+  if (r === 'A') return isMe(ctx) ? 'gemeint bin ich – der/die Berichtende' : ctx.addr.n;
+  if (r === 'W') return 'das Unternehmen – der Berichtende gehört nicht dazu; im Bericht auch „man“ oder „das Unternehmen“';
+  return 'Sprecher/in und ich – der Berichtende gehört dazu, also bleibt es';
+}
+function shiftHTML(tpl, ctx){
+  return [...rolesOf(tpl)].map(r => {
+    const a = PR[pkey(dirDesc(r, ctx))], b = PR[pkey(indDesc(r, ctx, {}))];
+    return `<div class="shift"><b>${a.n} · ${a.p}-</b> <span class="arr">→</span> <b>${b.n} · ${b.p}-</b> <span class="lbl">(${esc(roleLabel(r, ctx))})</span></div>`;
+  }).join('');
+}
+function verbHTML(tpl, vp){
+  const k = vp.k; let t = '';
+  if (tpl.imp) t += 'Aufforderung → „sollen“ im Konjunktiv + Infinitiv. ';
+  else if (tpl.t === 'perf') t += 'Vergangenheit → Hilfsverb im Konjunktiv + Partizip II. ';
+  else if (tpl.t === 'fut') t += 'Zukunft → „werden“ im Konjunktiv + Infinitiv. ';
+  if (k.kind === 'k1') t += `Konjunktiv I „${k.f}“ unterscheidet sich vom Indikativ „${k.ind}“ – also bleibt der Konjunktiv I.`;
+  else if (k.kind === 'k2') t += `Konjunktiv I „${k.k1}“ = Indikativ „${k.ind}“ – nicht erkennbar. Ersatzform Konjunktiv II: „${k.f}“.`;
+  else t += `Konjunktiv I „${k.k1}“ = Indikativ. Konjunktiv II „${k.k2}“ ` + (k.old ? `wäre korrekt, klingt aber veraltet` : `= Präteritum, also ebenfalls nicht erkennbar`) + ` → würde-Form: „${k.f} … ${vp.vv.infFull}“.`;
+  return t;
+}
+function variantsFor(tpl, ctx, cor){
+  const v = ['noShift','ind','flip'];
+  const tr = tokenRoles(tpl);
+  if (ctx.type !== 'none' && ctx.type !== 'org' && (tr.has('S') || tr.has('A'))) v.push('swap');
+  if (cor.sd && cor.sd.p === 5 || (cor.sd && cor.sd.p === 2 && cor.sd.g === 'f')) v.push('num');
+  if (tpl.t === 'perf') v.push('tense');
+  if (tpl.q) v.push('v2');
+  if (tpl.imp) v.push('plain');
+  if (rolesOf(tpl).has('U')) v.push('uShift');
+  return v;
+}
+function whyVar(key, b, cor, ctx){
+  switch (key){
+    case 'noShift': return 'Die Perspektive wurde nicht gewechselt. In der indirekten Rede spricht der/die Berichtende – Pronomen, Possessivartikel und Verbform müssen umgestellt werden.';
+    case 'ind': return `Hier steht der Indikativ („${b.vp.fin}“). Im Bericht verlangt die indirekte Rede den Konjunktiv.`;
+    case 'flip': return b.vp.flipped === 'k2'
+      ? `„${b.vp.fin}“ ist Konjunktiv II. Weil sich der Konjunktiv I („${b.vp.k.k1}“) vom Indikativ („${b.vp.k.ind}“) unterscheidet, steht im neutralen Bericht der Konjunktiv I.`
+      : `„${b.vp.fin}“ sieht genauso aus wie der Indikativ – der Konjunktiv ist nicht erkennbar. Deshalb braucht man die Ersatzform.`;
+    case 'swap': return 'Die Bezüge sind vertauscht: Ein Pronomen bzw. Possessivartikel verweist auf die falsche Person.';
+    case 'num': return cor.sd.p === 5 ? '„sie“ meint hier eine Gruppe (Plural) – die Verbform steht aber im Singular.' : '„sie“ meint hier eine einzelne Person (Singular) – die Verbform steht aber im Plural.';
+    case 'tense': return 'Die Zeit stimmt nicht: Die Aussage bezieht sich auf die Vergangenheit → Konjunktiv der Vergangenheit (Hilfsverb + Partizip II).';
+    case 'v2': return 'In der indirekten Frage steht das konjugierte Verb am Ende.';
+    case 'plain': return 'Eine Aufforderung (Imperativ) gibt man in der indirekten Rede mit „sollen“ wieder (höflich: „mögen“).';
+    case 'uShift': return '„wir/unser“ schließt hier den Berichtenden selbst ein – deshalb bleibt es bei „wir/unser“.';
+  }
+}
+function scenario(tpl, ctx){
+  const I = intro(tpl, ctx), dir = build(tpl, ctx, 'dir');
+  return `<div class="quote"><span class="qintro">${esc(I)}:</span> „${esc(dir.text)}“</div>`;
+}
+
+// ═══════════════ GENERATOR 1: PERSPEKTIVWECHSEL ═══════════════
+function genPersp(){
+  for (let t = 0; t < 30; t++){
+    const tpl = pick(TPL), ctx = makeCtx(tpl);
+    const cor = build(tpl, ctx, 'ind'); const I = intro(tpl, ctx);
+    const corS = `${I}, ${cor.text}.`;
+    const seen = new Set([corS]); const wr = [];
+    shuffle(variantsFor(tpl, ctx, cor)).forEach(key => {
+      const fl = {}; fl[key] = 1; const b = build(tpl, ctx, 'ind', fl); if (!b) return;
+      const s = `${I}, ${b.text}.`; if (seen.has(s)) return; seen.add(s); wr.push({s, why:whyVar(key, b, cor, ctx)});
+    });
+    if (wr.length < 2) continue;
+    const opts = shuffle([{h:esc(corS), ok:true, why:'Genau so lautet die indirekte Rede.'}, ...wr.slice(0,3).map(w => ({h:esc(w.s), ok:false, why:w.why}))]);
+    let ex = `<div class="exbox"><div class="exh">Perspektivwechsel</div>${shiftHTML(tpl, ctx)}<div class="exh">Verbform</div>${verbHTML(tpl, cor.vp)}`;
+    if (!tpl.q){ const d = build(tpl, ctx, 'ind', {dass:1}); ex += `<div class="exh">Ebenso korrekt mit „dass“</div>${esc(I)}, ${esc(d.text)}.`; }
+    ex += '</div>';
+    return {kind:'mc', kicker:'Perspektivwechsel', instr:'Wie lautet die indirekte Rede im neutralen Bericht? Achte auf Person, Bezug und Verbform.', stem:scenario(tpl, ctx), opts, ex, sol:corS};
+  }
+}
+
+// ═══════════════ GENERATOR 2: FORMEN-SCHMIEDE ═══════════════
+function genForm(){
+  for (let t = 0; t < 40; t++){
+    const tpl = pick(TPL), ctx = makeCtx(tpl);
+    const cor = build(tpl, ctx, 'ind');
+    if (cor.vp.k.kind === 'w') continue;
+    const gc = []; const b = build(tpl, ctx, 'ind', {}, gc);
+    const I = intro(tpl, ctx);
+    return {kind:'type', kicker:'Formen-Schmiede', instr:'Setze die passenden Formen ein: Pronomen, Possessivartikel und Verb – aus der Sicht des Berichts.', stem:scenario(tpl, ctx), frame: esc(I) + ', ' + esc(b.text) + '.', gaps:gc, ex:`<div class="exbox"><div class="exh">Perspektivwechsel</div>${shiftHTML(tpl, ctx)}<div class="exh">Verbform</div>${verbHTML(tpl, cor.vp)}</div>`, sol:`${I}, ${cor.text}.`};
+  }
+}
+
+// ═══════════════ GENERATOR 3: SATZBAUKASTEN ═══════════════
+function genBau(){
+  for (let t = 0; t < 30; t++){
+    const tpl = pick(TPL), ctx = makeCtx(tpl);
+    const dass = !tpl.q && Math.random() < .45;
+    const base = dass ? {dass:1} : {};
+    const cor = build(tpl, ctx, 'ind', base); const I = intro(tpl, ctx);
+    const traps = new Set();
+    shuffle(['noShift','ind','flip','swap','num','uShift']).forEach(key => {
+      const fl = {...base}; fl[key] = 1; const b = build(tpl, ctx, 'ind', fl); if (!b) return;
+      b.chunks.forEach(c => { if (!cor.chunks.includes(c)) traps.add(c); });
+    });
+    const tr = shuffle([...traps]).slice(0, 3);
+    if (tr.length < 2) continue;
+    return {kind:'bau', kicker:'Satzbaukasten' + (dass ? ' · mit „dass“' : ''), instr: dass ? 'Baue die indirekte Rede als dass-Satz. Achtung: Einige Bausteine sind Fallen und gehören nicht in den Satz.' : 'Baue die indirekte Rede (ohne „dass“). Achtung: Einige Bausteine sind Fallen und gehören nicht in den Satz.',
+      stem:scenario(tpl, ctx), prefix: I + ', ', tiles:shuffle([...cor.chunks, ...tr]), acc:[cor.chunks], ex:`<div class="exbox"><div class="exh">Perspektivwechsel</div>${shiftHTML(tpl, ctx)}<div class="exh">Verbform</div>${verbHTML(tpl, cor.vp)}</div>`};
+  }
+}
+
+// ═══════════════ HANDGEMACHTE POOLS ═══════════════
+const POOLS = {};
+function fromPool(name, arr){ if (!POOLS[name] || !POOLS[name].length) POOLS[name] = shuffle(arr.map((_,i)=>i)); return arr[POOLS[name].pop()]; }
+function gapStem(s){ return esc(s).replace('___','<span class="gap">…</span>').replace(' → ', '<br><span class="arrow">→</span> '); }
+function mcFrom(it, kicker, instr){
+  const opts = it.o.map((o,i) => ({h:esc(o), ok:i===0, why:i===0 ? it.ex : it.w[i-1]}));
+  return {kind:'mc', kicker, instr, stem:gapStem(it.s), gapFill:it.o[0], opts:shuffle(opts), ex:it.ex, sol:it.s.split(' → ').pop().replace('___', it.o[0])};
+}
+const genK2 = () => mcFrom(fromPool('k2', K2), 'Konjunktiv II', 'Welche Form ist korrekt? Nur eine Lösung passt.');
+const genSpez = () => mcFrom(fromPool('spez', SPEZ), 'Indirekte Rede · Spezialfall', 'Welche Form verlangt der neutrale Bericht? Nur eine Lösung passt.');
+function genFehler(){
+  const it = fromPool('fehler', FEHLER);
+  const opts = it.o.map((o,i) => ({h:esc(o), ok:i===0, why:i===0 ? 'Richtig erkannt – hier steckt der Fehler.' : 'Dieser Satz ist korrekt. Der Fehler steckt in einem anderen Satz.'}));
+  return {kind:'mc', kicker:'Fehlerjagd', instr:'Nur ein Satz verstößt gegen die Regeln der indirekten Rede im Bericht. Welcher?', stem:'', opts:shuffle(opts), ex:it.ex, sol:it.fix, solLabel:'So ist er richtig:'};
+}
+const MIX = [genPersp, genPersp, genPersp, genForm, genBau, genK2, genK2, genSpez, genSpez, genFehler];
+const MODES = {
+ persp:{t:"🔄 Perspektivwechsel", g:genPersp}, form:{t:"✍️ Formen-Schmiede", g:genForm}, bau:{t:"🧱 Satzbaukasten", g:genBau},
+ spez:{t:"🎯 Spezialfälle", g:genSpez, n:SPEZ.length}, k2:{t:"💭 Konjunktiv-II-Werkstatt", g:genK2, n:K2.length},
+ fehler:{t:"🔍 Fehlerjagd", g:genFehler, n:FEHLER.length}, marathon:{t:"🏁 Konjunktiv-Marathon", g:()=>pick(MIX)(), lim:20}
+};
+
+// ═══════════════ NAVIGATION ═══════════════
+function show(id){ document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id)); window.scrollTo({top:0}); }
+function goHome(){ show('home'); }
+
+// ═══════════════ QUIZ-ENGINE ═══════════════
+let Q = {};
+function startMode(m){ Q = {mode:m, n:0, ok:0, cur:null, done:false}; $('#qTitle').textContent = MODES[m].t; show('quiz'); nextQ(); }
+function updCount(){
+  const M = MODES[Q.mode];
+  $('#qCount').textContent = M.lim ? `Aufgabe ${Math.min(Q.n+1, M.lim)} / ${M.lim} · ${Q.ok} richtig` : `${Q.n} gelöst · ${Q.ok} richtig` + (M.n ? ` · ${M.n} Aufgaben im Pool` : ' · endlos');
+}
+function nextQ(){
+  const M = MODES[Q.mode];
+  if (M.lim && Q.n >= M.lim) return endMarathon();
+  Q.cur = M.g(); Q.done = false; Q.tries = 0; updCount();
+  if (Q.cur.kind === 'mc') renderMC(Q.cur); else if (Q.cur.kind === 'bau') renderBau(Q.cur); else renderType(Q.cur);
+}
+function renderMC(q){
+  const L = ['A','B','C','D'];
+  $('#qCard').innerHTML = `<span class="kicker">${q.kicker}</span><div class="instr">${q.instr}</div>${q.stem ? `<div class="stem" id="qStem">${q.stem}</div>` : ''}
+   <div class="opts">${q.opts.map((o,i) => `<button class="opt" data-i="${i}" onclick="answer(${i})"><span class="lt">${L[i]}</span><span>${o.h}</span></button>`).join('')}</div>
+   <div class="fb" id="qFb"></div><div class="qnav"><button class="btn" id="qNext" hidden onclick="nextQ()">Weiter →</button></div>`;
+}
+function answer(i){
+  if (Q.done || !Q.cur || Q.cur.kind !== 'mc') return;
+  Q.done = true; const q = Q.cur, o = q.opts[i];
+  document.querySelectorAll('.opt').forEach((b,j) => { b.disabled = true; if (q.opts[j].ok) b.classList.add('right'); });
+  if (!o.ok) document.querySelector(`.opt[data-i="${i}"]`).classList.add('wrong');
+  const g = document.querySelector('#qStem .gap'); if (g && q.gapFill){ g.textContent = q.gapFill; g.classList.add('filled'); }
+  Q.n++; if (o.ok) Q.ok++; award(o.ok); updCount();
+  let h = `<div class="verdict">${o.ok ? '✓ Richtig!' : '✗ Nicht ganz.'}</div>`;
+  if (!o.ok) h += `<div class="why"><b>Deine Wahl:</b> ${o.why}</div>`;
+  if (q.ex) h += `<div style="margin-top:8px">${q.ex}</div>`;
+  if (q.sol) h += `<p style="margin-top:8px"><b>${q.solLabel || 'Lösung:'}</b></p>` + solBox(q.sol);
+  const fb = $('#qFb'); fb.className = 'fb show ' + (o.ok ? 'ok' : 'no'); fb.innerHTML = h;
+  $('#qNext').hidden = false; $('#qNext').focus({preventScroll:true});
+}
+// Eingabe
+function renderType(q){
+  const frame = q.frame.replace(/§(\d+)§/g, (m,i) => `<input class="gin" id="gi${i}" autocomplete="off" spellcheck="false" placeholder="${esc(q.gaps[i].ph)}" style="width:${Math.max(5, q.gaps[i].a.length + 2, q.gaps[i].ph.length + 1)}ch">`);
+  $('#qCard').innerHTML = `<span class="kicker">${q.kicker}</span><div class="instr">${q.instr}</div><div class="stem">${q.stem}</div>
+   <div class="frame">${frame}</div><div class="hint">In Klammern steht der Infinitiv des Verbs, dessen Form gesucht ist.</div>
+   <div class="fb" id="qFb"></div><div class="qnav"><button class="btn ghost" id="tShow" onclick="typeCheck(true)">Lösung zeigen</button><button class="btn" id="tCheck" onclick="typeCheck()">Prüfen</button><button class="btn" id="qNext" hidden onclick="nextQ()">Weiter →</button></div>`;
+  setTimeout(() => { const f = document.querySelector('.gin'); if (f) f.focus({preventScroll:true}); }, 50);
+}
+function typeCheck(give){
+  const q = Q.cur; if (Q.done) return;
+  let all = true;
+  q.gaps.forEach((g,i) => { const el = $('#gi'+i), v = el.value.trim().toLowerCase().replace(/\s+/g,' '); const r = v === g.a.toLowerCase(); el.classList.toggle('r', r); el.classList.toggle('w', !r); if (!r) all = false; });
+  Q.tries++;
+  if (!all && !give && Q.tries < 2){ const fb = $('#qFb'); fb.className = 'fb show no'; fb.innerHTML = '<div class="verdict">Noch nicht ganz – die rot markierten Felder stimmen nicht.</div>Prüfe: Wer ist aus der Sicht des Berichts gemeint? Und ist der Konjunktiv I eindeutig?'; return; }
+  Q.done = true; Q.n++; if (all) Q.ok++; award(all, Q.tries === 1 ? 12 : 6); updCount();
+  q.gaps.forEach((g,i) => { const el = $('#gi'+i); if (!el.classList.contains('r')){ el.value = g.a; el.classList.remove('w'); el.classList.add('s'); } el.disabled = true; });
+  const fb = $('#qFb'); fb.className = 'fb show ' + (all ? 'ok' : 'no');
+  fb.innerHTML = `<div class="verdict">${all ? '✓ Alles richtig!' : 'Die Lösung'}</div>${q.ex}<p style="margin-top:8px"><b>Lösung:</b></p>${solBox(q.sol)}`;
+  $('#tCheck').hidden = true; $('#tShow').hidden = true; $('#qNext').hidden = false; $('#qNext').focus({preventScroll:true});
+}
+// Satzbau
+function renderBau(q){
+  q.built = [];
+  $('#qCard').innerHTML = `<span class="kicker">${q.kicker}</span><div class="instr">${q.instr}</div><div class="stem">${q.stem}</div>
+   <div class="built" id="bBuilt"></div>
+   <div class="zone target" id="bTarget"></div>
+   <div class="zone" id="bPool"></div>
+   <div class="hint">Ein Klick auf einen eingesetzten Baustein legt ihn zurück.</div>
+   <div class="fb" id="qFb"></div>
+   <div class="qnav"><button class="btn ghost" onclick="bauReset()">Zurücksetzen</button><button class="btn ghost" id="bShow" onclick="bauShow()">Lösung zeigen</button><button class="btn" id="bCheck" onclick="bauCheck()">Prüfen</button><button class="btn" id="qNext" hidden onclick="nextQ()">Weiter →</button></div>`;
+  bauDraw();
+}
+function bauDraw(){
+  const q = Q.cur, used = q.built;
+  const pool = q.tiles.map((t,i) => ({t,i})).filter(x => !used.includes(x.i));
+  $('#bPool').innerHTML = pool.map(x => `<button class="tile" onclick="bauAdd(${x.i})">${esc(x.t)}</button>`).join('') || '<span class="placeholder">Keine Bausteine mehr.</span>';
+  $('#bTarget').innerHTML = used.length ? used.map((i,pos) => `<button class="tile" onclick="bauRemove(${pos})">${esc(q.tiles[i])}</button>`).join('') : '<span class="placeholder">Hier entsteht deine indirekte Rede …</span>';
+  $('#bBuilt').innerHTML = esc(q.prefix) + '<b>' + esc(J(...used.map(i => q.tiles[i]))) + '</b>' + (used.length ? '.' : ' …');
+}
+function bauAdd(i){ if (Q.done) return; Q.cur.built.push(i); bauDraw(); }
+function bauRemove(pos){ if (Q.done) return; Q.cur.built.splice(pos,1); bauDraw(); }
+function bauReset(){ if (Q.done) return; Q.cur.built = []; bauDraw(); $('#qFb').className = 'fb'; }
+function bauCheck(){
+  const q = Q.cur; if (Q.done) return;
+  const mine = q.built.map(i => q.tiles[i]); const fb = $('#qFb');
+  Q.tries++;
+  if (q.acc.some(a => a.length === mine.length && a.every((x,i) => x === mine[i]))){
+    Q.done = true; Q.n++; Q.ok++; award(true, Q.tries === 1 ? 12 : 6); updCount(); $('#bTarget').classList.add('done');
+    fb.className = 'fb show ok'; fb.innerHTML = `<div class="verdict">✓ Perfekt gebaut!</div>${solBox(q.prefix + J(...mine) + '.')}${q.ex}`; bauEnd(); return;
+  }
+  if (Q.tries >= 3){ bauShow(); return; }
+  let best = 0; q.acc.forEach(a => { let n = 0; while (n < a.length && a[n] === mine[n]) n++; best = Math.max(best, n); });
+  const trap = mine.find(x => !q.acc[0].includes(x));
+  fb.className = 'fb show no';
+  fb.innerHTML = `<div class="verdict">Noch nicht ganz – versuch es noch einmal.</div>` + (trap ? `Mindestens ein Baustein ist eine Falle: Prüfe Person, Bezug und Verbform.` : best > 0 ? `Die ersten <b>${best}</b> Baustein(e) stimmen – danach solltest du umbauen.` : `Schon der Anfang passt noch nicht.`) + `<p class="hint">${Q.tries === 1 ? '' : 'Letzter Versuch – danach erscheint die Lösung.'}</p>`;
+}
+function bauShow(){
+  const q = Q.cur; if (Q.done) return;
+  Q.done = true; Q.n++; award(false); updCount();
+  $('#qFb').className = 'fb show no'; $('#qFb').innerHTML = `<div class="verdict">Die Lösung</div>${solBox(q.prefix + J(...q.acc[0]) + '.')}${q.ex}`; bauEnd();
+}
+function bauEnd(){ $('#bCheck').hidden = true; $('#bShow').hidden = true; $('#qNext').hidden = false; $('#qNext').focus({preventScroll:true}); }
+function endMarathon(){
+  const pct = Math.round(Q.ok / Q.n * 100);
+  const msg = pct >= 90 ? "Herausragend – du wechselst die Perspektive so sicher wie ein Profi-Journalist." : pct >= 75 ? "Sehr stark – Personen, Bezüge und Ersatzformen sitzen fast immer." : pct >= 55 ? "Solide Basis – die Feinheiten kommen mit jeder Runde." : "Guter Anfang – jede Runde schärft dein Gespür für die Perspektive.";
+  $('#resBox').innerHTML = `<div style="font-size:2.4rem">🏁</div><div class="mtitle" style="margin:6px 0 10px">Marathon beendet</div><div class="big">${Q.ok} / ${Q.n}</div><p style="margin:10px 0 4px">${pct} % richtig</p><p style="color:var(--muted)">${msg}</p><div class="qnav" style="justify-content:center;margin-top:20px"><button class="btn ghost" onclick="goHome()">Zur Übersicht</button><button class="btn" onclick="startMode('marathon')">Neuer Marathon</button></div>`;
+  show('result');
+}
+document.addEventListener('keydown', e => {
+  if (!$('#quiz').classList.contains('active') || !Q.cur) return;
+  if (e.target.tagName === 'BUTTON' && e.key === 'Enter') return;
+  if (Q.cur.kind === 'type' && !Q.done){ if (e.key === 'Enter'){ e.preventDefault(); typeCheck(); } return; }
+  if (e.target.tagName === 'INPUT') return;
+  if (Q.cur.kind === 'mc' && !Q.done){ const i = {'1':0,'2':1,'3':2,'4':3,'a':0,'b':1,'c':2,'d':3}[e.key.toLowerCase()]; if (i !== undefined && i < Q.cur.opts.length){ answer(i); e.preventDefault(); } }
+  else if (Q.done && e.key === 'Enter'){ e.preventDefault(); nextQ(); }
+});
+
+// ═══════════════ ZEITUNGS-REDAKTION ═══════════════
+let TX = {i:0, gaps:[], checked:false};
+function parseText(x){
+  const parts = []; const re = /\{([^}]+)\}/g; let last = 0, m;
+  while ((m = re.exec(x))){ parts.push(x.slice(last, m.index)); const [o, ex] = m[1].split('#'); parts.push({o:o.split('|'), ex}); last = re.lastIndex; }
+  parts.push(x.slice(last)); return parts;
+}
+function openText(){ show('text'); $('#txtSel').innerHTML = TEXTE.map((t,i) => `<button class="chip${i===TX.i?' on':''}" onclick="TX.i=${i};renderText()">${i+1}. ${esc(t.t)}</button>`).join(''); renderText(); }
+function renderText(){
+  document.querySelectorAll('#txtSel .chip').forEach((c,i) => c.classList.toggle('on', i === TX.i));
+  const T = TEXTE[TX.i]; const parts = parseText(T.x); TX.gaps = []; TX.checked = false;
+  $('#tKind').textContent = T.k; $('#tTitle').textContent = T.t; $('#tQuote').innerHTML = `<div class="exh">Das Originalzitat</div>${esc(T.q)}`; $('#tEx').innerHTML = ''; $('#tCheck').disabled = false;
+  let n = 0;
+  $('#tBody').innerHTML = parts.map(p => {
+    if (typeof p === 'string') return esc(p);
+    const id = n++; TX.gaps.push(p);
+    return `<span class="num">${id+1}</span><select id="g${id}"><option value="">…</option>${shuffle(p.o).map(o => `<option>${esc(o)}</option>`).join('')}</select>`;
+  }).join('');
+  $('#tCount').textContent = `Text ${TX.i+1} von ${TEXTE.length} · ${TX.gaps.length} Lücken`;
+}
+function checkText(){
+  if (TX.checked) return;
+  let ok = 0; const items = [];
+  TX.gaps.forEach((g,i) => {
+    const sel = $('#g'+i), v = sel.value, r = v === g.o[0];
+    sel.classList.add(r ? 'r' : 'w'); sel.disabled = true; if (r) ok++;
+    items.push(`<div class="exitem ${r?'r':'w'}"><b>${i+1}. ${esc(g.o[0])}</b>${r ? ' ✓' : ` – deine Wahl: ${v ? '„'+esc(v)+'“' : 'keine'}`}<br>${g.ex}</div>`);
+    award(r, 8, true);
+  });
+  if (ok) popup('+' + ok * 8);
+  TX.checked = true; $('#tCheck').disabled = true;
+  $('#tEx').innerHTML = `<div class="fb show ${ok===TX.gaps.length?'ok':'no'}"><div class="verdict">${ok} von ${TX.gaps.length} Lücken richtig</div>${ok===TX.gaps.length ? 'Ein druckreifer Bericht!' : 'Vergleiche jede Lücke mit dem Originalzitat: Wer spricht, wer ist gemeint – und ist die Form eindeutig?'}</div>` + items.join('') +
+    `<div class="qnav"><button class="btn" onclick="TX.i=(TX.i+1)%TEXTE.length;openText()">Nächster Text →</button></div>`;
+}
+
+// ═══════════════ BLITZ: KONJUNKTIV I ODER ERSATZFORM? ═══════════════
+const BL_V = ['haben','sein','werden','können','müssen','dürfen','wissen','kommen','geben','finden','gehen','bleiben','arbeiten','planen','warten'];
+const BL_P = [[0,'ich'],[2,'er / sie'],[3,'wir'],[5,'sie (Plural)']];
+let BZ = {};
+function openBlitz(){ show('blitz'); BZ = {run:false}; blitzIntro(); }
+function blitzIntro(){
+  $('#bzHi').textContent = `Highscore: ${ST.blitzHi}`;
+  $('#blitzCard').innerHTML = `<div class="instr">Person und Verb erscheinen – welche Form verlangt die indirekte Rede in der Gegenwart? 60 Sekunden, so viele richtige Entscheidungen wie möglich.</div>
+   <div class="rulemini"><b>1.</b> Konjunktiv I, wenn er sich vom Indikativ unterscheidet. <b>2.</b> Sonst Konjunktiv II. <b>3.</b> Gleicht auch der Konjunktiv II dem Präteritum → würde + Infinitiv.</div>
+   <div class="qnav" style="justify-content:center;margin-top:22px"><button class="btn lil" onclick="blitzStart()">Start ⚡</button></div>
+   <p class="hint" style="text-align:center">Tastatur: <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></p>`;
+}
+function blitzStart(){
+  BZ = {run:true, t:60, score:0, wrong:[]};
+  $('#blitzCard').innerHTML = `<div class="bar"><div class="counter">Punkte: <b id="bzScore">0</b></div><div class="counter" id="bzTime">60 s</div></div>
+   <div class="timer"><i id="bzBar"></i></div><div class="sortword" id="bzWord"></div><div class="sortbtns" id="bzBtns"></div><div class="sortfb" id="bzFb"></div>`;
+  blitzNext();
+  BZ.iv = setInterval(() => { BZ.t--; $('#bzTime').textContent = BZ.t + ' s'; $('#bzBar').style.width = (BZ.t/60*100) + '%'; if (BZ.t <= 0) blitzEnd(); }, 1000);
+}
+function blitzNext(){
+  let v, p, k, o;
+  do { v = pick(BL_V); [p] = pick(BL_P); k = konj(getV(v), p); o = [k.k1, k.k2, WU[p] + ' ' + v]; } while (new Set(o).size < 3 || (BZ.cur && BZ.cur.v === v && BZ.cur.p === p));
+  BZ.cur = {v, p, k, o, c: k.kind === 'k1' ? 0 : k.kind === 'k2' ? 1 : 2};
+  $('#bzWord').innerHTML = `${BL_P.find(x => x[0] === p)[1]} <span style="color:var(--muted);font-weight:400">·</span> ${v}`;
+  $('#bzBtns').innerHTML = o.map((x,i) => `<button class="sbtn" id="bz${i}" onclick="blitzPick(${i})">${i+1} · ${esc(x)}<small>${['Konjunktiv I','Konjunktiv II','würde-Form'][i]}</small></button>`).join('');
+}
+function blitzPick(i){
+  if (!BZ.run) return; const c = BZ.cur, ok = i === c.c, b = $('#bz'+i);
+  b.classList.add(ok ? 'flashR' : 'flashW');
+  const why = c.k.kind === 'k1' ? `„${c.k.k1}“ ≠ Indikativ „${c.k.ind}“ → Konjunktiv I.` : c.k.kind === 'k2' ? `„${c.k.k1}“ = Indikativ → Konjunktiv II „${c.k.k2}“.` : `„${c.k.k1}“ = Indikativ, „${c.k.k2}“ = Präteritum → würde-Form.`;
+  $('#bzFb').textContent = (ok ? '✓ ' : '✗ ') + why;
+  if (ok){ BZ.score++; $('#bzScore').textContent = BZ.score; } else BZ.wrong.push({w:`${BL_P.find(x=>x[0]===c.p)[1]} · ${c.v} → ${c.o[c.c]}`, why});
+  award(ok, 3, true); setTimeout(blitzNext, ok ? 150 : 600);
+}
+function stopBlitz(){ if (BZ.iv) clearInterval(BZ.iv); BZ.run = false; }
+function blitzEnd(){
+  stopBlitz(); const neu = BZ.score > ST.blitzHi; if (neu){ ST.blitzHi = BZ.score; save(); }
+  const wr = [...new Map(BZ.wrong.map(x => [x.w, x])).values()];
+  $('#blitzCard').innerHTML = `<div class="resultbig"><div class="big">${BZ.score}</div><p>richtige Entscheidungen in 60 Sekunden${neu ? ' – <b>neuer Highscore!</b>' : ''}</p></div>` +
+   (wr.length ? `<div class="sect-title">Das solltest du dir merken:</div><div class="exlist">${wr.map(x => `<div class="exitem w"><b>${esc(x.w)}</b><br>${esc(x.why)}</div>`).join('')}</div>` : '<p style="text-align:center">Keine einzige Fehlentscheidung – beeindruckend!</p>') +
+   `<div class="qnav" style="justify-content:center"><button class="btn lil" onclick="blitzStart()">Noch eine Runde ⚡</button></div>`;
+  $('#bzHi').textContent = `Highscore: ${ST.blitzHi}`;
+}
+document.addEventListener('keydown', e => { if (!$('#blitz').classList.contains('active') || !BZ.run) return; const i = parseInt(e.key) - 1; if (i >= 0 && i < 3){ blitzPick(i); e.preventDefault(); } });
+
+// ═══════════════ REPORTER-RUNDE (MÜNDLICH) ═══════════════
+let RP = {n:0};
+function openRep(){ show('rep'); repNext(); }
+function repNext(){
+  const tpl = pick(TPL), ctx = makeCtx(tpl), cor = build(tpl, ctx, 'ind'), I = intro(tpl, ctx);
+  RP.cur = {tpl, ctx, s:`${I}, ${cor.text}.`, d: tpl.q ? null : `${I}, ${build(tpl, ctx, 'ind', {dass:1}).text}.`, ex:`<div class="exbox"><div class="exh">Perspektivwechsel</div>${shiftHTML(tpl, ctx)}<div class="exh">Verbform</div>${verbHTML(tpl, cor.vp)}</div>`};
+  $('#repCount').textContent = `${RP.n} Zitate berichtet`;
+  $('#repCard').innerHTML = `<div class="instr" style="text-align:center">Berichte das Zitat mündlich in indirekter Rede – zuerst ohne „dass“, dann mit „dass“. Erst danach die Lösung aufdecken.</div>
+   <div class="stem">${scenario(tpl, ctx)}</div>
+   <div id="repSol"></div>
+   <div class="qnav" style="justify-content:center"><button class="btn ghost" id="repShow" onclick="repShow()">Lösung zeigen</button><button class="btn pet" onclick="RP.n++;award(true,10);repNext()">✓ Richtig berichtet</button><button class="btn" onclick="repNext()">Nächstes Zitat →</button></div>`;
+}
+function repShow(){ const c = RP.cur; $('#repSol').innerHTML = `<div class="fb show ok">${solBox(c.s)}${c.d ? solBox(c.d) : ''}${c.ex}</div>`; $('#repShow').hidden = true; }
+
+// ═══════════════ START ═══════════════
+(function bubbles(){ const cols = ['#34507c','#1d6670','#5b4679','#b7892e']; const b = $('#bubbles');
+  for (let i = 0; i < 14; i++){ const d = document.createElement('div'); d.className = 'bubble'; const s = 40 + Math.random()*160;
+    d.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;top:${Math.random()*100}%;background:radial-gradient(circle at 30% 30%, ${pick(cols)}55, transparent 70%);animation-duration:${14+Math.random()*16}s;animation-delay:-${Math.random()*10}s`;
+    b.appendChild(d); } })();
+renderStats();
+
+</script>
+</body>
+</html>
