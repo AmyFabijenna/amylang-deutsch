@@ -176,6 +176,23 @@ footer{text-align:center;font-size:.8rem;color:var(--muted);margin-top:30px}
 .yt{font-size:.85rem;color:var(--muted);margin-top:8px}
 .legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.85rem;color:var(--muted);margin-top:10px}
 kbd{font-family:inherit;font-size:.78rem;background:var(--blue-s);border-radius:5px;padding:1px 6px;color:var(--blue)}
+
+.fb.short{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;cursor:pointer;position:relative;padding:12px 16px 16px;font-size:1rem}
+.fb.short .verdict{margin:0}
+.autobar{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(0,0,0,.06);border-radius:0 0 14px 14px;overflow:hidden}
+.autobar i{display:block;height:100%;width:0;background:var(--pet)}
+.fb.no .autobar i{background:var(--rust)}
+.optwhy{display:block;font-size:.86rem;color:var(--rust);margin-top:5px;line-height:1.45}
+
+/* Weiter-Modus */
+.wmode{display:inline-flex;background:var(--blue-s);border-radius:999px;padding:3px;gap:2px;align-items:center}
+.wmode button{border:0;background:transparent;border-radius:999px;padding:5px 12px;font-size:.82rem;color:var(--blue);font-weight:500}
+.wmode button.on{background:var(--blue);color:#fff}
+.stat.wm{padding:5px 8px}
+.fb.manual{cursor:default}
+.fb.manual .longx{flex-basis:100%;margin-top:6px;font-size:.95rem}
+.fb.manual .nextrow{flex-basis:100%;display:flex;justify-content:flex-end;margin-top:10px}
+.holdlnk{flex-basis:100%;text-align:right;font-size:.8rem;color:var(--muted);text-decoration:underline;text-underline-offset:3px;background:none;border:0;padding:4px 0 0}
 </style>
 <style>
 .quote{background:var(--blue-s);border-left:5px solid var(--blue);border-radius:12px;padding:14px 18px;font-size:1.13rem;line-height:1.7}
@@ -221,7 +238,6 @@ kbd{font-family:inherit;font-size:.78rem;background:var(--blue-s);border-radius:
 <header>
   <h1>Konjunktiv-<span>Atelier</span> C1</h1>
   <p class="sub">Indirekte Rede wie im Qualitätsjournalismus – mit Perspektivwechsel, Ersatzformen und Konjunktiv II</p>
-  <div class="topbtn"><a href="../index.html">Übungsliste</a><a href="../../index.html">Hauptseite</a></div>
 </header>
 
 <div class="stats">
@@ -230,6 +246,7 @@ kbd{font-family:inherit;font-size:.78rem;background:var(--blue-s);border-radius:
   <div class="stat">Serie <b id="sStreak">0</b></div>
   <div class="stat">Beste Serie <b id="sBest">0</b></div>
   <div class="stat">Treffsicherheit <b id="sAcc">–</b></div>
+  <div class="stat wm"><span class="wmode"><button data-m="auto">sofort weiter</button><button data-m="manual">erst Erklärung, dann Weiter</button></span></div>
 </div>
 
 <section id="home" class="screen active">
@@ -264,7 +281,7 @@ kbd{font-family:inherit;font-size:.78rem;background:var(--blue-s);border-radius:
 </section>
 
 <section id="quiz" class="screen">
-  <div class="bar"><button class="back" onclick="goHome()">← Übersicht</button><div class="mtitle" id="qTitle"></div><div class="counter" id="qCount"></div></div>
+  <div class="bar"><button class="back" onclick="goHome()">← Übersicht</button><div class="mtitle" id="qTitle"></div><span class="wmode"><button data-m="auto">sofort weiter</button><button data-m="manual">mit Weiter</button></span><div class="counter" id="qCount"></div></div>
   <div class="card" id="qCard"></div>
 </section>
 
@@ -342,7 +359,7 @@ kbd{font-family:inherit;font-size:.78rem;background:var(--blue-s);border-radius:
   </div>
 </section>
 
-<footer>Konjunktiv-Atelier C1 · Tastatur: <kbd>1</kbd>–<kbd>4</kbd> zum Antworten, <kbd>Enter</kbd> zum Prüfen bzw. Weitergehen</footer>
+<footer>Konjunktiv-Atelier C1 · Tastatur: <kbd>1</kbd>–<kbd>4</kbd> zum Antworten, <kbd>Enter</kbd> zum Prüfen · Klick auf die Erklärung für sofort weiter</footer>
 </div>
 
 <script>
@@ -746,22 +763,79 @@ function variantsFor(tpl, ctx, cor){
 }
 function whyVar(key, b, cor, ctx){
   switch (key){
-    case 'noShift': return 'Die Perspektive wurde nicht gewechselt. In der indirekten Rede spricht der/die Berichtende – Pronomen, Possessivartikel und Verbform müssen umgestellt werden.';
-    case 'ind': return `Hier steht der Indikativ („${b.vp.fin}“). Im Bericht verlangt die indirekte Rede den Konjunktiv.`;
-    case 'flip': return b.vp.flipped === 'k2'
-      ? `„${b.vp.fin}“ ist Konjunktiv II. Weil sich der Konjunktiv I („${b.vp.k.k1}“) vom Indikativ („${b.vp.k.ind}“) unterscheidet, steht im neutralen Bericht der Konjunktiv I.`
-      : `„${b.vp.fin}“ sieht genauso aus wie der Indikativ – der Konjunktiv ist nicht erkennbar. Deshalb braucht man die Ersatzform.`;
-    case 'swap': return 'Die Bezüge sind vertauscht: Ein Pronomen bzw. Possessivartikel verweist auf die falsche Person.';
-    case 'num': return cor.sd.p === 5 ? '„sie“ meint hier eine Gruppe (Plural) – die Verbform steht aber im Singular.' : '„sie“ meint hier eine einzelne Person (Singular) – die Verbform steht aber im Plural.';
-    case 'tense': return 'Die Zeit stimmt nicht: Die Aussage bezieht sich auf die Vergangenheit → Konjunktiv der Vergangenheit (Hilfsverb + Partizip II).';
-    case 'v2': return 'In der indirekten Frage steht das konjugierte Verb am Ende.';
-    case 'plain': return 'Eine Aufforderung (Imperativ) gibt man in der indirekten Rede mit „sollen“ wieder (höflich: „mögen“).';
-    case 'uShift': return '„wir/unser“ schließt hier den Berichtenden selbst ein – deshalb bleibt es bei „wir/unser“.';
+    case 'noShift': return 'Perspektive nicht gewechselt – aus Sicht des Berichts umstellen.';
+    case 'ind': return `Indikativ („${b.vp.fin}“) – im Bericht steht der Konjunktiv.`;
+    case 'flip': return b.vp.flipped === 'k2' ? `„${b.vp.fin}“ ist Konj. II – der Konj. I „${b.vp.k.k1}“ ist hier eindeutig.` : `„${b.vp.fin}“ = Indikativ – hier braucht man die Ersatzform.`;
+    case 'swap': return 'Bezug vertauscht – Pronomen bzw. Possessiv meint die falsche Person.';
+    case 'num': return cor.sd.p === 5 ? '„sie“ = Gruppe (Plural) – Verb steht im Singular.' : '„sie“ = eine Person (Singular) – Verb steht im Plural.';
+    case 'tense': return 'Vergangenheit → Hilfsverb im Konjunktiv + Partizip II.';
+    case 'v2': return 'Indirekte Frage: Verb ans Ende.';
+    case 'plain': return 'Aufforderung → mit „sollen“ wiedergeben.';
+    case 'uShift': return '„wir/unser“ schließt mich ein → bleibt „wir/unser“.';
   }
 }
 function scenario(tpl, ctx){
   const I = intro(tpl, ctx), dir = build(tpl, ctx, 'dir');
   return `<div class="quote"><span class="qintro">${esc(I)}:</span> „${esc(dir.text)}“</div>`;
+}
+
+
+// ═══════════════ WEITER-MODUS (sofort weiter / erst Erklärung, dann Weiter) ═══════════════
+let ADV = 'auto';
+try { ADV = localStorage.getItem('weiterModus') || 'auto'; } catch(e){}
+function syncWM(){ document.querySelectorAll('.wmode button').forEach(b => { b.classList.toggle('on', b.dataset.m === ADV); b.onclick = () => { ADV = b.dataset.m; try{ localStorage.setItem('weiterModus', ADV); }catch(e){} syncWM(); }; }); }
+/* nach »Weiter« nicht an den Seitenanfang springen: die neue Aufgabe steht direkt im Blick */
+function keepInView(sel){
+  const el = document.querySelector(sel); if (!el) return;
+  const r = el.getBoundingClientRect();
+  if (r.top < 0 || r.top > window.innerHeight * 0.45) window.scrollTo({top: window.scrollY + r.top - 10, behavior:'smooth'});
+}
+
+// ═══════════════ AUTOMATISCH WEITER ═══════════════
+let AUTO = null;
+function clearAuto(){ if (AUTO){ clearTimeout(AUTO); AUTO = null; } }
+const firstS = s => { const t = String(s); const m = t.match(/^.+?[.!](?=\s+[A-ZÄÖÜ„(]|$)/); return m ? m[0] : t; };
+function autoGo(fn, txt, extra = 0){
+  clearAuto(); const plain = String(txt).replace(/<[^>]+>/g, '');
+  const ms = Math.min(4500, 1300 + plain.length * 24) + extra;
+  const bar = document.querySelector('.autobar i');
+  if (bar){ bar.style.transition = 'none'; bar.style.width = '0%'; requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.transition = `width ${ms}ms linear`; bar.style.width = '100%'; })); }
+  AUTO = setTimeout(() => { AUTO = null; fn(); }, ms);
+}
+function showShort(fbSel, txt, after, ok = true, extra = 0){
+  const fb = document.querySelector(fbSel);
+  const long = (fbSel === '#qFb' && typeof Q !== 'undefined' && Q.cur && Q.cur.long) ? Q.cur.long : '';
+  let rest = long && String(long).startsWith(String(txt)) ? String(long).slice(String(txt).length).trim() : long;
+  if (rest === txt) rest = '';
+  const go = () => { clearAuto(); after(); };
+  if (ADV === 'manual'){
+    fb.className = 'fb show short manual ' + (ok ? 'ok' : 'no');
+    fb.innerHTML = `<span class="verdict">${ok ? '✓' : '→'}</span> ${txt}` + (rest ? `<div class="longx">${rest}</div>` : '') + `<div class="nextrow"><button class="btn" type="button">Weiter →</button></div>`;
+    fb.onclick = null;
+    const nb = fb.querySelector('.nextrow .btn'); nb.onclick = go; WAITNEXT = go;
+    try { nb.focus({preventScroll:true}); } catch(e){}
+  } else {
+    fb.className = 'fb show short ' + (ok ? 'ok' : 'no');
+    fb.innerHTML = `<span class="verdict">${ok ? '✓' : '→'}</span> ${txt}<button class="holdlnk" type="button">Moment, ich lese noch</button><div class="autobar"><i></i></div>`;
+    fb.onclick = go; WAITNEXT = go;
+    fb.querySelector('.holdlnk').onclick = e => {
+      e.stopPropagation(); clearAuto(); fb.onclick = null; fb.classList.add('manual');
+      e.target.remove(); const bar = fb.querySelector('.autobar'); if (bar) bar.remove();
+      if (rest) fb.insertAdjacentHTML('beforeend', `<div class="longx">${rest}</div>`);
+      fb.insertAdjacentHTML('beforeend', '<div class="nextrow"><button class="btn" type="button">Weiter →</button></div>');
+      fb.querySelector('.nextrow .btn').onclick = go;
+    };
+    autoGo(after, txt, extra);
+  }
+  requestAnimationFrame(() => { try { const r = fb.getBoundingClientRect(); if (r.bottom > window.innerHeight - 10) window.scrollBy({top: r.bottom - window.innerHeight + 20, behavior:'smooth'}); } catch(e){} });
+}
+let WAITNEXT = null;
+
+function shortExpl(tpl, ctx, vp){
+  const sh = [...rolesOf(tpl)].map(r => `${PR[pkey(dirDesc(r, ctx))].n} → ${PR[pkey(indDesc(r, ctx, {}))].n}`).join(' · ');
+  const k = vp.k, pre = tpl.imp ? 'Aufforderung → sollen: ' : tpl.t === 'perf' ? 'Vergangenheit: ' : tpl.t === 'fut' ? 'Zukunft: ' : '';
+  const v = k.kind === 'k1' ? `„${k.f}“ (Konj. I ≠ „${k.ind}“)` : k.kind === 'k2' ? `„${k.f}“ (Ersatz, denn „${k.k1}“ = Indikativ)` : `würde-Form (denn „${k.k1}“ = Indikativ)`;
+  return `${sh} · ${pre}${v}`;
 }
 
 // ═══════════════ GENERATOR 1: PERSPEKTIVWECHSEL ═══════════════
@@ -780,7 +854,7 @@ function genPersp(){
     let ex = `<div class="exbox"><div class="exh">Perspektivwechsel</div>${shiftHTML(tpl, ctx)}<div class="exh">Verbform</div>${verbHTML(tpl, cor.vp)}`;
     if (!tpl.q){ const d = build(tpl, ctx, 'ind', {dass:1}); ex += `<div class="exh">Ebenso korrekt mit „dass“</div>${esc(I)}, ${esc(d.text)}.`; }
     ex += '</div>';
-    return {kind:'mc', kicker:'Perspektivwechsel', instr:'Wie lautet die indirekte Rede im neutralen Bericht? Achte auf Person, Bezug und Verbform.', stem:scenario(tpl, ctx), opts, ex, sol:corS};
+    return {kind:'mc', kicker:'Perspektivwechsel', instr:'Wie lautet die indirekte Rede im neutralen Bericht? Achte auf Person, Bezug und Verbform.', stem:scenario(tpl, ctx), opts, short:shortExpl(tpl, ctx, cor.vp), long:ex};
   }
 }
 
@@ -792,7 +866,7 @@ function genForm(){
     if (cor.vp.k.kind === 'w') continue;
     const gc = []; const b = build(tpl, ctx, 'ind', {}, gc);
     const I = intro(tpl, ctx);
-    return {kind:'type', kicker:'Formen-Schmiede', instr:'Setze die passenden Formen ein: Pronomen, Possessivartikel und Verb – aus der Sicht des Berichts.', stem:scenario(tpl, ctx), frame: esc(I) + ', ' + esc(b.text) + '.', gaps:gc, ex:`<div class="exbox"><div class="exh">Perspektivwechsel</div>${shiftHTML(tpl, ctx)}<div class="exh">Verbform</div>${verbHTML(tpl, cor.vp)}</div>`, sol:`${I}, ${cor.text}.`};
+    return {kind:'type', kicker:'Formen-Schmiede', instr:'Setze die passenden Formen ein: Pronomen, Possessivartikel und Verb – aus der Sicht des Berichts.', stem:scenario(tpl, ctx), frame: esc(I) + ', ' + esc(b.text) + '.', gaps:gc, short:shortExpl(tpl, ctx, cor.vp), sol:`${I}, ${cor.text}.`};
   }
 }
 
@@ -811,7 +885,7 @@ function genBau(){
     const tr = shuffle([...traps]).slice(0, 3);
     if (tr.length < 2) continue;
     return {kind:'bau', kicker:'Satzbaukasten' + (dass ? ' · mit „dass“' : ''), instr: dass ? 'Baue die indirekte Rede als dass-Satz. Achtung: Einige Bausteine sind Fallen und gehören nicht in den Satz.' : 'Baue die indirekte Rede (ohne „dass“). Achtung: Einige Bausteine sind Fallen und gehören nicht in den Satz.',
-      stem:scenario(tpl, ctx), prefix: I + ', ', tiles:shuffle([...cor.chunks, ...tr]), acc:[cor.chunks], ex:`<div class="exbox"><div class="exh">Perspektivwechsel</div>${shiftHTML(tpl, ctx)}<div class="exh">Verbform</div>${verbHTML(tpl, cor.vp)}</div>`};
+      stem:scenario(tpl, ctx), prefix: I + ', ', tiles:shuffle([...cor.chunks, ...tr]), acc:[cor.chunks], short:shortExpl(tpl, ctx, cor.vp)};
   }
 }
 
@@ -821,14 +895,14 @@ function fromPool(name, arr){ if (!POOLS[name] || !POOLS[name].length) POOLS[nam
 function gapStem(s){ return esc(s).replace('___','<span class="gap">…</span>').replace(' → ', '<br><span class="arrow">→</span> '); }
 function mcFrom(it, kicker, instr){
   const opts = it.o.map((o,i) => ({h:esc(o), ok:i===0, why:i===0 ? it.ex : it.w[i-1]}));
-  return {kind:'mc', kicker, instr, stem:gapStem(it.s), gapFill:it.o[0], opts:shuffle(opts), ex:it.ex, sol:it.s.split(' → ').pop().replace('___', it.o[0])};
+  return {kind:'mc', kicker, instr, stem:gapStem(it.s), gapFill:it.o[0], opts:shuffle(opts), short:firstS(it.ex), long:it.ex};
 }
 const genK2 = () => mcFrom(fromPool('k2', K2), 'Konjunktiv II', 'Welche Form ist korrekt? Nur eine Lösung passt.');
 const genSpez = () => mcFrom(fromPool('spez', SPEZ), 'Indirekte Rede · Spezialfall', 'Welche Form verlangt der neutrale Bericht? Nur eine Lösung passt.');
 function genFehler(){
   const it = fromPool('fehler', FEHLER);
   const opts = it.o.map((o,i) => ({h:esc(o), ok:i===0, why:i===0 ? 'Richtig erkannt – hier steckt der Fehler.' : 'Dieser Satz ist korrekt. Der Fehler steckt in einem anderen Satz.'}));
-  return {kind:'mc', kicker:'Fehlerjagd', instr:'Nur ein Satz verstößt gegen die Regeln der indirekten Rede im Bericht. Welcher?', stem:'', opts:shuffle(opts), ex:it.ex, sol:it.fix, solLabel:'So ist er richtig:'};
+  return {kind:'mc', kicker:'Fehlerjagd', instr:'Nur ein Satz verstößt gegen die Regeln der indirekten Rede im Bericht. Welcher?', stem:'', opts:shuffle(opts), short:`Richtig: ${it.fix}`, long:it.ex};
 }
 const MIX = [genPersp, genPersp, genPersp, genForm, genBau, genK2, genK2, genSpez, genSpez, genFehler];
 const MODES = {
@@ -839,7 +913,7 @@ const MODES = {
 
 // ═══════════════ NAVIGATION ═══════════════
 function show(id){ document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id)); window.scrollTo({top:0}); }
-function goHome(){ show('home'); }
+function goHome(){ clearAuto(); show('home'); }
 
 // ═══════════════ QUIZ-ENGINE ═══════════════
 let Q = {};
@@ -851,50 +925,59 @@ function updCount(){
 function nextQ(){
   const M = MODES[Q.mode];
   if (M.lim && Q.n >= M.lim) return endMarathon();
-  Q.cur = M.g(); Q.done = false; Q.tries = 0; updCount();
+  clearAuto(); Q.cur = M.g(); Q.done = false; Q.tries = 0; Q.missed = false; updCount();
+  WAITNEXT = null;
   if (Q.cur.kind === 'mc') renderMC(Q.cur); else if (Q.cur.kind === 'bau') renderBau(Q.cur); else renderType(Q.cur);
+  keepInView('#quiz .bar');
 }
 function renderMC(q){
   const L = ['A','B','C','D'];
   $('#qCard').innerHTML = `<span class="kicker">${q.kicker}</span><div class="instr">${q.instr}</div>${q.stem ? `<div class="stem" id="qStem">${q.stem}</div>` : ''}
    <div class="opts">${q.opts.map((o,i) => `<button class="opt" data-i="${i}" onclick="answer(${i})"><span class="lt">${L[i]}</span><span>${o.h}</span></button>`).join('')}</div>
-   <div class="fb" id="qFb"></div><div class="qnav"><button class="btn" id="qNext" hidden onclick="nextQ()">Weiter →</button></div>`;
+   <div class="fb" id="qFb"></div>`;
 }
 function answer(i){
   if (Q.done || !Q.cur || Q.cur.kind !== 'mc') return;
-  Q.done = true; const q = Q.cur, o = q.opts[i];
-  document.querySelectorAll('.opt').forEach((b,j) => { b.disabled = true; if (q.opts[j].ok) b.classList.add('right'); });
-  if (!o.ok) document.querySelector(`.opt[data-i="${i}"]`).classList.add('wrong');
+  const q = Q.cur, o = q.opts[i], b = document.querySelector(`.opt[data-i="${i}"]`);
+  if (!b || b.disabled) return;
+  if (!o.ok){
+    if (!Q.missed){ Q.missed = true; Q.n++; award(false); updCount(); }
+    b.classList.add('wrong'); b.disabled = true;
+    b.lastElementChild.insertAdjacentHTML('beforeend', `<small class="optwhy">${o.why}</small>`);
+    return;
+  }
+  Q.done = true;
+  if (!Q.missed){ Q.n++; Q.ok++; award(true); updCount(); }
+  document.querySelectorAll('.opt').forEach(x => x.disabled = true); b.classList.add('right');
   const g = document.querySelector('#qStem .gap'); if (g && q.gapFill){ g.textContent = q.gapFill; g.classList.add('filled'); }
-  Q.n++; if (o.ok) Q.ok++; award(o.ok); updCount();
-  let h = `<div class="verdict">${o.ok ? '✓ Richtig!' : '✗ Nicht ganz.'}</div>`;
-  if (!o.ok) h += `<div class="why"><b>Deine Wahl:</b> ${o.why}</div>`;
-  if (q.ex) h += `<div style="margin-top:8px">${q.ex}</div>`;
-  if (q.sol) h += `<p style="margin-top:8px"><b>${q.solLabel || 'Lösung:'}</b></p>` + solBox(q.sol);
-  const fb = $('#qFb'); fb.className = 'fb show ' + (o.ok ? 'ok' : 'no'); fb.innerHTML = h;
-  $('#qNext').hidden = false; $('#qNext').focus({preventScroll:true});
+  showShort('#qFb', q.short, nextQ);
 }
-// Eingabe
+
 function renderType(q){
   const frame = q.frame.replace(/§(\d+)§/g, (m,i) => `<input class="gin" id="gi${i}" autocomplete="off" spellcheck="false" placeholder="${esc(q.gaps[i].ph)}" style="width:${Math.max(5, q.gaps[i].a.length + 2, q.gaps[i].ph.length + 1)}ch">`);
   $('#qCard').innerHTML = `<span class="kicker">${q.kicker}</span><div class="instr">${q.instr}</div><div class="stem">${q.stem}</div>
    <div class="frame">${frame}</div><div class="hint">In Klammern steht der Infinitiv des Verbs, dessen Form gesucht ist.</div>
-   <div class="fb" id="qFb"></div><div class="qnav"><button class="btn ghost" id="tShow" onclick="typeCheck(true)">Lösung zeigen</button><button class="btn" id="tCheck" onclick="typeCheck()">Prüfen</button><button class="btn" id="qNext" hidden onclick="nextQ()">Weiter →</button></div>`;
+   <div class="fb" id="qFb"></div><div class="qnav"><button class="btn ghost" id="tShow" onclick="typeCheck(true)">Lösung zeigen</button><button class="btn" id="tCheck" onclick="typeCheck()">Prüfen</button></div>`;
   setTimeout(() => { const f = document.querySelector('.gin'); if (f) f.focus({preventScroll:true}); }, 50);
 }
 function typeCheck(give){
   const q = Q.cur; if (Q.done) return;
   let all = true;
   q.gaps.forEach((g,i) => { const el = $('#gi'+i), v = el.value.trim().toLowerCase().replace(/\s+/g,' '); const r = v === g.a.toLowerCase(); el.classList.toggle('r', r); el.classList.toggle('w', !r); if (!r) all = false; });
-  Q.tries++;
-  if (!all && !give && Q.tries < 2){ const fb = $('#qFb'); fb.className = 'fb show no'; fb.innerHTML = '<div class="verdict">Noch nicht ganz – die rot markierten Felder stimmen nicht.</div>Prüfe: Wer ist aus der Sicht des Berichts gemeint? Und ist der Konjunktiv I eindeutig?'; return; }
-  Q.done = true; Q.n++; if (all) Q.ok++; award(all, Q.tries === 1 ? 12 : 6); updCount();
+  if (!all && !give){
+    if (!Q.missed){ Q.missed = true; Q.n++; award(false); updCount(); }
+    const fb = $('#qFb'); fb.className = 'fb show no'; fb.onclick = null;
+    fb.innerHTML = 'Die rot markierten Felder stimmen noch nicht. Wer ist aus Sicht des Berichts gemeint – und ist der Konjunktiv I eindeutig?';
+    const w = document.querySelector('.gin.w'); if (w) w.focus(); return;
+  }
+  Q.done = true;
+  if (!Q.missed){ Q.n++; if (all){ Q.ok++; award(true, 12); } else award(false); }
+  updCount();
   q.gaps.forEach((g,i) => { const el = $('#gi'+i); if (!el.classList.contains('r')){ el.value = g.a; el.classList.remove('w'); el.classList.add('s'); } el.disabled = true; });
-  const fb = $('#qFb'); fb.className = 'fb show ' + (all ? 'ok' : 'no');
-  fb.innerHTML = `<div class="verdict">${all ? '✓ Alles richtig!' : 'Die Lösung'}</div>${q.ex}<p style="margin-top:8px"><b>Lösung:</b></p>${solBox(q.sol)}`;
-  $('#tCheck').hidden = true; $('#tShow').hidden = true; $('#qNext').hidden = false; $('#qNext').focus({preventScroll:true});
+  $('#tCheck').hidden = true; $('#tShow').hidden = true;
+  showShort('#qFb', q.short, nextQ, all, all ? 0 : 1500);
 }
-// Satzbau
+
 function renderBau(q){
   q.built = [];
   $('#qCard').innerHTML = `<span class="kicker">${q.kicker}</span><div class="instr">${q.instr}</div><div class="stem">${q.stem}</div>
@@ -903,7 +986,7 @@ function renderBau(q){
    <div class="zone" id="bPool"></div>
    <div class="hint">Ein Klick auf einen eingesetzten Baustein legt ihn zurück.</div>
    <div class="fb" id="qFb"></div>
-   <div class="qnav"><button class="btn ghost" onclick="bauReset()">Zurücksetzen</button><button class="btn ghost" id="bShow" onclick="bauShow()">Lösung zeigen</button><button class="btn" id="bCheck" onclick="bauCheck()">Prüfen</button><button class="btn" id="qNext" hidden onclick="nextQ()">Weiter →</button></div>`;
+   <div class="qnav"><button class="btn ghost" onclick="bauReset()">Zurücksetzen</button><button class="btn ghost" id="bShow" onclick="bauShow()">Lösung zeigen</button><button class="btn" id="bCheck" onclick="bauCheck()">Prüfen</button></div>`;
   bauDraw();
 }
 function bauDraw(){
@@ -921,21 +1004,27 @@ function bauCheck(){
   const mine = q.built.map(i => q.tiles[i]); const fb = $('#qFb');
   Q.tries++;
   if (q.acc.some(a => a.length === mine.length && a.every((x,i) => x === mine[i]))){
-    Q.done = true; Q.n++; Q.ok++; award(true, Q.tries === 1 ? 12 : 6); updCount(); $('#bTarget').classList.add('done');
-    fb.className = 'fb show ok'; fb.innerHTML = `<div class="verdict">✓ Perfekt gebaut!</div>${solBox(q.prefix + J(...mine) + '.')}${q.ex}`; bauEnd(); return;
+    Q.done = true; if (!Q.missed){ Q.n++; Q.ok++; award(true, 12); } updCount(); $('#bTarget').classList.add('done'); bauEnd();
+    showShort('#qFb', q.short, nextQ); return;
   }
-  if (Q.tries >= 3){ bauShow(); return; }
+  if (!Q.missed){ Q.missed = true; Q.n++; award(false); updCount(); }
   let best = 0; q.acc.forEach(a => { let n = 0; while (n < a.length && a[n] === mine[n]) n++; best = Math.max(best, n); });
   const trap = mine.find(x => !q.acc[0].includes(x));
-  fb.className = 'fb show no';
-  fb.innerHTML = `<div class="verdict">Noch nicht ganz – versuch es noch einmal.</div>` + (trap ? `Mindestens ein Baustein ist eine Falle: Prüfe Person, Bezug und Verbform.` : best > 0 ? `Die ersten <b>${best}</b> Baustein(e) stimmen – danach solltest du umbauen.` : `Schon der Anfang passt noch nicht.`) + `<p class="hint">${Q.tries === 1 ? '' : 'Letzter Versuch – danach erscheint die Lösung.'}</p>`;
+  fb.className = 'fb show no'; fb.onclick = null;
+  fb.innerHTML = trap ? `„${esc(trap)}“ ist eine Falle – prüfe Person, Bezug und Verbform.` : best > 0 ? `Die ersten ${best} Baustein(e) stimmen – danach umbauen.` : 'Schon der Anfang passt noch nicht.';
 }
+
 function bauShow(){
   const q = Q.cur; if (Q.done) return;
-  Q.done = true; Q.n++; award(false); updCount();
-  $('#qFb').className = 'fb show no'; $('#qFb').innerHTML = `<div class="verdict">Die Lösung</div>${solBox(q.prefix + J(...q.acc[0]) + '.')}${q.ex}`; bauEnd();
+  Q.done = true; if (!Q.missed){ Q.n++; award(false); } updCount();
+  const t = q.tiles.map((x,i) => ({x,i})); q.built = [];
+  q.acc[0].forEach(c => { const f = t.find(o => o.x === c && !q.built.includes(o.i)); if (f) q.built.push(f.i); });
+  bauDraw(); bauEnd();
+  showShort('#qFb', q.short, nextQ, false, 1500);
 }
-function bauEnd(){ $('#bCheck').hidden = true; $('#bShow').hidden = true; $('#qNext').hidden = false; $('#qNext').focus({preventScroll:true}); }
+
+function bauEnd(){ $('#bCheck').hidden = true; $('#bShow').hidden = true; }
+
 function endMarathon(){
   const pct = Math.round(Q.ok / Q.n * 100);
   const msg = pct >= 90 ? "Herausragend – du wechselst die Perspektive so sicher wie ein Profi-Journalist." : pct >= 75 ? "Sehr stark – Personen, Bezüge und Ersatzformen sitzen fast immer." : pct >= 55 ? "Solide Basis – die Feinheiten kommen mit jeder Runde." : "Guter Anfang – jede Runde schärft dein Gespür für die Perspektive.";
@@ -946,9 +1035,10 @@ document.addEventListener('keydown', e => {
   if (!$('#quiz').classList.contains('active') || !Q.cur) return;
   if (e.target.tagName === 'BUTTON' && e.key === 'Enter') return;
   if (Q.cur.kind === 'type' && !Q.done){ if (e.key === 'Enter'){ e.preventDefault(); typeCheck(); } return; }
+  if (Q.cur.kind === 'type' && Q.done && e.key === 'Enter'){ e.preventDefault(); clearAuto(); nextQ(); return; }
   if (e.target.tagName === 'INPUT') return;
   if (Q.cur.kind === 'mc' && !Q.done){ const i = {'1':0,'2':1,'3':2,'4':3,'a':0,'b':1,'c':2,'d':3}[e.key.toLowerCase()]; if (i !== undefined && i < Q.cur.opts.length){ answer(i); e.preventDefault(); } }
-  else if (Q.done && e.key === 'Enter'){ e.preventDefault(); nextQ(); }
+  else if (Q.done && e.key === 'Enter'){ e.preventDefault(); clearAuto(); nextQ(); }
 });
 
 // ═══════════════ ZEITUNGS-REDAKTION ═══════════════
@@ -1051,6 +1141,7 @@ function repShow(){ const c = RP.cur; $('#repSol').innerHTML = `<div class="fb s
     d.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;top:${Math.random()*100}%;background:radial-gradient(circle at 30% 30%, ${pick(cols)}55, transparent 70%);animation-duration:${14+Math.random()*16}s;animation-delay:-${Math.random()*10}s`;
     b.appendChild(d); } })();
 renderStats();
+syncWM();
 
 </script>
 </body>

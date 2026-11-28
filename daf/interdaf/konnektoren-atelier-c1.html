@@ -176,6 +176,24 @@ footer{text-align:center;font-size:.8rem;color:var(--muted);margin-top:30px}
 .yt{font-size:.85rem;color:var(--muted);margin-top:8px}
 .legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.85rem;color:var(--muted);margin-top:10px}
 kbd{font-family:inherit;font-size:.78rem;background:var(--blue-s);border-radius:5px;padding:1px 6px;color:var(--blue)}
+
+.fb.short{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;cursor:pointer;position:relative;padding:12px 16px 16px;font-size:1rem}
+.fb.short .verdict{margin:0}
+.autobar{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(0,0,0,.06);border-radius:0 0 14px 14px;overflow:hidden}
+.autobar i{display:block;height:100%;width:0;background:var(--pet)}
+.fb.no .autobar i{background:var(--rust)}
+.optwhy{display:block;font-size:.86rem;color:var(--rust);margin-top:5px;line-height:1.45}
+.fb .alt{color:var(--muted);font-size:.9rem}
+
+/* Weiter-Modus */
+.wmode{display:inline-flex;background:var(--blue-s);border-radius:999px;padding:3px;gap:2px;align-items:center}
+.wmode button{border:0;background:transparent;border-radius:999px;padding:5px 12px;font-size:.82rem;color:var(--blue);font-weight:500}
+.wmode button.on{background:var(--blue);color:#fff}
+.stat.wm{padding:5px 8px}
+.fb.manual{cursor:default}
+.fb.manual .longx{flex-basis:100%;margin-top:6px;font-size:.95rem}
+.fb.manual .nextrow{flex-basis:100%;display:flex;justify-content:flex-end;margin-top:10px}
+.holdlnk{flex-basis:100%;text-align:right;font-size:.8rem;color:var(--muted);text-decoration:underline;text-underline-offset:3px;background:none;border:0;padding:4px 0 0}
 </style>
 </head>
 <body>
@@ -184,7 +202,6 @@ kbd{font-family:inherit;font-size:.78rem;background:var(--blue-s);border-radius:
 <header>
   <h1>Konnektoren-<span>Atelier</span> C1</h1>
   <p class="sub">Sätze verbinden wie ein Profi – mit Logik, Stil und präziser Wortstellung</p>
-  <div class="topbtn"><a href="../index.html">Übungsliste</a><a href="../../index.html">Hauptseite</a></div>
 </header>
 
 <div class="stats">
@@ -193,6 +210,7 @@ kbd{font-family:inherit;font-size:.78rem;background:var(--blue-s);border-radius:
   <div class="stat">Serie <b id="sStreak">0</b></div>
   <div class="stat">Beste Serie <b id="sBest">0</b></div>
   <div class="stat">Treffsicherheit <b id="sAcc">–</b></div>
+  <div class="stat wm"><span class="wmode"><button data-m="auto">sofort weiter</button><button data-m="manual">erst Erklärung, dann Weiter</button></span></div>
 </div>
 
 <!-- HOME -->
@@ -231,7 +249,7 @@ kbd{font-family:inherit;font-size:.78rem;background:var(--blue-s);border-radius:
 
 <!-- QUIZ -->
 <section id="quiz" class="screen">
-  <div class="bar"><button class="back" onclick="goHome()">← Übersicht</button><div class="mtitle" id="qTitle"></div><div class="counter" id="qCount"></div></div>
+  <div class="bar"><button class="back" onclick="goHome()">← Übersicht</button><div class="mtitle" id="qTitle"></div><span class="wmode"><button data-m="auto">sofort weiter</button><button data-m="manual">mit Weiter</button></span><div class="counter" id="qCount"></div></div>
   <div class="card" id="qCard"></div>
 </section>
 
@@ -281,7 +299,7 @@ kbd{font-family:inherit;font-size:.78rem;background:var(--blue-s);border-radius:
   </div>
 </section>
 
-<footer>Konnektoren-Atelier C1 · Tastatur: <kbd>1</kbd>–<kbd>4</kbd> zum Antworten, <kbd>Enter</kbd> für die nächste Aufgabe</footer>
+<footer>Konnektoren-Atelier C1 · Tastatur: <kbd>1</kbd>–<kbd>4</kbd> zum Antworten, <kbd>Enter</kbd> oder Klick auf die Erklärung für sofort weiter</footer>
 </div>
 
 <script>
@@ -801,12 +819,68 @@ const SLOT_TXT = {
 const ACC = {ns:['ns'],nsf:['ns'],inv:['p1'],norm:['p0'],mf:['p1','mf'],zwar:['zwar','dop']};
 function whyOpt(k, slot, need){
   const K = KON[k], syn = ACC[slot].includes(K.t), sem = need.includes(K.r);
-  if (k === 'entweder') return "„entweder“ braucht als Partner „oder“ – hier folgt aber „aber“. Zu „aber“ gehört „zwar“.";
-  if (syn && sem) return `„${k}“ passt grammatisch und inhaltlich: Es ${R_TXT[K.r]} und ${T_TXT[K.t]}.`;
-  if (syn) return `„${k}“ ist grammatisch möglich, passt aber inhaltlich nicht: Es ${R_TXT[K.r]}. Gesucht ist ein Konnektor, der ${NEED_TXT[need[0]]}.`;
-  if (sem) return `„${k}“ passt inhaltlich, aber nicht grammatisch: Es ${T_TXT[K.t]}. ${SLOT_TXT[slot]}`;
-  return `„${k}“ passt weder inhaltlich noch grammatisch: Es ${R_TXT[K.r]} und ${T_TXT[K.t]}.`;
+  if (k === 'entweder') return '„entweder“ braucht „oder“ – hier folgt aber „aber“.';
+  if (syn && sem) return `„${k}“ = ${R_S[K.r]} · ${T_S[K.t]}.`;
+  if (syn) return `Satzbau passt, aber „${k}“ drückt ${R_S[K.r]} aus – gesucht: ${R_S[need[0]]}.`;
+  if (sem) return `Sinn passt, aber „${k}“: ${T_S[K.t]}.`;
+  return `„${k}“ = ${R_S[K.r]} · ${T_S[K.t]} – passt weder inhaltlich noch grammatisch.`;
 }
+
+
+// ═══════════════ WEITER-MODUS (sofort weiter / erst Erklärung, dann Weiter) ═══════════════
+let ADV = 'auto';
+try { ADV = localStorage.getItem('weiterModus') || 'auto'; } catch(e){}
+function syncWM(){ document.querySelectorAll('.wmode button').forEach(b => { b.classList.toggle('on', b.dataset.m === ADV); b.onclick = () => { ADV = b.dataset.m; try{ localStorage.setItem('weiterModus', ADV); }catch(e){} syncWM(); }; }); }
+/* nach »Weiter« nicht an den Seitenanfang springen: die neue Aufgabe steht direkt im Blick */
+function keepInView(sel){
+  const el = document.querySelector(sel); if (!el) return;
+  const r = el.getBoundingClientRect();
+  if (r.top < 0 || r.top > window.innerHeight * 0.45) window.scrollTo({top: window.scrollY + r.top - 10, behavior:'smooth'});
+}
+
+// ═══════════════ AUTOMATISCH WEITER ═══════════════
+let AUTO = null;
+function clearAuto(){ if (AUTO){ clearTimeout(AUTO); AUTO = null; } }
+const firstS = s => { const t = String(s); const m = t.match(/^.+?[.!](?=\s+[A-ZÄÖÜ„(]|$)/); return m ? m[0] : t; };
+function autoGo(fn, txt, extra = 0){
+  clearAuto(); const plain = String(txt).replace(/<[^>]+>/g, '');
+  const ms = Math.min(4500, 1300 + plain.length * 24) + extra;
+  const bar = document.querySelector('.autobar i');
+  if (bar){ bar.style.transition = 'none'; bar.style.width = '0%'; requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.transition = `width ${ms}ms linear`; bar.style.width = '100%'; })); }
+  AUTO = setTimeout(() => { AUTO = null; fn(); }, ms);
+}
+function showShort(fbSel, txt, after, ok = true, extra = 0){
+  const fb = document.querySelector(fbSel);
+  const long = (fbSel === '#qFb' && typeof Q !== 'undefined' && Q.cur && Q.cur.long) ? Q.cur.long : '';
+  let rest = long && String(long).startsWith(String(txt)) ? String(long).slice(String(txt).length).trim() : long;
+  if (rest === txt) rest = '';
+  const go = () => { clearAuto(); after(); };
+  if (ADV === 'manual'){
+    fb.className = 'fb show short manual ' + (ok ? 'ok' : 'no');
+    fb.innerHTML = `<span class="verdict">${ok ? '✓' : '→'}</span> ${txt}` + (rest ? `<div class="longx">${rest}</div>` : '') + `<div class="nextrow"><button class="btn" type="button">Weiter →</button></div>`;
+    fb.onclick = null;
+    const nb = fb.querySelector('.nextrow .btn'); nb.onclick = go; WAITNEXT = go;
+    try { nb.focus({preventScroll:true}); } catch(e){}
+  } else {
+    fb.className = 'fb show short ' + (ok ? 'ok' : 'no');
+    fb.innerHTML = `<span class="verdict">${ok ? '✓' : '→'}</span> ${txt}<button class="holdlnk" type="button">Moment, ich lese noch</button><div class="autobar"><i></i></div>`;
+    fb.onclick = go; WAITNEXT = go;
+    fb.querySelector('.holdlnk').onclick = e => {
+      e.stopPropagation(); clearAuto(); fb.onclick = null; fb.classList.add('manual');
+      e.target.remove(); const bar = fb.querySelector('.autobar'); if (bar) bar.remove();
+      if (rest) fb.insertAdjacentHTML('beforeend', `<div class="longx">${rest}</div>`);
+      fb.insertAdjacentHTML('beforeend', '<div class="nextrow"><button class="btn" type="button">Weiter →</button></div>');
+      fb.querySelector('.nextrow .btn').onclick = go;
+    };
+    autoGo(after, txt, extra);
+  }
+  requestAnimationFrame(() => { try { const r = fb.getBoundingClientRect(); if (r.bottom > window.innerHeight - 10) window.scrollBy({top: r.bottom - window.innerHeight + 20, behavior:'smooth'}); } catch(e){} });
+}
+let WAITNEXT = null;
+
+const R_S = {grund:'Grund',folge:'Folge',konz:'Gegengrund',zweck:'Zweck',gegen:'Gegensatz',alt:'Alternative'};
+const T_S = {ns:'Nebensatz → Verb ans Ende',p1:'Adverb → Verb direkt danach',p0:'Position 0 → Subjekt + Verb',mf:'nur im Mittelfeld nach dem Verb',zwar:'zwar … aber',dop:'Doppelkonnektor'};
+const RS = {'weil':'weil → Verb ans Ende; steht der weil-Satz vorne, beginnt der Hauptsatz mit dem Verb.','da':'da → Verb ans Ende; danach beginnt der Hauptsatz mit dem Verb.','denn':'denn = Position 0 → danach Subjekt + Verb.','deshalb':'deshalb → Verb direkt danach (oder im Mittelfeld).','folglich':'folglich → Verb direkt danach.','nämlich':'nämlich nie auf Position 1 → im Mittelfeld nach dem Verb.','sodass':'sodass → Verb ans Ende.','obwohl':'obwohl → Verb ans Ende; steht der obwohl-Satz vorne, beginnt der Hauptsatz mit dem Verb.','trotzdem':'trotzdem → Verb direkt danach (oder im Mittelfeld).','dennoch':'dennoch → Verb direkt danach.','zwar … aber':'zwar → Verb direkt danach · aber → Subjekt + Verb.','während':'während → Verb ans Ende.','wohingegen':'wohingegen → Verb ans Ende.','hingegen':'hingegen = Adverb, kein Nebensatz → Verb direkt danach bzw. nach dem Subjekt.','aber':'aber = Position 0 → Subjekt + Verb.'};
 
 // ═══════════════ GENERATOR 1: SINN & SATZBAU ═══════════════
 // § = Lücke
@@ -847,7 +921,7 @@ function genSinn(){
     stem: esc(pre) + '<span class="gap">…</span>' + esc(post),
     gapFill: fmt(cor),
     opts: shuffle(opts).map(o => ({h: esc(fmt(o.k)), ok:o.ok, why: whyOpt(o.k, T.slot, T.need)})),
-    ex: (others.length ? `Ebenso korrekt wäre hier: ${others.map(k=>'„'+fmt(k)+'“').join(', ')}.` : ''),
+    short: `„${fmt(cor)}“ = ${R_S[KON[cor].r]} · ${T_S[KON[cor].t]}` + (others.length ? ` · ebenso möglich: ${others.map(k=>'„'+fmt(k)+'“').join(', ')}` : ''),
     sol: full
   };
 }
@@ -944,7 +1018,7 @@ function genWort(){
     let wr = uniqStr(F.wr.map(w => ({s:toStr(w[0]), why:w[1]}))).filter(w => w.s !== okS && !F.ok.map(toStr).includes(w.s));
     wr = shuffle(wr).slice(0,3);
     const opts = shuffle([{h:esc(okS), ok:true, why:"Genau so ist der Satz korrekt."}, ...wr.map(w => ({h:esc(w.s), ok:false, why:w.why}))]);
-    return {kind:'mc', kicker:'Wortstellung · ' + F.k, instr:"Welcher Satz ist standardsprachlich korrekt? Nur einer ist es.", stem:'', opts, two:false, ex:F.rule, sol:okS};
+    return {kind:'mc', kicker:'Wortstellung · ' + F.k, instr:"Welcher Satz ist standardsprachlich korrekt? Nur einer ist es.", stem:'', opts, short:RS[F.k], sol:okS};
   }
   // Variante: Finde den falschen Satz
   const forms = Object.values(FORMS[rel]).map(f => f(p));
@@ -954,7 +1028,7 @@ function genWort(){
   const F = pick(forms); const w = pick(F.wr.filter(w => !okSet.has(toStr(w[0]))));
   const wrongS = toStr(w[0]), fixS = toStr(w[2]);
   const opts = shuffle([{h:esc(wrongS), ok:true, why:"Richtig erkannt – dieser Satz enthält den Fehler."}, ...oks.map(o => ({h:esc(o.s), ok:false, why:`Dieser Satz ist korrekt („${o.k}“). Der Fehler steckt in einem anderen Satz.`}))]);
-  return {kind:'mc', kicker:'Wortstellung · Fehlersuche', instr:"Drei Sätze sind korrekt. Welcher enthält einen Wortstellungsfehler?", stem:'', opts, ex:`<b>Der Fehler:</b> ${w[1]}<br>${F.rule}`, sol:fixS, solLabel:'So ist er richtig:'};
+  return {kind:'mc', kicker:'Wortstellung · Fehlersuche', instr:"Drei Sätze sind korrekt. Welcher enthält einen Wortstellungsfehler?", stem:'', opts, short:`Richtig: ${fixS}`};
 }
 
 // ═══════════════ GENERATOR 3: SATZBAUKASTEN ═══════════════
@@ -962,11 +1036,11 @@ function genBau(){
   if (Math.random() < .4){
     const h = pick(BAU_H);
     const acc = h.a.map(x => x.split('|'));
-    return {kind:'bau', kicker:'Satzbau · ' + h.k, instr:`Baue einen korrekten Satz mit „${h.k}“. Klicke die Bausteine in der richtigen Reihenfolge an.`, tiles:shuffle(acc[0]), acc, ex:h.ex, k:h.k.split(' (')[0]};
+    return {kind:'bau', kicker:'Satzbau · ' + h.k, instr:`Baue einen korrekten Satz mit „${h.k}“. Klicke die Bausteine in der richtigen Reihenfolge an.`, tiles:shuffle(acc[0]), acc, short:firstS(h.ex), long:h.ex, k:h.k.split(' (')[0]};
   }
   const rel = randRel(), p = pick(POOL_OF[rel]);
   const F = pick(Object.values(FORMS[rel]))(p);
-  return {kind:'bau', kicker:'Satzbau · ' + F.k, instr:`Verbinde die beiden Aussagen mit „${F.k}“. Klicke die Bausteine in der richtigen Reihenfolge an.`, tiles:shuffle(F.ok[0]), acc:F.ok, ex:F.rule, k:F.k};
+  return {kind:'bau', kicker:'Satzbau · ' + F.k, instr:`Verbinde die beiden Aussagen mit „${F.k}“. Klicke die Bausteine in der richtigen Reihenfolge an.`, tiles:shuffle(F.ok[0]), acc:F.ok, short:RS[F.k], k:F.k};
 }
 
 // ═══════════════ HANDGEMACHTE POOLS ═══════════════
@@ -976,25 +1050,25 @@ function gapStem(s){ return esc(s).replace('___','<span class="gap">…</span>')
 function genPrae(){
   const it = fromPool('prae', PRAE);
   const opts = it.o.map((o,i) => ({h:esc(o), ok:i===0, why:i===0 ? it.ex : it.w[i-1]}));
-  return {kind:'mc', kicker:'Präzision', instr:"Welcher Konnektor ist korrekt? Nur eine Lösung passt.", stem:gapStem(it.s), gapFill:it.o[0], opts:shuffle(opts), ex:it.ex, sol:it.s.replace('___', it.o[0])};
+  return {kind:'mc', kicker:'Präzision', instr:"Welcher Konnektor ist korrekt? Nur eine Lösung passt.", stem:gapStem(it.s), gapFill:it.o[0], opts:shuffle(opts), short:firstS(it.ex), long:it.ex, sol:it.s.replace('___', it.o[0])};
 }
 function genNomi(){
   const it = fromPool('nomi', NOMI);
   const opts = it.o.map((o,i) => ({h:esc(o), ok:i===0, why:i===0 ? it.ex : it.w[i-1]}));
   const ins = it.d === 'n' ? "Forme in den Nominalstil um (Präposition statt Konnektor). Welche Version ist korrekt?" : "Forme in den Verbalstil um (Konnektor + Nebensatz statt Präposition). Welche Version ist korrekt?";
-  return {kind:'mc', kicker: it.d === 'n' ? 'Verbal → Nominal' : 'Nominal → Verbal', instr:ins, stem:`<span class="src">${esc(it.q)}</span>`, opts:shuffle(opts), ex:it.ex, sol:it.o[0]};
+  return {kind:'mc', kicker: it.d === 'n' ? 'Verbal → Nominal' : 'Nominal → Verbal', instr:ins, stem:`<span class="src">${esc(it.q)}</span>`, opts:shuffle(opts), short:firstS(it.ex), long:it.ex};
 }
 function genFehler(){
   const it = fromPool('fehler', FEHLER);
   const opts = it.o.map((o,i) => ({h:esc(o), ok:i===0, why:i===0 ? "Richtig erkannt – hier steckt der Fehler." : "Dieser Satz ist korrekt. Der Fehler steckt in einem anderen Satz."}));
-  return {kind:'mc', kicker:'Fehlerjagd', instr:"Nur ein Satz enthält einen Fehler. Welcher?", stem:'', opts:shuffle(opts), ex:it.ex, sol:it.fix, solLabel:'So ist er richtig:'};
+  return {kind:'mc', kicker:'Fehlerjagd', instr:"Nur ein Satz enthält einen Fehler. Welcher?", stem:'', opts:shuffle(opts), short:`Richtig: ${it.fix}`, long:it.ex};
 }
 function genSyn(){
   const it = fromPool('syn', SYN);
   const m = it.s.match(/\[(.+?)\]/);
   const stem = esc(it.s).replace(/\[(.+?)\]/, '<span class="mk">$1</span>');
   const opts = it.o.map((o,i) => ({h:esc(o), ok:i===0, why:i===0 ? it.ex : it.w[i-1]}));
-  return {kind:'mc', kicker:'Synonym oder Falle?', instr:`Ersetze „${m[1]}“ so, dass Bedeutung UND Satzbau exakt gleich bleiben.`, stem, opts:shuffle(opts), ex:it.ex, sol:it.s.replace(/\[(.+?)\]/, it.o[0])};
+  return {kind:'mc', kicker:'Synonym oder Falle?', instr:`Ersetze „${m[1]}“ so, dass Bedeutung UND Satzbau exakt gleich bleiben.`, stem, opts:shuffle(opts), short:firstS(it.ex), long:it.ex};
 }
 const MIX = [genSinn, genSinn, genWort, genWort, genBau, genPrae, genPrae, genNomi, genFehler, genSyn];
 const MODES = {
@@ -1006,7 +1080,7 @@ const MODES = {
 
 // ═══════════════ NAVIGATION ═══════════════
 function show(id){ document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id)); window.scrollTo({top:0}); }
-function goHome(){ show('home'); }
+function goHome(){ clearAuto(); show('home'); }
 
 // ═══════════════ QUIZ-ENGINE ═══════════════
 let Q = {};
@@ -1018,33 +1092,35 @@ function updCount(){
 function nextQ(){
   const M = MODES[Q.mode];
   if (M.lim && Q.n >= M.lim) return endMarathon();
-  Q.cur = M.g(); Q.done = false; Q.tries = 0;
+  clearAuto(); Q.cur = M.g(); Q.done = false; Q.tries = 0; Q.missed = false;
   updCount();
+  WAITNEXT = null;
   if (Q.cur.kind === 'mc') renderMC(Q.cur); else renderBau(Q.cur);
+  keepInView('#quiz .bar');
 }
 function renderMC(q){
   const L = ['A','B','C','D'];
   $('#qCard').innerHTML = `<span class="kicker">${q.kicker}</span><div class="instr">${q.instr}</div>${q.stem ? `<div class="stem" id="qStem">${q.stem}</div>` : ''}
    <div class="opts">${q.opts.map((o,i) => `<button class="opt" data-i="${i}" onclick="answer(${i})"><span class="lt">${L[i]}</span><span>${o.h}</span></button>`).join('')}</div>
-   <div class="fb" id="qFb"></div><div class="qnav"><button class="btn" id="qNext" hidden onclick="nextQ()">Weiter →</button></div>`;
+   <div class="fb" id="qFb"></div>`;
 }
 function answer(i){
   if (Q.done || !Q.cur || Q.cur.kind !== 'mc') return;
-  Q.done = true; const q = Q.cur, o = q.opts[i];
-  document.querySelectorAll('.opt').forEach((b,j) => { b.disabled = true; if (q.opts[j].ok) b.classList.add('right'); });
-  if (!o.ok) document.querySelector(`.opt[data-i="${i}"]`).classList.add('wrong');
+  const q = Q.cur, o = q.opts[i], b = document.querySelector(`.opt[data-i="${i}"]`);
+  if (!b || b.disabled) return;
+  if (!o.ok){
+    if (!Q.missed){ Q.missed = true; Q.n++; award(false); updCount(); }
+    b.classList.add('wrong'); b.disabled = true;
+    b.lastElementChild.insertAdjacentHTML('beforeend', `<small class="optwhy">${o.why}</small>`);
+    return;
+  }
+  Q.done = true;
+  if (!Q.missed){ Q.n++; Q.ok++; award(true); updCount(); }
+  document.querySelectorAll('.opt').forEach(x => x.disabled = true); b.classList.add('right');
   const g = document.querySelector('#qStem .gap'); if (g && q.gapFill){ g.textContent = q.gapFill; g.classList.add('filled'); }
-  Q.n++; if (o.ok) Q.ok++; award(o.ok); updCount();
-  const right = q.opts.find(x => x.ok);
-  let h = `<div class="verdict">${o.ok ? '✓ Richtig!' : '✗ Nicht ganz.'}</div>`;
-  if (!o.ok) h += `<div class="why"><b>Deine Wahl:</b> ${o.why}</div>`;
-  if (right.why && right.why !== q.ex && !/^Genau so|^Richtig erkannt/.test(right.why)) h += `<p><b>Richtig:</b> ${right.why}</p>`;
-  if (q.ex) h += `<p>${q.ex}</p>`;
-  if (q.sol) h += `<p style="margin-top:8px"><b>${q.solLabel || 'Lösung:'}</b></p>` + solBox(q.sol);
-  const fb = $('#qFb'); fb.className = 'fb show ' + (o.ok ? 'ok' : 'no'); fb.innerHTML = h;
-  $('#qNext').hidden = false; $('#qNext').focus({preventScroll:true});
+  showShort('#qFb', q.short, nextQ);
 }
-// Satzbau
+
 function renderBau(q){
   q.built = [];
   $('#qCard').innerHTML = `<span class="kicker">${q.kicker}</span><div class="instr">${q.instr}</div>
@@ -1053,7 +1129,7 @@ function renderBau(q){
    <div class="zone" id="bPool"></div>
    <div class="hint">Tipp: Ein Klick auf einen eingesetzten Baustein legt ihn zurück. Satzzeichen sind eigene Bausteine; Großschreibung am Satzanfang ergänzt sich von selbst.</div>
    <div class="fb" id="qFb"></div>
-   <div class="qnav"><button class="btn ghost" onclick="bauReset()">Zurücksetzen</button><button class="btn ghost" id="bShow" onclick="bauShow()">Lösung zeigen</button><button class="btn" id="bCheck" onclick="bauCheck()">Prüfen</button><button class="btn" id="qNext" hidden onclick="nextQ()">Weiter →</button></div>`;
+   <div class="qnav"><button class="btn ghost" onclick="bauReset()">Zurücksetzen</button><button class="btn ghost" id="bShow" onclick="bauShow()">Lösung zeigen</button><button class="btn" id="bCheck" onclick="bauCheck()">Prüfen</button></div>`;
   bauDraw();
 }
 function tileClass(t, k){
@@ -1075,32 +1151,34 @@ function bauReset(){ if (Q.done) return; Q.cur.built = []; bauDraw(); $('#qFb').
 function bauCheck(){
   const q = Q.cur; if (Q.done) return;
   const fb = $('#qFb');
-  if (q.built.length < q.tiles.length){ fb.className = 'fb show no'; fb.innerHTML = `<div class="verdict">Noch nicht fertig</div>Es fehlen noch ${q.tiles.length - q.built.length} Baustein(e).`; return; }
+  if (q.built.length < q.tiles.length){ fb.className = 'fb show no'; fb.onclick = null; fb.innerHTML = `Es fehlen noch ${q.tiles.length - q.built.length} Baustein(e).`; return; }
   const mine = q.built.map(i => q.tiles[i]);
   const s = toStr(mine), accS = q.acc.map(toStr);
   Q.tries++;
   if (accS.includes(s)){
-    Q.done = true; Q.n++; Q.ok++; award(true, Q.tries === 1 ? 12 : 6); updCount();
-    $('#bTarget').classList.add('done');
+    Q.done = true; Q.n++; if (!Q.missed) Q.ok++; award(!Q.missed, Q.tries === 1 ? 12 : 6); updCount();
+    $('#bTarget').classList.add('done'); bauEnd();
     const alts = accS.filter(x => x !== s);
-    fb.className = 'fb show ok';
-    fb.innerHTML = `<div class="verdict">✓ Ausgezeichnet gebaut!</div>${solBox(s)}<p>${q.ex}</p>` + (alts.length ? `<p><b>Ebenso richtig:</b></p>${alts.map(solBox).join('')}` : '');
-    bauEnd(); return;
+    showShort('#qFb', q.short + (alts.length ? ` <span class="alt">Auch richtig: ${esc(alts[0])}</span>` : ''), nextQ);
+    return;
   }
+  if (!Q.missed){ Q.missed = true; award(false); }
   let best = 0; q.acc.forEach(a => { let n = 0; while (n < a.length && a[n] === mine[n]) n++; best = Math.max(best, n); });
-  if (Q.tries >= 3){ bauShow(); return; }
-  fb.className = 'fb show no';
-  fb.innerHTML = `<div class="verdict">Noch nicht ganz – versuch es noch einmal.</div>` + (best > 0 ? `Die ersten <b>${best}</b> Baustein(e) stimmen; ab dem ${best+1}. Baustein solltest du umbauen.` : `Schon der Satzanfang passt noch nicht.`) + `<p class="hint">${Q.tries === 1 ? 'Tipp: Wo steht nach diesem Konnektor das konjugierte Verb?' : 'Letzter Versuch – danach erscheint die Lösung.'}</p>`;
+  fb.className = 'fb show no'; fb.onclick = null;
+  fb.innerHTML = best > 0 ? `Die ersten ${best} Baustein(e) stimmen – ab dem ${best+1}. umbauen. Wo steht nach dem Konnektor das Verb?` : 'Schon der Satzanfang passt noch nicht. Wo steht nach dem Konnektor das Verb?';
 }
+
 function bauShow(){
   const q = Q.cur; if (Q.done) return;
-  Q.done = true; Q.n++; award(false); updCount();
-  const accS = q.acc.map(toStr);
-  $('#qFb').className = 'fb show no';
-  $('#qFb').innerHTML = `<div class="verdict">Die Lösung</div>${accS.map(solBox).join('')}<p>${q.ex}</p>`;
-  bauEnd();
+  Q.done = true; Q.n++; if (!Q.missed) award(false); updCount();
+  const t = q.tiles.map((x,i) => ({x,i})); q.built = [];
+  q.acc[0].forEach(c => { const f = t.find(o => o.x === c && !q.built.includes(o.i)); if (f) q.built.push(f.i); });
+  bauDraw(); bauEnd();
+  showShort('#qFb', `${esc(toStr(q.acc[0]))} – ${q.short}`, nextQ, false, 1500);
 }
-function bauEnd(){ $('#bCheck').hidden = true; $('#bShow').hidden = true; $('#qNext').hidden = false; $('#qNext').focus({preventScroll:true}); }
+
+function bauEnd(){ $('#bCheck').hidden = true; $('#bShow').hidden = true; }
+
 function endMarathon(){
   const pct = Math.round(Q.ok / Q.n * 100);
   const msg = pct >= 90 ? "Herausragend – du verknüpfst Gedanken auf höchstem Niveau." : pct >= 75 ? "Sehr stark – Logik und Wortstellung sitzen fast immer." : pct >= 55 ? "Solide Basis – die Feinheiten kommen mit jeder Runde." : "Guter Anfang – jede Runde schärft dein Gespür für Sinn und Satzbau.";
@@ -1112,7 +1190,7 @@ document.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT') return;
   if (e.target.tagName === 'BUTTON' && e.key === 'Enter') return;
   if (Q.cur.kind === 'mc' && !Q.done){ const i = {'1':0,'2':1,'3':2,'4':3,'a':0,'b':1,'c':2,'d':3}[e.key.toLowerCase()]; if (i !== undefined && i < Q.cur.opts.length){ answer(i); e.preventDefault(); } }
-  else if (Q.done && e.key === 'Enter'){ e.preventDefault(); nextQ(); }
+  else if (Q.done && e.key === 'Enter'){ e.preventDefault(); clearAuto(); nextQ(); }
 });
 
 // ═══════════════ TEXTKOHÄRENZ ═══════════════
@@ -1191,7 +1269,7 @@ document.addEventListener('keydown', e => { if (!$('#sort').classList.contains('
 
 // ═══════════════ DOPPEL-DUETT ═══════════════
 let DU = {rounds:0};
-function openDuett(){ show('duett'); duRound(); }
+function openDuett(){ clearAuto(); show('duett'); duRound(); }
 function duRound(){
   DU.set = shuffle(DUO).slice(0,6); DU.sel = null; DU.done = new Set(); DU.err = 0; DU.phase = 1;
   DU.L = shuffle(DU.set.map((p,i) => i)); DU.R = shuffle(DU.set.map((p,i) => i));
@@ -1226,22 +1304,20 @@ function duQ(){
     return;
   }
   const d = DU.q[DU.qi]; const L = ['A','B','C','D'];
-  DU.opts = shuffle(d.o.map((o,i) => ({o, ok:i===0}))); DU.ans = false;
+  DU.opts = shuffle(d.o.map((o,i) => ({o, ok:i===0}))); DU.ans = false; DU.miss = false;
   $('#duCard').innerHTML = `<span class="kicker">Phase 2 · Satz ${DU.qi+1} von ${DU.q.length}</span><div class="instr">Ergänze den passenden zweiten Teil.</div>
    <div class="stem" id="duStem">${gapStem(d.s)}</div>
    <div class="opts two">${DU.opts.map((x,i) => `<button class="opt" data-i="${i}" onclick="duA(${i})"><span class="lt">${L[i]}</span><span>${esc(x.o)}</span></button>`).join('')}</div>
-   <div class="fb" id="duFb"></div><div class="qnav"><button class="btn" id="duNext" hidden onclick="DU.qi++;duQ()">Weiter →</button></div>`;
+   <div class="fb" id="duFb"></div>`;
 }
 function duA(i){
-  if (DU.ans) return; DU.ans = true; const d = DU.q[DU.qi], x = DU.opts[i];
-  document.querySelectorAll('#duCard .opt').forEach((b,j) => { b.disabled = true; if (DU.opts[j].ok) b.classList.add('right'); });
-  if (!x.ok) document.querySelector(`#duCard .opt[data-i="${i}"]`).classList.add('wrong');
+  if (DU.ans) return; const d = DU.q[DU.qi], x = DU.opts[i], b = document.querySelector(`#duCard .opt[data-i="${i}"]`);
+  if (b.disabled) return;
+  if (!x.ok){ if (!DU.miss){ DU.miss = true; award(false); } b.classList.add('wrong'); b.disabled = true; b.lastElementChild.insertAdjacentHTML('beforeend', `<small class="optwhy">„${esc(x.o)}“ gehört zu einem anderen Doppelkonnektor.</small>`); return; }
+  DU.ans = true; document.querySelectorAll('#duCard .opt').forEach(o => o.disabled = true); b.classList.add('right');
   const g = document.querySelector('#duStem .gap'); g.textContent = d.o[0]; g.classList.add('filled');
-  if (x.ok) DU.qok++; award(x.ok);
-  const full = d.s.replace('___', d.o[0]);
-  $('#duFb').className = 'fb show ' + (x.ok ? 'ok' : 'no');
-  $('#duFb').innerHTML = `<div class="verdict">${x.ok ? '✓ Richtig!' : '✗ Nicht ganz.'}</div>Das feste Paar lautet <b>${esc(d.l)} … ${esc(d.r)}</b> (${d.m}).${x.ok ? '' : ` „${esc(x.o)}“ gehört zu einem anderen Doppelkonnektor.`}${solBox(full)}`;
-  $('#duNext').hidden = false;
+  if (!DU.miss){ DU.qok++; award(true); }
+  showShort('#duFb', `<b>${esc(d.l)} … ${esc(d.r)}</b> = ${d.m}`, () => { DU.qi++; duQ(); });
 }
 
 // ═══════════════ ARGUMENTATIONSRAD ═══════════════
@@ -1289,6 +1365,7 @@ function lexTog(h){ const c = h.parentElement, id = c.dataset.id; c.classList.to
     d.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;top:${Math.random()*100}%;background:radial-gradient(circle at 30% 30%, ${pick(cols)}55, transparent 70%);animation-duration:${14+Math.random()*16}s;animation-delay:-${Math.random()*10}s`;
     b.appendChild(d); } })();
 renderStats();
+syncWM();
 
 </script>
 </body>
